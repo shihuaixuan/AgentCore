@@ -359,14 +359,35 @@ async def _retire(
 async def _retire_except(
     tx: prisma.Prisma, keep: set[str], *, dry_run: bool
 ) -> list[str]:
-    listings = await prisma.models.SkillListing.prisma(tx).find_many(
-        where={**_PLATFORM_LISTING, "isDeleted": False}
+    listings = await database.query_raw_with_schema(
+        'SELECT "slug" FROM {schema_prefix}"SkillListing" '
+        'WHERE "owningUserId" IS NULL AND "owningOrgId" IS NULL '
+        'AND "isDeleted" = false AND NOT ("slug" = ANY($1::text[])) '
+        'ORDER BY "slug"',
+        list(keep),
+        client=tx,
     )
-    return await _retire(
-        tx,
-        (listing.slug for listing in listings if listing.slug not in keep),
-        dry_run=dry_run,
-    )
+    retired = [row["slug"] for row in listings]
+    if retired and not dry_run:
+        await database.execute_raw_with_schema(
+            'UPDATE {schema_prefix}"SkillListingVersion" '
+            'SET "isAvailable" = false '
+            'WHERE "id" IN (SELECT "activeVersionId" '
+            'FROM {schema_prefix}"SkillListing" '
+            'WHERE "owningUserId" IS NULL AND "owningOrgId" IS NULL '
+            'AND "isDeleted" = false AND NOT ("slug" = ANY($1::text[])) '
+            'AND "activeVersionId" IS NOT NULL)',
+            list(keep),
+            client=tx,
+        )
+        await database.execute_raw_with_schema(
+            'UPDATE {schema_prefix}"SkillListing" SET "isDeleted" = true '
+            'WHERE "owningUserId" IS NULL AND "owningOrgId" IS NULL '
+            'AND "isDeleted" = false AND NOT ("slug" = ANY($1::text[]))',
+            list(keep),
+            client=tx,
+        )
+    return retired
 
 
 async def _orphaned(tx: prisma.Prisma, loaded: LoadedRelease) -> list[str]:
