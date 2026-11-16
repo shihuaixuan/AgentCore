@@ -46,6 +46,21 @@ def test_a_release_loads_its_packages_experts_and_retirements(tmp_path: Path):
     assert release.experts[0]["bundled_skills"] == ["cold-email", "warm-intro"]
 
 
+def test_release_preserves_market_categories(tmp_path: Path):
+    write_catalog(tmp_path, {"pptx": {}}, categories={"pptx": ["pdf-documents"]})
+
+    release = load_release(tmp_path, allow_noncanonical_categories=True)
+
+    assert release.packages[0].entry["categories"] == ["pdf-documents"]
+
+
+def test_release_rejects_malformed_market_category(tmp_path: Path):
+    write_catalog(tmp_path, {"pptx": {}}, categories={"pptx": ["../private"]})
+
+    with pytest.raises(CatalogError, match="invalid market category"):
+        load_release(tmp_path, allow_noncanonical_categories=True)
+
+
 def test_package_hash_is_the_catalogs_tree_hash(tmp_path: Path):
     write_catalog(tmp_path, {"demo": {"references/x.md": "x\n"}})
     manifest = json.loads((tmp_path / "release.json").read_text(encoding="utf-8"))

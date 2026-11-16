@@ -3165,6 +3165,13 @@ model SkillCatalogRelease {
   @@index([createdAt])
 }
 
+model MCPMarketplaceEntry {
+  name      String   @id
+  payload   Json
+  source    String
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
 /// One file beside a published version's SKILL.md, snapshotted at submit time
 /// like the body is. Bytes live in the row: a version is immutable once
 /// approved, capped at 20 MiB in the application layer, and cascade-deleted

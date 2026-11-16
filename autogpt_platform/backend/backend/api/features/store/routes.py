@@ -7,10 +7,12 @@ import autogpt_libs.auth
 import fastapi
 import fastapi.responses
 import prisma.enums
+import prisma.models
 from fastapi import Depends, Query, Security
 from pydantic import BaseModel
 from starlette.datastructures import Headers
 
+import backend.data.db
 import backend.data.graph
 import backend.util.json
 from backend.api.features.search import hybrid_search as search_engine
@@ -25,10 +27,9 @@ from . import cache as store_cache
 from . import categories as store_categories
 from . import db as store_db
 from . import image_gen as store_image_gen
-from . import local_media
+from . import local_media, submission_media
 from . import media as store_media
 from . import model as store_model
-from . import submission_media
 
 logger = logging.getLogger(__name__)
 
@@ -213,14 +214,33 @@ async def get_agents(
     tags=["store", "public"],
 )
 async def get_categories() -> list[store_model.StoreCategoryInfo]:
-    """The canonical categories a listing can be filed under."""
+    """Categories present in the local skill marketplace."""
+    rows = await backend.data.db.query_raw_with_schema(
+        'SELECT DISTINCT unnest(v."categories") AS category '
+        'FROM {schema_prefix}"SkillListingVersion" v '
+        'JOIN {schema_prefix}"SkillListing" l ON l."activeVersionId" = v."id" '
+        'WHERE v."submissionStatus" = $1 AND v."isAvailable" = true '
+        'AND v."isDeleted" = false AND l."isDeleted" = false '
+        'AND l."hasApprovedVersion" = true',
+        prisma.enums.SubmissionStatus.APPROVED,
+    )
+    values = sorted({row["category"] for row in rows if row.get("category")})
+    if values:
+        return [
+            store_model.StoreCategoryInfo(
+                value=value,
+                label=value.replace("-", " ").replace("_", " ").title(),
+                description="Skills in this marketplace category",
+            )
+            for value in values
+        ]
     return [
         store_model.StoreCategoryInfo(
-            value=category.value,
-            label=store_categories.CATEGORY_LABELS[category],
-            description=store_categories.CATEGORY_DESCRIPTIONS[category],
+            value=value,
+            label=value.replace("-", " ").replace("_", " ").title(),
+            description="Skills in this marketplace category",
         )
-        for category in store_categories.StoreCategory
+        for value in sorted(store_categories.all_category_match_values())
     ]
 
 
