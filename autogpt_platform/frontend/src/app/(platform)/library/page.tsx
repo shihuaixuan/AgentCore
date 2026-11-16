@@ -1,0 +1,82 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { useEffect, useState, useCallback } from "react";
+import { useQueryState } from "nuqs";
+import { AgentsTabIntro } from "./components/AgentsTabIntro/AgentsTabIntro";
+import { LibraryActionHeader } from "./components/LibraryActionHeader/LibraryActionHeader";
+import { LibraryAgentList } from "./components/LibraryAgentList/LibraryAgentList";
+import { useLibraryListPage } from "./components/useLibraryListPage";
+import { FavoriteAnimationProvider } from "./context/FavoriteAnimationContext";
+import type { LibraryTab, AgentStatusFilter } from "./types";
+import { useLibraryFleetSummary } from "./hooks/useLibraryFleetSummary";
+import { useLibraryAgents } from "@/hooks/useLibraryAgents/useLibraryAgents";
+import { FavouriteIcon, Menu01Icon } from "@hugeicons/core-free-icons";
+
+const LIBRARY_TABS: LibraryTab[] = [
+  { id: "all", title: "All", icon: Menu01Icon },
+  { id: "favorites", title: "Favorites", icon: FavouriteIcon },
+];
+
+export default function LibraryPage() {
+  const { t } = useTranslation();
+  const { searchTerm, setSearchTerm, librarySort, setLibrarySort } =
+    useLibraryListPage();
+  // In the URL, so a link can open a folder (the approval card links one).
+  const [selectedFolderId, setSelectedFolderId] = useQueryState("folder");
+  const [activeTab, setActiveTab] = useState(LIBRARY_TABS[0].id);
+  const [statusFilter, setStatusFilter] = useState<AgentStatusFilter>("all");
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const { agents } = useLibraryAgents();
+  const fleetSummary = useLibraryFleetSummary(agents);
+
+  useEffect(() => {
+    document.title = t(
+      "Library – AutoGPT Platform",
+      "工作流库 – AutoGPT Platform",
+    );
+  }, [t]);
+
+  function handleTabChange(tabId: string) {
+    setActiveTab(tabId);
+    setSelectedFolderId(null);
+  }
+
+  const handleFavoriteAnimationComplete = useCallback(() => {
+    setActiveTab("favorites");
+    setSelectedFolderId(null);
+  }, []);
+
+  return (
+    <FavoriteAnimationProvider
+      onAnimationComplete={handleFavoriteAnimationComplete}
+    >
+      <main className="container min-h-screen space-y-4 pt-16 pb-20 sm:px-8 md:px-12">
+        <LibraryActionHeader
+          setSearchTerm={setSearchTerm}
+          isImportOpen={isImportOpen}
+          onImportOpenChange={setIsImportOpen}
+        />
+        <LibraryAgentList
+          searchTerm={searchTerm}
+          librarySort={librarySort}
+          setLibrarySort={setLibrarySort}
+          selectedFolderId={selectedFolderId}
+          onFolderSelect={setSelectedFolderId}
+          tabs={LIBRARY_TABS.map((tab) => ({
+            ...tab,
+            title:
+              tab.id === "all" ? t(tab.title, "全部") : t(tab.title, "收藏"),
+          }))}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          fleetSummary={fleetSummary}
+          briefingAgents={agents}
+        />
+      </main>
+      <AgentsTabIntro canShow={!isImportOpen} />
+    </FavoriteAnimationProvider>
+  );
+}

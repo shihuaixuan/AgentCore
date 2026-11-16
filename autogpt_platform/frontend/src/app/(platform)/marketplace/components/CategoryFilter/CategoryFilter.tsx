@@ -1,0 +1,61 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getCategoryHex } from "@/components/molecules/ExpertAvatar/colors";
+import { useStoreCategories } from "@/hooks/useStoreCategories";
+import { CategoryChip } from "../CategoryChip/CategoryChip";
+import { getCategoryAccent } from "../ExpertsSection/helpers";
+
+interface Props {
+  selected: string | null;
+  onSelect: (category: string | null) => void;
+}
+
+export function CategoryFilter({ selected, onSelect }: Props) {
+  const { t } = useTranslation();
+  const { categories } = useStoreCategories();
+
+  if (categories.length === 0) return null;
+
+  function handleClick(value: string | null) {
+    onSelect(value === selected ? null : value);
+  }
+
+  return (
+    // Labelled because the hero above carries its own chip row of search
+    // terms, and the two overlap on names like "Marketing".
+    <div
+      className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2.5"
+      role="group"
+      aria-label={t("Browse experts by category", "按分类浏览专家")}
+    >
+      <span className="text-body font-medium text-foreground-tertiary">
+        {t("Browse experts by category", "按分类浏览专家")}
+      </span>
+      {/* One flex item, so the whole list drops below the label before it
+          breaks within itself. */}
+      <div className="flex flex-wrap gap-2">
+        <CategoryChip
+          label={t("All", "全部")}
+          isSelected={selected === null}
+          onClick={() => onSelect(null)}
+        />
+        {categories.map((category) => {
+          const { accent, icon } = getCategoryAccent(category.value);
+          return (
+            <CategoryChip
+              key={category.value}
+              label={category.label}
+              color={getCategoryHex(category.value)}
+              title={category.description}
+              icon={icon}
+              accent={accent}
+              isSelected={selected === category.value}
+              onClick={() => handleClick(category.value)}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}

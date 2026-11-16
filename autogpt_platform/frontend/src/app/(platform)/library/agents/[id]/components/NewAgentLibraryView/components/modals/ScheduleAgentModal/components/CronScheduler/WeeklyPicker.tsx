@@ -1,0 +1,78 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import React from "react";
+import { Text } from "@/components/atoms/Text/Text";
+import { MultiToggle } from "@/components/molecules/MultiToggle/MultiToggle";
+
+const weekDays = [
+  { label: "Su", value: 0 },
+  { label: "Mo", value: 1 },
+  { label: "Tu", value: 2 },
+  { label: "We", value: 3 },
+  { label: "Th", value: 4 },
+  { label: "Fr", value: 5 },
+  { label: "Sa", value: 6 },
+];
+
+export function WeeklyPicker({
+  values,
+  onChange,
+}: {
+  values: number[];
+  onChange: (v: number[]) => void;
+}) {
+  const { t } = useTranslation();
+  function toggleAll() {
+    if (values.length === weekDays.length) onChange([]);
+    else onChange(weekDays.map((d) => d.value));
+  }
+  function setWeekdays() {
+    onChange([1, 2, 3, 4, 5]);
+  }
+  function setWeekends() {
+    onChange([0, 6]);
+  }
+  const items = weekDays.map((d) => ({
+    value: String(d.value),
+    label: d.label,
+  }));
+  const selectedValues = values.map((v) => String(v));
+
+  return (
+    <div className="mb-8 space-y-3">
+      <Text variant="body-medium" as="span">
+        {t("Repeats on", "重复日期")}
+      </Text>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          className="h-[2.25rem] rounded-full border border-foreground-body px-4 py-2 text-body leading-4 font-medium text-foreground-base hover:bg-surface-hover"
+          onClick={toggleAll}
+        >
+          {t("Select all", "全选")}
+        </button>
+        <button
+          type="button"
+          className="h-[2.25rem] rounded-full border border-foreground-body px-4 py-2 text-body leading-4 font-medium text-foreground-base hover:bg-surface-hover"
+          onClick={setWeekdays}
+        >
+          {t("Weekdays", "工作日")}
+        </button>
+        <button
+          type="button"
+          className="h-[2.25rem] rounded-full border border-foreground-body px-4 py-2 text-body leading-4 font-medium text-foreground-base hover:bg-surface-hover"
+          onClick={setWeekends}
+        >
+          {t("Weekends", "周末")}
+        </button>
+      </div>
+      <MultiToggle
+        items={items}
+        selectedValues={selectedValues}
+        onChange={(sv) => onChange(sv.map((s) => parseInt(s)))}
+        aria-label={t("Select days of week", "选择星期")}
+      />
+    </div>
+  );
+}

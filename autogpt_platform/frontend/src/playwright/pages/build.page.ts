@@ -1,0 +1,715 @@
+import { randomUUID } from "crypto";
+import { expect, Locator, Page } from "@playwright/test";
+import { BasePage } from "./base.page";
+
+export function createUniqueAgentName(prefix: string): string {
+  return `${prefix} ${Date.now()}-${randomUUID().slice(0, 8)}`;
+}
+
+// The agent addSimpleAgentBlocks builds: Store Value passes `value` to an
+// Agent Output named `outputName`, so every run of it outputs exactly that.
+export const SIMPLE_AGENT = {
+  value: "smoke-value",
+  outputName: "smoke-result",
+} as const;
+
+// A node by its position on the canvas or by its block title.
+type NodeRef = number | string;
+
+interface BuilderRun {
+  status: string;
+  outputs: Record<string, unknown[]>;
+}
+
+function escapeRegex(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+async function getNodeID(node: Locator): Promise<string> {
+  const dataID = await node.getAttribute("data-id");
+  return (dataID ?? "").replace("custom-node-", "");
+}
+
+export class BuildPage extends BasePage {
+  constructor(page: Page) {
+    super(page);
+  }
+
+  // --- Navigation ---
+
+  async goto(): Promise<void> {
+    await this.page.goto("/build");
+    await this.page.waitForLoadState("domcontentloaded");
+  }
+
+  async isLoaded(): Promise<boolean> {
+    try {
+      await this.page.waitForLoadState("domcontentloaded", { timeout: 10_000 });
+      await this.page
+        .locator(".react-flow")
+        .waitFor({ state: "visible", timeout: 10_000 });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async closeTutorial(): Promise<void> {
+    try {
+      await this.page
+        .getByRole("button", { name: "Skip Tutorial", exact: true })
+        .click({ timeout: 3000 });
+    } catch {
+      // Tutorial not shown or already dismissed
+    }
+  }
+
+  // --- Block Menu ---
+
+  async openBlocksPanel(): Promise<void> {
+    const popoverContent = this.page.locator(
+      '[data-id="blocks-control-popover-content"]',
+    );
+    if (!(await popoverContent.isVisible())) {
+      await this.page.getByTestId("blocks-control-blocks-button").click();
+      await popoverContent.waitFor({ state: "visible", timeout: 5000 });
+    }
+  }
+
+  async closeBlocksPanel(): Promise<void> {
+    const popoverContent = this.page.locator(
+      '[data-id="blocks-control-popover-content"]',
+    );
+    if (await popoverContent.isVisible()) {
+      await this.page.getByTestId("blocks-control-blocks-button").click();
+      await popoverContent.waitFor({ state: "hidden", timeout: 5000 });
+    }
+  }
+
+  async searchBlock(searchTerm: string): Promise<void> {
+    const searchInput = this.page.locator(
+      '[data-id="blocks-control-search-bar"] input[type="text"]',
+    );
+    await searchInput.clear();
+    await searchInput.fill(searchTerm);
+    await expect(searchInput).toHaveValue(searchTerm);
+  }
+
+  private getBlockCardByName(name: string): Locator {
+    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const exactName = new RegExp(`^\\s*${escapedName}\\s*$`, "i");
+    return this.page
+      .locator('[data-id^="block-card-"]')
+      .filter({ has: this.page.locator("span", { hasText: exactName }) })
+      .first();
+  }
+
+  async addBlockByClick(searchTerm: string): Promise<void> {
+    await this.openBlocksPanel();
+    const blockCard = this.getBlockCardByName(searchTerm);
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await this.searchBlock(searchTerm);
+
+      const cardVisible = await blockCard
+        .waitFor({
+          state: "visible",
+          timeout: attempt === 0 ? 15000 : 5000,
+        })
+        .then(() => true)
+        .catch(() => false);
+
+      if (cardVisible) {
+        break;
+      }
+    }
+
+    await expect(blockCard).toBeVisible({ timeout: 5000 });
+    await blockCard.click();
+
+    // Close the panel so it doesn't overlay the canvas
+    await this.closeBlocksPanel();
+  }
+
+  async dragBlockToCanvas(searchTerm: string): Promise<void> {
+    await this.openBlocksPanel();
+    await this.searchBlock(searchTerm);
+
+    const anyCard = this.page.locator('[data-id^="block-card-"]').first();
+    await anyCard.waitFor({ state: "visible", timeout: 10000 });
+
+    const blockCard = this.getBlockCardByName(searchTerm);
+    await blockCard.waitFor({ state: "visible", timeout: 5000 });
+
+    const canvas = this.page.locator(".react-flow__pane").first();
+    await blockCard.dragTo(canvas);
+  }
+
+  // --- Nodes on Canvas ---
+
+  getNodeLocator(index?: number): Locator {
+    const locator = this.page.locator('[data-id^="custom-node-"]');
+    return index !== undefined ? locator.nth(index) : locator;
+  }
+
+  getNodeLocatorByTitle(title: string): Locator {
+    const exactTitle = new RegExp(`^\\s*${escapeRegex(title)}\\s*$`, "i");
+    return this.page
+      .locator('[data-id^="custom-node-"]')
+      .filter({ has: this.page.getByText(exactTitle) })
+      .first();
+  }
+
+  private getNode(node: NodeRef): Locator {
+    return typeof node === "number"
+      ? this.getNodeLocator(node)
+      : this.getNodeLocatorByTitle(node);
+  }
+
+  getNodeTextInputs(nodeTitle: string): Locator {
+    return this.getNodeLocatorByTitle(nodeTitle).locator(
+      'input[placeholder="Enter string value..."]:visible',
+    );
+  }
+
+  getNodeTextInput(nodeTitle: string, inputIndex = 0): Locator {
+    return this.getNodeTextInputs(nodeTitle).nth(inputIndex);
+  }
+
+  async fillNodeTextInput(
+    nodeTitle: string,
+    value: string,
+    inputIndex = 0,
+  ): Promise<void> {
+    const node = this.getNodeLocatorByTitle(nodeTitle);
+    await expect(node).toBeVisible({ timeout: 15000 });
+    await expect
+      .poll(async () => await this.getNodeTextInputs(nodeTitle).count(), {
+        timeout: 15000,
+      })
+      .toBeGreaterThan(inputIndex);
+    const input = this.getNodeTextInput(nodeTitle, inputIndex);
+    await input.scrollIntoViewIfNeeded();
+    await input.fill(value);
+  }
+
+  async fillLastNodeTextInput(nodeTitle: string, value: string): Promise<void> {
+    const node = this.getNodeLocatorByTitle(nodeTitle);
+    await expect(node).toBeVisible({ timeout: 15000 });
+    await expect
+      .poll(async () => await this.getNodeTextInputs(nodeTitle).count(), {
+        timeout: 15000,
+      })
+      .toBeGreaterThan(0);
+    const input = this.getNodeTextInputs(nodeTitle).last();
+    await input.scrollIntoViewIfNeeded();
+    await input.fill(value);
+  }
+
+  async getNodeCount(): Promise<number> {
+    return await this.getNodeLocator().count();
+  }
+
+  async waitForNodeOnCanvas(expectedCount?: number): Promise<void> {
+    if (expectedCount !== undefined) {
+      await expect(this.getNodeLocator()).toHaveCount(expectedCount, {
+        timeout: 10000,
+      });
+    } else {
+      await this.getNodeLocator()
+        .first()
+        .waitFor({ state: "visible", timeout: 10000 });
+    }
+  }
+
+  async selectNode(index: number = 0): Promise<void> {
+    const node = this.getNodeLocator(index);
+    await node.click();
+  }
+
+  async selectAllNodes(): Promise<void> {
+    await this.page.locator(".react-flow__pane").first().click();
+    const isMac = process.platform === "darwin";
+    await this.page.keyboard.press(isMac ? "Meta+a" : "Control+a");
+  }
+
+  async deleteSelectedNodes(): Promise<void> {
+    await this.page.keyboard.press("Backspace");
+  }
+
+  // --- Connections (Edges) ---
+
+  // Wires the named output of one node to the named input of another. Every
+  // pin has a handle, starting with `error` on most blocks, so a handle picked
+  // by position wires the wrong pin; and a drop that misses makes no edge.
+  async connectNodes({
+    source,
+    target,
+  }: {
+    source: { node: NodeRef; output: string };
+    target: { node: NodeRef; input: string };
+  }): Promise<void> {
+    const sourceNode = this.getNode(source.node);
+    const targetNode = this.getNode(target.node);
+    const sourceHandle = sourceNode.locator(
+      `.react-flow__handle-right[data-handleid="${source.output}"]`,
+    );
+    const targetHandle = targetNode.locator(
+      `.react-flow__handle-left[data-handleid="${target.input}"]`,
+    );
+    await expect(
+      sourceHandle,
+      `output "${source.output}" should be on ${source.node}`,
+    ).toBeVisible();
+    await expect(
+      targetHandle,
+      `input "${target.input}" should be on ${target.node}`,
+    ).toBeVisible();
+
+    // Get precise center coordinates using evaluate to avoid CSS transform issues
+    const getHandleCenter = async (locator: Locator) => {
+      const el = await locator.elementHandle();
+      if (!el) throw new Error("Handle element not found");
+      const rect = await el.evaluate((node) => {
+        const r = node.getBoundingClientRect();
+        return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+      });
+      return rect;
+    };
+
+    const from = await getHandleCenter(sourceHandle);
+    const to = await getHandleCenter(targetHandle);
+
+    // ReactFlow requires a proper drag sequence with intermediate moves
+    await this.page.mouse.move(from.x, from.y);
+    await this.page.mouse.down();
+    // Move in steps to trigger ReactFlow's connection detection
+    const steps = 20;
+    for (let i = 1; i <= steps; i++) {
+      const ratio = i / steps;
+      await this.page.mouse.move(
+        from.x + (to.x - from.x) * ratio,
+        from.y + (to.y - from.y) * ratio,
+      );
+    }
+    await this.page.mouse.up();
+
+    // The builder names each edge after both of its pins.
+    const [sourceID, targetID] = await Promise.all([
+      getNodeID(sourceNode),
+      getNodeID(targetNode),
+    ]);
+    await expect(
+      this.page.getByTestId(
+        `rf__edge-${sourceID}:${source.output}->${targetID}:${target.input}`,
+      ),
+      `edge ${source.output} -> ${target.input} should be on the canvas`,
+    ).toBeAttached();
+  }
+
+  async getEdgeCount(): Promise<number> {
+    return await this.page.locator(".react-flow__edge").count();
+  }
+
+  // --- Save ---
+
+  async saveAgent(
+    name: string = "Test Agent",
+    description: string = "",
+  ): Promise<void> {
+    await this.page.getByTestId("save-control-save-button").click();
+
+    const nameInput = this.page.getByTestId("save-control-name-input");
+    await nameInput.waitFor({ state: "visible", timeout: 5000 });
+    await nameInput.fill(name);
+
+    if (description) {
+      await this.page
+        .getByTestId("save-control-description-input")
+        .fill(description);
+    }
+
+    await this.page.getByTestId("save-control-save-agent-button").click();
+  }
+
+  async waitForSaveComplete(): Promise<void> {
+    await expect(this.page).toHaveURL(/flowID=/, { timeout: 15000 });
+  }
+
+  async waitForSaveButton(): Promise<void> {
+    await this.page.waitForSelector(
+      '[data-testid="save-control-save-button"]:not([disabled])',
+      { timeout: 10000 },
+    );
+  }
+
+  // --- Run ---
+
+  async isRunButtonEnabled(): Promise<boolean> {
+    const runButton = this.page.locator('[data-id="run-graph-button"]');
+    return await runButton.isEnabled();
+  }
+
+  async clickRunButton(): Promise<void> {
+    // Dismiss any post-save toast that may be intercepting pointer events on
+    // the run button. Actively close it rather than waiting for Sonner's
+    // default auto-dismiss — the auto-dismiss + fade-out routinely runs over
+    // 5s and caused flakes here. The toast is optional (only after save), so
+    // the dismissal is guarded.
+    await this.dismissSaveToast();
+    const runButton = this.page.locator('[data-id="run-graph-button"]');
+    await runButton.click();
+  }
+
+  // --- Undo / Redo ---
+
+  async isUndoEnabled(): Promise<boolean> {
+    const btn = this.page.locator('[data-id="undo-button"]');
+    return !(await btn.isDisabled());
+  }
+
+  async isRedoEnabled(): Promise<boolean> {
+    const btn = this.page.locator('[data-id="redo-button"]');
+    return !(await btn.isDisabled());
+  }
+
+  async clickUndo(): Promise<void> {
+    await this.page.locator('[data-id="undo-button"]').click();
+  }
+
+  async clickRedo(): Promise<void> {
+    await this.page.locator('[data-id="redo-button"]').click();
+  }
+
+  // --- Copy / Paste ---
+
+  async copyViaKeyboard(): Promise<void> {
+    const isMac = process.platform === "darwin";
+    await this.page.keyboard.press(isMac ? "Meta+c" : "Control+c");
+  }
+
+  async pasteViaKeyboard(): Promise<void> {
+    const isMac = process.platform === "darwin";
+    await this.page.keyboard.press(isMac ? "Meta+v" : "Control+v");
+  }
+
+  // --- Helpers ---
+
+  async fillBlockInputByPlaceholder(
+    placeholder: string,
+    value: string,
+    nodeIndex: number = 0,
+  ): Promise<void> {
+    const node = this.getNodeLocator(nodeIndex);
+    const input = node.getByPlaceholder(placeholder);
+    await input.fill(value);
+  }
+
+  async clickCanvas(): Promise<void> {
+    const pane = this.page.locator(".react-flow__pane").first();
+    const box = await pane.boundingBox();
+    if (box) {
+      // Click in the center of the canvas to avoid sidebar/toolbar overlaps
+      await pane.click({
+        position: { x: box.width / 2, y: box.height / 2 },
+      });
+    } else {
+      await pane.click();
+    }
+  }
+
+  getPlaywrightPage(): Page {
+    return this.page;
+  }
+
+  getSavedGraphRef(): { graphId: string; graphVersion: number } {
+    const currentUrl = new URL(this.page.url());
+    const graphId = currentUrl.searchParams.get("flowID");
+    const graphVersion = Number(currentUrl.searchParams.get("flowVersion"));
+
+    if (!graphId || Number.isNaN(graphVersion)) {
+      throw new Error(
+        `Saved graph reference missing from builder URL: ${this.page.url()}`,
+      );
+    }
+
+    return { graphId, graphVersion };
+  }
+
+  async createDummyAgent(): Promise<void> {
+    await this.closeTutorial();
+    await this.addBlockByClick("Add to Dictionary");
+    await this.waitForNodeOnCanvas(1);
+    await this.saveAgent("Test Agent", "Test Description");
+    await this.waitForSaveComplete();
+  }
+
+  // --- Happy-path flows shared across PR smoke specs ---
+
+  async open(): Promise<void> {
+    await this.goto();
+    await this.closeTutorial();
+    await expect(this.page.locator(".react-flow")).toBeVisible({
+      timeout: 15000,
+    });
+    await expect(
+      this.page.getByTestId("blocks-control-blocks-button"),
+    ).toBeVisible({ timeout: 15000 });
+  }
+
+  async addSimpleAgentBlocks(): Promise<void> {
+    await this.addBlockByClick("Store Value");
+    await this.waitForNodeOnCanvas(1);
+    await this.fillBlockInputByPlaceholder(
+      "Enter string value...",
+      SIMPLE_AGENT.value,
+      0,
+    );
+
+    await this.addBlockByClick("Agent Output");
+    await this.waitForNodeOnCanvas(2);
+    await this.connectNodes({
+      source: { node: "Store Value", output: "output" },
+      target: { node: "Agent Output", input: "value" },
+    });
+    await this.fillLastNodeTextInput("Agent Output", SIMPLE_AGENT.outputName);
+  }
+
+  async createAndSaveSimpleAgent(
+    prefix: string,
+  ): Promise<{ agentName: string; graphId: string; graphVersion: number }> {
+    await this.open();
+    const agentName = createUniqueAgentName(prefix);
+
+    await this.addSimpleAgentBlocks();
+    await this.saveAgent(agentName, "PR E2E builder coverage");
+    await this.waitForSaveComplete();
+    await this.waitForSaveButton();
+    const { graphId, graphVersion } = this.getSavedGraphRef();
+
+    return { agentName, graphId, graphVersion };
+  }
+
+  async dismissSaveToast(): Promise<void> {
+    const closeToastButton = this.page.getByRole("button", {
+      name: "Close toast",
+    });
+    // Toast is optional — only shown after a save action
+    if (await closeToastButton.isVisible({ timeout: 1000 })) {
+      await closeToastButton.click();
+    }
+
+    // If the toast appeared but is not yet hidden, wait for it. If it never
+    // appeared at all the locator is simply hidden already — no-op.
+    const savedToast = this.page.getByText("Workflow saved successfully");
+    if (await savedToast.isVisible({ timeout: 500 })) {
+      await expect(savedToast).toBeHidden({ timeout: 10000 });
+    }
+  }
+
+  // Starts a run and returns its id. The builder keeps the last run's id in
+  // the URL, so a rerun only counts once the URL holds a different one.
+  async startRun(): Promise<string> {
+    const previousRunID = this.getCurrentRunID();
+    await this.clickRunButton();
+
+    // The run-input dialog is optional — agents without required inputs skip it
+    const runDialog = this.page.locator('[data-id="run-input-dialog-content"]');
+    if (await runDialog.isVisible({ timeout: 5000 })) {
+      await this.page
+        .locator('[data-id="run-input-manual-run-button"]')
+        .click();
+    }
+
+    // The id lands after the builder saves the graph and POSTs /execute; on a
+    // loaded CI runner that outlasts the default 5 s expect timeout.
+    await expect(
+      this.page,
+      "the run should get a new flowExecutionID",
+    ).toHaveURL(
+      (url) => {
+        const runID = url.searchParams.get("flowExecutionID");
+        return Boolean(runID) && runID !== previousRunID;
+      },
+      { timeout: 15_000 },
+    );
+    const runID = this.getCurrentRunID();
+    if (!runID) throw new Error(`No flowExecutionID in ${this.page.url()}`);
+    return runID;
+  }
+
+  getCurrentRunID(): string | null {
+    return new URL(this.page.url()).searchParams.get("flowExecutionID");
+  }
+
+  // Reads the given builder run back from the API once it ends.
+  async waitForRunToEnd(runID: string): Promise<BuilderRun> {
+    const graphId = new URL(this.page.url()).searchParams.get("flowID");
+    expect(graphId, "the builder URL should name the saved graph").toBeTruthy();
+    let run: BuilderRun = { status: "UNKNOWN", outputs: {} };
+    await expect
+      .poll(
+        async () => {
+          const response = await this.page.request.get(
+            `/api/proxy/api/graphs/${graphId}/executions/${runID}`,
+          );
+          if (response.ok()) run = (await response.json()) as BuilderRun;
+          return run.status;
+        },
+        { message: "the builder's run should end", timeout: 30000 },
+      )
+      .toMatch(/^(COMPLETED|FAILED|TERMINATED)$/);
+    return run;
+  }
+
+  // --- Tutorial (Shepherd.js tour) ---
+
+  // Each Shepherd step's <h3> title has id="<stepId>-label"; using it avoids
+  // title-overlap collisions like "Open the Block Menu" vs "The Block Menu".
+  private getShepherdStep(stepId: string): Locator {
+    return this.page.locator(`#${stepId}-label`);
+  }
+
+  // Scope to .shepherd-enabled so we don't click buttons on hidden-but-still-
+  // attached previous steps.
+  private getShepherdButton(name: string | RegExp): Locator {
+    return this.page
+      .locator(".shepherd-element.shepherd-enabled")
+      .getByRole("button", { name });
+  }
+
+  async startTutorial(): Promise<void> {
+    // Tutorial only starts from pristine /build; a flowID query param routes
+    // the tutorial button to /build?view=new instead.
+    await this.page.goto("/build");
+    await this.page.waitForLoadState("domcontentloaded");
+    await expect(this.page.locator(".react-flow")).toBeVisible({
+      timeout: 15000,
+    });
+
+    await this.page.evaluate(() => {
+      window.localStorage.removeItem("shepherd-tour");
+    });
+
+    const tutorialButton = this.page.locator('[data-id="tutorial-button"]');
+    await expect(tutorialButton).toBeVisible({ timeout: 15000 });
+    await expect(tutorialButton).toBeEnabled({ timeout: 15000 });
+    await tutorialButton.click();
+
+    await expect(this.getShepherdStep("welcome")).toBeVisible({
+      timeout: 15000,
+    });
+  }
+
+  async walkWelcomeToBlockMenu(): Promise<void> {
+    await this.getShepherdButton("Let's Begin").click();
+
+    await expect(this.getShepherdStep("open-block-menu")).toBeVisible({
+      timeout: 10000,
+    });
+    await this.page
+      .locator('[data-id="blocks-control-popover-trigger"]')
+      .click();
+
+    await expect(this.getShepherdStep("block-menu-overview")).toBeVisible({
+      timeout: 10000,
+    });
+    await this.getShepherdButton("Next").click();
+  }
+
+  async walkSearchAndAddCalculator(): Promise<void> {
+    // search-calculator auto-advances once the Calculator block card appears
+    // in the filtered results; select-calculator auto-advances once the
+    // Calculator is added to the node store.
+    await expect(this.getShepherdStep("search-calculator")).toBeVisible({
+      timeout: 10000,
+    });
+    await this.page
+      .locator('[data-id="blocks-control-search-bar"] input[type="text"]')
+      .fill("Calculator");
+
+    const calculatorCard = this.page.locator(
+      '[data-id="blocks-control-search-results"] [data-id="block-card-b1ab9b1967a6406dabf52dba76d00c79"]',
+    );
+    await expect(calculatorCard).toBeVisible({ timeout: 15000 });
+
+    await expect(this.getShepherdStep("select-calculator")).toBeVisible({
+      timeout: 15000,
+    });
+    await calculatorCard.scrollIntoViewIfNeeded();
+    await calculatorCard.click();
+
+    await expect(this.getShepherdStep("focus-new-block")).toBeVisible({
+      timeout: 10000,
+    });
+    await this.waitForNodeOnCanvas(1);
+  }
+
+  // Use dispatchEvent — the Shepherd cancel icon sits inside a step that's
+  // pinned to an off-screen React Flow node, so Playwright's visibility
+  // checks reject a normal click. A synthetic click event still triggers
+  // tour.cancel() via Shepherd's listener.
+  async cancelTutorial(): Promise<void> {
+    await this.page
+      .locator(".shepherd-element.shepherd-enabled .shepherd-cancel-icon")
+      .first()
+      .dispatchEvent("click");
+    await expect(
+      this.page.locator(".shepherd-element.shepherd-enabled"),
+    ).toHaveCount(0, { timeout: 10000 });
+  }
+
+  // NOTE: welcome.ts "Skip Tutorial" only calls handleTutorialSkip, which
+  // writes localStorage but does NOT call tour.cancel(). The tour UI stays
+  // open — the skip state is persisted so the next /build visit knows the
+  // user already dismissed the tour. Callers that want the UI closed must
+  // also call cancelTutorial().
+  async skipTutorialFromWelcome(): Promise<void> {
+    await expect(this.getShepherdStep("welcome")).toBeVisible({
+      timeout: 10000,
+    });
+    await this.getShepherdButton(/Skip Tutorial/i).click();
+    await expect
+      .poll(() => this.getTutorialStateFromStorage(), { timeout: 5000 })
+      .toBe("skipped");
+  }
+
+  async getTutorialStateFromStorage(): Promise<string | null> {
+    return this.page.evaluate(() =>
+      window.localStorage.getItem("shepherd-tour"),
+    );
+  }
+
+  async createScheduleForSavedAgent(agentName: string): Promise<void> {
+    await this.dismissSaveToast();
+
+    const { graphId, graphVersion } = this.getSavedGraphRef();
+    const scheduleName = `Daily ${agentName}`;
+    const scheduleCreateUrl = `/api/proxy/api/graphs/${graphId}/schedules`;
+    const timeoutAt = Date.now() + 45000;
+    let lastFailure = "schedule request did not run";
+
+    while (Date.now() < timeoutAt) {
+      const createResponse = await this.page.request.post(scheduleCreateUrl, {
+        data: {
+          name: scheduleName,
+          graph_version: graphVersion,
+          cron: "0 10 * * *",
+          inputs: {},
+          credentials: {},
+          timezone: "UTC",
+        },
+      });
+
+      const createResponseBody = await createResponse.text();
+      if (createResponse.ok()) {
+        return;
+      }
+
+      lastFailure = `${createResponse.status()} ${createResponseBody}`;
+      await this.page.waitForTimeout(1000);
+    }
+
+    throw new Error(`schedule creation API should succeed: ${lastFailure}`);
+  }
+}

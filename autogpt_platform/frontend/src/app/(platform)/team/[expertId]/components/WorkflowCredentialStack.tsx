@@ -1,0 +1,81 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { ExpertWorkflowChainItem } from "@/app/api/__generated__/models/expertWorkflowChainItem";
+import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
+import { cn } from "@/lib/utils";
+import { IntegrationLogo } from "@/components/molecules/IntegrationLogo/IntegrationLogo";
+import { toDisplayName } from "@/components/renderers/InputRenderer/custom/CredentialField/helpers";
+
+const MAX_VISIBLE = 3;
+
+export function getWorkflowCredentialProviders(
+  agent: LibraryAgent | undefined,
+  chain: ExpertWorkflowChainItem[],
+): string[] {
+  const properties = agent?.credentials_input_schema?.properties;
+  const fromSchema = properties
+    ? Object.values(properties as Record<string, unknown>).flatMap((schema) => {
+        const providers =
+          schema &&
+          typeof schema === "object" &&
+          "credentials_provider" in schema
+            ? (schema as { credentials_provider?: unknown })
+                .credentials_provider
+            : undefined;
+        return Array.isArray(providers) && providers.length === 1
+          ? providers.filter((p): p is string => typeof p === "string")
+          : [];
+      })
+    : [];
+  const fromChain = chain
+    .map((item) => item.provider)
+    .filter((provider): provider is string => Boolean(provider));
+  return [...new Set([...fromSchema, ...fromChain])];
+}
+
+interface Props {
+  providers: string[];
+}
+
+export function WorkflowCredentialStack({ providers }: Props) {
+  const { t } = useTranslation();
+  if (providers.length === 0) return null;
+  const visible = providers.slice(0, MAX_VISIBLE);
+  const hidden = providers.length - visible.length;
+  return (
+    <div
+      className="flex items-center"
+      role="list"
+      aria-label={t("Credentials used", "使用的凭据")}
+      title={providers.map(toDisplayName).join(", ")}
+    >
+      {visible.map((provider, index) => (
+        <span
+          key={provider}
+          role="listitem"
+          className={cn(
+            "flex size-7 items-center justify-center rounded-full border border-border-base bg-surface ring-2 ring-surface",
+            index > 0 && "-ml-2",
+            ["z-30", "z-20", "z-10"][index],
+          )}
+        >
+          <IntegrationLogo
+            provider={provider}
+            alt={toDisplayName(provider)}
+            size={16}
+          />
+        </span>
+      ))}
+      {hidden > 0 ? (
+        <span
+          role="listitem"
+          className="-ml-2 flex size-7 items-center justify-center rounded-full border border-border-base bg-surface-hover font-sans text-caption font-medium text-foreground-secondary ring-2 ring-surface"
+          aria-label={`${hidden} more`}
+        >
+          +{hidden}
+        </span>
+      ) : null}
+    </div>
+  );
+}

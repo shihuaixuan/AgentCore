@@ -1,0 +1,208 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { DeleteChatDialog } from "@/app/(platform)/copilot/components/DeleteChatDialog/DeleteChatDialog";
+import { ShareChatDialog } from "@/app/(platform)/copilot/sharing/ShareChatDialog";
+import { useExpertMap } from "@/app/(platform)/copilot/useExpertMap";
+import { groupSessionsByExpert } from "@/app/(platform)/copilot/useSessionList";
+import { Icon } from "@/components/atoms/Icon/Icon";
+import { Text } from "@/components/atoms/Text/Text";
+import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
+import { SidebarMenu } from "@/components/molecules/Sidebar/Sidebar";
+import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
+import { PinIcon } from "@hugeicons/core-free-icons";
+import { useState } from "react";
+import { ExpertChatGroup } from "./components/ExpertChatGroup/ExpertChatGroup";
+import { NewExpertGroup } from "./components/NewExpertGroup/NewExpertGroup";
+import { RecentChatItem } from "./components/RecentChatItem/RecentChatItem";
+import { getNewChatHref, getNewExpertsWithoutChats } from "./helpers";
+import { useRecentChats } from "./useRecentChats";
+
+export function RecentChats() {
+  const { t } = useTranslation();
+  const chatPinningEnabled = useGetFlag(Flag.CHAT_PINNING);
+
+  const isLearningEnabled = useGetFlag(Flag.DREAM_SKILL_LEARNING_ENABLED);
+  const { expertsById, activeExperts, activeExpertIds } = useExpertMap();
+  // The week a new expert keeps their entry is measured from when the list
+  // mounted: an expert who joins later counts as new, and one only ages out
+  // on a later visit.
+  const [mountedAt] = useState(() => Date.now());
+  const {
+    sessions,
+    isLoading,
+    hasMore,
+    isLoadingMore,
+    loadMore,
+    activeSessionId,
+    togglePin,
+    editingSessionId,
+    editingTitle,
+    setEditingTitle,
+    startRename,
+    submitRename,
+    cancelRename,
+    exportingIds,
+    exportChat,
+    sharingSessionId,
+    setSharingSessionId,
+    excludeFromLearning,
+    sessionToDelete,
+    isDeleting,
+    requestDelete,
+    confirmDelete,
+    cancelDelete,
+  } = useRecentChats();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-4">
+        <LoadingSpinner size="small" className="text-foreground-tertiary" />
+      </div>
+    );
+  }
+
+  const newExperts = getNewExpertsWithoutChats(
+    activeExperts,
+    sessions,
+    mountedAt,
+  );
+
+  if (!sessions.length && !newExperts.length) {
+    return (
+      <div className="px-2 py-2">
+        <Text variant="body-tight" as="p" tone="muted">
+          {t("No conversations yet", "暂无对话")}
+        </Text>
+      </div>
+    );
+  }
+
+  function renderItem(session: (typeof sessions)[number]) {
+    const isEditing = editingSessionId === session.id;
+    return (
+      <RecentChatItem
+        key={session.id}
+        session={session}
+        isActive={session.id === activeSessionId}
+        isEditing={isEditing}
+        editingTitle={isEditing ? editingTitle : ""}
+        onEditingTitleChange={setEditingTitle}
+        onSubmitRename={submitRename}
+        onCancelRename={cancelRename}
+        isExporting={exportingIds.has(session.id)}
+        isDeleting={isDeleting}
+        chatPinningEnabled={chatPinningEnabled}
+        onPin={togglePin}
+        onRename={startRename}
+        onExport={exportChat}
+        onShare={setSharingSessionId}
+        isLearningEnabled={isLearningEnabled}
+        onExcludeFromLearning={excludeFromLearning}
+        onDelete={requestDelete}
+      />
+    );
+  }
+
+  const pinnedSessions = chatPinningEnabled
+    ? sessions.filter((session) => !!session.is_pinned)
+    : [];
+  const unpinnedSessions =
+    pinnedSessions.length > 0
+      ? sessions.filter((session) => !session.is_pinned)
+      : sessions;
+  const groups = groupSessionsByExpert(unpinnedSessions);
+  // Otto stays first; an expert waiting to be greeted comes next, ahead of
+  // the experts the user already talks to.
+  const ottoGroups = groups.filter((group) => !group.expertId);
+  const expertGroups = groups.filter((group) => !!group.expertId);
+
+  function renderGroup(group: (typeof groups)[number]) {
+    const expert = group.expertId ? expertsById.get(group.expertId) : null;
+    return (
+      // Keyed by expert id so each group's collapse/reveal state
+      // survives the session list's periodic refetch.
+      <ExpertChatGroup
+        key={group.expertId ?? "autopilot"}
+        label={group.expertId ? (expert?.name ?? "Expert") : "Otto"}
+        role={
+          group.expertId
+            ? expert?.jobTitle || expert?.role
+            : t("Head of AI", "AI 负责人")
+        }
+        avatarUrl={expert?.avatarUrl ?? null}
+        color={expert?.color ?? null}
+        newChatHref={getNewChatHref(group.expertId, activeExpertIds)}
+        isAutopilot={!group.expertId}
+        sessions={group.sessions}
+        renderItem={renderItem}
+      />
+    );
+  }
+
+  return (
+    <>
+      <div className="mt-2 flex flex-col gap-4">
+        {pinnedSessions.length > 0 && (
+          <div>
+            <div className="flex items-center gap-1.5 px-2 pb-1.5 text-foreground-tertiary">
+              <Icon icon={PinIcon} className="size-3.5" />
+              <Text
+                variant="small-medium-tight"
+                as="span"
+                tone="muted"
+                className="truncate"
+              >
+                {t("Pinned", "已置顶")}
+              </Text>
+            </div>
+            <SidebarMenu>{pinnedSessions.map(renderItem)}</SidebarMenu>
+          </div>
+        )}
+        {ottoGroups.map(renderGroup)}
+        {newExperts.map((expert) => (
+          <NewExpertGroup key={`new-${expert.id}`} expert={expert} />
+        ))}
+        {expertGroups.map(renderGroup)}
+      </div>
+
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => loadMore()}
+          disabled={isLoadingMore}
+          className="mt-1 flex w-full items-center justify-center gap-2 rounded-md bg-surface-active px-2 py-1.5 text-foreground-emphasis hover:bg-border-strong disabled:opacity-60 max-md:py-3"
+        >
+          {isLoadingMore && (
+            <LoadingSpinner
+              size="small"
+              className="size-4 text-foreground-tertiary"
+            />
+          )}
+          <Text as="span" variant="body-tight-touch" tone="inherit">
+            {isLoadingMore
+              ? t("Loading…", "加载中…")
+              : t("Load more", "加载更多")}
+          </Text>
+        </button>
+      )}
+
+      <DeleteChatDialog
+        session={sessionToDelete}
+        isDeleting={isDeleting}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
+
+      {sharingSessionId && (
+        <ShareChatDialog
+          sessionId={sharingSessionId}
+          open={true}
+          onOpenChange={(next) => {
+            if (!next) setSharingSessionId(null);
+          }}
+        />
+      )}
+    </>
+  );
+}

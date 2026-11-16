@@ -1,0 +1,181 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { Button } from "@/components/atoms/Button/Button";
+import { Input } from "@/components/atoms/Input/Input";
+import { Text } from "@/components/atoms/Text/Text";
+import { Dialog } from "@/components/molecules/Dialog/Dialog";
+import { useToast } from "@/components/molecules/Toast/use-toast";
+import {
+  useGetV2ListLibraryFolders,
+  usePostV2BulkMoveAgents,
+  getGetV2ListLibraryFoldersQueryKey,
+} from "@/app/api/__generated__/endpoints/folders/folders";
+import { getGetV2ListLibraryAgentsQueryKey } from "@/app/api/__generated__/endpoints/library/library";
+import { okData } from "@/app/api/helpers";
+import { useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import type { LibraryFolder } from "@/app/api/__generated__/models/libraryFolder";
+
+interface Props {
+  agentId: string;
+  agentName: string;
+  currentFolderId?: string | null;
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}
+
+export function MoveToFolderDialog({
+  agentId,
+  agentName,
+  currentFolderId,
+  isOpen,
+  setIsOpen,
+}: Props) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [search, setSearch] = useState("");
+
+  const { data: foldersData } = useGetV2ListLibraryFolders(undefined, {
+    query: { select: okData },
+  });
+
+  const { mutate: moveAgent, isPending } = usePostV2BulkMoveAgents({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: getGetV2ListLibraryAgentsQueryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: getGetV2ListLibraryFoldersQueryKey(),
+        });
+        setIsOpen(false);
+        setSearch("");
+        toast({
+          title: t("Workflow moved", "工作流已移动"),
+          description: `"${agentName}" has been moved.`,
+        });
+      },
+      onError: () => {
+        toast({
+          title: t("Error", "错误"),
+          description: t(
+            "Failed to move workflow. Please try again.",
+            "移动工作流失败，请重试。",
+          ),
+          variant: "destructive",
+        });
+      },
+    },
+  });
+
+  const hierarchicalFolders = useMemo(() => {
+    const allFolders = foldersData?.folders ?? [];
+    const result: { folder: LibraryFolder; depth: number }[] = [];
+
+    function addChildren(parentId: string | null, depth: number) {
+      for (const f of allFolders) {
+        if ((f.parent_id ?? null) === parentId) {
+          result.push({ folder: f, depth });
+          addChildren(f.id, depth + 1);
+        }
+      }
+    }
+
+    addChildren(null, 0);
+    return result;
+  }, [foldersData]);
+
+  const folders = hierarchicalFolders.filter(
+    ({ folder: f }) =>
+      f.id !== currentFolderId &&
+      f.name.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  function handleMoveToFolder(folderId: string | null) {
+    moveAgent({
+      data: {
+        agent_ids: [agentId],
+        folder_id: folderId,
+      },
+    });
+  }
+
+  return (
+    <Dialog
+      controlled={{ isOpen, set: setIsOpen }}
+      styling={{ maxWidth: "28rem" }}
+      title={t("Move to folder", "移动到文件夹")}
+      onClose={() => {
+        setSearch("");
+      }}
+    >
+      <Dialog.Content>
+        <div className="flex flex-col gap-3">
+          <Input
+            id="search-folders"
+            label={t("Search folders", "搜索文件夹")}
+            placeholder={t("Search folders...", "搜索文件夹…")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full"
+          />
+          <div className="max-h-[280px] overflow-y-auto">
+            {folders.length === 0 ? (
+              <div className="flex h-20 items-center justify-center">
+                <Text variant="small" tone="subtle">
+                  {t("No folders found", "未找到文件夹")}
+                </Text>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1">
+                {currentFolderId && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    disabled={isPending}
+                    onClick={() => handleMoveToFolder(null)}
+                  >
+                    <span className="text-lead">📂</span>
+                    <div className="flex flex-col items-start">
+                      <Text variant="small-medium">
+                        {t("My Library (root)", "我的工作流库（根目录）")}
+                      </Text>
+                      <Text variant="small" tone="subtle">
+                        {t("Remove from folder", "从文件夹移出")}
+                      </Text>
+                    </div>
+                  </Button>
+                )}
+                {folders.map(({ folder, depth }) => (
+                  <Button
+                    key={folder.id}
+                    variant="ghost"
+                    className="w-full justify-start"
+                    style={{ "--folder-depth": depth } as React.CSSProperties}
+                    disabled={isPending}
+                    onClick={() => handleMoveToFolder(folder.id)}
+                  >
+                    <span className="ml-[calc(var(--folder-depth)*1.25rem)] text-lead">
+                      {folder.icon ?? "📁"}
+                    </span>
+                    <div className="flex flex-col items-start">
+                      <Text variant="small-medium">{folder.name}</Text>
+                      <Text variant="small" tone="subtle">
+                        {folder.agent_count ?? 0}{" "}
+                        {(folder.agent_count ?? 0) === 1
+                          ? "workflow"
+                          : "workflows"}
+                      </Text>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </Dialog.Content>
+    </Dialog>
+  );
+}

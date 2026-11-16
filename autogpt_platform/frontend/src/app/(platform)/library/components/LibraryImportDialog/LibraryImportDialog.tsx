@@ -1,0 +1,73 @@
+"use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { Button } from "@/components/atoms/Button/Button";
+import { Dialog } from "@/components/molecules/Dialog/Dialog";
+import {
+  TabsLine,
+  TabsLineList,
+  TabsLineTrigger,
+} from "@/components/molecules/TabsLine/TabsLine";
+import { useLibraryUploadAgentDialog } from "../LibraryUploadAgentDialog/useLibraryUploadAgentDialog";
+import AgentUploadTab from "./components/AgentUploadTab/AgentUploadTab";
+import ExternalWorkflowTab from "./components/ExternalWorkflowTab/ExternalWorkflowTab";
+import { useExternalWorkflowTab } from "./components/ExternalWorkflowTab/useExternalWorkflowTab";
+import { Upload03Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/atoms/Icon/Icon";
+
+interface Props {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export default function LibraryImportDialog({ isOpen, onOpenChange }: Props) {
+  const { t } = useTranslation();
+  const importWorkflow = useExternalWorkflowTab();
+
+  function handleClose() {
+    onOpenChange(false);
+    importWorkflow.setFileValue("");
+    importWorkflow.setUrlValue("");
+  }
+
+  const upload = useLibraryUploadAgentDialog({ onSuccess: handleClose });
+
+  return (
+    <Dialog
+      title={t("Import", "导入")}
+      styling={{ maxWidth: "32rem" }}
+      controlled={{
+        isOpen,
+        set: onOpenChange,
+      }}
+      onClose={handleClose}
+    >
+      <Dialog.Trigger>
+        <Button
+          data-testid="import-button"
+          variant="primary"
+          className="h-[2.78rem] w-full md:w-[10rem]"
+          size="small"
+        >
+          <Icon icon={Upload03Icon} width={18} height={18} />
+          <span>{t("Import", "导入")}</span>
+        </Button>
+      </Dialog.Trigger>
+      <Dialog.Content>
+        <TabsLine defaultValue="agent">
+          <TabsLineList>
+            <TabsLineTrigger value="agent">AutoGPT workflow</TabsLineTrigger>
+            <TabsLineTrigger value="platform">
+              {t("Another platform", "其他平台")}
+            </TabsLineTrigger>
+          </TabsLineList>
+
+          {/* Tab: Import from any platform (file upload + n8n URL) */}
+          <ExternalWorkflowTab importWorkflow={importWorkflow} />
+
+          {/* Tab: Upload AutoGPT agent JSON */}
+          <AgentUploadTab upload={upload} />
+        </TabsLine>
+      </Dialog.Content>
+    </Dialog>
+  );
+}

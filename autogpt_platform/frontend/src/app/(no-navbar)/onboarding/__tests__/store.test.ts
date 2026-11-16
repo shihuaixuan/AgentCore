@@ -1,0 +1,299 @@
+import { describe, it, expect, beforeEach } from "vitest";
+import {
+  buildStepLayout,
+  DEFAULT_STEP_ORDER,
+  MAX_STEP,
+  resolveStepOrder,
+  useOnboardingWizardStore,
+} from "../store";
+
+beforeEach(() => {
+  useOnboardingWizardStore.getState().reset();
+});
+
+describe("useOnboardingWizardStore", () => {
+  describe("initial state", () => {
+    it("starts at step 1 with empty fields", () => {
+      const state = useOnboardingWizardStore.getState();
+      expect(state.currentStep).toBe(1);
+      expect(state.role).toBe("");
+      expect(state.otherRole).toBe("");
+      expect(state.painPoints).toEqual([]);
+      expect(state.otherPainPoint).toBe("");
+    });
+
+    it("defaults to monthly billing", () => {
+      expect(useOnboardingWizardStore.getState().selectedBilling).toBe(
+        "monthly",
+      );
+      expect(useOnboardingWizardStore.getState().hasUserSelectedBilling).toBe(
+        false,
+      );
+    });
+  });
+
+  describe("billing selection", () => {
+    it("tracks when the billing cycle was selected by the user", () => {
+      useOnboardingWizardStore.getState().setSelectedBilling("monthly");
+
+      const state = useOnboardingWizardStore.getState();
+      expect(state.selectedBilling).toBe("monthly");
+      expect(state.hasUserSelectedBilling).toBe(true);
+    });
+
+    it("applies experiment billing until the user has selected a cycle", () => {
+      useOnboardingWizardStore
+        .getState()
+        .applyPricingExperimentBilling("monthly");
+      expect(useOnboardingWizardStore.getState().selectedBilling).toBe(
+        "monthly",
+      );
+
+      useOnboardingWizardStore.getState().setSelectedBilling("yearly");
+      useOnboardingWizardStore
+        .getState()
+        .applyPricingExperimentBilling("monthly");
+
+      const state = useOnboardingWizardStore.getState();
+      expect(state.selectedBilling).toBe("yearly");
+      expect(state.hasUserSelectedBilling).toBe(true);
+    });
+  });
+
+  describe("setRole", () => {
+    it("updates the role", () => {
+      useOnboardingWizardStore.getState().setRole("Engineer");
+      expect(useOnboardingWizardStore.getState().role).toBe("Engineer");
+    });
+  });
+
+  describe("setOtherRole", () => {
+    it("updates the other role text", () => {
+      useOnboardingWizardStore.getState().setOtherRole("Designer");
+      expect(useOnboardingWizardStore.getState().otherRole).toBe("Designer");
+    });
+  });
+
+  describe("togglePainPoint", () => {
+    it("adds a pain point", () => {
+      useOnboardingWizardStore.getState().togglePainPoint("slow builds");
+      expect(useOnboardingWizardStore.getState().painPoints).toEqual([
+        "slow builds",
+      ]);
+    });
+
+    it("removes a pain point when toggled again", () => {
+      useOnboardingWizardStore.getState().togglePainPoint("slow builds");
+      useOnboardingWizardStore.getState().togglePainPoint("slow builds");
+      expect(useOnboardingWizardStore.getState().painPoints).toEqual([]);
+    });
+
+    it("handles multiple pain points", () => {
+      useOnboardingWizardStore.getState().togglePainPoint("slow builds");
+      useOnboardingWizardStore.getState().togglePainPoint("no tests");
+      expect(useOnboardingWizardStore.getState().painPoints).toEqual([
+        "slow builds",
+        "no tests",
+      ]);
+
+      useOnboardingWizardStore.getState().togglePainPoint("slow builds");
+      expect(useOnboardingWizardStore.getState().painPoints).toEqual([
+        "no tests",
+      ]);
+    });
+
+    it("ignores new selections when at the max limit", () => {
+      useOnboardingWizardStore.getState().togglePainPoint("a");
+      useOnboardingWizardStore.getState().togglePainPoint("b");
+      useOnboardingWizardStore.getState().togglePainPoint("c");
+      useOnboardingWizardStore.getState().togglePainPoint("d");
+      expect(useOnboardingWizardStore.getState().painPoints).toEqual([
+        "a",
+        "b",
+        "c",
+      ]);
+    });
+
+    it("still allows deselecting when at the max limit", () => {
+      useOnboardingWizardStore.getState().togglePainPoint("a");
+      useOnboardingWizardStore.getState().togglePainPoint("b");
+      useOnboardingWizardStore.getState().togglePainPoint("c");
+      useOnboardingWizardStore.getState().togglePainPoint("b");
+      expect(useOnboardingWizardStore.getState().painPoints).toEqual([
+        "a",
+        "c",
+      ]);
+    });
+  });
+
+  describe("setOtherPainPoint", () => {
+    it("updates the other pain point text", () => {
+      useOnboardingWizardStore.getState().setOtherPainPoint("flaky CI");
+      expect(useOnboardingWizardStore.getState().otherPainPoint).toBe(
+        "flaky CI",
+      );
+    });
+  });
+
+  describe("nextStep", () => {
+    it("increments the step", () => {
+      useOnboardingWizardStore.getState().nextStep();
+      expect(useOnboardingWizardStore.getState().currentStep).toBe(2);
+    });
+
+    it("clamps at the last step", () => {
+      useOnboardingWizardStore.getState().goToStep(MAX_STEP);
+      useOnboardingWizardStore.getState().nextStep();
+      expect(useOnboardingWizardStore.getState().currentStep).toBe(MAX_STEP);
+    });
+  });
+
+  describe("prevStep", () => {
+    it("decrements the step", () => {
+      useOnboardingWizardStore.getState().goToStep(3);
+      useOnboardingWizardStore.getState().prevStep();
+      expect(useOnboardingWizardStore.getState().currentStep).toBe(2);
+    });
+
+    it("clamps at step 1", () => {
+      useOnboardingWizardStore.getState().prevStep();
+      expect(useOnboardingWizardStore.getState().currentStep).toBe(1);
+    });
+  });
+
+  describe("goToStep", () => {
+    it("jumps to an arbitrary step", () => {
+      useOnboardingWizardStore.getState().goToStep(3);
+      expect(useOnboardingWizardStore.getState().currentStep).toBe(3);
+    });
+  });
+
+  describe("reset", () => {
+    it("resets all fields to defaults", () => {
+      useOnboardingWizardStore.getState().setRole("Engineer");
+      useOnboardingWizardStore.getState().setOtherRole("Other");
+      useOnboardingWizardStore.getState().togglePainPoint("slow builds");
+      useOnboardingWizardStore.getState().setOtherPainPoint("flaky CI");
+      useOnboardingWizardStore.setState({ hiredTemplateIds: ["tpl-maria"] });
+      useOnboardingWizardStore.getState().goToStep(3);
+
+      useOnboardingWizardStore.getState().reset();
+
+      const state = useOnboardingWizardStore.getState();
+      expect(state.currentStep).toBe(1);
+      expect(state.role).toBe("");
+      expect(state.otherRole).toBe("");
+      expect(state.painPoints).toEqual([]);
+      expect(state.otherPainPoint).toBe("");
+      expect(state.hiredTemplateIds).toEqual([]);
+    });
+  });
+});
+
+describe("buildStepLayout", () => {
+  it("puts the plan + trial step straight after the brain dump", () => {
+    expect(buildStepLayout({ hasPaywall: true })).toEqual({
+      team: 1,
+      autopilot: 2,
+      role: 3,
+      painPoints: 4,
+      subscription: 5,
+      preparing: 6,
+    });
+  });
+
+  it("never lays out the retired hire step", () => {
+    for (const layout of [
+      buildStepLayout({ hasPaywall: true }),
+      buildStepLayout({ hasPlan: true }),
+      buildStepLayout({ hasPlan: true, hasConnect: true }),
+      buildStepLayout({}),
+      buildStepLayout({ order: resolveStepOrder(["hire", "role"]) }),
+      buildStepLayout({ order: ["hire", "team", "preparing"] }),
+    ]) {
+      expect(layout.hire).toBeUndefined();
+    }
+  });
+
+  it("shows the plan alone, under the same key, without a paywall", () => {
+    expect(buildStepLayout({ hasPlan: true })).toEqual({
+      team: 1,
+      autopilot: 2,
+      role: 3,
+      painPoints: 4,
+      subscription: 5,
+      preparing: 6,
+    });
+  });
+
+  it("skips the plan once it is paid for", () => {
+    expect(buildStepLayout({})).toEqual({
+      team: 1,
+      autopilot: 2,
+      role: 3,
+      painPoints: 4,
+      preparing: 5,
+    });
+  });
+
+  it("closes with the connection on self-host, never beside a paywall", () => {
+    expect(buildStepLayout({ hasPlan: true, hasConnect: true })).toEqual({
+      team: 1,
+      autopilot: 2,
+      role: 3,
+      painPoints: 4,
+      subscription: 5,
+      connect: 6,
+      preparing: 7,
+    });
+    expect(
+      buildStepLayout({ hasPaywall: true, hasConnect: true }).connect,
+    ).toBeUndefined();
+  });
+
+  it("fits every layout under MAX_STEP", () => {
+    expect(
+      buildStepLayout({ hasPlan: true, hasConnect: true, hasAccess: true })
+        .preparing,
+    ).toBe(MAX_STEP);
+  });
+});
+
+describe("step order", () => {
+  it("shows the sign-in access step only to accounts that can connect one", () => {
+    expect(buildStepLayout({}).access).toBeUndefined();
+    expect(buildStepLayout({ hasAccess: true }).access).toBe(1);
+  });
+
+  it("keeps the default order when no experiment asks otherwise", () => {
+    expect(resolveStepOrder([])).toEqual(DEFAULT_STEP_ORDER);
+    expect(resolveStepOrder(true)).toEqual(DEFAULT_STEP_ORDER);
+  });
+
+  it("leads with the steps an experiment names and keeps the rest in order", () => {
+    expect(resolveStepOrder(["role", "access", "role", "nonsense"])).toEqual([
+      "role",
+      "access",
+      "team",
+      "autopilot",
+      "painPoints",
+      "subscription",
+      "connect",
+      "preparing",
+    ]);
+  });
+
+  it("puts the access step after the paywall, where connecting needs a plan", () => {
+    const withPaywall = resolveStepOrder(["access", "role"], { paywall: true });
+
+    expect(withPaywall.indexOf("access")).toBe(
+      withPaywall.indexOf("subscription") + 1,
+    );
+    expect(withPaywall.slice(0, 2)).toEqual(["role", "team"]);
+    expect(resolveStepOrder(["access"])[0]).toBe("access");
+  });
+
+  it("always finishes with preparing", () => {
+    expect(resolveStepOrder(["preparing", "role"]).at(-1)).toBe("preparing");
+  });
+});

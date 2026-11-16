@@ -1,0 +1,437 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import {
+  getGetV1ListGraphExecutionsQueryKey,
+  usePostV1ExecuteGraphAgent,
+} from "@/app/api/__generated__/endpoints/graphs/graphs";
+import {
+  getGetV2ListPresetsQueryKey,
+  usePostV2SetupTrigger,
+} from "@/app/api/__generated__/endpoints/presets/presets";
+import { GraphExecutionMeta } from "@/app/api/__generated__/models/graphExecutionMeta";
+import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
+import { LibraryAgentPreset } from "@/app/api/__generated__/models/libraryAgentPreset";
+import { useToast } from "@/components/molecules/Toast/use-toast";
+import { CredentialsProvidersContext } from "@/providers/agent-credentials/credentials-provider";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { getSystemCredentials } from "../../../../../../../../../../components/contextual/CredentialsInput/helpers";
+import { getVisibleFields } from "../AgentInputsReadOnly/helpers";
+import { showExecutionErrorToast } from "./errorHelpers";
+
+export type RunVariant =
+  | "manual"
+  | "schedule"
+  | "automatic-trigger"
+  | "manual-trigger";
+
+interface UseAgentRunModalCallbacks {
+  onRun?: (execution: GraphExecutionMeta) => void;
+  onSetupTrigger?: (preset: LibraryAgentPreset) => void;
+  initialInputValues?: Record<string, any>;
+  initialTriggerConfigValues?: Record<string, any>;
+  initialInputCredentials?: Record<string, any>;
+}
+
+export function useAgentRunModal(
+  agent: LibraryAgent,
+  callbacks?: UseAgentRunModalCallbacks,
+) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isOpen, setIsOpen] = useState(false);
+  const [inputValues, setInputValues] = useState<Record<string, any>>(
+    callbacks?.initialInputValues || {},
+  );
+  const [inputCredentials, setInputCredentials] = useState<Record<string, any>>(
+    callbacks?.initialInputCredentials || {},
+  );
+  // For triggered agents the form is split in two: `inputValues` holds the
+  // graph's regular inputs (sent as `constant_inputs` when setting up the
+  // trigger), and these hold the trigger node's config (sent as
+  // `trigger_config`). Seeded from `initialTriggerConfigValues` when editing.
+  const [triggerConfigValues, setTriggerConfigValues] = useState<
+    Record<string, any>
+  >(callbacks?.initialTriggerConfigValues || {});
+
+  const [presetName, setPresetName] = useState<string>("");
+  const [presetDescription, setPresetDescription] = useState<string>("");
+  const hasInitializedSystemCreds = useRef(false);
+
+  // Determine the default run type based on agent capabilities
+  const defaultRunType: RunVariant = agent.trigger_setup_info
+    ? agent.trigger_setup_info.credentials_input_name
+      ? "automatic-trigger"
+      : "manual-trigger"
+    : "manual";
+
+  // Update input values/credentials if template is selected/unselected
+  useEffect(() => {
+    setInputValues(callbacks?.initialInputValues || {});
+    setInputCredentials(callbacks?.initialInputCredentials || {});
+    setTriggerConfigValues(callbacks?.initialTriggerConfigValues || {});
+  }, [
+    callbacks?.initialInputValues,
+    callbacks?.initialTriggerConfigValues,
+    callbacks?.initialInputCredentials,
+  ]);
+
+  const allProviders = useContext(CredentialsProvidersContext);
+
+  // Initialize credentials with default system credentials
+  useEffect(() => {
+    if (!allProviders || !agent.credentials_input_schema?.properties) return;
+    if (callbacks?.initialInputCredentials) {
+      hasInitializedSystemCreds.current = true;
+      return;
+    }
+    if (hasInitializedSystemCreds.current) return;
+
+    const properties = agent.credentials_input_schema.properties as Record<
+      string,
+      any
+    >;
+
+    setInputCredentials((currentCreds) => {
+      const credsToAdd: Record<string, any> = {};
+
+      for (const [key, schema] of Object.entries(properties)) {
+        if (currentCreds[key]) continue;
+
+        const providerNames = schema.credentials_provider || [];
+        const supportedTypes = schema.credentials_types || [];
+        const requiredScopes = schema.credentials_scopes;
+
+        for (const providerName of providerNames) {
+          const providerData = allProviders[providerName];
+          if (!providerData) continue;
+
+          const systemCreds = getSystemCredentials(
+            providerData.savedCredentials ?? [],
+          );
+          const matchingSystemCreds = systemCreds.filter((cred) => {
+            if (!supportedTypes.includes(cred.type)) return false;
+
+            if (
+              cred.type === "oauth2" &&
+              requiredScopes &&
+              requiredScopes.length > 0
+            ) {
+              const grantedScopes = new Set(cred.scopes || []);
+              const hasAllRequiredScopes = requiredScopes.every(
+                (scope: string) => grantedScopes.has(scope),
+              );
+              if (!hasAllRequiredScopes) return false;
+            }
+
+            return true;
+          });
+
+          if (matchingSystemCreds.length === 1) {
+            const systemCred = matchingSystemCreds[0];
+            credsToAdd[key] = {
+              id: systemCred.id,
+              type: systemCred.type,
+              provider: providerName,
+              title: systemCred.title,
+            };
+            break;
+          }
+        }
+      }
+
+      if (Object.keys(credsToAdd).length > 0) {
+        hasInitializedSystemCreds.current = true;
+        return {
+          ...currentCreds,
+          ...credsToAdd,
+        };
+      }
+
+      return currentCreds;
+    });
+  }, [
+    allProviders,
+    agent.credentials_input_schema,
+    callbacks?.initialInputCredentials,
+  ]);
+
+  // Reset initialization flag when modal closes/opens or agent changes
+  useEffect(() => {
+    hasInitializedSystemCreds.current = false;
+  }, [isOpen, agent.graph_id]);
+
+  // API mutations
+  const executeGraphMutation = usePostV1ExecuteGraphAgent({
+    mutation: {
+      onSuccess: (response) => {
+        if (response.status === 200) {
+          toast({
+            title: t("Workflow execution started", "工作流已开始运行"),
+          });
+          queryClient.invalidateQueries({
+            queryKey: getGetV1ListGraphExecutionsQueryKey(agent.graph_id),
+          });
+          callbacks?.onRun?.(response.data);
+          setIsOpen(false);
+        }
+      },
+      onError: (error: any) => {
+        showExecutionErrorToast(toast, error, {
+          graph_id: agent.graph_id,
+          graph_version: agent.graph_version,
+        });
+      },
+    },
+  });
+
+  const setupTriggerMutation = usePostV2SetupTrigger({
+    mutation: {
+      onSuccess: (response) => {
+        if (response.status === 200) {
+          toast({
+            title: t("Trigger setup complete", "触发器设置完成"),
+          });
+          queryClient.invalidateQueries({
+            queryKey: getGetV2ListPresetsQueryKey({ graph_id: agent.graph_id }),
+          });
+          callbacks?.onSetupTrigger?.(response.data);
+          setIsOpen(false);
+        }
+      },
+      onError: (error: any) => {
+        toast({
+          title: "❌ Failed to setup trigger",
+          description: error.message || "An unexpected error occurred.",
+          variant: "destructive",
+        });
+      },
+    },
+  });
+
+  // Primary input fields: the agent's regular graph inputs — consistent for
+  // both triggered and non-triggered agents.
+  const agentInputSchema = useMemo(
+    () => agent.input_schema || { properties: {}, required: [] },
+    [agent.input_schema],
+  );
+
+  const agentInputFields = useMemo(
+    () => getVisibleFields(agentInputSchema),
+    [agentInputSchema],
+  );
+
+  // Triggered agents additionally have the trigger node's config, collected in
+  // its own conditional section and sent as `trigger_config`.
+  const triggerConfigSchema = useMemo(
+    () => agent.trigger_setup_info?.config_schema,
+    [agent.trigger_setup_info],
+  );
+
+  const triggerConfigFields = useMemo(
+    () => getVisibleFields(triggerConfigSchema),
+    [triggerConfigSchema],
+  );
+
+  const agentCredentialsInputFields = useMemo(() => {
+    if (
+      !agent.credentials_input_schema ||
+      typeof agent.credentials_input_schema !== "object" ||
+      !("properties" in agent.credentials_input_schema) ||
+      !agent.credentials_input_schema.properties
+    ) {
+      return {} as Record<string, any>;
+    }
+    return agent.credentials_input_schema.properties as Record<string, any>;
+  }, [agent.credentials_input_schema]);
+
+  // Validation logic
+  const [allRequiredInputsAreSetRaw, missingInputs] = useMemo(() => {
+    const missingFor = (
+      schema: { required?: unknown } | undefined,
+      values: Record<string, any>,
+    ) => {
+      const required = (schema?.required as string[]) || [];
+      return required.filter((field) => !isFilled(values[field]));
+    };
+
+    const missing = [
+      ...missingFor(agentInputSchema, inputValues),
+      ...missingFor(triggerConfigSchema, triggerConfigValues),
+    ];
+    return [missing.length === 0, missing];
+  }, [agentInputSchema, inputValues, triggerConfigSchema, triggerConfigValues]);
+
+  const [allCredentialsAreSet, missingCredentials] = useMemo(() => {
+    const requiredCredentials = new Set(
+      (agent.credentials_input_schema?.required as string[]) || [],
+    );
+
+    const missing = [...requiredCredentials].filter((key) => {
+      const cred = inputCredentials[key];
+      return !cred || !cred.id;
+    });
+
+    return [missing.length === 0, missing];
+  }, [agent.credentials_input_schema, inputCredentials]);
+
+  const credentialsRequired = useMemo(
+    () => Object.keys(agentCredentialsInputFields || {}).length > 0,
+    [agentCredentialsInputFields],
+  );
+
+  const allRequiredInputsAreSet = useMemo(
+    () =>
+      allRequiredInputsAreSetRaw &&
+      (!credentialsRequired || allCredentialsAreSet),
+    [allRequiredInputsAreSetRaw, credentialsRequired, allCredentialsAreSet],
+  );
+
+  const notifyMissingRequirements = useCallback(() => {
+    const allMissingFields = missingInputs.concat(
+      credentialsRequired && !allCredentialsAreSet
+        ? missingCredentials.map((k) => `credentials:${k}`)
+        : [],
+    );
+
+    toast({
+      title: "⚠️ Missing required inputs",
+      description: `Please provide: ${allMissingFields.map((k) => `"${k}"`).join(", ")}`,
+      variant: "destructive",
+    });
+  }, [
+    missingInputs,
+    toast,
+    credentialsRequired,
+    allCredentialsAreSet,
+    missingCredentials,
+  ]);
+
+  // Action handlers
+  const handleRun = useCallback(() => {
+    if (!allRequiredInputsAreSet) {
+      notifyMissingRequirements();
+      return;
+    }
+
+    if (
+      defaultRunType === "automatic-trigger" ||
+      defaultRunType === "manual-trigger"
+    ) {
+      if (!presetName.trim()) {
+        toast({
+          title: "⚠️ Trigger name required",
+          description: t(
+            "Please provide a name for your trigger.",
+            "请填写触发器名称。",
+          ),
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setupTriggerMutation.mutate({
+        data: {
+          name: presetName,
+          description: presetDescription || `Trigger for ${agent.name}`,
+          graph_id: agent.graph_id,
+          graph_version: agent.graph_version,
+          trigger_config: triggerConfigValues,
+          constant_inputs: inputValues,
+          agent_credentials: inputCredentials,
+        },
+      });
+    } else {
+      const validCredentials = Object.fromEntries(
+        Object.entries(inputCredentials).filter(([_, cred]) => cred && cred.id),
+      );
+
+      executeGraphMutation.mutate({
+        graphId: agent.graph_id,
+        graphVersion: agent.graph_version,
+        data: {
+          inputs: inputValues,
+          credentials_inputs: validCredentials,
+          source: "library",
+        },
+      });
+    }
+  }, [
+    allRequiredInputsAreSet,
+    defaultRunType,
+    inputValues,
+    triggerConfigValues,
+    inputCredentials,
+    agent,
+    presetName,
+    presetDescription,
+    notifyMissingRequirements,
+    setupTriggerMutation,
+    executeGraphMutation,
+    toast,
+  ]);
+
+  const handleSimulate = useCallback(() => {
+    executeGraphMutation.mutate({
+      graphId: agent.graph_id,
+      graphVersion: agent.graph_version,
+      data: {
+        inputs: inputValues,
+        credentials_inputs: {},
+        source: "library",
+        dry_run: true,
+      },
+    });
+  }, [agent, inputValues, executeGraphMutation]);
+
+  const hasInputFields = useMemo(() => {
+    return (
+      Object.keys(agentInputFields).length > 0 ||
+      Object.keys(triggerConfigFields).length > 0
+    );
+  }, [agentInputFields, triggerConfigFields]);
+
+  return {
+    isOpen,
+    setIsOpen,
+    defaultRunType: defaultRunType as RunVariant,
+    inputValues,
+    setInputValues,
+    triggerConfigValues,
+    setTriggerConfigValues,
+    inputCredentials,
+    setInputCredentials,
+    presetName,
+    presetDescription,
+    setPresetName,
+    setPresetDescription,
+    allRequiredInputsAreSet,
+    missingInputs,
+    agentInputFields,
+    triggerConfigFields,
+    agentCredentialsInputFields,
+    hasInputFields,
+    isExecuting: executeGraphMutation.isPending,
+    isSettingUpTrigger: setupTriggerMutation.isPending,
+    handleRun,
+    handleSimulate,
+  };
+}
+
+// Mirror the backend's `_is_filled`: only null/undefined, "", {}, and [] count
+// as missing — falsy primitives like 0 and false are valid provided values.
+export function isFilled(value: unknown): boolean {
+  if (value === null || value === undefined || value === "") return false;
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === "object") return Object.keys(value).length > 0;
+  return true;
+}

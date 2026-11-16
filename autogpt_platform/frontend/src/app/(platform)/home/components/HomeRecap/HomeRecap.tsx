@@ -1,0 +1,118 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
+import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
+import { useTrackFunnelViewOnce } from "@/services/experts/use-track-funnel-view-once";
+import { useHomePage } from "../../useHomePage";
+import { AgentTeam } from "../AgentTeam/AgentTeam";
+import { HomeHeader } from "../HomeHeader/HomeHeader";
+import { NeedsYou } from "../NeedsYou/NeedsYou";
+import { NowNext } from "../NowNext/NowNext";
+import { RecentWork } from "../RecentWork/RecentWork";
+
+const SHELL_CLASS = "relative mt-10 px-4 pb-8 pt-6 text-left sm:px-6";
+const CONTENT_CLASS = "relative mx-auto w-full max-w-[1120px]";
+const GRID_CLASS = "grid grid-cols-1 items-start gap-4 xl:grid-cols-12";
+
+export function HomeRecap() {
+  const { t } = useTranslation();
+  const { dashboard, isLoading, isError, refetch } = useHomePage();
+
+  useTrackFunnelViewOnce(
+    "home_viewed",
+    !isLoading && !isError && Boolean(dashboard),
+  );
+
+  if (isLoading) {
+    return <HomeSkeleton />;
+  }
+
+  if (isError || !dashboard) {
+    return (
+      <section className={SHELL_CLASS}>
+        <div className={CONTENT_CLASS}>
+          <ErrorCard
+            context="home"
+            httpError={{
+              message: t(
+                "Your Home briefing could not be loaded",
+                "无法加载你的首页简报",
+              ),
+            }}
+            onRetry={() => refetch()}
+          />
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className={SHELL_CLASS}>
+      <div className={CONTENT_CLASS}>
+        <HomeHeader dashboard={dashboard} />
+        <div className={GRID_CLASS}>
+          <div className="flex min-w-0 flex-col gap-4 xl:col-span-8">
+            {dashboard.attention.length > 0 && (
+              <NeedsYou dashboard={dashboard} />
+            )}
+            <RecentWork dashboard={dashboard} />
+          </div>
+          <div className="flex min-w-0 flex-col gap-4 xl:col-span-4">
+            <AgentTeam dashboard={dashboard} />
+            <NowNext dashboard={dashboard} />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HomeSkeleton() {
+  const { t } = useTranslation();
+  return (
+    <section
+      className={SHELL_CLASS}
+      aria-label={t("Loading Home…", "正在加载首页…")}
+    >
+      <div className={CONTENT_CLASS}>
+        <div className="flex items-end justify-between gap-6 px-1 pt-1 pb-5">
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-64" />
+            <Skeleton className="h-4 w-80 max-w-full" />
+          </div>
+          <div className="flex shrink-0 flex-col items-end gap-1.5">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+        </div>
+        <div className={GRID_CLASS}>
+          <div className="flex flex-col gap-4 xl:col-span-8">
+            <HomeTileSkeleton cardClassName="h-64" />
+            <HomeTileSkeleton cardClassName="h-56" />
+          </div>
+          <div className="flex flex-col gap-4 xl:col-span-4">
+            <HomeTileSkeleton cardClassName="h-44" />
+            <HomeTileSkeleton cardClassName="h-56" />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+interface Props {
+  cardClassName: string;
+}
+
+function HomeTileSkeleton({ cardClassName }: Props) {
+  return (
+    <div className="overflow-hidden rounded-2xl bg-surface smooth-shadow-ring-sm">
+      <div className="flex h-10 items-center border-b border-separator px-4">
+        <Skeleton className="h-3.5 w-28" />
+      </div>
+      {/* oxlint-disable-next-line design-system/require-static-classes -- cardClassName is a whole, static class string */}
+      <Skeleton className={`${cardClassName} rounded-none`} />
+    </div>
+  );
+}

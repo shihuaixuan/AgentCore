@@ -1,0 +1,204 @@
+import { useToast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { useCaptureMarketingPrompt } from "@/hooks/useCaptureMarketingPrompt";
+import { getAuthDeepLink, sanitizeAuthNext } from "@/lib/auth-redirect";
+import { providerCallbackPath } from "@/lib/auth/provider-callback";
+import { isBannedNotice } from "@/lib/auth/account-banned";
+import {
+  EMAIL_VERIFICATION_NOTICE_PARAM,
+  getEmailVerificationNotice,
+} from "@/lib/auth/email-verification";
+import { useAuth } from "@/lib/auth/hooks/useAuth";
+import {
+  getSocialSignInError,
+  isWaitlistSignInError,
+} from "@/lib/auth/microsoft-login";
+import { environment } from "@/services/environment";
+import { loginFormSchema, LoginProvider } from "@/types/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import z from "zod";
+import { login as loginAction } from "./actions";
+import { getPostLoginPath, getSignInErrorNotice } from "./helpers";
+import { isTeamEmail } from "@/lib/auth/team-email";
+import { clearImpersonationEverywhere } from "@/lib/impersonation";
+
+export function useLoginPage() {
+  const { t } = useTranslation();
+  useCaptureMarketingPrompt();
+
+  const { user, isUserLoading, isLoggedIn } = useAuth();
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loadingProvider, setLoadingProvider] = useState<LoginProvider | null>(
+    null,
+  );
+  // A social sign-in that fails returns here with Better Auth's error code.
+  // Microsoft's own copy (microsoft-login.ts) is for a Microsoft sign-in only,
+  // which the with-provider route marks with `provider=microsoft`.
+  const microsoftErrorCode =
+    searchParams.get("provider") === "microsoft"
+      ? searchParams.get("error")
+      : null;
+  const isWaitlisted = isWaitlistSignInError(microsoftErrorCode);
+  const [showNotAllowedModal, setShowNotAllowedModal] = useState(isWaitlisted);
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(
+    null,
+  );
+  const isCloudEnv = environment.isCloud();
+
+  // Same-origin redirect target; off-site values are dropped so a crafted
+  // `/login?next=https://phishing.site` cannot redirect users elsewhere.
+  const rawNext = searchParams.get("next");
+  const nextUrl = getAuthDeepLink(rawNext);
+  // Round trips (Google, the verification email) carry the whole safe `next`;
+  // /auth/callback decides from it, tracking params included.
+  const safeNext = sanitizeAuthNext(rawNext);
+  const verificationNotice = getEmailVerificationNotice(
+    searchParams.get(EMAIL_VERIFICATION_NOTICE_PARAM),
+  );
+  const signInErrorNotice = getSignInErrorNotice(searchParams.get("error"));
+  const showBannedNotice = isBannedNotice(searchParams);
+
+  // Only honour explicit `?next=` deep links here. Generic "already logged in
+  // on /login, get me out" is handled by OnboardingProvider so the user lands
+  // straight on /onboarding or /copilot. Otherwise we'd bounce
+  // /login → / → /copilot → /onboarding, and each hop renders before the next
+  // redirect — that intermediate /copilot render is the flash users see.
+  useEffect(() => {
+    if (isLoggedIn && !isLoggingIn && nextUrl) {
+      router.replace(nextUrl);
+    }
+  }, [isLoggedIn, isLoggingIn, nextUrl, router]);
+
+  const form = useForm<z.infer<typeof loginFormSchema>>({
+    resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  async function handleProviderLogin(provider: LoginProvider) {
+    setLoadingProvider(provider);
+    setIsLoggingIn(true);
+    // Leftover impersonation (expired admin session, pre-fix cookie) would 403 a non-admin.
+    clearImpersonationEverywhere();
+
+    try {
+      // Include next URL in OAuth flow if present
+      const fullCallbackUrl = `${window.location.origin}${providerCallbackPath(provider, safeNext)}`;
+
+      const response = await fetch("/api/auth/login/with-provider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider, redirectTo: fullCallbackUrl }),
+      });
+
+      if (!response.ok) {
+        const { error } = await response.json();
+        throw new Error(
+          error || t("Failed to start OAuth flow", "无法启动第三方登录"),
+        );
+      }
+
+      const { url } = await response.json();
+      if (url) window.location.href = url as string;
+    } catch (error) {
+      setLoadingProvider(null);
+      setIsLoggingIn(false);
+      setFeedback(
+        error instanceof Error
+          ? error.message
+          : t("Failed to start OAuth flow", "无法启动第三方登录"),
+      );
+    }
+  }
+
+  async function handleLogin(data: z.infer<typeof loginFormSchema>) {
+    setIsLoading(true);
+    setIsLoggingIn(true);
+
+    if (isTeamEmail(data.email)) {
+      toast({
+        title: t(
+          "Please use Google SSO to login using an AutoGPT email.",
+          "使用 AutoGPT 团队邮箱时，请通过 Google 单点登录。",
+        ),
+        variant: "default",
+      });
+
+      setIsLoading(false);
+      setIsLoggingIn(false);
+      return;
+    }
+
+    clearImpersonationEverywhere();
+
+    try {
+      const result = await loginAction(data.email, data.password, safeNext);
+
+      if (result.error === "email_not_verified" && result.email) {
+        setVerificationEmail(result.email);
+        setIsLoading(false);
+        setIsLoggingIn(false);
+        return;
+      }
+
+      if (!result.success) {
+        throw new Error(result.error || t("Login failed", "登录失败"));
+      }
+
+      // Use full page navigation to ensure middleware processes the new auth cookies.
+      // router.replace() does a soft navigation where the cookie store may not
+      // immediately reflect cookies set by the server action, causing a blank page.
+      // This matches the OAuth flow which also uses window.location.href.
+      window.location.href = getPostLoginPath({
+        nextUrl,
+        resultNext: result.next,
+        rawNext,
+      });
+    } catch (error) {
+      toast({
+        title:
+          error instanceof Error
+            ? error.message
+            : t("Unexpected error during login", "登录时发生意外错误"),
+        variant: "destructive",
+      });
+
+      setIsLoading(false);
+      setIsLoggingIn(false);
+    }
+  }
+
+  return {
+    form,
+    feedback:
+      feedback ??
+      signInErrorNotice ??
+      (isWaitlisted ? null : getSocialSignInError(microsoftErrorCode)),
+    nextUrl: safeNext,
+    verificationEmail,
+    verificationNotice,
+    showBannedNotice,
+    user,
+    isLoading,
+    isGoogleLoading: loadingProvider === "google",
+    isMicrosoftLoading: loadingProvider === "microsoft",
+    isMicrosoftEnabled: environment.isMicrosoftLoginEnabled(),
+    isCloudEnv,
+    isUserLoading,
+    showNotAllowedModal,
+    handleSubmit: form.handleSubmit(handleLogin),
+    handleProviderLogin,
+    handleCloseNotAllowedModal: () => setShowNotAllowedModal(false),
+    handleBackToLogin: () => setVerificationEmail(null),
+  };
+}

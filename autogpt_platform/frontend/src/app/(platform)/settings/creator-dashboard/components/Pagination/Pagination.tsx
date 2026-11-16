@@ -1,0 +1,96 @@
+"use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Pagination as PaginationModel } from "@/app/api/__generated__/models/pagination";
+import { Button } from "@/components/atoms/Button/Button";
+import { Text } from "@/components/atoms/Text/Text";
+import { cn } from "@/lib/utils";
+import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/atoms/Icon/Icon";
+
+interface Props {
+  pagination: PaginationModel;
+  onPageChange: (page: number) => void;
+  disabled?: boolean;
+}
+
+const MAX_VISIBLE_PAGES = 5;
+
+function getVisiblePages(current: number, total: number): number[] {
+  if (total <= MAX_VISIBLE_PAGES) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  let start = Math.max(1, current - Math.floor(MAX_VISIBLE_PAGES / 2));
+  let end = start + MAX_VISIBLE_PAGES - 1;
+  if (end > total) {
+    end = total;
+    start = end - MAX_VISIBLE_PAGES + 1;
+  }
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
+export function Pagination({ pagination, onPageChange, disabled }: Props) {
+  const { t } = useTranslation();
+  const { current_page, total_pages, total_items, page_size } = pagination;
+
+  if (total_pages <= 1) return null;
+
+  const startItem = (current_page - 1) * page_size + 1;
+  const endItem = Math.min(current_page * page_size, total_items);
+  const visiblePages = getVisiblePages(current_page, total_pages);
+
+  return (
+    <div
+      className="flex items-center justify-between gap-3 px-4 py-3"
+      data-testid="submissions-pagination"
+    >
+      <Text variant="small" tone="muted">
+        Showing {startItem}–{endItem} of {total_items}
+      </Text>
+      <div className="flex items-center gap-1.5">
+        <Button
+          variant="secondary"
+          size="small"
+          leftIcon={<Icon icon={ArrowLeft01Icon} size={14} />}
+          disabled={disabled || current_page <= 1}
+          onClick={() => onPageChange(current_page - 1)}
+          aria-label={t("Previous page", "上一页")}
+        >
+          {t("Previous", "上一步")}
+        </Button>
+        <div className="flex items-center gap-1">
+          {visiblePages.map((page) => {
+            const isActive = page === current_page;
+            return (
+              <button
+                key={page}
+                type="button"
+                disabled={disabled}
+                onClick={() => onPageChange(page)}
+                aria-label={`Go to page ${page}`}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-caption font-medium tabular-nums transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50",
+                  isActive
+                    ? "bg-action-hover text-action-foreground"
+                    : "text-foreground-body hover:bg-surface-hover",
+                )}
+              >
+                {page}
+              </button>
+            );
+          })}
+        </div>
+        <Button
+          variant="secondary"
+          size="small"
+          rightIcon={<Icon icon={ArrowRight01Icon} size={14} />}
+          disabled={disabled || current_page >= total_pages}
+          onClick={() => onPageChange(current_page + 1)}
+          aria-label={t("Next page", "下一页")}
+        >
+          {t("Next", "下一步")}
+        </Button>
+      </div>
+    </div>
+  );
+}
