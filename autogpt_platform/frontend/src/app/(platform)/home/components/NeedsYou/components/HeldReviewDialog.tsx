@@ -38,7 +38,7 @@ interface Props {
 
 // Every held call on the page, one at a time: the chat's card, a sidebar, and ‹ › to move.
 export function HeldReviewDialog({ carousel, held, chatLink = true }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { current } = carousel;
   const approval = current ? toApprovalItem(current.item.review!) : null;
 
@@ -67,7 +67,7 @@ export function HeldReviewDialog({ carousel, held, chatLink = true }: Props) {
             <ReviewSidebar carousel={carousel} />
           </div>
           <section
-            aria-label="Held call"
+            aria-label={t("Held call", "待审核调用")}
             className="flex min-w-0 flex-1 flex-col"
           >
             <header className="flex min-h-16 shrink-0 items-center gap-2 border-b border-separator py-3 pr-16 pl-4">
@@ -75,7 +75,7 @@ export function HeldReviewDialog({ carousel, held, chatLink = true }: Props) {
                 variant="secondary"
                 size="icon-sm"
                 className="lg:hidden"
-                aria-label="All held calls"
+                aria-label={t("All held calls", "所有待审核调用")}
                 aria-expanded={carousel.sheetOpen}
                 leadingIcon={Menu01Icon}
                 onClick={() => carousel.setSheetOpen(!carousel.sheetOpen)}
@@ -89,7 +89,10 @@ export function HeldReviewDialog({ carousel, held, chatLink = true }: Props) {
                 onClick={() => carousel.move(-1)}
               />
               <Text variant="body-medium" as="span" aria-live="polite" tabular>
-                {carousel.position} of {carousel.total}
+                {t(
+                  `${carousel.position} of ${carousel.total}`,
+                  `第 ${carousel.position} 项，共 ${carousel.total} 项`,
+                )}
               </Text>
               <Button
                 variant="secondary"
@@ -110,7 +113,7 @@ export function HeldReviewDialog({ carousel, held, chatLink = true }: Props) {
                   >
                     {current.item.expert?.name ?? "Otto"}
                     {current.item.created_at
-                      ? ` · ${shortAge(current.item.created_at)}`
+                      ? ` · ${shortAge(current.item.created_at, undefined, locale)}`
                       : ""}
                   </Text>
                 </span>
@@ -204,10 +207,10 @@ function Finished({
     <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
       <Icon icon={Tick02Icon} size={20} tone="success" aria-hidden />
       <Text variant="h4" as="h3" data-pane-focus>
-        {t("All", "全部")} {carousel.total} reviewed
+        {t(`All ${carousel.total} reviewed`, `已审核全部 ${carousel.total} 项`)}
       </Text>
       <Text variant="body" tone="secondary">
-        {reviewTally(carousel.order)}
+        {reviewTally(carousel.order, t)}
       </Text>
     </div>
   );

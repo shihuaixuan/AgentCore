@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
 import { useIsBillingEnabled } from "@/hooks/useIsBillingEnabled";
@@ -29,6 +30,8 @@ export function PlanRequiredDescription() {
 }
 
 export function PaywallToastAction() {
+  const { t } = useTranslation();
+
   const isBillingEnabled = useIsBillingEnabled();
   if (!isBillingEnabled) return null;
   return (
@@ -39,7 +42,7 @@ export function PaywallToastAction() {
       variant="secondary"
       onClick={() => sonnerToast.dismiss(PAYWALL_TOAST_KEY)}
     >
-      See plans
+      {t("See plans", "查看套餐")}
     </Button>
   );
 }

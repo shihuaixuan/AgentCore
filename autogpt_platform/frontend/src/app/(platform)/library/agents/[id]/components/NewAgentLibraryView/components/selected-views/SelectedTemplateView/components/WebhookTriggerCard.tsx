@@ -66,7 +66,9 @@ export function WebhookTriggerCard({ template, triggerSetupInfo }: Props) {
               up the trigger connection with the service of your choosing.
             </Text>
             <div className="flex flex-col gap-1">
-              <Text variant="body-medium">Webhook URL:</Text>
+              <Text variant="body-medium">
+                {t("Webhook URL:", "Webhook 地址：")}
+              </Text>
               <div className="flex gap-2 rounded-md bg-surface-muted p-2">
                 <code className="ph-no-capture flex-1 text-body select-all">
                   {webhook.url}

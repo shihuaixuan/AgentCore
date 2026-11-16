@@ -21,7 +21,7 @@ export function SkillTopicChips({ selected, onSelect, size = "small" }: Props) {
   return (
     <div
       role="group"
-      aria-label="Filter skills by topic"
+      aria-label={t("Filter skills by topic", "按主题筛选技能")}
       className={cn(
         "flex flex-wrap",
         size === "default" ? "gap-2" : "gap-1 sm:justify-end",

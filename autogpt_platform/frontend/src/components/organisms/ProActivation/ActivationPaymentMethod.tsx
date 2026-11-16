@@ -1,9 +1,13 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useGetV1ManagePaymentMethods } from "@/app/api/__generated__/endpoints/credits/credits";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { CreditCardIcon, LinkSquare01Icon } from "@hugeicons/core-free-icons";
 
 export function ActivationPaymentMethod() {
+  const { t } = useTranslation();
   const { data } = useGetV1ManagePaymentMethods({ query: { retry: false } });
   const raw = data?.data;
   const portal =
@@ -23,7 +27,7 @@ export function ActivationPaymentMethod() {
         className="flex items-center gap-2 text-body text-foreground-secondary"
       >
         <Icon icon={CreditCardIcon} size={18} />
-        Payment method
+        {t("Payment method", "付款方式")}
       </div>
       <Button
         as="NextLink"
@@ -33,9 +37,12 @@ export function ActivationPaymentMethod() {
         variant="ghost"
         size="inline"
         className="underline underline-offset-4"
-        aria-label="Manage payment method in a new tab"
+        aria-label={t(
+          "Manage payment method in a new tab",
+          "在新标签页中管理付款方式",
+        )}
       >
-        Manage
+        {t("Manage", "管理")}
         <Icon icon={LinkSquare01Icon} size={14} />
       </Button>
     </div>

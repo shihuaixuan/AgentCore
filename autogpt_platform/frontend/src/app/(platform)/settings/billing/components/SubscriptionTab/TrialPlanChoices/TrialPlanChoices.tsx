@@ -41,7 +41,10 @@ export function TrialPlanChoices({ offer }: Props) {
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <PlanChoice
           plan={ownPlan}
-          actionLabel={`Subscribe to ${ownPlan.label}`}
+          actionLabel={t(
+            `Subscribe to ${ownPlan.label}`,
+            `订阅 ${ownPlan.label}`,
+          )}
           variant="primary"
           isLoading={requestedTier === ownPlan.tier}
           isDisabled={isBusy}
@@ -50,7 +53,10 @@ export function TrialPlanChoices({ offer }: Props) {
         {upgradePlan ? (
           <PlanChoice
             plan={upgradePlan}
-            actionLabel={`Upgrade to ${upgradePlan.label}`}
+            actionLabel={t(
+              `Upgrade to ${upgradePlan.label}`,
+              `升级至 ${upgradePlan.label}`,
+            )}
             variant="outline"
             isLoading={requestedTier === upgradePlan.tier}
             isDisabled={isBusy}

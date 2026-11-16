@@ -3,6 +3,7 @@ import { fireEvent, screen } from "@testing-library/react";
 import { render } from "@/tests/integrations/test-utils";
 import { server } from "@/mocks/mock-server";
 import { http, HttpResponse } from "msw";
+import { LanguageProvider, useTranslation } from "@/lib/i18n/LanguageProvider";
 
 vi.mock("@sentry/nextjs", () => ({
   captureException: vi.fn(),
@@ -19,6 +20,50 @@ vi.mock("./components/ThumbnailImages", () => ({
 }));
 
 import { AgentInfoStep } from "../AgentInfoStep";
+
+function LocalizedListing() {
+  const { setLocale } = useTranslation();
+  return (
+    <>
+      <button onClick={() => setLocale("en")}>English</button>
+      <AgentInfoStep
+        onBack={() => {}}
+        onSuccess={() => {}}
+        selectedAgentId="graph-1"
+        selectedAgentVersion={1}
+      />
+    </>
+  );
+}
+
+it("opens the slug help in Chinese and switches the same help to English", async () => {
+  render(
+    <LanguageProvider>
+      <LocalizedListing />
+    </LanguageProvider>,
+  );
+  const slug = await screen.findByLabelText("网址标识");
+  const label = document.querySelector(`label[for="${slug.id}"]`);
+  const trigger = label?.parentElement?.querySelector("button");
+  expect(trigger).toBeDefined();
+  fireEvent.focus(trigger!);
+  expect(
+    await screen.findByText(
+      "用于市场网址路径的标识，只能包含小写字母、数字和连字符。",
+    ),
+  ).toBeDefined();
+  fireEvent.click(screen.getByRole("button", { name: "English" }));
+  expect(
+    await screen.findByText(
+      "URL-friendly identifier used in the marketplace path. Lowercase letters, numbers, hyphens only.",
+    ),
+  ).toBeDefined();
+  fireEvent.click(screen.getByRole("button", { name: "Experience details" }));
+  await screen.findByLabelText("YouTube video link");
+  expect(
+    screen.getAllByPlaceholderText("https://youtube.com/watch?v=...").length,
+  ).toBe(2);
+});
 
 describe("AgentInfoStep", () => {
   const baseProps = {

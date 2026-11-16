@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Text } from "@/components/atoms/Text/Text";
 import { FieldProps } from "@rjsf/utils";
 import { BaseDropdown } from "./components/BaseDropdown";
@@ -31,6 +33,7 @@ function BasePicker({
   fieldPathId,
   credentialsID,
 }: FieldProps & { credentialsID: string }) {
+  const { t } = useTranslation();
   const picker = useAirtableBasePickerField(credentialsID);
   const value = typeof formData === "string" ? formData : "";
   const labelID = `${fieldPathId.$id}-label`;
@@ -77,27 +80,30 @@ function BasePicker({
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <Text variant="body-medium" id={labelID} tone="primary">
-          Choose an Airtable base
+          {t("Choose an Airtable base", "选择 Airtable 数据库")}
         </Text>
         <Text variant="small" id={`${labelID}-hint`} tone="secondary">
-          {pickerHint(needed)}
+          {pickerHint(needed, t)}
         </Text>
       </div>
       {body()}
       {noneUsable && (
         <Text variant="small" tone="secondary">
-          {noUsableBaseText(needed)}
+          {noUsableBaseText(needed, t)}
         </Text>
       )}
       {ready && picker.truncated && (
         <Text variant="small" tone="muted">
-          Showing the first {picker.bases.length} of your bases.
+          {t(
+            `Showing the first ${picker.bases.length} of your bases.`,
+            `显示你的前 ${picker.bases.length} 个数据库。`,
+          )}
         </Text>
       )}
       {ready && (
         <div className="flex flex-wrap items-center gap-x-2">
           <Text variant="small" tone="muted">
-            Want a new, empty one?
+            {t("Want a new, empty one?", "想新建一个空数据库？")}
           </Text>
           <NewBaseActions
             onRefresh={picker.refresh}

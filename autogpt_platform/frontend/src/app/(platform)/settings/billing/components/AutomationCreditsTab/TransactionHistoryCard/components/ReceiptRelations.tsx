@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { CreditHistoryRelatedExecution } from "@/app/api/__generated__/models/creditHistoryRelatedExecution";
 import { Button } from "@/components/atoms/Button/Button";
 import { Link } from "@/components/atoms/Link/Link";
@@ -16,6 +18,7 @@ export function ReceiptRelations({
   loadedTransactions,
   onSelectRelated,
 }: Props) {
+  const { t } = useTranslation();
   const related = transaction.related_executions ?? [];
   if (
     !transaction.parent_execution_id &&
@@ -27,7 +30,7 @@ export function ReceiptRelations({
     <div className="mt-4 space-y-2 border-t border-border-base pt-3">
       {transaction.parent_execution_id && (
         <Text variant="small" tone="secondary">
-          Started by
+          {t("Started by", "由以下运行启动")}
         </Text>
       )}
       {transaction.parent_execution_id && (
@@ -45,7 +48,7 @@ export function ReceiptRelations({
       )}
       {(related.length > 0 || transaction.related_executions_has_more) && (
         <Text variant="small" tone="secondary">
-          Other workflows used by this run
+          {t("Other workflows used by this run", "此运行使用的其他工作流")}
         </Text>
       )}
       {related.map((execution) => (
@@ -58,14 +61,17 @@ export function ReceiptRelations({
         />
       ))}
       <Text variant="small" tone="secondary">
-        Any credit charges for related runs appear separately.
-        {related.length > 0
-          ? " The task page includes related runs in its total."
-          : ""}
+        {t(
+          `Any credit charges for related runs appear separately.${related.length > 0 ? " The task page includes related runs in its total." : ""}`,
+          `关联运行的积分费用单独显示。${related.length > 0 ? "任务页面的总额包含关联运行费用。" : ""}`,
+        )}
       </Text>
       {transaction.related_executions_has_more && (
         <Text variant="small" tone="secondary">
-          More related runs are not shown here.
+          {t(
+            "More related runs are not shown here.",
+            "此处未显示更多关联运行。",
+          )}
         </Text>
       )}
     </div>
@@ -83,7 +89,9 @@ function RelatedExecution({
   receiptAsOf: Transaction["receipt_as_of"];
   onSelectRelated: (executionID: string) => void;
 }) {
-  const name = execution.agent_name || "Workflow unavailable";
+  const { t } = useTranslation();
+  const name =
+    execution.agent_name || t("Workflow unavailable", "工作流不可用");
   const loaded = loadedTransactions.find(
     (item) => item.usage_execution_id === execution.execution_id,
   );

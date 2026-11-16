@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { LockIcon, Tick02Icon } from "@hugeicons/core-free-icons";
@@ -136,6 +138,7 @@ interface LockedProps {
  * unavailable, and the one action that changes that.
  */
 function LockedRow({ title, subtitle, notes, lock }: LockedProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-start gap-2.5 px-3 py-2.5">
       <Icon
@@ -170,7 +173,7 @@ function LockedRow({ title, subtitle, notes, lock }: LockedProps) {
             href={lock.href}
             className="mt-1 w-fit text-caption-sm leading-inherit font-medium text-foreground-strong underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-border-strong focus-visible:outline-none"
           >
-            See plans
+            {t("See plans", "查看套餐")}
           </Link>
         )}
       </span>

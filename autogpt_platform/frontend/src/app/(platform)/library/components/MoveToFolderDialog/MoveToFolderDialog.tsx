@@ -54,7 +54,10 @@ export function MoveToFolderDialog({
         setSearch("");
         toast({
           title: t("Workflow moved", "工作流已移动"),
-          description: `"${agentName}" has been moved.`,
+          description: t(
+            `"${agentName}" has been moved.`,
+            `“${agentName}”已移动。`,
+          ),
         });
       },
       onError: () => {
@@ -165,8 +168,8 @@ export function MoveToFolderDialog({
                       <Text variant="small" tone="subtle">
                         {folder.agent_count ?? 0}{" "}
                         {(folder.agent_count ?? 0) === 1
-                          ? "workflow"
-                          : "workflows"}
+                          ? t("workflow", "个工作流")
+                          : t("workflows", "个工作流")}
                       </Text>
                     </div>
                   </Button>

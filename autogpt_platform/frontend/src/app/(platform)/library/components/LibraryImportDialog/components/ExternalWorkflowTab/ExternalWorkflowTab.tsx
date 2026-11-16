@@ -54,14 +54,14 @@ export default function ExternalWorkflowTab({
             <span>{t("Importing...", "正在导入…")}</span>
           </div>
         ) : (
-          "Import to Otto"
+          t("Import to Otto", "导入至 Otto")
         )}
       </Button>
 
       <div className="my-5 flex items-center gap-3">
         <div className="h-px flex-1 bg-surface-active" />
         <span className="text-caption text-foreground-subtle">
-          or import from URL
+          {t("or import from URL", "或通过链接导入")}
         </span>
         <div className="h-px flex-1 bg-surface-active" />
       </div>
@@ -100,7 +100,7 @@ export default function ExternalWorkflowTab({
             <span>{t("Importing...", "正在导入…")}</span>
           </div>
         ) : (
-          "Import from URL"
+          t("Import from URL", "通过链接导入")
         )}
       </Button>
     </TabsLineContent>

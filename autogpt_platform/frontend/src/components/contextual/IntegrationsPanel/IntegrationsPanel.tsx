@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { useState } from "react";
@@ -30,6 +31,8 @@ export function IntegrationsPanel({
   preferMcp,
   onConnected,
 }: Props) {
+  const { t } = useTranslation();
+
   const [isConnectOpen, setIsConnectOpen] = useState(false);
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(
     null,
@@ -58,7 +61,10 @@ export function IntegrationsPanel({
             transform="uppercase"
             tracking="eyebrow"
           >
-            Tools your experts and workflows use
+            {t(
+              "Tools your experts and workflows use",
+              "专家和工作流使用的工具",
+            )}
           </Text>
         </div>
         <IntegrationsList

@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { ArrowLeft02Icon, ArrowRight02Icon } from "@hugeicons/core-free-icons";
@@ -22,6 +23,7 @@ export const HorizontalScroll: React.FC<HorizontalScrollAreaProps> = ({
   scrollAmount = 300,
   dependencyList = defaultDependencies,
 }) => {
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -79,7 +81,7 @@ export const HorizontalScroll: React.FC<HorizontalScrollAreaProps> = ({
         {canScrollLeft && (
           <button
             type="button"
-            aria-label="Scroll left"
+            aria-label={t("Scroll left", "向左滚动")}
             className="pointer-events-none absolute top-5 left-2 -translate-y-1/2 opacity-0 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100"
             onClick={() => scrollByDelta(-scrollAmount)}
           >
@@ -91,7 +93,7 @@ export const HorizontalScroll: React.FC<HorizontalScrollAreaProps> = ({
         {canScrollRight && (
           <button
             type="button"
-            aria-label="Scroll right"
+            aria-label={t("Scroll right", "向右滚动")}
             className="pointer-events-none absolute top-5 right-2 -translate-y-1/2 opacity-0 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100"
             onClick={() => scrollByDelta(scrollAmount)}
           >

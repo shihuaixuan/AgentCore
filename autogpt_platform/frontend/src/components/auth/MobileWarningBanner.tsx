@@ -1,11 +1,14 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { Text } from "../atoms/Text/Text";
 import { SmartPhone01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export function MobileWarningBanner() {
+  const { t } = useTranslation();
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "base" || breakpoint === "sm";
 
@@ -23,11 +26,16 @@ export function MobileWarningBanner() {
         />
         <div className="flex flex-col gap-1">
           <Text variant="body-medium" tone="warning">
-            Heads up: AutoGPT works best on desktop
+            {t(
+              "Heads up: AutoGPT works best on desktop",
+              "提示：在电脑上使用 AutoGPT 体验更佳",
+            )}
           </Text>
           <Text variant="small" tone="warning">
-            Some features may be limited on mobile. For the best experience,
-            consider switching to a desktop.
+            {t(
+              "Some features may be limited on mobile. For the best experience, consider switching to a desktop.",
+              "移动设备上的部分功能可能受限。建议使用电脑以获得更好的体验。",
+            )}
           </Text>
         </div>
       </div>

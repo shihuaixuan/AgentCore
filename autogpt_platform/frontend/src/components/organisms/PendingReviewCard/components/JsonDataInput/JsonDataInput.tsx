@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Input } from "@/components/atoms/Input/Input";
 import { LongNumberHint } from "@/components/contextual/LongNumberHint/LongNumberHint";
 import { hasLongWholeNumber, isJsonTextFor } from "@/lib/json-text";
@@ -29,6 +32,7 @@ export function JsonDataInput({
   onChange,
   onInvalidDraft,
 }: Props) {
+  const { t } = useTranslation();
   const id = useId();
   const [text, setText] = useState(() => initialText ?? toJsonText(value));
   const [shownValue, setShownValue] = useState(value);
@@ -55,14 +59,14 @@ export function JsonDataInput({
     <div className="mb-6 flex flex-col gap-2">
       <Input
         id={id}
-        label="Value"
+        label={t("Value", "值")}
         hideLabel
         size="small"
         type="textarea"
         rows={6}
         value={text}
         onChange={(e) => handleChange(e.target.value)}
-        placeholder="Edit JSON data"
+        placeholder={t("Edit JSON data", "编辑 JSON 数据")}
         aria-describedby={longNumberHintId}
         wrapperClassName="mb-0"
         className="font-mono text-body"

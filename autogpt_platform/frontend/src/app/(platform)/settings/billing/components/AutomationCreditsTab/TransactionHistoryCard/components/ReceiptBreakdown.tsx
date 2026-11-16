@@ -17,7 +17,7 @@ export function ReceiptBreakdown({ transaction }: Props) {
       {usage ? (
         <>
           <BreakdownLine
-            label="Block usage"
+            label={t("Block usage", "模块用量")}
             amount={transaction.usage_charge_amount ?? 0}
           />
           {!!transaction.usage_fee_amount && (
@@ -35,13 +35,15 @@ export function ReceiptBreakdown({ transaction }: Props) {
         </>
       ) : (
         <BreakdownLine
-          label={activityName(transaction)}
+          label={activityName(transaction, t)}
           amount={transaction.amount}
         />
       )}
       <dt className="mt-1 border-t border-border-base pt-3">
         <Text variant="body-medium" as="span">
-          {isRunActive(transaction) ? "Net change so far" : "Net change"}
+          {isRunActive(transaction)
+            ? t("Net change so far", "截至目前的净变化")
+            : t("Net change", "净变化")}
         </Text>
       </dt>
       <dd className="mt-1 border-t border-border-base pt-3 text-right">

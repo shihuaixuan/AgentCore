@@ -86,7 +86,7 @@ export function NotificationsCard({
           <Switch
             checked={values.alertsEnabled}
             onCheckedChange={onAlertsChange}
-            aria-label="Alerts"
+            aria-label={t("Alerts", "提醒")}
           />
         </div>
 

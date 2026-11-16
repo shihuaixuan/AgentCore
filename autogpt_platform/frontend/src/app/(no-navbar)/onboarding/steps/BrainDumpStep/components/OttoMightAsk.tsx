@@ -1,5 +1,8 @@
 "use client";
 
+import { usePromptTranslation } from "../usePromptTranslation";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { SwapFade } from "@/components/atoms/SwapFade/SwapFade";
 import { Text } from "@/components/atoms/Text/Text";
@@ -29,6 +32,8 @@ export function OttoMightAsk({
   onTogglePause,
   className,
 }: Props) {
+  const { translatePrompt } = usePromptTranslation();
+  const { t } = useTranslation();
   const isLeft = align === "left";
 
   // Left aligned above the composer, the button shares the label's row to
@@ -50,10 +55,10 @@ export function OttoMightAsk({
           isLeft && "col-start-1 row-start-1",
         )}
       >
-        Otto might ask
+        {t("Otto might ask", "Otto 可能会问")}
       </span>
       <SwapFade
-        swapKey={question}
+        swapKey={translatePrompt(question)}
         className={cn("mt-0.5", isLeft && "col-span-2 row-start-2")}
       >
         <Text
@@ -74,7 +79,7 @@ export function OttoMightAsk({
           className={isLeft ? "col-start-2 row-start-1 -mr-2.5" : "mt-1"}
         >
           <Text variant="small-medium-loose-underline" as="span">
-            Another question
+            {t("Another question", "换个问题")}
           </Text>
         </Button>
       )}
@@ -86,7 +91,11 @@ export function OttoMightAsk({
         data-testid="otto-might-ask-announcer"
         className="sr-only"
       >
-        {announcement && `Otto might ask: ${announcement}`}
+        {announcement &&
+          t(
+            `Otto might ask: ${announcement}`,
+            `Otto 可能会问：${translatePrompt(announcement)}`,
+          )}
       </p>
     </div>
   );

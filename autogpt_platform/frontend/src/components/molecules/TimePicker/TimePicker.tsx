@@ -1,4 +1,7 @@
+"use client";
+
 import { Select } from "@/components/atoms/Select/Select";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   value?: string;
@@ -7,6 +10,7 @@ interface Props {
 }
 
 export function TimePicker({ value, onChange }: Props) {
+  const { t } = useTranslation();
   const pad = (n: number) => n.toString().padStart(2, "0");
   const [hourNum, minuteNum] = value ? value.split(":").map(Number) : [0, 0];
 
@@ -24,7 +28,7 @@ export function TimePicker({ value, onChange }: Props) {
       <div data-slot="time-picker-field" className="flex flex-col items-center">
         <Select
           id={`time-hour`}
-          label="Hour"
+          label={t("Hour", "时")}
           hideLabel
           size="small"
           value={hour}
@@ -53,7 +57,7 @@ export function TimePicker({ value, onChange }: Props) {
       <div data-slot="time-picker-field" className="flex flex-col items-center">
         <Select
           id={`time-minute`}
-          label="Minute"
+          label={t("Minute", "分")}
           hideLabel
           size="small"
           value={minute}
@@ -68,14 +72,14 @@ export function TimePicker({ value, onChange }: Props) {
       <div data-slot="time-picker-field" className="flex flex-col items-center">
         <Select
           id={`time-meridiem`}
-          label="AM/PM"
+          label={t("AM/PM", "上午/下午")}
           hideLabel
           size="small"
           value={meridiem}
           onValueChange={(val: string) => changeTime(hour, minute, val)}
           options={[
-            { value: "AM", label: "AM" },
-            { value: "PM", label: "PM" },
+            { value: "AM", label: t("AM", "上午") },
+            { value: "PM", label: t("PM", "下午") },
           ]}
         />
       </div>

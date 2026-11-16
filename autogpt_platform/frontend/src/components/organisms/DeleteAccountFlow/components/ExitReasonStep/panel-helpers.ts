@@ -46,7 +46,78 @@ const LIMITS_COPY = "Max gives you 8.5x the usage of Pro.";
 
 const NAMED_APPS = 2;
 
-export function getReasonPanel(args: ReasonPanelArgs): ReasonPanel | null {
+export function getReasonPanel(
+  args: ReasonPanelArgs,
+  locale = "en",
+): ReasonPanel | null {
+  const panel = getEnglishReasonPanel(args);
+  if (!panel || locale !== "zh-CN") return panel;
+  const {
+    reason,
+    apps,
+    disconnect,
+    pending,
+    planState,
+    trialEndsAt,
+    proMonthlyCents,
+  } = args;
+  const downgrade =
+    "降级后会保留你的专家、对话和计划任务，并在当前计费周期结束后生效。";
+  let copy = panel.copy;
+  if (reason === "privacy") {
+    if (disconnect.status !== "idle" && disconnect.names.length > 0) {
+      const names = disconnect.names.join("、");
+      copy =
+        disconnect.status === "done"
+          ? `${names} 已断开连接。`
+          : `无法断开 ${names}，请重试。`;
+    } else {
+      copy =
+        apps.status === "unavailable" || apps.names.length === 0
+          ? "你尚未连接任何应用，因此 AutoGPT 无法访问你的邮件、日历或文件。"
+          : `你可以断开 ${apps.names.join("、")}，无需删除账户。断开后，我们的访问权限将立即终止。`;
+    }
+  } else if (reason === "limits") {
+    copy = "Max 提供的用量额度为 Pro 的 8.5 倍。";
+  } else if (pending?.kind === "cancel" && planState !== "none") {
+    copy =
+      planState === "trial"
+        ? `你的试用已安排于 ${formatShortDate(pending.effectiveAt)} 结束，不会向你扣款。`
+        : `你的套餐已安排于 ${formatShortDate(pending.effectiveAt)} 结束，之后不会再扣款，账户将继续保留。`;
+  } else if (planState === "none") {
+    copy =
+      "没有订阅套餐时，账户本身不收费。你的专家和对话会保留，方便你随时回来。";
+  } else if (planState === "trial") {
+    copy = trialEndsAt
+      ? `你也可以只取消试用，不会产生费用，且仍可使用至 ${formatShortDate(trialEndsAt)}。`
+      : "你也可以只取消试用，不会产生费用。";
+  } else if (planState === "max" && reason === "cost") {
+    copy =
+      pending?.kind === "downgrade"
+        ? `你已安排于 ${formatShortDate(pending.effectiveAt)} 切换至 Pro。`
+        : proMonthlyCents && proMonthlyCents > 0
+          ? `Pro 每月 ${formatCents(proMonthlyCents)}。${downgrade}`
+          : downgrade;
+  } else {
+    copy =
+      "你可以取消套餐并保留账户，之后不会再扣款。你的专家和对话会保留，方便你随时回来。";
+  }
+  const labels: Record<PanelActionKind, string> = {
+    manage_apps: "管理已连接的应用",
+    disconnect_all: "断开所有应用",
+    billing: "前往账单设置",
+    keep_account: "保留我的账户",
+  };
+  return {
+    ...panel,
+    copy,
+    action: panel.action
+      ? { ...panel.action, label: labels[panel.action.kind] }
+      : null,
+  };
+}
+
+function getEnglishReasonPanel(args: ReasonPanelArgs): ReasonPanel | null {
   switch (args.reason) {
     case "privacy":
       return getPrivacyPanel(args);

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 
@@ -30,6 +31,8 @@ interface Props {
 }
 
 export function MethodPanel({ method, provider, onSuccess }: Props) {
+  const { t } = useTranslation();
+
   const authProvider = getAuthProvider(provider, method);
   if (method === AuthType.oauth2) {
     const isChatGPT = authProvider === "codex";
@@ -39,7 +42,11 @@ export function MethodPanel({ method, provider, onSuccess }: Props) {
         <OAuthConnectButton
           provider={authProvider}
           providerName={isChatGPT ? "ChatGPT" : provider.name}
-          buttonLabel={isChatGPT ? "Sign in with ChatGPT" : undefined}
+          buttonLabel={
+            isChatGPT
+              ? t("Sign in with ChatGPT", "使用 ChatGPT 登录")
+              : undefined
+          }
           termsNotice={isChatGPT ? "OpenAI" : undefined}
           onSuccess={onSuccess}
         />
@@ -81,7 +88,10 @@ export function MethodPanel({ method, provider, onSuccess }: Props) {
   return (
     <UnsupportedNotice
       providerName={provider.name}
-      detail={`${TAB_LABEL[method]} sign-in for ${provider.name} is not yet wired up in this dialog.`}
+      detail={t(
+        `${TAB_LABEL[method]} sign-in for ${provider.name} is not yet wired up in this dialog.`,
+        `此对话框尚未支持 ${provider.name} 的${getAuthMethodLabel(provider, method, (_english, chinese) => chinese)}登录。`,
+      )}
     />
   );
 }
@@ -96,6 +106,7 @@ export function getAuthProvider(
 export function getAuthMethodLabel(
   provider: ConnectableProvider,
   method: AuthMethod,
+  t: (english: string, chinese: string) => string = (english) => english,
 ): string {
   if (
     method === AuthType.oauth2 &&
@@ -103,7 +114,14 @@ export function getAuthMethodLabel(
   ) {
     return "ChatGPT";
   }
-  return TAB_LABEL[method];
+  const chinese = {
+    oauth2: "OAuth",
+    api_key: "API 密钥",
+    user_password: "用户名 / 密码",
+    host_scoped: "主机",
+    device_code: "设备授权",
+  };
+  return t(TAB_LABEL[method], chinese[method]);
 }
 
 export { TAB_LABEL };

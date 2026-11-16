@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { HomeAgentStatus } from "@/app/api/__generated__/models/homeAgentStatus";
 import { Button } from "@/components/atoms/Button/Button";
 import { BubbleChatIcon, Settings01Icon } from "@hugeicons/core-free-icons";
@@ -15,9 +17,13 @@ interface Props {
 /** One expert with its status and two ways in. The detail line is gone:
  *  anything that needs doing is already spelled out under Needs you. */
 export function AgentRow({ agent }: Props) {
-  const spend = formatWeeklySpend(agent.spend_cents);
+  const { t, locale } = useTranslation();
+  const spend = formatWeeklySpend(agent.spend_cents, t);
   const nextRun = agent.next_run_time
-    ? `Next run ${formatUntil(agent.next_run_time)}`
+    ? t(
+        `Next run ${formatUntil(agent.next_run_time)}`,
+        `下次运行：${formatUntil(agent.next_run_time, undefined, t, locale)}`,
+      )
     : null;
   const secondLine = [spend, nextRun].filter(Boolean).join(" · ");
 
@@ -36,14 +42,17 @@ export function AgentRow({ agent }: Props) {
           <StatusBadge status={agent.status} />
         </div>
         <Text variant="small" tone="secondary" className="break-words">
-          {agent.detail || "No status details available."}{" "}
+          {agent.detail || t("No status details available.", "暂无状态详情。")}{" "}
           {agent.status === "failed"
-            ? "Open Manage to inspect recent work."
+            ? t(
+                "Open Manage to inspect recent work.",
+                "打开管理页面查看最近的工作。",
+              )
             : agent.status === "needs_setup"
-              ? "Open Manage to finish setup."
+              ? t("Open Manage to finish setup.", "打开管理页面完成设置。")
               : agent.status === "paused"
-                ? "Open Manage to review settings."
-                : "Open Chat to give instructions."}
+                ? t("Open Manage to review settings.", "打开管理页面查看设置。")
+                : t("Open Chat to give instructions.", "打开聊天以提供指令。")}
         </Text>
         {secondLine ? (
           <Text variant="small-tight" tone="muted" tabular className="truncate">

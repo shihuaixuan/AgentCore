@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { DecisionRequestAction } from "@/app/api/__generated__/models/decisionRequestAction";
 import { SkillVersionSummary } from "@/app/api/__generated__/models/skillVersionSummary";
@@ -32,15 +33,16 @@ export function DecisionView({
   onDraftChange,
   onDecide,
 }: Props) {
+  const { t } = useTranslation();
   const changes = stepChanges(current?.body ?? "", proposal.body ?? "");
   return (
     <section
-      aria-label="Needs your decision"
+      aria-label={t("Needs your decision", "需要你决定")}
       data-slot="skill-learning-sheet-decision"
       className="flex flex-col gap-3 rounded-xl border border-warning-border bg-warning-surface/60 p-3"
     >
       <Text variant="small-medium" tone="primary">
-        Needs your decision
+        {t("Needs your decision", "需要你决定")}
       </Text>
       <Text variant="small" tone="secondary">
         {proposal.summary || proposal.description} — {proposal.state_reason}
@@ -48,7 +50,7 @@ export function DecisionView({
       <ul
         data-slot="skill-learning-sheet-decision-list"
         className="flex flex-col gap-2"
-        aria-label="Proposed changes by step"
+        aria-label={t("Proposed changes by step", "按步骤查看提议的变更")}
       >
         {changes.map((change) => (
           <li
@@ -65,7 +67,7 @@ export function DecisionView({
               </Text>
             ) : null}
             <Text variant="small" tone="primary">
-              {change.after ?? "Removed"}
+              {change.after ?? t("Removed", "已移除")}
             </Text>
           </li>
         ))}
@@ -77,8 +79,10 @@ export function DecisionView({
           className="flex flex-col gap-2"
         >
           <Text variant="small" tone="secondary">
-            A newer proposal replaced the one you were editing. Your earlier
-            draft is saved.
+            {t(
+              "A newer proposal replaced the one you were editing. Your earlier draft is saved.",
+              "新提议已替换你正在编辑的提议。先前的草稿已保存。",
+            )}
           </Text>
           <Button
             variant="secondary"
@@ -86,13 +90,13 @@ export function DecisionView({
             disabled={isBusy}
             onClick={onRecoverDraft}
           >
-            Bring back my draft
+            {t("Bring back my draft", "恢复我的草稿")}
           </Button>
         </div>
       ) : null}
       <Input
         id={`decision-edit-${proposal.id}`}
-        label="Edited alternative (optional)"
+        label={t("Edited alternative (optional)", "编辑后的替代方案（选填）")}
         labelVariant="small-medium"
         type="textarea"
         rows={5}
@@ -111,7 +115,7 @@ export function DecisionView({
           disabled={isBusy}
           onClick={() => onDecide(proposal.id, "keep_current")}
         >
-          Keep current
+          {t("Keep current", "保留当前版本")}
         </Button>
         <Button
           variant="primary"
@@ -119,7 +123,7 @@ export function DecisionView({
           disabled={isBusy}
           onClick={() => onDecide(proposal.id, "apply")}
         >
-          Apply change
+          {t("Apply change", "应用变更")}
         </Button>
         <Button
           variant="ghost"
@@ -127,7 +131,7 @@ export function DecisionView({
           disabled={isBusy || !draft.trim()}
           onClick={() => onDecide(proposal.id, "apply_edited")}
         >
-          Apply edited alternative
+          {t("Apply edited alternative", "应用编辑后的方案")}
         </Button>
       </div>
     </section>

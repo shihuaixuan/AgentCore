@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
@@ -260,6 +262,7 @@ export function ExpertChangeCard({
   onSend,
   readOnly = false,
 }: Props) {
+  const { t } = useTranslation();
   const [showCharter, setShowCharter] = useState(false);
   const openArtifact = useCopilotUIStore((s) => s.openArtifact);
   const panelAvailable = !!artifactId;
@@ -288,6 +291,17 @@ export function ExpertChangeCard({
   const applied = output.applied === true;
   const kind = kindOf(output);
   const header = headerFor(kind, applied);
+  const headerTitle = applied
+    ? kind === "hire"
+      ? "已聘用专家"
+      : kind === "update"
+        ? "已更新专家"
+        : "已创建专家"
+    : kind === "hire"
+      ? "聘用专家"
+      : kind === "update"
+        ? "更新专家"
+        : "创建专家";
   const task = applied ? null : handoffTaskOf(output);
   const outcome = applied ? handoffOutcomeOf(output) : null;
   const expertId = str(expert, "id");
@@ -311,7 +325,7 @@ export function ExpertChangeCard({
       leftIcon={<Icon icon={InformationCircleIcon} size={16} />}
       className="shrink-0"
     >
-      {showCharter ? "Hide details" : "Details"}
+      {showCharter ? t("Hide details", "收起详情") : t("Details", "详情")}
     </Button>
   );
 
@@ -373,8 +387,11 @@ export function ExpertChangeCard({
             chosen={
               decision
                 ? decision === "approved"
-                  ? `${NEW_EXPERT_COPY[newExpertKindOf(kind)].Verb} and start chosen`
-                  : "Not now chosen"
+                  ? t(
+                      `${NEW_EXPERT_COPY[newExpertKindOf(kind)].Verb} and start chosen`,
+                      `已选择${kind === "raise" ? "创建" : "聘用"}并开始`,
+                    )
+                  : t("Not now chosen", "已选择暂不")
                 : undefined
             }
           />
@@ -393,7 +410,7 @@ export function ExpertChangeCard({
           tone="primary"
           className="min-w-0 flex-1 truncate"
         >
-          {header.title}
+          {t(header.title, headerTitle)}
         </Text>
       </div>
       <div className="px-4 py-3">
@@ -456,7 +473,7 @@ export function ExpertChangeCard({
             )}
             {boundaries && (
               <Text variant="body-tight" tone="subtle">
-                Stops at: {boundaries}
+                {t(`Stops at: ${boundaries}`, `行为边界：${boundaries}`)}
               </Text>
             )}
           </div>
@@ -500,6 +517,7 @@ function SoulChangeCard({
   action,
   waiting = false,
 }: Props) {
+  const { t } = useTranslation();
   const showFooter = !!pager || !!onDecide || !!decision || !!action;
   return (
     <div className={SHELL}>
@@ -511,21 +529,32 @@ function SoulChangeCard({
           tone="primary"
           className="min-w-0 flex-1 truncate"
         >
-          {output.applied === true ? "Soul updated" : "Update Soul"}
+          {output.applied === true
+            ? t("Soul updated", "已更新专家设定")
+            : t("Update Soul", "更新专家设定")}
         </Text>
       </div>
       <div className="flex flex-col gap-3 px-4 py-3">
         {soulChanges(output).map((change) => (
           <section key={change.field} className="flex flex-col gap-0.5">
             <Text variant="small-medium-tight" tone="body">
-              {SOUL_LABELS[change.field] ?? change.field}
+              {t(
+                SOUL_LABELS[change.field] ?? change.field,
+                (
+                  {
+                    identity: "身份与性格",
+                    voice_preferences: "表达风格",
+                    boundaries: "行为边界",
+                  } as Record<string, string>
+                )[change.field] ?? change.field,
+              )}
             </Text>
             <Text
               variant="body-tight"
               tone="body"
               className="whitespace-pre-line"
             >
-              {change.after || "Empty"}
+              {change.after || t("Empty", "空")}
             </Text>
             {change.before && (
               <Text
@@ -533,7 +562,7 @@ function SoulChangeCard({
                 tone="subtle"
                 className="line-clamp-2"
               >
-                Was: {change.before}
+                {t(`Was: ${change.before}`, `原内容：${change.before}`)}
               </Text>
             )}
           </section>
@@ -570,6 +599,7 @@ function DecisionFooter({
   waiting = false,
   chosen,
 }: FooterProps) {
+  const { t } = useTranslation();
   return (
     <div className={FOOTER}>
       <div className="min-w-0">{pager}</div>
@@ -587,10 +617,10 @@ function DecisionFooter({
             leftIcon={<Icon icon={UndoIcon} size={14} />}
           >
             {chosen
-              ? "Change"
+              ? t("Change", "更改")
               : decision === "approved"
-                ? "Unapprove"
-                : "Undo decline"}
+                ? t("Unapprove", "撤销批准")
+                : t("Undo decline", "撤销拒绝")}
           </Button>
         )}
         {!decision && onDecide && (
@@ -601,7 +631,7 @@ function DecisionFooter({
               disabled={waiting}
               onClick={() => onDecide("declined")}
             >
-              Decline
+              {t("Decline", "拒绝")}
             </Button>
             <Button
               variant="primary"
@@ -609,7 +639,7 @@ function DecisionFooter({
               disabled={waiting}
               onClick={() => onDecide("approved")}
             >
-              Approve
+              {t("Approve", "批准")}
             </Button>
           </>
         )}
@@ -753,6 +783,7 @@ export function ExpertChangeGroup({
   isCurrentlyStreaming = false,
   readOnly = false,
 }: GroupProps) {
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<StepDirection | undefined>();
   const [decisions, setDecisions] = useState<Record<string, Decision>>({});
@@ -844,7 +875,7 @@ export function ExpertChangeGroup({
     <div className="flex items-center gap-2">
       <button
         type="button"
-        aria-label="Previous expert"
+        aria-label={t("Previous expert", "上一位专家")}
         disabled={current === 0}
         onClick={() => goTo(current - 1)}
         className="flex size-6 items-center justify-center rounded-lg text-foreground-subtle transition-colors enabled:hover:bg-surface-hover enabled:hover:text-foreground-secondary disabled:opacity-35"
@@ -856,7 +887,7 @@ export function ExpertChangeGroup({
           <button
             key={toolCallId}
             type="button"
-            aria-label={`Go to expert ${i + 1}`}
+            aria-label={t(`Go to expert ${i + 1}`, `转到第 ${i + 1} 位专家`)}
             aria-current={i === current ? "step" : undefined}
             data-decision={decisions[toolCallId]}
             onClick={() => goTo(i)}
@@ -876,7 +907,7 @@ export function ExpertChangeGroup({
       </span>
       <button
         type="button"
-        aria-label="Next expert"
+        aria-label={t("Next expert", "下一位专家")}
         disabled={isLast}
         onClick={() => goTo(current + 1)}
         className="flex size-6 items-center justify-center rounded-lg text-foreground-subtle transition-colors enabled:hover:bg-surface-hover enabled:hover:text-foreground-secondary disabled:opacity-35"
@@ -884,7 +915,10 @@ export function ExpertChangeGroup({
         <Icon icon={ArrowRight01Icon} size={14} />
       </button>
       <Text variant="small-tight" as="span" tone="subtle">
-        {current + 1} of {visible.length}
+        {t(
+          `${current + 1} of ${visible.length}`,
+          `第 ${current + 1} 位，共 ${visible.length} 位`,
+        )}
       </Text>
     </div>
   );
@@ -893,7 +927,7 @@ export function ExpertChangeGroup({
   const action = sent ? (
     <span className="flex items-center gap-1 text-caption text-foreground-subtle">
       <Icon icon={Tick02Icon} size={14} />
-      Sent
+      {t("Sent", "已发送")}
     </span>
   ) : canSend ? (
     <Button
@@ -901,7 +935,7 @@ export function ExpertChangeGroup({
       size="icon-sm"
       shape="pill"
       withTooltip={false}
-      aria-label="Send decisions"
+      aria-label={t("Send decisions", "发送决定")}
       onClick={() => send(decisions)}
     >
       <Icon icon={SentIcon} size={15} />
@@ -915,7 +949,13 @@ export function ExpertChangeGroup({
     return (
       <div className="my-2">
         <HandoffReceipt>
-          {receiptFor(proposals[0], decisions[proposals[0].toolCallId])}
+          {t(
+            receiptFor(proposals[0], decisions[proposals[0].toolCallId]),
+            decisions[proposals[0].toolCallId] === "approved" &&
+              proposals[0].handoff
+              ? `你已选择${proposals[0].kind === "raise" ? "创建" : "聘用"} ${proposals[0].name} 来处理“${proposals[0].handoff.title}”。`
+              : `你已选择暂不${proposals[0].kind === "raise" ? "创建" : "聘用"} ${proposals[0].name}。`,
+          )}
         </HandoffReceipt>
       </div>
     );

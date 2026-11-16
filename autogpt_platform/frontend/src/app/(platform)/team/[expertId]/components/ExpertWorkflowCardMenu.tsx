@@ -97,7 +97,7 @@ export function ExpertWorkflowCardMenu({
                   size={16}
                 />
                 {workflowNeedsSetup(workflow)
-                  ? "Set up"
+                  ? t("Set up", "设置")
                   : t("Open in library", "在工作流库中打开")}
               </NextLink>
             </DropdownMenuItem>

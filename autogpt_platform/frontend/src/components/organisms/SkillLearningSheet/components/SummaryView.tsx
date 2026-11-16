@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { SkillLearningDetail } from "@/app/api/__generated__/models/skillLearningDetail";
 import { SkillVersionSummary } from "@/app/api/__generated__/models/skillVersionSummary";
@@ -38,6 +39,7 @@ export function SummaryView({
   onEdit,
   onReport,
 }: Props) {
+  const { t } = useTranslation();
   const isCurrent =
     version != null && version.id === detail.current_version?.id;
   const badgeState = version && !isCurrent ? version.state : detail.state;
@@ -64,14 +66,16 @@ export function SummaryView({
             {formatDistanceToNow(new Date(version.created_at), {
               addSuffix: true,
             })}
-            {isCurrent ? "" : " · not the current version"}
+            {isCurrent ? "" : t(" · not the current version", " · 非当前版本")}
           </Text>
         ) : null}
       </div>
       {version && !isCurrent ? (
         <Text variant="small" tone="muted">
-          Skill now: {detail.state_label}. The controls below apply to the skill
-          as a whole, not to this historical version.
+          {t(
+            `Skill now: ${detail.state_label}. The controls below apply to the skill as a whole, not to this historical version.`,
+            `技能当前状态：${detail.state_label}。下方控制项适用于整个技能，而非此历史版本。`,
+          )}
         </Text>
       ) : null}
       {isCurrent && version?.state === "invalidated" ? (
@@ -84,10 +88,10 @@ export function SummaryView({
           </Text>
           <section
             data-slot="skill-learning-sheet-summary-evidence"
-            aria-label="Evidence"
+            aria-label={t("Evidence", "依据")}
           >
             <Text variant="small-medium" tone="primary">
-              Evidence
+              {t("Evidence", "依据")}
             </Text>
             <ul
               data-slot="skill-learning-sheet-summary-evidence-list"
@@ -117,10 +121,10 @@ export function SummaryView({
           {(version.limits ?? []).length > 0 ? (
             <section
               data-slot="skill-learning-sheet-summary-limits"
-              aria-label="Limits"
+              aria-label={t("Limits", "限制")}
             >
               <Text variant="small-medium" tone="primary">
-                Limits
+                {t("Limits", "限制")}
               </Text>
               <ul
                 data-slot="skill-learning-sheet-summary-limits-list"
@@ -141,18 +145,20 @@ export function SummaryView({
           ) : null}
           {version.blocked_pattern_class ? (
             <Text variant="small" tone="danger">
-              Blocked by content check: {version.blocked_pattern_class} at{" "}
-              {version.blocked_step}. Replace the value with a typed input.
+              {t(
+                `Blocked by content check: ${version.blocked_pattern_class} at ${version.blocked_step}. Replace the value with a typed input.`,
+                `内容检查已阻止此版本：步骤 ${version.blocked_step} 中存在 ${version.blocked_pattern_class}。请将该值替换为带类型的输入。`,
+              )}
             </Text>
           ) : null}
         </>
       ) : (
         <Text variant="small" tone="muted">
-          No version has been published yet.
+          {t("No version has been published yet.", "尚未发布任何版本。")}
         </Text>
       )}
       <section
-        aria-label="Learning controls"
+        aria-label={t("Learning controls", "学习控制")}
         data-slot="skill-learning-sheet-summary-controls"
         className="flex flex-col gap-3"
       >
@@ -161,12 +167,12 @@ export function SummaryView({
           className="flex items-center justify-between gap-3"
         >
           <Text variant="small" tone="primary">
-            Automatic improvements
+            {t("Automatic improvements", "自动改进")}
           </Text>
           <Switch
             checked={detail.policy.auto_improve}
             disabled={isBusy}
-            aria-label="Automatic improvements"
+            aria-label={t("Automatic improvements", "自动改进")}
             onCheckedChange={(checked) => onPolicy({ auto_improve: checked })}
           />
         </label>
@@ -183,8 +189,8 @@ export function SummaryView({
             }
           >
             {detail.policy.learning_paused
-              ? "Resume learning"
-              : "Pause learning"}
+              ? t("Resume learning", "恢复学习")
+              : t("Pause learning", "暂停学习")}
           </Button>
           <Button
             variant="secondary"
@@ -193,13 +199,15 @@ export function SummaryView({
             onClick={() => onPolicy({ use_paused: !detail.policy.use_paused })}
           >
             {detail.policy.use_paused
-              ? "Resume using this skill"
-              : "Stop using this skill"}
+              ? t("Resume using this skill", "恢复使用此技能")
+              : t("Stop using this skill", "停止使用此技能")}
           </Button>
         </div>
         <Text variant="small" tone="muted">
-          Pause learning stops future automatic changes only; stop using removes
-          the skill from retrieval. Each is separate.
+          {t(
+            "Pause learning stops future automatic changes only; stop using removes the skill from retrieval. Each is separate.",
+            "暂停学习仅阻止后续自动变更；停止使用则会将此技能从检索中移除。两项操作互相独立。",
+          )}
         </Text>
         <div
           data-slot="skill-learning-sheet-summary-edit-actions"
@@ -211,14 +219,20 @@ export function SummaryView({
             disabled={isBusy || !isCurrent}
             title={
               !version
-                ? "Editing is available after a version is published."
+                ? t(
+                    "Editing is available after a version is published.",
+                    "发布版本后即可编辑。",
+                  )
                 : isCurrent
                   ? undefined
-                  : "Editing starts from the current version. Restore this version first to build on it."
+                  : t(
+                      "Editing starts from the current version. Restore this version first to build on it.",
+                      "编辑将从当前版本开始。若要基于此版本编辑，请先恢复它。",
+                    )
             }
             onClick={onEdit}
           >
-            Edit skill
+            {t("Edit skill", "编辑技能")}
           </Button>
           {version ? (
             <>
@@ -228,7 +242,7 @@ export function SummaryView({
                 disabled={isBusy}
                 onClick={() => onReport(version.id, "succeeded")}
               >
-                Report: it worked
+                {t("Report: it worked", "反馈：有效")}
               </Button>
               <Button
                 variant="ghost"
@@ -236,15 +250,16 @@ export function SummaryView({
                 disabled={isBusy}
                 onClick={() => onReport(version.id, "failed")}
               >
-                Report: it failed
+                {t("Report: it failed", "反馈：失败")}
               </Button>
             </>
           ) : null}
         </div>
         <Text variant="small" tone="muted">
-          Edit skill applies your correction now
-          {isCurrent ? "" : " (available on the current version)"}. Report an
-          outcome adds evidence for a later review without changing the skill.
+          {t(
+            `Edit skill applies your correction now${isCurrent ? "" : " (available on the current version)"}. Report an outcome adds evidence for a later review without changing the skill.`,
+            `编辑技能会立即应用你的修改${isCurrent ? "" : "（当前版本可用）"}。反馈结果会为后续审核提供依据，不会修改技能。`,
+          )}
         </Text>
       </section>
     </div>

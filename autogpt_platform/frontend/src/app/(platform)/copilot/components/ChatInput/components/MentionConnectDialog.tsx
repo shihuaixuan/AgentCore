@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { ConnectServiceDialog } from "@/components/contextual/IntegrationsPanel/components/ConnectServiceDialog/ConnectServiceDialog";
 import { useToast } from "@/components/molecules/Toast/use-toast";
@@ -28,6 +30,7 @@ export function MentionConnectDialog({
   onCancel,
   onConnected,
 }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -37,8 +40,14 @@ export function MentionConnectDialog({
       const ok = await grantToExpert(queryClient, expertId, credential.id);
       if (!ok) {
         toast({
-          title: `Connected, but could not give ${expertName ?? "this expert"} access`,
-          description: "Grant it from the Integrations tab.",
+          title: t(
+            `Connected, but could not give ${expertName ?? "this expert"} access`,
+            `已连接，但无法授予${expertName ?? "此专家"}访问权限`,
+          ),
+          description: t(
+            "Grant it from the Integrations tab.",
+            "请在“集成服务”选项卡中授予访问权限。",
+          ),
           variant: "destructive",
         });
       }

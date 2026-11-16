@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
 import { Text } from "@/components/atoms/Text/Text";
@@ -9,6 +11,7 @@ import { StillClosedHelp } from "./components/StillClosedHelp";
 import { useAccountClosedPage } from "./useAccountClosedPage";
 
 export default function AccountClosedPage() {
+  const { t } = useTranslation();
   const {
     view,
     eraseDate,
@@ -42,18 +45,22 @@ export default function AccountClosedPage() {
     <PageCard
       title={
         view === "error"
-          ? "We couldn't load your account"
-          : "Your account is closed"
+          ? t("We couldn't load your account", "无法加载账户")
+          : t("Your account is closed", "账户已关闭")
       }
     >
       {view === "error" && (
-        <Text variant="body">Reload the page to try again.</Text>
+        <Text variant="body">
+          {t("Reload the page to try again.", "请刷新页面重试。")}
+        </Text>
       )}
       {view === "too_late" && (
         <>
           <Text variant="body">
-            The 14 days to keep your account are over, and everything in it is
-            being erased.
+            {t(
+              "The 14 days to keep your account are over, and everything in it is being erased.",
+              "保留账户的 14 天期限已过，正在清除账户及其中的所有内容。",
+            )}
           </Text>
           <StillClosedHelp variant="too_late" />
         </>
@@ -61,16 +68,16 @@ export default function AccountClosedPage() {
       {view === "closed" && (
         <>
           <Text variant="body">
-            We&apos;ll erase your account and everything in it on{" "}
-            <span className="font-semibold">{eraseDate}</span>. Changed your
-            mind? Keep your account and use AutoGPT again.
+            {t(
+              `We'll erase your account and everything in it on ${eraseDate}. Changed your mind? Keep your account and use AutoGPT again.`,
+              `我们将在 ${eraseDate} 清除账户及其中的所有内容。改变主意了？你可以保留账户并继续使用 AutoGPT。`,
+            )}
           </Text>
           <Text variant="small" tone="muted">
-            Your plan, connected apps, API keys, schedules and share links
-            stopped and your Marketplace listings and reviews were removed when
-            you closed your account, and notification emails are off. If you
-            keep it, subscribe again, set up what you need and switch emails
-            back on in Settings.
+            {t(
+              "Your plan, connected apps, API keys, schedules and share links stopped and your Marketplace listings and reviews were removed when you closed your account, and notification emails are off. If you keep it, subscribe again, set up what you need and switch emails back on in Settings.",
+              "关闭账户时，你的套餐、已连接应用、API 密钥、定时任务和分享链接已停用，市场上架内容和评价已移除，通知邮件已关闭。若保留账户，请重新订阅，配置所需功能，并在设置中重新开启邮件。",
+            )}
           </Text>
         </>
       )}
@@ -81,7 +88,7 @@ export default function AccountClosedPage() {
           onClick={signOut}
           disabled={isKeeping || isLeaving}
         >
-          Sign out
+          {t("Sign out", "退出登录")}
         </Button>
         {view === "closed" && (
           <Button
@@ -90,7 +97,7 @@ export default function AccountClosedPage() {
             loading={isKeeping}
             disabled={isLeaving}
           >
-            Keep my account
+            {t("Keep my account", "保留我的账户")}
           </Button>
         )}
       </div>

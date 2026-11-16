@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 
@@ -27,13 +28,16 @@ export function OAuthConnectButton({
   termsNotice,
   onSuccess,
 }: Props) {
+  const { t } = useTranslation();
   const { connect, isPending } = useOAuthConnect({ provider, onSuccess });
 
   return (
     <div className="flex flex-col gap-3">
       <Text variant="body" tone="body">
-        We&apos;ll open a {providerName} sign-in window. Approve access there to
-        finish connecting.
+        {t(
+          `We'll open a ${providerName} sign-in window. Approve access there to finish connecting.`,
+          `即将打开 ${providerName} 登录窗口。请在其中批准授权以完成连接。`,
+        )}
       </Text>
       <Button
         type="button"
@@ -43,12 +47,15 @@ export function OAuthConnectButton({
         loading={isPending}
         rightIcon={<Icon icon={LinkSquare01Icon} size={18} />}
       >
-        {buttonLabel ?? `Continue with ${providerName}`}
+        {buttonLabel ??
+          t(`Continue with ${providerName}`, `使用 ${providerName} 继续`)}
       </Button>
       {termsNotice && (
         <Text variant="small" tone="muted">
-          Linked runs are sent to {termsNotice} under your own account and
-          follow {termsNotice}&apos;s terms.
+          {t(
+            `Linked runs are sent to ${termsNotice} under your own account and follow ${termsNotice}'s terms.`,
+            `关联运行会通过您自己的账户发送给 ${termsNotice}，并遵循 ${termsNotice} 的条款。`,
+          )}
         </Text>
       )}
     </div>

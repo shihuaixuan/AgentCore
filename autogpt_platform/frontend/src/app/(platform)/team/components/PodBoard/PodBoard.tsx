@@ -34,7 +34,10 @@ export function PodBoard({
   if (openGroup) {
     return (
       <section
-        aria-label={`${openGroup.pod.name} pod`}
+        aria-label={t(
+          `${openGroup.pod.name} pod`,
+          `${openGroup.pod.name} 小组`,
+        )}
         className="flex flex-col gap-4"
       >
         <div className="flex items-center gap-2">
@@ -124,7 +127,7 @@ function PodFolder({ name, experts, onOpen }: PodFolderProps) {
     <button
       type="button"
       onClick={onOpen}
-      aria-label={`Open ${name} pod`}
+      aria-label={t(`Open ${name} pod`, `打开 ${name} 小组`)}
       className="flex flex-col gap-3 rounded-2xl bg-surface p-4 text-left smooth-shadow-ring-sm transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-foreground-subtle focus-visible:outline-none"
     >
       <div className="flex items-center gap-3">

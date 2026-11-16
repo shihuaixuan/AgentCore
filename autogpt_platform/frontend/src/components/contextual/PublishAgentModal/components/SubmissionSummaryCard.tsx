@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import Image from "next/image";
 import { isLocalStoreMediaUrl } from "@/lib/store-media";
@@ -22,6 +23,8 @@ export function SubmissionSummaryCard({
   isPending,
   shouldReduceMotion,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <motion.div
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
@@ -58,7 +61,7 @@ export function SubmissionSummaryCard({
       {isPending ? (
         <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-surface px-2.5 py-1 text-caption-sm leading-inherit font-medium text-warning-foreground">
           <Icon icon={Clock01Icon} size={12} />
-          In review
+          {t("In review", "审核中")}
         </span>
       ) : null}
     </motion.div>

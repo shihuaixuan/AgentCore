@@ -39,14 +39,13 @@ export function HeldCallRow({
   onOpen,
   onDecide,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [confirmReject, setConfirmReject] = useState(false);
   const read = isHeldRead(approval);
   const reason = reasonLine(approval);
   const mode = approval.reasonKind === "mode" ? modeLabel(approval.mode) : null;
   const busy = status !== "idle";
-  const approveLabel = read ? "Release" : "Approve";
-  const rejectLabel = read ? "Keep it out" : "Reject";
+  const approveLabel = read ? t("Release", "放行") : t("Approve", "批准");
 
   function handleReject() {
     if (!confirmReject) {
@@ -79,7 +78,7 @@ export function HeldCallRow({
             </button>
             {approval.subject.irreversible && (
               <Tag tone="error-strong" className="bg-error-surface">
-                Can&apos;t be undone
+                {t("Can't be undone", "无法撤销")}
               </Tag>
             )}
             {mode && (
@@ -98,7 +97,10 @@ export function HeldCallRow({
           </div>
           {failed ? (
             <Text variant="body" role="alert" tone="error-strong">
-              Couldn&apos;t send your answer. Nothing ran. Try again.
+              {t(
+                "Couldn't send your answer. Nothing ran. Try again.",
+                "无法发送你的回复，尚未执行任何操作。请重试。",
+              )}
             </Text>
           ) : reason ? (
             <Text
@@ -128,7 +130,7 @@ export function HeldCallRow({
             className="mr-1 hidden sm:inline"
           >
             <time dateTime={new Date(item.created_at).toISOString()}>
-              {shortAge(item.created_at)}
+              {shortAge(item.created_at, undefined, locale)}
             </time>
           </Text>
         ) : null}
@@ -147,7 +149,7 @@ export function HeldCallRow({
             variant="secondary"
             size="row"
             disabled={busy}
-            aria-label={`Review: ${item.title}`}
+            aria-label={t(`Review: ${item.title}`, `审核：${item.title}`)}
             onClick={onOpen}
           >
             {t("Review", "审核")}
@@ -159,14 +161,20 @@ export function HeldCallRow({
           leadingIcon={Cancel01Icon}
           loading={status === "rejecting"}
           disabled={busy}
-          aria-label={`${confirmReject ? `Confirm ${rejectLabel.toLowerCase()}` : rejectLabel}: ${item.title}`}
+          aria-label={t(
+            `${confirmReject ? `Confirm ${read ? "keep it out" : "reject"}` : read ? "Keep it out" : "Reject"}: ${item.title}`,
+            `${confirmReject ? "确认" : ""}${read ? "拦截" : "拒绝"}：${item.title}`,
+          )}
           onClick={handleReject}
           onBlur={() => setConfirmReject(false)}
         />
       </div>
       <span className="sr-only" aria-live="polite">
         {confirmReject
-          ? `Press again to ${rejectLabel.toLowerCase()} ${item.title}. ${read ? approval.reader : AUTOPILOT_NAME} will be told it didn't run.`
+          ? t(
+              `Press again to ${read ? "keep it out" : "reject"} ${item.title}. ${read ? approval.reader : AUTOPILOT_NAME} will be told it didn't run.`,
+              `再次点击以${read ? "拦截" : "拒绝"} ${item.title}。系统将告知 ${read ? approval.reader : AUTOPILOT_NAME} 此操作未执行。`,
+            )
           : ""}
       </span>
     </article>

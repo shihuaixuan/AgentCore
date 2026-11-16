@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -31,6 +33,7 @@ export function SuggestedTasksBlock({
   showTeam = false,
   className,
 }: Props) {
+  const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
   const listID = useId();
   const toggleID = useId();
@@ -46,7 +49,9 @@ export function SuggestedTasksBlock({
       aria-label="Suggested first tasks"
     >
       <div className="mb-2 flex items-center justify-between px-1">
-        <Text variant="eyebrow">Suggested first tasks</Text>
+        <Text variant="eyebrow">
+          {t("Suggested first tasks", "建议的初始任务")}
+        </Text>
         <Button
           type="button"
           variant="ghost"

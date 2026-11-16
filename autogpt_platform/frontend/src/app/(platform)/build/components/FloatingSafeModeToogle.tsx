@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { GraphModel } from "@/app/api/__generated__/models/graphModel";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { Button } from "@/components/atoms/Button/Button";
@@ -38,6 +39,7 @@ function SafeModeButton({
   isPending,
   fullWidth = false,
 }: SafeModeButtonProps) {
+  const { t } = useTranslation();
   return (
     <Tooltip delayDuration={100}>
       <TooltipTrigger asChild>
@@ -52,14 +54,14 @@ function SafeModeButton({
             <>
               <Icon icon={SecurityCheckIcon} size={16} />
               <Text variant="body" className="text-border-base">
-                {label}: ON
+                {t(`${label}: ON`, `${label}：已开启`)}
               </Text>
             </>
           ) : (
             <>
               <Icon icon={Shield01Icon} size={16} />
               <Text variant="body" tone="secondary">
-                {label}: OFF
+                {t(`${label}: OFF`, `${label}：已关闭`)}
               </Text>
             </>
           )}
@@ -68,7 +70,9 @@ function SafeModeButton({
       <TooltipContent>
         <div className="text-center">
           <Text variant="small-medium-lh-normal" as="div" tone="inherit">
-            {label}: {isEnabled ? "ON" : "OFF"}
+            {isEnabled
+              ? t(`${label}: ON`, `${label}：已开启`)
+              : t(`${label}: OFF`, `${label}：已关闭`)}
           </Text>
           <Text variant="small-tight" tone="muted" as="div" className="mt-1">
             {isEnabled ? tooltipEnabled : tooltipDisabled}
@@ -84,6 +88,7 @@ export function FloatingSafeModeToggle({
   className,
   fullWidth = false,
 }: Props) {
+  const { t } = useTranslation();
   const {
     currentHITLSafeMode,
     showHITLToggle,
@@ -104,9 +109,15 @@ export function FloatingSafeModeToggle({
       {showHITLToggle && (
         <SafeModeButton
           isEnabled={currentHITLSafeMode}
-          label="Human in the loop block approval"
-          tooltipEnabled="The workflow will pause at human-in-the-loop blocks and wait for your approval"
-          tooltipDisabled="Human in the loop blocks will proceed automatically"
+          label={t("Human in the loop block approval", "人工介入模块审批")}
+          tooltipEnabled={t(
+            "The workflow will pause at human-in-the-loop blocks and wait for your approval",
+            "工作流将在人工介入模块处暂停，等待你的批准",
+          )}
+          tooltipDisabled={t(
+            "Human in the loop blocks will proceed automatically",
+            "人工介入模块将自动继续执行",
+          )}
           onToggle={handleHITLToggle}
           isPending={isPending}
           fullWidth={fullWidth}
@@ -115,9 +126,15 @@ export function FloatingSafeModeToggle({
       {showSensitiveActionToggle && (
         <SafeModeButton
           isEnabled={currentSensitiveActionSafeMode}
-          label="Sensitive actions blocks approval"
-          tooltipEnabled="The workflow will pause at sensitive action blocks and wait for your approval"
-          tooltipDisabled="Sensitive action blocks will proceed automatically"
+          label={t("Sensitive actions blocks approval", "敏感操作模块审批")}
+          tooltipEnabled={t(
+            "The workflow will pause at sensitive action blocks and wait for your approval",
+            "工作流将在敏感操作模块处暂停，等待你的批准",
+          )}
+          tooltipDisabled={t(
+            "Sensitive action blocks will proceed automatically",
+            "敏感操作模块将自动继续执行",
+          )}
           onToggle={handleSensitiveActionToggle}
           isPending={isPending}
           fullWidth={fullWidth}

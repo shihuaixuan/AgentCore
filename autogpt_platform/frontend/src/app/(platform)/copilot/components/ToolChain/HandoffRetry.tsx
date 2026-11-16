@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
 import NextLink from "next/link";
 import { Button } from "@/components/atoms/Button/Button";
@@ -19,11 +21,12 @@ interface Props {
  *  while nothing has reached the expert since: one copy of the task, never
  *  two. */
 export function HandoffRetry({ title, name, expertId, onSend }: Props) {
+  const { t } = useTranslation();
   const { asked, markAsked, known, threadId } = useHandoffRetry(expertId);
   if (asked) {
     return (
       <Text variant="body-tight" as="span" tone="muted">
-        Asked Otto to try again.
+        {t("Asked Otto to try again.", "已请 Otto 重试。")}
       </Text>
     );
   }
@@ -34,7 +37,7 @@ export function HandoffRetry({ title, name, expertId, onSend }: Props) {
         href={`/copilot?sessionId=${encodeURIComponent(threadId)}`}
         className="inline-flex shrink-0 items-center gap-1 rounded text-body font-medium text-foreground-emphasis underline-offset-2 hover:underline focus-visible:ring-1 focus-visible:ring-focus focus-visible:outline-none"
       >
-        Open {possessive(name)} chat
+        {t(`Open ${possessive(name)} chat`, `打开与 ${name} 的对话`)}
         <Icon
           icon={ArrowUpRight01Icon}
           size={14}
@@ -53,7 +56,7 @@ export function HandoffRetry({ title, name, expertId, onSend }: Props) {
         onSend(`Try handing ${title} to ${name} again.`);
       }}
     >
-      Try again
+      {t("Try again", "重试")}
     </Button>
   );
 }

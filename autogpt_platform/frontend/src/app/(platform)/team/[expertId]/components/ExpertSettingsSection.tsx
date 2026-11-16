@@ -139,7 +139,7 @@ export function ExpertSettingsSection({ expert, onFire }: Props) {
         <Consequence
           icon={BubbleChatIcon}
           tag="Kept"
-          title="Chat history stays, read-only"
+          title={t("Chat history stays, read-only", "聊天记录会保留，变为只读")}
         />
         <Consequence
           icon={Store01Icon}

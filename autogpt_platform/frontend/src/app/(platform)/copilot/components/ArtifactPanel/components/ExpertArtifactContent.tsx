@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { useGetExpert } from "@/app/api/__generated__/endpoints/experts/experts";
 import { okData } from "@/app/api/helpers";
 import { swatchClassFor } from "@/app/(platform)/raise/components/ColorStep/helpers";
@@ -65,10 +67,11 @@ function useCharterFallback(artifact: ExpertArtifact): ExpertArtifact {
 /** The whole charter of a proposed or newly created expert — the card in
  *  the chat shows one line, this is everything the model wrote for them. */
 export function ExpertArtifactContent({ expert: artifact }: Props) {
+  const { t } = useTranslation();
   const expert = useCharterFallback(artifact);
   const status = expert.applied
-    ? "On the team"
-    : "Proposed — nothing created yet";
+    ? t("On the team", "已加入团队")
+    : t("Proposed — nothing created yet", "提案 — 尚未创建");
 
   return (
     <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-5">
@@ -99,28 +102,49 @@ export function ExpertArtifactContent({ expert: artifact }: Props) {
           {expert.tagline}
         </p>
       )}
-      <Section title="Status" text={status} />
-      {expert.kind && <Section title="Kind" text={KIND_LABELS[expert.kind]} />}
+      <Section title={t("Status", "状态")} text={status} />
+      {expert.kind && (
+        <Section
+          title={t("Kind", "来源")}
+          text={t(
+            KIND_LABELS[expert.kind],
+            {
+              hire: "从专家名册聘用",
+              raise: "根据专家章程培养",
+              update: "更新专家章程",
+            }[expert.kind],
+          )}
+        />
+      )}
       {expert.about && (
-        <Section title="Identity and personality" text={expert.about} />
+        <Section
+          title={t("Identity and personality", "身份与性格")}
+          text={expert.about}
+        />
       )}
       {expert.voicePreferences && (
-        <Section title="Voice" text={expert.voicePreferences} />
+        <Section
+          title={t("Voice", "表达风格")}
+          text={expert.voicePreferences}
+        />
       )}
       {expert.boundaries && (
-        <Section title="Boundaries" text={expert.boundaries} />
+        <Section title={t("Boundaries", "行为边界")} text={expert.boundaries} />
       )}
       <Section
-        title="Weekly budget"
+        title={t("Weekly budget", "每周预算")}
         text={
           expert.weeklyBudget === null
-            ? "Default"
-            : `${expert.weeklyBudget} credits`
+            ? t("Default", "默认")
+            : t(
+                `${expert.weeklyBudget} credits`,
+                `${expert.weeklyBudget} 点额度`,
+              )
         }
       />
       {expert.color && swatchClassFor(expert.color) && (
         <section>
-          <div className={LABEL}>Accent</div>
+          <div className={LABEL}>{t("Accent", "主题色")}</div>
           <div className="flex items-center gap-2 text-body text-foreground-secondary">
             <span
               aria-hidden="true"
@@ -133,7 +157,9 @@ export function ExpertArtifactContent({ expert: artifact }: Props) {
           </div>
         </section>
       )}
-      {expert.id && <Section title="Expert ID" text={expert.id} />}
+      {expert.id && (
+        <Section title={t("Expert ID", "专家 ID")} text={expert.id} />
+      )}
     </div>
   );
 }

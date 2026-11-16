@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import type { HomeRecentWorkGroup } from "@/app/api/__generated__/models/homeRecentWorkGroup";
@@ -15,6 +17,7 @@ interface Props {
 }
 
 export function WorkGroup({ group, timezone }: Props) {
+  const { t } = useTranslation();
   const { actor } = group;
   const chip = getActorChip(actor.kind);
   const runs = group.runs ?? [];
@@ -39,7 +42,14 @@ export function WorkGroup({ group, timezone }: Props) {
           transform="capitalize"
           className="block"
         >
-          {chip.label}
+          {t(
+            chip.label,
+            actor.kind === "expert"
+              ? "专家"
+              : actor.kind === "workflow"
+                ? "工作流"
+                : "Otto",
+          )}
         </Text>
       </span>
       <Text
@@ -49,7 +59,7 @@ export function WorkGroup({ group, timezone }: Props) {
         className="ml-auto shrink-0"
         as="span"
       >
-        {formatGroupCounts(group)}
+        {formatGroupCounts(group, t)}
       </Text>
       {actor.link ? (
         <Icon

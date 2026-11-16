@@ -54,6 +54,49 @@ function classes(selector: string) {
 }
 
 describe("tutorial requirement and connection status", () => {
+  it("keeps an existing Chinese callback isolated from a later English tutorial", () => {
+    const chineseText = (_english: string, chinese: string) => chinese;
+    const chinese = createConfigureCalculatorSteps(
+      tour,
+      chineseText,
+    ) as StepLike[];
+    const english = createConfigureCalculatorSteps(tour) as StepLike[];
+    const step = mount(chinese, "enter-values");
+    nodes.first = {
+      id: "n1",
+      data: { hardcodedValues: { a: 1, b: 2, operation: "Add" } },
+    };
+    step.when?.show?.();
+    vi.advanceTimersByTime(300);
+    expect(document.querySelector("#requirements-title")?.textContent).toBe(
+      "🎉 所有数值已填写完成！",
+    );
+    step.when?.hide?.();
+    mount(english, "enter-values");
+    expect(document.body.textContent).toContain("Required to continue:");
+  });
+  it("localizes tutorial requirements and preserves step identities", () => {
+    const chineseText = (_english: string, chinese: string) => chinese;
+    const steps = createConfigureCalculatorSteps(
+      tour,
+      chineseText,
+    ) as StepLike[];
+    const step = mount(steps, "enter-values");
+    expect(document.body.textContent).toContain("在字段 A 中输入数字");
+    expect(document.body.textContent).toContain("继续前请完成");
+    nodes.first = {
+      id: "n1",
+      data: { hardcodedValues: { a: 1, b: 2, operation: "Add" } },
+    };
+    step.when?.show?.();
+    vi.advanceTimersByTime(300);
+    expect(document.querySelector("#requirements-title")?.textContent).toBe(
+      "🎉 所有数值已填写完成！",
+    );
+    step.when?.hide?.();
+    mount(createConfigureCalculatorSteps(tour) as StepLike[], "enter-values");
+    expect(document.body.textContent).toContain("Required to continue:");
+  });
   beforeEach(() => {
     vi.useFakeTimers();
     for (const key of Object.keys(currentStep)) delete currentStep[key];

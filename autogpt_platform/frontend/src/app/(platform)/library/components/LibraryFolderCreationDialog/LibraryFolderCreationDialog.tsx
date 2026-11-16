@@ -46,6 +46,24 @@ export const libraryFolderCreationFormSchema = z.object({
 
 export default function LibraryFolderCreationDialog() {
   const { t } = useTranslation();
+  const localizedSchema = z.object({
+    folderName: z
+      .string()
+      .min(1, t("Folder name is required", "请输入文件夹名称"))
+      .max(
+        100,
+        t(
+          "Folder name must be 100 characters or less",
+          "文件夹名称不能超过 100 个字符",
+        ),
+      ),
+    folderColor: z
+      .string()
+      .min(1, t("Folder color is required", "请选择文件夹颜色")),
+    folderIcon: z
+      .string()
+      .min(1, t("Folder icon is required", "请选择文件夹图标")),
+  });
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -80,7 +98,7 @@ export default function LibraryFolderCreationDialog() {
   });
 
   const form = useForm<z.infer<typeof libraryFolderCreationFormSchema>>({
-    resolver: zodResolver(libraryFolderCreationFormSchema),
+    resolver: zodResolver(localizedSchema),
     defaultValues: {
       folderName: "",
       folderColor: "",
@@ -156,13 +174,24 @@ export default function LibraryFolderCreationDialog() {
                 <FormControl>
                   <Select
                     id="folderColor"
-                    label="Folder color"
-                    placeholder="Select a color"
+                    label={t("Folder color", "文件夹颜色")}
+                    placeholder={t("Select a color", "选择颜色")}
                     value={field.value}
                     onValueChange={field.onChange}
                     options={FOLDER_COLORS.map((color) => ({
                       value: color.value,
-                      label: color.label,
+                      label: t(
+                        color.label,
+                        (
+                          {
+                            Blue: "蓝色",
+                            Purple: "紫色",
+                            Green: "绿色",
+                            Orange: "橙色",
+                            Pink: "粉色",
+                          } as Record<string, string>
+                        )[color.label] ?? color.label,
+                      ),
                       icon: (
                         <div
                           className="h-4 w-4 rounded-full"
@@ -192,12 +221,12 @@ export default function LibraryFolderCreationDialog() {
               <FormItem>
                 <div className="flex flex-col gap-2">
                   <Text variant="large-medium" as="span">
-                    Folder icon
+                    {t("Folder icon", "文件夹图标")}
                   </Text>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-3">
                       <Text variant="small" tone="muted">
-                        Selected:
+                        {t("Selected:", "已选择：")}
                       </Text>
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border-base bg-surface-muted text-heading-md">
                         {form.watch("folderIcon") || (

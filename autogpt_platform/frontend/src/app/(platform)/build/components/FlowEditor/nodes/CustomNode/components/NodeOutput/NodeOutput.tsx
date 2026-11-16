@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import {
@@ -15,6 +16,7 @@ import { Copy01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export const NodeDataRenderer = ({ nodeId }: { nodeId: string }) => {
+  const { t } = useTranslation();
   const {
     latestOutputData,
     copiedKey,
@@ -36,13 +38,13 @@ export const NodeDataRenderer = ({ nodeId }: { nodeId: string }) => {
         <AccordionItem value="node-output" className="border-none">
           <AccordionTrigger className="py-2 hover:no-underline">
             <Text variant="body-semibold" tone="body">
-              Node Output
+              {t("Node Output", "节点输出")}
             </Text>
           </AccordionTrigger>
           <AccordionContent className="pt-2">
             <div className="flex max-w-[350px] flex-col gap-4">
               <div className="space-y-2">
-                <Text variant="small-medium">Input</Text>
+                <Text variant="small-medium">{t("Input", "输入")}</Text>
 
                 <ContentRenderer value={latestInputData} shortContent={true} />
 

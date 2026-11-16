@@ -10,9 +10,13 @@ interface Props {
 }
 
 export function HomeHeader({ dashboard }: Props) {
-  const { t } = useTranslation();
-  const date = formatHeaderDate(dashboard.generated_at, dashboard.timezone);
-  const status = getHomeStatusLine(dashboard);
+  const { t, locale } = useTranslation();
+  const date = formatHeaderDate(
+    dashboard.generated_at,
+    dashboard.timezone,
+    locale,
+  );
+  const status = getHomeStatusLine(dashboard, t);
 
   return (
     <header className="flex items-end justify-between gap-6 px-1 pt-1 pb-5">

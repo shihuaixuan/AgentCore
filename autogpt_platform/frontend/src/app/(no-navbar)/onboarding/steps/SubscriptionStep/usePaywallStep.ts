@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { computePlanPricing } from "@/components/molecules/PlanCard/computePricing";
 import { PLAN_KEYS } from "@/components/molecules/PlanCard/plans";
 import { getEligibleTrialOffer } from "@/components/organisms/SubscriptionPlans/helpers";
@@ -13,6 +14,7 @@ const SAVE_FAILED =
 // The paying half of the plan step: the trial offer when there is one, Pro
 // checkout when there is not. Progress is saved before Stripe takes over.
 export function usePaywallStep() {
+  const { t } = useTranslation();
   const subscription = useSubscriptionStep();
   const trial = useTrialCard("onboarding");
   const [saving, setSaving] = useState(false);
@@ -28,7 +30,7 @@ export function usePaywallStep() {
       if (useOnboardingWizardStore.getState().userID !== ownerID) return;
       await trial.startTrial();
     } catch {
-      setSaveError(SAVE_FAILED);
+      setSaveError(t(SAVE_FAILED, "无法保存进度，请重试后再前往结账。"));
     } finally {
       setSaving(false);
     }

@@ -1,4 +1,6 @@
 "use client";
+import { DISPLAY_LABELS } from "../display-labels";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
@@ -51,6 +53,7 @@ export function ReasonTiles({
   layout = "row",
   size = "default",
 }: Props) {
+  const { t } = useTranslation();
   const isCompact = size === "compact";
   const spanLast = layout === "row" && reasons.length % columns !== 0;
 
@@ -94,7 +97,7 @@ export function ReasonTiles({
                 isCompact ? "text-caption leading-4" : "text-body",
               )}
             >
-              {reason.label}
+              {t(reason.label, DISPLAY_LABELS[reason.label] ?? reason.label)}
             </span>
             <span
               className={cn(

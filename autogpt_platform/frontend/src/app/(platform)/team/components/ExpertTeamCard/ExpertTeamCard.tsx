@@ -101,7 +101,7 @@ export function ExpertTeamCard({
 
       <Link
         href={`/team/${expert.id}`}
-        aria-label={`View ${expert.name}`}
+        aria-label={t(`View ${expert.name}`, `查看 ${expert.name}`)}
         className="flex flex-1 flex-col items-center p-2 pb-4"
       >
         <ExpertCover
@@ -131,7 +131,7 @@ export function ExpertTeamCard({
               <Text variant="small-medium" tone="secondary">
                 {weeklySpend
                   ? `${creditsToUsdLabel(weeklySpend.spent)} / ${creditsToUsdLabel(weeklySpend.budget)}`
-                  : "No budget"}
+                  : t("No budget", "未设置预算")}
               </Text>
             </div>
             <SpendMeter

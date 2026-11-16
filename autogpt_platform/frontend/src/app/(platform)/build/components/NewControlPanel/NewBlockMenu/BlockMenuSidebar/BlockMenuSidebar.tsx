@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React from "react";
 import { MenuItem } from "../MenuItem";
 import { useBlockMenuSidebar } from "./useBlockMenuSidebar";
@@ -7,6 +8,7 @@ import { useBlockMenuStore } from "../../../../stores/blockMenuStore";
 import { DefaultStateType } from "../types";
 
 export const BlockMenuSidebar = () => {
+  const { t } = useTranslation();
   const { data, setDefaultState, defaultState, isLoading, isError, error } =
     useBlockMenuSidebar();
   const setIntegration = useBlockMenuStore((state) => state.setIntegration);
@@ -32,8 +34,9 @@ export const BlockMenuSidebar = () => {
           context="block menu"
           httpError={{
             status: data?.status,
-            statusText: "Internal Server Error",
-            message: (error?.detail as string) || "An error occurred",
+            statusText: t("Internal Server Error", "服务器内部错误"),
+            message:
+              (error?.detail as string) || t("An error occurred", "发生错误"),
           }}
         />
       </div>
@@ -44,11 +47,11 @@ export const BlockMenuSidebar = () => {
 
   const topLevelMenuItems = [
     {
-      name: "Suggestion",
+      name: t("Suggestion", "推荐"),
       type: "suggestion",
     },
     {
-      name: "All blocks",
+      name: t("All blocks", "全部模块"),
       type: "all_blocks",
       number: blockCounts?.all_blocks,
     },
@@ -56,17 +59,17 @@ export const BlockMenuSidebar = () => {
 
   const subMenuItems = [
     {
-      name: "Input blocks",
+      name: t("Input blocks", "输入模块"),
       type: "input_blocks",
       number: blockCounts?.input_blocks,
     },
     {
-      name: "Action blocks",
+      name: t("Action blocks", "操作模块"),
       type: "action_blocks",
       number: blockCounts?.action_blocks,
     },
     {
-      name: "Output blocks",
+      name: t("Output blocks", "输出模块"),
       type: "output_blocks",
       number: blockCounts?.output_blocks,
     },
@@ -74,7 +77,7 @@ export const BlockMenuSidebar = () => {
 
   const bottomMenuItems = [
     {
-      name: "Integrations",
+      name: t("Integrations", "集成"),
       type: "integrations",
       number: blockCounts?.integrations,
       onClick: () => {
@@ -83,12 +86,12 @@ export const BlockMenuSidebar = () => {
       },
     },
     {
-      name: "Marketplace Workflows",
+      name: t("Marketplace Workflows", "市场工作流"),
       type: "marketplace_agents",
       number: blockCounts?.marketplace_agents,
     },
     {
-      name: "My Workflows",
+      name: t("My Workflows", "我的工作流"),
       type: "my_agents",
       number: blockCounts?.my_agents,
     },

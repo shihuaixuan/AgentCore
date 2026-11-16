@@ -1,3 +1,4 @@
+import { englishTutorialText, type TutorialTranslate } from "../translation";
 import { StepOptions } from "shepherd.js";
 import { createWelcomeSteps } from "./welcome";
 import { createBlockMenuSteps } from "./block-menu";
@@ -9,14 +10,17 @@ import { createSaveSteps } from "./save";
 import { createRunSteps } from "./run";
 import { createCompletionSteps } from "./completion";
 
-export const createTutorialSteps = (tour: any): StepOptions[] => [
-  ...createWelcomeSteps(tour),
-  ...createBlockMenuSteps(tour),
-  ...createBlockBasicsSteps(tour),
-  ...createConfigureCalculatorSteps(tour),
-  ...createSecondCalculatorSteps(tour),
-  ...createConnectionSteps(tour),
-  ...createSaveSteps(),
-  ...createRunSteps(tour),
-  ...createCompletionSteps(tour),
+export const createTutorialSteps = (
+  tour: any,
+  t: TutorialTranslate = englishTutorialText,
+): StepOptions[] => [
+  ...createWelcomeSteps(tour, t),
+  ...createBlockMenuSteps(tour, t),
+  ...createBlockBasicsSteps(tour, t),
+  ...createConfigureCalculatorSteps(tour, t),
+  ...createSecondCalculatorSteps(tour, t),
+  ...createConnectionSteps(tour, t),
+  ...createSaveSteps(t),
+  ...createRunSteps(tour, t),
+  ...createCompletionSteps(tour, t),
 ];

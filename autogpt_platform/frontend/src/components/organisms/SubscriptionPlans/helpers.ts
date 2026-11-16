@@ -82,6 +82,7 @@ function getPaidActionPrice(
   amount: number | null,
   currency: string,
   billing: SubscriptionPlansProps["billing"],
+  locale: string,
 ) {
   if (!trial || amount === null) return null;
   const price = formatPlanAmount(amount, currency);
@@ -91,13 +92,17 @@ function getPaidActionPrice(
   ) {
     return null;
   }
-  return `${price} / ${billing === "yearly" ? "year" : "month"}`;
+  return locale === "zh-CN"
+    ? `${price} / ${billing === "yearly" ? "年" : "月"}`
+    : `${price} / ${billing === "yearly" ? "year" : "month"}`;
 }
 
 export function getPlanPresentation(
   plan: PlanDef,
   props: SubscriptionPlansProps,
+  locale = "en",
 ) {
+  const zh = locale === "zh-CN";
   const offer =
     supportsTrialPlan(plan.key) && props.trialOffer?.tier === plan.key
       ? props.trialOffer
@@ -117,27 +122,40 @@ export function getPlanPresentation(
       pricing.chargedToday,
       props.country.currencyCode,
       props.billing,
+      locale,
     ),
     price: trial
       ? getTrialPricing(trial).formatted
       : contactSales
-        ? "Contact us"
+        ? zh
+          ? "联系我们"
+          : "Contact us"
         : formatPlanAmount(
             pricing.primaryPrice ?? 0,
             props.country.currencyCode,
           ),
     unit: trial
-      ? `/ ${trial.billing_cycle === "yearly" ? "year" : "month"}`
+      ? zh
+        ? `/ ${trial.billing_cycle === "yearly" ? "年" : "月"}`
+        : `/ ${trial.billing_cycle === "yearly" ? "year" : "month"}`
       : contactSales
         ? null
-        : "/ month",
+        : zh
+          ? "/ 月"
+          : "/ month",
     caption: trial
-      ? `after your ${trial.duration_days}-day trial · plus applicable tax`
+      ? zh
+        ? `${trial.duration_days} 天试用结束后收费 · 另加适用税费`
+        : `after your ${trial.duration_days}-day trial · plus applicable tax`
       : contactSales
         ? null
         : props.billing === "yearly"
-          ? "billed annually"
-          : "billed monthly",
+          ? zh
+            ? "按年计费"
+            : "billed annually"
+          : zh
+            ? "按月计费"
+            : "billed monthly",
     action: trial ? `Start ${trial.duration_days}-day trial` : plan.cta,
   };
 }

@@ -48,7 +48,7 @@ export function NewPodDialog({ open, onClose, onCreate, isCreating }: Props) {
             size="small"
             label={t("Pod name", "小组名称")}
             labelVariant="small-medium"
-            placeholder="e.g. Growth"
+            placeholder={t("e.g. Growth", "例如：增长团队")}
             value={name}
             maxLength={POD_NAME_MAX_LENGTH}
             onChange={(event) => setName(event.target.value)}

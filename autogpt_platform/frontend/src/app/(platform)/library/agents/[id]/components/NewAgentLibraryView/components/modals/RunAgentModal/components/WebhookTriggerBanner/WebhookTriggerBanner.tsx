@@ -25,8 +25,10 @@ export function WebhookTriggerBanner() {
           </h3>
           <div className="mt-2 text-body text-info-foreground">
             <p>
-              This will create a webhook endpoint that automatically runs your
-              workflow when triggered by external events.
+              {t(
+                "This will create a webhook endpoint that automatically runs your workflow when triggered by external events.",
+                "这将创建一个 Webhook 端点，在外部事件触发时自动运行你的工作流。",
+              )}
             </p>
           </div>
         </div>

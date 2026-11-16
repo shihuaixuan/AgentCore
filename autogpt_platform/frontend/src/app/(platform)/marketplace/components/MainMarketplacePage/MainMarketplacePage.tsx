@@ -95,7 +95,10 @@ export function MainMarkeplacePage() {
             shelf instead, where it cannot outshout the shelf itself. */}
         {!hasWorkflowShelf ? (
           <BecomeACreator
-            description="Join our ever-growing community of hackers and tinkerers"
+            description={t(
+              "Join our ever-growing community of hackers and tinkerers",
+              "加入我们不断壮大的开发者和探索者社区",
+            )}
             buttonText="Publish your workflows"
             onPublish={openPublishing}
           />

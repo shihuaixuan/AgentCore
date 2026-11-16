@@ -117,7 +117,10 @@ export function AddSkillDialog({
               ) : visible.length === 0 ? (
                 <Text variant="small" tone="muted">
                   {skills.length === 0
-                    ? "Every library skill is already on this expert."
+                    ? t(
+                        "Every library skill is already on this expert.",
+                        "技能库中的所有技能都已添加给这位专家。",
+                      )
                     : t("No skills match.", "没有匹配的技能。")}
                 </Text>
               ) : (

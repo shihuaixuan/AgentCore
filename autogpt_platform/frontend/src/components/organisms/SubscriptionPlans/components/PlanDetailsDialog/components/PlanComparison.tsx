@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import type { PlanDef } from "@/components/molecules/PlanCard/plans";
 
@@ -6,6 +9,7 @@ interface Props {
 }
 
 export function PlanComparison({ plans }: Props) {
+  const { t } = useTranslation();
   return (
     <div data-slot="plan-comparison" className="space-y-4">
       <table
@@ -51,7 +55,10 @@ export function PlanComparison({ plans }: Props) {
         </tbody>
       </table>
       <Text variant="small" tone="secondary">
-        Trial usage is limited. Paid plan allowances apply after the trial.
+        {t(
+          "Trial usage is limited. Paid plan allowances apply after the trial.",
+          "试用额度有限，试用结束后适用付费套餐额度。",
+        )}
       </Text>
     </div>
   );

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { TrialStatusResponse } from "@/app/api/__generated__/models/trialStatusResponse";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -12,6 +15,7 @@ interface Props {
 }
 
 export function TrialOffer({ trial, isStarting, isBlocked, onStart }: Props) {
+  const { t, locale } = useTranslation();
   const offer = trial.offer;
   if (!offer) return null;
   return (
@@ -28,24 +32,29 @@ export function TrialOffer({ trial, isStarting, isBlocked, onStart }: Props) {
           className="flex flex-wrap items-center gap-2"
         >
           <TrialTitle>
-            Try AutoGPT {trialPlanLabels[offer.tier]} for {offer.duration_days}{" "}
-            days
+            {t(
+              `Try AutoGPT ${trialPlanLabels[offer.tier]} for ${offer.duration_days} days`,
+              `试用 AutoGPT ${trialPlanLabels[offer.tier]} ${offer.duration_days} 天`,
+            )}
           </TrialTitle>
           <span
             data-slot="trial-offer-pill"
             className="inline-flex items-center rounded-full bg-accent-surface px-2 py-0.5 text-tiny leading-inherit font-medium text-accent-strong"
           >
-            No charge today
+            {t("No charge today", "今日不收费")}
           </span>
         </div>
         <Text variant="body" tone="emphasis">
-          Card required. No subscription charge today. Then{" "}
-          {formatTrialPrice(offer)}, plus applicable tax, unless you cancel
-          before the trial ends.
+          {t(
+            `Card required. No subscription charge today. Then ${formatTrialPrice(offer)}, plus applicable tax, unless you cancel before the trial ends.`,
+            `需要提供银行卡，今天不收取订阅费用。除非你在试用结束前取消，否则之后将收取 ${formatTrialPrice(offer, locale)}，另加适用税费。`,
+          )}
         </Text>
         <Text variant="small" tone="muted">
-          Trial usage is limited. If you cancel, you keep access until the trial
-          ends. You can manage your plan in billing.
+          {t(
+            "Trial usage is limited. If you cancel, you keep access until the trial ends. You can manage your plan in billing.",
+            "试用额度有限。取消后仍可使用至试用结束。你可以在账单设置中管理套餐。",
+          )}
         </Text>
       </div>
       <Button
@@ -56,7 +65,10 @@ export function TrialOffer({ trial, isStarting, isBlocked, onStart }: Props) {
         disabled={isStarting || isBlocked}
         className="w-full shrink-0 md:w-auto md:min-w-[11rem]"
       >
-        Start {offer.duration_days}-day trial
+        {t(
+          `Start ${offer.duration_days}-day trial`,
+          `开始 ${offer.duration_days} 天试用`,
+        )}
       </Button>
     </div>
   );

@@ -23,6 +23,7 @@ interface Props {
 }
 
 export function SoulDrawer({ expert, onClose }: Props) {
+  const { t } = useTranslation();
   return (
     <ExpertSidePanel
       identity={
@@ -34,9 +35,9 @@ export function SoulDrawer({ expert, onClose }: Props) {
             }
           : null
       }
-      title={expert ? `${expert.name}'s Soul` : ""}
+      title={expert ? t(`${expert.name}'s Soul`, `${expert.name} 的设定`) : ""}
       panelId="soul"
-      closeLabel="Close Soul panel"
+      closeLabel={t("Close Soul panel", "关闭设定面板")}
       onClose={onClose}
     >
       {expert ? <SoulPanelBody expert={expert} onClose={onClose} /> : null}

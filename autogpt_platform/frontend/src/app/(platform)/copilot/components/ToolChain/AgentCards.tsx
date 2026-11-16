@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   LinkSquare01Icon,
   PlayIcon,
@@ -53,6 +55,7 @@ function CardLink({ href, label }: CardLinkProps) {
 }
 
 export function AgentListCard({ agents }: AgentListCardProps) {
+  const { t } = useTranslation();
   return (
     <div className={RESULT_GRID}>
       {agents.map((agent, i) => {
@@ -79,7 +82,10 @@ export function AgentListCard({ agents }: AgentListCardProps) {
                 </Text>
                 {str(agent, "creator") && (
                   <span className="shrink-0 truncate text-caption-sm leading-inherit text-foreground-subtle">
-                    by {str(agent, "creator")}
+                    {t(
+                      `by ${str(agent, "creator")}`,
+                      `作者：${str(agent, "creator")}`,
+                    )}
                   </span>
                 )}
               </div>
@@ -93,7 +99,10 @@ export function AgentListCard({ agents }: AgentListCardProps) {
                   {runs !== null && (
                     <span className="flex items-center gap-1">
                       <Icon icon={PlayIcon} size={10} />
-                      {runs.toLocaleString()} runs
+                      {t(
+                        `${runs.toLocaleString()} runs`,
+                        `${runs.toLocaleString()} 次运行`,
+                      )}
                     </span>
                   )}
                   {rating !== null && (
@@ -105,7 +114,9 @@ export function AgentListCard({ agents }: AgentListCardProps) {
                 </div>
               )}
             </div>
-            {href && <CardLink href={href} label="Open workflow" />}
+            {href && (
+              <CardLink href={href} label={t("Open workflow", "打开工作流")} />
+            )}
           </div>
         );
       })}
@@ -114,7 +125,9 @@ export function AgentListCard({ agents }: AgentListCardProps) {
 }
 
 export function AgentSavedCard({ output }: OutputCardProps) {
-  const name = str(output, "agent_name", "name", "graph_name") ?? "Workflow";
+  const { t } = useTranslation();
+  const name =
+    str(output, "agent_name", "name", "graph_name") ?? t("Workflow", "工作流");
   const version = output.graph_version;
   const libraryLink =
     str(output, "library_agent_link") ??
@@ -142,19 +155,26 @@ export function AgentSavedCard({ output }: OutputCardProps) {
       {builderLink && (
         <Link
           href={builderLink}
-          aria-label="Open in builder"
+          aria-label={t("Open in builder", "在构建器中打开")}
           className="shrink-0 rounded-full p-1 text-foreground-subtle transition-colors hover:bg-surface-hover hover:text-foreground-body"
         >
           <Icon icon={WrenchIcon} size={14} />
         </Link>
       )}
-      {libraryLink && <CardLink href={libraryLink} label="Open in library" />}
+      {libraryLink && (
+        <CardLink
+          href={libraryLink}
+          label={t("Open in library", "在工作库中打开")}
+        />
+      )}
     </div>
   );
 }
 
 export function AgentPreviewCard({ output }: OutputCardProps) {
-  const name = str(output, "agent_name", "name") ?? "Workflow preview";
+  const { t } = useTranslation();
+  const name =
+    str(output, "agent_name", "name") ?? t("Workflow preview", "工作流预览");
   const count =
     typeof output.node_count === "number" ? output.node_count : null;
   return (
@@ -178,7 +198,7 @@ export function AgentPreviewCard({ output }: OutputCardProps) {
       </div>
       {count !== null && (
         <span className="shrink-0 rounded-full bg-surface-hover px-2 py-0.5 text-caption-sm leading-inherit text-foreground-tertiary">
-          {count} block{count === 1 ? "" : "s"}
+          {t(`${count} block${count === 1 ? "" : "s"}`, `${count} 个模块`)}
         </span>
       )}
     </div>
@@ -193,6 +213,7 @@ export function SubSessionCard({
   output,
   minimal = false,
 }: SubSessionCardProps) {
+  const { t } = useTranslation();
   const frozenStatus = str(output, "status");
   const response = str(output, "response");
   const link = str(output, "sub_autopilot_session_link");
@@ -210,7 +231,7 @@ export function SubSessionCard({
   const role = expert && str(expert, "role");
   const name =
     (expert && str(expert, "name")) ??
-    (background ? "Background subtask" : "Expert");
+    (background ? t("Background subtask", "后台子任务") : t("Expert", "专家"));
   return (
     <div className={cn(CARD, "w-full rounded-2xl p-2.5")}>
       <div className="flex items-center gap-2.5">
@@ -240,7 +261,9 @@ export function SubSessionCard({
           ["running", "queued", "unknown"].includes(status ?? "") && (
             <BackgroundSubtaskStop sessionId={subSessionId} />
           )}
-        {link && <CardLink href={link} label="Open sub-session" />}
+        {link && (
+          <CardLink href={link} label={t("Open sub-session", "打开子对话")} />
+        )}
       </div>
       {!minimal && response && (
         <p className="mt-1.5 line-clamp-2 pl-9 text-caption text-foreground-tertiary">

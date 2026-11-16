@@ -15,6 +15,7 @@ import { DialogCtx, DialogVariant } from "../useDialogCtx";
 import { compactStyles, modalStyles } from "./styles";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type BaseProps = DialogCtx & PropsWithChildren;
 
@@ -42,6 +43,7 @@ export function DialogWrap({
   isForceOpen,
   handleClose,
 }: Props) {
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [hasVerticalScrollbar, setHasVerticalScrollbar] = useState(false);
   const isCompact = variant === "compact";
@@ -138,7 +140,7 @@ export function DialogWrap({
             </RXDialog.Title>
           ) : (
             <RXDialog.Title data-slot="dialog-title" className="sr-only">
-              Dialog
+              {t("Dialog", "对话框")}
             </RXDialog.Title>
           )}
 
@@ -147,7 +149,7 @@ export function DialogWrap({
               variant="icon"
               size={isCompact ? "icon-sm" : "icon"}
               onClick={handleClose}
-              aria-label="Close"
+              aria-label={t("Close", "关闭")}
               data-slot="dialog-close"
               className={cn(
                 "absolute top-4 right-4 z-50",
@@ -167,7 +169,7 @@ export function DialogWrap({
           data-slot="dialog-description"
           className="sr-only"
         >
-          Dialog
+          {t("Dialog", "对话框")}
         </RXDialog.Description>
         <div data-slot="dialog-body" className="flex min-h-0 flex-1 flex-col">
           <div

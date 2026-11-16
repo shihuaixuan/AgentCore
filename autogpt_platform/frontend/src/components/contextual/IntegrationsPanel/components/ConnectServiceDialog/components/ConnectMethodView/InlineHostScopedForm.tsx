@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -57,13 +58,15 @@ interface Props {
 // Host pattern plus the headers to attach to requests matching it. Carries its
 // own submit, because the panel footer's Continue only drives OAuth and API key.
 export function InlineHostScopedForm({ provider, host, onSuccess }: Props) {
+  const { t } = useTranslation();
+
   const [headerPairs, setHeaderPairs] = useState<HeaderPair[]>([
     { key: "", value: "" },
   ]);
   const { submit, isPending } = useInlineConnectForm({
     provider,
-    successTitle: "Host credentials saved",
-    failureTitle: "Couldn't save host credentials",
+    successTitle: t("Host credentials saved", "主机凭据已保存"),
+    failureTitle: t("Couldn't save host credentials", "无法保存主机凭据"),
     onSuccess,
   });
 
@@ -106,7 +109,7 @@ export function InlineHostScopedForm({ provider, host, onSuccess }: Props) {
                 id="host"
                 autoComplete="off"
                 spellCheck={false}
-                label="Host"
+                label={t("Host", "主机")}
                 labelVariant="small-medium"
                 size="small"
                 readOnly={Boolean(host)}
@@ -116,8 +119,14 @@ export function InlineHostScopedForm({ provider, host, onSuccess }: Props) {
             </FormControl>
             <Text variant="small" tone="muted">
               {host
-                ? "Taken from the URL this block calls."
-                : "The host of the URL this block will call."}
+                ? t(
+                    "Taken from the URL this block calls.",
+                    "取自此模块调用的 URL。",
+                  )
+                : t(
+                    "The host of the URL this block will call.",
+                    "此模块将调用的 URL 所属的主机。",
+                  )}
             </Text>
             <FormMessage />
           </FormItem>
@@ -126,17 +135,20 @@ export function InlineHostScopedForm({ provider, host, onSuccess }: Props) {
 
       <div className="space-y-2">
         <Text variant="small-medium" tone="primary">
-          Headers
+          {t("Headers", "请求头")}
         </Text>
         <Text variant="small" tone="muted">
-          Sent with every request to this host, such as Authorization.
+          {t(
+            "Sent with every request to this host, such as Authorization.",
+            "向此主机发送的每个请求都会携带，例如 Authorization。",
+          )}
         </Text>
 
         {headerPairs.map((pair, index) => (
           <div key={index} className="flex items-end gap-2">
             <Input
               id={`header-${index}-key`}
-              label="Header name"
+              label={t("Header name", "请求头名称")}
               hideLabel
               size="small"
               className="flex-1"
@@ -149,7 +161,7 @@ export function InlineHostScopedForm({ provider, host, onSuccess }: Props) {
             />
             <Input
               id={`header-${index}-value`}
-              label="Header value"
+              label={t("Header value", "请求头值")}
               hideLabel
               type="password"
               autoComplete="new-password"
@@ -166,7 +178,10 @@ export function InlineHostScopedForm({ provider, host, onSuccess }: Props) {
               type="button"
               variant="icon"
               size="icon"
-              aria-label={`Remove header ${index + 1}`}
+              aria-label={t(
+                `Remove header ${index + 1}`,
+                `移除请求头 ${index + 1}`,
+              )}
               disabled={headerPairs.length === 1}
               onClick={() => removeHeaderPair(index)}
             >
@@ -181,7 +196,7 @@ export function InlineHostScopedForm({ provider, host, onSuccess }: Props) {
           size="small"
           onClick={addHeaderPair}
         >
-          <Icon icon={PlusSignIcon} size={16} /> Add header
+          <Icon icon={PlusSignIcon} size={16} /> {t("Add header", "添加请求头")}
         </Button>
       </div>
 

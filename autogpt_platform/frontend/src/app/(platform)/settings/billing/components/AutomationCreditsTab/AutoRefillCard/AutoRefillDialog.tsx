@@ -44,8 +44,10 @@ export function AutoRefillDialog({
       <Dialog.Content>
         <div className="flex flex-col gap-4">
           <Text variant="small" as="span" tone="muted">
-            Top up your balance automatically when it dips below the threshold
-            you set.
+            {t(
+              "Top up your balance automatically when it dips below the threshold you set.",
+              "当余额低于你设置的阈值时自动充值。",
+            )}
           </Text>
 
           <RefillRow
@@ -64,9 +66,10 @@ export function AutoRefillDialog({
           <div className="flex items-start gap-2 rounded-medium bg-warning-surface px-3 py-2 text-warning-foreground">
             <Icon icon={Alert01Icon} size={18} className="mt-0.5 shrink-0" />
             <Text variant="small" as="span" tone="warning">
-              As a safety mechanism, auto-refill will only trigger once per
-              task. Keep this in mind when budgeting to ensure your balance does
-              not hit zero and your tasks don&apos;t pause mid-run.
+              {t(
+                "As a safety mechanism, auto-refill will only trigger once per task. Keep this in mind when budgeting to ensure your balance does not hit zero and your tasks don't pause mid-run.",
+                "为安全起见，每个任务最多触发一次自动充值。请在规划预算时考虑这一点，避免余额耗尽导致任务在运行中暂停。",
+              )}
             </Text>
           </div>
         </div>
@@ -100,7 +103,9 @@ export function AutoRefillDialog({
             loading={isSaving}
             onClick={onSave}
           >
-            {isEnabled ? t("Save changes", "保存更改") : "Enable Auto-Refill"}
+            {isEnabled
+              ? t("Save changes", "保存更改")
+              : t("Enable Auto-Refill", "启用自动充值")}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>
@@ -119,6 +124,7 @@ function RefillRow({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <Text variant="body" as="span">
@@ -132,7 +138,7 @@ function RefillRow({
           type="amount"
           amountPrefix="$"
           decimalCount={2}
-          placeholder="min $5"
+          placeholder={t("min $5", "最低 5 美元")}
           size="small"
           value={value}
           onChange={(event) => onChange(event.target.value)}

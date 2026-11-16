@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import type { AirtableBase } from "@/app/api/__generated__/models/airtableBase";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Input } from "@/components/atoms/Input/Input";
@@ -35,7 +37,7 @@ interface Props {
   onChange: (id: string) => void;
 }
 
-/** One "Choose a base" button that opens the bases as a listbox. A base that
+/** One t("Choose a base", "选择数据库") button that opens the bases as a listbox. A base that
  *  doesn't allow the step is listed so the user recognises it, but can't be
  *  picked, and says why. */
 export function BaseDropdown({
@@ -51,6 +53,7 @@ export function BaseDropdown({
   onSearchChange,
   onChange,
 }: Props) {
+  const { t } = useTranslation();
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const listID = `${id}-list`;
   const canPick = (base: AirtableBase) => allows(base.access, needed);
@@ -111,7 +114,7 @@ export function BaseDropdown({
           )}
         >
           <span className="min-w-0 flex-1 truncate">
-            {chosen ? chosen.name : "Choose a base"}
+            {chosen ? chosen.name : t("Choose a base", "选择数据库")}
           </span>
           <Icon
             icon={UnfoldMoreIcon}
@@ -129,10 +132,10 @@ export function BaseDropdown({
         {bases.length >= SEARCH_THRESHOLD && (
           <Input
             id={`${id}-search`}
-            label="Search your bases"
+            label={t("Search your bases", "搜索数据库")}
             hideLabel
             size="small"
-            placeholder="Search your bases"
+            placeholder={t("Search your bases", "搜索数据库")}
             wrapperClassName="mb-0"
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
@@ -178,7 +181,7 @@ export function BaseDropdown({
                     tone="muted"
                     className="shrink-0"
                   >
-                    {lockedReason(base.access, needed)}
+                    {lockedReason(base.access, needed, t)}
                   </Text>
                 )}
                 {isSelected && (
@@ -190,7 +193,10 @@ export function BaseDropdown({
           {shown.length === 0 && (
             <div className="px-3 py-2">
               <Text variant="small" tone="muted">
-                No base matches “{search.trim()}”.
+                {t(
+                  `No base matches “${search.trim()}”.`,
+                  `没有与“${search.trim()}”匹配的数据库。`,
+                )}
               </Text>
             </div>
           )}

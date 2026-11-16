@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -29,6 +30,8 @@ export function ThumbnailImages({
   initialSelectedImage = null,
   errorMessage,
 }: ThumbnailImagesProps) {
+  const { t } = useTranslation();
+
   const {
     images,
     selectedImage,
@@ -52,15 +55,18 @@ export function ThumbnailImages({
       <div className="flex flex-col gap-1">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <Text variant="body-medium" as="h3">
-            Media
+            {t("Media", "媒体")}
           </Text>
           <Text variant="small" as="span" tone="muted">
-            {images.length}/5 images
+            {images.length}
+            {t("/5 images", "/5 张图片")}
           </Text>
         </div>
         <Text variant="small" tone="muted">
-          The selected image is submitted first and appears as the marketplace
-          thumbnail.
+          {t(
+            "The selected image is submitted first and appears as the marketplace thumbnail.",
+            "所选图片将首先提交，并用作市场缩略图。",
+          )}
         </Text>
         {errorMessage && (
           <Text variant="body-tight" tone="error">
@@ -97,7 +103,9 @@ export function ThumbnailImages({
               ) : (
                 <Icon icon={PlusSignIcon} size={16} />
               )}
-              <span>{isUploading ? "Uploading" : "Add image"}</span>
+              <span>
+                {isUploading ? "Uploading" : t("Add image", "添加图片")}
+              </span>
             </label>
             <Button
               type="button"
@@ -126,12 +134,15 @@ export function ThumbnailImages({
                         : "border-transparent hover:border-border-strong",
                     )}
                     aria-pressed={selectedImage === src}
-                    aria-label={`Select thumbnail ${index + 1}`}
+                    aria-label={t(
+                      `Select thumbnail ${index + 1}`,
+                      `选择缩略图 ${index + 1}`,
+                    )}
                   >
                     <Image
                       src={src}
                       unoptimized={isLocalStoreMediaUrl(src)}
-                      alt={`Thumbnail ${index + 1}`}
+                      alt={t(`Thumbnail ${index + 1}`, `缩略图 ${index + 1}`)}
                       fill
                       className="object-cover"
                     />
@@ -144,14 +155,17 @@ export function ThumbnailImages({
                       handleRemoveImage(index);
                     }}
                     className="absolute top-1.5 right-1.5 z-30 inline-flex size-7 cursor-pointer items-center justify-center rounded-full bg-action-hover/85 text-action-foreground shadow-sm backdrop-blur-sm transition-colors hover:bg-action-hover"
-                    aria-label={`Remove image ${index + 1}`}
+                    aria-label={t(
+                      `Remove image ${index + 1}`,
+                      `移除图片 ${index + 1}`,
+                    )}
                     data-testid={`thumbnail-remove-${index}`}
                   >
                     <Icon icon={Cancel01Icon} size={14} />
                   </button>
                   {index === 0 ? (
                     <span className="mt-1 block text-center text-caption-sm leading-inherit font-medium text-foreground-tertiary">
-                      Thumbnail
+                      {t("Thumbnail", "缩略图")}
                     </span>
                   ) : null}
                 </div>
@@ -174,7 +188,7 @@ export function ThumbnailImages({
                   }
                   data-testid="thumbnail-add-image"
                 >
-                  {isUploading ? "Uploading" : "Add image"}
+                  {isUploading ? "Uploading" : t("Add image", "添加图片")}
                 </Button>
               ) : null}
               <Button
@@ -189,7 +203,7 @@ export function ThumbnailImages({
                 {isGenerating
                   ? "Generating"
                   : images.length >= 5
-                    ? "Max images reached"
+                    ? t("Max images reached", "已达到图片数量上限")
                     : "Generate"}
               </Button>
             </div>

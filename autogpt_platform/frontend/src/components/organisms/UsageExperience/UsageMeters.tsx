@@ -1,4 +1,7 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { UsageMeter } from "./UsageMeter";
 
 interface Reading {
@@ -14,13 +17,16 @@ interface Props {
 }
 
 export function UsageMeters({ daily, weekly, trialPercent, className }: Props) {
+  const { t } = useTranslation();
   const meters =
     trialPercent != null
-      ? [{ label: "Trial allowance", percent: trialPercent }]
+      ? [{ label: t("Trial allowance", "试用额度"), percent: trialPercent }]
       : [
-          ...(daily ? [{ label: "Today", percent: daily.percent_used }] : []),
+          ...(daily
+            ? [{ label: t("Today", "今天"), percent: daily.percent_used }]
+            : []),
           ...(weekly
-            ? [{ label: "This week", percent: weekly.percent_used }]
+            ? [{ label: t("This week", "本周"), percent: weekly.percent_used }]
             : []),
         ];
   if (meters.length === 0) return null;

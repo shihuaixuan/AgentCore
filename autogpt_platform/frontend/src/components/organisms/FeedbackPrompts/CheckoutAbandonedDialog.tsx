@@ -1,4 +1,7 @@
 "use client";
+import { DISPLAY_LABELS } from "./display-labels";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -28,6 +31,7 @@ export function CheckoutAbandonedDialog({
   onSubmit,
   onTryAnotherCard,
 }: Props) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(true);
   const [sentReason, setSentReason] = useState<string | null>(null);
   const offersRetry = sentReason === CARD_FAILED_VALUE && onTryAnotherCard;
@@ -39,7 +43,7 @@ export function CheckoutAbandonedDialog({
 
   return (
     <Dialog
-      title={TITLE}
+      title={t(TITLE, DISPLAY_LABELS[TITLE] ?? TITLE)}
       styling={{ maxWidth: "38rem", minWidth: "auto" }}
       controlled={{
         isOpen,
@@ -53,10 +57,13 @@ export function CheckoutAbandonedDialog({
         <NoInitialFocus />
         <div className="flex flex-col gap-4">
           <Text variant="body" tone="muted">
-            One tap helps us fix the right thing.
+            {t(
+              "One tap helps us fix the right thing.",
+              "点一下，帮助我们找到需要改进的地方。",
+            )}
           </Text>
           <ReasonFlow
-            label={TITLE}
+            label={t(TITLE, DISPLAY_LABELS[TITLE] ?? TITLE)}
             reasons={UPGRADE_CHECKOUT_REASONS}
             initialReason={initialReason}
             onReason={onReason}
@@ -71,7 +78,7 @@ export function CheckoutAbandonedDialog({
               disabled={isRetrying}
               onClick={onTryAnotherCard}
             >
-              Try another card
+              {t("Try another card", "尝试其他银行卡")}
             </Button>
           </Dialog.Footer>
         ) : null}

@@ -50,7 +50,10 @@ export function WorkflowsShelf({
       <SectionHeader
         title={t("Workflows", "工作流")}
         titleId={HEADING_ID}
-        subtitle="Automations your experts can run — or install one yourself."
+        subtitle={t(
+          "Automations your experts can run — or install one yourself.",
+          "供你的专家运行的自动化工作流，你也可以自行安装。",
+        )}
       />
       <ul className={SHELF_GRID}>
         {shown.map((agent) => (

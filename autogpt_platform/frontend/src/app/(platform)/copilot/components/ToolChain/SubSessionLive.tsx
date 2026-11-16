@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   useGetV2GetSession,
   useGetV2ListSessions,
@@ -62,6 +64,7 @@ export function SubSessionLive({
   active,
   background = false,
 }: Props) {
+  const { t } = useTranslation();
   const { session, isError, isPaused } = useLiveSubSession(
     subSessionId,
     active,
@@ -72,7 +75,11 @@ export function SubSessionLive({
   const turn = session ? collectCurrentTurn(session) : null;
   const recent = turn?.steps.slice(-MAX_STEPS) ?? [];
   const latestText = turn?.latestText ?? null;
-  const notice = getLiveNotice({ isError, isPaused });
+  const notice = isError
+    ? t("Couldn't load live updates", "无法加载实时更新")
+    : isPaused
+      ? t("Live updates paused", "实时更新已暂停")
+      : null;
   if (!notice && recent.length === 0 && !latestText) return null;
 
   const isLive = !!session && isSessionLive(session) && !isPaused && !isError;
@@ -137,18 +144,6 @@ function useLiveSubSession(
   };
 }
 
-function getLiveNotice({
-  isError,
-  isPaused,
-}: {
-  isError: boolean;
-  isPaused: boolean;
-}) {
-  if (isError) return "Couldn't load live updates";
-  if (isPaused) return "Live updates paused";
-  return null;
-}
-
 /** Says the polling stopped and keeps the deep link, so the user can follow
  *  the run at its source instead of watching a spinner that never resolves. */
 function LiveNotice({
@@ -158,6 +153,7 @@ function LiveNotice({
   text: string;
   subSessionId: string;
 }) {
+  const { t } = useTranslation();
   return (
     <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-caption text-foreground-subtle">
       {text}
@@ -165,7 +161,7 @@ function LiveNotice({
         href={`/copilot?sessionId=${subSessionId}`}
         className="underline underline-offset-2 hover:text-foreground-secondary"
       >
-        Open sub-session
+        {t("Open sub-session", "打开子对话")}
       </Link>
     </p>
   );
@@ -282,6 +278,7 @@ export function SubSessionPendingCard({
   input,
   minimal = false,
 }: PendingCardProps) {
+  const { t } = useTranslation();
   const { expertsById } = useExpertMap();
   const args = asObject(input) ?? {};
   const inputExpertId = str(args, "expert_id");
@@ -304,7 +301,7 @@ export function SubSessionPendingCard({
     <div className={cn(CARD, "w-full rounded-2xl p-2.5")}>
       <div className="flex items-center gap-2.5">
         <ExpertAvatar
-          name={expert?.name ?? "Expert"}
+          name={expert?.name ?? t("Expert", "专家")}
           avatarUrl={expert?.avatarUrl ?? null}
           color={expert?.color}
           size={28}
@@ -314,7 +311,7 @@ export function SubSessionPendingCard({
           tone="emphasis"
           className="min-w-0 flex-1 truncate"
         >
-          {expert?.name ?? "Expert"}
+          {expert?.name ?? t("Expert", "专家")}
           {expert?.role && (
             <span className="ml-1.5 font-normal text-foreground-subtle">
               {expert.role}
@@ -330,7 +327,7 @@ export function SubSessionPendingCard({
         {liveSessionId && (
           <Link
             href={`/copilot?sessionId=${liveSessionId}`}
-            aria-label="Open sub-session"
+            aria-label={t("Open sub-session", "打开子对话")}
             className="shrink-0 rounded-full p-1 text-foreground-subtle transition-colors hover:bg-surface-hover hover:text-foreground-body"
           >
             <Icon icon={LinkSquare01Icon} size={14} />

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { toastIfPlanRequired } from "@/components/contextual/PaywallToast/helpers";
 import { useState, useRef, useEffect } from "react";
 import { postV2GenerateSubmissionImage } from "@/app/api/__generated__/endpoints/store/store";
@@ -23,6 +26,7 @@ export function useThumbnailImages({
   initialImages = [],
   initialSelectedImage = null,
 }: UseThumbnailImagesProps) {
+  const { t } = useTranslation();
   const [images, setImages] = useState<string[]>(initialImages);
 
   const [selectedImage, setSelectedImage] = useState<string | null>(
@@ -123,9 +127,11 @@ export function useThumbnailImages({
       if (toastIfPlanRequired(error, "Uploading images needs an active plan"))
         return;
       const detail =
-        error instanceof Error ? error.message : "Please try again.";
+        error instanceof Error
+          ? error.message
+          : t("Please try again.", "请重试。");
       toast({
-        title: "Upload failed",
+        title: t("Upload failed", "上传失败"),
         description: detail,
         variant: "destructive",
       });
@@ -140,7 +146,7 @@ export function useThumbnailImages({
     setIsGenerating(true);
     try {
       if (!agentId) {
-        throw new Error("Workflow ID is required");
+        throw new Error(t("Workflow ID is required", "需要工作流 ID"));
       }
       const { image_url } = await resolveResponse(
         postV2GenerateSubmissionImage({ graph_id: agentId }),
@@ -156,16 +162,21 @@ export function useThumbnailImages({
         return;
       if (error instanceof ApiError && error.status === 429) {
         toast({
-          title: "Daily image limit reached",
-          description:
+          title: t("Daily image limit reached", "已达到每日图片生成上限"),
+          description: t(
             "You can generate more within 24 hours. Until then, upload an image instead.",
+            "24 小时内即可再次生成图片。在此之前，请上传图片。",
+          ),
           variant: "destructive",
         });
         return;
       }
       toast({
-        title: "Generation failed",
-        description: "Failed to generate image. Please try again.",
+        title: t("Generation failed", "生成失败"),
+        description: t(
+          "Failed to generate image. Please try again.",
+          "生成图片失败。请重试。",
+        ),
         variant: "destructive",
       });
     } finally {

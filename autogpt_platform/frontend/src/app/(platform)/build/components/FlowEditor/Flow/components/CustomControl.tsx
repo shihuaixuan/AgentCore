@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useReactFlow } from "@xyflow/react";
 import { Button } from "@/components/atoms/Button/Button";
 import {
@@ -30,6 +31,7 @@ export const CustomControls = memo(
     setIsLocked: (isLocked: boolean) => void;
     isReadOnly?: boolean;
   }) => {
+    const { t } = useTranslation();
     const { zoomIn, zoomOut, fitView } = useReactFlow();
     const { isTutorialRunning, setIsTutorialRunning } = useTutorialStore();
     const [isTutorialLoading, setIsTutorialLoading] = useState(false);
@@ -50,7 +52,7 @@ export const CustomControls = memo(
         return;
       }
 
-      startTutorial();
+      startTutorial(t);
       setIsTutorialRunning(true);
     };
 
@@ -58,14 +60,14 @@ export const CustomControls = memo(
       {
         id: "zoom-in-button",
         icon: <Icon aria-hidden icon={PlusSignIcon} className="size-3.5" />,
-        label: "Zoom In",
+        label: t("Zoom In", "放大"),
         onClick: () => zoomIn(),
         className: "h-10 w-10 border-none",
       },
       {
         id: "zoom-out-button",
         icon: <Icon aria-hidden icon={MinusSignIcon} className="size-3.5" />,
-        label: "Zoom Out",
+        label: t("Zoom Out", "缩小"),
         onClick: () => zoomOut(),
         className: "h-10 w-10 border-none",
       },
@@ -76,7 +78,9 @@ export const CustomControls = memo(
         ) : (
           <Icon aria-hidden icon={Presentation01Icon} className="size-3.5" />
         ),
-        label: isTutorialLoading ? "Loading Tutorial..." : "Start Tutorial",
+        label: isTutorialLoading
+          ? t("Loading Tutorial...", "正在加载教程…")
+          : t("Start Tutorial", "开始教程"),
         onClick: handleTutorialClick,
         className: `h-10 w-10 border-none ${isTutorialRunning || isTutorialLoading ? "bg-surface-hover" : "bg-surface"}`,
         disabled: isTutorialLoading,
@@ -84,7 +88,7 @@ export const CustomControls = memo(
       {
         id: "fit-view-button",
         icon: <Icon aria-hidden icon={FullScreenIcon} className="size-3.5" />,
-        label: "Fit View",
+        label: t("Fit View", "适应画布"),
         onClick: () => fitView({ padding: 0.2, duration: 800, maxZoom: 1 }),
         className: "h-10 w-10 border-none",
       },
@@ -96,8 +100,11 @@ export const CustomControls = memo(
           <Icon aria-hidden icon={SquareLock02Icon} className="size-3.5" />
         ),
         label: isReadOnly
-          ? "Canvas is locked because this is a read-only workflow"
-          : "Toggle Lock",
+          ? t(
+              "Canvas is locked because this is a read-only workflow",
+              "当前工作流为只读，画布已锁定",
+            )
+          : t("Toggle Lock", "切换锁定状态"),
         onClick: () => setIsLocked(!isLocked),
         className: `h-10 w-10 border-none ${isLocked ? "bg-surface-hover" : "bg-surface"}`,
         disabled: isReadOnly,

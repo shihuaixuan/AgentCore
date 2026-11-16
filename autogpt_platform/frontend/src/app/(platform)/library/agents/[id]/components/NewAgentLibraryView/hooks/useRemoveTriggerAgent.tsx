@@ -58,7 +58,7 @@ export function useRemoveTriggerAgent({
             description:
               error instanceof Error
                 ? error.message
-                : "An unexpected error occurred.",
+                : t("An unexpected error occurred.", "发生意外错误。"),
             variant: "destructive",
           });
         },

@@ -5,6 +5,7 @@ import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { LocalizedCloseLabel } from "@/lib/i18n/LocalizedCloseLabel";
 
 import { cn } from "@/lib/utils";
 
@@ -76,7 +77,9 @@ const SheetContent = React.forwardRef<
         className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-surface transition-opacity hover:opacity-100 focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-surface-hover"
       >
         <Icon aria-hidden icon={Cancel01Icon} className="h-4 w-4" />
-        <span className="sr-only">Close</span>
+        <span className="sr-only">
+          <LocalizedCloseLabel />
+        </span>
       </SheetPrimitive.Close>
       {children}
     </SheetPrimitive.Content>

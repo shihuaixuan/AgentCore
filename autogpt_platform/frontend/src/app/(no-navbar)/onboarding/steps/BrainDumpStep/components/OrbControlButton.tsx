@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { SwapFade } from "@/components/atoms/SwapFade/SwapFade";
@@ -19,6 +21,7 @@ interface Props {
 }
 
 export function OrbControlButton({ screen, onClick }: Props) {
+  const { t } = useTranslation();
   const ariaLabel = LABELS[screen];
 
   return (
@@ -26,7 +29,7 @@ export function OrbControlButton({ screen, onClick }: Props) {
       variant="icon"
       size="icon"
       onClick={onClick}
-      aria-label={ariaLabel}
+      aria-label={t(ariaLabel, screen === "rest" ? "开始讲述" : "重试")}
       className="mt-4"
     >
       <SwapFade swapKey={screen} className="flex items-center justify-center">

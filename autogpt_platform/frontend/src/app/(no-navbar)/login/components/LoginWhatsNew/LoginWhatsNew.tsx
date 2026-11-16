@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { CHANGELOG_BASE_URL } from "@/components/molecules/ChangelogPopup/changelog-constants";
 import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
@@ -8,6 +11,7 @@ import { ReleaseListSkeleton } from "./components/ReleaseListSkeleton";
 import { useLoginWhatsNew } from "./useLoginWhatsNew";
 
 export function LoginWhatsNew() {
+  const { t } = useTranslation();
   const { releases, isLoading } = useLoginWhatsNew();
   const headingID = useId();
   const isUnavailable = !isLoading && releases.length === 0;
@@ -23,7 +27,7 @@ export function LoginWhatsNew() {
           id={headingID}
           className="font-sans text-caption font-medium tracking-caps text-foreground-secondary uppercase"
         >
-          What&apos;s new
+          {t("What's new", "最新动态")}
         </h2>
         {isUnavailable ? null : (
           <a
@@ -32,8 +36,10 @@ export function LoginWhatsNew() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 rounded-sm font-sans text-caption leading-4 font-medium text-foreground-secondary hover:text-foreground-strong hover:underline focus:ring-2 focus:ring-info focus:ring-offset-2 focus:outline-none"
           >
-            Full changelog
-            <span className="sr-only">(opens in a new tab)</span>
+            {t("Full changelog", "完整更新日志")}
+            <span className="sr-only">
+              {t("(opens in a new tab)", "（在新标签页中打开）")}
+            </span>
             <Icon icon={ArrowUpRight01Icon} size={14} aria-hidden />
           </a>
         )}

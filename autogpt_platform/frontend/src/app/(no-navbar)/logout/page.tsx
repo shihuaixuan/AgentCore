@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
 import { Text } from "@/components/atoms/Text/Text";
 import { useToast } from "@/components/molecules/Toast/use-toast";
@@ -17,6 +19,7 @@ function wait(ms: number): Promise<void> {
 }
 
 export default function LogoutPage() {
+  const { t } = useTranslation();
   const { logOut } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
@@ -56,7 +59,7 @@ export default function LogoutPage() {
       <div className="flex flex-col items-center justify-center gap-4 py-8">
         <LoadingSpinner size="large" />
         <Text variant="body" className="text-center">
-          Logging you out...
+          {t("Logging you out...", "正在退出登录…")}
         </Text>
       </div>
     </div>

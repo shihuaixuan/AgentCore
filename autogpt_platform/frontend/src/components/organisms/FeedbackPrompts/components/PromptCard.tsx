@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -22,6 +25,7 @@ export function PromptCard({
   onClose,
   className,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <section
       aria-label={title}
@@ -45,7 +49,7 @@ export function PromptCard({
         <Button
           variant="ghost"
           size="icon-xs"
-          aria-label="Close"
+          aria-label={t("Close", "关闭")}
           withTooltip={false}
           onClick={onClose}
           className="-mt-1 -mr-1 shrink-0"

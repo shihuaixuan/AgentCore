@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Text } from "@/components/atoms/Text/Text";
 
 import { Button } from "@/components/atoms/Button/Button";
@@ -32,6 +34,8 @@ export function WorkflowConnectionView({
   onApiKeySubmit,
   onConnected,
 }: Props) {
+  const { t } = useTranslation();
+
   const hasSignIn = provider.supportedAuthTypes.includes(AuthType.oauth2);
   const hasKey = provider.supportedAuthTypes.includes(AuthType.api_key);
   return (
@@ -44,17 +48,22 @@ export function WorkflowConnectionView({
       </div>
       <div>
         <h3 className="text-lead font-medium text-foreground-strong">
-          Connect {provider.name}
+          {t(`Connect ${provider.name}`, `连接 ${provider.name}`)}
         </h3>
         <Text variant="body-tight" tone="muted" className="mt-2">
-          Choose the account Otto should use for this workflow.
+          {t(
+            "Choose the account Otto should use for this workflow.",
+            "选择 Otto 应为此工作流使用的账户。",
+          )}
         </Text>
       </div>
       {hasSignIn ? (
         <>
           <div className="rounded-xl bg-surface-muted p-4 text-body text-foreground-tertiary">
-            Review the requested access on {provider.name}&apos;s sign-in page
-            before connecting.
+            {t(
+              `Review the requested access on ${provider.name}'s sign-in page before connecting.`,
+              `连接前，请在 ${provider.name} 的登录页面上查看请求的权限。`,
+            )}
           </div>
           <Button
             variant="primary"
@@ -64,16 +73,22 @@ export function WorkflowConnectionView({
             onClick={options.onSignIn}
           >
             {options.isConnecting
-              ? "Connecting…"
-              : `Continue with ${provider.name}`}
+              ? t("Connecting…", "正在连接…")
+              : t(
+                  `Continue with ${provider.name}`,
+                  `使用 ${provider.name} 继续`,
+                )}
           </Button>
           <Text variant="small-tight" tone="muted" className="text-center">
-            Sign in on the app&apos;s own page, then return here.
+            {t(
+              "Sign in on the app's own page, then return here.",
+              "在应用自身的页面上登录，然后返回此处。",
+            )}
           </Text>
           {hasKey && (
             <details className="border-t border-separator pt-4">
               <summary className="cursor-pointer text-body text-foreground-tertiary">
-                Use an API key instead
+                {t("Use an API key instead", "改用 API 密钥")}
               </summary>
               <div className="mt-4 space-y-3">
                 <InlineApiKeyForm
@@ -88,7 +103,7 @@ export function WorkflowConnectionView({
                   disabled={!form.formState.isValid || options.isConnecting}
                   onClick={form.handleSubmit(onApiKeySubmit)}
                 >
-                  Save and connect
+                  {t("Save and connect", "保存并连接")}
                 </Button>
               </div>
             </details>

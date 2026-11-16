@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useGetV1GetExecutionDetails } from "@/app/api/__generated__/endpoints/graphs/graphs";
 import { okData } from "@/app/api/helpers";
@@ -49,6 +50,7 @@ export function WorkOutputSheet({
   executionId,
   runLink,
 }: Props) {
+  const { t } = useTranslation();
   const shouldFetch = open && outputType !== "unknown";
   const detailsQuery = useGetV1GetExecutionDetails(graphId, executionId, {
     query: {
@@ -75,7 +77,7 @@ export function WorkOutputSheet({
         <SheetHeader className="text-left">
           <SheetTitle className="truncate">{title}</SheetTitle>
           <SheetDescription className="sr-only">
-            This run&apos;s output.
+            {t("This run's output.", "本次运行的输出。")}
           </SheetDescription>
         </SheetHeader>
         <WorkOutputBody
@@ -185,6 +187,7 @@ function OutputTable({
   rows: Record<string, unknown>[];
   runLink?: string | null;
 }) {
+  const { t } = useTranslation();
   const visibleRows = rows.slice(0, MAX_PREVIEW_ROWS);
   const allColumns = tableColumns(visibleRows);
   const columns = allColumns.slice(0, MAX_PREVIEW_COLUMNS);
@@ -204,7 +207,7 @@ function OutputTable({
             downloadCsv(`${title || "run"}.csv`, toCsv(visibleRows, columns))
           }
         >
-          Export CSV
+          {t("Export CSV", "导出 CSV")}
         </Button>
       </div>
       <OutputTablePreview rows={visibleRows} columns={columns} />
@@ -295,11 +298,13 @@ function OutputTableTruncationNotice({
   columnCount,
   runLink,
 }: OutputTableTruncationNoticeProps) {
+  const { t } = useTranslation();
   return (
     <Text variant="small" tone="muted">
-      Showing the first {visibleRowCount} of {rowCount} rows and{" "}
-      {visibleColumnCount} of {columnCount} columns. The CSV export matches this
-      preview
+      {t(
+        `Showing the first ${visibleRowCount} of ${rowCount} rows and ${visibleColumnCount} of ${columnCount} columns. The CSV export matches this preview.`,
+        `共 ${rowCount} 行、${columnCount} 列，当前显示前 ${visibleRowCount} 行、${visibleColumnCount} 列。导出的 CSV 与此预览一致。`,
+      )}
       {runLink ? (
         <>
           {" — "}
@@ -308,31 +313,33 @@ function OutputTableTruncationNotice({
             data-slot="work-output-sheet-truncation-link"
             className="underline"
           >
-            open the full run
-          </Link>{" "}
-          for everything
+            {t("open the full run", "打开完整运行记录")}
+          </Link>
         </>
       ) : null}
-      .
     </Text>
   );
 }
 
 function RunLinkFallback({ runLink }: { runLink?: string | null }) {
+  const { t } = useTranslation();
   if (!runLink) {
     return (
       <Text variant="body" tone="muted">
-        This run has no preview available.
+        {t("This run has no preview available.", "本次运行暂无预览。")}
       </Text>
     );
   }
   return (
     <div data-slot="work-output-sheet-fallback" className="space-y-3">
       <Text variant="body" tone="muted">
-        Open the full run to inspect its output.
+        {t(
+          "Open the full run to inspect its output.",
+          "打开完整运行记录以查看输出。",
+        )}
       </Text>
       <Button as="NextLink" href={runLink} variant="primary" size="small">
-        Open run details
+        {t("Open run details", "打开运行详情")}
       </Button>
     </div>
   );

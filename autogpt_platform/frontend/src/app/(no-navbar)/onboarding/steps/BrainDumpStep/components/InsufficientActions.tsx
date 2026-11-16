@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { Mic01Icon, PencilEdit01Icon } from "@hugeicons/core-free-icons";
 import { actionLabels, type InsufficientMode } from "./insufficient-copy";
@@ -23,6 +25,7 @@ export function InsufficientActions({
   onWrite,
   onSkip,
 }: Props) {
+  const { t } = useTranslation();
   const labels = actionLabels(mode);
   const talkLeads = mode === "voice" && canRecord;
 
@@ -36,7 +39,7 @@ export function InsufficientActions({
       onClick={onTalk}
       className={ACTION_CLASS}
     >
-      {labels.talk}
+      {t(labels.talk, mode === "voice" ? "语音讲述" : "改用语音")}
     </Button>
   );
   const write = (
@@ -49,7 +52,7 @@ export function InsufficientActions({
       onClick={onWrite}
       className={ACTION_CLASS}
     >
-      {labels.write}
+      {t(labels.write, mode === "voice" ? "文字输入" : "写下来")}
     </Button>
   );
 
@@ -65,7 +68,7 @@ export function InsufficientActions({
         size="small"
         onClick={onSkip}
       >
-        Continue without it
+        {t("Continue without it", "跳过并继续")}
       </Button>
     </div>
   );

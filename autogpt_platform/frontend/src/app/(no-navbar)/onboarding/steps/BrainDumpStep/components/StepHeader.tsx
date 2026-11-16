@@ -1,5 +1,9 @@
 "use client";
 
+import { useOnboardingTranslation } from "../../../useOnboardingTranslation";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { RevealItem } from "@/components/atoms/Reveal/Reveal";
 import { SwapFade } from "@/components/atoms/SwapFade/SwapFade";
 import { Text } from "@/components/atoms/Text/Text";
@@ -33,6 +37,8 @@ export function StepHeader({
   question,
   onTogglePause,
 }: Props) {
+  const { translateCopy } = useOnboardingTranslation();
+  const { t } = useTranslation();
   // Otto's big question is the heading of the not-enough screen.
   if (screen === "insufficient") return null;
   const isRecording = screen === "recording";
@@ -53,7 +59,7 @@ export function StepHeader({
             <ElapsedTime seconds={elapsedSeconds} />
           ) : (
             <Text variant="h3">
-              {stateHeadline(screen, restHeadline, isFollowUp)}
+              {translateCopy(stateHeadline(screen, restHeadline, isFollowUp))}
             </Text>
           )}
         </SwapFade>
@@ -62,11 +68,20 @@ export function StepHeader({
         <RevealItem>
           <div className="flex flex-col items-center gap-4">
             <p className="max-w-xl font-sans text-body-lg font-normal text-foreground-tertiary md:text-lead">
-              Tell me what you do and what eats up your week.{" "}
+              {t(
+                "Tell me what you do and what eats up your week.",
+                "说说你的工作，以及每周最耗时的事情。",
+              )}{" "}
               <Text variant="body-medium" as="span">
-                Otto uses it to pick your experts and plan your first week.
+                {t(
+                  "Otto uses it to pick your experts and plan your first week.",
+                  "Otto 会据此为你选择专家并安排第一周的工作。",
+                )}
               </Text>{" "}
-              A minute is plenty, and you can type instead.
+              {t(
+                "A minute is plenty, and you can type instead.",
+                "一分钟就够了，也可以改用文字输入。",
+              )}
             </p>
             {/* On wide screens the ambient cards carry these questions, and
               they are hidden from assistive tech, so this one stays in the
@@ -84,13 +99,16 @@ export function StepHeader({
         <RevealItem>
           {isFollowUp ? (
             <Text variant="body" tone="muted" className="max-w-2xl">
-              {FEW_SENTENCES_HINT}
+              {translateCopy(FEW_SENTENCES_HINT)}
             </Text>
           ) : (
             <Text variant="body" tone="muted" className="max-w-2xl">
-              What repeats every week, and what would you hand off first?{" "}
+              {t(
+                "What repeats every week, and what would you hand off first?",
+                "每周有哪些重复工作？你最想先交出哪一项？",
+              )}{" "}
               <Text variant="body-medium" as="span">
-                {FEW_SENTENCES_HINT}
+                {translateCopy(FEW_SENTENCES_HINT)}
               </Text>
             </Text>
           )}

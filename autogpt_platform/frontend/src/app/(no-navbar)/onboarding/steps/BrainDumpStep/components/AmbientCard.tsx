@@ -1,5 +1,6 @@
 "use client";
 
+import { usePromptTranslation } from "../usePromptTranslation";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import type { AmbientContent } from "./useAmbientPrompts";
@@ -25,6 +26,7 @@ export function AmbientCard({
   reduceMotion,
   onClick,
 }: Props) {
+  const { translatePrompt } = usePromptTranslation();
   return (
     <motion.div
       onClick={onClick}
@@ -47,7 +49,11 @@ export function AmbientCard({
     >
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
-          key={content.text}
+          key={
+            content.isQuote
+              ? `“${translatePrompt(content.text.slice(1, -1))}”`
+              : translatePrompt(content.text)
+          }
           initial={
             reduceMotion
               ? { opacity: 0 }
@@ -63,7 +69,7 @@ export function AmbientCard({
           className={cn(content.isQuote && "italic")}
         >
           <span className="block font-sans text-caption-sm font-semibold tracking-eyebrow text-accent-strong uppercase">
-            {content.label}
+            {translatePrompt(content.label)}
           </span>
           <span className="block font-sans text-body-sm font-normal text-foreground-secondary">
             {content.text}

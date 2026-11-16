@@ -6,6 +6,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   icon: IconSvgElement;
@@ -39,6 +40,7 @@ export function TourStepCard({
   onSkip,
   altAction,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2.5">
@@ -86,7 +88,7 @@ export function TourStepCard({
           tone="secondary"
           className="-ml-2.5"
         >
-          {isLastStep ? "Close" : "Skip tour"}
+          {isLastStep ? t("Close", "关闭") : t("Skip tour", "跳过导览")}
         </Button>
         <div className="flex items-center gap-2">
           {!isFirstStep && (
@@ -96,7 +98,7 @@ export function TourStepCard({
               size="xs"
               onClick={onBack}
             >
-              Back
+              {t("Back", "上一步")}
             </Button>
           )}
           <Button
@@ -111,7 +113,7 @@ export function TourStepCard({
               ) : undefined
             }
           >
-            {isLastStep ? "Start here" : "Next"}
+            {isLastStep ? t("Start here", "从这里开始") : t("Next", "下一步")}
           </Button>
         </div>
       </div>
@@ -125,6 +127,7 @@ interface StepProgressProps {
 }
 
 function StepProgress({ stepNumber, stepCount }: StepProgressProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-2.5">
       <div aria-hidden className="flex items-center gap-1">
@@ -141,7 +144,7 @@ function StepProgress({ stepNumber, stepCount }: StepProgressProps) {
         ))}
       </div>
       <Text variant="small" tone="secondary" tabular dir="auto">
-        {stepNumber} of {stepCount}
+        {t(`${stepNumber} of ${stepCount}`, `${stepNumber} / ${stepCount}`)}
       </Text>
     </div>
   );

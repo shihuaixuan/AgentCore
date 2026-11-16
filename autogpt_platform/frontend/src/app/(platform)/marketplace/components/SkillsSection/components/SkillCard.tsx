@@ -120,7 +120,7 @@ export function SkillCard({ skill, isInstalled }: Props) {
             />
             {/* Nobody having installed it yet makes a listing new, not failing. */}
             {skill.install_count === 0
-              ? "New"
+              ? t("New", "新建")
               : `${skill.install_count.toLocaleString()} installed`}
           </span>
           {isInstalled ? (

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -48,6 +49,7 @@ export function IntegrationsList({
   onQueryChange: setQuery,
   stickyClassName,
 }: Props) {
+  const { t } = useTranslation();
   const {
     providers,
     isLoading,
@@ -94,7 +96,10 @@ export function IntegrationsList({
   // removing a ChatGPT connection does: it stops new ChatGPT-backed chats and
   // leaves everything already said in them alone.
   const pendingNotice = pendingTargets.some((t) => t.provider === "codex")
-    ? "New chats can no longer run on your ChatGPT plan — they fall back to the connection AutoGPT picks. Your chat history is kept, and your other integrations are unaffected."
+    ? t(
+        "New chats can no longer run on your ChatGPT plan — they fall back to the connection AutoGPT picks. Your chat history is kept, and your other integrations are unaffected.",
+        "新聊天将无法再通过您的 ChatGPT 套餐运行，系统会改用 AutoGPT 选择的连接。聊天记录将保留，其他集成不受影响。",
+      )
     : undefined;
 
   if (isLoading) {

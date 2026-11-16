@@ -78,7 +78,7 @@ export function AgentVersionChangelog({
         </div>
 
         <Text variant="small" tone="secondary" className="mt-1">
-          Available marketplace version
+          {t("Available marketplace version", "市场中可用的版本")}
         </Text>
       </div>
     );
@@ -86,7 +86,7 @@ export function AgentVersionChangelog({
 
   return (
     <Dialog
-      title={`Version History - ${agent.name}`}
+      title={t(`Version History - ${agent.name}`, `版本历史 - ${agent.name}`)}
       styling={{
         maxWidth: "45rem",
       }}

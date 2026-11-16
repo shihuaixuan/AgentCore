@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { SkillVersionSummary } from "@/app/api/__generated__/models/skillVersionSummary";
 import { Button } from "@/components/atoms/Button/Button";
@@ -12,11 +13,12 @@ interface Props {
 }
 
 export function SourcesView({ version, isBusy, onExclude }: Props) {
+  const { t } = useTranslation();
   const sources = version?.sources ?? [];
   if (!version || sources.length === 0) {
     return (
       <Text variant="small" tone="muted">
-        No sources are attached to this version.
+        {t("No sources are attached to this version.", "此版本没有关联来源。")}
       </Text>
     );
   }
@@ -24,7 +26,7 @@ export function SourcesView({ version, isBusy, onExclude }: Props) {
     <ul
       data-slot="skill-learning-sheet-sources"
       className="flex flex-col gap-3"
-      aria-label="Sources"
+      aria-label={t("Sources", "来源")}
     >
       {sources.map((source) => (
         <li
@@ -35,11 +37,14 @@ export function SourcesView({ version, isBusy, onExclude }: Props) {
           {source.accessible ? (
             <>
               <Text variant="small-medium" tone="primary">
-                {source.title || "Conversation"}
+                {source.title || t("Conversation", "对话")}
               </Text>
               <Text variant="small" tone="muted">
-                Revision {source.revision.replace(/^0+/, "") || "0"}
-                {source.excluded ? " · Excluded from learning" : ""}
+                {t("Revision", "修订版本")}
+                {source.revision.replace(/^0+/, "") || "0"}
+                {source.excluded
+                  ? t(" · Excluded from learning", " · 已从学习中排除")
+                  : ""}
               </Text>
               <div
                 data-slot="skill-learning-sheet-sources-item-actions"
@@ -53,7 +58,7 @@ export function SourcesView({ version, isBusy, onExclude }: Props) {
                     data-slot="skill-learning-sheet-sources-item-link"
                     className="text-body text-accent-strong underline"
                   >
-                    Open source
+                    {t("Open source", "打开来源")}
                   </Link>
                 ) : null}
                 {!source.excluded && source.source_ref ? (
@@ -65,14 +70,17 @@ export function SourcesView({ version, isBusy, onExclude }: Props) {
                       onExclude(source.source_kind, source.source_ref ?? "")
                     }
                   >
-                    Exclude this source from learning
+                    {t(
+                      "Exclude this source from learning",
+                      "从学习中排除此来源",
+                    )}
                   </Button>
                 ) : null}
               </div>
             </>
           ) : (
             <Text variant="small" tone="muted">
-              Evidence not visible to you
+              {t("Evidence not visible to you", "你无权查看的依据")}
             </Text>
           )}
         </li>

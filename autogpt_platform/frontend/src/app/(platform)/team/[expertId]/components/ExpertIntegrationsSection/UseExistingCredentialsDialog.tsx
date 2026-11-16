@@ -180,10 +180,10 @@ export function UseExistingCredentialsDialog({
           ) : (
             <>
               <Text variant="body-tight" tone="muted">
-                These connections are already set up on your account but{" "}
-                {expertName} can&apos;t use them yet. Choose one to give{" "}
-                {expertName} access. Nothing is re-authorised, and you can
-                remove the access from this tab at any time.
+                {t(
+                  `These connections are already set up on your account but ${expertName} can't use them yet. Choose one to give ${expertName} access. Nothing is re-authorised, and you can remove the access from this tab at any time.`,
+                  `这些连接已在你的账户中设置，但 ${expertName} 尚无使用权限。选择一个连接以授予 ${expertName} 访问权限。无需重新授权，你可以随时在此标签页中移除访问权限。`,
+                )}
               </Text>
               <SearchInput
                 size="small"
@@ -195,7 +195,7 @@ export function UseExistingCredentialsDialog({
                 <Text variant="small" tone="muted">
                   {credentials.length === 0
                     ? `${expertName} can already use everything in your account.`
-                    : "No connections match."}
+                    : t("No connections match.", "没有匹配的连接。")}
                 </Text>
               ) : (
                 <div className="relative">

@@ -68,7 +68,7 @@ export function EmptyTasks({
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     } finally {
@@ -120,8 +120,10 @@ export function EmptyTasks({
                   Ready to get started?
                 </Text>
                 <Text variant="large" className="text-center">
-                  Run your workflow and this space will fill with your
-                  workflow&apos;s activity
+                  {t(
+                    "Run your workflow and this space will fill with your workflow's activity",
+                    "运行工作流后，这里将显示其活动记录",
+                  )}
                 </Text>
               </div>
             </div>
@@ -168,14 +170,18 @@ export function EmptyTasks({
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-20">
             <div className="flex flex-col gap-0">
-              <Text variant="body-medium">Workflow created on</Text>
+              <Text variant="body-medium">
+                {t("Workflow created on", "工作流创建于")}
+              </Text>
               <Text variant="body" tone="body">
                 {createdAt}
               </Text>
             </div>
             {isUpdated ? (
               <div className="flex flex-col gap-0">
-                <Text variant="body-medium">Workflow updated on</Text>
+                <Text variant="body-medium">
+                  {t("Workflow updated on", "工作流更新于")}
+                </Text>
                 <Text variant="body" tone="body">
                   {updatedAt}
                 </Text>

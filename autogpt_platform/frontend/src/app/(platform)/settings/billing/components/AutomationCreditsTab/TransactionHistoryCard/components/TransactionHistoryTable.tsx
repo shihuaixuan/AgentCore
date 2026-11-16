@@ -93,7 +93,7 @@ export function TransactionHistoryTable({
       </table>
       <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-3 sm:px-5">
         <Text variant="small" tone="secondary">
-          Latest charges and credits first
+          {t("Latest charges and credits first", "最新费用和积分变动优先显示")}
         </Text>
         {hasMore ? (
           <Button
@@ -104,7 +104,9 @@ export function TransactionHistoryTable({
             loading={isLoadingMore}
             onClick={(event) => void loadOlder(event)}
           >
-            {isLoadMoreError ? "Retry loading more" : "Load more"}
+            {isLoadMoreError
+              ? t("Retry loading more", "重试加载更多")
+              : t("Load more", "加载更多")}
           </Button>
         ) : (
           <Text
@@ -125,15 +127,20 @@ export function TransactionHistoryTable({
             tone="secondary"
             className="w-full"
           >
-            We couldn’t load older transactions. Your loaded history is still
-            available.
+            {t(
+              "We couldn’t load older transactions. Your loaded history is still available.",
+              "无法加载更早的交易。已加载的历史记录仍可查看。",
+            )}
           </Text>
         )}
       </div>
       <Text variant="small" className="sr-only" role="status">
         {isLoadingMore
-          ? "Loading older transactions"
-          : `${transactions.length} transactions loaded`}
+          ? t("Loading older transactions", "正在加载更早的交易")
+          : t(
+              `${transactions.length} transactions loaded`,
+              `已加载 ${transactions.length} 笔交易`,
+            )}
       </Text>
     </div>
   );

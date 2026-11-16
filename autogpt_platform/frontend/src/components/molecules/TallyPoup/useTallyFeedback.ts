@@ -1,5 +1,6 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   FEEDBACK_TALLY_FORM_ID,
   getFeedbackHiddenFields,
@@ -24,6 +25,7 @@ export function useTallyPageContext() {
 }
 
 export function useTallyFeedback(isAuthenticated: boolean | null) {
+  const { locale } = useTranslation();
   const page = useTallyPageContext();
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +50,7 @@ export function useTallyFeedback(isAuthenticated: boolean | null) {
         onClose: handleFormClose,
       });
     } catch {
-      showFeedbackLoadError();
+      showFeedbackLoadError(locale);
     } finally {
       setIsLoading(false);
     }

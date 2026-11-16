@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import {
   Tooltip,
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function PublishToMarketplace({ flowID, flowVersion }: Props) {
+  const { t } = useTranslation();
   const { handlePublishToMarketplace, publishState, handleStateChange } =
     usePublishToMarketplace({ flowID, flowVersion });
 
@@ -33,7 +35,9 @@ export function PublishToMarketplace({ flowID, flowVersion }: Props) {
             <Icon icon={Share01Icon} className="size-4" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Publish to Marketplace</TooltipContent>
+        <TooltipContent>
+          {t("Publish to Marketplace", "发布到市场")}
+        </TooltipContent>
       </Tooltip>
 
       <PublishAgentModal

@@ -16,10 +16,14 @@ import {
 type Props = { transaction: Transaction };
 
 export function ReceiptMetadata({ transaction }: Props) {
-  const { t } = useTranslation();
-  const started = formatActivityDate(transaction.execution_started_at);
-  const posted = formatActivityDate(transaction.transaction_time);
-  const cutoff = formatActivityDate(transaction.receipt_as_of);
+  const { t, locale } = useTranslation();
+  const started = formatActivityDate(
+    transaction.execution_started_at,
+    t,
+    locale,
+  );
+  const posted = formatActivityDate(transaction.transaction_time, t, locale);
+  const cutoff = formatActivityDate(transaction.receipt_as_of, t, locale);
   return (
     <div className="mt-4 flex flex-wrap items-end justify-between gap-4 border-t border-border-base pt-4">
       <div className="flex flex-wrap gap-x-6 gap-y-3">
@@ -38,13 +42,13 @@ export function ReceiptMetadata({ transaction }: Props) {
               }
               size="small"
             >
-              {statusLabel(transaction.execution_status)}
+              {statusLabel(transaction.execution_status, t)}
             </Badge>
           </div>
         )}
         {transaction.execution_started_at && (
           <MetadataField
-            label="Started"
+            label={t("Started", "开始时间")}
             value={`${started.date} · ${started.time}`}
             title={started.full}
           />
@@ -62,7 +66,7 @@ export function ReceiptMetadata({ transaction }: Props) {
         />
         {transaction.receipt_as_of && (
           <MetadataField
-            label="Credits as of"
+            label={t("Credits as of", "积分统计截至")}
             value={`${cutoff.date} · ${cutoff.time}`}
             title={cutoff.full}
           />
@@ -110,16 +114,16 @@ function ReceiptDestination({ transaction }: Props) {
         className="min-h-11 min-w-0"
         rightIcon={<Icon icon={ArrowUpRight01Icon} size={16} />}
       >
-        {href ? "View task" : "View conversation"}
+        {href ? t("View task", "查看任务") : t("View conversation", "查看对话")}
       </Button>
     );
   }
   if (transaction.activity_type === "agent_run") {
     const label = transaction.library_agent_id
-      ? "Run unavailable"
+      ? t("Run unavailable", "运行不可用")
       : transaction.execution_available
-        ? "Not in your library"
-        : "Workflow and run unavailable";
+        ? t("Not in your library", "不在你的工作流库中")
+        : t("Workflow and run unavailable", "工作流和运行均不可用");
     return (
       <Text variant="small" tone="secondary">
         {label}

@@ -49,8 +49,14 @@ export function AutoRefillCard({ index = 0 }: Props) {
           </Text>
           <Text variant="body" as="span" tone="muted">
             {isEnabled && config
-              ? `Refills $${(config.amount / 100).toFixed(0)} when balance drops below $${(config.threshold / 100).toFixed(0)}.`
-              : "Top up automatically when your balance gets low."}
+              ? t(
+                  `Refills ${(config.amount / 100).toFixed(0)} when balance drops below ${(config.threshold / 100).toFixed(0)}.`,
+                  `余额低于 ${(config.threshold / 100).toFixed(0)} 时自动充值 ${(config.amount / 100).toFixed(0)}。`,
+                )
+              : t(
+                  "Top up automatically when your balance gets low.",
+                  "余额不足时自动充值。",
+                )}
           </Text>
         </div>
       </div>
@@ -61,7 +67,9 @@ export function AutoRefillCard({ index = 0 }: Props) {
         onClick={() => setOpen(true)}
         disabled={isLoading}
       >
-        {isEnabled ? t("Edit", "编辑") : "Set up auto-refill"}
+        {isEnabled
+          ? t("Edit", "编辑")
+          : t("Set up auto-refill", "设置自动充值")}
       </Button>
 
       <AutoRefillDialog

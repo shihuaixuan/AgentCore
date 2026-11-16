@@ -56,7 +56,10 @@ export function SkillsList({ category }: Props) {
       <SectionHeader
         title={t("Skills", "技能")}
         titleId={HEADING_ID}
-        subtitle="Playbooks your experts pick up as they work."
+        subtitle={t(
+          "Playbooks your experts pick up as they work.",
+          "专家在工作中学习使用的操作指南。",
+        )}
         filters={
           <SkillTopicChips
             selected={topic}
@@ -94,7 +97,7 @@ export function SkillsList({ category }: Props) {
           <span>
             {topic
               ? `No ${formatCategoryLabel(topic).toLowerCase()} skills yet.`
-              : "No skills yet."}
+              : t("No skills yet.", "暂无技能。")}
           </span>
           {topic ? (
             <button

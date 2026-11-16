@@ -81,7 +81,9 @@ export function SelectedTemplateActions({
       onError: (error: any) => {
         toast({
           title: t("Failed to delete template", "无法删除模板"),
-          description: error.message || "An unexpected error occurred.",
+          description:
+            error.message ||
+            t("An unexpected error occurred.", "发生意外错误。"),
           variant: "destructive",
         });
       },

@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import Link from "next/link";
 import type { HomeActiveTask } from "@/app/api/__generated__/models/homeActiveTask";
 import { Text } from "@/components/atoms/Text/Text";
@@ -14,6 +16,7 @@ interface Props {
 const ROW_CLASS = "relative flex items-center gap-3 py-2 pl-[3.75rem] pr-4";
 
 export function ActiveRow({ item }: Props) {
+  const { t } = useTranslation();
   const content = (
     <>
       <span className="absolute top-1/2 left-4 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-surface">
@@ -36,13 +39,14 @@ export function ActiveRow({ item }: Props) {
           <span>{item.title}</span>
           <span className="font-normal text-foreground-tertiary">
             {" "}
-            workflow
+            {t("workflow", "工作流")}
           </span>
         </Text>
         <Text variant="small" tone="muted" className="truncate">
           {item.status === "queued"
-            ? "Queued"
-            : (formatRunningFor(item.started_at) ?? "Running now")}
+            ? t("Queued", "排队中")
+            : (formatRunningFor(item.started_at, undefined, t) ??
+              t("Running now", "正在运行"))}
         </Text>
       </div>
     </>

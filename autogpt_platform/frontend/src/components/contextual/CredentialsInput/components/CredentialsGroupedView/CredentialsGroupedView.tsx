@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { CredentialsInput } from "@/components/contextual/CredentialsInput/CredentialsInput";
 import {
   Accordion,
@@ -36,6 +39,8 @@ export function CredentialsGroupedView({
   inputValues,
   onCredentialChange,
 }: Props) {
+  const { t } = useTranslation();
+
   const allProviders = useContext(CredentialsProvidersContext);
 
   const { userCredentialFields, systemCredentialFields } = useMemo(
@@ -148,10 +153,12 @@ export function CredentialsGroupedView({
           <AccordionItem value="system-credentials" className="border-none">
             <AccordionTrigger className="py-2 text-body text-foreground-tertiary hover:no-underline">
               <div className="flex items-center gap-1">
-                <Icon icon={SlidersHorizontalIcon} size={16} /> System
-                credentials
+                <Icon icon={SlidersHorizontalIcon} size={16} />{" "}
+                {t("System credentials", "系统凭据")}
                 {hasMissingSystemCredentials && (
-                  <span className="text-error">(missing)</span>
+                  <span className="text-error">
+                    {t("(missing)", "（缺失）")}
+                  </span>
                 )}
               </div>
             </AccordionTrigger>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { RunOutputs } from "@/app/(platform)/library/agents/[id]/components/NewAgentLibraryView/components/selected-views/SelectedRunView/components/RunOutputs";
 import { okData } from "@/app/api/helpers";
 import { useGetV1GetSharedExecution } from "@/app/api/__generated__/endpoints/default/default";
@@ -39,6 +41,7 @@ function ExecutionShareChrome({
 }
 
 export default function SharePage() {
+  const { t } = useTranslation();
   const params = useParams();
   const token = params.token as string;
 
@@ -57,7 +60,7 @@ export default function SharePage() {
           <div className="text-center">
             <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-action"></div>
             <p className="text-foreground-tertiary">
-              Loading shared execution...
+              {t("Loading shared execution...", "正在加载分享的运行结果…")}
             </p>
           </div>
         </div>
@@ -82,12 +85,20 @@ export default function SharePage() {
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-lead font-semibold">
-                      {is404 ? "Share Link Not Found" : "Unable to Load"}
+                      {is404
+                        ? t("Share Link Not Found", "找不到分享链接")
+                        : t("Unable to Load", "无法加载")}
                     </h3>
                     <p className="text-body text-foreground-tertiary">
                       {is404
-                        ? "This shared link is invalid or has been disabled by the owner. Please check with the person who shared this link."
-                        : "There was an error loading this shared execution. Please try refreshing the page."}
+                        ? t(
+                            "This shared link is invalid or has been disabled by the owner. Please check with the person who shared this link.",
+                            "此分享链接无效或已被所有者停用，请联系分享者。",
+                          )
+                        : t(
+                            "There was an error loading this shared execution. Please try refreshing the page.",
+                            "加载分享的运行结果时出错，请刷新页面重试。",
+                          )}
                     </p>
                   </div>
                   <div className="pt-2">
@@ -95,14 +106,16 @@ export default function SharePage() {
                       onClick={() => window.location.reload()}
                       className="text-body text-action hover:underline"
                     >
-                      Try again
+                      {t("Try again", "重试")}
                     </button>
                   </div>
                 </div>
               </div>
             </div>
             <div className="mt-8 text-center text-caption text-foreground-tertiary">
-              <p>Powered by AutoGPT Platform</p>
+              <p>
+                {t("Powered by AutoGPT Platform", "由 AutoGPT 平台提供支持")}
+              </p>
             </div>
           </div>
         </div>
@@ -121,8 +134,10 @@ export default function SharePage() {
               className="h-4 w-4"
             />
             <AlertDescription>
-              This is a publicly shared workflow run result. The person who
-              shared this link can disable access at any time.
+              {t(
+                "This is a publicly shared workflow run result. The person who shared this link can disable access at any time.",
+                "这是公开分享的工作流运行结果。分享者可以随时停用此链接。",
+              )}
             </AlertDescription>
           </Alert>
         </div>
@@ -141,13 +156,15 @@ export default function SharePage() {
           <CardContent>
             <div className="grid grid-cols-2 gap-4 text-body">
               <div>
-                <span className="font-medium">Status:</span>
+                <span className="font-medium">{t("Status:", "状态：")}</span>
                 <span className="ml-2 capitalize">
                   {executionData.status.toLowerCase()}
                 </span>
               </div>
               <div>
-                <span className="font-medium">Created:</span>
+                <span className="font-medium">
+                  {t("Created:", "创建时间：")}
+                </span>
                 <span className="ml-2">
                   {new Date(executionData.created_at).toLocaleString()}
                 </span>
@@ -158,7 +175,7 @@ export default function SharePage() {
 
         <Card variant="outlined">
           <CardHeader>
-            <CardTitle>Output</CardTitle>
+            <CardTitle>{t("Output", "输出")}</CardTitle>
           </CardHeader>
           <CardContent>
             <RunOutputs outputs={executionData.outputs} shareToken={token} />
@@ -166,7 +183,7 @@ export default function SharePage() {
         </Card>
 
         <div className="mt-8 text-center text-body text-foreground-tertiary">
-          <p>Powered by AutoGPT Platform</p>
+          <p>{t("Powered by AutoGPT Platform", "由 AutoGPT 平台提供支持")}</p>
         </div>
       </div>
     </ExecutionShareChrome>

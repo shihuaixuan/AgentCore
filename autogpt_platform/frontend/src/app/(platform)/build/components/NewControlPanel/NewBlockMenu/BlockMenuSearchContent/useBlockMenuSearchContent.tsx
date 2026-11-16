@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useBlockMenuStore } from "@/app/(platform)/build/stores/blockMenuStore";
 import { useShallow } from "zustand/react/shallow";
@@ -27,6 +28,7 @@ import * as Sentry from "@sentry/nextjs";
 import { CategoryCounts } from "../BlockMenuFilters/types";
 
 export const useBlockMenuSearchContent = () => {
+  const { t } = useTranslation();
   const {
     searchQuery,
     searchId,
@@ -100,10 +102,13 @@ export const useBlockMenuSearchContent = () => {
       onError: (error) => {
         Sentry.captureException(error);
         toast({
-          title: "Failed to add workflow to library",
+          title: t(
+            "Failed to add workflow to library",
+            "无法将工作流添加到工作库",
+          ),
           description:
             ((error as any).message as string) ||
-            "An unexpected error occurred.",
+            t("An unexpected error occurred.", "发生意外错误。"),
           variant: "destructive",
         });
       },
@@ -193,15 +198,22 @@ export const useBlockMenuSearchContent = () => {
       addAgentToBuilder(libraryAgentDetails as LibraryAgent);
 
       toast({
-        title: "Workflow Added",
-        description: "Workflow has been added to your library and builder",
+        title: t("Workflow Added", "工作流已添加"),
+        description: t(
+          "Workflow has been added to your library and builder",
+          "工作流已添加到工作库和编辑器",
+        ),
       });
     } catch (error) {
       Sentry.captureException(error);
       toast({
-        title: "Failed to add workflow to library",
+        title: t(
+          "Failed to add workflow to library",
+          "无法将工作流添加到工作库",
+        ),
         description:
-          ((error as any).message as string) || "An unexpected error occurred.",
+          ((error as any).message as string) ||
+          t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     } finally {

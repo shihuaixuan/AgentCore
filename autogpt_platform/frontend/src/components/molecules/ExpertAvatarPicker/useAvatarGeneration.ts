@@ -4,8 +4,10 @@ import {
 } from "@/app/api/__generated__/endpoints/experts/experts";
 import type { ExpertAvatarRequest } from "@/app/api/__generated__/models/expertAvatarRequest";
 import { useRef, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function useAvatarGeneration() {
+  const { t } = useTranslation();
   const [jobID, setJobID] = useState("");
   const requestVersion = useRef(0);
   const mutation = useGenerateExpertAvatar<Error>({
@@ -32,7 +34,10 @@ export function useAvatarGeneration() {
   const error =
     mutation.error?.message ??
     (query.isError
-      ? "Could not check generation. Try again or regenerate."
+      ? t(
+          "Could not check generation. Try again or regenerate.",
+          "无法获取生成进度，请重试或重新生成。",
+        )
       : job?.error);
 
   function generate(request: ExpertAvatarRequest) {

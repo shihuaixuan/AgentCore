@@ -40,9 +40,9 @@ export function useBotCard() {
   const invalidatePlatforms = () =>
     queryClient.invalidateQueries({ queryKey: getListBotPlatformsQueryKey() });
 
-  function showError(action: string) {
+  function showError(action: string, chinese: string) {
     toast({
-      title: `Couldn't ${action}`,
+      title: t(`Couldn't ${action}`, chinese),
       description: t("Please try again in a moment.", "请稍后重试。"),
       variant: "destructive",
     });
@@ -51,14 +51,14 @@ export function useBotCard() {
   const unlinkServer = useDeletePlatformLinkingUnlinkAPlatformServer({
     mutation: {
       onSuccess: () => invalidatePlatforms(),
-      onError: () => showError("unlink the server"),
+      onError: () => showError("unlink the server", "无法解除服务器绑定"),
     },
   });
 
   const unlinkDm = useDeletePlatformLinkingUnlinkADmUserLink({
     mutation: {
       onSuccess: () => invalidatePlatforms(),
-      onError: () => showError("unlink the DM"),
+      onError: () => showError("unlink the DM", "无法解除私信绑定"),
     },
   });
 

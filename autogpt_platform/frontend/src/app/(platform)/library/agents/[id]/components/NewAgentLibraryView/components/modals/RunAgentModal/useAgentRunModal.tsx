@@ -186,10 +186,15 @@ export function useAgentRunModal(
         }
       },
       onError: (error: any) => {
-        showExecutionErrorToast(toast, error, {
-          graph_id: agent.graph_id,
-          graph_version: agent.graph_version,
-        });
+        showExecutionErrorToast(
+          toast,
+          error,
+          {
+            graph_id: agent.graph_id,
+            graph_version: agent.graph_version,
+          },
+          t,
+        );
       },
     },
   });
@@ -211,7 +216,9 @@ export function useAgentRunModal(
       onError: (error: any) => {
         toast({
           title: "❌ Failed to setup trigger",
-          description: error.message || "An unexpected error occurred.",
+          description:
+            error.message ||
+            t("An unexpected error occurred.", "发生意外错误。"),
           variant: "destructive",
         });
       },

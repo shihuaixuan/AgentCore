@@ -30,7 +30,13 @@ export function SwitchCycleDialog({
 
   return (
     <Dialog
-      title={title ?? `Switch billing to ${targetLabel}?`}
+      title={
+        title ??
+        t(
+          `Switch billing to ${targetCycle === "yearly" ? "Yearly" : "Monthly"}?`,
+          `将账单周期改为${targetLabel}？`,
+        )
+      }
       styling={{ maxWidth: "440px" }}
       controlled={{ isOpen, set: onOpenChange }}
     >
@@ -71,7 +77,10 @@ export function SwitchCycleDialog({
             disabled={isSaving}
             loading={isSaving}
           >
-            Switch to {targetLabel}
+            {t(
+              `Switch to ${targetCycle === "yearly" ? "Yearly" : "Monthly"}`,
+              `改为${targetLabel}`,
+            )}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -24,6 +25,7 @@ export const ViewMoreData = ({
   nodeId: string;
   dataType?: NodeDataType;
 }) => {
+  const { t } = useTranslation();
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const { toast } = useToast();
   const executionResults = useNodeStore(
@@ -45,7 +47,10 @@ export const ViewMoreData = ({
   const copyExecutionId = (executionId: string) => {
     navigator.clipboard.writeText(executionId || "N/A").then(() => {
       toast({
-        title: "Execution ID copied to clipboard!",
+        title: t(
+          "Execution ID copied to clipboard!",
+          "运行 ID 已复制到剪贴板！",
+        ),
         duration: 2000,
       });
     });
@@ -53,7 +58,7 @@ export const ViewMoreData = ({
 
   return (
     <Dialog
-      title="View Data"
+      title={t("View Data", "查看数据")}
       styling={{ width: "600px", paddingRight: "16px" }}
     >
       <Dialog.Trigger>
@@ -63,14 +68,16 @@ export const ViewMoreData = ({
           className="h-fit w-fit min-w-0"
         >
           <Text variant="small-medium-tight" as="span" tone="inherit">
-            View More
+            {t("View More", "查看更多")}
           </Text>
         </Button>
       </Dialog.Trigger>
       <Dialog.Content>
         <div className="flex flex-col gap-4">
           <Text variant="h4" tone="primary">
-            Complete {dataType === "input" ? "Input" : "Output"} Data
+            {dataType === "input"
+              ? t("Complete Input Data", "完整输入数据")
+              : t("Complete Output Data", "完整输出数据")}
           </Text>
 
           <ScrollArea className="h-full">
@@ -82,7 +89,7 @@ export const ViewMoreData = ({
                 >
                   <div className="flex items-center gap-2">
                     <Text variant="body" tone="secondary">
-                      Execution ID:
+                      {t("Execution ID:", "运行 ID：")}
                     </Text>
                     <div className="rounded-full border border-border-strong bg-surface-muted px-2 py-1">
                       <Text variant="small-medium-mono-tight" as="p">
@@ -107,7 +114,7 @@ export const ViewMoreData = ({
                           <div key={key} className="flex flex-col gap-2">
                             <div className="flex items-center gap-2">
                               <Text variant="body-semibold" tone="secondary">
-                                Pin:
+                                {t("Pin:", "连接点：")}
                               </Text>
                               <Text variant="body-medium" tone="body">
                                 {beautifyString(key)}
@@ -115,7 +122,7 @@ export const ViewMoreData = ({
                             </div>
                             <div className="w-full space-y-2">
                               <Text variant="body-semibold" tone="secondary">
-                                Data:
+                                {t("Data:", "数据：")}
                               </Text>
                               <div className="relative space-y-2">
                                 {normalizedValue.map((item, index) => (

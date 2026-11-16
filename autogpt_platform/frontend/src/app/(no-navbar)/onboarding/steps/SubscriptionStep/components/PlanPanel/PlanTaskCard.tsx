@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { RecommendedExpert } from "@/app/api/__generated__/models/recommendedExpert";
 import type { SuggestedTask } from "@/app/api/__generated__/models/suggestedTask";
 import { Text } from "@/components/atoms/Text/Text";
@@ -16,6 +19,7 @@ interface Props {
 
 // One task as the plan step shows it: read-only, with who takes it.
 export function PlanTaskCard({ task, owner, isFirst }: Props) {
+  const { t } = useTranslation();
   return (
     <li
       className={cn(
@@ -37,7 +41,7 @@ export function PlanTaskCard({ task, owner, isFirst }: Props) {
       <div className="flex min-w-0 flex-col items-start">
         {isFirst ? (
           <span className="mb-1.5 rounded-full bg-accent-surface px-2 py-0.5 text-caption-sm font-semibold tracking-eyebrow text-accent-strong uppercase">
-            Start here
+            {t("Start here", "从这里开始")}
           </span>
         ) : null}
         <Text variant="body-medium" as="span" className="text-pretty">
@@ -55,18 +59,21 @@ export function PlanTaskCard({ task, owner, isFirst }: Props) {
 }
 
 function OwnerLine({ owner }: { owner: RecommendedExpert | null }) {
+  const { t } = useTranslation();
   if (!owner)
     return (
       // Text has no accent tone, so the role classes go on the span.
       <span className="mt-1.5 font-sans text-caption text-accent-strong">
-        Otto handles this one
+        {t("Otto handles this one", "这项工作由 Otto 负责")}
       </span>
     );
   return (
     <Text variant="small" as="span" tone="secondary" className="mt-1.5">
       <span className="font-medium text-foreground-strong">{owner.name}</span>,{" "}
       {getExpertRoleLabel(owner.role)}{" "}
-      <span className="text-foreground-subtle">· joins your team</span>
+      <span className="text-foreground-subtle">
+        {t("· joins your team", "· 加入你的团队")}
+      </span>
     </Text>
   );
 }

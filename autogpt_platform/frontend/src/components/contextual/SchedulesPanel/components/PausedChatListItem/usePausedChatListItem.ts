@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getGetHomeDashboardQueryKey } from "@/app/api/__generated__/endpoints/home/home";
 import {
   getListPausedScheduledChatsQueryKey,
@@ -17,6 +20,8 @@ interface Args {
 }
 
 export function usePausedChatListItem({ paused }: Args) {
+  const { t } = useTranslation();
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -35,8 +40,11 @@ export function usePausedChatListItem({ paused }: Args) {
       onSuccess: () => {
         void refresh();
         toast({
-          title: "Resumed",
-          description: `“${paused.title}” runs again at its next scheduled time.`,
+          title: t("Resumed", "已恢复"),
+          description: t(
+            `“${paused.title}” runs again at its next scheduled time.`,
+            `“${paused.title}”将在下次计划时间再次运行。`,
+          ),
         });
       },
       onError: (error) => {
@@ -46,8 +54,8 @@ export function usePausedChatListItem({ paused }: Args) {
         Sentry.captureException(error);
         toast({
           variant: "destructive",
-          title: "Couldn't resume this scheduled chat",
-          description: "Please try again.",
+          title: t("Couldn't resume this scheduled chat", "无法恢复此定时聊天"),
+          description: t("Please try again.", "请重试。"),
         });
       },
     },
@@ -56,7 +64,7 @@ export function usePausedChatListItem({ paused }: Args) {
   function handleDeleted() {
     setIsDeleteOpen(false);
     void refresh();
-    toast({ title: "Scheduled chat deleted" });
+    toast({ title: t("Scheduled chat deleted", "定时聊天已删除") });
   }
 
   const { mutate: deleteSchedule, isPending: isDeleting } =
@@ -73,8 +81,11 @@ export function usePausedChatListItem({ paused }: Args) {
           Sentry.captureException(error);
           toast({
             variant: "destructive",
-            title: "Couldn't delete this scheduled chat",
-            description: "Please try again.",
+            title: t(
+              "Couldn't delete this scheduled chat",
+              "无法删除此定时聊天",
+            ),
+            description: t("Please try again.", "请重试。"),
           });
         },
       },

@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Text } from "@/components/atoms/Text/Text";
 import { AlertCircleIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -8,12 +10,14 @@ interface Props {
 }
 
 export function RejectionFeedback({ comments }: Props) {
+  const { t } = useTranslation();
+
   return (
     <div className="mt-4 w-full max-w-md rounded-xl border border-error/20 bg-error-surface p-3">
       <div className="mb-1 flex items-center gap-2 text-error-foreground">
         <Icon icon={AlertCircleIcon} size={16} />
         <Text variant="small-medium" as="span" tone="inherit">
-          Review feedback
+          {t("Review feedback", "审核反馈")}
         </Text>
       </div>
       <Text variant="small" tone="error-strong">

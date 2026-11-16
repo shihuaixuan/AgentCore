@@ -4,11 +4,14 @@ import type { CopilotSkillInfo } from "@/app/api/__generated__/models/copilotSki
 
 const DESCRIPTION_PREVIEW_MAX_LEN = 220;
 
-export function describeSkill(skill: CopilotSkillInfo) {
+export function describeSkill(
+  skill: CopilotSkillInfo,
+  t: (english: string, chinese: string) => string = (english) => english,
+) {
   const description = (skill.description ?? "").trim();
   const descriptionPreview =
     description.length === 0
-      ? "(no description)"
+      ? t("(no description)", "（无描述）")
       : description.length > DESCRIPTION_PREVIEW_MAX_LEN
         ? `${description.slice(0, DESCRIPTION_PREVIEW_MAX_LEN).trimEnd()}…`
         : description;

@@ -2,6 +2,8 @@
 
 import { useNowMinute } from "@/hooks/useNowMinute";
 import { formatDistanceToNow } from "date-fns";
+import { zhCN } from "date-fns/locale";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   date: Date | string | number;
@@ -13,6 +15,14 @@ interface Props {
  * and without its parent re-rendering.
  */
 export function RelativeTime({ date }: Props) {
+  const { locale } = useTranslation();
   useNowMinute();
-  return <>{formatDistanceToNow(date, { addSuffix: true })}</>;
+  return (
+    <>
+      {formatDistanceToNow(date, {
+        addSuffix: true,
+        locale: locale === "zh-CN" ? zhCN : undefined,
+      })}
+    </>
+  );
 }

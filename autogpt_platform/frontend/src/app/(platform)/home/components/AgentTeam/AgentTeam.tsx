@@ -22,11 +22,14 @@ interface Props {
 export function AgentTeam({ dashboard, className }: Props) {
   const { t } = useTranslation();
   const { team, agents } = dashboard;
-  const teamSpend = formatWeeklySpend(team.spend_cents);
+  const teamSpend = formatWeeklySpend(team.spend_cents, t);
   const statusLine =
     team.working > 0
-      ? `${team.working} working now · ${team.ready} ready`
-      : `${team.ready} ready for work`;
+      ? t(
+          `${team.working} working now · ${team.ready} ready`,
+          `${team.working} 位正在工作 · ${team.ready} 位已就绪`,
+        )
+      : t(`${team.ready} ready for work`, `${team.ready} 位已就绪`);
 
   return (
     <HomeTile
@@ -74,8 +77,11 @@ export function AgentTeam({ dashboard, className }: Props) {
             className="group-hover:text-foreground-strong"
           >
             {team.total > LISTED_EXPERTS
-              ? `View all ${team.total} experts`
-              : "Open team"}
+              ? t(
+                  `View all ${team.total} experts`,
+                  `查看全部 ${team.total} 位专家`,
+                )
+              : t("Open team", "打开团队")}
           </Text>
           <Icon icon={ArrowRight01Icon} size={14} aria-hidden="true" />
         </Link>

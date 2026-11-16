@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import type { ProviderMetadata } from "@/app/api/__generated__/models/providerMetadata";
@@ -33,6 +34,8 @@ interface Props {
 }
 
 export function MCPPresetPanel({ server, onSuccess, actions }: Props) {
+  const { t } = useTranslation();
+
   const methods = server.auth_methods;
   return (
     <div className="flex flex-col gap-4">
@@ -40,7 +43,7 @@ export function MCPPresetPanel({ server, onSuccess, actions }: Props) {
         {server.setup_instructions}
       </Text>
       <Link href={server.documentation_url} isExternal variant="secondary">
-        Official documentation
+        {t("Official documentation", "官方文档")}
       </Link>
       {methods.length === 1 ? (
         <PresetMethod
@@ -51,7 +54,7 @@ export function MCPPresetPanel({ server, onSuccess, actions }: Props) {
         />
       ) : (
         <TabsLine defaultValue={methods[0]}>
-          <TabsLineList aria-label="Connection method">
+          <TabsLineList aria-label={t("Connection method", "连接方式")}>
             {methods.map((method) => (
               <TabsLineTrigger key={method} value={method}>
                 {METHOD_LABELS[method]}

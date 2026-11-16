@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   folderSummary,
   subfolderCountOf,
@@ -40,11 +42,16 @@ export function WorkspaceFolderRows({
   onOpen,
   onToggleAttach,
 }: Props) {
+  const { t } = useTranslation();
   if (isLoading) return <Skeleton className="h-14 w-full rounded-2xl" />;
   if (folders.length === 0) return null;
 
   return (
-    <ul role="list" aria-label="Folders" className="flex flex-col gap-2">
+    <ul
+      role="list"
+      aria-label={t("Folders", "文件夹")}
+      className="flex flex-col gap-2"
+    >
       {folders.map((folder) => {
         const isSelected = selectedIds.has(folder.id);
         const subfolderCount = subfolderCountOf(allFolders, folder.id);
@@ -60,7 +67,7 @@ export function WorkspaceFolderRows({
           >
             <button
               type="button"
-              aria-label={`Open ${folder.name}`}
+              aria-label={t(`Open ${folder.name}`, `打开 ${folder.name}`)}
               onClick={() => onOpen(folder.id)}
               onKeyDown={(e) => {
                 if (!isKey(e, "Enter", " ")) return;
@@ -91,14 +98,20 @@ export function WorkspaceFolderRows({
                   {folder.name}
                 </Text>
                 <Text tone="muted" variant="small">
-                  {folderSummary(folder.file_count ?? 0, subfolderCount)}
+                  {t(
+                    folderSummary(folder.file_count ?? 0, subfolderCount),
+                    `${folder.file_count ?? 0} 个文件，${subfolderCount} 个子文件夹`,
+                  )}
                 </Text>
               </div>
             </button>
             <button
               type="button"
               aria-pressed={isSelected}
-              aria-label={`Attach folder ${folder.name}`}
+              aria-label={t(
+                `Attach folder ${folder.name}`,
+                `添加文件夹 ${folder.name}`,
+              )}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleAttach(folder, subfolderCount);
@@ -111,7 +124,7 @@ export function WorkspaceFolderRows({
                   : "text-foreground-tertiary hover:bg-surface-hover hover:text-foreground-body",
               )}
             >
-              Attach
+              {t("Attach", "添加")}
               <Icon
                 icon={isSelected ? CheckmarkCircle02Icon : Circle}
                 className="h-4 w-4"

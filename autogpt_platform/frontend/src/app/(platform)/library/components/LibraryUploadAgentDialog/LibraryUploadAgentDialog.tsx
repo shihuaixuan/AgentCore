@@ -66,7 +66,7 @@ export default function LibraryUploadAgentDialog() {
                   <Input
                     {...field}
                     id={field.name}
-                    label="Workflow name"
+                    label={t("Workflow name", "工作流名称")}
                     className="w-full"
                   />
                 </FormControl>
@@ -84,7 +84,7 @@ export default function LibraryUploadAgentDialog() {
                   <Input
                     {...field}
                     id={field.name}
-                    label="Workflow description"
+                    label={t("Workflow description", "工作流说明")}
                     type="textarea"
                     className="w-full"
                   />
@@ -105,7 +105,7 @@ export default function LibraryUploadAgentDialog() {
                     value={field.value}
                     onChange={field.onChange}
                     accept=".json,application/json"
-                    placeholder="Workflow file"
+                    placeholder={t("Workflow file", "工作流文件")}
                     maxFileSize={10 * 1024 * 1024}
                     showStorageNote={false}
                     className="mt-4 mb-8"

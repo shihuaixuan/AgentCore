@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -20,6 +21,7 @@ interface RemoveResult {
 }
 
 export function useDeleteIntegration() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isPending, setIsPending] = useState(false);
   const [pendingIds, setPendingIds] = useState<Record<string, true>>({});
@@ -77,7 +79,9 @@ export function useDeleteIntegration() {
       if (successCount === 1) {
         const only = out.succeeded[0];
         toast({
-          title: only.name ? `Removed ${only.name}` : "Integration removed",
+          title: only.name
+            ? t(`Removed ${only.name}`, `已移除 ${only.name}`)
+            : t("Integration removed", "集成已移除"),
           variant: "success",
         });
       } else if (successCount > 1) {
@@ -87,7 +91,10 @@ export function useDeleteIntegration() {
           .slice(0, 3)
           .join(", ");
         toast({
-          title: `${successCount} integrations removed`,
+          title: t(
+            `${successCount} integrations removed`,
+            `已移除 ${successCount} 个集成`,
+          ),
           description: previewNames || undefined,
           variant: "success",
         });
@@ -102,21 +109,35 @@ export function useDeleteIntegration() {
           .slice(0, 3)
           .join(", ");
         const more =
-          out.failed.length > 3 ? ` +${out.failed.length - 3} more` : "";
+          out.failed.length > 3
+            ? t(
+                ` +${out.failed.length - 3} more`,
+                `，另有 ${out.failed.length - 3} 个`,
+              )
+            : "";
         // needsConfirmation items are pending a force-delete prompt, not
         // failures and not successes — exclude them from the denominator
         // so "X of Y could not be removed" doesn't imply the rest succeeded.
         const attemptableCount = targets.length - out.needsConfirmation.length;
         const allFailedTitle =
           attemptableCount === 1
-            ? "Failed to remove integration"
-            : `Failed to remove ${attemptableCount} integrations`;
+            ? t("Failed to remove integration", "移除集成失败")
+            : t(
+                `Failed to remove ${attemptableCount} integrations`,
+                `移除 ${attemptableCount} 个集成失败`,
+              );
         toast({
           title:
             out.failed.length === attemptableCount
               ? allFailedTitle
-              : `${out.failed.length} of ${attemptableCount} could not be removed`,
-          description: `${failedNames}${more}. Try again to retry the failed ones.`,
+              : t(
+                  `${out.failed.length} of ${attemptableCount} could not be removed`,
+                  `${attemptableCount} 个集成中有 ${out.failed.length} 个无法移除`,
+                ),
+          description: t(
+            `${failedNames}${more}. Try again to retry the failed ones.`,
+            `${failedNames}${more}。请重试以再次移除失败的项目。`,
+          ),
           variant: "destructive",
         });
       }

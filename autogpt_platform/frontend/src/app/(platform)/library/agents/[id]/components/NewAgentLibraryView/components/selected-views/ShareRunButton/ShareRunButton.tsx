@@ -64,8 +64,14 @@ export function ShareRunButton({
         <div className="flex flex-col gap-4">
           <Text variant="large">
             {isShared
-              ? "Your workflow run is currently shared. Anyone with the link can view the output."
-              : "Generate a public link to share this workflow run output with others."}
+              ? t(
+                  "Your workflow run is currently shared. Anyone with the link can view the output.",
+                  "此工作流运行结果已共享。任何拥有链接的人都可以查看输出。",
+                )
+              : t(
+                  "Generate a public link to share this workflow run output with others.",
+                  "生成公开链接，与他人分享此工作流运行的输出。",
+                )}
           </Text>
 
           {!isShared ? (

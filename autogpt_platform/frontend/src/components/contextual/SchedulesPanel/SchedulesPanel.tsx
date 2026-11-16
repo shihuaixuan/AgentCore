@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
 import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
@@ -19,6 +20,8 @@ interface Props {
 }
 
 export function SchedulesPanel({ onGuidedPrompt, withHeading = true }: Props) {
+  const { t } = useTranslation();
+
   const { schedules, paused, isLoading, error, partialError } =
     useSchedulesPanel();
 
@@ -26,11 +29,14 @@ export function SchedulesPanel({ onGuidedPrompt, withHeading = true }: Props) {
     <section className="space-y-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-col gap-2">
-          {withHeading && <Text variant="h2">Scheduled</Text>}
+          {withHeading && (
+            <Text variant="h2">{t("Scheduled", "定时任务")}</Text>
+          )}
           <Text variant="body" tone="muted">
-            Every automated job in one place — your experts&apos; scheduled
-            follow-ups and recurring workflow runs from the builder. Open an
-            item to view its chat or workflow, or cancel one you no longer need.
+            {t(
+              "Every automated job in one place — your experts' scheduled follow-ups and recurring workflow runs from the builder. Open an item to view its chat or workflow, or cancel one you no longer need.",
+              "在此集中管理所有自动任务，包括专家的定时跟进，以及在构建器中设置的周期性工作流运行。打开任务可查看对应聊天或工作流，也可取消不再需要的任务。",
+            )}
           </Text>
         </div>
         <div className="flex flex-shrink-0 items-center gap-2">
@@ -41,7 +47,7 @@ export function SchedulesPanel({ onGuidedPrompt, withHeading = true }: Props) {
             data-testid="schedule-new-button"
           >
             <Icon icon={PlusSignIcon} className="mr-1 h-4 w-4" />
-            New scheduled task
+            {t("New scheduled task", "新建定时任务")}
           </Button>
         </div>
       </header>
@@ -53,8 +59,10 @@ export function SchedulesPanel({ onGuidedPrompt, withHeading = true }: Props) {
             tone="warning"
             data-testid="schedules-partial-error"
           >
-            Some scheduled items couldn&apos;t be loaded — showing the ones that
-            did. Refresh to try again.
+            {t(
+              "Some scheduled items couldn't be loaded — showing the ones that did. Refresh to try again.",
+              "部分定时任务无法加载，当前仅显示已加载的任务。请刷新重试。",
+            )}
           </Text>
         </div>
       )}
@@ -63,7 +71,7 @@ export function SchedulesPanel({ onGuidedPrompt, withHeading = true }: Props) {
         <ul
           className="flex flex-col gap-3"
           data-testid="paused-chats-list"
-          aria-label="Paused scheduled chats"
+          aria-label={t("Paused scheduled chats", "已暂停的定时聊天")}
         >
           {paused.map((chat) => (
             <li key={`paused:${chat.schedule_key}`}>
@@ -79,7 +87,7 @@ export function SchedulesPanel({ onGuidedPrompt, withHeading = true }: Props) {
             message:
               error instanceof Error
                 ? error.message
-                : "Failed to load schedules",
+                : t("Failed to load schedules", "加载定时任务失败"),
           }}
           context="scheduled items"
         />
@@ -96,7 +104,7 @@ export function SchedulesPanel({ onGuidedPrompt, withHeading = true }: Props) {
         <ul
           className="flex flex-col gap-3"
           data-testid="followups-list"
-          aria-label="Scheduled items"
+          aria-label={t("Scheduled items", "定时任务")}
         >
           {schedules.map((schedule) => (
             <li key={`${schedule.kind}:${schedule.item.id}`}>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Popover,
@@ -42,6 +44,7 @@ export function LlmModelPicker({
   onSelect,
   disabled,
 }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<MenuView>("creator");
   const [activeCreator, setActiveCreator] = useState<string | null>(null);
@@ -128,10 +131,10 @@ export function LlmModelPicker({
     ? undefined
     : (selectedModel ?? recommendedModel ?? models[0]);
   const triggerTitle = isUnavailableSelection
-    ? `${selectedName} (unavailable)`
+    ? t(`${selectedName} (unavailable)`, `${selectedName}（不可用）`)
     : triggerModel
       ? getModelDisplayName(triggerModel)
-      : "Select model";
+      : t("Select model", "选择模型");
   const triggerCreator = triggerModel?.creator ?? "";
 
   return (
@@ -164,7 +167,7 @@ export function LlmModelPicker({
               <>
                 <LlmMenuItem
                   title={getModelDisplayName(recommendedModel)}
-                  subtitle="Recommended"
+                  subtitle={t("Recommended", "推荐")}
                   icon={<LlmIcon value={recommendedModel.creator} />}
                   onClick={() => handleSelectModel(recommendedModel.name)}
                 />

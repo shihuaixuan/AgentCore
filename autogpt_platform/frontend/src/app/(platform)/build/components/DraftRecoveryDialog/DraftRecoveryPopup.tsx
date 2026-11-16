@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { cn } from "@/lib/utils";
 import { formatTimeAgo } from "@/lib/utils/time";
@@ -19,7 +21,10 @@ interface DraftRecoveryPopupProps {
   isInitialLoadComplete: boolean;
 }
 
-function formatDiffSummary(diff: DraftDiff | null): string {
+function formatDiffSummary(
+  diff: DraftDiff | null,
+  t: (english: string, chinese: string) => string,
+): string {
   if (!diff) return "";
 
   const parts: string[] = [];
@@ -32,7 +37,10 @@ function formatDiffSummary(diff: DraftDiff | null): string {
 
   if (nodeChanges.length > 0) {
     parts.push(
-      `${nodeChanges.join("/")} block${diff.nodes.added + diff.nodes.removed + diff.nodes.modified !== 1 ? "s" : ""}`,
+      t(
+        `${nodeChanges.join("/")} block${diff.nodes.added + diff.nodes.removed + diff.nodes.modified !== 1 ? "s" : ""}`,
+        `${nodeChanges.join("/")} 个模块`,
+      ),
     );
   }
 
@@ -44,7 +52,10 @@ function formatDiffSummary(diff: DraftDiff | null): string {
 
   if (edgeChanges.length > 0) {
     parts.push(
-      `${edgeChanges.join("/")} connection${diff.edges.added + diff.edges.removed + diff.edges.modified !== 1 ? "s" : ""}`,
+      t(
+        `${edgeChanges.join("/")} connection${diff.edges.added + diff.edges.removed + diff.edges.modified !== 1 ? "s" : ""}`,
+        `${edgeChanges.join("/")} 条连接`,
+      ),
     );
   }
 
@@ -54,6 +65,7 @@ function formatDiffSummary(diff: DraftDiff | null): string {
 export function DraftRecoveryPopup({
   isInitialLoadComplete,
 }: DraftRecoveryPopupProps) {
+  const { t, locale } = useTranslation();
   const {
     isOpen,
     popupRef,
@@ -65,7 +77,7 @@ export function DraftRecoveryPopup({
     onDiscard,
   } = useDraftRecoveryPopup(isInitialLoadComplete);
 
-  const diffSummary = formatDiffSummary(diff);
+  const diffSummary = formatDiffSummary(diff, t);
 
   return (
     <AnimatePresence>
@@ -107,12 +119,15 @@ export function DraftRecoveryPopup({
 
             <div className="flex flex-col">
               <Text variant="small-medium" tone="warning">
-                Unsaved changes found
+                {t("Unsaved changes found", "发现未保存的更改")}
               </Text>
               <Text variant="small" tone="warning">
                 {diffSummary ||
-                  `${nodeCount} block${nodeCount !== 1 ? "s" : ""}, ${edgeCount} connection${edgeCount !== 1 ? "s" : ""}`}{" "}
-                • {formatTimeAgo(new Date(savedAt).toISOString())}
+                  t(
+                    `${nodeCount} block${nodeCount !== 1 ? "s" : ""}, ${edgeCount} connection${edgeCount !== 1 ? "s" : ""}`,
+                    `${nodeCount} 个模块，${edgeCount} 条连接`,
+                  )}{" "}
+                • {formatTimeAgo(new Date(savedAt).toISOString(), locale)}
               </Text>
             </div>
 
@@ -127,10 +142,14 @@ export function DraftRecoveryPopup({
                     className="size-9"
                   >
                     <Icon icon={HistoryIcon} size={20} />
-                    <span className="sr-only">Restore changes</span>
+                    <span className="sr-only">
+                      {t("Restore changes", "恢复更改")}
+                    </span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Restore changes</TooltipContent>
+                <TooltipContent>
+                  {t("Restore changes", "恢复更改")}
+                </TooltipContent>
               </Tooltip>
               <Tooltip delayDuration={10}>
                 <TooltipTrigger asChild>
@@ -140,14 +159,18 @@ export function DraftRecoveryPopup({
                     shape="pill"
                     withTooltip={false}
                     onClick={onDiscard}
-                    aria-label="Discard changes"
+                    aria-label={t("Discard changes", "放弃更改")}
                     className="size-9"
                   >
                     <Icon icon={Cancel01Icon} size={20} />
-                    <span className="sr-only">Discard changes</span>
+                    <span className="sr-only">
+                      {t("Discard changes", "放弃更改")}
+                    </span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Discard changes</TooltipContent>
+                <TooltipContent>
+                  {t("Discard changes", "放弃更改")}
+                </TooltipContent>
               </Tooltip>
             </div>
           </div>

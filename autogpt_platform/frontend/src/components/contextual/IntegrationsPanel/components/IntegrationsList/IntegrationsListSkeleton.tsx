@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { motion, useReducedMotion } from "framer-motion";
 import type { Variants } from "framer-motion";
@@ -27,13 +28,15 @@ const REDUCED_MOTION_ITEM_VARIANTS: Variants = {
 };
 
 export function IntegrationsListSkeleton() {
+  const { t } = useTranslation();
+
   const reduceMotion = useReducedMotion();
 
   return (
     <motion.div
       className="flex flex-col gap-3"
       aria-busy="true"
-      aria-label="Loading integrations"
+      aria-label={t("Loading integrations", "正在加载集成")}
       initial={reduceMotion ? false : "hidden"}
       animate={reduceMotion ? undefined : "show"}
       variants={reduceMotion ? undefined : SKELETON_CONTAINER_VARIANTS}

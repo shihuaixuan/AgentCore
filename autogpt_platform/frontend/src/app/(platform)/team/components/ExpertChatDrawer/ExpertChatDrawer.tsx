@@ -61,7 +61,9 @@ export function ExpertChatDrawer({
     <ExpertSidePanel
       identity={identity}
       title={target?.name ?? ""}
-      ariaLabel={target ? `Chat with ${target.name}` : ""}
+      ariaLabel={
+        target ? t(`Chat with ${target.name}`, `与 ${target.name} 聊天`) : ""
+      }
       panelId="chat"
       closeLabel="Close chat panel"
       showIdentity={!!chat.sessionId}
@@ -178,7 +180,10 @@ function ChatPanelBody({ target, identity, chat }: BodyProps) {
             onStop={stop}
             onEnqueue={onSend}
             canAttachWhileStreaming
-            placeholder={`Message ${target.name}…`}
+            placeholder={t(
+              `Message ${target.name}…`,
+              `给 ${target.name} 发消息…`,
+            )}
             hasSession={!!sessionId}
             expertId={target.expertId}
             expertName={target.name}

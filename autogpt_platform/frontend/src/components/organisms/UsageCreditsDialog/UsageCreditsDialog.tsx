@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -19,9 +20,10 @@ export function UsageCreditsDialog({
   onOpenChange,
   showBillingLink = true,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <Dialog
-      title="How usage and credits work"
+      title={t("How usage and credits work", "用量与积分说明")}
       variant="compact"
       controlled={{ isOpen, set: onOpenChange }}
       className="max-w-xl"
@@ -41,7 +43,7 @@ export function UsageCreditsDialog({
                 }
                 onClick={() => onOpenChange(false)}
               >
-                Go to billing settings
+                {t("Go to billing settings", "前往账单设置")}
               </Button>
             </div>
           )}

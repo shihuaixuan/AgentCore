@@ -122,14 +122,24 @@ export function SelectedTemplateView({
               />
             )}
 
-            <RunDetailCard title={`${templateOrTrigger} Details`}>
+            <RunDetailCard
+              title={t(
+                `${templateOrTrigger} Details`,
+                agent.trigger_setup_info ? "触发器详情" : "模板详情",
+              )}
+            >
               <div className="flex flex-col gap-2">
                 <Input
                   id="template-name"
                   label={t("Name", "名称")}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder={`Enter ${templateOrTrigger.toLowerCase()} name`}
+                  placeholder={t(
+                    `Enter ${templateOrTrigger.toLowerCase()} name`,
+                    agent.trigger_setup_info
+                      ? "输入触发器名称"
+                      : "输入模板名称",
+                  )}
                 />
 
                 <Input
@@ -139,7 +149,12 @@ export function SelectedTemplateView({
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder={`Enter ${templateOrTrigger.toLowerCase()} description`}
+                  placeholder={t(
+                    `Enter ${templateOrTrigger.toLowerCase()} description`,
+                    agent.trigger_setup_info
+                      ? "输入触发器说明"
+                      : "输入模板说明",
+                  )}
                 />
               </div>
             </RunDetailCard>

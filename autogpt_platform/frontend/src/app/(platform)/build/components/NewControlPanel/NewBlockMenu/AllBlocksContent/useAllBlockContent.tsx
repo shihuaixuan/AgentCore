@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV2GetBuilderBlockCategoriesQueryKey,
   getV2GetBuilderBlocks,
@@ -11,6 +12,7 @@ import { useState } from "react";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 
 export const useAllBlockContent = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [loadingCategories, setLoadingCategories] = useState<Set<string>>(
     new Set(),
@@ -75,8 +77,8 @@ export const useAllBlockContent = () => {
       Sentry.captureException(error);
       setErrorLoadingCategories((prev) => new Set(prev).add(targetCategory));
       toast({
-        title: "Error loading blocks",
-        description: "Please try again later",
+        title: t("Error loading blocks", "加载模块失败"),
+        description: t("Please try again later", "请稍后重试"),
         variant: "destructive",
       });
     } finally {

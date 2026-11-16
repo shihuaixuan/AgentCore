@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import Link from "next/link";
 import { Alert02Icon } from "@hugeicons/core-free-icons";
 
@@ -24,6 +26,7 @@ export function SecretPasteNotice({
   assistantName,
   className,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       role="status"
@@ -38,18 +41,19 @@ export function SecretPasteNotice({
             </AttentionCard.Icon>
             <AttentionCard.Content asChild>
               <span>
-                This looks like an API key or other secret. Anything you send
-                here is saved in the chat. To let {assistantName} use a key, add
-                it under{" "}
+                {t(
+                  `This looks like an API key or other secret. Anything you send here is saved in the chat. To let ${assistantName} use a key, add it under `,
+                  `这看起来像 API 密钥或其他机密。你在此发送的所有内容都会保存在对话中。若要让 ${assistantName} 使用密钥，请将其添加到`,
+                )}
                 <Link
                   href="/settings/integrations"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium underline underline-offset-2"
                 >
-                  Integrations
+                  {t("Integrations", "集成服务")}
                 </Link>{" "}
-                instead.
+                {t("instead.", "设置中。")}
               </span>
             </AttentionCard.Content>
           </AttentionCard.Row>

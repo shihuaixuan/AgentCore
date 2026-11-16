@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Calendar03Icon } from "@hugeicons/core-free-icons";
 import type { HomeUpcomingTask } from "@/app/api/__generated__/models/homeUpcomingTask";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -11,6 +13,7 @@ interface Props {
 }
 
 export function UpcomingRow({ item }: Props) {
+  const { t, locale } = useTranslation();
   return (
     <div
       // oxlint-disable-next-line design-system/no-arbitrary-values -- the 60px indent lines the row up with the timeline column; the spacing scale has 14 (56px) and 16 (64px)
@@ -34,7 +37,7 @@ export function UpcomingRow({ item }: Props) {
             (item.kind === "followup" ? "Follow-up" : "Scheduled task")}
           <span aria-hidden="true"> · </span>
           <span className="tabular-nums">
-            {formatUntil(item.next_run_time)}
+            {formatUntil(item.next_run_time, undefined, t, locale)}
           </span>
         </Text>
       </div>

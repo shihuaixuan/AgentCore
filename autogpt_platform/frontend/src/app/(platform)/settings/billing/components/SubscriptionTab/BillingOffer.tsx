@@ -40,8 +40,11 @@ export function BillingOffer({ controller }: Props) {
     return (
       <SupportOffer
         eyebrow="AutoGPT Pro"
-        title="Pro is active"
-        description="Pro is active. Pick up where you left off with your conversations and workflows."
+        title={t("Pro is active", "Pro 已启用")}
+        description={t(
+          "Pro is active. Pick up where you left off with your conversations and workflows.",
+          "Pro 已启用。继续之前的对话和工作流。",
+        )}
         label={t("Back to your work", "返回你的工作")}
         href="/copilot"
         ready
@@ -50,16 +53,22 @@ export function BillingOffer({ controller }: Props) {
   if (!canUpgrade || !target)
     return (
       <SupportOffer
-        eyebrow="Your plan"
+        eyebrow={t("Your plan", "你的套餐")}
         title={t("Need more capacity?", "需要更多容量？")}
         description={
           experience.tier === "ENTERPRISE"
-            ? "For additional capacity or changes to your plan, your account team is ready to help."
-            : "When your work calls for more capacity, talk with us about what you need."
+            ? t(
+                "For additional capacity or changes to your plan, your account team is ready to help.",
+                "如需增加容量或更改套餐，你的客户团队随时可以提供帮助。",
+              )
+            : t(
+                "When your work calls for more capacity, talk with us about what you need.",
+                "当工作需要更多容量时，请联系我们讨论你的需求。",
+              )
         }
         label={
           experience.tier === "ENTERPRISE"
-            ? "Contact account team"
+            ? t("Contact account team", "联系客户团队")
             : t("Contact us", "联系我们")
         }
         href={
@@ -69,9 +78,9 @@ export function BillingOffer({ controller }: Props) {
     );
   const price =
     isTrial && trial?.offer
-      ? `${formatOfferPrice(trial.offer.unit_amount, trial.offer.currency)} / ${trial.offer.billing_cycle === "yearly" ? "year" : "month"}`
+      ? `${formatOfferPrice(trial.offer.unit_amount, trial.offer.currency)} / ${trial.offer.billing_cycle === "yearly" ? t("year", "年") : t("month", "月")}`
       : controller?.offerPriceCents !== undefined
-        ? `${formatCents(controller.offerPriceCents)} / ${controller.plan?.billingCycle === "yearly" ? "year" : "month"}`
+        ? `${formatCents(controller.offerPriceCents)} / ${controller.plan?.billingCycle === "yearly" ? t("year", "年") : t("month", "月")}`
         : null;
   const multipliers = subscription?.tier_multipliers;
   const multiplier =
@@ -80,28 +89,58 @@ export function BillingOffer({ controller }: Props) {
       : null;
   const benefits = isTrial
     ? [
-        "A full daily and weekly allowance once payment goes through",
-        "Your chats, workflows and files stay where they are",
+        t(
+          "A full daily and weekly allowance once payment goes through",
+          "支付成功后即可获得完整的每日和每周额度",
+        ),
+        t(
+          "Your chats, workflows and files stay where they are",
+          "你的聊天、工作流和文件将保留原位",
+        ),
       ]
     : target === "Max"
       ? [
           multiplier
-            ? `${multiplier}× the usage of Pro`
-            : "More room for demanding work",
-          "More workspace storage and priority support",
+            ? t(`${multiplier}× the usage of Pro`, `Pro ${multiplier} 倍的用量`)
+            : t("More room for demanding work", "更多用量，满足高负载工作需求"),
+          t(
+            "More workspace storage and priority support",
+            "更多工作区存储空间和优先支持",
+          ),
         ]
       : [
-          "Experts for content, sales and research, with Otto coordinating",
-          "Workflows that keep working in the background on a schedule",
+          t(
+            "Experts for content, sales and research, with Otto coordinating",
+            "由 Otto 协调的内容、销售和研究专家",
+          ),
+          t(
+            "Workflows that keep working in the background on a schedule",
+            "按计划在后台持续运行的工作流",
+          ),
         ];
   const quiet =
     isTrial &&
     getUsageStatus(getFeaturedUsagePercent(experience, usage)) === "plenty";
+  const trialEnd = experience.trialEndsAt
+    ? new Date(experience.trialEndsAt)
+    : null;
+  const trialEndDate =
+    trialEnd && Number.isFinite(trialEnd.getTime())
+      ? trialEnd.toLocaleDateString("zh-CN", { month: "short", day: "numeric" })
+      : null;
   const title = quiet
-    ? formatTrialStartTitle(experience.trialEndsAt)
+    ? t(
+        formatTrialStartTitle(experience.trialEndsAt),
+        trialEndDate
+          ? `Pro 将于 ${trialEndDate} 启用`
+          : "Pro 将在试用结束时启用",
+      )
     : isTrial
-      ? "Start Pro now"
-      : `${experience.tier === "NO_TIER" ? "Start" : "Upgrade to"} ${target}`;
+      ? t("Start Pro now", "立即启用 Pro")
+      : t(
+          `${experience.tier === "NO_TIER" ? "Start" : "Upgrade to"} ${target}`,
+          `${experience.tier === "NO_TIER" ? "开始使用" : "升级至"} ${target}`,
+        );
   return (
     <BillingPlanOffer
       target={target}
@@ -110,15 +149,23 @@ export function BillingOffer({ controller }: Props) {
       description={
         isTrial && experience.freshProUsage
           ? quiet
-            ? "Your trial keeps going until then. You can also start today."
-            : formatTrialStartDescription(experience.trialEndsAt)
+            ? t(
+                "Your trial keeps going until then. You can also start today.",
+                "试用将持续至该时间。你也可以今天就开始订阅。",
+              )
+            : t(
+                formatTrialStartDescription(experience.trialEndsAt),
+                trialEndDate
+                  ? `Pro 将于 ${trialEndDate} 自动启用。立即启用即可在今天继续工作。`
+                  : "Pro 将在试用结束时自动启用。立即启用即可在今天继续工作。",
+              )
           : undefined
       }
       price={price}
       benefits={benefits}
       actionLabel={
         quiet
-          ? "Start Pro now"
+          ? t("Start Pro now", "立即启用 Pro")
           : isTrial && price
             ? `${title} · ${price.split(" / ")[0]}`
             : title
@@ -135,10 +182,16 @@ export function BillingOffer({ controller }: Props) {
       }
       caption={
         isTrial
-          ? "Starting now ends your trial early. You’ll review the charge first."
+          ? t(
+              "Starting now ends your trial early. You’ll review the charge first.",
+              "立即开始订阅将提前结束试用。付款前你可以先查看费用。",
+            )
           : target === "Max"
-            ? "What you’ve already used counts toward Max’s higher limit."
-            : "Review your options before paying."
+            ? t(
+                "What you’ve already used counts toward Max’s higher limit.",
+                "已使用的用量会计入 Max 的更高额度。",
+              )
+            : t("Review your options before paying.", "付款前先查看可选方案。")
       }
     />
   );

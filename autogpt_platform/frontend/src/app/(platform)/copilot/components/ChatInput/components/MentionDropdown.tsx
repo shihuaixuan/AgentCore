@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { getFileTypeIcon } from "@/app/(platform)/artifacts/components/ArtifactsList/helpers";
 import { folderSummary } from "@/app/(platform)/artifacts/components/WorkspaceFolders/folderTree";
 import type { WorkspaceFileItem } from "@/app/api/__generated__/models/workspaceFileItem";
@@ -50,6 +52,7 @@ export function MentionDropdown({
   onSelect,
   onHighlight,
 }: Props) {
+  const { t } = useTranslation();
   const resultCount = options.filter(
     (option) => option.kind !== "connect",
   ).length;
@@ -101,7 +104,7 @@ export function MentionDropdown({
     return (
       <div
         role="listbox"
-        aria-label="Skill commands"
+        aria-label={t("Skill commands", "技能命令")}
         onMouseDown={(e) => e.preventDefault()}
         className="absolute bottom-full left-0 z-50 mb-2 max-h-80 w-80 max-w-full overflow-y-auto rounded-2xl border border-border-base bg-surface p-1.5 shadow-md"
       >
@@ -118,11 +121,11 @@ export function MentionDropdown({
         {isLoading ? (
           <p className="flex items-center gap-2 px-3 py-2 text-body text-foreground-tertiary">
             <Icon icon={Loading03Icon} className="h-4 w-4 shrink-0" />
-            Loading skills…
+            {t("Loading skills…", "正在加载技能…")}
           </p>
         ) : options.length === 0 ? (
           <p className="px-3 py-2 text-body text-foreground-tertiary">
-            No matching skills.
+            {t("No matching skills.", "没有匹配的技能。")}
           </p>
         ) : null}
       </div>
@@ -132,7 +135,7 @@ export function MentionDropdown({
   return (
     <div
       role="listbox"
-      aria-label="Mention suggestions"
+      aria-label={t("Mention suggestions", "引用建议")}
       // preventDefault on mousedown keeps focus in the textarea when clicking
       // non-interactive areas (padding, empty/loading/error states) so the
       // textarea's onBlur doesn't close the dropdown before a selection.
@@ -140,7 +143,9 @@ export function MentionDropdown({
       className="absolute bottom-full left-0 z-50 mb-2 flex max-h-96 w-80 max-w-full flex-col overflow-hidden rounded-2xl border border-border-base bg-surface shadow-md"
     >
       <div className="min-h-0 flex-1 overflow-y-auto p-1.5">
-        {showHeadings && <SectionHeading label="Integrations" />}
+        {showHeadings && (
+          <SectionHeading label={t("Integrations", "集成服务")} />
+        )}
         {options.map((option, index) =>
           option.kind === "integration"
             ? renderOption(
@@ -150,7 +155,7 @@ export function MentionDropdown({
               )
             : null,
         )}
-        {showFilesHeading && <SectionHeading label="Files" />}
+        {showFilesHeading && <SectionHeading label={t("Files", "文件")} />}
         {options.map((option, index) => {
           if (option.kind === "folder") {
             const count = folderSummary(
@@ -161,7 +166,10 @@ export function MentionDropdown({
               option,
               index,
               <FolderOption folder={option.folder} count={count} />,
-              `Folder ${option.folder.name}, ${count}`,
+              t(
+                `Folder ${option.folder.name}, ${count}`,
+                `文件夹 ${option.folder.name}，${count}`,
+              ),
             );
           }
           if (option.kind === "file") {
@@ -176,17 +184,26 @@ export function MentionDropdown({
         {isError ? (
           <p className="flex items-center gap-2 px-3 py-2 text-body text-error-foreground">
             <Icon icon={AlertCircleIcon} className="h-4 w-4 shrink-0" />
-            Couldn&apos;t load files. Try again.
+            {t("Couldn't load files. Try again.", "无法加载文件，请重试。")}
           </p>
         ) : isLoading ? (
           <p className="flex items-center gap-2 px-3 py-2 text-body text-foreground-tertiary">
             <Icon icon={Loading03Icon} spin className="h-4 w-4 shrink-0" />
-            Searching files…
+            {t("Searching files…", "正在搜索文件…")}
           </p>
         ) : null}
         {showEmpty && (
           <p className="px-3 py-2 text-body text-foreground-tertiary">
-            {emptyMessage(showFiles, hasIntegrations)}
+            {t(
+              emptyMessage(showFiles, hasIntegrations),
+              showFiles
+                ? hasIntegrations
+                  ? "没有匹配的文件或集成服务。"
+                  : "没有匹配的文件。"
+                : hasIntegrations
+                  ? "没有匹配的集成服务。"
+                  : "尚无可引用的已连接集成服务。",
+            )}
           </p>
         )}
       </div>
@@ -208,17 +225,21 @@ export function MentionDropdown({
 }
 
 function ConnectOption({ query }: { query: string }) {
+  const { t } = useTranslation();
   const search = query.trim();
   return (
     <>
       <Icon icon={PlugSocketIcon} tone="primary" className="h-4 w-4 shrink-0" />
       <span className="min-w-0 flex-1">
         <span className="block truncate font-medium">
-          Connect an integration
+          {t("Connect an integration", "连接集成服务")}
         </span>
         {search && (
           <span className="block truncate text-caption text-foreground-tertiary">
-            Search services for “{search}”
+            {t(
+              `Search services for “${search}”`,
+              `搜索与“${search}”相关的服务`,
+            )}
           </span>
         )}
       </span>

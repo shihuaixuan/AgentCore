@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   LinkSquare01Icon,
   PlayIcon,
@@ -27,6 +29,7 @@ export function ExecutionCard({
   variant = "run",
   run,
 }: Props) {
+  const { t } = useTranslation();
   const live = useLiveRunStatus(
     run
       ? { graph_id: run.graphID, execution_id: run.executionID, status }
@@ -59,7 +62,9 @@ export function ExecutionCard({
           <Link
             href={href}
             aria-label={
-              variant === "agent" ? "Open workflow" : "Open execution"
+              variant === "agent"
+                ? t("Open workflow", "打开工作流")
+                : t("Open execution", "打开运行记录")
             }
             className="shrink-0 rounded-full p-1 text-foreground-subtle transition-colors hover:bg-surface-hover hover:text-foreground-body"
           >

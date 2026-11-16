@@ -167,7 +167,7 @@ export function ExpertComputerSection({ expertId, expertName }: Props) {
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <DetailTile icon={ComputerTerminalIcon} label="Machine">
+        <DetailTile icon={ComputerTerminalIcon} label={t("Machine", "机器")}>
           {box
             ? formatSandboxState(box)
             : "Created on the first message that runs a command."}

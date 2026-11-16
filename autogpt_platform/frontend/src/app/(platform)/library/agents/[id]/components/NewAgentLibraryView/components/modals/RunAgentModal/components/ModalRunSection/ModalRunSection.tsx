@@ -48,7 +48,10 @@ export function ModalRunSection() {
       defaultRunType === "manual-trigger" ? (
         <ModalSection
           title={t("Task Trigger", "任务触发器")}
-          subtitle="Set up a trigger for the workflow to run this task automatically"
+          subtitle={t(
+            "Set up a trigger for the workflow to run this task automatically",
+            "设置触发器，让工作流自动执行此任务",
+          )}
         >
           <WebhookTriggerBanner />
           <div className="flex flex-col gap-4">
@@ -99,7 +102,10 @@ export function ModalRunSection() {
       {triggerConfigFieldEntries.length > 0 ? (
         <ModalSection
           title={t("Trigger Configuration", "触发器配置")}
-          subtitle="Configure what this trigger listens for"
+          subtitle={t(
+            "Configure what this trigger listens for",
+            "配置此触发器监听的事件",
+          )}
         >
           {triggerConfigFieldEntries.map(([key, inputSubSchema]) => (
             <RunAgentInputs
@@ -117,7 +123,10 @@ export function ModalRunSection() {
       {inputFields.length > 0 ? (
         <ModalSection
           title={t("Task Inputs", "任务输入")}
-          subtitle="Enter the information you want to provide to the workflow for this task"
+          subtitle={t(
+            "Enter the information you want to provide to the workflow for this task",
+            "输入此任务需要提供给工作流的信息",
+          )}
         >
           {inputFields.map(([key, inputSubSchema]) => (
             <RunAgentInputs
@@ -135,7 +144,10 @@ export function ModalRunSection() {
       {credentialFields.length > 0 ? (
         <ModalSection
           title={t("Task Credentials", "任务凭据")}
-          subtitle="These are the credentials the workflow will use to perform this task"
+          subtitle={t(
+            "These are the credentials the workflow will use to perform this task",
+            "这些是工作流执行此任务时使用的凭据",
+          )}
         >
           <CredentialsGroupedView
             credentialFields={credentialFields}

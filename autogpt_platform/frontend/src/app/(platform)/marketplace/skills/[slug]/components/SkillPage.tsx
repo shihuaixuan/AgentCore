@@ -154,7 +154,7 @@ export function SkillPage({ slug }: Props) {
           <span aria-hidden>·</span>
           <span>
             {skill.install_count === 0
-              ? "New"
+              ? t("New", "新建")
               : `${skill.install_count.toLocaleString()} installed`}
           </span>
           {skill.updated_at ? (
@@ -211,7 +211,10 @@ export function SkillPage({ slug }: Props) {
           title={t("Instructions", "说明")}
           description={
             skill.body.trim()
-              ? "Instructions your experts follow when using this skill."
+              ? t(
+                  "Instructions your experts follow when using this skill.",
+                  "专家使用此技能时遵循的操作说明。",
+                )
               : t("This skill has no instructions yet.", "此技能尚无说明。")
           }
         >

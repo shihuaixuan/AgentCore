@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { SwapFade } from "@/components/atoms/SwapFade/SwapFade";
@@ -21,6 +23,7 @@ export function ModeSwitchLink({
   onRecordInstead,
   onTypeInsteadOfRecovered,
 }: Props) {
+  const { t } = useTranslation();
   if (screen !== "typing" && screen !== "failed" && screen !== "recovery") {
     return null;
   }
@@ -30,17 +33,21 @@ export function ModeSwitchLink({
       <SwapFade swapKey={screen}>
         {screen === "failed" && (
           <LinkButton onClick={onTypeInstead}>
-            {submittedMode === "typed" ? "edit your text" : "type instead"}
+            {submittedMode === "typed"
+              ? t("edit your text", "编辑文字")
+              : t("type instead", "改用文字")}
           </LinkButton>
         )}
         {/* Kept while the microphone is refused: it asks the browser again
             rather than going back to an orb that would only be refused. */}
         {screen === "typing" && (
-          <LinkButton onClick={onRecordInstead}>record instead</LinkButton>
+          <LinkButton onClick={onRecordInstead}>
+            {t("record instead", "改用录音")}
+          </LinkButton>
         )}
         {screen === "recovery" && (
           <LinkButton onClick={onTypeInsteadOfRecovered}>
-            type instead
+            {t("type instead", "改用文字")}
           </LinkButton>
         )}
       </SwapFade>

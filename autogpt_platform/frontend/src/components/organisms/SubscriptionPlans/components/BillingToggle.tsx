@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { cn } from "@/lib/utils";
 import type { SubscriptionPlansProps } from "../helpers";
@@ -5,10 +8,11 @@ import type { SubscriptionPlansProps } from "../helpers";
 type Props = Pick<SubscriptionPlansProps, "billing" | "onBillingChange">;
 
 export function BillingToggle({ billing, onBillingChange }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       role="group"
-      aria-label="Billing period"
+      aria-label={t("Billing period", "计费周期")}
       data-slot="billing-toggle"
       className="mt-3 flex rounded-full border border-border-base bg-surface-hover p-1"
     >
@@ -28,13 +32,15 @@ export function BillingToggle({ billing, onBillingChange }: Props) {
               : "text-foreground-tertiary",
           )}
         >
-          {cycle === "monthly" ? "Monthly billing" : "Yearly billing"}
+          {cycle === "monthly"
+            ? t("Monthly billing", "按月计费")
+            : t("Yearly billing", "按年计费")}
           {cycle === "yearly" && (
             <span
               data-slot="billing-toggle-savings"
               className="text-caption text-success"
             >
-              Save 15%
+              {t("Save 15%", "节省 15%")}
             </span>
           )}
         </Button>

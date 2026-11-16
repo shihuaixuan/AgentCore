@@ -1,6 +1,7 @@
 "use client";
 
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getFireSummary } from "./helpers";
 import {
   FireExpertFooter,
@@ -23,6 +24,7 @@ export function FireExpertDialog({
   onClose,
   onFired,
 }: Props) {
+  const { t } = useTranslation();
   const {
     preview,
     isPreviewLoading,
@@ -52,13 +54,18 @@ export function FireExpertDialog({
       variant="compact"
       controlled={{ isOpen: open, set: handleOpenChange }}
       styling={{ maxWidth: "30rem" }}
-      title={`Fire ${expertName}?`}
+      title={t(`Fire ${expertName}?`, `解雇 ${expertName}？`)}
     >
       <Dialog.Content>
         <div className="flex flex-col gap-4">
           <FireExpertPreview
             expertName={expertName}
-            automationLine={summary.automationLine}
+            automationLine={t(
+              summary.automationLine,
+              summary.items.length === 0
+                ? "不会暂停任何自动化任务。"
+                : `将暂停 ${summary.items.length} 项自动化任务。`,
+            )}
             items={summary.items}
             isLoading={isPreviewLoading}
             isError={isPreviewError}

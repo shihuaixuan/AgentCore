@@ -25,12 +25,20 @@ export function SummaryCard({
         </Text>
         <Text variant="small" as="span" tone="muted">
           {isAutoPilot
-            ? "Ask Otto what it knows about you. Opens a chat — you can correct or forget anything from there."
-            : `Ask ${scopeName} what they know about you and their work. Opens a chat.`}
+            ? t(
+                "Ask Otto what it knows about you. Opens a chat — you can correct or forget anything from there.",
+                "询问 Otto 对你的了解。这会打开聊天，你可以在其中纠正内容或让 Otto 忘记任何信息。",
+              )
+            : t(
+                `Ask ${scopeName} what they know about you and their work. Opens a chat.`,
+                `询问 ${scopeName} 对你和工作内容的了解。这会打开聊天。`,
+              )}
         </Text>
       </div>
       <Button variant="primary" size="small" onClick={onViewSummary}>
-        {isAutoPilot ? "View my summary" : `View ${scopeName}'s summary`}
+        {isAutoPilot
+          ? t("View my summary", "查看我的摘要")
+          : t(`View ${scopeName}'s summary`, `查看 ${scopeName} 的摘要`)}
       </Button>
     </div>
   );

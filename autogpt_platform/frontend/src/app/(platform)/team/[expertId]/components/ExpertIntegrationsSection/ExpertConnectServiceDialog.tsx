@@ -205,8 +205,14 @@ export function ExpertConnectServiceDialog({
                               {query.trim()
                                 ? `No services match "${query.trim()}"`
                                 : filter === "connected"
-                                  ? "No services connected yet."
-                                  : "No services available."}
+                                  ? t(
+                                      "No services connected yet.",
+                                      "尚未连接任何服务。",
+                                    )
+                                  : t(
+                                      "No services available.",
+                                      "暂无可用服务。",
+                                    )}
                             </Text>
                           </div>
                         ) : (

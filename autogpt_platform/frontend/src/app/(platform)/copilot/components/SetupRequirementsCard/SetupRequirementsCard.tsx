@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { useStableCallback } from "@/hooks/useStableCallback";
 import type { SetupRequirementsResponse } from "@/app/api/__generated__/models/setupRequirementsResponse";
 import { Button } from "@/components/atoms/Button/Button";
@@ -73,6 +75,7 @@ export function SetupRequirementsCard({
   inputsMode = "edit",
   onComplete,
 }: Props) {
+  const { t } = useTranslation();
   const { onSend } = useCopilotChatActions();
   const chainActions = useContext(ChainActionsContext);
   const actionId = useId();
@@ -325,7 +328,11 @@ export function SetupRequirementsCard({
   ]);
 
   if (hasSent || (!chainActions && canAutoDismiss)) {
-    return <ContentMessage>Connected. Continuing…</ContentMessage>;
+    return (
+      <ContentMessage>
+        {t("Connected. Continuing…", "已连接，正在继续…")}
+      </ContentMessage>
+    );
   }
 
   return (
@@ -341,7 +348,9 @@ export function SetupRequirementsCard({
           <div className="w-fit border-b">
             <Text tone="muted" variant="small">
               {credentialsLabel ??
-                (isEditMode ? "Credentials" : "Workflow credentials")}
+                (isEditMode
+                  ? t("Credentials", "凭据")
+                  : t("Workflow credentials", "工作流凭据"))}
             </Text>
           </div>
           <div className="mt-6">
@@ -362,7 +371,7 @@ export function SetupRequirementsCard({
         <div className="rounded-2xl border bg-canvas p-3 pt-4">
           <div className="w-fit border-b">
             <Text tone="muted" variant="small">
-              Inputs
+              {t("Inputs", "输入参数")}
             </Text>
           </div>
           {inputSchema && (
@@ -388,7 +397,9 @@ export function SetupRequirementsCard({
               className="text-caption text-foreground-tertiary underline"
               onClick={() => setShowAdvanced((v) => !v)}
             >
-              {showAdvanced ? "Hide advanced fields" : "Show advanced fields"}
+              {showAdvanced
+                ? t("Hide advanced fields", "隐藏高级字段")
+                : t("Show advanced fields", "显示高级字段")}
             </button>
           )}
         </div>
@@ -396,7 +407,9 @@ export function SetupRequirementsCard({
 
       {!isEditMode && expectedInputs.length > 0 && (
         <div className="rounded-2xl border bg-canvas p-3">
-          <ContentCardTitle size="small">Expected inputs</ContentCardTitle>
+          <ContentCardTitle size="small">
+            {t("Expected inputs", "预期输入")}
+          </ContentCardTitle>
           <div className="mt-2 grid gap-2">
             {expectedInputs.map((input) => (
               <div key={input.name} className="rounded-xl border p-2">
@@ -405,7 +418,9 @@ export function SetupRequirementsCard({
                     {input.title}
                   </ContentCardTitle>
                   <ContentBadge>
-                    {input.required ? "Required" : "Optional"}
+                    {input.required
+                      ? t("Required", "必填")
+                      : t("Optional", "选填")}
                   </ContentBadge>
                 </div>
                 {input.description && (
@@ -427,7 +442,7 @@ export function SetupRequirementsCard({
           disabled={!canRun}
           onClick={handleRun}
         >
-          Proceed
+          {t("Proceed", "继续")}
         </Button>
       )}
     </div>

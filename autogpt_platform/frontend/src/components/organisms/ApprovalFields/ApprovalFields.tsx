@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useState } from "react";
 import { Button } from "@/components/atoms/Button/Button";
@@ -36,6 +37,7 @@ export function ApprovalFields({
   references = [],
   referenceTotals = {},
 }: Props) {
+  const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
   const specs = new Map(fields.map((f) => [f.key, f]));
   const ordered = visibleKeys({
@@ -95,7 +97,9 @@ export function ApprovalFields({
           className="self-start"
           onClick={() => setShowAll(true)}
         >
-          Show {more} more
+          {t("Show", "显示")}
+          {more}
+          {t("more", "更多")}
         </Button>
       )}
     </div>

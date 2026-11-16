@@ -175,7 +175,10 @@ export function SelectedRunView({
                             </Text>
                             <InformationTooltip
                               iconSize={20}
-                              description="This AI-generated summary describes how the workflow handled your task. It's an experimental feature and may occasionally be inaccurate."
+                              description={t(
+                                "This AI-generated summary describes how the workflow handled your task. It's an experimental feature and may occasionally be inaccurate.",
+                                "这份 AI 生成的摘要描述了工作流处理任务的过程。这是一项实验性功能，偶尔可能不准确。",
+                              )}
                             />
                           </div>
                         }
@@ -219,7 +222,10 @@ export function SelectedRunView({
                           </Text>
                           <InformationTooltip
                             iconSize={20}
-                            description="This is the input that was provided to the workflow for running this task."
+                            description={t(
+                              "This is the input that was provided to the workflow for running this task.",
+                              "这是执行此任务时提供给工作流的输入。",
+                            )}
                           />
                         </div>
                       }

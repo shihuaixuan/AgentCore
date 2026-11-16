@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { ActivationResponse } from "@/app/api/__generated__/models/activationResponse";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -28,6 +31,7 @@ export function ActivationStatus({
   check,
   close,
 }: Props) {
+  const { t } = useTranslation();
   const url = invoiceURL(attempt?.hosted_invoice_url);
   const payment =
     attempt?.status === "payment_required" ||
@@ -59,17 +63,38 @@ export function ActivationStatus({
         <Text variant="body" tone="body">
           {isReady
             ? hasFreshUsage
-              ? `Your ${plan} plan is active with fresh daily and weekly allowances. Your conversations and work are right where you left them.`
-              : `Your ${plan} plan is active. Your existing usage still counts toward your plan’s limits.`
+              ? t(
+                  `Your ${plan} plan is active with fresh daily and weekly allowances. Your conversations and work are right where you left them.`,
+                  `你的 ${plan} 套餐已启用，每日和每周额度已重置。对话和工作内容均保留在原处。`,
+                )
+              : t(
+                  `Your ${plan} plan is active. Your existing usage still counts toward your plan’s limits.`,
+                  `你的 ${plan} 套餐已启用。已使用的额度仍计入套餐额度上限。`,
+                )
             : notApplicable
-              ? "This activation no longer applies to your current plan. Check Billing for your current plan and payment details."
+              ? t(
+                  "This activation no longer applies to your current plan. Check Billing for your current plan and payment details.",
+                  "此次激活已不适用于当前套餐。请前往账单设置查看当前套餐和付款详情。",
+                )
               : payment
-                ? "Complete payment securely with Stripe using your existing invoice. It opens in a new tab, keeping your draft here while we check your activation."
+                ? t(
+                    "Complete payment securely with Stripe using your existing invoice. It opens in a new tab, keeping your draft here while we check your activation.",
+                    "请通过现有账单在 Stripe 安全完成付款。页面将在新标签页打开；我们检查激活状态时，你的草稿会保留在此处。",
+                  )
                 : failed
-                  ? "This payment was canceled or could not be completed. Your usage has not been reset."
+                  ? t(
+                      "This payment was canceled or could not be completed. Your usage has not been reset.",
+                      "此次付款已取消或未能完成，用量额度尚未重置。",
+                    )
                   : needsSupport
-                    ? "We need to verify your existing payment before you can continue. Contact support; please don’t start another purchase."
-                    : `We’re confirming your payment and preparing your ${plan} allowance. You can close this window; we’ll keep checking.`}
+                    ? t(
+                        "We need to verify your existing payment before you can continue. Contact support; please don’t start another purchase.",
+                        "继续前需要核实现有付款。请联系客服，暂时不要再次购买。",
+                      )
+                    : t(
+                        `We’re confirming your payment and preparing your ${plan} allowance. You can close this window; we’ll keep checking.`,
+                        `正在确认付款并准备你的 ${plan} 额度。你可以关闭此窗口，我们会继续检查。`,
+                      )}
         </Text>
       </div>
       {notApplicable && (
@@ -80,7 +105,7 @@ export function ActivationStatus({
           className="w-full"
           onClick={close}
         >
-          View my plan
+          {t("View my plan", "查看我的套餐")}
         </Button>
       )}
       {url && payment && (
@@ -93,8 +118,8 @@ export function ActivationStatus({
           className="w-full"
         >
           {attempt?.status === "action_required"
-            ? "Verify payment securely"
-            : "Complete payment securely"}
+            ? t("Verify payment securely", "安全验证付款")
+            : t("Complete payment securely", "安全完成付款")}
         </Button>
       )}
       {needsSupport && (
@@ -104,7 +129,7 @@ export function ActivationStatus({
           variant="primary"
           className="w-full"
         >
-          Contact support
+          {t("Contact support", "联系客服")}
         </Button>
       )}
       <Button
@@ -115,10 +140,10 @@ export function ActivationStatus({
         className="w-full"
       >
         {isReady
-          ? "Continue where you left off"
+          ? t("Continue where you left off", "返回并继续工作")
           : failed || notApplicable
-            ? "Back to your work"
-            : "Check activation status"}
+            ? t("Back to your work", "返回工作")
+            : t("Check activation status", "检查激活状态")}
       </Button>
     </div>
   );

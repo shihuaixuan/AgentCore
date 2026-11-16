@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import {
   useGetV1ListCredentials,
@@ -20,6 +21,7 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useIntegrationsSelection } from "./useIntegrationsSelection";
 
 export function useIntegrationsList(query: string) {
+  const { t } = useTranslation();
   const debouncedQuery = useDebouncedValue(query, 250);
 
   const credentialsQuery = useGetV1ListCredentials({
@@ -39,6 +41,7 @@ export function useIntegrationsList(query: string) {
   const allProviders: ProviderGroupView[] = groupCredentialsByProvider(
     credentials,
     blockServiceKeys(providersQuery.data ?? []),
+    t,
   );
   const providers = filterProviders(allProviders, debouncedQuery);
 

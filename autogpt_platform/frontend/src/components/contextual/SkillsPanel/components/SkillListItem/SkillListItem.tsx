@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { CopilotSkillInfo } from "@/app/api/__generated__/models/copilotSkillInfo";
 import { Badge } from "@/components/atoms/Badge/Badge";
@@ -23,6 +24,8 @@ interface Props {
 }
 
 export function SkillListItem({ skill, isNew = false }: Props) {
+  const { t } = useTranslation();
+
   const {
     descriptionPreview,
     triggers,
@@ -60,7 +63,7 @@ export function SkillListItem({ skill, isNew = false }: Props) {
             {isNew && (
               <span data-testid="skill-new-badge">
                 <Badge variant="success" size="small">
-                  New
+                  {t("New", "新建")}
                 </Badge>
               </span>
             )}
@@ -92,7 +95,7 @@ export function SkillListItem({ skill, isNew = false }: Props) {
           size="icon"
           onClick={openView}
           data-testid="skill-view-button"
-          aria-label="View skill"
+          aria-label={t("View skill", "查看技能")}
         >
           <Icon icon={EyeIcon} className="h-4 w-4" />
         </Button>
@@ -102,7 +105,7 @@ export function SkillListItem({ skill, isNew = false }: Props) {
           onClick={handleDownload}
           loading={isDownloading}
           data-testid="skill-download-button"
-          aria-label="Download skill"
+          aria-label={t("Download skill", "下载技能")}
         >
           <Icon icon={Download04Icon} className="h-4 w-4" />
         </Button>
@@ -112,7 +115,7 @@ export function SkillListItem({ skill, isNew = false }: Props) {
           size="icon"
           onClick={openDelete}
           data-testid="skill-delete-button"
-          aria-label="Delete skill"
+          aria-label={t("Delete skill", "删除技能")}
         >
           <Icon icon={Delete02Icon} className="h-4 w-4" />
         </Button>
@@ -165,7 +168,10 @@ export function SkillListItem({ skill, isNew = false }: Props) {
                     data-testid="skill-view-files"
                   >
                     <Text variant="small" tone="muted">
-                      Package files ({detail?.files?.length ?? 0}):
+                      {t(
+                        `Package files (${detail?.files?.length ?? 0}):`,
+                        `技能包文件（${detail?.files?.length ?? 0}）：`,
+                      )}
                     </Text>
                     <ul className="flex flex-col gap-0.5 text-caption text-foreground-secondary">
                       {fileRows.map((row) => (
@@ -193,13 +199,15 @@ export function SkillListItem({ skill, isNew = false }: Props) {
       <Dialog
         controlled={{ isOpen: isDeleteOpen, set: closeDelete }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete skill"
+        title={t("Delete skill", "删除技能")}
       >
         <Dialog.Content>
           <div className="flex flex-col gap-4">
             <Text variant="large">
-              Delete the skill <strong>{skill.name}</strong> from your library?
-              You can create or upload it again later if needed.
+              {t(
+                `Delete the skill ${skill.name} from your library? You can create or upload it again later if needed.`,
+                `要从库中删除技能 ${skill.name} 吗？如有需要，之后可以重新创建或上传。`,
+              )}
             </Text>
             <Dialog.Footer>
               <Button
@@ -207,7 +215,7 @@ export function SkillListItem({ skill, isNew = false }: Props) {
                 disabled={isDeleting}
                 onClick={() => closeDelete(false)}
               >
-                Keep it
+                {t("Keep it", "保留")}
               </Button>
               <Button
                 variant="destructive"
@@ -215,7 +223,7 @@ export function SkillListItem({ skill, isNew = false }: Props) {
                 loading={isDeleting}
                 data-testid="skill-confirm-delete"
               >
-                Yes, delete
+                {t("Yes, delete", "确认删除")}
               </Button>
             </Dialog.Footer>
           </div>

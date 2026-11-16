@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/locale";
+
 type BudgetWindow = "daily" | "weekly" | "trial";
 type RecurringWindow = "daily" | "weekly";
 
@@ -55,11 +57,29 @@ export function getResetWait(budget?: UsageBudget | null): ResetWait | null {
   return { window: budget.window, resetsAt: budget.resetsAt };
 }
 
-export function budgetOutTitle(window: RecurringWindow) {
+export function budgetOutTitle(window: RecurringWindow, locale: Locale = "en") {
+  if (locale === "zh-CN")
+    return window === "weekly" ? "你已用完本周预算" : "你已用完今日预算";
   return `You’re out of budget for ${window === "weekly" ? "this week" : "today"}`;
 }
 
-export function budgetResetSentence(wait: ResetWait, now = new Date()) {
+export function budgetResetSentence(
+  wait: ResetWait,
+  now = new Date(),
+  locale: Locale = "en",
+) {
+  if (locale === "zh-CN") {
+    const clock = wait.resetsAt.toLocaleTimeString("zh-CN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    const day =
+      wait.window === "weekly"
+        ? `${wait.resetsAt.toLocaleDateString("zh-CN", { weekday: "long" })} `
+        : "";
+    return `预算将于${day}${clock}（${formatCountdown(wait.resetsAt, now, locale)}）重置。你仍可浏览、编辑工作流和查看结果。`;
+  }
   return `It resets ${formatResetMoment(wait, now)}. You can still browse, edit workflows and read results.`;
 }
 
@@ -85,8 +105,22 @@ export function formatWeekday(date: Date) {
   return date.toLocaleDateString(undefined, { weekday: "long" });
 }
 
-export function formatCountdown(date: Date, now = new Date()) {
+export function formatCountdown(
+  date: Date,
+  now = new Date(),
+  locale: Locale = "en",
+) {
   const minutes = Math.floor((date.getTime() - now.getTime()) / 60_000);
+  if (locale === "zh-CN") {
+    if (minutes < 1) return "不到 1 分钟后";
+    if (minutes < 60) return `${minutes} 分钟后`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) {
+      const rest = minutes % 60;
+      return rest ? `${hours} 小时 ${rest} 分钟后` : `${hours} 小时后`;
+    }
+    return `${Math.round(hours / 24)} 天后`;
+  }
   if (minutes < 1) return "in under a minute";
   if (minutes < 60) return `in ${minutes} min`;
   const hours = Math.floor(minutes / 60);

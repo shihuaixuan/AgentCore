@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { usePostV2PublishSkillToMarketplace } from "@/app/api/__generated__/endpoints/store/store";
 import { useGetV1ListProviders } from "@/app/api/__generated__/endpoints/integrations/integrations";
 import { formatProviderName } from "@/components/contextual/IntegrationsPanel/helpers";
@@ -10,6 +13,8 @@ interface Args {
 }
 
 export function usePublishSkillButton({ skillName }: Args) {
+  const { t } = useTranslation();
+
   const { toast } = useToast();
   const { categories } = useStoreCategories();
   const [isOpen, setIsOpen] = useState(false);
@@ -32,9 +37,11 @@ export function usePublishSkillButton({ skillName }: Args) {
       },
       onError: (error) =>
         toast({
-          title: "Couldn't publish this skill",
+          title: t("Couldn't publish this skill", "无法发布此技能"),
           description:
-            error instanceof Error ? error.message : "Please try again.",
+            error instanceof Error
+              ? error.message
+              : t("Please try again.", "请重试。"),
           variant: "destructive",
         }),
     },

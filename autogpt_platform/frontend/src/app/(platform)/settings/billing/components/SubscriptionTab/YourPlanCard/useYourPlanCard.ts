@@ -1,5 +1,5 @@
 "use client";
-
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -69,6 +69,7 @@ function getPreviousTier(current: string): SubscriptionTierRequestTier | null {
 }
 
 export function useYourPlanCard() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const [handledUpgrade, setHandledUpgrade] = useState(false);
@@ -337,7 +338,10 @@ export function useYourPlanCard() {
       title: "Downgrade scheduled",
       description: periodEnd
         ? `You keep ${plan.label} until ${periodEnd}, then switch to ${targetLabel}. No charge today.`
-        : `Your plan will switch to ${targetLabel} at the close of the current billing period. No charge today.`,
+        : t(
+            `Your plan will switch to ${targetLabel} at the close of the current billing period. No charge today.`,
+            `当前计费周期结束后，你的套餐将切换至 ${targetLabel}。今天不扣款。`,
+          ),
     });
   }
 
@@ -426,12 +430,18 @@ export function useYourPlanCard() {
       effectiveTier === "BUSINESS"
     ) {
       return pendingCycle === "yearly"
-        ? "Switch billing to Yearly?"
-        : "Switch billing to Monthly?";
+        ? t("Switch billing to Yearly?", "改为按年计费？")
+        : t("Switch billing to Monthly?", "改为按月计费？");
     }
     return pendingCycle === "yearly"
-      ? `Switch ${tierLabel} to yearly billing?`
-      : `Switch ${tierLabel} to monthly billing?`;
+      ? t(
+          `Switch ${tierLabel} to yearly billing?`,
+          `将 ${tierLabel} 改为按年计费？`,
+        )
+      : t(
+          `Switch ${tierLabel} to monthly billing?`,
+          `将 ${tierLabel} 改为按月计费？`,
+        );
   }
 
   function getDialogBody(): { label?: string; text: string }[] {
@@ -451,12 +461,23 @@ export function useYourPlanCard() {
         currentYearlyCents <= currentMonthlyCents * 12;
       if (!hasPrices) {
         return [
-          { text: "You'll be charged the prorated difference today." },
+          {
+            text: t(
+              "You'll be charged the prorated difference today.",
+              "今天将按比例收取差额。",
+            ),
+          },
           {
             text:
               currentYearlyCents !== undefined
-                ? `Renews at ${formatCents(currentYearlyCents)}/year after this period.`
-                : "Renews on the new yearly cadence after this period.",
+                ? t(
+                    `Renews at ${formatCents(currentYearlyCents)}/year after this period.`,
+                    `本周期结束后将以每年 ${formatCents(currentYearlyCents)} 续订。`,
+                  )
+                : t(
+                    "Renews on the new yearly cadence after this period.",
+                    "本周期结束后将按新的年度周期续订。",
+                  ),
           },
         ];
       }
@@ -480,20 +501,50 @@ export function useYourPlanCard() {
       const chargedToday =
         prorationCreditCents > 0
           ? {
-              label: "Charged today:",
-              text: `${formatCents(netChargeCents)} (prorated from your monthly plan).`,
+              label: t("Charged today:", "今日扣款："),
+              text: t(
+                `${formatCents(netChargeCents)} (prorated from your monthly plan).`,
+                `${formatCents(netChargeCents)}（已按比例扣除月度套餐的剩余价值）。`,
+              ),
             }
-          : { text: "You'll be charged the prorated difference today." };
+          : {
+              text: t(
+                "You'll be charged the prorated difference today.",
+                "今天将按比例收取差额。",
+              ),
+            };
       const renews = periodEndLabel
-        ? { label: "Renews", text: `${yearly}/year on ${periodEndLabel}.` }
-        : { label: "Renews", text: `at ${yearly}/year after this period.` };
+        ? {
+            label: t("Renews", "续订"),
+            text: t(
+              `${yearly}/year on ${periodEndLabel}.`,
+              `于 ${periodEndLabel} 以每年 ${yearly} 续订。`,
+            ),
+          }
+        : {
+            label: t("Renews", "续订"),
+            text: t(
+              `at ${yearly}/year after this period.`,
+              `本周期结束后以每年 ${yearly} 续订。`,
+            ),
+          };
       return [
         savingsPercent > 0
-          ? { text: `Save ${savingsPercent}% with yearly billing.` }
+          ? {
+              text: t(
+                `Save ${savingsPercent}% with yearly billing.`,
+                `按年计费可节省 ${savingsPercent}%。`,
+              ),
+            }
           : null,
         {
-          label: tierLabel ? `${tierLabel} yearly:` : "Yearly:",
-          text: `${yearly}/year (${monthlyEquivalent}/month).`,
+          label: tierLabel
+            ? t(`${tierLabel} yearly:`, `${tierLabel} 按年：`)
+            : t("Yearly:", "按年："),
+          text: t(
+            `${yearly}/year (${monthlyEquivalent}/month).`,
+            `${yearly}/年（折合 ${monthlyEquivalent}/月）。`,
+          ),
         },
         chargedToday,
         renews,
@@ -506,11 +557,22 @@ export function useYourPlanCard() {
     return [
       {
         text: periodEndLabel
-          ? `Switches to monthly billing on ${periodEndLabel}.`
-          : "Switches to monthly at the end of your current yearly period.",
+          ? t(
+              `Switches to monthly billing on ${periodEndLabel}.`,
+              `于 ${periodEndLabel} 改为按月计费。`,
+            )
+          : t(
+              "Switches to monthly at the end of your current yearly period.",
+              "当前年度周期结束后改为按月计费。",
+            ),
       },
-      monthly ? { label: "New price:", text: `${monthly}/month.` } : null,
-      { text: "No charge today." },
+      monthly
+        ? {
+            label: t("New price:", "新价格："),
+            text: t(`${monthly}/month.`, `${monthly}/月。`),
+          }
+        : null,
+      { text: t("No charge today.", "今天不扣款。") },
     ].filter((line): line is { label?: string; text: string } => line !== null);
   }
 
@@ -543,12 +605,21 @@ export function useYourPlanCard() {
     const cycleNoun = serverCycle === "yearly" ? "yearly" : "monthly";
     const cycleUnit = serverCycle === "yearly" ? "year" : "month";
     const renewLine = newPrice
-      ? `After this period, your plan renews at ${newPrice} per ${cycleUnit}.`
+      ? t(
+          `After this period, your plan renews at ${newPrice} per ${cycleUnit}.`,
+          `本周期结束后，你的套餐将以每${serverCycle === "yearly" ? "年" : "月"} ${newPrice} 续订。`,
+        )
       : "";
     return [
-      `You'll be charged the prorated difference immediately for the rest of your ${cycleNoun} period.`,
+      t(
+        `You'll be charged the prorated difference immediately for the rest of your ${cycleNoun} period.`,
+        `当前${serverCycle === "yearly" ? "年度" : "月度"}周期剩余时间的费用差额将按比例立即收取。`,
+      ),
       renewLine,
-      "Your current usage carries over into the higher allowance.",
+      t(
+        "Your current usage carries over into the higher allowance.",
+        "当前已使用的用量将计入更高的额度。",
+      ),
     ]
       .filter(Boolean)
       .join(" ");
@@ -575,9 +646,15 @@ export function useYourPlanCard() {
       ? formatShortDate(plan.currentPeriodEnd * 1000)
       : null;
     if (periodEnd) {
-      return `You'll keep ${plan.label} (${cycleNoun}) until ${periodEnd}, then switch to ${targetLabel}. No charge today.`;
+      return t(
+        `You'll keep ${plan.label} (${cycleNoun}) until ${periodEnd}, then switch to ${targetLabel}. No charge today.`,
+        `你可继续使用 ${plan.label}（${serverCycle === "yearly" ? "按年" : "按月"}）至 ${periodEnd}，之后将切换至 ${targetLabel}。今天不扣款。`,
+      );
     }
-    return `Your plan will switch to ${targetLabel} at the close of the current billing period. No charge today.`;
+    return t(
+      `Your plan will switch to ${targetLabel} at the close of the current billing period. No charge today.`,
+      `当前计费周期结束后，你的套餐将切换至 ${targetLabel}。今天不扣款。`,
+    );
   }
 
   async function confirmTierDowngrade() {

@@ -12,6 +12,7 @@ import { TransactionAmount } from "./TransactionAmount";
 type Props = { transaction: Transaction };
 
 export function ReceiptEntries({ transaction }: Props) {
+  const { t } = useTranslation();
   const [entriesOpen, setEntriesOpen] = useState(false);
   const [referenceOpen, setReferenceOpen] = useState(false);
   const entriesID = useId();
@@ -39,7 +40,10 @@ export function ReceiptEntries({ transaction }: Props) {
               />
             }
           >
-            {entriesOpen ? "Hide" : "Show"} charge entries
+            {t(
+              `${entriesOpen ? "Hide" : "Show"} charge entries`,
+              entriesOpen ? "隐藏费用条目" : "显示费用条目",
+            )}
           </Button>
         )}
         {reference && (
@@ -52,7 +56,9 @@ export function ReceiptEntries({ transaction }: Props) {
             aria-expanded={referenceOpen}
             aria-controls={referenceOpen ? referenceID : undefined}
           >
-            {referenceOpen ? "Hide reference" : "Reference"}
+            {referenceOpen
+              ? t("Hide reference", "隐藏参考信息")
+              : t("Reference", "参考信息")}
           </Button>
         )}
       </div>
@@ -64,7 +70,7 @@ export function ReceiptEntries({ transaction }: Props) {
       {referenceOpen && (
         <div id={referenceID} className="mt-2">
           <Text variant="small" tone="secondary">
-            {referenceLabel(transaction)}
+            {referenceLabel(transaction, t)}
           </Text>
           <Text variant="small-mono" as="code" className="break-all">
             {reference}
@@ -75,14 +81,17 @@ export function ReceiptEntries({ transaction }: Props) {
   );
 }
 
-function referenceLabel(transaction: Transaction) {
-  if (transaction.usage_execution_id) return "Run ID";
-  if (transaction.usage_chat_session_id) return "Chat ID";
-  return "Reference";
+function referenceLabel(
+  transaction: Transaction,
+  t: ReturnType<typeof useTranslation>["t"],
+) {
+  if (transaction.usage_execution_id) return t("Run ID", "运行 ID");
+  if (transaction.usage_chat_session_id) return t("Chat ID", "聊天 ID");
+  return t("Reference", "参考信息");
 }
 
 function ChargeEntries({ transaction }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const charges = transaction.charges ?? [];
   return (
     <div className="mt-2 border-t border-border-base pt-3">
@@ -99,7 +108,7 @@ function ChargeEntries({ transaction }: Props) {
         </thead>
         <tbody>
           {charges.map((charge) => {
-            const posted = formatActivityDate(charge.posted_at);
+            const posted = formatActivityDate(charge.posted_at, t, locale);
             return (
               <tr key={charge.id}>
                 <td className="py-2 pr-3 align-top">
@@ -110,7 +119,9 @@ function ChargeEntries({ transaction }: Props) {
                   </Text>
                 </td>
                 <td className="py-2 pr-3 align-top">
-                  <Text variant="small">{chargeLabel(charge.charge_type)}</Text>
+                  <Text variant="small">
+                    {chargeLabel(charge.charge_type, t)}
+                  </Text>
                 </td>
                 <td className="py-2 text-right align-top">
                   <TransactionAmount amount={charge.amount} variant="small" />
@@ -122,8 +133,10 @@ function ChargeEntries({ transaction }: Props) {
       </table>
       {transaction.charges_truncated && (
         <Text variant="small" tone="secondary" className="mt-2">
-          Showing {charges.length} of {transaction.charges_total_count} charge
-          entries. The total includes every charge and adjustment.
+          {t(
+            `Showing ${charges.length} of ${transaction.charges_total_count} charge entries. The total includes every charge and adjustment.`,
+            `显示 ${transaction.charges_total_count} 条费用记录中的 ${charges.length} 条。总额包含所有费用和调整。`,
+          )}
         </Text>
       )}
     </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React from "react";
 import { Button } from "@/components/atoms/Button/Button";
 import { Alert, AlertDescription } from "@/components/molecules/Alert/Alert";
@@ -31,6 +32,7 @@ export function IncompatibleUpdateDialog({
   agentName,
   incompatibilities,
 }: IncompatibleUpdateDialogProps) {
+  const { t } = useTranslation();
   const hasMissingInputs = incompatibilities.missingInputs.length > 0;
   const hasMissingOutputs = incompatibilities.missingOutputs.length > 0;
   const hasNewInputs = incompatibilities.newInputs.length > 0;
@@ -46,7 +48,7 @@ export function IncompatibleUpdateDialog({
       title={
         <div className="flex items-center gap-2">
           <Icon icon={Alert01Icon} tone="warning-bright" className="h-5 w-5" />
-          Incompatible Update
+          {t("Incompatible Update", "不兼容的更新")}
         </div>
       }
       controlled={{
@@ -61,14 +63,16 @@ export function IncompatibleUpdateDialog({
       <Dialog.Content>
         <div className="space-y-4">
           <Text variant="body-tight" tone="secondary">
-            Updating <strong>{beautifyString(agentName)}</strong> from v
-            {currentVersion} to v{latestVersion} will break some connections.
+            {t(
+              `Updating ${beautifyString(agentName)} from v${currentVersion} to v${latestVersion} will break some connections.`,
+              `将 ${beautifyString(agentName)} 从 v${currentVersion} 更新到 v${latestVersion} 将导致部分连接失效。`,
+            )}
           </Text>
 
           {/* Input changes - two column layout */}
           {hasInputChanges && (
             <TwoColumnSection
-              title="Input Changes"
+              title={t("Input Changes", "输入变更")}
               leftIcon={
                 <Icon
                   icon={CancelCircleIcon}
@@ -76,7 +80,7 @@ export function IncompatibleUpdateDialog({
                   className="h-4 w-4"
                 />
               }
-              leftTitle="Removed"
+              leftTitle={t("Removed", "已移除")}
               leftItems={incompatibilities.missingInputs}
               rightIcon={
                 <Icon
@@ -85,7 +89,7 @@ export function IncompatibleUpdateDialog({
                   className="h-4 w-4"
                 />
               }
-              rightTitle="Added"
+              rightTitle={t("Added", "已添加")}
               rightItems={incompatibilities.newInputs}
             />
           )}
@@ -93,7 +97,7 @@ export function IncompatibleUpdateDialog({
           {/* Output changes - two column layout */}
           {hasOutputChanges && (
             <TwoColumnSection
-              title="Output Changes"
+              title={t("Output Changes", "输出变更")}
               leftIcon={
                 <Icon
                   icon={CancelCircleIcon}
@@ -101,7 +105,7 @@ export function IncompatibleUpdateDialog({
                   className="h-4 w-4"
                 />
               }
-              leftTitle="Removed"
+              leftTitle={t("Removed", "已移除")}
               leftItems={incompatibilities.missingOutputs}
               rightIcon={
                 <Icon
@@ -110,7 +114,7 @@ export function IncompatibleUpdateDialog({
                   className="h-4 w-4"
                 />
               }
-              rightTitle="Added"
+              rightTitle={t("Added", "已添加")}
               rightItems={incompatibilities.newOutputs}
             />
           )}
@@ -124,8 +128,11 @@ export function IncompatibleUpdateDialog({
                   className="h-4 w-4"
                 />
               }
-              title="Type Changed"
-              description="These connected inputs have a different type:"
+              title={t("Type Changed", "类型已变更")}
+              description={t(
+                "These connected inputs have a different type:",
+                "以下已连接输入的类型发生了变化：",
+              )}
               items={incompatibilities.inputTypeMismatches.map(
                 (m) => `${m.name} (${m.oldType} → ${m.newType})`,
               )}
@@ -141,25 +148,30 @@ export function IncompatibleUpdateDialog({
                   className="h-4 w-4"
                 />
               }
-              title="New Required Inputs"
-              description="These inputs are now required:"
+              title={t("New Required Inputs", "新增必填输入")}
+              description={t(
+                "These inputs are now required:",
+                "以下输入现在为必填项：",
+              )}
               items={incompatibilities.newRequiredInputs}
             />
           )}
 
           <Alert variant="warning">
             <AlertDescription>
-              If you proceed, you&apos;ll need to remove the broken connections
-              before you can save or run your workflow.
+              {t(
+                "If you proceed, you'll need to remove the broken connections before you can save or run your workflow.",
+                "如果继续更新，需要移除失效的连接后才能保存或运行工作流。",
+              )}
             </AlertDescription>
           </Alert>
 
           <Dialog.Footer>
             <Button variant="ghost" size="small" onClick={onClose}>
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button variant="warning" size="small" onClick={onConfirm}>
-              Update Anyway
+              {t("Update Anyway", "仍然更新")}
             </Button>
           </Dialog.Footer>
         </div>
@@ -187,6 +199,7 @@ function TwoColumnSection({
   rightTitle,
   rightItems,
 }: TwoColumnSectionProps) {
+  const { t } = useTranslation();
   return (
     <div className="rounded-md border border-border-base p-3">
       <Text variant="large-medium-tight" as="span" tone="inherit">
@@ -220,7 +233,7 @@ function TwoColumnSection({
               ))
             ) : (
               <Text variant="body-tight-italic" tone="subtle" as="li">
-                None
+                {t("None", "无")}
               </Text>
             )}
           </ul>
@@ -253,7 +266,7 @@ function TwoColumnSection({
               ))
             ) : (
               <Text variant="body-tight-italic" tone="subtle" as="li">
-                None
+                {t("None", "无")}
               </Text>
             )}
           </ul>

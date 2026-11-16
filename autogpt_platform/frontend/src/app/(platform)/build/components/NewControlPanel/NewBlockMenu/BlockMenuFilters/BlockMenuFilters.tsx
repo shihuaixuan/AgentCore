@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useBlockMenuStore } from "@/app/(platform)/build/stores/blockMenuStore";
 import { useShallow } from "zustand/react/shallow";
 import { FilterChip } from "../FilterChip";
@@ -6,6 +7,7 @@ import { FilterSheet } from "../FilterSheet/FilterSheet";
 import { CategoryKey } from "./types";
 
 export const BlockMenuFilters = () => {
+  const { t } = useTranslation();
   const {
     filters,
     addFilter,
@@ -49,7 +51,10 @@ export const BlockMenuFilters = () => {
         creators.map((creator) => (
           <FilterChip
             key={creator}
-            name={"Created by " + creator.slice(0, 10) + "..."}
+            name={t(
+              `Created by ${creator.slice(0, 10)}...`,
+              `创建者：${creator.slice(0, 10)}…`,
+            )}
             selected={creators.includes(creator)}
             onClick={() => handleCreatorClick(creator)}
           />

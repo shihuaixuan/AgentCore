@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useState } from "react";
 import type { PendingHumanReviewModel } from "@/app/api/__generated__/models/pendingHumanReviewModel";
 import { useToast } from "@/components/molecules/Toast/use-toast";
@@ -5,6 +8,7 @@ import { useNeedsAttention } from "@/hooks/useNeedsAttention";
 import { useProcessReviews } from "@/hooks/useProcessReviews";
 
 export function useNeedsAttentionList() {
+  const { t } = useTranslation();
   const { reviews, countLabel, isLoading, isError, refetch } =
     useNeedsAttention();
   const { processReviews } = useProcessReviews();
@@ -57,12 +61,16 @@ export function useNeedsAttentionList() {
         throw new Error(res.data.error || "The review could not be processed.");
       }
 
-      toast({ title: approved ? "Approved" : "Declined" });
+      toast({
+        title: approved ? t("Approved", "已批准") : t("Declined", "已拒绝"),
+      });
     } catch (error) {
       toast({
         title: `Failed to ${verb} review`,
         description:
-          error instanceof Error ? error.message : "An error occurred",
+          error instanceof Error
+            ? error.message
+            : t("An error occurred", "发生错误"),
         variant: "destructive",
       });
     } finally {

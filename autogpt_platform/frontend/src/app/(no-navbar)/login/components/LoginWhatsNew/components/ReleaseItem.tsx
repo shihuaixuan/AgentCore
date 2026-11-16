@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
@@ -20,6 +23,7 @@ interface Props {
 }
 
 export function ReleaseItem({ release, isLatest, isLast }: Props) {
+  const { t } = useTranslation();
   const detailsID = useId();
   const { headline, details } = release;
 
@@ -59,7 +63,7 @@ export function ReleaseItem({ release, isLatest, isLast }: Props) {
             </Text>
             {isLatest ? (
               <span className="rounded-full bg-accent-surface px-2 py-px font-sans text-caption leading-4 font-medium text-accent-strong">
-                Latest
+                {t("Latest", "最新")}
               </span>
             ) : null}
             <span

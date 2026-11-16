@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { Button } from "@/components/atoms/Button/Button";
@@ -26,10 +27,12 @@ interface Props {
 export function MicrosoftConnectionPanel({
   browserAvailable,
   scopes,
-  doneLabel = "Done",
+  doneLabel,
   onDone,
   onSkip,
 }: Props) {
+  const { t } = useTranslation();
+
   const connection = useMicrosoftConnection({ scopes });
   const { credential, check } = connection;
   const workIQ = workIQToAllow(check);
@@ -55,7 +58,7 @@ export function MicrosoftConnectionPanel({
       {connection.credentials.length > 1 ? (
         <Select
           id="microsoft-account"
-          label="Microsoft account"
+          label={t("Microsoft account", "Microsoft 账户")}
           hideLabel
           size="small"
           wrapperClassName="mb-0"
@@ -85,7 +88,7 @@ export function MicrosoftConnectionPanel({
             loading={connection.oauth.isPending}
             onClick={() => connection.allow(connection.pending)}
           >
-            Allow everything listed
+            {t("Allow everything listed", "允许所有列出的权限")}
           </Button>
         ) : (
           <DeviceAuthConnectButton
@@ -116,11 +119,13 @@ export function MicrosoftConnectionPanel({
             target="_blank"
             rel="noopener noreferrer"
           >
-            Approve for my whole organization
+            {t("Approve for my whole organization", "为整个组织批准")}
           </Button>
           <Text variant="small" tone="muted">
-            Only a Microsoft admin can do this. Afterwards everyone in your
-            organization gets these services in one click.
+            {t(
+              "Only a Microsoft admin can do this. Afterwards everyone in your organization gets these services in one click.",
+              "仅 Microsoft 管理员可执行此操作。完成后，组织内所有人都可一键连接这些服务。",
+            )}
           </Text>
         </div>
       )}
@@ -139,7 +144,7 @@ export function MicrosoftConnectionPanel({
       {connection.checkFailure && !connection.recovery && (
         <MicrosoftAdminSetup
           reason={connection.checkFailure}
-          retryLabel="Sign in again"
+          retryLabel={t("Sign in again", "重新登录")}
           onRetry={browserAvailable ? connection.signIn : connection.addAccount}
         />
       )}
@@ -150,21 +155,21 @@ export function MicrosoftConnectionPanel({
           loading={connection.checking}
           onClick={connection.recheck}
         >
-          Check again
+          {t("Check again", "重新检查")}
         </Button>
         <Button
           variant="ghost"
           size="small"
           onClick={browserAvailable ? connection.signIn : connection.addAccount}
         >
-          Connect another account
+          {t("Connect another account", "连接其他账户")}
         </Button>
         <Button
           variant="primary"
           size="small"
           onClick={() => onDone(credential)}
         >
-          {doneLabel}
+          {doneLabel ?? t("Done", "完成")}
         </Button>
       </div>
     </div>

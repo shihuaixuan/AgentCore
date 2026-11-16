@@ -34,8 +34,18 @@ const TYPE_LABELS: Record<CredentialType, string> = {
   device_code: "Device auth",
 };
 
-export function typeBadgeLabel(type: CredentialType): string {
-  return TYPE_LABELS[type] ?? type;
+export function typeBadgeLabel(
+  type: CredentialType,
+  t: (english: string, chinese: string) => string = (english) => english,
+): string {
+  const chinese: Record<CredentialType, string> = {
+    api_key: "API 密钥",
+    oauth2: "OAuth",
+    user_password: "用户名/密码",
+    host_scoped: "限定主机",
+    device_code: "设备授权",
+  };
+  return t(TYPE_LABELS[type] ?? type, chinese[type] ?? type);
 }
 
 const PROVIDER_DISPLAY_NAME_OVERRIDES: Record<string, string> = {
@@ -103,13 +113,23 @@ export function serviceLabelFromIcon(id: string): string {
     : formatProviderName(id);
 }
 
-export function formatMaskedValue(credential: CredentialView): string {
-  if (credential.username) return `Username: ${credential.username}`;
+export function formatMaskedValue(
+  credential: CredentialView,
+  t: (english: string, chinese: string) => string = (english) => english,
+): string {
+  if (credential.username)
+    return t(
+      `Username: ${credential.username}`,
+      `用户名：${credential.username}`,
+    );
   if (credential.host) return credential.host;
-  if (credential.type === "api_key") return "API key configured";
-  if (credential.type === "oauth2") return "Connected via OAuth";
-  if (credential.type === "user_password") return "Username/password set";
-  return "Configured";
+  if (credential.type === "api_key")
+    return t("API key configured", "已配置 API 密钥");
+  if (credential.type === "oauth2")
+    return t("Connected via OAuth", "已通过 OAuth 连接");
+  if (credential.type === "user_password")
+    return t("Username/password set", "已设置用户名和密码");
+  return t("Configured", "已配置");
 }
 
 export function stripProviderPrefix(title: string, provider: string): string {
@@ -135,6 +155,7 @@ function toCredentialView(
   cred: CredentialsMetaResponse,
   serviceLabel: string,
   hasBlocks: boolean,
+  t: (english: string, chinese: string) => string,
 ): CredentialView {
   const rawTitle = cred.title ?? serviceName(cred);
   const isSignIn = cred.provider === SIGN_IN_PROVIDER;
@@ -149,7 +170,10 @@ function toCredentialView(
     isSignIn,
     blocksNote:
       isSignIn && hasBlocks
-        ? `${serviceLabel} blocks in workflows need their own connection.`
+        ? t(
+            `${serviceLabel} blocks in workflows need their own connection.`,
+            `工作流中的 ${serviceLabel} 模块需要单独连接。`,
+          )
         : null,
   };
 }
@@ -169,6 +193,7 @@ export function blockServiceKeys(providers: ProviderMetadata[]): Set<string> {
 export function groupCredentialsByProvider(
   credentials: CredentialsMetaResponse[],
   blockServices: ReadonlySet<string> = new Set(),
+  t: (english: string, chinese: string) => string = (english) => english,
 ): ProviderGroupView[] {
   const byService = new Map<string, CredentialsMetaResponse[]>();
   for (const cred of credentials) {
@@ -184,7 +209,7 @@ export function groupCredentialsByProvider(
       name: identity.name,
       logoUrl: integrationIconSrc(identity.icon) ?? undefined,
       credentials: creds.map((cred) =>
-        toCredentialView(cred, identity.name, blockServices.has(id)),
+        toCredentialView(cred, identity.name, blockServices.has(id), t),
       ),
     });
   }

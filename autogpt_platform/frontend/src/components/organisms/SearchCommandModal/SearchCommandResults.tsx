@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { MutableRefObject } from "react";
 import {
   flattenBuckets,
@@ -29,6 +32,7 @@ export function SearchCommandResults({
   onSelect,
   loadingItemId,
 }: Props) {
+  const { t } = useTranslation();
   const flat = flattenBuckets(buckets);
   // Group the flat list back by bucket so the absolute ``index`` survives
   // for keyboard nav while we still render each section under its
@@ -40,7 +44,7 @@ export function SearchCommandResults({
   return (
     <div
       role="listbox"
-      aria-label="Search results"
+      aria-label={t("Search results", "搜索结果")}
       data-slot="search-command-results"
       className="flex flex-col gap-1"
     >

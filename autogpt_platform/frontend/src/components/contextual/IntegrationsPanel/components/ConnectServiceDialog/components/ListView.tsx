@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { useId } from "react";
 import { Text } from "@/components/atoms/Text/Text";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -27,6 +29,8 @@ export function ListView({
   onSelect,
   description,
 }: Props) {
+  const { t } = useTranslation();
+
   const popularHeadingId = useId();
   const moreHeadingId = useId();
   const showSections = popular.length > 0;
@@ -49,8 +53,8 @@ export function ListView({
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search services..."
-          aria-label="Search services"
+          placeholder={t("Search services...", "搜索服务…")}
+          aria-label={t("Search services", "搜索服务")}
           className="h-[46px] w-full rounded-3xl border border-border-base bg-surface pr-4 pl-12 text-body text-foreground-base placeholder:text-placeholder focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none"
         />
       </div>
@@ -60,8 +64,11 @@ export function ListView({
           <Icon icon={Plug01Icon} size={24} tone="muted" />
           <Text variant="body" tone="body">
             {query.trim()
-              ? `No services match "${query.trim()}"`
-              : "No services available"}
+              ? t(
+                  `No services match "${query.trim()}"`,
+                  `没有与“${query.trim()}”匹配的服务`,
+                )
+              : t("No services available", "暂无可用服务")}
           </Text>
         </div>
       ) : (
@@ -81,7 +88,7 @@ export function ListView({
                     tone="secondary"
                     id={popularHeadingId}
                   >
-                    Popular
+                    {t("Popular", "热门")}
                   </Text>
                   <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {popular.map((provider) => (
@@ -105,7 +112,7 @@ export function ListView({
                       tone="secondary"
                       id={moreHeadingId}
                     >
-                      More services
+                      {t("More services", "更多服务")}
                     </Text>
                     <ProviderList providers={providers} onSelect={onSelect} />
                   </section>

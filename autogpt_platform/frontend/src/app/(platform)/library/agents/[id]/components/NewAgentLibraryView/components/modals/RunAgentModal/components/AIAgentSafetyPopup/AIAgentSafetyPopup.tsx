@@ -51,14 +51,17 @@ export function AIAgentSafetyPopup({ agentId, onAcknowledge, isOpen }: Props) {
           </Text>
 
           <Text variant="body" tone="body" className="mb-2">
-            AI-generated workflows may take actions that affect your data or
-            external systems.
+            {t(
+              "AI-generated workflows may take actions that affect your data or external systems.",
+              "AI 生成的工作流可能执行影响你的数据或外部系统的操作。",
+            )}
           </Text>
 
           <Text variant="body" tone="body" className="mb-8">
-            AutoGPT includes safety checks so you&apos;ll always have the
-            opportunity to review and approve sensitive actions before they
-            happen.
+            {t(
+              "AutoGPT includes safety checks so you'll always have the opportunity to review and approve sensitive actions before they happen.",
+              "AutoGPT 内置安全检查，确保你始终能在敏感操作执行前进行审核和批准。",
+            )}
           </Text>
 
           <Button

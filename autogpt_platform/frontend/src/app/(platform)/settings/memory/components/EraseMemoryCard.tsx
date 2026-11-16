@@ -36,16 +36,21 @@ export function EraseMemoryCard({
       <div className="flex min-w-0 flex-col">
         <span className="flex text-error-foreground">
           <Text variant="body-medium" as="span" tone="inherit">
-            {t("Erase", "清除")} {scopeName}&apos;s memory
+            {t(`Erase ${scopeName}'s memory`, `清除 ${scopeName} 的记忆`)}
           </Text>
         </span>
         <Text variant="small" as="span" tone="muted">
-          Permanently delete everything this memory holds. This can&apos;t be
-          undone.
+          {t(
+            "Permanently delete everything this memory holds. This can't be undone.",
+            "永久删除此范围内保存的全部记忆。此操作无法撤销。",
+          )}
         </Text>
       </div>
       <Dialog
-        title={`Erase all of ${scopeName}'s memory`}
+        title={t(
+          `Erase all of ${scopeName}'s memory`,
+          `清除 ${scopeName} 的全部记忆`,
+        )}
         styling={{ maxWidth: "440px" }}
         controlled={{
           isOpen,
@@ -64,8 +69,14 @@ export function EraseMemoryCard({
           <div className="flex flex-col gap-4">
             <Text variant="small" as="p" tone="secondary">
               {memoryCount !== null
-                ? `Every memory in this scope will be permanently deleted — ${memoryCount} ${memoryCount === 1 ? "memory" : "memories"}, raw conversations included. Other scopes are not affected.`
-                : "Every memory in this scope will be permanently deleted, raw conversations included. Other scopes are not affected."}{" "}
+                ? t(
+                    `Every memory in this scope will be permanently deleted — ${memoryCount} ${memoryCount === 1 ? "memory" : "memories"}, raw conversations included. Other scopes are not affected.`,
+                    `此范围内的全部 ${memoryCount} 条记忆（包括原始对话）将永久删除。其他范围不受影响。`,
+                  )
+                : t(
+                    "Every memory in this scope will be permanently deleted, raw conversations included. Other scopes are not affected.",
+                    "此范围内的全部记忆（包括原始对话）将永久删除。其他范围不受影响。",
+                  )}{" "}
               {t("Type", "输入")} <strong>{scopeName}</strong>{" "}
               {t("to confirm.", "以确认。")}
             </Text>

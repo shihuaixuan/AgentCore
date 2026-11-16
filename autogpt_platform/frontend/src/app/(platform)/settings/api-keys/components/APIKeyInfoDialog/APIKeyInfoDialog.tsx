@@ -77,7 +77,7 @@ export function APIKeyInfoDialog({ open, apiKey, onOpenChange }: Props) {
             <Text variant="body" tone="body">
               {apiKey.last_used_at
                 ? format(new Date(apiKey.last_used_at), "PPP p")
-                : "Never used"}
+                : t("Never used", "从未使用")}
             </Text>
           </Section>
         </div>

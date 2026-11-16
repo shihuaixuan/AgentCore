@@ -30,15 +30,31 @@ export function BotCardDmTile({
 }: Props) {
   const { t } = useTranslation();
   const title = dmLink
-    ? (dmLink.platform_username ?? `User ${dmLink.platform_user_id}`)
+    ? (dmLink.platform_username ??
+      t(`User ${dmLink.platform_user_id}`, `用户 ${dmLink.platform_user_id}`))
     : pendingServerName
-      ? `${capitalize(serverNoun)} “${pendingServerName}” connected — one step left`
-      : `DM the bot on ${platformName} to link`;
+      ? t(
+          `${capitalize(serverNoun)} “${pendingServerName}” connected — one step left`,
+          `“${pendingServerName}”已连接，还差一步`,
+        )
+      : t(
+          `DM the bot on ${platformName} to link`,
+          `在 ${platformName} 上私信机器人以绑定`,
+        );
   const subtitle = dmLink
-    ? "Your DM channel is linked to this account."
+    ? t(
+        "Your DM channel is linked to this account.",
+        "你的私信频道已绑定此账户。",
+      )
     : pendingServerName
-      ? `DM the bot in ${platformName} and tap Link Account to connect your DMs.`
-      : "Send the bot a direct message to start the link flow.";
+      ? t(
+          `DM the bot in ${platformName} and tap Link Account to connect your DMs.`,
+          `在 ${platformName} 中私信机器人，然后点击“Link Account”（绑定账户）以连接私信。`,
+        )
+      : t(
+          "Send the bot a direct message to start the link flow.",
+          "向机器人发送私信以开始绑定。",
+        );
 
   return (
     <div className="flex items-center justify-between gap-3 rounded-large border border-border-base px-4 py-3">
@@ -60,7 +76,10 @@ export function BotCardDmTile({
           leftIcon={<Icon icon={Delete02Icon} size={16} />}
           loading={isPending(dmLink.id)}
           onClick={() => onUnlink(dmLink.id)}
-          aria-label={`Unlink DM on ${platformName}`}
+          aria-label={t(
+            `Unlink DM on ${platformName}`,
+            `解除 ${platformName} 私信绑定`,
+          )}
         >
           {t("Unlink", "断开连接")}
         </Button>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { Mic01Icon, PencilEdit01Icon } from "@hugeicons/core-free-icons";
 
@@ -12,6 +14,7 @@ interface Props {
 // The two ways to tell Otto about your work, side by side, so neither
 // is hidden behind a link. Talking leads, unless the microphone failed.
 export function RestActions({ onTalk, onWrite, writeFirst = false }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="mt-4 flex items-center gap-3">
       <Button
@@ -22,7 +25,7 @@ export function RestActions({ onTalk, onWrite, writeFirst = false }: Props) {
         leadingIcon={Mic01Icon}
         className="h-10 w-36"
       >
-        Talk
+        {t("Talk", "语音讲述")}
       </Button>
       <Button
         type="button"
@@ -32,7 +35,7 @@ export function RestActions({ onTalk, onWrite, writeFirst = false }: Props) {
         leadingIcon={PencilEdit01Icon}
         className="h-10 w-36"
       >
-        Write
+        {t("Write", "文字输入")}
       </Button>
     </div>
   );

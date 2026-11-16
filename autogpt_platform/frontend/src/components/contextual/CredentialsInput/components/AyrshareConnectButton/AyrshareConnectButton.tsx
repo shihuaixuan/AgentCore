@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Key01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/atoms/Button/Button";
@@ -12,6 +13,8 @@ interface Props {
 
 // This SSO button is not a part of inputSchema - that's why we are not rendering it using Input renderer
 export function AyrshareConnectButton({ className }: Props) {
+  const { t } = useTranslation();
+
   const { connect, isLoading } = useAyrshareConnect();
 
   // TODO :Need better UI to show user which social media accounts are connected
@@ -25,7 +28,7 @@ export function AyrshareConnectButton({ className }: Props) {
       loading={isLoading}
       leftIcon={<Icon icon={Key01Icon} size={16} />}
     >
-      Connect Social Media Accounts
+      {t("Connect Social Media Accounts", "连接社交媒体账户")}
     </Button>
   );
 }

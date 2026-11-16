@@ -37,7 +37,7 @@ export function CreateAPIKeyForm({ form, onSubmit, isPending }: Props) {
                 {...field}
                 id={field.name}
                 label={t("Name", "名称")}
-                placeholder="My integration key"
+                placeholder={t("My integration key", "我的集成密钥")}
                 wrapperClassName="!mb-0"
               />
             </FormControl>
@@ -55,8 +55,11 @@ export function CreateAPIKeyForm({ form, onSubmit, isPending }: Props) {
               <Input
                 {...field}
                 id={field.name}
-                label="Description (optional)"
-                placeholder="Describe what this key is used for"
+                label={t("Description (optional)", "说明（可选）")}
+                placeholder={t(
+                  "Describe what this key is used for",
+                  "描述此密钥的用途",
+                )}
                 wrapperClassName="!mb-0"
               />
             </FormControl>

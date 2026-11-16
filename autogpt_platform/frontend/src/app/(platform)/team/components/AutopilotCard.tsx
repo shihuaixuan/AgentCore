@@ -47,7 +47,7 @@ export function AutopilotCard({
     >
       <Link
         href="/team/autopilot"
-        aria-label={`View ${AUTOPILOT_NAME}`}
+        aria-label={t(`View ${AUTOPILOT_NAME}`, `查看 ${AUTOPILOT_NAME}`)}
         className="flex flex-1 flex-col items-start p-2 pb-4"
       >
         <ExpertCover color={AUTOPILOT_COVER_COLOR} status="built-in" />

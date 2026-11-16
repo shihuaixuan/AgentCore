@@ -1,3 +1,4 @@
+import { englishTutorialText, type TutorialTranslate } from "./translation";
 import Shepherd from "shepherd.js";
 import { analytics } from "@/services/analytics";
 import { TUTORIAL_CONFIG } from "./constants";
@@ -21,7 +22,9 @@ export const setTutorialLoadingCallback = (
   tutorialLoadingCallback = callback;
 };
 
-export const startTutorial = async () => {
+export const startTutorial = async (
+  t: TutorialTranslate = englishTutorialText,
+) => {
   tutorialLoadingCallback?.(true);
 
   useNodeStore.getState().setNodes([]);
@@ -49,7 +52,7 @@ export const startTutorial = async () => {
 
   injectTutorialStyles();
 
-  const steps = createTutorialSteps(tour);
+  const steps = createTutorialSteps(tour, t);
   steps.forEach((step) => tour.addStep(step));
 
   tour.on("complete", () => {

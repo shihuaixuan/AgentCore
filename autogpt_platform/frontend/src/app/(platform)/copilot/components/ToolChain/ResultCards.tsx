@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   CancelCircleIcon,
   CheckmarkCircle02Icon,
@@ -52,6 +54,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export function StatusPill({ status, className }: StatusPillProps) {
+  const { t } = useTranslation();
   const normalized = status.toUpperCase();
   const isPending = normalized === "RUNNING" || normalized === "QUEUED";
   return (
@@ -66,7 +69,23 @@ export function StatusPill({ status, className }: StatusPillProps) {
       {isPending && (
         <span className="size-2.5 animate-spin rounded-full border border-current border-t-transparent motion-reduce:animate-none" />
       )}
-      {normalized.toLowerCase()}
+      {t(
+        normalized.toLowerCase(),
+        (
+          {
+            COMPLETED: "已完成",
+            FAILED: "失败",
+            RUNNING: "运行中",
+            QUEUED: "排队中",
+            CANCELLED: "已取消",
+            CANCELED: "已取消",
+            STOPPED: "已停止",
+            PAUSED: "已暂停",
+            PENDING: "等待中",
+            UNKNOWN: "未知",
+          } as Record<string, string>
+        )[normalized] ?? status,
+      )}
     </span>
   );
 }
@@ -139,6 +158,7 @@ export function ChipList({ label, items }: ChipListProps) {
 }
 
 export function LinkCard({ url, title, meta, secret }: LinkCardProps) {
+  const { t } = useTranslation();
   const domain = safeHostname(url) ?? url;
 
   return (
@@ -179,7 +199,7 @@ export function LinkCard({ url, title, meta, secret }: LinkCardProps) {
         href={url}
         target="_blank"
         rel="noreferrer"
-        aria-label="Open link"
+        aria-label={t("Open link", "打开链接")}
         className="shrink-0 rounded-full p-1 text-foreground-subtle transition-colors hover:bg-surface-hover hover:text-foreground-body"
       >
         <Icon icon={LinkSquare01Icon} size={14} />

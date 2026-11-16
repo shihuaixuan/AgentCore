@@ -34,11 +34,15 @@ export function DeleteFolderDialog({
       <Dialog.Content>
         <div className="flex flex-col gap-4">
           <Text variant="body" tone="secondary">
-            {t("Delete", "删除")}{" "}
-            <span className="font-medium">&ldquo;{folderName}&rdquo;</span>
             {subfolderCount > 0
-              ? ` and its ${subfolderCount} ${subfolderCount === 1 ? "folder" : "folders"}? Files inside them will be moved back to the root, not deleted.`
-              : "? Files inside it will be moved back to the root, not deleted."}
+              ? t(
+                  `Delete “${folderName}” and its ${subfolderCount} ${subfolderCount === 1 ? "folder" : "folders"}? Files inside them will be moved back to the root, not deleted.`,
+                  `删除“${folderName}”及其 ${subfolderCount} 个子文件夹？其中的文件会移回根目录，不会被删除。`,
+                )
+              : t(
+                  `Delete “${folderName}”? Files inside it will be moved back to the root, not deleted.`,
+                  `删除“${folderName}”？其中的文件会移回根目录，不会被删除。`,
+                )}
           </Text>
           <div className="flex justify-end gap-2">
             <Button

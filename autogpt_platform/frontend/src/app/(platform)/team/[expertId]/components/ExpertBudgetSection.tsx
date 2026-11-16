@@ -57,7 +57,7 @@ export function ExpertBudgetSection({ expert, color, className }: Props) {
         <Text variant="body-medium" tone={color ? "inherit" : "secondary"}>
           {weeklySpend
             ? `${creditsToUsdLabel(weeklySpend.spent)} / ${creditsToUsdLabel(weeklySpend.budget)}`
-            : "No budget"}
+            : t("No budget", "未设置预算")}
         </Text>
       </div>
       <SpendMeter

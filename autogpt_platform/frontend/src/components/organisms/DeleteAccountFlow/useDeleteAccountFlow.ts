@@ -1,4 +1,7 @@
+"use client";
+
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type Step = "reason" | "confirm";
 
@@ -13,6 +16,7 @@ const STEP_TITLE: Record<Step, string> = {
 };
 
 export function useDeleteAccountFlow({ open, onOpenChange }: Args) {
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>("reason");
   const [session, setSession] = useState(0);
   const [wasOpen, setWasOpen] = useState(open);
@@ -44,7 +48,10 @@ export function useDeleteAccountFlow({ open, onOpenChange }: Args) {
   return {
     step,
     session,
-    title: STEP_TITLE[step],
+    title:
+      step === "reason"
+        ? t(STEP_TITLE.reason, "你为什么选择离开？")
+        : t(STEP_TITLE.confirm, "删除你的账户？"),
     isDeleting,
     setIsDeleting,
     handleOpenChange,

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useEffect, useState } from "react";
 import { BaseInput } from "@/components/atoms/Input/BaseInput";
 import { Text } from "@/components/atoms/Text/Text";
@@ -38,11 +41,13 @@ type CronSchedulerDialogProps = {
 );
 
 export function CronSchedulerDialog(props: CronSchedulerDialogProps) {
+  const { t } = useTranslation();
+
   const {
     open,
     setOpen,
     defaultCronExpression = "",
-    title = "Schedule Task",
+    title = t("Schedule Task", "设置定时任务"),
   } = props;
 
   const { toast } = useToast();
@@ -68,7 +73,7 @@ export function CronSchedulerDialog(props: CronSchedulerDialogProps) {
   const handleDone = () => {
     if (props.mode === "with-name" && !scheduleName.trim()) {
       toast({
-        title: "Please enter a schedule name",
+        title: t("Please enter a schedule name", "请输入计划名称"),
         variant: "destructive",
       });
       return;
@@ -78,8 +83,11 @@ export function CronSchedulerDialog(props: CronSchedulerDialogProps) {
     if (!cronExpression || cronExpression.trim() === "") {
       toast({
         variant: "destructive",
-        title: "Invalid schedule",
-        description: "Please enter a valid cron expression",
+        title: t("Invalid schedule", "计划无效"),
+        description: t(
+          "Please enter a valid cron expression",
+          "请输入有效的 Cron 表达式",
+        ),
       });
       return;
     }
@@ -103,12 +111,15 @@ export function CronSchedulerDialog(props: CronSchedulerDialogProps) {
           {props.mode === "with-name" && (
             <div className="flex max-w-[448px] flex-col space-y-2">
               <Text variant="body-medium-tight" as="label" tone="inherit">
-                Schedule Name
+                {t("Schedule Name", "计划名称")}
               </Text>
               <BaseInput
                 value={scheduleName}
                 onChange={(e) => setScheduleName(e.target.value)}
-                placeholder="Enter a name for this schedule"
+                placeholder={t(
+                  "Enter a name for this schedule",
+                  "输入此计划的名称",
+                )}
               />
             </div>
           )}
@@ -130,9 +141,12 @@ export function CronSchedulerDialog(props: CronSchedulerDialogProps) {
                 />
               </span>
               <Text variant="body-tight" tone="warning-strong">
-                No timezone set. Schedule will run in UTC.
+                {t(
+                  "No timezone set. Schedule will run in UTC.",
+                  "尚未设置时区。计划将按 UTC 运行。",
+                )}
                 <a href="/settings/account" className="ml-1 underline">
-                  Set your timezone
+                  {t("Set your timezone", "设置时区")}
                 </a>
               </Text>
             </div>
@@ -146,7 +160,10 @@ export function CronSchedulerDialog(props: CronSchedulerDialogProps) {
                 />
               </span>
               <Text variant="body-tight" tone="muted">
-                Schedule will run in your timezone:{" "}
+                {t(
+                  "Schedule will run in your timezone:",
+                  "计划将按您的时区运行：",
+                )}{" "}
                 <span className="font-medium">{timezoneDisplay}</span>
               </Text>
             </div>
@@ -158,10 +175,10 @@ export function CronSchedulerDialog(props: CronSchedulerDialogProps) {
             size="compact"
             onClick={() => setOpen(false)}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button variant="compact-primary" size="compact" onClick={handleDone}>
-            Done
+            {t("Done", "完成")}
           </Button>
         </div>
       </Dialog.Content>
@@ -175,7 +192,7 @@ export function CronExpressionDialog({
   setOpen,
   onSubmit,
   defaultCronExpression,
-  title = "Set Schedule",
+  title,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -183,6 +200,8 @@ export function CronExpressionDialog({
   defaultCronExpression?: string;
   title?: string;
 }) {
+  const { t } = useTranslation();
+
   return (
     <CronSchedulerDialog
       open={open}
@@ -190,7 +209,7 @@ export function CronExpressionDialog({
       mode="cron-only"
       onSubmit={onSubmit}
       defaultCronExpression={defaultCronExpression}
-      title={title}
+      title={title ?? t("Set Schedule", "设置计划")}
     />
   );
 }
@@ -201,7 +220,7 @@ export function ScheduleTaskDialog({
   onSubmit,
   defaultScheduleName,
   defaultCronExpression,
-  title = "Schedule Task",
+  title,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -210,6 +229,8 @@ export function ScheduleTaskDialog({
   defaultCronExpression?: string;
   title?: string;
 }) {
+  const { t } = useTranslation();
+
   return (
     <CronSchedulerDialog
       open={open}
@@ -218,7 +239,7 @@ export function ScheduleTaskDialog({
       onSubmit={onSubmit}
       defaultScheduleName={defaultScheduleName}
       defaultCronExpression={defaultCronExpression}
-      title={title}
+      title={title ?? t("Schedule Task", "设置定时任务")}
     />
   );
 }

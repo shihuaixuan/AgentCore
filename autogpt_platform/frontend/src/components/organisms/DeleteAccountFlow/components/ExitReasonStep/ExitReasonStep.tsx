@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { QuestionOptionList } from "@/app/(platform)/copilot/components/ChainActionCard/QuestionOptionList";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
@@ -8,6 +11,7 @@ import { StepFooter } from "../StepFooter/StepFooter";
 import { AlternativePanel } from "./components/AlternativePanel/AlternativePanel";
 import { EXIT_REASON_LABELS, MAX_FEEDBACK_TEXT_LENGTH } from "./helpers";
 import { useExitReasonStep } from "./useExitReasonStep";
+import { DISPLAY_LABELS } from "@/components/organisms/FeedbackPrompts/display-labels";
 
 interface Props {
   origin: DeletionSource;
@@ -16,6 +20,7 @@ interface Props {
 }
 
 export function ExitReasonStep({ origin, onClose, onContinue }: Props) {
+  const { t } = useTranslation();
   const labelID = useId();
   const textID = useId();
   const {
@@ -35,18 +40,29 @@ export function ExitReasonStep({ origin, onClose, onContinue }: Props) {
     <div className="flex flex-col px-0.5">
       <div className="flex flex-col gap-4">
         <Text variant="body" tone="muted">
-          Optional. You can skip straight to deleting, and your answer
-          isn&apos;t linked to your account.
+          {t(
+            "Optional. You can skip straight to deleting, and your answer isn't linked to your account.",
+            "此项选填。你可以直接跳过并删除账户，回答不会与你的账户关联。",
+          )}
         </Text>
         <span id={labelID} className="sr-only">
-          Why are you leaving?
+          {t("Why are you leaving?", "你为什么选择离开？")}
         </span>
         <QuestionOptionList
-          options={EXIT_REASON_LABELS}
-          value={reasonLabel}
+          options={EXIT_REASON_LABELS.map((label) =>
+            t(label, DISPLAY_LABELS[label] ?? label),
+          )}
+          value={t(reasonLabel, DISPLAY_LABELS[reasonLabel] ?? reasonLabel)}
           labelId={labelID}
           focusActiveOption={false}
-          onChange={selectReason}
+          onChange={(label) =>
+            selectReason(
+              EXIT_REASON_LABELS.find(
+                (english) =>
+                  t(english, DISPLAY_LABELS[english] ?? english) === label,
+              ) ?? label,
+            )
+          }
           onSubmit={submit}
           editable={false}
           required={false}
@@ -67,9 +83,12 @@ export function ExitReasonStep({ origin, onClose, onContinue }: Props) {
           id={textID}
           type="textarea"
           rows={1}
-          label="Tell us more"
+          label={t("Tell us more", "请详细说明")}
           hideLabel
-          placeholder={placeholder}
+          placeholder={t(
+            placeholder,
+            DISPLAY_LABELS[placeholder] ?? placeholder,
+          )}
           maxLength={MAX_FEEDBACK_TEXT_LENGTH}
           value={text}
           onChange={(event) => setText(event.target.value)}
@@ -85,10 +104,10 @@ export function ExitReasonStep({ origin, onClose, onContinue }: Props) {
           onClick={skip}
           className="flex-1 lg:flex-none"
         >
-          Skip
+          {t("Skip", "跳过")}
         </Button>
         <Button onClick={submit} className="flex-1 lg:flex-none">
-          Continue
+          {t("Continue", "继续")}
         </Button>
       </StepFooter>
     </div>

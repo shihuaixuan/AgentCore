@@ -79,8 +79,10 @@ export function AgentSettingsModal({
                     {t("Human-in-the-loop approval", "人工审批")}
                   </Text>
                   <Text variant="large" tone="primary" className="mt-1">
-                    The workflow will pause at human-in-the-loop blocks and wait
-                    for your review before continuing
+                    {t(
+                      "The workflow will pause at human-in-the-loop blocks and wait for your review before continuing",
+                      "工作流将在人工审批模块处暂停，等待你审核后再继续",
+                    )}
                   </Text>
                 </div>
                 <Switch
@@ -100,8 +102,10 @@ export function AgentSettingsModal({
                     {t("Sensitive action approval", "敏感操作审批")}
                   </Text>
                   <Text variant="large" tone="primary" className="mt-1">
-                    The workflow will pause at sensitive action blocks and wait
-                    for your review before continuing
+                    {t(
+                      "The workflow will pause at sensitive action blocks and wait for your review before continuing",
+                      "工作流将在敏感操作模块处暂停，等待你审核后再继续",
+                    )}
                   </Text>
                 </div>
                 <Switch

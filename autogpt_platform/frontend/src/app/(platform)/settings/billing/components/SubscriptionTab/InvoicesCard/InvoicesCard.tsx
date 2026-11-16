@@ -134,7 +134,10 @@ export function InvoicesCard({ index = 0 }: Props) {
                         size="icon-xs"
                         shape="pill"
                         withTooltip={false}
-                        aria-label={`Download invoice ${invoice.number}`}
+                        aria-label={t(
+                          `Download invoice ${invoice.number}`,
+                          `下载发票 ${invoice.number}`,
+                        )}
                         disabled={!invoice.pdfUrl}
                         onClick={() => {
                           if (invoice.pdfUrl) {

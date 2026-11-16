@@ -4,6 +4,7 @@ import * as React from "react";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { LocalizedCloseLabel } from "@/lib/i18n/LocalizedCloseLabel";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
@@ -87,7 +88,7 @@ const SheetContent = React.forwardRef<
           className="h-4 w-4"
         />
         <span data-slot="sheet-close-label" className="sr-only">
-          Close
+          <LocalizedCloseLabel />
         </span>
       </SheetPrimitive.Close>
       {children}

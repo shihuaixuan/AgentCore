@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 // Rounded-md outline buttons; the Button atom's outline variant is a pill.
 const pageButtonClassName =
@@ -18,6 +19,7 @@ export function PaginationControls({
   totalPages,
   pathParam = "page",
 }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -44,7 +46,7 @@ export function PaginationControls({
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage <= 1}
       >
-        Previous
+        {t("Previous", "上一页")}
       </button>
       <Text
         variant="body-tight"
@@ -52,7 +54,10 @@ export function PaginationControls({
         tone="inherit"
         data-slot="pagination-controls-label"
       >
-        Page {currentPage} of {totalPages}
+        {t(
+          `Page ${currentPage} of ${totalPages}`,
+          `第 ${currentPage} 页，共 ${totalPages} 页`,
+        )}
       </Text>
       <button
         type="button"
@@ -61,7 +66,7 @@ export function PaginationControls({
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
       >
-        Next
+        {t("Next", "下一页")}
       </button>
     </div>
   );

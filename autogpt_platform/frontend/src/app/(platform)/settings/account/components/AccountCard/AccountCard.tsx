@@ -98,8 +98,10 @@ export function AccountCard({ user, index = 0 }: Props) {
                 <Form form={emailForm} onSubmit={handleEmailSubmit}>
                   <div className="flex flex-col gap-4">
                     <Text variant="small" as="span" tone="muted">
-                      We&apos;ll send a confirmation link to verify your new
-                      address.
+                      {t(
+                        "We'll send a confirmation link to verify your new address.",
+                        "我们将发送确认链接，以验证你的新邮箱地址。",
+                      )}
                     </Text>
                     <FormField
                       control={emailForm.control}
@@ -140,7 +142,7 @@ export function AccountCard({ user, index = 0 }: Props) {
                       loading={isUpdatingEmail}
                     >
                       {isUpdatingEmail
-                        ? "Saving"
+                        ? t("Saving", "正在保存")
                         : t("Update email", "更新邮箱")}
                     </Button>
                   </Dialog.Footer>

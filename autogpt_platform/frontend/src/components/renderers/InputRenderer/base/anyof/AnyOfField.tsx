@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useFieldAccessibilityContext } from "../../field-accessibility";
 import { FieldProps, getUiOptions, getWidget } from "@rjsf/utils";
 import { AnyOfFieldTitle } from "./components/AnyOfFieldTitle";
@@ -11,6 +12,7 @@ import { useNodeStore } from "@/app/(platform)/build/stores/nodeStore";
 import { cn } from "@/lib/utils";
 
 export const AnyOfField = (props: FieldProps) => {
+  const { t } = useTranslation();
   const { registry, schema } = props;
   const { fields } = registry;
   const { SchemaField: _SchemaField } = fields;
@@ -96,7 +98,11 @@ export const AnyOfField = (props: FieldProps) => {
           "border-error bg-error-surface text-error-foreground line-through",
       )}
       autofocus={props.autofocus}
-      label={schema.title ? `${schema.title} — variant` : "Variant selector"}
+      label={
+        schema.title
+          ? t(`${schema.title} — variant`, `${schema.title} — 类型选项`)
+          : t("Variant selector", "类型选项选择器")
+      }
       hideLabel={true}
       readonly={props.readonly}
     />

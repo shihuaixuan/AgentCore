@@ -53,7 +53,10 @@ export function ExpertsSection({ category }: Props) {
     <section id="experts" className="mb-20 scroll-mt-24">
       <SectionHeader
         title={t("Meet the AI Experts", "认识 AI 专家")}
-        subtitle="Hire a ready-made specialist — competent on day one, working for you in minutes."
+        subtitle={t(
+          "Hire a ready-made specialist — competent on day one, working for you in minutes.",
+          "聘请一位经验丰富的专家，即刻上手，几分钟内即可为你工作。",
+        )}
         actions={
           isLoggedIn ? (
             <div className="flex items-center gap-2">

@@ -179,7 +179,7 @@ function SettingsBillingPage() {
             variant="ghost"
             size="icon-sm"
             leadingIcon={InformationCircleIcon}
-            aria-label="How usage and credits work"
+            aria-label={t("How usage and credits work", "用量和积分的使用方式")}
             tone="muted"
             onClick={() => setIsExplainerOpen(true)}
           />

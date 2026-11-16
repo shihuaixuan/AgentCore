@@ -13,17 +13,17 @@ export const SUBSCRIBE_NOW_PARAM = "subscribe";
 export const SUBSCRIBE_NOW_VALUE = "trial-plan";
 export const BILLING_PATH = "/settings/billing";
 
-export function formatTrialPrice(offer: TrialOfferResponse) {
+export function formatTrialPrice(offer: TrialOfferResponse, locale = "en") {
   const amount = currencyFormatter(offer.currency).format(
     getTrialChargeAmount(offer),
   );
-  return `${amount} / ${getTrialCadence(offer)}`;
+  return `${amount} / ${locale === "zh-CN" ? (offer.billing_cycle === "yearly" ? "年" : "月") : getTrialCadence(offer)}`;
 }
 
 // The cancel-pending screens drop the cents of a whole price ("$50 / month")
 // and keep them otherwise ("$19.99 / month").
-export function formatPlanPrice(offer: TrialOfferResponse) {
-  return `${formatPlanAmount(offer)} / ${getTrialCadence(offer)}`;
+export function formatPlanPrice(offer: TrialOfferResponse, locale = "en") {
+  return `${formatPlanAmount(offer)} / ${locale === "zh-CN" ? (offer.billing_cycle === "yearly" ? "年" : "月") : getTrialCadence(offer)}`;
 }
 
 export function formatPlanAmount(offer: TrialOfferResponse) {
@@ -55,12 +55,19 @@ function currencyFormatter(currency: string) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency });
 }
 
-export function formatTrialEnd(value: Date | string | null | undefined) {
-  if (!value) return "the end of your trial";
-  return new Date(value).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+export function formatTrialEnd(
+  value: Date | string | null | undefined,
+  locale = "en",
+) {
+  if (!value)
+    return locale === "zh-CN" ? "试用结束时" : "the end of your trial";
+  return new Date(value).toLocaleString(
+    locale === "zh-CN" ? locale : undefined,
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  );
 }
 
 export function formatTrialEndDate(value: Date | string) {

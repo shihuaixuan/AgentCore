@@ -1,5 +1,9 @@
 "use client";
 
+import { useOnboardingTranslation } from "../../../useOnboardingTranslation";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { MicOff01Icon } from "@hugeicons/core-free-icons";
@@ -45,6 +49,8 @@ export function MicBlockedNotice({
   permission,
   onRetry,
 }: Props) {
+  const { translateCopy } = useOnboardingTranslation();
+  const { t } = useTranslation();
   if (!isBlocked && !isUnavailable) return null;
   const copy = isBlocked ? noticeCopy(permission) : COPY.unavailable;
 
@@ -56,15 +62,15 @@ export function MicBlockedNotice({
       <Icon icon={MicOff01Icon} size={18} className="mt-0.5 shrink-0" />
       <Text variant="body" tone="secondary">
         <Text variant="body-medium" as="span">
-          {copy.reason}
+          {translateCopy(copy.reason)}
         </Text>{" "}
-        {copy.howTo}{" "}
+        {translateCopy(copy.howTo)}{" "}
         <button
           type="button"
           onClick={onRetry}
           className="inline rounded-sm border border-transparent align-baseline font-sans text-body font-medium whitespace-nowrap text-foreground-base underline underline-offset-4 transition-colors hover:text-foreground-strong focus-visible:ring-1 focus-visible:ring-focus focus-visible:outline-none"
         >
-          try the microphone again
+          {t("try the microphone again", "重试麦克风")}
         </button>
         .
       </Text>

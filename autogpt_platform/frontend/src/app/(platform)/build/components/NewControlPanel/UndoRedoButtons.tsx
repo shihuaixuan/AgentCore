@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Separator } from "@/components/atoms/Separator/Separator";
 import {
   Tooltip,
@@ -15,6 +16,7 @@ import {
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export const UndoRedoButtons = () => {
+  const { t } = useTranslation();
   const { undo, redo, canUndo, canRedo } = useHistoryStore();
 
   // Keyboard shortcuts for undo and redo
@@ -55,7 +57,7 @@ export const UndoRedoButtons = () => {
             <Icon icon={ArrowTurnBackwardIcon} className="size-5" />
           </ControlPanelButton>
         </TooltipTrigger>
-        <TooltipContent side="right">Undo</TooltipContent>
+        <TooltipContent side="right">{t("Undo", "撤销")}</TooltipContent>
       </Tooltip>
       <Separator />
       <Tooltip delayDuration={100}>
@@ -69,7 +71,7 @@ export const UndoRedoButtons = () => {
             <Icon icon={ArrowTurnForwardIcon} className="size-5" />
           </ControlPanelButton>
         </TooltipTrigger>
-        <TooltipContent side="right">Redo</TooltipContent>
+        <TooltipContent side="right">{t("Redo", "重做")}</TooltipContent>
       </Tooltip>
     </>
   );

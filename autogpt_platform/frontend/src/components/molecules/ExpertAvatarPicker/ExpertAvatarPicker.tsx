@@ -6,6 +6,7 @@ import { RefreshIcon } from "@hugeicons/core-free-icons";
 import { ExpertAvatar } from "../ExpertAvatar/ExpertAvatar";
 import { ACCEPTED_AVATAR_TYPES } from "./helpers";
 import { useExpertAvatarPicker } from "./useExpertAvatarPicker";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   name: string;
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function ExpertAvatarPicker({ name, ...props }: Props) {
+  const { t } = useTranslation();
   const picker = useExpertAvatarPicker({ name, ...props });
   return (
     <div
@@ -22,7 +24,7 @@ export function ExpertAvatarPicker({ name, ...props }: Props) {
       className="flex w-full flex-col items-center gap-4 rounded-2xl border border-border-base bg-canvas p-5"
     >
       <ExpertAvatar
-        name={name || "Your expert"}
+        name={name || t("Your expert", "你的专家")}
         avatarUrl={picker.selectedUrl}
         size={144}
         className={picker.isGenerating ? "animate-pulse" : undefined}
@@ -33,8 +35,10 @@ export function ExpertAvatarPicker({ name, ...props }: Props) {
           data-slot="expert-avatar-picker-status"
           className="text-body leading-5 text-foreground-tertiary"
         >
-          Creating another avatar. You can keep this one or upload a picture
-          while you wait.
+          {t(
+            "Creating another avatar. You can keep this one or upload a picture while you wait.",
+            "正在生成另一个头像。等待期间，你可以保留当前头像或上传图片。",
+          )}
         </p>
       )}
       {picker.error && (
@@ -51,7 +55,7 @@ export function ExpertAvatarPicker({ name, ...props }: Props) {
         type="file"
         disabled={picker.isUploading}
         accept={ACCEPTED_AVATAR_TYPES}
-        aria-label="Upload avatar"
+        aria-label={t("Upload avatar", "上传头像")}
         data-slot="expert-avatar-picker-file-input"
         className="sr-only"
         tabIndex={-1}
@@ -72,7 +76,7 @@ export function ExpertAvatarPicker({ name, ...props }: Props) {
           disabled={picker.isUploading}
           data-slot="expert-avatar-picker-upload"
         >
-          Upload a picture
+          {t("Upload a picture", "上传图片")}
         </Button>
         <Button
           variant="secondary"
@@ -83,7 +87,7 @@ export function ExpertAvatarPicker({ name, ...props }: Props) {
           disabled={picker.isBusy}
           data-slot="expert-avatar-picker-regenerate"
         >
-          Regenerate
+          {t("Regenerate", "重新生成")}
         </Button>
         <Button
           size="small"
@@ -91,7 +95,7 @@ export function ExpertAvatarPicker({ name, ...props }: Props) {
           disabled={picker.isUploading}
           data-slot="expert-avatar-picker-confirm"
         >
-          Use this avatar
+          {t("Use this avatar", "使用此头像")}
         </Button>
       </div>
     </div>

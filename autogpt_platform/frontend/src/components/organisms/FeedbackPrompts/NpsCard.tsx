@@ -1,4 +1,7 @@
 "use client";
+import { DISPLAY_LABELS } from "./display-labels";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -35,6 +38,7 @@ export function NpsCard({
   onSubmit,
   onDismiss,
 }: Props) {
+  const { t } = useTranslation();
   const [score, setScore] = useState<number | null>(initialScore);
   const [note, setNote] = useState("");
   const [sent, setSent] = useState(initialSent);
@@ -58,7 +62,10 @@ export function NpsCard({
   if (!isOpen) return null;
 
   return (
-    <PromptCard title={QUESTION} onClose={close}>
+    <PromptCard
+      title={t(QUESTION, DISPLAY_LABELS[QUESTION] ?? QUESTION)}
+      onClose={close}
+    >
       {sent ? (
         <ThanksLine />
       ) : (
@@ -85,29 +92,35 @@ export function NpsCard({
           </div>
           <div className="flex justify-between">
             <Text variant="small" tone="muted">
-              Not at all likely
+              {t("Not at all likely", "完全不可能")}
             </Text>
             <Text variant="small" tone="muted">
-              Extremely likely
+              {t("Extremely likely", "非常可能")}
             </Text>
           </div>
           {score !== null ? (
             <>
               <Text variant="body-medium" tone="primary">
-                {followUpFor(score)}
+                {t(
+                  followUpFor(score),
+                  DISPLAY_LABELS[followUpFor(score)] ?? followUpFor(score),
+                )}
               </Text>
               <Textarea
                 maxLength={MAX_FEEDBACK_NOTE_CHARS}
                 rows={3}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                aria-label={followUpFor(score)}
-                placeholder="Optional"
+                aria-label={t(
+                  followUpFor(score),
+                  DISPLAY_LABELS[followUpFor(score)] ?? followUpFor(score),
+                )}
+                placeholder={t("Optional", "选填")}
                 className="resize-none"
               />
               <div className="flex justify-end">
                 <Button size="small" onClick={send}>
-                  Send
+                  {t("Send", "发送")}
                 </Button>
               </div>
             </>

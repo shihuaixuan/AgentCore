@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   BookOpenIcon,
   ClockIcon,
@@ -75,6 +77,7 @@ export function FeatureRequestList({ results }: ResultsProps) {
 }
 
 export function ScheduleList({ schedules }: SchedulesProps) {
+  const { t } = useTranslation();
   return (
     <div className={RESULT_GRID}>
       {schedules.map((schedule, i) => {
@@ -105,7 +108,9 @@ export function ScheduleList({ schedules }: SchedulesProps) {
             </div>
             {str(schedule, "kind") && (
               <span className="shrink-0 rounded-full bg-surface-hover px-2 py-0.5 text-caption-sm leading-inherit text-foreground-tertiary">
-                {str(schedule, "kind") === "copilot_turn" ? "chat" : "workflow"}
+                {str(schedule, "kind") === "copilot_turn"
+                  ? t("chat", "对话")
+                  : t("workflow", "工作流")}
               </span>
             )}
           </div>
@@ -116,6 +121,7 @@ export function ScheduleList({ schedules }: SchedulesProps) {
 }
 
 export function ScheduleCreatedCard({ output }: OutputProps) {
+  const { t } = useTranslation();
   const next = str(output, "next_run_time");
   return (
     <div className={`${CARD} ${HALF} flex items-center gap-2.5 p-2.5`}>
@@ -128,7 +134,7 @@ export function ScheduleCreatedCard({ output }: OutputProps) {
           tone="emphasis"
           className="truncate"
         >
-          Follow-up scheduled
+          {t("Follow-up scheduled", "已安排后续任务")}
         </Text>
         {next && (
           <p className="flex items-center gap-1 text-caption text-foreground-tertiary">
@@ -144,6 +150,7 @@ export function ScheduleCreatedCard({ output }: OutputProps) {
 }
 
 export function FolderList({ folders }: FoldersProps) {
+  const { t } = useTranslation();
   return (
     <div className={RESULT_GRID}>
       {folders.map((folder, i) => {
@@ -171,7 +178,10 @@ export function FolderList({ folders }: FoldersProps) {
                 tone="subtle"
                 className="shrink-0"
               >
-                {count} workflow{count === 1 ? "" : "s"}
+                {t(
+                  `${count} workflow${count === 1 ? "" : "s"}`,
+                  `${count} 个工作流`,
+                )}
               </Text>
             )}
           </div>
@@ -226,6 +236,7 @@ export function FileList({ files }: FilesProps) {
 }
 
 export function DocsList({ results }: ResultsProps) {
+  const { t } = useTranslation();
   return (
     <div className={RESULT_GRID}>
       {results.map((doc, i) => {
@@ -265,7 +276,7 @@ export function DocsList({ results }: ResultsProps) {
                 href={docUrl}
                 target="_blank"
                 rel="noreferrer"
-                aria-label="Open doc"
+                aria-label={t("Open doc", "打开文档")}
                 className="shrink-0 rounded-full p-1 text-foreground-subtle transition-colors hover:bg-surface-hover hover:text-foreground-body"
               >
                 <Icon icon={LinkSquare01Icon} size={14} />

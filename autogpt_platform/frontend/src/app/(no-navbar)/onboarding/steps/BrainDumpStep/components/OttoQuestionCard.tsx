@@ -1,11 +1,14 @@
 "use client";
 
+import { useOnboardingTranslation } from "../../../useOnboardingTranslation";
+
 import { Text } from "@/components/atoms/Text/Text";
 import { OFF_YOUR_PLATE_QUESTION } from "./insufficient-copy";
 
 // Otto's question from the not-enough screen, kept in view while the person
 // answers it out loud.
 export function OttoQuestionCard() {
+  const { translateCopy } = useOnboardingTranslation();
   return (
     <div
       data-testid="otto-question-card"
@@ -15,7 +18,7 @@ export function OttoQuestionCard() {
         Otto
       </Text>
       <Text variant="h4" as="p" className="text-balance">
-        {OFF_YOUR_PLATE_QUESTION}
+        {translateCopy(OFF_YOUR_PLATE_QUESTION)}
       </Text>
     </div>
   );

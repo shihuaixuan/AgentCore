@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetSkillLearningDetailQueryKey,
   useDecideSkillLearningProposal,
@@ -49,6 +52,7 @@ export function useSkillLearningSheet({
   update,
   onChanged,
 }: Args) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { view, selectedVersionId, editor } = state;
@@ -95,7 +99,12 @@ export function useSkillLearningSheet({
     } else {
       toast({
         title: result.status_label,
-        description: result.reason || "Your draft was kept; adjust and retry.",
+        description:
+          result.reason ||
+          t(
+            "Your draft was kept; adjust and retry.",
+            "草稿已保留，请调整后重试。",
+          ),
         variant: "destructive",
       });
     }
@@ -143,7 +152,12 @@ export function useSkillLearningSheet({
   const outcome = useReportSkillOutcome({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Outcome recorded as evidence for a later review" });
+        toast({
+          title: t(
+            "Outcome recorded as evidence for a later review",
+            "结果已记录，将作为后续审核的依据",
+          ),
+        });
         refresh();
       },
       onError: fail("Could not record the outcome"),
@@ -163,7 +177,9 @@ export function useSkillLearningSheet({
   const exclude = useExcludeSkillLearningSource({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Source excluded from learning" });
+        toast({
+          title: t("Source excluded from learning", "已从学习中排除此来源"),
+        });
         refresh();
       },
       onError: fail("Could not exclude that source"),

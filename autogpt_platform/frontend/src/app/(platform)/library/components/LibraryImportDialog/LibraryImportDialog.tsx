@@ -55,7 +55,9 @@ export default function LibraryImportDialog({ isOpen, onOpenChange }: Props) {
       <Dialog.Content>
         <TabsLine defaultValue="agent">
           <TabsLineList>
-            <TabsLineTrigger value="agent">AutoGPT workflow</TabsLineTrigger>
+            <TabsLineTrigger value="agent">
+              {t("AutoGPT workflow", "AutoGPT 工作流")}
+            </TabsLineTrigger>
             <TabsLineTrigger value="platform">
               {t("Another platform", "其他平台")}
             </TabsLineTrigger>

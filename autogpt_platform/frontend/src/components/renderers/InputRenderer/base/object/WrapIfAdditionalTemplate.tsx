@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getFieldDomId,
   useFieldAccessibility,
@@ -18,6 +19,7 @@ import { useEdgeStore } from "@/app/(platform)/build/stores/edgeStore";
 export default function WrapIfAdditionalTemplate(
   props: WrapIfAdditionalTemplateProps,
 ) {
+  const { t } = useTranslation();
   const {
     classNames,
     style,
@@ -44,7 +46,7 @@ export default function WrapIfAdditionalTemplate(
   const handleId = uiOptions.handleId;
   const accessibility = useFieldAccessibility(
     id,
-    `${label || "Property"} key`,
+    t(`${label || "Property"} key`, `${label || "属性"}键`),
     formContext,
   );
 
@@ -91,7 +93,7 @@ export default function WrapIfAdditionalTemplate(
         {!isHandleConnected && (
           <div className="nodrag flex flex-1 items-center gap-2">
             <Input
-              label={`${label || "Property"} key`}
+              label={t(`${label || "Property"} key`, `${label || "属性"}键`)}
               hideLabel={true}
               required={required}
               defaultValue={label}

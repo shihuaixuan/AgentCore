@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { FormField } from "@/components/molecules/Form/Form";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
@@ -32,6 +35,8 @@ export function PasswordCredentialsModal({
   onCredentialsCreate,
   siblingInputs,
 }: Props) {
+  const { t } = useTranslation();
+
   const credentials = useCredentials(schema, siblingInputs);
   const schemes = credentials
     ? getServerScopeSchemes(credentials.provider)
@@ -43,9 +48,9 @@ export function PasswordCredentialsModal({
         ? getServerFieldSchema(credentials.provider)
         : z.string().trim(),
     scheme: z.string(),
-    username: z.string().min(1, "Username is required"),
-    password: z.string().min(1, "Password is required"),
-    title: z.string().min(1, "Name is required"),
+    username: z.string().min(1, t("Username is required", "请输入用户名")),
+    password: z.string().min(1, t("Password is required", "请输入密码")),
+    title: z.string().min(1, t("Name is required", "请输入名称")),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -86,7 +91,10 @@ export function PasswordCredentialsModal({
 
   return (
     <Dialog
-      title={`Add new username & password for ${providerName}`}
+      title={t(
+        `Add new username & password for ${providerName}`,
+        `为 ${providerName} 添加用户名和密码`,
+      )}
       controlled={{
         isOpen: open,
         set: (isOpen) => {
@@ -111,7 +119,7 @@ export function PasswordCredentialsModal({
                 render={({ field }) => (
                   <Select
                     id="scheme"
-                    label="Database type"
+                    label={t("Database type", "数据库类型")}
                     value={field.value}
                     onValueChange={field.onChange}
                     options={schemes}
@@ -127,7 +135,7 @@ export function PasswordCredentialsModal({
                   <Input
                     id="server"
                     error={fieldState.error?.message}
-                    label="Server"
+                    label={t("Server", "服务器")}
                     type="text"
                     placeholder="host or host:port"
                     hint="This login is only ever sent to this server."
@@ -143,9 +151,9 @@ export function PasswordCredentialsModal({
                 <Input
                   id="username"
                   error={fieldState.error?.message}
-                  label="Username"
+                  label={t("Username", "用户名")}
                   type="text"
-                  placeholder="Enter username..."
+                  placeholder={t("Enter username...", "输入用户名…")}
                   {...field}
                 />
               )}
@@ -157,9 +165,9 @@ export function PasswordCredentialsModal({
                 <Input
                   id="password"
                   error={fieldState.error?.message}
-                  label="Password"
+                  label={t("Password", "密码")}
                   type="password"
-                  placeholder="Enter password..."
+                  placeholder={t("Enter password...", "输入密码…")}
                   {...field}
                 />
               )}
@@ -171,16 +179,19 @@ export function PasswordCredentialsModal({
                 <Input
                   id="title"
                   error={fieldState.error?.message}
-                  label="Name"
+                  label={t("Name", "名称")}
                   type="text"
-                  placeholder="Enter a name for this user login..."
+                  placeholder={t(
+                    "Enter a name for this user login...",
+                    "为此登录凭据输入名称…",
+                  )}
                   className="mb-8"
                   {...field}
                 />
               )}
             />
             <Button type="submit" className="w-full">
-              Save & use this user login
+              {t("Save & use this user login", "保存并使用此登录凭据")}
             </Button>
           </form>
         </FormProvider>

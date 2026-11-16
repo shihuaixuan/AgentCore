@@ -1,5 +1,8 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { usePromptTranslation } from "../usePromptTranslation";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { FadeIn } from "@/components/atoms/FadeIn/FadeIn";
 import { Input } from "@/components/atoms/Input/Input";
@@ -31,6 +34,8 @@ export function TypedFallback({
   rows = 6,
   placeholder = DEFAULT_PLACEHOLDER,
 }: Props) {
+  const { t } = useTranslation();
+  const { translatePrompt } = usePromptTranslation();
   return (
     <FadeIn className="w-full">
       <div className="flex w-full flex-col items-center gap-3">
@@ -38,10 +43,17 @@ export function TypedFallback({
           <Input
             id="brain-dump-text"
             type="textarea"
-            label="Your brain dump"
+            label={t("Your brain dump", "你的工作描述")}
             hideLabel
             rows={rows}
-            placeholder={placeholder}
+            placeholder={
+              placeholder === DEFAULT_PLACEHOLDER
+                ? t(
+                    DEFAULT_PLACEHOLDER,
+                    "每周有哪些重复工作？你最想先交出哪一项？",
+                  )
+                : translatePrompt(placeholder)
+            }
             value={value}
             onChange={(e) => onChange(e.target.value)}
             maxLength={MAX_TYPED_CHARS}
@@ -57,7 +69,10 @@ export function TypedFallback({
               id={LIMIT_HINT_ID}
               className="text-left"
             >
-              {TYPED_TOO_LONG_COPY}
+              {t(
+                TYPED_TOO_LONG_COPY,
+                "已超过 20,000 个字符的限制，请精简后重试。",
+              )}
             </Text>
           ) : (
             <Text
@@ -66,7 +81,11 @@ export function TypedFallback({
               id={LIMIT_HINT_ID}
               className="min-h-[1.125rem] text-right"
             >
-              {typedCharsLeftHint(value.length)}
+              {typedCharsLeftHint(value.length) &&
+                t(
+                  typedCharsLeftHint(value.length) ?? "",
+                  `还可输入 ${Math.max(0, MAX_TYPED_CHARS - value.length).toLocaleString("zh-CN")} 个字符`,
+                )}
             </Text>
           )}
         </div>
@@ -76,7 +95,7 @@ export function TypedFallback({
           disabled={!value.trim()}
           className="h-10 w-56"
         >
-          I&apos;m done
+          {t("I'm done", "我说完了")}
         </Button>
       </div>
     </FadeIn>

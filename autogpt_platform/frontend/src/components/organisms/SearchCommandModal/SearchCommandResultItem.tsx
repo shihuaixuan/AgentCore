@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
 import { Button } from "@/components/atoms/Button/Button";
@@ -28,6 +31,7 @@ export function SearchCommandResultItem({
   onHighlight,
   onSelect,
 }: Props) {
+  const { t } = useTranslation();
   const Icon = item.icon;
 
   return (
@@ -111,7 +115,7 @@ export function SearchCommandResultItem({
         {isLoading ? (
           <LoadingSpinner
             size="small"
-            aria-label="Opening"
+            aria-label={t("Opening", "正在打开")}
             className="shrink-0 text-foreground-tertiary"
           />
         ) : (

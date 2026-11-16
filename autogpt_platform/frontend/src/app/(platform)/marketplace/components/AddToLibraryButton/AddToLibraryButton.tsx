@@ -192,7 +192,7 @@ export function AddToLibraryButton({
       className={`z-10 ${className ?? ""}`}
       aria-label={`Add ${agentName} to library`}
     >
-      {isPending ? "Adding..." : t("Add", "添加")}
+      {isPending ? t("Adding...", "正在添加…") : t("Add", "添加")}
     </Button>
   );
 }

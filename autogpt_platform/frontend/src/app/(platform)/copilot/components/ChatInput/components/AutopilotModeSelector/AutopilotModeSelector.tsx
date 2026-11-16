@@ -69,8 +69,14 @@ export function AutopilotModeSelector({
         <DropdownMenuTrigger asChild disabled={disabled}>
           <button
             type="button"
-            aria-label={`Approval mode: ${current.label}. Change mode`}
-            title={`Approval mode: ${current.label}`}
+            aria-label={t(
+              `Approval mode: ${current.label}. Change mode`,
+              `审批模式：${current.label}。更改模式`,
+            )}
+            title={t(
+              `Approval mode: ${current.label}`,
+              `审批模式：${current.label}`,
+            )}
             className={cn(
               "inline-flex h-8 items-center justify-center gap-1 rounded-full text-caption font-medium transition-colors focus-visible:ring-2 focus-visible:ring-foreground-subtle focus-visible:outline-none",
               isDefault

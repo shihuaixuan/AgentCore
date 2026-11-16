@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { FolderBreadcrumb } from "@/app/(platform)/artifacts/components/WorkspaceFolders/FolderBreadcrumb";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
@@ -31,6 +33,7 @@ export function WorkspaceFilePicker({
   expertId,
   expertName,
 }: Props) {
+  const { t } = useTranslation();
   const picker = useWorkspaceFilePicker({ enabled: isOpen, expertId });
 
   function handleOpenChange(open: boolean) {
@@ -46,12 +49,12 @@ export function WorkspaceFilePicker({
     onClose();
   }
 
-  const who = expertName ?? "this expert";
+  const who = expertName ?? t("this expert", "此专家");
   const { selectedFileCount: files, selectedFolderCount: folders } = picker;
 
   return (
     <Dialog
-      title="Use a file from your workspace"
+      title={t("Use a file from your workspace", "使用工作区中的文件")}
       styling={{ maxWidth: "48rem" }}
       controlled={{ isOpen, set: handleOpenChange }}
     >
@@ -66,13 +69,13 @@ export function WorkspaceFilePicker({
               className="absolute top-1/2 left-4 z-20 -translate-y-1/2"
             />
             <Input
-              label="Search workspace files"
+              label={t("Search workspace files", "搜索工作区文件")}
               id="workspace-file-picker-search"
               hideLabel
               type="text"
               value={picker.searchTerm}
               onChange={(e) => picker.setSearchTerm(e.target.value)}
-              placeholder="Search files"
+              placeholder={t("Search files", "搜索文件")}
               className="w-full pl-12"
               wrapperClassName="!mb-0"
             />
@@ -88,14 +91,17 @@ export function WorkspaceFilePicker({
                 />
                 <label htmlFor="picker-expert-only">
                   <Text tone="body" variant="small-medium" as="span">
-                    Only {who}&rsquo;s files
+                    {t(`Only ${who}’s files`, `仅显示${who}的文件`)}
                   </Text>
                 </label>
               </div>
               <Text tone="muted" variant="small">
                 {picker.expertOnly
-                  ? `From your chats with ${who}`
-                  : "Plus your own files and folders"}
+                  ? t(`From your chats with ${who}`, `来自你与${who}的对话`)
+                  : t(
+                      "Plus your own files and folders",
+                      "另含你自己的文件和文件夹",
+                    )}
               </Text>
             </div>
           ) : null}
@@ -129,13 +135,26 @@ export function WorkspaceFilePicker({
             hasMore={picker.hasMore}
             isLoadingMore={picker.isLoadingMore}
             onLoadMore={picker.loadMore}
-            emptyMessage={emptyMessage({
-              isExpertOnly: !!expertId && picker.expertOnly,
-              who,
-              isSearching: picker.searchTerm.trim().length > 0,
-              isInFolder: picker.folderId !== null,
-              hasFolderRows: picker.folderRows.length > 0,
-            })}
+            emptyMessage={t(
+              emptyMessage({
+                isExpertOnly: !!expertId && picker.expertOnly,
+                who,
+                isSearching: picker.searchTerm.trim().length > 0,
+                isInFolder: picker.folderId !== null,
+                hasFolderRows: picker.folderRows.length > 0,
+              }),
+              expertId && picker.expertOnly
+                ? picker.searchTerm.trim()
+                  ? `没有来自${who}的匹配文件。`
+                  : `尚无来自${who}的文件。`
+                : picker.searchTerm.trim()
+                  ? "没有匹配的文件。"
+                  : picker.folderId !== null
+                    ? picker.folderRows.length > 0
+                      ? "此文件夹下没有直接存放的文件。"
+                      : "此文件夹为空。"
+                    : "工作区中尚无文件。",
+            )}
             emptyAction={
               expertId && picker.expertOnly ? (
                 <Button
@@ -144,7 +163,7 @@ export function WorkspaceFilePicker({
                   size="small"
                   onClick={() => picker.setExpertOnly(false)}
                 >
-                  Show your own files too
+                  {t("Show your own files too", "同时显示你自己的文件")}
                 </Button>
               ) : null
             }
@@ -158,7 +177,7 @@ export function WorkspaceFilePicker({
             size="small"
             onClick={() => handleOpenChange(false)}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button
             type="button"
@@ -167,7 +186,12 @@ export function WorkspaceFilePicker({
             disabled={files + folders === 0}
             onClick={handleConfirm}
           >
-            {addLabel(files, folders)}
+            {t(
+              addLabel(files, folders),
+              files + folders === 0
+                ? "添加"
+                : `添加${[files > 0 ? `${files} 个文件` : "", folders > 0 ? `${folders} 个文件夹` : ""].filter(Boolean).join("和")}`,
+            )}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

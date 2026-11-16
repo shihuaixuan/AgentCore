@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +18,10 @@ const formSchema = z.object({
 type SaveableGraphFormValues = z.infer<typeof formSchema>;
 
 export const useNewSaveControl = () => {
+  const { t } = useTranslation();
+  const localizedFormSchema = formSchema.extend({
+    name: z.string().min(1, t("Name is required", "请填写名称")).max(100),
+  });
   const { setSaveControlOpen } = useControlPanelStore();
 
   const onSuccess = (graph: GraphModel) => {
@@ -50,7 +55,7 @@ export const useNewSaveControl = () => {
   );
 
   const form = useForm<SaveableGraphFormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(localizedFormSchema),
     defaultValues: {
       name: graph?.name ?? "",
       description: graph?.description ?? "",

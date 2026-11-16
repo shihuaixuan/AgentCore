@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   Tooltip,
   TooltipContent,
@@ -34,6 +36,8 @@ export function CredentialRow({
   onDelete,
   isDeleting = false,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <div
       data-selected={selected}
@@ -47,7 +51,10 @@ export function CredentialRow({
             type="button"
             role="checkbox"
             aria-checked={selected}
-            aria-label={`Select ${credential.title}`}
+            aria-label={t(
+              `Select ${credential.title}`,
+              `选择 ${credential.title}`,
+            )}
             onClick={onToggleSelected}
             className={`shrink-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-action ${
               selected
@@ -66,17 +73,19 @@ export function CredentialRow({
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <span className="text-body leading-5.5 font-medium text-foreground-base">
-              {credential.title}
+              {credential.title === "Manual Entry"
+                ? t("Manual Entry", "手动输入")
+                : credential.title}
             </span>
             <span className="inline-flex items-center justify-center rounded-lg bg-surface-hover px-2 py-0.5 text-caption leading-5 font-medium text-foreground-body">
               {credential.isSignIn
-                ? "For chats"
-                : typeBadgeLabel(credential.type)}
+                ? t("For chats", "用于聊天")
+                : typeBadgeLabel(credential.type, t)}
             </span>
           </div>
           <div className="flex items-center gap-3 leading-5">
             <span className="text-caption-sm leading-inherit font-medium tracking-eyebrow text-foreground-body uppercase">
-              {credential.blocksNote ?? formatMaskedValue(credential)}
+              {credential.blocksNote ?? formatMaskedValue(credential, t)}
             </span>
           </div>
         </div>
@@ -90,11 +99,14 @@ export function CredentialRow({
                 tabIndex={0}
                 className="text-caption-sm leading-inherit font-medium tracking-eyebrow text-foreground-body uppercase focus:outline-none focus-visible:ring-2 focus-visible:ring-action"
               >
-                Managed
+                {t("Managed", "托管")}
               </span>
             </TooltipTrigger>
             <TooltipContent side="top">
-              Managed by AutoGPT — cannot be removed
+              {t(
+                "Managed by AutoGPT — cannot be removed",
+                "由 AutoGPT 托管，无法移除",
+              )}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -104,7 +116,10 @@ export function CredentialRow({
           onClick={onDelete}
           disabled={isDeleting}
           aria-busy={isDeleting}
-          aria-label={`Delete ${credential.title}`}
+          aria-label={t(
+            `Delete ${credential.title}`,
+            `删除 ${credential.title}`,
+          )}
           className="inline-flex size-5 items-center justify-center text-foreground-base transition-colors hover:text-error focus-visible:ring-1 focus-visible:ring-brand focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-foreground-base"
         >
           {isDeleting ? (

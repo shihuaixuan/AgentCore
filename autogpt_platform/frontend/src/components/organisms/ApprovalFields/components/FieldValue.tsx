@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useState } from "react";
 import { Button } from "@/components/atoms/Button/Button";
@@ -22,13 +23,14 @@ interface Props {
 }
 
 export function FieldValue({ name, value, clipped, format }: Props) {
+  const { t } = useTranslation();
   const kind = fieldKind(name, value);
   const shortened = clipped ? (
     <span
       data-slot="field-value-shortened"
       className="ml-1 text-foreground-subtle"
     >
-      (shortened)
+      {t("(shortened)", "（已缩短）")}
     </span>
   ) : null;
   const formatted = formattedText(format, value);
@@ -97,7 +99,7 @@ export function FieldValue({ name, value, clipped, format }: Props) {
             data-slot="field-value-json-toggle"
             className="cursor-pointer text-foreground-secondary underline decoration-border-strong underline-offset-2 hover:text-foreground-strong"
           >
-            View as JSON
+            {t("View as JSON", "以 JSON 查看")}
           </summary>
           <pre
             data-slot="field-value-json-body"
@@ -123,6 +125,7 @@ interface LongTextProps {
 }
 
 function LongText({ text, shortened }: LongTextProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
     <div
@@ -151,7 +154,7 @@ function LongText({ text, shortened }: LongTextProps) {
         <Button variant="link" size="inline" onClick={() => setOpen(true)}>
           {lineCount(text) > CLAMP_LINES
             ? `Show all ${lineCount(text)} lines`
-            : "Show all"}
+            : t("Show all", "显示全部")}
         </Button>
       )}
     </div>
@@ -159,12 +162,13 @@ function LongText({ text, shortened }: LongTextProps) {
 }
 
 function Hidden() {
+  const { t } = useTranslation();
   return (
     <span data-slot="field-value-hidden" className="text-foreground-tertiary">
       <span data-slot="field-value-hidden-mask" aria-hidden="true">
         ••••••••{" "}
       </span>
-      hidden
+      {t("hidden", "已隐藏")}
     </span>
   );
 }

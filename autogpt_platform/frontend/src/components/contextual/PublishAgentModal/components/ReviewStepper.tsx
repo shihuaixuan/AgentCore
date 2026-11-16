@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion } from "framer-motion";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -19,30 +22,6 @@ interface Step {
   Icon: IconSvgElement;
 }
 
-const STEPS: Step[] = [
-  {
-    title: "Submitted for review",
-    description: "Your listing is queued in the marketplace review pipeline.",
-    state: "done",
-    Icon: Tick02Icon,
-  },
-  {
-    title: "In review",
-    description:
-      "Our team checks the details, media, and safety of your workflow.",
-    note: "Typically reviewed within 2–3 days.",
-    state: "current",
-    Icon: Clock01Icon,
-  },
-  {
-    title: "Goes live",
-    description:
-      "You'll get an email once it's approved. Rejected listings come back with feedback.",
-    state: "upcoming",
-    Icon: Rocket01Icon,
-  },
-];
-
 const NODE_CLASS: Record<StepState, string> = {
   done: "bg-success text-action-foreground",
   current:
@@ -55,6 +34,41 @@ interface Props {
 }
 
 export function ReviewStepper({ shouldReduceMotion }: Props) {
+  const { t } = useTranslation();
+  const STEPS: Step[] = [
+    {
+      title: t("Submitted for review", "已提交审核"),
+      description: t(
+        "Your listing is queued in the marketplace review pipeline.",
+        "您的条目已进入市场审核队列。",
+      ),
+      state: "done",
+      Icon: Tick02Icon,
+    },
+    {
+      title: t("In review", "审核中"),
+      description: t(
+        "Our team checks the details, media, and safety of your workflow.",
+        "我们的团队会检查工作流的详情、媒体内容和安全性。",
+      ),
+      note: t(
+        "Typically reviewed within 2–3 days.",
+        "通常在 2–3 天内完成审核。",
+      ),
+      state: "current",
+      Icon: Clock01Icon,
+    },
+    {
+      title: t("Goes live", "上线"),
+      description: t(
+        "You'll get an email once it's approved. Rejected listings come back with feedback.",
+        "获批后您会收到邮件。未获批准的条目会附带审核反馈。",
+      ),
+      state: "upcoming",
+      Icon: Rocket01Icon,
+    },
+  ];
+
   return (
     <motion.div
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
@@ -63,7 +77,7 @@ export function ReviewStepper({ shouldReduceMotion }: Props) {
       className="mt-6 flex w-full max-w-md flex-col gap-3 px-2"
     >
       <Text variant="body-medium" as="span">
-        What happens next
+        {t("What happens next", "接下来的流程")}
       </Text>
       <ol className="flex flex-col">
         {STEPS.map((step, index) => {

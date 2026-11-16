@@ -79,7 +79,7 @@ export function OutcomeRow({ outcome, timezone, showAgentName }: Props) {
 }
 
 function RunMeta({ outcome, timezone, showAgentName }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const parts = [
     outcome.status === "failed" ? (
       <span key="status" className="font-medium text-error-hover">
@@ -94,9 +94,9 @@ function RunMeta({ outcome, timezone, showAgentName }: Props) {
         {outcome.agent_name}
       </span>
     ) : null,
-    <span key="trigger">{getRunTriggerLabel(outcome.trigger)}</span>,
+    <span key="trigger">{getRunTriggerLabel(outcome.trigger, t)}</span>,
     <span key="time" className="tabular-nums">
-      {formatWorkTime(outcome.occurred_at, timezone)}
+      {formatWorkTime(outcome.occurred_at, timezone, locale)}
     </span>,
   ].filter(Boolean);
 

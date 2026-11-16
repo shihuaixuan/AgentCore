@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { CreditCardIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -10,9 +13,10 @@ interface Props {
 }
 
 export function PaymentRecoveryCard({ payment, fallback }: Props) {
+  const { t } = useTranslation();
   return (
     <section
-      aria-label="Payment"
+      aria-label={t("Payment", "付款")}
       data-slot="payment-recovery-card"
       className="w-full rounded-2xl border border-border-base bg-surface p-6 text-left"
     >
@@ -27,7 +31,7 @@ export function PaymentRecoveryCard({ payment, fallback }: Props) {
           <Icon icon={CreditCardIcon} size={17} />
         </span>
         <Text variant="small-medium" tone="secondary">
-          Payment
+          {t("Payment", "付款")}
         </Text>
       </div>
       <Text
@@ -35,7 +39,7 @@ export function PaymentRecoveryCard({ payment, fallback }: Props) {
         as="h2"
         className="mt-4 mb-3 leading-8 tracking-display"
       >
-        Your payment didn’t go through
+        {t("Your payment didn’t go through", "付款未成功")}
       </Text>
       <Text
         variant="small"

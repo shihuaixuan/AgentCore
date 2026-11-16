@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { toastIfPlanRequired } from "@/components/contextual/PaywallToast/helpers";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -46,6 +47,8 @@ export function useOAuthConnect({
   credentialID,
   onError,
 }: Args) {
+  const { t } = useTranslation();
+
   const queryClient = useQueryClient();
   const credentialsActions = useContext(CredentialsActionsContext);
   const [isPending, setIsPending] = useState(false);
@@ -142,7 +145,7 @@ export function useOAuthConnect({
       // message — showing both would contradict each other.
       if (popupBlocked && !fallbackBlocked) {
         toast({
-          title: "Popup blocked",
+          title: t("Popup blocked", "弹出窗口被阻止"),
           description: OAUTH_ERROR_POPUP_BLOCKED,
         });
       }
@@ -155,7 +158,10 @@ export function useOAuthConnect({
         state_token: state,
       });
 
-      toast({ title: "Connected via OAuth", variant: "success" });
+      toast({
+        title: t("Connected via OAuth", "已通过 OAuth 连接"),
+        variant: "success",
+      });
       await invalidateConnectionQueries(queryClient);
       // The provider's in-memory list only reloads off a React Query cache
       // event, which invalidation never emits unless something already
@@ -185,8 +191,8 @@ export function useOAuthConnect({
         return;
       }
       toast({
-        title: "OAuth connection failed",
-        description: getOAuthErrorMessage(error),
+        title: t("OAuth connection failed", "OAuth 连接失败"),
+        description: getOAuthErrorMessage(error, t),
         variant: "destructive",
       });
     } finally {

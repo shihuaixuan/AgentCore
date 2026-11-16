@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { Button } from "@/components/atoms/Button/Button";
@@ -39,6 +40,8 @@ export function McpConnectPanel({
   serverURLOptions,
   actions,
 }: Props) {
+  const { t } = useTranslation();
+
   const state = useMCPConnectPanel({
     onSuccess,
     initialServerURL,
@@ -51,7 +54,10 @@ export function McpConnectPanel({
     <div className="flex flex-col gap-4">
       {!lockServerURL && (
         <Text variant="body" tone="secondary">
-          Enter the server URL from the service&apos;s setup instructions.
+          {t(
+            "Enter the server URL from the service's setup instructions.",
+            "输入服务设置说明中提供的服务器 URL。",
+          )}
         </Text>
       )}
       <MCPServerURLField
@@ -71,10 +77,13 @@ export function McpConnectPanel({
           />
           <span className="flex flex-col">
             <Text variant="body-medium" as="span">
-              Allow changes
+              {t("Allow changes", "允许更改")}
             </Text>
             <Text variant="small" as="span" tone="muted">
-              Without this it can only read, not create or edit.
+              {t(
+                "Without this it can only read, not create or edit.",
+                "关闭后仅可读取，无法创建或编辑。",
+              )}
             </Text>
           </span>
         </label>
@@ -83,8 +92,14 @@ export function McpConnectPanel({
         <>
           <Text variant="small" tone="secondary">
             {allowedAuthMethods
-              ? "Use the credential described in the setup instructions above."
-              : "Use an API credential only if this server supports it. Follow the server's documentation for the correct authentication type."}
+              ? t(
+                  "Use the credential described in the setup instructions above.",
+                  "使用上方设置说明中描述的凭据。",
+                )
+              : t(
+                  "Use an API credential only if this server supports it. Follow the server's documentation for the correct authentication type.",
+                  "仅在此服务器支持时使用 API 凭据。请根据服务器文档选择正确的身份验证类型。",
+                )}
           </Text>
           {state.manualSchemes.length > 1 && (
             <MCPAuthSchemeField
@@ -98,13 +113,13 @@ export function McpConnectPanel({
           )}
           <Input
             id="mcp-auth-token"
-            label={mcpAuthTokenLabel(state.authScheme)}
+            label={mcpAuthTokenLabel(state.authScheme, t)}
             type="password"
-            placeholder={mcpAuthTokenPlaceholder(state.authScheme)}
+            placeholder={mcpAuthTokenPlaceholder(state.authScheme, t)}
             value={state.token}
             onChange={(e) => state.handleTokenChange(e.target.value)}
             disabled={state.isSubmitting}
-            hint={mcpAuthTokenHint(state.authScheme)}
+            hint={mcpAuthTokenHint(state.authScheme, t)}
             {...noPasswordManager}
             autoComplete="new-password"
           />
@@ -127,7 +142,7 @@ export function McpConnectPanel({
             size="small"
             onClick={state.handleSwitchToToken}
           >
-            Use an API token instead
+            {t("Use an API token instead", "改用 API 令牌")}
           </Button>
         )}
         {state.phase === "manual-token" && state.canUseOAuth && (
@@ -137,7 +152,7 @@ export function McpConnectPanel({
             onClick={state.handleSwitchToOAuth}
             disabled={state.isSubmitting}
           >
-            Try OAuth
+            {t("Try OAuth", "尝试 OAuth")}
           </Button>
         )}
         <Button
@@ -153,7 +168,9 @@ export function McpConnectPanel({
           }
           loading={state.isSubmitting}
         >
-          {state.phase === "form" ? "Connect" : "Save token"}
+          {state.phase === "form"
+            ? t("Connect", "连接")
+            : t("Save token", "保存令牌")}
         </Button>
       </div>
     </div>

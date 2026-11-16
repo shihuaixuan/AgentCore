@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   getGetV2GetSessionQueryKey,
   usePostV2CancelSessionTask,
@@ -13,6 +15,7 @@ interface Props {
 }
 
 export function BackgroundSubtaskStop({ sessionId }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { mutate, isPending } = usePostV2CancelSessionTask({
     mutation: {
@@ -33,8 +36,8 @@ export function BackgroundSubtaskStop({ sessionId }: Props) {
 
   function showStopError() {
     toast({
-      title: "Could not stop subtask",
-      description: "Please try again.",
+      title: t("Could not stop subtask", "无法停止子任务"),
+      description: t("Please try again.", "请重试。"),
       variant: "destructive",
     });
   }
@@ -45,9 +48,9 @@ export function BackgroundSubtaskStop({ sessionId }: Props) {
       size="small"
       disabled={isPending}
       onClick={stop}
-      aria-label="Stop background subtask"
+      aria-label={t("Stop background subtask", "停止后台子任务")}
     >
-      {isPending ? "Stopping…" : "Stop"}
+      {isPending ? t("Stopping…", "正在停止…") : t("Stop", "停止")}
     </Button>
   );
 }

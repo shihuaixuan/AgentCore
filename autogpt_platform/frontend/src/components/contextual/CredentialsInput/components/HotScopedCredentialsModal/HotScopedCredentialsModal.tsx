@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useContext, useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm, FormProvider } from "react-hook-form";
@@ -46,6 +49,8 @@ export function HostScopedCredentialsModal({
   onCredentialsCreate,
   siblingInputs,
 }: Props) {
+  const { t } = useTranslation();
+
   const credentials = useCredentials(schema, siblingInputs);
   const allProviders = useContext(CredentialsProvidersContext);
 
@@ -56,14 +61,19 @@ export function HostScopedCredentialsModal({
   const formSchema = z.object({
     host: z
       .string()
-      .min(1, "Host is required")
+      .min(1, t("Host is required", "请输入主机"))
       .refine((val) => !/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(val), {
-        message: "Enter only the host (e.g. api.example.com), not a full URL",
+        message: t(
+          "Enter only the host (e.g. api.example.com), not a full URL",
+          "仅输入主机（例如 api.example.com），不要输入完整 URL",
+        ),
       })
       .refine((val) => !val.includes("/"), {
-        message:
+        message: t(
           "Enter only the host (e.g. api.example.com), without a trailing path. " +
-          "You may specify a port (e.g. api.example.com:8080) if needed.",
+            "You may specify a port (e.g. api.example.com:8080) if needed.",
+          "仅输入主机（例如 api.example.com），不要附加路径。如有需要，可以指定端口（例如 api.example.com:8080）。",
+        ),
       }),
     title: z.string().optional(),
     headers: z.record(z.string()).optional(),
@@ -166,9 +176,11 @@ export function HostScopedCredentialsModal({
       });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Something went wrong";
+        error instanceof Error
+          ? error.message
+          : t("Something went wrong", "出现错误");
       toast({
-        title: "Failed to save credentials",
+        title: t("Failed to save credentials", "保存凭据失败"),
         description: message,
         variant: "destructive",
       });
@@ -179,8 +191,14 @@ export function HostScopedCredentialsModal({
     <Dialog
       title={
         hasExistingForHost
-          ? `Update sensitive headers for ${providerName}`
-          : `Add sensitive headers for ${providerName}`
+          ? t(
+              `Update sensitive headers for ${providerName}`,
+              `更新 ${providerName} 的敏感请求头`,
+            )
+          : t(
+              `Add sensitive headers for ${providerName}`,
+              `为 ${providerName} 添加敏感请求头`,
+            )
       }
       controlled={{
         isOpen: open,
@@ -208,19 +226,28 @@ export function HostScopedCredentialsModal({
               render={({ field }) => (
                 <Input
                   id="host"
-                  label="Host Pattern"
+                  label={t("Host Pattern", "主机匹配规则")}
                   type="text"
                   size="small"
                   readOnly={!!currentHost}
                   hint={
                     currentHost
-                      ? "Auto-populated from the URL field. Headers will be applied to requests to this host."
-                      : "Enter the host/domain to match against request URLs (e.g., api.example.com)."
+                      ? t(
+                          "Auto-populated from the URL field. Headers will be applied to requests to this host.",
+                          "已从 URL 字段自动填入。向此主机发送请求时将携带这些请求头。",
+                        )
+                      : t(
+                          "Enter the host/domain to match against request URLs (e.g., api.example.com).",
+                          "输入用于匹配请求 URL 的主机或域名（例如 api.example.com）。",
+                        )
                   }
                   placeholder={
                     currentHost
                       ? undefined
-                      : "Enter host (e.g., api.example.com)"
+                      : t(
+                          "Enter host (e.g., api.example.com)",
+                          "输入主机（例如 api.example.com）",
+                        )
                   }
                   {...field}
                 />
@@ -230,21 +257,25 @@ export function HostScopedCredentialsModal({
             <div className="space-y-2">
               <FormLabel className="peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 <Text variant="body-medium-lh-none" as="span" tone="inherit">
-                  Headers
+                  {t("Headers", "请求头")}
                 </Text>
               </FormLabel>
               <FormDescription className="max-w-md text-body-sm leading-inherit">
-                Add sensitive headers (like Authorization, X-API-Key) that
-                should be automatically included in requests to the specified
-                host.
+                {t(
+                  "Add sensitive headers (like Authorization, X-API-Key) that should be automatically included in requests to the specified host.",
+                  "添加敏感请求头（例如 Authorization、X-API-Key），向指定主机发送请求时将自动携带这些请求头。",
+                )}
               </FormDescription>
 
               {headerPairs.map((pair, index) => (
                 <div key={index} className="flex w-full items-center gap-4">
                   <Input
                     id={`header-${index}-key`}
-                    label="Header Name"
-                    placeholder="Header name (e.g., Authorization)"
+                    label={t("Header Name", "请求头名称")}
+                    placeholder={t(
+                      "Header name (e.g., Authorization)",
+                      "请求头名称（例如 Authorization）",
+                    )}
                     size="small"
                     value={pair.key}
                     className="flex-1"
@@ -255,10 +286,13 @@ export function HostScopedCredentialsModal({
 
                   <Input
                     id={`header-${index}-value`}
-                    label="Header Value"
+                    label={t("Header Value", "请求头值")}
                     size="small"
                     type="password"
-                    placeholder="Header value (e.g., Bearer token123)"
+                    placeholder={t(
+                      "Header value (e.g., Bearer token123)",
+                      "请求头值（例如 Bearer token123）",
+                    )}
                     value={pair.value}
                     onChange={(e) =>
                       updateHeaderPair(index, "value", e.target.value)
@@ -271,7 +305,8 @@ export function HostScopedCredentialsModal({
                     onClick={() => removeHeaderPair(index)}
                     disabled={headerPairs.length === 1}
                   >
-                    <Icon icon={Delete02Icon} className="size-4" /> Remove
+                    <Icon icon={Delete02Icon} className="size-4" />{" "}
+                    {t("Remove", "移除")}
                   </Button>
                 </div>
               ))}
@@ -282,16 +317,16 @@ export function HostScopedCredentialsModal({
                 size="small"
                 onClick={addHeaderPair}
               >
-                <Icon icon={PlusSignIcon} className="size-4" /> Add Another
-                Header
+                <Icon icon={PlusSignIcon} className="size-4" />{" "}
+                {t("Add Another Header", "添加另一个请求头")}
               </Button>
             </div>
 
             <div className="pt-8">
               <Button type="submit" className="w-full" size="small">
                 {hasExistingForHost
-                  ? "Update & use these credentials"
-                  : "Save & use these credentials"}
+                  ? t("Update & use these credentials", "更新并使用这些凭据")
+                  : t("Save & use these credentials", "保存并使用这些凭据")}
               </Button>
             </div>
           </form>

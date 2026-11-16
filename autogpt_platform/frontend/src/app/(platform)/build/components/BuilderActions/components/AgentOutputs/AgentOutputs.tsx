@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { BlockUIType } from "@/app/(platform)/build/components/types";
 import { Label } from "@/components/atoms/Label/Label";
 import { useGraphStore } from "@/app/(platform)/build/stores/graphStore";
@@ -30,6 +31,7 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 
 export const AgentOutputs = ({ flowID }: { flowID: string | null }) => {
+  const { t } = useTranslation();
   const hasOutputs = useGraphStore(useShallow((state) => state.hasOutputs));
   const nodes = useNodeStore(useShallow((state) => state.nodes));
 
@@ -66,16 +68,16 @@ export const AgentOutputs = ({ flowID }: { flowID: string | null }) => {
         return {
           nodeID: node.id,
           metadata: {
-            name: node.data.hardcodedValues?.name || "Output",
+            name: node.data.hardcodedValues?.name || t("Output", "输出"),
             description:
               node.data.hardcodedValues?.description ||
-              "Output from the workflow",
+              t("Output from the workflow", "工作流输出"),
           },
           items,
         };
       })
       .filter((group): group is NonNullable<typeof group> => group !== null);
-  }, [nodes]);
+  }, [nodes, t]);
 
   const actionItems = useMemo(() => {
     return outputs.flatMap((group) =>
@@ -104,7 +106,7 @@ export const AgentOutputs = ({ flowID }: { flowID: string | null }) => {
             </SheetTrigger>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Workflow Outputs</p>
+            <p>{t("Workflow Outputs", "工作流输出")}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -119,7 +121,7 @@ export const AgentOutputs = ({ flowID }: { flowID: string | null }) => {
                   tone="inherit"
                   className="block"
                 >
-                  Run Outputs
+                  {t("Run Outputs", "运行输出")}
                 </Text>
               </SheetTitle>
               <SheetDescription className="mt-1 text-foreground-tertiary">
@@ -131,11 +133,14 @@ export const AgentOutputs = ({ flowID }: { flowID: string | null }) => {
                       tone="inherit"
                       className="block"
                     >
-                      Beta
+                      {t("Beta", "测试版")}
                     </Text>
                   </span>
                   <Text variant="body-tight" as="span" tone="inherit">
-                    This feature is in beta and may contain bugs
+                    {t(
+                      "This feature is in beta and may contain bugs",
+                      "此功能处于测试阶段，可能存在问题",
+                    )}
                   </Text>
                 </span>
               </SheetDescription>
@@ -156,7 +161,8 @@ export const AgentOutputs = ({ flowID }: { flowID: string | null }) => {
                           as="span"
                           tone="inherit"
                         >
-                          {group.metadata.name || "Unnamed Output"}
+                          {group.metadata.name ||
+                            t("Unnamed Output", "未命名输出")}
                         </Text>
                       </Label>
                       {group.metadata.description && (
@@ -184,7 +190,7 @@ export const AgentOutputs = ({ flowID }: { flowID: string | null }) => {
                 ))
               ) : (
                 <div className="flex h-full items-center justify-center text-foreground-tertiary">
-                  <p>No output blocks available.</p>
+                  <p>{t("No output blocks available.", "暂无输出模块。")}</p>
                 </div>
               )}
             </div>

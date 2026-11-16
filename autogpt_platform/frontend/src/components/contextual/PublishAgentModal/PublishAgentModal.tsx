@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -27,6 +28,8 @@ export function PublishAgentModal({
   preSelectedAgentVersion,
   showTrigger = true,
 }: Props) {
+  const { t } = useTranslation();
+
   const {
     // State
     currentState,
@@ -143,7 +146,7 @@ export function PublishAgentModal({
   return (
     <>
       <Dialog
-        title="Publish Workflow"
+        title={t("Publish Workflow", "发布工作流")}
         styling={{
           maxWidth: "48rem",
           marginRight: "0.5rem",
@@ -165,7 +168,11 @@ export function PublishAgentModal({
       >
         {showTrigger && (
           <Dialog.Trigger>
-            {trigger || <Button size="small">Publish Workflow</Button>}
+            {trigger || (
+              <Button size="small">
+                {t("Publish Workflow", "发布工作流")}
+              </Button>
+            )}
           </Dialog.Trigger>
         )}
         <Dialog.Content>

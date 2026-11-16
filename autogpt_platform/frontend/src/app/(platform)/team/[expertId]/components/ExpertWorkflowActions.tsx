@@ -50,7 +50,7 @@ export function ExpertWorkflowActions({
           type="button"
           variant={variant}
           size={size}
-          aria-label="Ask about this workflow"
+          aria-label={t("Ask about this workflow", "询问此工作流")}
           leadingIcon={SparklesIcon}
           onClick={() => onAsk(chatPrompt)}
         />
@@ -60,7 +60,7 @@ export function ExpertWorkflowActions({
           href={chatHref}
           variant={variant}
           size={size}
-          aria-label="Ask about this workflow"
+          aria-label={t("Ask about this workflow", "询问此工作流")}
           leadingIcon={SparklesIcon}
         />
       )}

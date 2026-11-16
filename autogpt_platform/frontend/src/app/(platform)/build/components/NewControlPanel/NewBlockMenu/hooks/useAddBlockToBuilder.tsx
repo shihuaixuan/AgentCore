@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { BlockInfo } from "@/app/api/__generated__/models/blockInfo";
 import { useReactFlow, useStoreApi } from "@xyflow/react";
 import { useNodeStore } from "@/app/(platform)/build/stores/nodeStore";
@@ -14,6 +15,7 @@ import { CustomNode } from "@/app/(platform)/build/components/FlowEditor/nodes/C
 const PLACEMENT_MARGIN = 30;
 
 export function useAddBlockToBuilder() {
+  const { t } = useTranslation();
   const { getViewport, fitView } = useReactFlow();
   const flowStore = useStoreApi();
 
@@ -57,10 +59,13 @@ export function useAddBlockToBuilder() {
         notification.dismiss();
       }
       const notification = toast({
-        title: "Block added outside the current view",
+        title: t(
+          "Block added outside the current view",
+          "模块已添加到当前视野之外",
+        ),
         action: (
           <Button variant="secondary" size="small" onClick={handleShowBlock}>
-            Show block
+            {t("Show block", "显示模块")}
           </Button>
         ),
       });

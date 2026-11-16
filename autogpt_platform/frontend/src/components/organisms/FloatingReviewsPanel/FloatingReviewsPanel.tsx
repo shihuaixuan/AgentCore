@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useState, useEffect } from "react";
 import { PendingReviewsList } from "@/components/organisms/PendingReviewsList/PendingReviewsList";
 import { usePendingReviewsForExecution } from "@/hooks/usePendingReviews";
@@ -23,6 +26,7 @@ export function FloatingReviewsPanel({
   graphId,
   className,
 }: FloatingReviewsPanelProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const { data: executionDetails } = useGetV1GetExecutionDetails(
@@ -126,8 +130,10 @@ export function FloatingReviewsPanel({
           variant="primary"
           leftIcon={<Icon icon={Clock01Icon} size={20} />}
         >
-          {pendingReviews.length} Review
-          {pendingReviews.length !== 1 ? "s" : ""} Pending
+          {pendingReviews.length}
+          {t("Review", "审核")}
+          {pendingReviews.length !== 1 ? "s" : ""}
+          {t("Pending", "待处理")}
         </Button>
       )}
 
@@ -155,7 +161,7 @@ export function FloatingReviewsPanel({
                 className="py-8 text-center"
               >
                 <Text variant="body" tone="muted">
-                  Loading reviews...
+                  {t("Loading reviews...", "正在加载审核项…")}
                 </Text>
               </div>
             ) : (

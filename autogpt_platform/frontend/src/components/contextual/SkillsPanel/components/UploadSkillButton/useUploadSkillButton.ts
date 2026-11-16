@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getListCopilotSkillsQueryKey,
   useUploadCopilotSkill,
@@ -13,6 +16,7 @@ interface Args {
 }
 
 export function useUploadSkillButton({ onUploaded }: Args = {}) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -41,7 +45,7 @@ export function useUploadSkillButton({ onUploaded }: Args = {}) {
 
       const name =
         result.status === 201 ? result.data.name : (file.name ?? "skill");
-      toast({ title: `Skill "${name}" uploaded` });
+      toast({ title: t(`Skill "${name}" uploaded`, `技能“${name}”已上传`) });
       if (result.status === 201) {
         onUploaded?.(result.data.name);
       }
@@ -50,11 +54,11 @@ export function useUploadSkillButton({ onUploaded }: Args = {}) {
       });
     } catch (error) {
       toast({
-        title: "Failed to upload skill",
+        title: t("Failed to upload skill", "上传技能失败"),
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     }
@@ -67,10 +71,10 @@ export function useUploadSkillButton({ onUploaded }: Args = {}) {
 
     // Pre-flight the common rejections client-side so the user gets an
     // instant, specific message instead of waiting on a server round-trip.
-    const validationError = getSkillUploadError(content);
+    const validationError = getSkillUploadError(content, t);
     if (validationError) {
       toast({
-        title: "Can't upload this skill",
+        title: t("Can't upload this skill", "无法上传此技能"),
         description: validationError,
         variant: "destructive",
       });

@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 // Creating this hook, because we are using same saving stuff at multiple places in our builder
 
 import { useCallback } from "react";
@@ -39,6 +40,7 @@ export const useSaveGraph = ({
   onSuccess,
   onError,
 }: SaveGraphOptions) => {
+  const { t } = useTranslation();
   const { toast } = useToast();
 
   const [{ flowID, flowVersion }, setQueryStates] = useQueryStates({
@@ -81,8 +83,11 @@ export const useSaveGraph = ({
           onSuccess?.(data);
           if (showToast) {
             toast({
-              title: "Workflow saved successfully",
-              description: "The workflow has been saved successfully.",
+              title: t("Workflow saved successfully", "工作流保存成功"),
+              description: t(
+                "The workflow has been saved successfully.",
+                "工作流已成功保存。",
+              ),
               variant: "default",
             });
           }
@@ -108,8 +113,11 @@ export const useSaveGraph = ({
           onSuccess?.(data);
           if (showToast) {
             toast({
-              title: "Workflow saved successfully",
-              description: "The workflow has been saved successfully.",
+              title: t("Workflow saved successfully", "工作流保存成功"),
+              description: t(
+                "The workflow has been saved successfully.",
+                "工作流已成功保存。",
+              ),
               variant: "default",
             });
           }
@@ -137,8 +145,11 @@ export const useSaveGraph = ({
         if (graphsEquivalent(graph, data)) {
           if (showToast) {
             toast({
-              title: "No changes to save",
-              description: "The workflow is the same as the saved version.",
+              title: t("No changes to save", "没有需要保存的更改"),
+              description: t(
+                "The workflow is the same as the saved version.",
+                "工作流与已保存的版本相同。",
+              ),
               variant: "default",
             });
           }
@@ -175,7 +186,7 @@ export const useSaveGraph = ({
         return graphData;
       }
     },
-    [graph, toast, createNewGraph, updateGraph],
+    [graph, toast, createNewGraph, updateGraph, t],
   );
 
   // Resolves to null when the save fails; the user has been told why.
@@ -187,13 +198,13 @@ export const useSaveGraph = ({
       } catch (error) {
         onError?.(error);
         markInvalidFields(error);
-        toast(describeSaveError(error));
+        toast(describeSaveError(error, t));
         return null;
       }
       useNodeStore.getState().clearAllNodeErrors();
       return saved;
     },
-    [persistGraph, onError, toast],
+    [persistGraph, onError, toast, t],
   );
 
   return {

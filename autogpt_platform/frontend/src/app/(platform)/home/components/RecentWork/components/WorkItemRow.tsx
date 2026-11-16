@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import Link from "next/link";
 import type { HomeRecentWorkItem } from "@/app/api/__generated__/models/homeRecentWorkItem";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -13,6 +15,7 @@ interface Props {
 const ROW_CLASS = "flex items-center gap-2";
 
 export function WorkItemRow({ item, timezone }: Props) {
+  const { locale } = useTranslation();
   const content = (
     <>
       <span className="flex size-[18px] shrink-0 items-center justify-center text-foreground-subtle">
@@ -31,7 +34,7 @@ export function WorkItemRow({ item, timezone }: Props) {
       </Text>
       <Text variant="small" as="span" tone="muted" tabular className="shrink-0">
         {item.provider ? `${item.provider} · ` : ""}
-        {formatWorkTime(item.occurred_at, timezone)}
+        {formatWorkTime(item.occurred_at, timezone, locale)}
       </Text>
     </>
   );

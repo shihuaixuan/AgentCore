@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import Link from "next/link";
@@ -22,13 +24,14 @@ export function ConnectionPickerDialog({
   open,
   onOpenChange,
 }: Props) {
+  const { t } = useTranslation();
   // Mounted while closed too: the hook also drops a lapsed Advanced tier,
   // which has to happen whether or not anyone opens the sheet.
   const picker = useConnectionPicker();
 
   return (
     <Dialog
-      title="Model and connection"
+      title={t("Model and connection", "模型与连接")}
       controlled={{ isOpen: open, set: onOpenChange }}
       styling={{ maxWidth: "26rem" }}
     >
@@ -45,6 +48,7 @@ interface BodyProps {
 }
 
 function DialogBody({ picker, connectionLocked }: BodyProps) {
+  const { t } = useTranslation();
   const { offers, active, isLoading, isError } = picker;
 
   if (isLoading && offers.length === 0) {
@@ -54,7 +58,10 @@ function DialogBody({ picker, connectionLocked }: BodyProps) {
   if (isError) {
     return (
       <Text variant="body-tight" tone="secondary">
-        AI connections are unavailable right now. Try again in a moment.
+        {t(
+          "AI connections are unavailable right now. Try again in a moment.",
+          "AI 连接暂时不可用，请稍后重试。",
+        )}
       </Text>
     );
   }
@@ -62,9 +69,9 @@ function DialogBody({ picker, connectionLocked }: BodyProps) {
   if (offers.length === 0) {
     return (
       <Text variant="body-tight" tone="secondary">
-        No AI connection is set up yet.{" "}
+        {t("No AI connection is set up yet.", "尚未设置 AI 连接。")}{" "}
         <Link href="/settings/integrations" className="underline">
-          Set one up
+          {t("Set one up", "立即设置")}
         </Link>
       </Text>
     );

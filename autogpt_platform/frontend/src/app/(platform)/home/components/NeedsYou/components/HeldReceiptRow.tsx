@@ -1,3 +1,6 @@
+"use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { receiptText } from "../helpers";
 import {
   Cancel01Icon,
   InformationCircleIcon,
@@ -22,6 +25,11 @@ const ICONS = {
 } as const;
 
 export function HeldReceiptRow({ approval, receipt, heading = false }: Props) {
+  const { t } = useTranslation();
+  const text =
+    receipt.outcome === "elsewhere"
+      ? t("Answered elsewhere", "已在别处处理")
+      : receiptText(approval, receipt.outcome === "approved", t);
   // oxlint-disable-next-line design-system/require-static-classes -- ICONS holds whole, static class strings
   const [icon, tone] = ICONS[receipt.outcome];
   return (
@@ -36,7 +44,7 @@ export function HeldReceiptRow({ approval, receipt, heading = false }: Props) {
           <HeadlineText item={approval} />
         </span>
       )}
-      <span className="shrink-0 text-foreground-subtle">· {receipt.text}</span>
+      <span className="shrink-0 text-foreground-subtle">· {text}</span>
     </div>
   );
 }

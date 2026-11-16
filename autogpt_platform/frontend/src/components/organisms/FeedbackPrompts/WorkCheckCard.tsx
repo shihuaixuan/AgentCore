@@ -1,4 +1,7 @@
 "use client";
+import { DISPLAY_LABELS } from "./display-labels";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -70,6 +73,7 @@ export function WorkCheckCard({
   onSubmit,
   onDismiss,
 }: Props) {
+  const { t } = useTranslation();
   const [rating, setRating] = useState<WorkCheckRating | null>(initialRating);
   const [isOpen, setIsOpen] = useState(true);
 
@@ -110,7 +114,7 @@ export function WorkCheckCard({
           className="-mt-1 -mr-1"
           onClick={close}
         >
-          Not now
+          {t("Not now", "暂时不用")}
         </Button>
       </div>
       {rating === null ? (
@@ -129,7 +133,7 @@ export function WorkCheckCard({
             >
               <Icon icon={option.icon} size={28} strokeWidth={1.75} />
               <Text variant="small-medium" tone="inherit">
-                {option.label}
+                {t(option.label, DISPLAY_LABELS[option.label] ?? option.label)}
               </Text>
             </motion.button>
           ))}
@@ -143,7 +147,10 @@ export function WorkCheckCard({
       {rating === "bad" || rating === "okay" ? (
         <ReasonFlow
           reasons={WORK_REASONS}
-          label={FOLLOW_UPS[rating]}
+          label={t(
+            FOLLOW_UPS[rating],
+            DISPLAY_LABELS[FOLLOW_UPS[rating]] ?? FOLLOW_UPS[rating],
+          )}
           size="compact"
           thanks="Thanks. The team reads every one of these."
           initialSent={initialSent}

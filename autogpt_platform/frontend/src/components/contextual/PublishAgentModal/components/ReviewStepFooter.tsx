@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { StepFooter } from "./StepFooter";
 import {
@@ -31,6 +33,8 @@ export function ReviewStepFooter({
   isDashboardPage,
   marketplaceUrl,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <div className="mt-8 w-full">
       <StepFooter
@@ -45,7 +49,7 @@ export function ReviewStepFooter({
                 leftIcon={<Icon icon={NoteEditIcon} size={14} />}
                 data-testid="edit-submission-button"
               >
-                Edit details
+                {t("Edit details", "编辑详情")}
               </Button>
             ) : null}
             <Button
@@ -54,7 +58,7 @@ export function ReviewStepFooter({
               onClick={onDone}
               className="w-full sm:w-auto"
             >
-              Done
+              {t("Done", "完成")}
             </Button>
           </>
         }
@@ -68,7 +72,7 @@ export function ReviewStepFooter({
               rightIcon={<Icon icon={Store01Icon} size={14} />}
               data-testid="view-marketplace-button"
             >
-              View on marketplace
+              {t("View on marketplace", "在市场中查看")}
             </Button>
           ) : isRejected || isDraft || isDashboardPage ? null : (
             <Button
@@ -78,7 +82,7 @@ export function ReviewStepFooter({
               rightIcon={<Icon icon={ArrowRight02Icon} size={14} />}
               data-testid="view-progress-button"
             >
-              Go to Creator Dashboard
+              {t("Go to Creator Dashboard", "前往创作者控制台")}
             </Button>
           )
         }

@@ -1,4 +1,7 @@
+"use client";
+
 import { isComposingEvent } from "@/lib/keyboard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 import { forwardRef, ReactNode, useState } from "react";
 import CurrencyInput from "react-currency-input-field";
@@ -102,6 +105,7 @@ const TextField = forwardRef<InputElement, TextFieldProps>(function TextField(
   },
   ref,
 ) {
+  const { t } = useTranslation();
   // Consumers never see keydowns an IME is still composing; see AGENTS.md
   // "Keyboard handling". Left undefined when the consumer passes no handler, so
   // we don't attach a listener that does nothing.
@@ -286,7 +290,11 @@ const TextField = forwardRef<InputElement, TextFieldProps>(function TextField(
           onClick={handleTogglePassword}
           disabled={props.disabled}
           className="absolute top-1/2 right-4 -translate-y-1/2 text-foreground-subtle transition-colors hover:text-foreground-secondary disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label={showPassword ? "Hide password" : "Show password"}
+          aria-label={
+            showPassword
+              ? t("Hide password", "隐藏密码")
+              : t("Show password", "显示密码")
+          }
           aria-pressed={showPassword}
           aria-controls={inputId}
         >

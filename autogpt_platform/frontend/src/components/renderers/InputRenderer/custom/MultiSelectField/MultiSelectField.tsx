@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React from "react";
 import { FieldProps, getUiOptions } from "@rjsf/utils";
 import { BlockIOObjectSubSchema } from "@/lib/autogpt-server-api/types";
@@ -13,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { useMultiSelectField } from "./useMultiSelectField";
 
 export const MultiSelectField = (props: FieldProps) => {
+  const { t } = useTranslation();
   const { schema, formData, onChange, fieldPathId } = props;
   const uiOptions = getUiOptions(props.uiSchema);
 
@@ -24,7 +26,7 @@ export const MultiSelectField = (props: FieldProps) => {
 
   const handleValuesChange = createChangeHandler(onChange, fieldPathId);
 
-  const displayName = schema.title || "options";
+  const displayName = schema.title;
 
   return (
     <div className={cn("flex flex-col", uiOptions.className)}>
@@ -36,7 +38,10 @@ export const MultiSelectField = (props: FieldProps) => {
         <MultiSelectorTrigger className="rounded-3xl border border-border-base bg-surface px-2 shadow-none">
           <MultiSelectorInput
             placeholder={
-              (schema as any).placeholder ?? `Select ${displayName}...`
+              (schema as any).placeholder ??
+              (displayName
+                ? t(`Select ${displayName}...`, `选择${displayName}…`)
+                : t("Select options...", "选择选项…"))
             }
           />
         </MultiSelectorTrigger>

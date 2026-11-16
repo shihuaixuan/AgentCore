@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { RJSFSchema } from "@rjsf/utils";
 import { uiSchema } from "../../../FlowEditor/nodes/uiSchema";
@@ -26,6 +27,7 @@ export const RunInputDialog = ({
   graphID?: string;
   graphVersion?: number | null;
 }) => {
+  const { t } = useTranslation();
   const hasInputs = useGraphStore((state) => state.hasInputs);
   const hasCredentials = useGraphStore((state) => state.hasCredentials);
   const inputSchema = useGraphStore((state) => state.inputSchema);
@@ -61,7 +63,11 @@ export const RunInputDialog = ({
   return (
     <>
       <Dialog
-        title={purpose === "run" ? "Run Workflow" : "Schedule Run"}
+        title={
+          purpose === "run"
+            ? t("Run Workflow", "运行工作流")
+            : t("Schedule Run", "定时运行")
+        }
         controlled={{
           isOpen,
           set: setIsOpen,
@@ -78,7 +84,7 @@ export const RunInputDialog = ({
               {hasCredentials() && credentialFields.length > 0 && (
                 <div data-id="run-input-credentials-section">
                   <div className="mb-4">
-                    <Text variant="h4">Credentials</Text>
+                    <Text variant="h4">{t("Credentials", "凭据")}</Text>
                   </div>
                   <div className="px-2" data-id="run-input-credentials-form">
                     <CredentialsGroupedView
@@ -96,7 +102,7 @@ export const RunInputDialog = ({
               {hasInputs() && (
                 <div data-id="run-input-inputs-section">
                   <div className="mb-4">
-                    <Text variant="h4">Inputs</Text>
+                    <Text variant="h4">{t("Inputs", "输入")}</Text>
                   </div>
                   <div data-id="run-input-inputs-form">
                     <FormRenderer
@@ -135,7 +141,7 @@ export const RunInputDialog = ({
                     />
                   )}
                   <Text variant="body-semibold-tight" as="span" tone="inherit">
-                    Manual Run
+                    {t("Manual Run", "手动运行")}
                   </Text>
                 </Button>
               )}
@@ -153,7 +159,7 @@ export const RunInputDialog = ({
                     className="size-5 group-hover:scale-110"
                   />
                   <Text variant="body-semibold-tight" as="span" tone="inherit">
-                    Schedule Run
+                    {t("Schedule Run", "定时运行")}
                   </Text>
                 </Button>
               )}

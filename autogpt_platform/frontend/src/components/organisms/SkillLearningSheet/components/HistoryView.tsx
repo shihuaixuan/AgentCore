@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { SkillVersionSummary } from "@/app/api/__generated__/models/skillVersionSummary";
 import { Button } from "@/components/atoms/Button/Button";
@@ -21,19 +22,22 @@ export function HistoryView({
   onRestore,
   onSelect,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       data-slot="skill-learning-sheet-history"
       className="flex flex-col gap-3"
     >
       <Text variant="small" tone="muted">
-        Restoring affects future use only and cannot undo actions already taken.
-        The current version stays in history.
+        {t(
+          "Restoring affects future use only and cannot undo actions already taken. The current version stays in history.",
+          "恢复仅影响以后的使用，无法撤销已执行的操作。当前版本会保留在历史记录中。",
+        )}
       </Text>
       <ul
         data-slot="skill-learning-sheet-history-list"
         className="flex flex-col gap-2"
-        aria-label="Version history"
+        aria-label={t("Version history", "版本历史")}
       >
         {versions.map((version) => {
           const restorable = canRestore(version, currentVersionId);
@@ -49,7 +53,9 @@ export function HistoryView({
               >
                 <Text variant="small-medium" tone="primary">
                   v{version.version} · {version.origin_label}
-                  {version.id === currentVersionId ? " · current" : ""}
+                  {version.id === currentVersionId
+                    ? t(" · current", " · 当前版本")
+                    : ""}
                 </Text>
                 <Text variant="small" tone="muted">
                   {version.state_label} ·{" "}
@@ -68,7 +74,7 @@ export function HistoryView({
                   size="small"
                   onClick={() => onSelect(version.id)}
                 >
-                  View
+                  {t("View", "查看")}
                 </Button>
                 {restorable ? (
                   <Button
@@ -76,9 +82,12 @@ export function HistoryView({
                     size="small"
                     disabled={isBusy}
                     onClick={() => onRestore(version.id)}
-                    aria-label={`Restore v${version.version}`}
+                    aria-label={t(
+                      `Restore v${version.version}`,
+                      `恢复 v${version.version}`,
+                    )}
                   >
-                    Restore
+                    {t("Restore", "恢复")}
                   </Button>
                 ) : null}
               </div>

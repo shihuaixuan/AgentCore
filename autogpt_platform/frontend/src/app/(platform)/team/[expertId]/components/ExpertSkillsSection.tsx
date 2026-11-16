@@ -61,7 +61,7 @@ export function ExpertSkillsSection({
     <section>
       <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
         <Text variant="large-medium" tone="primary">
-          {expert.name}&apos;s Skills
+          {t(`${expert.name}'s Skills`, `${expert.name} 的技能`)}
         </Text>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <Button
@@ -90,7 +90,10 @@ export function ExpertSkillsSection({
           <Text variant="small" tone="secondary">
             {learning.recentChange
               ? `${learning.recentChange.summary} · ${learning.recentChange.origin_label ?? ""} · ${learning.recentChange.state_label}`
-              : "No overnight changes yet. Verified procedures from chats are reviewed nightly."}
+              : t(
+                  "No overnight changes yet. Verified procedures from chats are reviewed nightly.",
+                  "暂无夜间更新。系统每晚会审核聊天中已验证的操作流程。",
+                )}
           </Text>
           <label className="flex shrink-0 items-center gap-2 whitespace-nowrap">
             <Text variant="small" tone="primary">

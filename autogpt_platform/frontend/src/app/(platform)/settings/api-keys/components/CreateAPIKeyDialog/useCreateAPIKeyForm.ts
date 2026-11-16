@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { z } from "zod";
 
 import { useCreateAPIKey } from "../hooks/useCreateAPIKey";
 import { createAPIKeySchema, type CreateAPIKeyFormValues } from "./schema";
@@ -14,12 +16,38 @@ interface Args {
 }
 
 export function useCreateAPIKeyForm({ onClose }: Args) {
+  const { t } = useTranslation();
+  const localizedSchema = createAPIKeySchema.extend({
+    name: z
+      .string()
+      .trim()
+      .min(1, t("Name is required", "请输入名称"))
+      .max(
+        100,
+        t("Name must be 100 characters or less", "名称不能超过 100 个字符"),
+      ),
+    description: z
+      .string()
+      .trim()
+      .max(
+        500,
+        t(
+          "Description must be 500 characters or less",
+          "说明不能超过 500 个字符",
+        ),
+      )
+      .optional(),
+    permissions: createAPIKeySchema.shape.permissions.min(
+      1,
+      t("Select at least one permission", "请至少选择一项权限"),
+    ),
+  });
   const [view, setView] = useState<View>("form");
   const [plainTextKey, setPlainTextKey] = useState("");
   const { createKey, isPending } = useCreateAPIKey();
 
   const form = useForm<CreateAPIKeyFormValues>({
-    resolver: zodResolver(createAPIKeySchema),
+    resolver: zodResolver(localizedSchema),
     defaultValues: { name: "", description: "", permissions: [] },
     mode: "onChange",
   });

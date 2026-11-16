@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -20,6 +21,7 @@ export function OttoMistakeCard({
   onSubmit,
   onDismiss,
 }: Props) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(true);
 
   function close() {
@@ -35,10 +37,13 @@ export function OttoMistakeCard({
         <AutopilotAvatar size={32} className="ring-1 ring-border-base" />
         <div className="flex flex-1 flex-col gap-0.5">
           <Text variant="body-medium" tone="primary">
-            Help the team fix this
+            {t("Help the team fix this", "帮助团队解决此问题")}
           </Text>
           <Text variant="small" tone="muted">
-            I&apos;ve flagged this chat for review. Which of these went wrong?
+            {t(
+              "I've flagged this chat for review. Which of these went wrong?",
+              "我已将此对话标记为待审核。以下哪些方面出了问题？",
+            )}
           </Text>
         </div>
         <Button
@@ -47,12 +52,12 @@ export function OttoMistakeCard({
           className="-mt-1 -mr-1"
           onClick={close}
         >
-          Not now
+          {t("Not now", "暂时不用")}
         </Button>
       </div>
       <ReasonFlow
         reasons={WORK_REASONS}
-        label="Which of these went wrong?"
+        label={t("Which of these went wrong?", "以下哪些方面出了问题？")}
         size="compact"
         thanks="Thanks. The team reads every one of these."
         initialSent={initialSent}

@@ -73,7 +73,9 @@ export function SelectedTriggerActions({
       onError: (error: any) => {
         toast({
           title: t("Failed to delete trigger", "无法删除触发器"),
-          description: error.message || "An unexpected error occurred.",
+          description:
+            error.message ||
+            t("An unexpected error occurred.", "发生意外错误。"),
           variant: "destructive",
         });
       },

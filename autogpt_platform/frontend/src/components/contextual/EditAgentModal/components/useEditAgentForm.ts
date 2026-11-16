@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { toastIfPlanRequired } from "@/components/contextual/PaywallToast/helpers";
 import * as Sentry from "@sentry/nextjs";
 import {
@@ -30,34 +32,59 @@ export const useEditAgentForm = ({
   onSuccess,
   onClose,
 }: useEditAgentFormProps) => {
+  const { t } = useTranslation();
   const editAgentSchema = z.object({
     title: z
       .string()
-      .min(1, "Title is required")
-      .max(100, "Title must be less than 100 characters"),
+      .min(1, t("Title is required", "请输入标题"))
+      .max(
+        100,
+        t("Title must be less than 100 characters", "标题必须少于 100 个字符"),
+      ),
     subheader: z
       .string()
       .trim()
-      .min(1, "Tagline is required")
+      .min(1, t("Tagline is required", "请输入简短介绍"))
       .max(
         SUB_HEADING_MAX,
-        `Tagline must be ${SUB_HEADING_MAX} characters or less`,
+        t(
+          `Tagline must be ${SUB_HEADING_MAX} characters or less`,
+          `简短介绍不能超过 ${SUB_HEADING_MAX} 个字符`,
+        ),
       ),
     youtubeLink: z
       .string()
-      .refine(validateYouTubeUrl, "Please enter a valid YouTube URL"),
-    category: z.string().min(1, "Category is required"),
+      .refine(
+        validateYouTubeUrl,
+        t("Please enter a valid YouTube URL", "请输入有效的 YouTube URL"),
+      ),
+    category: z.string().min(1, t("Category is required", "请选择分类")),
     description: z
       .string()
-      .min(1, "Description is required")
-      .max(1000, "Description must be less than 1000 characters"),
+      .min(1, t("Description is required", "请输入描述"))
+      .max(
+        1000,
+        t(
+          "Description must be less than 1000 characters",
+          "描述必须少于 1000 个字符",
+        ),
+      ),
     changes_summary: z
       .string()
-      .min(1, "Changes summary is required")
-      .max(500, "Changes summary must be less than 500 characters"),
+      .min(1, t("Changes summary is required", "请输入更改摘要"))
+      .max(
+        500,
+        t(
+          "Changes summary must be less than 500 characters",
+          "更改摘要必须少于 500 个字符",
+        ),
+      ),
     agentOutputDemo: z
       .string()
-      .refine(validateYouTubeUrl, "Please enter a valid YouTube URL"),
+      .refine(
+        validateYouTubeUrl,
+        t("Please enter a valid YouTube URL", "请输入有效的 YouTube URL"),
+      ),
   });
 
   type EditAgentFormData = z.infer<typeof editAgentSchema>;
@@ -105,7 +132,7 @@ export const useEditAgentForm = ({
     if (images.length === 0) {
       form.setError("root", {
         type: "manual",
-        message: "At least one image is required",
+        message: t("At least one image is required", "请至少添加一张图片"),
       });
       return;
     }
@@ -131,9 +158,11 @@ export const useEditAgentForm = ({
       // Extract the StoreSubmission from the response
       if (response.status === 200 && response.data) {
         toast({
-          title: "Workflow Updated",
-          description:
+          title: t("Workflow Updated", "工作流已更新"),
+          description: t(
             "Your workflow submission has been updated successfully.",
+            "您的工作流提交已成功更新。",
+          ),
           duration: 3000,
           variant: "default",
         });
@@ -146,15 +175,23 @@ export const useEditAgentForm = ({
         onSuccess(response.data);
         onClose();
       } else {
-        throw new Error("Failed to update submission");
+        throw new Error(t("Failed to update submission", "更新提交失败"));
       }
     } catch (error) {
-      if (toastIfPlanRequired(error, "Publishing needs an active plan")) return;
+      if (
+        toastIfPlanRequired(
+          error,
+          t("Publishing needs an active plan", "发布需要有效套餐"),
+        )
+      )
+        return;
       Sentry.captureException(error);
       toast({
-        title: "Edit Workflow Error",
-        description:
+        title: t("Edit Workflow Error", "编辑工作流失败"),
+        description: t(
           "An error occurred while editing the workflow. Please try again.",
+          "编辑工作流时发生错误。请重试。",
+        ),
         duration: 3000,
         variant: "destructive",
       });

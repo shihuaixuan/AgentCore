@@ -41,7 +41,10 @@ export function LibraryFolderDeleteDialog({
         });
         toast({
           title: t("Folder deleted", "文件夹已删除"),
-          description: `"${folder.name}" has been deleted.`,
+          description: t(
+            `"${folder.name}" has been deleted.`,
+            `“${folder.name}”已删除。`,
+          ),
         });
         setIsOpen(false);
         onDeleted?.();
@@ -75,8 +78,10 @@ export function LibraryFolderDeleteDialog({
       <Dialog.Content>
         <div>
           <Text variant="large">
-            Are you sure you want to delete &ldquo;{folder.name}&rdquo;?
-            Workflows inside this folder will be moved back to your library.
+            {t(
+              `Are you sure you want to delete “${folder.name}”? Workflows inside this folder will be moved back to your library.`,
+              `确定要删除“${folder.name}”吗？此文件夹中的工作流将移回你的工作流库。`,
+            )}
           </Text>
           <Dialog.Footer>
             <Button

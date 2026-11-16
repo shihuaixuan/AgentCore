@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { CookieSettingsLink } from "@/components/molecules/CookieSettingsLink/CookieSettingsLink";
 import { ErrorView } from "./components/ErrorView";
 import { LoadingView } from "./components/LoadingView";
@@ -9,6 +11,7 @@ import { SuccessView } from "./components/SuccessView";
 import { usePlatformLinkingPage } from "./usePlatformLinkingPage";
 
 export default function PlatformLinkPage() {
+  const { t } = useTranslation();
   const page = usePlatformLinkingPage();
 
   return (
@@ -61,7 +64,7 @@ export default function PlatformLinkPage() {
       {page.status === "error" && <ErrorView message={page.errorMessage} />}
 
       <div className="mt-8 text-center text-caption text-foreground-tertiary">
-        <p>Powered by AutoGPT Platform</p>
+        <p>{t("Powered by AutoGPT Platform", "由 AutoGPT 平台提供支持")}</p>
       </div>
       <CookieSettingsLink className="mt-2" />
     </div>

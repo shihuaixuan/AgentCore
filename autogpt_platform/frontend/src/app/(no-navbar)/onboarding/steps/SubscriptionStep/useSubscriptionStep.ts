@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetSubscriptionStatusQueryKey,
   useUpdateSubscriptionTier,
@@ -42,6 +43,7 @@ interface CheckoutResponse {
 }
 
 export function useSubscriptionStep() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const setSelectedBilling = useOnboardingWizardStore(
     (s) => s.setSelectedBilling,
@@ -160,11 +162,14 @@ export function useSubscriptionStep() {
     } catch (error) {
       setSelectedPlan(null);
       toast({
-        title: "Couldn't start checkout",
+        title: t("Couldn't start checkout", "无法开始结账"),
         description:
           error instanceof Error
             ? error.message
-            : "Stripe didn't accept the request. Please try again.",
+            : t(
+                "Stripe didn't accept the request. Please try again.",
+                "Stripe 未接受请求，请重试。",
+              ),
         variant: "destructive",
       });
     } finally {
