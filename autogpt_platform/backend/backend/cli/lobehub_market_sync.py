@@ -318,16 +318,19 @@ async def fetch_top_mcp_entries(
 
     async def fetch_detail(identifier: str) -> dict[str, Any] | None:
         async with semaphore:
-            response = await client.get(
-                f"{MARKET_URL}/api/v1/plugins/{quote(identifier, safe='')}"
-            )
-            if response.status_code == 404:
+            try:
                 response = await client.get(
-                    f"{MARKET_URL}/api/v1/plugins/{quote(identifier, safe='')}",
-                    headers=headers,
+                    f"{MARKET_URL}/api/v1/plugins/{quote(identifier, safe='')}"
                 )
-            response.raise_for_status()
-            return response.json()
+                if response.status_code == 404:
+                    response = await client.get(
+                        f"{MARKET_URL}/api/v1/plugins/{quote(identifier, safe='')}",
+                        headers=headers,
+                    )
+                response.raise_for_status()
+                return response.json()
+            except (httpx.HTTPError, ValueError):
+                return None
 
     for page in range(1, 1001):
         response = await client.get(
