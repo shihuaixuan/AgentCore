@@ -146,6 +146,50 @@ class TestMCPClientIntegration:
     """Test MCPClient against a real local MCP server."""
 
     @pytest.mark.asyncio(loop_scope="session")
+    async def test_saved_connection_discovers_and_runs_a_tool(self, mcp_server):
+        from uuid import uuid4
+
+        from backend.copilot.model import ChatMessage, ChatSession
+        from backend.copilot.tools.run_capability import RunCapabilityTool
+
+        connection_id = str(uuid4())
+        session = ChatSession.new(MOCK_USER_ID, dry_run=False)
+        session.messages = [
+            ChatMessage(role="user", content=f"Weather [custom_mcp:{connection_id}]")
+        ]
+        row = {
+            "id": connection_id,
+            "name": "Weather",
+            "description": "Weather lookup",
+            "serverUrl": mcp_server,
+            "credentialId": None,
+            "enabled": True,
+        }
+        with (
+            patch("backend.data.db.is_connected", return_value=True),
+            patch(
+                "backend.data.custom_mcp.get_custom_mcp_connection", return_value=row
+            ),
+            patch("backend.copilot.tools.run_mcp_tool.validate_url_host"),
+            patch(
+                "backend.copilot.tools.run_capability.gate_active", return_value=False
+            ),
+        ):
+            runner = RunCapabilityTool()
+            discovered = await runner._execute(
+                MOCK_USER_ID, session, id=f"custom_mcp:{connection_id}", input={}
+            )
+            assert any(tool.name == "get_weather" for tool in discovered.tools)
+            result = await runner._execute(
+                MOCK_USER_ID,
+                session,
+                id=f"custom_mcp:{connection_id}",
+                input={"tool": "get_weather", "arguments": {"city": "London"}},
+            )
+        assert result.result["city"] == "London"
+        assert result.result["temperature"] == 22
+
+    @pytest.mark.asyncio(loop_scope="session")
     async def test_initialize(self, mcp_server):
         client = _make_client(mcp_server)
         result = await client.initialize()

@@ -10,6 +10,7 @@ import {
 import { getGetV1ListExecutionSchedulesForAUserMockHandler } from "@/app/api/__generated__/endpoints/schedules/schedules.msw";
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import type { ExpertCredentialRef } from "@/app/api/__generated__/models/expertCredentialRef";
+import type { ConnectionResponse } from "@/app/api/__generated__/models/connectionResponse";
 import { server } from "@/mocks/mock-server";
 import {
   render,
@@ -106,6 +107,7 @@ const linkedin: ExpertCredentialRef = {
 
 beforeEach(() => {
   server.use(
+    http.get("*/api/mcp/connections", () => HttpResponse.json([])),
     getGetHomeDashboardMockHandler(
       getGetHomeDashboardResponseMock200({ attention: [] }),
     ),
@@ -138,6 +140,221 @@ async function openIntegrationsTab() {
 }
 
 describe("managing an expert's integrations", () => {
+  const searchConnection: ConnectionResponse = {
+    id: "custom-search",
+    name: "Web_Search_Test",
+    description: "Research current news",
+    server_url: "https://api.anysearch.com/mcp",
+    auth_type: "bearer",
+    credential_id: "cred-search",
+    enabled: true,
+  };
+  const searchRef: ExpertCredentialRef = {
+    credential_id: "cred-search",
+    provider: "mcp",
+    title: "MCP: api.anysearch.com",
+    type: "oauth2",
+    service: "mcp:api.anysearch.com",
+    service_name: "AnySearch MCP Server",
+    service_icon: null,
+  };
+
+  function mockSearchConnections(connections = [searchConnection]) {
+    server.use(
+      http.get("*/api/mcp/connections", () => HttpResponse.json(connections)),
+      http.get("*/api/integrations/credentials", () =>
+        HttpResponse.json([
+          {
+            id: "cred-search",
+            provider: "mcp",
+            title: searchRef.title,
+            type: "oauth2",
+            service: searchRef.service,
+            service_name: searchRef.service_name,
+            service_icon: null,
+            scopes: null,
+            username: null,
+            host: searchConnection.server_url,
+            mcp_auth_scheme: "bearer",
+          },
+        ]),
+      ),
+    );
+  }
+
+  it("grants and removes a custom connection using its saved credential and custom name", async () => {
+    mockSearchConnections();
+    let grants: ExpertCredentialRef[] = [];
+    server.use(
+      http.get("*/api/experts/expert-maria/credentials", () =>
+        HttpResponse.json(grants),
+      ),
+      http.post(
+        "*/api/experts/expert-maria/credentials",
+        async ({ request }) => {
+          const body = (await request.json()) as { credential_ids: string[] };
+          if (JSON.stringify(body.credential_ids) !== '["cred-search"]')
+            return HttpResponse.json(
+              { detail: "Wrong credential" },
+              { status: 400 },
+            );
+          grants = [searchRef];
+          return HttpResponse.json(grants);
+        },
+      ),
+      http.delete("*/api/experts/expert-maria/credentials/cred-search", () => {
+        grants = [];
+        return HttpResponse.json([]);
+      }),
+    );
+    render(<ExpertDetailPage />);
+    await openIntegrationsTab();
+    const section = await screen.findByTestId("expert-integrations-section");
+    await userEvent.click(
+      (await screen.findAllByRole("button", { name: /Use existing/ }))[0],
+    );
+    const dialog = await screen.findByRole("dialog");
+    const list = await within(dialog).findByRole("list", {
+      name: "Existing connections",
+    });
+    expect(within(list).getAllByRole("button")).toHaveLength(1);
+    expect(within(list).queryByText("AnySearch MCP Server")).toBeNull();
+    expect(within(dialog).queryByLabelText(/token|API key/i)).toBeNull();
+    await userEvent.click(
+      within(list).getByRole("button", { name: /Web_Search_Test/ }),
+    );
+    const row = await within(section).findByTestId("expert-integration-row");
+    expect(within(row).getByText("Web_Search_Test")).toBeDefined();
+    expect(within(row).getByText("Custom MCP")).toBeDefined();
+    expect(within(row).getByText("Bearer token configured")).toBeDefined();
+    expect(within(section).queryByText("AnySearch MCP Server")).toBeNull();
+    await userEvent.click(
+      within(row).getByRole("button", { name: "Remove Web_Search_Test" }),
+    );
+    await waitFor(() =>
+      expect(
+        within(section).queryByTestId("expert-integration-row"),
+      ).toBeNull(),
+    );
+    expect(
+      within(section)
+        .getByRole("link", { name: "Manage custom connectors" })
+        .getAttribute("href"),
+    ).toBe("/settings/integrations");
+  });
+
+  it.each(["Web_Search_Test", "current news", "api.anysearch.com"])(
+    "finds a custom connection by %s",
+    async (search) => {
+      mockSearchConnections();
+      server.use(getListExpertCredentialsMockHandler([]));
+      render(<ExpertDetailPage />);
+      await openIntegrationsTab();
+      await userEvent.click(
+        (await screen.findAllByRole("button", { name: /Use existing/ }))[0],
+      );
+      const dialog = await screen.findByRole("dialog");
+      await userEvent.type(
+        within(dialog).getByPlaceholderText("Search connections"),
+        search,
+      );
+      expect(
+        within(dialog).getByRole("button", { name: /Web_Search_Test/ }),
+      ).toBeDefined();
+    },
+  );
+
+  it("keeps a disabled grant removable but does not offer it as an available connection", async () => {
+    mockSearchConnections([{ ...searchConnection, enabled: false }]);
+    server.use(getListExpertCredentialsMockHandler([searchRef]));
+    render(<ExpertDetailPage />);
+    await openIntegrationsTab();
+    const row = await screen.findByTestId("expert-integration-row");
+    expect(within(row).getByText("Disabled")).toBeDefined();
+    expect(within(row).queryByText("Ready")).toBeNull();
+    expect(
+      within(row)
+        .getByRole("button", { name: "Remove Web_Search_Test" })
+        .hasAttribute("disabled"),
+    ).toBe(false);
+  });
+
+  it("does not offer disabled custom credentials under the underlying service name", async () => {
+    mockSearchConnections([{ ...searchConnection, enabled: false }]);
+    server.use(getListExpertCredentialsMockHandler([]));
+    render(<ExpertDetailPage />);
+    await openIntegrationsTab();
+    const section = await screen.findByTestId("expert-integrations-section");
+    await waitFor(() =>
+      expect(
+        within(section)
+          .getByRole("button", { name: /Use existing/ })
+          .hasAttribute("disabled"),
+      ).toBe(true),
+    );
+    expect(within(section).queryByText(/already use everything/)).toBeNull();
+  });
+
+  it("does not offer raw credentials when custom connection metadata fails to load", async () => {
+    mockSearchConnections();
+    server.use(
+      getListExpertCredentialsMockHandler([linkedin]),
+      http.get("*/api/mcp/connections", () =>
+        HttpResponse.json({ detail: "unavailable" }, { status: 500 }),
+      ),
+    );
+    render(<ExpertDetailPage />);
+    await openIntegrationsTab();
+    const section = await screen.findByTestId("expert-integrations-section");
+    await waitFor(() =>
+      expect(
+        within(section)
+          .getByRole("button", { name: /Use existing/ })
+          .hasAttribute("disabled"),
+      ).toBe(true),
+    );
+    expect(
+      await within(section).findByText("Could not load custom connectors."),
+    ).toBeDefined();
+    expect(
+      within(section)
+        .getByRole("button", { name: "Remove Work LinkedIn" })
+        .hasAttribute("disabled"),
+    ).toBe(false);
+  });
+
+  it("shows connections sharing a credential as one shared grant", async () => {
+    mockSearchConnections([
+      searchConnection,
+      { ...searchConnection, id: "other-search", name: "Other Search" },
+    ]);
+    server.use(getListExpertCredentialsMockHandler([searchRef]));
+    render(<ExpertDetailPage />);
+    await openIntegrationsTab();
+    const rows = await screen.findAllByTestId("expert-integration-row");
+    expect(rows).toHaveLength(1);
+    expect(
+      within(rows[0]).getByText("Web_Search_Test / Other Search"),
+    ).toBeDefined();
+    expect(
+      within(rows[0]).getByText(
+        "Shared credential: access applies to all listed connections.",
+      ),
+    ).toBeDefined();
+  });
+
+  it("preserves a custom name that starts with a provider prefix", async () => {
+    mockSearchConnections([{ ...searchConnection, name: "MCP: Research" }]);
+    server.use(getListExpertCredentialsMockHandler([searchRef]));
+    render(<ExpertDetailPage />);
+    await openIntegrationsTab();
+    const row = await screen.findByTestId("expert-integration-row");
+    expect(within(row).getByText("MCP: Research")).toBeDefined();
+    expect(
+      within(row).getByRole("button", { name: "Remove MCP: Research" }),
+    ).toBeDefined();
+  });
+
   it("lists what the expert can reach", async () => {
     server.use(getListExpertCredentialsMockHandler([linkedin]));
 

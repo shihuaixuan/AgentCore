@@ -37,7 +37,7 @@ export function AutopilotHeader() {
             </h1>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border-base bg-surface-muted px-2.5 py-0.5 font-sans text-caption font-medium text-foreground-body">
               <Icon icon={SparklesIcon} size={12} />
-              {AUTOPILOT_ROLE}
+              {t(AUTOPILOT_ROLE, "AI 负责人")}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border-base bg-surface-muted px-2.5 py-0.5 font-sans text-caption font-medium text-foreground-body">
               <Icon icon={Tick02Icon} size={12} />

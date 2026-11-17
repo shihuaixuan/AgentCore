@@ -1439,12 +1439,12 @@ def test_mcp_credential_combine_different_servers():
 
     # Each entry should contain the server hostname in its key
     keys = list(combined.keys())
-    assert any(
-        "mcp.sentry.dev" in k for k in keys
-    ), f"Expected 'mcp.sentry.dev' in one key, got {keys}"
-    assert any(
-        "mcp.linear.app" in k for k in keys
-    ), f"Expected 'mcp.linear.app' in one key, got {keys}"
+    assert any("mcp.sentry.dev" in k for k in keys), (
+        f"Expected 'mcp.sentry.dev' in one key, got {keys}"
+    )
+    assert any("mcp.linear.app" in k for k in keys), (
+        f"Expected 'mcp.linear.app' in one key, got {keys}"
+    )
 
 
 def test_mcp_credential_combine_same_server():
@@ -2026,9 +2026,9 @@ async def test_get_graph_version_none_ignores_unsubmitted_newer_version() -> Non
         result = await get_graph(graph_id=graph_id, version=None, user_id=requester_id)
 
     assert result is mock_from_db.return_value
-    assert (
-        mock_from_db.call_args.args[0] is submitted_v1
-    ), "version=None must resolve to the submitted version, not the newest row"
+    assert mock_from_db.call_args.args[0] is submitted_v1, (
+        "version=None must resolve to the submitted version, not the newest row"
+    )
     lib_where = lib_prisma.return_value.find_first.await_args.kwargs["where"]
     assert "agentGraphVersion" not in lib_where
 
@@ -2135,9 +2135,9 @@ async def test_get_graph_library_with_null_agent_graph_denied() -> None:
             user_id=requester_id,
         )
 
-    assert (
-        result is None
-    ), "Library agent with missing graph relation should not grant access"
+    assert result is None, (
+        "Library agent with missing graph relation should not grant access"
+    )
 
 
 @pytest.mark.asyncio
@@ -2166,9 +2166,9 @@ async def test_get_graph_library_wrong_version_denied() -> None:
     ):
         result = await get_graph(graph_id=graph_id, version=2, user_id=requester_id)
 
-    assert (
-        result is None
-    ), "Library agent for version 1 must not grant access to version 2"
+    assert result is None, (
+        "Library agent for version 1 must not grant access to version 2"
+    )
     lib_where = lib_prisma.return_value.find_first.await_args.kwargs["where"]
     assert lib_where["agentGraphVersion"] == 2
 
@@ -2229,9 +2229,9 @@ async def test_admin_can_access_pending_v2_via_get_graph_as_admin() -> None:
             for_export=False,
         )
 
-    assert (
-        result is mock_graph_model
-    ), "Admin must access pending v2 via get_graph_as_admin"
+    assert result is mock_graph_model, (
+        "Admin must access pending v2 via get_graph_as_admin"
+    )
 
 
 # --------------- execution permission truth table --------------- #
@@ -3456,6 +3456,32 @@ def _slots(graph: GraphModel) -> dict[str, tuple[set[str], set[str], bool]]:
         )
         for key, prop in schema["properties"].items()
     }
+
+
+@pytest.mark.parametrize("credential_id", [None, "account-1"])
+async def test_saved_mcp_connection_does_not_require_auto_selected_credentials(
+    credential_id,
+):
+    from backend.copilot.tools.utils import match_user_credentials_to_graph
+
+    inputs = {
+        "connection_id": "connection-1",
+        "server_url": "https://mcp.example.com/mcp",
+        "selected_tool": "get_weather",
+    }
+    if credential_id:
+        inputs["credentials"] = {
+            "id": credential_id,
+            "provider": "mcp",
+            "type": "oauth2",
+        }
+    graph = _graph_with([_node("mcp-node", MCPToolBlock().id, inputs)])
+    matched, missing = await match_user_credentials_to_graph(
+        "u-1", graph, available_credentials=[]
+    )
+    assert graph.regular_credentials_inputs == {}
+    assert matched == {}
+    assert missing == []
 
 
 def test_codegen_without_transport_resolves_to_schema_default():

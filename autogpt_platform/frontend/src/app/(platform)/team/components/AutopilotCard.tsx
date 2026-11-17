@@ -77,14 +77,17 @@ export function AutopilotCard({
             style={categoryTagStyle(AUTOPILOT_COVER_COLOR)}
           >
             <Icon icon={SparklesIcon} size={12} className="shrink-0" />
-            <span className="truncate">{AUTOPILOT_ROLE}</span>
+            <span className="truncate">{t(AUTOPILOT_ROLE, "AI 负责人")}</span>
           </span>
           <Text
             variant="body"
             tone="muted"
             className="mt-1 line-clamp-2 min-h-[2lh]"
           >
-            {AUTOPILOT_BLURB}
+            {t(
+              AUTOPILOT_BLURB,
+              "你的内置通才助手，负责回答问题、运行工作流，并将任务分配给你聘用的专家。",
+            )}
           </Text>
         </div>
 

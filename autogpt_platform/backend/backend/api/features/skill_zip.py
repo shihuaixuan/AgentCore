@@ -122,6 +122,13 @@ def _checked_members(infos: list[zipfile.ZipInfo]) -> dict[str, zipfile.ZipInfo]
         if info.is_dir():
             continue
         named = f"member '{info.filename[:120]}'"
+        if (
+            info.filename.startswith("/")
+            or "\\" in info.filename
+            or "\x00" in info.filename
+            or any(part in ("", ".", "..") for part in info.filename.split("/"))
+        ):
+            raise SkillPackageError(f"{named} has an unsafe path")
         if info.flag_bits & _ENCRYPTED_FLAG:
             raise SkillPackageError(f"{named} is encrypted")
         if _mode(info) & _FILE_TYPE_MASK == _SYMLINK_TYPE:
@@ -154,15 +161,27 @@ def _checked_members(infos: list[zipfile.ZipInfo]) -> dict[str, zipfile.ZipInfo]
 
 
 def _unwrapped(members: dict[str, zipfile.ZipInfo]) -> dict[str, zipfile.ZipInfo]:
-    """Strip the wrapping directory a "download zip" button adds, so
-    ``webapp-testing-main/SKILL.md`` is the package root.
-
-    Only when one directory holds every member and the ``SKILL.md`` is the one
-    inside it, so a package whose own root is present is never rewritten.
-    """
-    tops = {name.split("/", 1)[0] for name in members}
-    if len(tops) == 1 and (top := tops.pop()) and f"{top}/{ROOT_SKILL_MD}" in members:
-        members = {name[len(top) + 1 :]: info for name, info in members.items()}
+    """Find a root skill, retaining other files unless they are macOS metadata."""
+    members = {
+        name: info for name, info in members.items() if not name.startswith("__MACOSX/")
+    }
+    if ROOT_SKILL_MD not in members:
+        candidates = [
+            name
+            for name in members
+            if name.count("/") == 1 and name.endswith("/SKILL.md")
+        ]
+        if len(candidates) == 1:
+            prefix = candidates[0][: -len(ROOT_SKILL_MD)]
+            unwrapped: dict[str, zipfile.ZipInfo] = {}
+            for name, info in members.items():
+                path = name.removeprefix(prefix)
+                if path in unwrapped:
+                    raise SkillPackageError(
+                        f"member '{path[:120]}' appears twice in the archive"
+                    )
+                unwrapped[path] = info
+            members = unwrapped
     if ROOT_SKILL_MD not in members:
         raise SkillPackageError(
             "archive has no SKILL.md at its root — a skill package is a "

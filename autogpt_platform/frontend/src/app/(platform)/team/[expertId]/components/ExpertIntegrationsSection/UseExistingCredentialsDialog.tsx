@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
+import { connectionSearchText, type ExistingConnection } from "./helpers";
 import { ConnectProviderRow } from "@/app/(platform)/copilot/components/ConnectToolsDialog/ConnectProviderRow";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -25,7 +25,7 @@ import { useFitListToDialog } from "../useFitListToDialog";
 interface Props {
   open: boolean;
   expertName: string;
-  credentials: CredentialsMetaResponse[];
+  credentials: ExistingConnection[];
   isGranting: boolean;
   onUse: (credentialId: string) => void;
   onClose: () => void;
@@ -33,13 +33,11 @@ interface Props {
 
 interface ProviderGroup {
   provider: ConnectableProvider;
-  credentials: CredentialsMetaResponse[];
+  credentials: ExistingConnection[];
 }
 
-function groupByProvider(
-  credentials: CredentialsMetaResponse[],
-): ProviderGroup[] {
-  const groups = new Map<string, CredentialsMetaResponse[]>();
+function groupByProvider(credentials: ExistingConnection[]): ProviderGroup[] {
+  const groups = new Map<string, ExistingConnection[]>();
   for (const credential of credentials) {
     const id = serviceKey(credential);
     groups.set(id, [...(groups.get(id) ?? []), credential]);
@@ -91,7 +89,7 @@ export function UseExistingCredentialsDialog({
       !needle ||
       group.provider.name.toLowerCase().includes(needle) ||
       group.credentials.some((credential) =>
-        (credential.title ?? "").toLowerCase().includes(needle),
+        connectionSearchText(credential).includes(needle),
       ),
   );
   const selected = groups.find(
@@ -191,10 +189,23 @@ export function UseExistingCredentialsDialog({
                 onChange={setQuery}
                 placeholder={t("Search connections", "搜索连接")}
               />
+              {credentials.some(
+                (credential) => (credential.customConnections?.length ?? 0) > 1,
+              ) && (
+                <Text variant="small" tone="muted">
+                  {t(
+                    "Connections listed together share a credential. Adding or removing access applies to all of them.",
+                    "合并列出的连接共用一份凭据，添加或移除权限将同时影响这些连接。",
+                  )}
+                </Text>
+              )}
               {groups.length === 0 ? (
                 <Text variant="small" tone="muted">
                   {credentials.length === 0
-                    ? `${expertName} can already use everything in your account.`
+                    ? t(
+                        "No available connections to add.",
+                        "没有可添加的可用连接。",
+                      )
                     : t("No connections match.", "没有匹配的连接。")}
                 </Text>
               ) : (
@@ -210,13 +221,15 @@ export function UseExistingCredentialsDialog({
                           provider={group.provider}
                           onSelect={handleSelect}
                           description={
-                            group.credentials.length === 1
-                              ? formatCredentialName(
-                                  group.credentials[0].title ??
-                                    group.provider.name,
-                                  group.credentials[0].provider,
-                                )
-                              : `${group.credentials.length} connections · choose one`
+                            group.credentials[0].customConnections
+                              ? t("Custom MCP", "自定义 MCP")
+                              : group.credentials.length === 1
+                                ? formatCredentialName(
+                                    group.credentials[0].title ??
+                                      group.provider.name,
+                                    group.credentials[0].provider,
+                                  )
+                                : `${group.credentials.length} connections · choose one`
                           }
                         />
                       </li>

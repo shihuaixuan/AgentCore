@@ -27,6 +27,7 @@ from backend.copilot.tools.utils import (
 )
 from backend.data.db_accessors import experts_db
 from backend.data.model import OAuth2Credentials
+from backend.integrations.credentials_store import provider_matches
 from backend.integrations.providers import ProviderName
 from backend.util.request import (
     AUTH_STATUS_CODES,
@@ -63,7 +64,7 @@ _PARAMS_SUMMARY_MAX_CHARS = 400
 
 def _service_name(host: str) -> str:
     """Strip the 'mcp.' prefix from an MCP hostname: 'mcp.sentry.dev' → 'sentry.dev'"""
-    return host[4:] if host.startswith("mcp.") else host
+    return host.removeprefix("mcp.")
 
 
 def _args_contain_file_ref(value: Any) -> bool:
@@ -147,6 +148,8 @@ class RunMCPToolTool(BaseTool):
         tool_name: str = "",
         tool_arguments: dict[str, Any] | None = None,
         surface_connect_card: bool = False,
+        custom_connection_id: str | None = None,
+        custom_credential_id: str | None = None,
         **kwargs,
     ) -> ToolResponseBase:
         server_url = server_url.strip()
@@ -236,10 +239,63 @@ class RunMCPToolTool(BaseTool):
                     user_id, session.expert_id
                 )
             )
-        creds = await auto_lookup_mcp_credential(
-            user_id, normalized_url, allowed_ids=allowed_ids
-        )
-        if creds is None and allowed_ids is not None:
+        if custom_connection_id:
+            from backend.data import db
+            from backend.data.custom_mcp import get_custom_mcp_connection
+            from backend.data.model import OAuth2Credentials
+            from backend.integrations.creds_manager import IntegrationCredentialsManager
+            from backend.util.clients import get_database_manager_async_client
+
+            lookup = (
+                get_custom_mcp_connection
+                if db.is_connected()
+                else get_database_manager_async_client().get_custom_mcp_connection
+            )
+            row = await lookup(user_id, custom_connection_id)
+            if (
+                not row
+                or not row["enabled"]
+                or normalize_mcp_url(row["serverUrl"]) != normalized_url
+                or row["credentialId"] != custom_credential_id
+                or (
+                    custom_credential_id is not None
+                    and allowed_ids is not None
+                    and custom_credential_id not in allowed_ids
+                )
+            ):
+                return ErrorResponse(
+                    message="This connection is unavailable. Check its settings in Integrations.",
+                    session_id=session_id,
+                ).from_outside()
+            try:
+                creds = (
+                    await IntegrationCredentialsManager().get(
+                        user_id, custom_credential_id
+                    )
+                    if custom_credential_id
+                    else None
+                )
+            except Exception:
+                logger.warning("Could not refresh custom MCP credential", exc_info=True)
+                return ErrorResponse(
+                    message="Could not refresh this connection. Please try again.",
+                    session_id=session_id,
+                ).from_outside()
+            if custom_credential_id and (
+                not isinstance(creds, OAuth2Credentials)
+                or not provider_matches(creds.provider, ProviderName.MCP.value)
+                or normalize_mcp_url((creds.metadata or {}).get("mcp_server_url", ""))
+                != normalized_url
+            ):
+                return ErrorResponse(
+                    message="This connection's credential is unavailable.",
+                    session_id=session_id,
+                ).from_outside()
+        else:
+            creds = await auto_lookup_mcp_credential(
+                user_id, normalized_url, allowed_ids=allowed_ids
+            )
+        if creds is None and allowed_ids is not None and not custom_connection_id:
             ungranted = await auto_lookup_mcp_credential(user_id, normalized_url)
             if ungranted is not None:
                 # The card rather than a bare error: the expert can ask for the
@@ -296,7 +352,8 @@ class RunMCPToolTool(BaseTool):
                         if probe_err.status_code in CREDENTIAL_REJECTED_STATUS_CODES:
                             connected = False
                             rejection = _rejection(creds, probe_err)
-                            await invalidate_mcp_credential(user_id, creds.id)
+                            if not custom_connection_id:
+                                await invalidate_mcp_credential(user_id, creds.id)
                         elif probe_err.status_code in AUTH_STATUS_CODES:
                             refused_detail = sanitize_provider_message(
                                 str(probe_err), max_chars=400
@@ -369,6 +426,14 @@ class RunMCPToolTool(BaseTool):
 
         except HTTPClientError as e:
             if e.status_code in AUTH_STATUS_CODES:
+                if custom_connection_id:
+                    return ErrorResponse(
+                        message=(
+                            f"This connection refused access with HTTP {e.status_code}. "
+                            "Open Integrations, edit this custom MCP connection, and check its credentials or permissions."
+                        ),
+                        session_id=session_id,
+                    ).from_outside(str(e)[:300])
                 credential_rejected = e.status_code in CREDENTIAL_REJECTED_STATUS_CODES
                 # Fire the setup card whether or not a credential row exists.
                 rejected = (
@@ -376,7 +441,11 @@ class RunMCPToolTool(BaseTool):
                     if creds is not None and credential_rejected
                     else None
                 )
-                if creds is not None and credential_rejected:
+                if (
+                    creds is not None
+                    and credential_rejected
+                    and not custom_connection_id
+                ):
                     await invalidate_mcp_credential(user_id, creds.id)
                 # A 403 over a credential we deliberately kept means "this
                 # token is fine, it just may not call *this* tool". Rendering

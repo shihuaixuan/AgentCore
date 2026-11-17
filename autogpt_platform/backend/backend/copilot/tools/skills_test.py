@@ -2449,8 +2449,6 @@ def test_a_body_the_reference_package_needs_is_accepted():
         "scripts/../../escape.md",
         "scripts//double.md",
         "./here.md",
-        ".hidden/secret.md",
-        "scripts/.hidden",
         "windows\\path.md",
         "nul\x00byte.md",
         "SKILL.md",
@@ -2468,6 +2466,18 @@ def test_validate_package_refuses_an_unsafe_path(relative_path):
         )
     assert relative_path[:120] in str(exc.value)
     assert not exc.value.over_limit
+
+
+def test_validate_package_accepts_hidden_files():
+    validate_package(
+        SkillPackage(
+            skill_md="---\nname: a\ndescription: b\n---\nbody\n",
+            files=[
+                SkillFile(relative_path=".skill-metadata.yaml", content=b"metadata"),
+                SkillFile(relative_path=".settings/options.json", content=b"{}"),
+            ],
+        )
+    )
 
 
 def test_validate_package_refuses_a_duplicate_path():

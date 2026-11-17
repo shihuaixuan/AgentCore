@@ -1,22 +1,16 @@
 import { test, expect } from "./coverage-fixture";
 
-test("keeps the selected language and typed login email after switching", async ({
+test("shows Chinese without a language switcher even with a saved English preference", async ({
   page,
   context,
+  baseURL,
 }) => {
-  await context.clearCookies();
+  await context.addCookies([
+    { name: "autogpt-locale", value: "en", url: baseURL! },
+  ]);
   await page.goto("/login", { waitUntil: "domcontentloaded" });
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
-  const email = page.locator('input[type="email"]');
-  await email.fill("localization@example.invalid");
-  await page.getByRole("button", { name: "切换为英文", exact: true }).click();
-  await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(email).toHaveValue("localization@example.invalid");
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await page
-    .getByRole("button", { name: "Switch to Simplified Chinese", exact: true })
-    .click();
+  await expect(page.locator('[data-slot="language-switcher"]')).toHaveCount(0);
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
 });

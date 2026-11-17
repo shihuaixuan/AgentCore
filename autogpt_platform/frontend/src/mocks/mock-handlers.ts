@@ -34,6 +34,7 @@ import { getHealthMock } from "@/app/api/__generated__/endpoints/health/health.m
 import { getIntegrationsMock } from "@/app/api/__generated__/endpoints/integrations/integrations.msw";
 import { getLibraryMock } from "@/app/api/__generated__/endpoints/library/library.msw";
 import { getMetricsMock } from "@/app/api/__generated__/endpoints/metrics/metrics.msw";
+import { getGetV2ListConnectionsMockHandler200 } from "@/app/api/__generated__/endpoints/mcp/mcp.msw";
 import { getOauthMock } from "@/app/api/__generated__/endpoints/oauth/oauth.msw";
 import {
   getGetV1CheckIfOnboardingIsCompletedMockHandler,
@@ -112,6 +113,7 @@ export const mockHandlers = [
   ...getIntegrationsMock(),
   ...getLibraryMock(),
   ...getMetricsMock(),
+  getGetV2ListConnectionsMockHandler200([]),
   ...getOauthMock(),
   // Onboarded unless a test says otherwise: the paywall and the top-up prompt
   // wait for this, so a random answer would show or hide them by chance.

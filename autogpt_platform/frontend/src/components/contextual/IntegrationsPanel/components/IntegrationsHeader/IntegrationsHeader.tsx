@@ -9,9 +9,14 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 interface Props {
   onConnect: () => void;
   withTitle?: boolean;
+  onAddCustom?: () => void;
 }
 
-export function IntegrationsHeader({ onConnect, withTitle = true }: Props) {
+export function IntegrationsHeader({
+  onConnect,
+  withTitle = true,
+  onAddCustom,
+}: Props) {
   const { t } = useTranslation();
 
   return (
@@ -30,24 +35,31 @@ export function IntegrationsHeader({ onConnect, withTitle = true }: Props) {
         </Text>
       </div>
 
-      <Button
-        variant="primary"
-        size="small"
-        leftIcon={<Icon icon={PlusSignIcon} size={16} />}
-        onClick={onConnect}
-        className="sm:hidden"
-      >
-        {t("Connect Service", "连接服务")}
-      </Button>
-      <Button
-        variant="primary"
-        size="large"
-        leftIcon={<Icon icon={PlusSignIcon} size={20} />}
-        onClick={onConnect}
-        className="hidden sm:inline-flex"
-      >
-        {t("Connect Service", "连接服务")}
-      </Button>
+      <div className="flex items-center gap-2">
+        {onAddCustom && (
+          <Button variant="secondary" size="small" onClick={onAddCustom}>
+            {t("Add custom MCP", "添加自定义 MCP")}
+          </Button>
+        )}
+        <Button
+          variant="primary"
+          size="small"
+          leftIcon={<Icon icon={PlusSignIcon} size={16} />}
+          onClick={onConnect}
+          className="sm:hidden"
+        >
+          {t("Connect Service", "连接服务")}
+        </Button>
+        <Button
+          variant="primary"
+          size="large"
+          leftIcon={<Icon icon={PlusSignIcon} size={20} />}
+          onClick={onConnect}
+          className="hidden sm:inline-flex"
+        >
+          {t("Connect Service", "连接服务")}
+        </Button>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import { ExpertCredentialRef } from "@/app/api/__generated__/models/expertCredentialRef";
+import { isConnectionEnabled, type GrantedConnection } from "./helpers";
+import { CustomConnectionDetails } from "./CustomConnectionDetails";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import {
@@ -56,13 +57,13 @@ interface Group {
   id: string;
   name: string;
   icon: string;
-  integrations: ExpertCredentialRef[];
+  integrations: GrantedConnection[];
 }
 
 export function groupExpertIntegrations(
-  integrations: ExpertCredentialRef[],
+  integrations: GrantedConnection[],
 ): Group[] {
-  const byService = new Map<string, ExpertCredentialRef[]>();
+  const byService = new Map<string, GrantedConnection[]>();
   for (const integration of integrations) {
     const id = serviceKey(integration);
     byService.set(id, [...(byService.get(id) ?? []), integration]);
@@ -77,7 +78,7 @@ export function groupExpertIntegrations(
 }
 
 interface Props {
-  integrations: ExpertCredentialRef[];
+  integrations: GrantedConnection[];
   isRemoving: boolean;
   onRemove: (credentialId: string) => void;
 }
@@ -156,14 +157,16 @@ export function ExpertIntegrationGroups({
 }
 
 interface RowProps {
-  integration: ExpertCredentialRef;
+  integration: GrantedConnection;
   isRemoving: boolean;
   onRemove: () => void;
 }
 
 function ExpertIntegrationRow({ integration, isRemoving, onRemove }: RowProps) {
   const { t } = useTranslation();
-  const name = formatCredentialName(integration.title, integration.provider);
+  const name = integration.customConnections
+    ? integration.title
+    : formatCredentialName(integration.title, integration.provider);
   return (
     <div
       className="flex w-full items-center justify-between py-2.5 pr-4 pl-3"
@@ -175,16 +178,29 @@ function ExpertIntegrationRow({ integration, isRemoving, onRemove }: RowProps) {
             {name}
           </Text>
           <span className="inline-flex items-center justify-center rounded-md bg-surface-hover px-1.5 py-0.5 font-sans text-caption leading-4 text-foreground-secondary">
-            {TYPE_LABELS[integration.type] ?? integration.type}
+            {integration.customConnections
+              ? t("Custom MCP", "自定义 MCP")
+              : (TYPE_LABELS[integration.type] ?? integration.type)}
           </span>
         </div>
-        <Text variant="body-md" as="span" tone="muted">
-          {CONNECTION_LABELS[integration.type] ?? "Configured"}
-        </Text>
+        {integration.customConnections ? (
+          <CustomConnectionDetails
+            connections={integration.customConnections}
+          />
+        ) : (
+          <Text variant="body-md" as="span" tone="muted">
+            {CONNECTION_LABELS[integration.type] ?? "Configured"}
+          </Text>
+        )}
       </div>
       <div className="flex items-center gap-3">
-        <Text variant="eyebrow" tone="success">
-          {t("Ready", "就绪")}
+        <Text
+          variant="eyebrow"
+          tone={isConnectionEnabled(integration) ? "success" : "muted"}
+        >
+          {isConnectionEnabled(integration)
+            ? t("Ready", "就绪")
+            : t("Disabled", "已禁用")}
         </Text>
         <button
           type="button"

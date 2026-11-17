@@ -19,6 +19,7 @@ from backend.api.features.integrations.router import (
     CredentialsMetaResponse,
     to_meta_response,
 )
+from backend.api.features.mcp.custom_connections import router as connections_router
 from backend.api.features.mcp.oauth_registration import (
     MCPClientRegistration,
     check_preregistered_endpoints,
@@ -43,6 +44,7 @@ from backend.blocks.mcp.helpers import (
 from backend.blocks.mcp.oauth import MCPOAuthHandler, MCPTokenEndpointAuthMethod
 from backend.copilot.rate_limit import enforce_payment_paywall
 from backend.data.model import OAuth2Credentials
+from backend.integrations.credentials_store import provider_matches
 from backend.integrations.creds_manager import IntegrationCredentialsManager
 from backend.integrations.mcp_catalog import get_mcp_catalog_entry_for_url
 from backend.integrations.providers import ProviderName
@@ -63,6 +65,7 @@ settings = Settings()
 router = fastapi.APIRouter(
     tags=["mcp"], dependencies=[fastapi.Depends(enforce_payment_paywall)]
 )
+router.include_router(connections_router)
 creds_manager = IntegrationCredentialsManager()
 
 # Verifying a token is best-effort; it must never outlast a user's patience.
@@ -88,6 +91,9 @@ class DiscoverToolsRequest(BaseModel):
     """Request to discover tools on an MCP server."""
 
     server_url: str = Field(description="URL of the MCP server")
+    credential_id: str | None = Field(
+        default=None, description="Specific credential to use for this server"
+    )
     use_saved_credentials: bool = Field(
         default=True,
         description="Use a saved credential when no auth token is supplied. "
@@ -146,7 +152,29 @@ async def discover_tools(
     explicit_token = (
         request.auth_token.get_secret_value() if request.auth_token else None
     )
-    if explicit_token:
+    if (explicit_token or request.credential_id) and not normalize_mcp_url(
+        request.server_url
+    ).lower().startswith("https://"):
+        raise fastapi.HTTPException(
+            status_code=400, detail="Credentials require an HTTPS server URL."
+        )
+    if explicit_token and request.credential_id:
+        raise fastapi.HTTPException(
+            status_code=422, detail="Choose one credential source."
+        )
+    if request.credential_id:
+        credential = await creds_manager.get(user_id, request.credential_id)
+        if (
+            not isinstance(credential, OAuth2Credentials)
+            or not provider_matches(credential.provider, ProviderName.MCP.value)
+            or normalize_mcp_url((credential.metadata or {}).get("mcp_server_url", ""))
+            != normalize_mcp_url(request.server_url)
+        ):
+            raise fastapi.HTTPException(
+                status_code=404, detail="Credential not found for this server."
+            )
+        authorization = mcp_authorization_header(credential)
+    elif explicit_token:
         try:
             authorization = normalize_mcp_authorization(explicit_token)
         except ValueError as e:
@@ -224,6 +252,10 @@ class MCPOAuthLoginRequest(BaseModel):
     """Request to start an OAuth flow for an MCP server."""
 
     server_url: str = Field(description="URL of the MCP server that requires OAuth")
+    isolated: bool = Field(
+        default=False,
+        description="Create a separate credential for a custom connection",
+    )
     scopes: list[str] | None = Field(
         default=None,
         description="OAuth scopes to request. Omit or use null to use catalogue or discovered defaults; "
@@ -495,6 +527,7 @@ async def mcp_oauth_login(
             "token_endpoint_auth_method": token_endpoint_auth_method,
             "issuer": issuer,
             "iss_required": iss_required,
+            "isolated": request.isolated,
         },
     )
 
@@ -617,7 +650,9 @@ async def mcp_oauth_callback(
     catalog_entry = get_mcp_catalog_entry_for_url(meta["server_url"])
     tools_url = (
         catalog_entry.mcp_server.server_url
-        if catalog_entry and catalog_entry.mcp_server.server_url
+        if catalog_entry
+        and catalog_entry.mcp_server.server_url
+        and not meta.get("isolated")
         else meta["server_url"]
     )
     credentials.metadata["mcp_server_url"] = tools_url
@@ -634,6 +669,7 @@ async def mcp_oauth_callback(
     credentials.metadata["mcp_revoke_url"] = meta.get("revoke_url")
     credentials.metadata["mcp_resource_url"] = meta.get("resource_url", "")
     credentials.metadata["mcp_issuer"] = expected_issuer
+    credentials.metadata["mcp_isolated"] = bool(meta.get("isolated"))
 
     hostname = server_host(meta["server_url"])
     credentials.title = f"MCP: {hostname}"
@@ -648,9 +684,13 @@ async def mcp_oauth_callback(
             # URL, but ones stored before that change are under the sign-in
             # URL, and for the two entries where those differ matching only
             # one of them leaves a dead token behind on every reconnection.
-            if isinstance(old, OAuth2Credentials) and (old.metadata or {}).get(
-                "mcp_server_url"
-            ) in {tools_url, meta["server_url"]}:
+            if (
+                not meta.get("isolated")
+                and isinstance(old, OAuth2Credentials)
+                and not (old.metadata or {}).get("mcp_isolated")
+                and (old.metadata or {}).get("mcp_server_url")
+                in {tools_url, meta["server_url"]}
+            ):
                 await creds_manager.store.delete_creds_by_id(user_id, old.id)
                 logger.info(
                     "Removed old MCP credential %s for %s",
@@ -673,6 +713,10 @@ class MCPStoreTokenRequest(BaseModel):
 
     server_url: str = Field(
         description="MCP server URL the credential authenticates against"
+    )
+    isolated: bool = Field(
+        default=False,
+        description="Create a separate credential for a custom connection",
     )
     token: SecretStr = Field(
         min_length=1,
@@ -790,6 +834,8 @@ async def mcp_store_token(
             if (
                 not isinstance(old, OAuth2Credentials)
                 or old.is_managed
+                or request.isolated
+                or (old.metadata or {}).get("mcp_isolated")
                 or normalize_mcp_url((old.metadata or {}).get("mcp_server_url", ""))
                 != server_url
             ):
@@ -804,7 +850,12 @@ async def mcp_store_token(
         ) from e
 
     auth_scheme = authorization.split(" ", 1)[0].lower()
-    metadata = {"mcp_server_url": server_url, "mcp_auth_scheme": auth_scheme}
+    metadata: dict[str, Any] = {
+        "mcp_server_url": server_url,
+        "mcp_auth_scheme": auth_scheme,
+    }
+    if request.isolated:
+        metadata["mcp_isolated"] = True
     manual_credentials.sort(key=lambda cred: cred.id)
     survivor = manual_credentials[-1] if manual_credentials else None
     superseded_ids = [old.id for old in manual_credentials[:-1]]

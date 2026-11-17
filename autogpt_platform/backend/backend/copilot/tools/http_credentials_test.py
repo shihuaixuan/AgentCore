@@ -339,6 +339,19 @@ class TestFindMatchingOAuth2Credential:
         assert result is not None
         assert result.id == cred.id
 
+    def test_isolated_mcp_credential_is_not_automatically_selected(self):
+        cred = self._make_oauth2_cred("mcp")
+        cred.metadata = {
+            "mcp_isolated": True,
+            "mcp_server_url": "https://mcp.example.com",
+        }
+        field_info = self._make_field_info(ProviderName.MCP)
+        assert find_matching_credential([cred], field_info) is None
+        assert (
+            find_matching_credential([cred], field_info, selected={"mcp": cred.id})
+            is None
+        )
+
     def test_rejects_credential_for_wrong_provider(self):
         """An OAuth2 credential for a different provider should not match."""
         cred = self._make_oauth2_cred("github")

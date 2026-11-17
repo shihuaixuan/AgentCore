@@ -20,7 +20,10 @@ import {
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useIntegrationsSelection } from "./useIntegrationsSelection";
 
-export function useIntegrationsList(query: string) {
+export function useIntegrationsList(
+  query: string,
+  customCredentialIDs: ReadonlySet<string> = new Set(),
+) {
   const { t } = useTranslation();
   const debouncedQuery = useDebouncedValue(query, 250);
 
@@ -37,7 +40,9 @@ export function useIntegrationsList(query: string) {
     },
   });
 
-  const credentials = credentialsQuery.data ?? [];
+  const credentials = (credentialsQuery.data ?? []).filter(
+    (credential) => !customCredentialIDs.has(credential.id),
+  );
   const allProviders: ProviderGroupView[] = groupCredentialsByProvider(
     credentials,
     blockServiceKeys(providersQuery.data ?? []),

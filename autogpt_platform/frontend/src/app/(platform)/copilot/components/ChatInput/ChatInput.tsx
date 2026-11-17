@@ -197,7 +197,6 @@ export const ChatInput = memo(function ChatInput({
   const [refusedCount, setRefusedCount] = useState(0);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isMultiline, setIsMultiline] = useState(false);
-
   function handleToggleDryRun() {
     const next = !isDryRun;
     setIsDryRun(next);

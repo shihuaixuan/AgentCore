@@ -692,7 +692,7 @@ def get_default_skill_with_body(name: str) -> ParsedSkill | None:
 # caps and the path rules are stated once.
 # ---------------------------------------------------------------------------
 
-_PACKAGE_SEGMENT_RE = re.compile(r"^[A-Za-z0-9_-][A-Za-z0-9._-]*$")
+_PACKAGE_SEGMENT_RE = re.compile(r"^[A-Za-z0-9._-]+$")
 _ROOT_SKILL_MD = "SKILL.md"
 
 
@@ -778,7 +778,7 @@ def _package_path_error(path: str) -> str | None:
     """Why *path* may not be written into a skill folder, or ``None``.
 
     Rejects what a zip member or an API caller can smuggle in: an escape out
-    of the folder, a hidden file, a backslash or NUL a later consumer would
+    of the folder, a backslash or NUL a later consumer would
     read as a separator or a terminator.
     """
     named = f"file path '{path[:120]}'"
@@ -793,6 +793,8 @@ def _package_path_error(path: str) -> str | None:
     if path == _ROOT_SKILL_MD:
         return f"{named} is the package root; pass it as skill_md, not a file"
     segments = path.split("/")
+    if any(segment in (".", "..") for segment in segments):
+        return f"{named} is not normalised (no '.', '..' or repeated '/')"
     if len(segments) > MAX_PACKAGE_PATH_DEPTH:
         return (
             f"{named} is {len(segments)} segments deep; the limit is "
@@ -802,7 +804,7 @@ def _package_path_error(path: str) -> str | None:
         if not _PACKAGE_SEGMENT_RE.match(segment):
             return (
                 f"{named} has an unusable segment '{segment[:40]}' — use "
-                "letters, digits, '.', '_' or '-', not starting with '.'"
+                "letters, digits, '.', '_' or '-'"
             )
     return None
 

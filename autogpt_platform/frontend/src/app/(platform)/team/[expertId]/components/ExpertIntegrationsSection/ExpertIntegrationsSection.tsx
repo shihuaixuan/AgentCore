@@ -5,6 +5,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { Text } from "@/components/atoms/Text/Text";
+import { Link } from "@/components/atoms/Link/Link";
 import { useState } from "react";
 import { ExpertConnectServiceDialog } from "./ExpertConnectServiceDialog";
 import { ExpertIntegrationGroups } from "./ExpertIntegrationGroups";
@@ -19,6 +20,7 @@ import { useExpertIntegrationsSection } from "./useExpertIntegrationsSection";
 import { IntegrationLogo } from "@/components/molecules/IntegrationLogo/IntegrationLogo";
 import { SectionEmptyState } from "../../../components/SectionEmptyState";
 import { ToolbarSearch } from "../../../components/ToolbarSearch";
+import { connectionSearchText } from "./helpers";
 
 interface Props {
   expertId: string;
@@ -43,6 +45,7 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
     isRevoking,
     isLoading,
     isError,
+    isCustomError,
     isGrantableLoading,
     isGrantableError,
     refetch,
@@ -51,9 +54,7 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
   const needle = query.trim().toLowerCase();
   const visible = needle
     ? granted.filter((integration) =>
-        `${integration.title} ${integration.provider}`
-          .toLowerCase()
-          .includes(needle),
+        connectionSearchText(integration).includes(needle),
       )
     : granted;
 
@@ -73,7 +74,11 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
                   textSize="body-md"
                   leadingIcon={Share01Icon}
                   disabled={
-                    grantable.length === 0 || isError || isGrantableError
+                    grantable.length === 0 ||
+                    isLoading ||
+                    isGrantableLoading ||
+                    isError ||
+                    isGrantableError
                   }
                   onClick={openUseExisting}
                 >
@@ -91,7 +96,10 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
               </TooltipContent>
             ) : grantable.length === 0 && !isGrantableLoading ? (
               <TooltipContent side="bottom">
-                {expertName} can already use everything in your account.
+                {t(
+                  "No available connections to add.",
+                  "没有可添加的可用连接。",
+                )}
               </TooltipContent>
             ) : null}
           </Tooltip>
@@ -112,6 +120,28 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
             onChange={setQuery}
           />
         </div>
+      </div>
+
+      <div className="mb-3 flex flex-col gap-1">
+        <Link href="/settings/integrations">
+          {t("Manage custom connectors", "管理自定义连接器")}
+        </Link>
+        <Text variant="small" tone="muted">
+          {t(
+            "Create custom connectors in Settings, then select Use existing here. Saved keys do not need to be entered again.",
+            "在设置中创建自定义连接器后，在这里选择“使用现有连接”，无需再次填写已保存的密钥。",
+          )}
+        </Text>
+        {isCustomError && (
+          <div className="flex items-center gap-2">
+            <Text variant="small" tone="muted">
+              {t("Could not load custom connectors.", "无法加载自定义连接器。")}
+            </Text>
+            <Button variant="secondary" size="small" onClick={refetch}>
+              {t("Retry", "重试")}
+            </Button>
+          </div>
+        )}
       </div>
 
       {isLoading ? (

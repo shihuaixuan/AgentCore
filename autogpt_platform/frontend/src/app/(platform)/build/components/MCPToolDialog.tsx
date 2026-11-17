@@ -53,8 +53,11 @@ import { isKey } from "@/lib/keyboard";
 import { mcpServerIdentity, normalizeMcpUrl } from "@/lib/mcp-url";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { Select } from "@/components/atoms/Select/Select";
+import { useGetV2ListConnections } from "@/app/api/__generated__/endpoints/mcp/mcp";
 
 export type MCPToolDialogResult = {
+  connectionID?: string;
   serverUrl: string;
   serverName: string | null;
   selectedTool: string;
@@ -79,6 +82,10 @@ export function MCPToolDialog({
 }: MCPToolDialogProps) {
   const { t } = useTranslation();
   const allProviders = useContext(CredentialsProvidersContext);
+  const savedConnections = useGetV2ListConnections({
+    query: { enabled: open },
+  });
+  const [connectionID, setConnectionID] = useState<string | undefined>();
 
   const [step, setStep] = useState<DialogStep>("url");
   const [serverUrl, setServerUrl] = useState("");
@@ -132,6 +139,7 @@ export function MCPToolDialog({
     oauthRequest.current = null;
     setStep("url");
     setServerUrl("");
+    setConnectionID(undefined);
     setManualToken("");
     resetScheme();
     setTools([]);
@@ -176,6 +184,8 @@ export function MCPToolDialog({
       try {
         const response = await postV2DiscoverAvailableToolsOnAnMcpServer({
           server_url: url,
+          credential_id: connectionID ? (credentials?.id ?? null) : null,
+          use_saved_credentials: !connectionID,
           auth_token: null,
         });
         if (response.status !== 200) {
@@ -185,6 +195,15 @@ export function MCPToolDialog({
       } catch (error: unknown) {
         const status = getErrorStatus(error);
         if (status === 401 || status === 403) {
+          if (connectionID) {
+            setError(
+              t(
+                "This connection needs to be reconnected in Integrations.",
+                "请在集成页面重新连接此服务。",
+              ),
+            );
+            return;
+          }
           setAuthRequired(true);
           setError(null);
           // Automatically start OAuth sign-in instead of requiring a second click
@@ -202,7 +221,7 @@ export function MCPToolDialog({
         setLoading(false);
       }
     },
-    [applyDiscoveredTools, t],
+    [applyDiscoveredTools, connectionID, credentials, t],
   );
 
   const connectWithManualCredential = useCallback(async () => {
@@ -381,6 +400,7 @@ export function MCPToolDialog({
 
     onConfirm({
       serverUrl: serverUrl.trim(),
+      connectionID,
       serverName,
       selectedTool: selectedTool.name,
       toolInputSchema: selectedTool.input_schema,
@@ -393,6 +413,7 @@ export function MCPToolDialog({
     selectedTool,
     tools,
     serverUrl,
+    connectionID,
     serverName,
     credentials,
     credentialServerUrl,
@@ -427,6 +448,48 @@ export function MCPToolDialog({
 
         {step === "url" && (
           <div className="flex flex-col gap-4 py-2">
+            {savedConnections.data?.status === 200 &&
+              savedConnections.data.data.some((item) => item.enabled) && (
+                <Select
+                  id="saved-mcp-connection"
+                  label={t("Saved connection", "已保存的连接")}
+                  value={connectionID ?? "none"}
+                  onValueChange={(value) => {
+                    const selected =
+                      savedConnections.data?.status === 200
+                        ? savedConnections.data.data.find(
+                            (item) => item.id === value,
+                          )
+                        : undefined;
+                    setConnectionID(selected?.id);
+                    if (!selected) return;
+                    setServerUrl(selected.server_url);
+                    const stored = allProviders?.mcp?.savedCredentials.find(
+                      (credential) => credential.id === selected.credential_id,
+                    );
+                    setCredentials(
+                      selected.credential_id
+                        ? {
+                            id: selected.credential_id,
+                            provider: "mcp",
+                            type: "oauth2",
+                            title: stored?.title ?? selected.name,
+                          }
+                        : null,
+                    );
+                    setCredentialServerUrl(selected.server_url);
+                  }}
+                  options={[
+                    {
+                      value: "none",
+                      label: t("Enter a server URL", "输入服务器地址"),
+                    },
+                    ...savedConnections.data.data
+                      .filter((item) => item.enabled)
+                      .map((item) => ({ value: item.id, label: item.name })),
+                  ]}
+                />
+              )}
             <div className="flex flex-col gap-2">
               <Label htmlFor="mcp-server-url">
                 {t("Server URL", "服务器网址")}
@@ -438,6 +501,7 @@ export function MCPToolDialog({
                 value={serverUrl}
                 onChange={(e) => {
                   const nextUrl = e.target.value;
+                  setConnectionID(undefined);
                   // Only a change of server identity discards the credential.
                   const serverChanged =
                     mcpServerIdentity(serverUrl) !== mcpServerIdentity(nextUrl);

@@ -11,6 +11,8 @@ import { ConnectServiceDialog } from "./components/ConnectServiceDialog/ConnectS
 import { IntegrationsHeader } from "./components/IntegrationsHeader/IntegrationsHeader";
 import { IntegrationsList } from "./components/IntegrationsList/IntegrationsList";
 import { AvailableIntegrations } from "./components/AvailableIntegrations/AvailableIntegrations";
+import { CustomMCPConnections } from "./components/CustomMCPConnections/CustomMCPConnections";
+import { useCustomMCPConnections } from "./components/CustomMCPConnections/useCustomMCPConnections";
 
 const SURFACE_BACKGROUND = {
   page: "bg-surface-muted",
@@ -32,6 +34,7 @@ export function IntegrationsPanel({
   onConnected,
 }: Props) {
   const { t } = useTranslation();
+  const customConnections = useCustomMCPConnections();
 
   const [isConnectOpen, setIsConnectOpen] = useState(false);
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(
@@ -49,8 +52,10 @@ export function IntegrationsPanel({
       <IntegrationsHeader
         onConnect={() => openConnect()}
         withTitle={withHeading}
+        onAddCustom={customConnections.create}
       />
       <AIConnectionsSection />
+      <CustomMCPConnections state={customConnections} />
       <section aria-labelledby="tool-connections-heading">
         <div className="pb-3 pl-4">
           <Text
@@ -71,6 +76,7 @@ export function IntegrationsPanel({
           query={query}
           onQueryChange={setQuery}
           stickyClassName={SURFACE_BACKGROUND[surface]}
+          customConnections={customConnections}
         />
       </section>
       <AvailableIntegrations query={query} onSelect={openConnect} />

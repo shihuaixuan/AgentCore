@@ -26,6 +26,14 @@ def _oauth(provider: str, url: str | None = None) -> OAuth2Credentials:
     )
 
 
+def test_isolated_custom_credential_does_not_mark_catalog_connected():
+    credential = _oauth("mcp", "https://mcp.example.com/mcp")
+    credential.metadata["mcp_isolated"] = True
+    state = connection_state_from([credential])
+    assert "mcp" not in state.providers
+    assert "https://mcp.example.com/mcp" not in state.server_urls
+
+
 def test_a_legacy_provider_string_still_counts_as_connected():
     """Credentials written under Python 3.13 carry ``"ProviderName.MCP"``.
 

@@ -4,6 +4,7 @@ import {
   useRevokeExpertCredential,
 } from "@/app/api/__generated__/endpoints/experts/experts";
 import { useGetV1ListCredentials } from "@/app/api/__generated__/endpoints/integrations/integrations";
+import { useGetV2ListConnections } from "@/app/api/__generated__/endpoints/mcp/mcp";
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { okData } from "@/app/api/helpers";
 import { filterSystemCredentials } from "@/components/contextual/CredentialsInput/helpers";
@@ -11,6 +12,7 @@ import { useToast } from "@/components/molecules/Toast/use-toast";
 import { invalidateExpertGrantQueries } from "@/services/experts/invalidate-experts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { attachCustomConnections, isConnectionEnabled } from "./helpers";
 
 export function useExpertIntegrationsSection(expertId: string) {
   const queryClient = useQueryClient();
@@ -33,11 +35,30 @@ export function useExpertIntegrationsSection(expertId: string) {
     },
   });
 
-  const granted = grantedQuery.data ?? [];
-  const grantedIds = new Set(granted.map((g) => g.credential_id));
-  const grantable = (connectedQuery.data ?? []).filter(
-    (credential) => !grantedIds.has(credential.id),
+  const customQuery = useGetV2ListConnections({
+    query: {
+      select: (response) => {
+        if (response.status !== 200)
+          throw new Error("Could not load custom connectors.");
+        return response.data;
+      },
+    },
+  });
+  const connections = customQuery.data ?? [];
+  const granted = (grantedQuery.data ?? []).map((credential) =>
+    attachCustomConnections(credential, connections),
   );
+  const grantedIds = new Set(granted.map((g) => g.credential_id));
+  const grantable = (
+    customQuery.isLoading || customQuery.isError
+      ? []
+      : (connectedQuery.data ?? [])
+  )
+    .map((credential) => attachCustomConnections(credential, connections))
+    .filter(
+      (credential) =>
+        !grantedIds.has(credential.id) && isConnectionEnabled(credential),
+    );
 
   // The expert and the roster carry the provider logos, so they go stale too.
   function invalidate() {
@@ -94,7 +115,11 @@ export function useExpertIntegrationsSection(expertId: string) {
   }
 
   async function refetch() {
-    await Promise.all([grantedQuery.refetch(), connectedQuery.refetch()]);
+    await Promise.all([
+      grantedQuery.refetch(),
+      connectedQuery.refetch(),
+      customQuery.refetch(),
+    ]);
   }
 
   return {
@@ -104,10 +129,11 @@ export function useExpertIntegrationsSection(expertId: string) {
     // must not claim the expert has no access, and a failed granted read must
     // not claim there is nothing left to add. Collapsing either into an empty
     // array would render a confident lie.
-    isLoading: grantedQuery.isLoading,
+    isLoading: grantedQuery.isLoading || customQuery.isLoading,
     isError: grantedQuery.isError,
-    isGrantableLoading: connectedQuery.isLoading,
-    isGrantableError: connectedQuery.isError,
+    isCustomError: customQuery.isError,
+    isGrantableLoading: connectedQuery.isLoading || customQuery.isLoading,
+    isGrantableError: connectedQuery.isError || customQuery.isError,
     refetch,
     isConnecting,
     isUsingExisting,

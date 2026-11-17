@@ -185,7 +185,11 @@ async def _resume_mcp(
         # call on arguments nobody ever saw.
         host = server_host(payload.server_url)
         fresh = MCPReviewPayload(
-            server_url=payload.server_url, tool=payload.tool, arguments=arguments
+            server_url=payload.server_url,
+            tool=payload.tool,
+            arguments=arguments,
+            connection_id=payload.connection_id,
+            credential_id=payload.credential_id,
         )
         new_id = await open_mcp_review(
             user_id=user_id,
@@ -219,6 +223,8 @@ async def _resume_mcp(
             server_url=payload.server_url,
             tool_name=payload.tool,
             tool_arguments=arguments,
+            custom_connection_id=payload.connection_id,
+            custom_credential_id=payload.credential_id,
         ),
     )
 
