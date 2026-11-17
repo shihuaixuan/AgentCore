@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { SkillVersionSummary } from "@/app/api/__generated__/models/skillVersionSummary";
 import { Button } from "@/components/atoms/Button/Button";
@@ -14,11 +15,12 @@ interface Props {
 }
 
 export function ChangesView({ version, versions, onSelect }: Props) {
+  const { t } = useTranslation();
   const [showRaw, setShowRaw] = useState(false);
   if (!version) {
     return (
       <Text variant="small" tone="muted">
-        Nothing to compare yet.
+        {t("Nothing to compare yet.", "暂无可比较的内容。")}
       </Text>
     );
   }
@@ -36,14 +38,14 @@ export function ChangesView({ version, versions, onSelect }: Props) {
         className="flex flex-col gap-1"
       >
         <Text variant="small-medium" tone="primary">
-          Version
+          {t("Version", "版本")}
         </Text>
         <select
           data-slot="skill-learning-sheet-changes-version-picker"
           className="rounded-md border border-border-base px-2 py-1 text-body"
           value={version.id}
           onChange={(event) => onSelect(event.target.value)}
-          aria-label="Choose a version"
+          aria-label={t("Choose a version", "选择版本")}
         >
           {versions.map((item) => (
             <option
@@ -58,18 +60,21 @@ export function ChangesView({ version, versions, onSelect }: Props) {
       </label>
       <Text variant="small" tone="secondary">
         {base
-          ? `Compared with v${base.version}`
-          : "First version — nothing to compare with"}
+          ? t(`Compared with v${base.version}`, `与 v${base.version} 比较`)
+          : t(
+              "First version — nothing to compare with",
+              "首个版本，没有可比较的内容",
+            )}
       </Text>
       {changes.length === 0 ? (
         <Text variant="small" tone="muted">
-          No step changed in this version.
+          {t("No step changed in this version.", "此版本没有步骤变更。")}
         </Text>
       ) : (
         <ul
           data-slot="skill-learning-sheet-changes-list"
           className="flex flex-col gap-3"
-          aria-label="Changes by step"
+          aria-label={t("Changes by step", "按步骤查看变更")}
         >
           {changes.map((change) => (
             <li
@@ -91,7 +96,7 @@ export function ChangesView({ version, versions, onSelect }: Props) {
                 </Text>
               ) : (
                 <Text variant="small" tone="danger">
-                  Removed
+                  {t("Removed", "已移除")}
                 </Text>
               )}
             </li>
@@ -99,7 +104,9 @@ export function ChangesView({ version, versions, onSelect }: Props) {
         </ul>
       )}
       <Button variant="ghost" size="small" onClick={() => setShowRaw(!showRaw)}>
-        {showRaw ? "Hide raw diff" : "Show raw Markdown diff"}
+        {showRaw
+          ? t("Hide raw diff", "隐藏原始差异")
+          : t("Show raw Markdown diff", "显示原始 Markdown 差异")}
       </Button>
       <PackageFiles before={base?.files} after={version.files} />
       {showRaw ? (
@@ -107,7 +114,8 @@ export function ChangesView({ version, versions, onSelect }: Props) {
           data-slot="skill-learning-sheet-changes-raw-diff"
           className="overflow-x-auto rounded-lg bg-action-hover p-3 text-caption text-action-foreground"
         >
-          {lineDiff(before, after) || "(no line-level differences)"}
+          {lineDiff(before, after) ||
+            t("(no line-level differences)", "（无行级差异）")}
         </pre>
       ) : null}
     </div>

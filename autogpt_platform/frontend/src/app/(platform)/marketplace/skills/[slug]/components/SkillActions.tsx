@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { Button } from "@/components/atoms/Button/Button";
@@ -40,6 +43,7 @@ export function SkillActions({
   onAdd,
   onAddToExpert,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div aria-live="polite" className="w-full sm:w-auto">
       {!isReady ? (
@@ -52,13 +56,14 @@ export function SkillActions({
           size="small"
           className="w-full sm:w-auto"
         >
-          Install skill
+          {t("Install skill", "安装技能")}
         </Button>
       ) : isAdded ? (
         <div className="flex flex-wrap items-center gap-3">
           <Badge variant="success" className={STATUS_CLASS}>
             <Icon icon={CheckmarkCircle02Icon} size={16} aria-hidden />
-            Installed
+
+            {t("Installed", "已安装")}
           </Badge>
           <Button
             as="NextLink"
@@ -66,7 +71,7 @@ export function SkillActions({
             variant="secondary"
             size="small"
           >
-            Your skills
+            {t("Your skills", "你的技能")}
           </Button>
           {/* Already in your own skills is no reason not to hand it to an
               expert too, so the dropdown outlives the main action. */}

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 
@@ -19,9 +22,14 @@ export function OAuthFlowWaitingModal({
   providerName,
   popupBlocked = false,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <Dialog
-      title={`Waiting on ${providerName} sign-in process...`}
+      title={t(
+        `Waiting on ${providerName} sign-in process...`,
+        `正在等待 ${providerName} 登录…`,
+      )}
       controlled={{
         isOpen: open,
         set: (isOpen) => {
@@ -33,17 +41,27 @@ export function OAuthFlowWaitingModal({
       <Dialog.Content>
         {popupBlocked ? (
           <Text variant="body-tight" tone="secondary">
-            Your browser blocked the sign-in window, so we opened it in a new
-            tab. Switch to that tab and complete sign-in there.
+            {t(
+              "Your browser blocked the sign-in window, so we opened it in a new tab. Switch to that tab and complete sign-in there.",
+              "浏览器阻止了登录窗口，因此我们已在新标签页中打开。请切换到该标签页完成登录。",
+            )}
             <br />
-            If you don&apos;t see the tab, allow popups for this site, close
-            this dialog, and try connecting again.
+            {t(
+              "If you don't see the tab, allow popups for this site, close this dialog, and try connecting again.",
+              "如果没有看到该标签页，请允许此网站弹出窗口，关闭此对话框后重新连接。",
+            )}
           </Text>
         ) : (
           <Text variant="body-tight" tone="secondary">
-            Complete the sign-in process in the sign-in window.
+            {t(
+              "Complete the sign-in process in the sign-in window.",
+              "请在登录窗口中完成登录。",
+            )}
             <br />
-            Closing this dialog will cancel the sign-in process.
+            {t(
+              "Closing this dialog will cancel the sign-in process.",
+              "关闭此对话框将取消登录。",
+            )}
           </Text>
         )}
       </Dialog.Content>

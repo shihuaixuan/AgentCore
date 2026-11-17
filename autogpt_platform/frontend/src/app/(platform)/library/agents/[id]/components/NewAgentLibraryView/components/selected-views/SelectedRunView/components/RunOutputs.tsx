@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type {
   OutputMetadata,
   OutputRenderer,
@@ -26,6 +27,7 @@ export function RunOutputs({
   shareToken,
   hiddenFromReplay = false,
 }: RunOutputsProps) {
+  const { t } = useTranslation();
   const items = useMemo(() => {
     const list: Array<{
       key: string;
@@ -89,7 +91,9 @@ export function RunOutputs({
 
   if (!items.length) {
     return (
-      <div className="text-foreground-secondary">No output from this run.</div>
+      <div className="text-foreground-secondary">
+        {t("No output from this run.", "此次运行没有输出。")}
+      </div>
     );
   }
 

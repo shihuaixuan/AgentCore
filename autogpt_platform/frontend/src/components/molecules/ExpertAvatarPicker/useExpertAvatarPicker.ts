@@ -13,6 +13,7 @@ import {
   randomAvatarRequest,
 } from "./helpers";
 import { useAvatarGeneration } from "./useAvatarGeneration";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Args {
   name: string;
@@ -27,6 +28,7 @@ export function useExpertAvatarPicker({
   avatarUrl,
   onPick,
 }: Args) {
+  const { t } = useTranslation();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -55,7 +57,14 @@ export function useExpertAvatarPicker({
     if (!file) return;
     const sizeError = getFileSizeError(file, SUBMISSION_MEDIA_MAX_SIZE_MB);
     if (!ACCEPTED_AVATAR_TYPES.split(",").includes(file.type) || sizeError) {
-      setUploadError(sizeError ?? "Choose a PNG, JPEG, or WEBP.");
+      setUploadError(
+        sizeError
+          ? t(sizeError, `图片不能超过 ${SUBMISSION_MEDIA_MAX_SIZE_MB} MB。`)
+          : t(
+              "Choose a PNG, JPEG, or WEBP.",
+              "请选择 PNG、JPEG 或 WEBP 图片。",
+            ),
+      );
       return;
     }
     setUploadError(null);
@@ -67,7 +76,12 @@ export function useExpertAvatarPicker({
         throw new Error("No image URL");
       setPreviewUrl(response.trim());
     } catch {
-      setUploadError("Could not upload that picture. Try again or regenerate.");
+      setUploadError(
+        t(
+          "Could not upload that picture. Try again or regenerate.",
+          "图片上传失败，请重试或重新生成。",
+        ),
+      );
     }
   }
 

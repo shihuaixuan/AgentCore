@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import {
@@ -32,6 +34,7 @@ export function ComposerOverflowMenu({
   disabled,
   className,
 }: Props) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   // Forget the open state while forced shut, or the panel pops back open
@@ -45,7 +48,7 @@ export function ComposerOverflowMenu({
           type="button"
           variant="tray"
           size="icon"
-          aria-label="More options"
+          aria-label={t("More options", "更多选项")}
           data-testid="composer-overflow-button"
           disabled={disabled}
           className={cn(className)}

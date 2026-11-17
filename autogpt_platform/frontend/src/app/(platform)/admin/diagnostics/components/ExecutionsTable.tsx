@@ -61,6 +61,7 @@ import {
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface RunningExecutionDetail {
   execution_id: string;
@@ -119,6 +120,7 @@ export function ExecutionsTable({
   onTabChange,
   diagnosticsData,
 }: ExecutionsTableProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<
     "all" | "orphaned" | "failed" | "long-running" | "stuck-queued" | "invalid"
   >(initialTab);
@@ -309,8 +311,8 @@ export function ExecutionsTable({
   React.useEffect(() => {
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to fetch executions",
+        title: t("Error", "错误"),
+        description: t("Failed to fetch executions", "获取执行记录失败"),
         variant: "destructive",
       });
     }
@@ -367,14 +369,14 @@ export function ExecutionsTable({
                 });
 
         toast({
-          title: "Success",
+          title: t("Success", "成功"),
           description:
             (result.data as MutationResponseData)?.message ||
             (stopMode === "cleanup"
-              ? "Orphaned execution cleaned up"
+              ? t("Orphaned execution cleaned up", "已清理孤立执行")
               : stopMode === "requeue"
-                ? "Execution requeued"
-                : "Execution stopped"),
+                ? t("Execution requeued", "已重新排队执行")
+                : t("Execution stopped", "已停止执行")),
         });
       } else {
         // Multiple executions
@@ -385,7 +387,7 @@ export function ExecutionsTable({
             const result = await requeueAllStuck();
 
             toast({
-              title: "Success",
+              title: t("Success", "成功"),
               description:
                 (result.data as MutationResponseData)?.message ||
                 `Requeued ${(result.data as MutationResponseData)?.requeued_count || 0} stuck executions`,
@@ -398,7 +400,7 @@ export function ExecutionsTable({
             });
 
             toast({
-              title: "Success",
+              title: t("Success", "成功"),
               description:
                 (result.data as MutationResponseData)?.message ||
                 `Requeued ${(result.data as MutationResponseData)?.requeued_count || 0} execution(s)`,
@@ -411,7 +413,7 @@ export function ExecutionsTable({
             const result = await cleanupAllOrphaned();
 
             toast({
-              title: "Success",
+              title: t("Success", "成功"),
               description:
                 (result.data as MutationResponseData)?.message ||
                 `Cleaned up ${(result.data as MutationResponseData)?.stopped_count || 0} orphaned executions`,
@@ -421,7 +423,7 @@ export function ExecutionsTable({
             const result = await cleanupAllStuckQueued();
 
             toast({
-              title: "Success",
+              title: t("Success", "成功"),
               description:
                 (result.data as MutationResponseData)?.message ||
                 `Cleaned up ${(result.data as MutationResponseData)?.stopped_count || 0} stuck queued executions`,
@@ -438,7 +440,7 @@ export function ExecutionsTable({
             });
 
             toast({
-              title: "Success",
+              title: t("Success", "成功"),
               description:
                 (result.data as MutationResponseData)?.message ||
                 `Cleaned up ${(result.data as MutationResponseData)?.stopped_count || 0} execution(s)`,
@@ -451,7 +453,7 @@ export function ExecutionsTable({
             const result = await stopAllLongRunning();
 
             toast({
-              title: "Success",
+              title: t("Success", "成功"),
               description:
                 (result.data as MutationResponseData)?.message ||
                 `Stopped ${(result.data as MutationResponseData)?.stopped_count || 0} long-running executions`,
@@ -494,7 +496,7 @@ export function ExecutionsTable({
               : 0;
 
             toast({
-              title: "Success",
+              title: t("Success", "成功"),
               description:
                 stoppedCount > 0 && cleanedCount > 0
                   ? `Stopped ${stoppedCount} active and cleaned ${cleanedCount} orphaned executions`
@@ -515,11 +517,11 @@ export function ExecutionsTable({
     } catch (err: unknown) {
       console.error("Error stopping/cleaning executions:", err);
       toast({
-        title: "Error",
+        title: t("Error", "错误"),
         description:
           err instanceof Error
             ? err.message
-            : "Failed to stop/cleanup executions",
+            : t("Failed to stop/cleanup executions", "停止或清理执行失败"),
         variant: "destructive",
       });
     }
@@ -533,7 +535,7 @@ export function ExecutionsTable({
         <TabsLine value={activeTab} onValueChange={handleTabChange}>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Executions</CardTitle>
+              <CardTitle>{t("Executions", "执行记录")}</CardTitle>
               <div className="flex gap-2">
                 {/* Show Cleanup and Requeue buttons for stuck-queued tab */}
                 {activeTab === "stuck-queued" && total > 0 && (
@@ -547,7 +549,7 @@ export function ExecutionsTable({
                       className="border-orange text-warning-foreground hover:bg-orange/10"
                     >
                       <Icon icon={StopCircleIcon} className="mr-2 h-4 w-4" />
-                      Cleanup All ({total})
+                      {t("Cleanup All", "全部清理")} ({total})
                     </Button>
                     <Button
                       variant="outline"
@@ -559,7 +561,7 @@ export function ExecutionsTable({
                       className="border-info hover:bg-info-surface"
                     >
                       <Icon icon={Refresh01Icon} className="mr-2 h-4 w-4" />
-                      Requeue All ({total})
+                      {t("Requeue All", "全部重新排队")} ({total})
                     </Button>
                   </>
                 )}
@@ -573,7 +575,7 @@ export function ExecutionsTable({
                       disabled={isStopping}
                     >
                       <Icon icon={StopCircleIcon} className="mr-2 h-4 w-4" />
-                      Stop Selected ({selectedIds.size})
+                      {t("Stop Selected", "停止所选")} ({selectedIds.size})
                       {hasOrphanedSelected && (
                         <span className="ml-1 text-caption leading-4 font-medium text-action-foreground/80">
                           ({selectedOrphanedIds.length} orphaned)
@@ -590,7 +592,7 @@ export function ExecutionsTable({
                     disabled={isStopping}
                   >
                     <Icon icon={StopCircleIcon} className="mr-2 h-4 w-4" />
-                    Stop All Long-Running ({total})
+                    {t("Stop All Long-Running", "停止全部长时间运行")} ({total})
                   </Button>
                 )}
                 {activeTab === "failed" && selectedIds.size === 0 && (
@@ -600,12 +602,12 @@ export function ExecutionsTable({
                     tone="muted"
                     className="mx-3"
                   >
-                    View-only (select to delete)
+                    {t("View-only (select to delete)", "仅查看（选择后删除）")}
                   </Text>
                 )}
                 {activeTab === "invalid" && (
                   <div className="rounded-md bg-pink/10 px-3 py-2 text-body leading-5 text-pink-foreground">
-                    ⚠️ Read-only: Invalid states require manual investigation
+                    ⚠️ {t("Read-only: Invalid states require manual investigation", "只读：无效状态需要人工调查")}
                   </div>
                 )}
                 <Button
@@ -674,7 +676,7 @@ export function ExecutionsTable({
                 </div>
               ) : executions.length === 0 ? (
                 <div className="py-8 text-center text-foreground-tertiary">
-                  No running executions
+                  {t("No running executions", "没有正在运行的执行")}
                 </div>
               ) : (
                 <>
@@ -691,19 +693,19 @@ export function ExecutionsTable({
                             disabled={activeTab === "invalid"}
                           />
                         </TableHead>
-                        <TableHead>Execution ID</TableHead>
-                        <TableHead>Agent Name</TableHead>
-                        <TableHead>Version</TableHead>
-                        <TableHead>User</TableHead>
+                        <TableHead>{t("Execution ID", "执行 ID")}</TableHead>
+                        <TableHead>{t("Agent Name", "工作流名称")}</TableHead>
+                        <TableHead>{t("Version", "版本")}</TableHead>
+                        <TableHead>{t("User", "用户")}</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Age</TableHead>
                         <TableHead>
-                          {activeTab === "failed" ? "Failed At" : "Started At"}
+                          {activeTab === "failed" ? t("Failed At", "失败时间") : t("Started At", "开始时间")}
                         </TableHead>
                         {activeTab === "failed" && (
-                          <TableHead>Error Message</TableHead>
+                          <TableHead>{t("Error Message", "错误信息")}</TableHead>
                         )}
-                        <TableHead className="w-20">Actions</TableHead>
+                        <TableHead className="w-20">{t("Actions", "操作")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -743,9 +745,9 @@ export function ExecutionsTable({
                                     execution.execution_id,
                                   );
                                   toast({
-                                    title: "Copied",
+                                    title: t("Copied", "已复制"),
                                     description:
-                                      "Execution ID copied to clipboard",
+                                      t("Execution ID copied to clipboard", "执行 ID 已复制到剪贴板"),
                                   });
                                 }}
                                 title="Click to copy full execution ID"
@@ -779,8 +781,8 @@ export function ExecutionsTable({
                                     execution.user_id,
                                   );
                                   toast({
-                                    title: "Copied",
-                                    description: "User ID copied to clipboard",
+                                    title: t("Copied", "已复制"),
+                                    description: t("User ID copied to clipboard", "用户 ID 已复制到剪贴板"),
                                   });
                                 }}
                                 title="Click to copy full user ID"
@@ -812,7 +814,7 @@ export function ExecutionsTable({
                             <TableCell>
                               {(() => {
                                 if (!execution.started_at)
-                                  return "Never started";
+                                  return t("Never started", "从未开始");
                                 const ageMs =
                                   now.getTime() -
                                   new Date(execution.started_at).getTime();
@@ -862,7 +864,7 @@ export function ExecutionsTable({
                                   title={execution.error_message || ""}
                                 >
                                   {execution.error_message ||
-                                    "No error message"}
+                                    t("No error message", "没有错误信息")}
                                 </Text>
                               </TableCell>
                             )}
@@ -883,7 +885,7 @@ export function ExecutionsTable({
                                       disabled={isStopping}
                                       // oxlint-disable-next-line design-system/no-restyle -- Button has no orange ghost variant (deferred)
                                       className="text-orange-foreground hover:bg-orange/10"
-                                      title="Cleanup (mark as FAILED)"
+                                      title={t("Cleanup (mark as FAILED)", "清理（标记为失败）")}
                                     >
                                       <Icon
                                         icon={StopCircleIcon}
@@ -904,7 +906,7 @@ export function ExecutionsTable({
                                       tone="info-strong"
                                       // oxlint-disable-next-line design-system/no-restyle -- Button has no info ghost variant; ghost would turn its hover grey (deferred)
                                       className="hover:bg-info-surface"
-                                      title="Requeue (send to RabbitMQ)"
+                                      title={t("Requeue (send to RabbitMQ)", "重新排队（发送到 RabbitMQ）")}
                                     >
                                       <Icon
                                         icon={Refresh01Icon}
@@ -989,10 +991,10 @@ export function ExecutionsTable({
           <DialogHeader>
             <DialogTitle>
               {stopMode === "cleanup"
-                ? "Confirm Cleanup Orphaned Executions"
+                ? t("Confirm Cleanup Orphaned Executions", "确认清理孤立执行")
                 : stopMode === "requeue"
-                  ? "Confirm Requeue Stuck Executions"
-                  : "Confirm Stop Executions"}
+                  ? t("Confirm Requeue Stuck Executions", "确认重新排队卡住的执行")
+                  : t("Confirm Stop Executions", "确认停止执行")}
             </DialogTitle>
             <DialogDescription>
               {stopMode === "requeue" ? (
@@ -1119,10 +1121,10 @@ export function ExecutionsTable({
               }
             >
               {stopMode === "cleanup"
-                ? "Cleanup Orphaned"
+                ? t("Cleanup Orphaned", "清理孤立执行")
                 : stopMode === "requeue"
-                  ? "Requeue Executions"
-                  : "Stop Executions"}
+                  ? t("Requeue Executions", "重新排队执行")
+                  : t("Stop Executions", "停止执行")}
             </Button>
           </DialogFooter>
         </DialogContent>

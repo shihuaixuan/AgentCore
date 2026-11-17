@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { DecisionRequestAction } from "@/app/api/__generated__/models/decisionRequestAction";
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import type { SkillVersionSummary } from "@/app/api/__generated__/models/skillVersionSummary";
@@ -24,6 +25,7 @@ export function OpenDecisionsCard({
   isDeciding,
   onDecide,
 }: Props) {
+  const { t } = useTranslation();
   if (decisions.length === 0) return null;
   return (
     <div
@@ -31,7 +33,7 @@ export function OpenDecisionsCard({
       data-testid="open-decisions-card"
     >
       <Text variant="body-medium" as="span">
-        Needs your decision
+        {t("Needs your decision", "需要你决策")}
       </Text>
       <Text variant="small" as="span" tone="muted">
         Proposed changes to skills you control. Unrelated learning continues.

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV1ListGraphExecutionsQueryKey,
   useDeleteV1DeleteGraphExecution,
@@ -34,6 +35,7 @@ interface Props {
 }
 
 export function TaskActionsDropdown({ agent, run, onDeleted }: Props) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -63,7 +65,7 @@ export function TaskActionsDropdown({ agent, run, onDeleted }: Props) {
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     }
@@ -98,7 +100,7 @@ export function TaskActionsDropdown({ agent, run, onDeleted }: Props) {
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     }
@@ -111,7 +113,7 @@ export function TaskActionsDropdown({ agent, run, onDeleted }: Props) {
           <button
             className="ml-auto shrink-0 rounded p-1 text-foreground-subtle hover:bg-surface-hover"
             onClick={(e) => e.stopPropagation()}
-            aria-label="More actions"
+            aria-label={t("More actions", "更多操作")}
           >
             <Icon icon={MoreVerticalIcon} className="h-5 w-5" />
           </button>
@@ -123,7 +125,7 @@ export function TaskActionsDropdown({ agent, run, onDeleted }: Props) {
               setIsCreateTemplateModalOpen(true);
             }}
           >
-            Save as template
+            {t("Save as template", "另存为模板")}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -132,7 +134,7 @@ export function TaskActionsDropdown({ agent, run, onDeleted }: Props) {
               setShowDeleteDialog(true);
             }}
           >
-            Delete task
+            {t("Delete task", "删除任务")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -143,13 +145,15 @@ export function TaskActionsDropdown({ agent, run, onDeleted }: Props) {
           set: setShowDeleteDialog,
         }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete task"
+        title={t("Delete task", "删除任务")}
       >
         <Dialog.Content>
           <div>
             <Text variant="large">
-              Are you sure you want to delete this task? This action cannot be
-              undone.
+              {t(
+                "Are you sure you want to delete this task? This action cannot be undone.",
+                "确定要删除此任务吗？此操作无法撤销。",
+              )}
             </Text>
             <Dialog.Footer>
               <Button
@@ -157,14 +161,14 @@ export function TaskActionsDropdown({ agent, run, onDeleted }: Props) {
                 disabled={isDeletingRun}
                 onClick={() => setShowDeleteDialog(false)}
               >
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDeleteRun}
                 loading={isDeletingRun}
               >
-                Delete Task
+                {t("Delete Task", "删除任务")}
               </Button>
             </Dialog.Footer>
           </div>

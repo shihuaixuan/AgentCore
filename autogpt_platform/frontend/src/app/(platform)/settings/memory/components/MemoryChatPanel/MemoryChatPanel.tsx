@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ChatInput } from "@/app/(platform)/copilot/components/ChatInput/ChatInput";
 import { ChatMessagesContainer } from "@/app/(platform)/copilot/components/ChatMessagesContainer/ChatMessagesContainer";
 import { CopilotChatActionsProvider } from "@/app/(platform)/copilot/components/CopilotChatActionsProvider/CopilotChatActionsProvider";
@@ -42,6 +43,7 @@ export function MemoryChatPanel({
   onRetry,
   onClose,
 }: Props) {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   const isStreaming = status === "streaming" || status === "submitted";
@@ -51,7 +53,7 @@ export function MemoryChatPanel({
       <CopilotChatActionsProvider onSend={onSend}>
         <div
           role="complementary"
-          aria-label="Memory chat panel"
+          aria-label={t("Memory chat panel", "记忆聊天面板")}
           className="pointer-events-auto flex h-[70vh] max-h-[calc(100vh-6rem)] w-[26rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-border-base bg-surface shadow-2xl sm:h-[75vh]"
         >
           <div className="flex items-center justify-between border-b border-separator px-4 py-3">
@@ -65,7 +67,7 @@ export function MemoryChatPanel({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              aria-label="Close memory chat"
+              aria-label={t("Close memory chat", "关闭记忆聊天")}
             >
               <Icon icon={Cancel01Icon} size={16} />
             </Button>
@@ -75,18 +77,21 @@ export function MemoryChatPanel({
             {startError ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 py-6 text-center text-body text-foreground-secondary">
                 <p className="font-medium text-foreground-emphasis">
-                  Could not start the memory chat
+                  {t("Could not start the memory chat", "无法开始记忆聊天")}
                 </p>
                 <p className="text-foreground-tertiary">
-                  Something went wrong. Retry to try again.
+                  {t(
+                    "Something went wrong. Retry to try again.",
+                    "出现问题，请重试。",
+                  )}
                 </p>
                 <Button variant="secondary" size="small" onClick={onRetry}>
-                  Retry
+                  {t("Retry", "重试")}
                 </Button>
               </div>
             ) : isStarting || !sessionId ? (
               <div className="flex flex-1 items-center justify-center px-4 py-6 text-body text-foreground-tertiary">
-                Starting memory chat…
+                {t("Starting memory chat…", "正在启动记忆聊天…")}
               </div>
             ) : (
               <>
@@ -110,7 +115,7 @@ export function MemoryChatPanel({
                     isTurnStarting={status === "submitted"}
                     onStop={onStop}
                     onEnqueue={onSend}
-                    placeholder="Ask or update…"
+                    placeholder={t("Ask or update…", "提问或更新…")}
                     hasSession={true}
                   />
                 </div>

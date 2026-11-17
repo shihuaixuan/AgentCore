@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useState } from "react";
 import {
@@ -22,6 +23,8 @@ import { isSelectable, tierSummary } from "./helpers";
 import { useAIConnectionsSection } from "./useAIConnectionsSection";
 
 export function AIConnectionsSection() {
+  const { t } = useTranslation();
+
   const {
     connectChatGPT,
     isConnectingChatGPT,
@@ -63,12 +66,18 @@ export function AIConnectionsSection() {
         transform="uppercase"
         tracking="eyebrow"
       >
-        AI subscriptions
+        {t("AI subscriptions", "AI 订阅")}
       </Text>
       <Text variant="body" tone="body" className="mt-2 max-w-[600px]">
         {hasChoice
-          ? "These power Otto and your experts. Pick the one new chats should start on — you can still change it per conversation, and nothing switches on its own."
-          : "These power Otto and your experts. Link a subscription and you can choose which one new chats start on."}
+          ? t(
+              "These power Otto and your experts. Pick the one new chats should start on — you can still change it per conversation, and nothing switches on its own.",
+              "这些订阅为 Otto 和专家提供模型能力。请选择新聊天默认使用的连接；您仍可在每段对话中更改，系统不会自动切换。",
+            )
+          : t(
+              "These power Otto and your experts. Link a subscription and you can choose which one new chats start on.",
+              "这些订阅为 Otto 和专家提供模型能力。关联订阅后，即可选择新聊天默认使用的连接。",
+            )}
       </Text>
 
       {isLoading ? (
@@ -79,7 +88,11 @@ export function AIConnectionsSection() {
       ) : (
         <div
           role={hasChoice ? "radiogroup" : undefined}
-          aria-label={hasChoice ? "Connection new chats start on" : undefined}
+          aria-label={
+            hasChoice
+              ? t("Connection new chats start on", "新聊天使用的连接")
+              : undefined
+          }
           className="mt-4 flex flex-col gap-3"
         >
           {connections.map((connection) => (
@@ -106,7 +119,7 @@ export function AIConnectionsSection() {
       {!isLoading && (
         <div
           role="group"
-          aria-label="Available AI subscriptions"
+          aria-label={t("Available AI subscriptions", "可用 AI 订阅")}
           className="mt-4 grid w-full grid-cols-2 gap-3 sm:grid-cols-4"
         >
           {!isChatGPTLinked && (
@@ -157,6 +170,8 @@ function ConnectionRow({
   onSelect,
   onManage,
 }: RowProps) {
+  const { t } = useTranslation();
+
   const body = (
     <>
       {selectable && (
@@ -196,7 +211,7 @@ function ConnectionRow({
             isSelectable(connection) && (
               <span className="inline-flex items-center gap-1 rounded-lg bg-success-surface px-2 py-0.5 text-body-sm leading-5 font-medium text-success-foreground">
                 <Icon icon={CheckmarkCircle02Icon} size={13} />
-                Connected
+                {t("Connected", "已连接")}
               </span>
             )}
           {account && (
@@ -207,7 +222,7 @@ function ConnectionRow({
           {isSelected && (
             <span className="inline-flex items-center gap-1 rounded-lg bg-accent-surface px-2 py-0.5 text-body-sm leading-5 font-medium text-accent-strong">
               <Icon icon={SparklesIcon} size={13} />
-              Used for new chats
+              {t("Used for new chats", "用于新聊天")}
             </span>
           )}
         </span>
@@ -235,7 +250,7 @@ function ConnectionRow({
       className="ml-auto flex-none self-center"
       onClick={onManage}
     >
-      Manage
+      {t("Manage", "管理")}
     </Button>
   ) : null;
 

@@ -1,6 +1,8 @@
 "use client";
 
 import { FormProvider } from "react-hook-form";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { useAuthTranslation } from "@/components/auth/useAuthTranslation";
 import { FormField } from "@/components/molecules/Form/Form";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
@@ -24,6 +26,8 @@ import { useSignupPage } from "./useSignupPage";
 export const dynamic = "force-dynamic";
 
 export default function SignupPage() {
+  const { t } = useTranslation();
+  const { translateAuthMessage } = useAuthTranslation();
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("next");
   const loginHref = nextUrl
@@ -76,12 +80,12 @@ export default function SignupPage() {
     <AuthSplitLayout marketing={<SignupMarketingPanel />}>
       <div className="mb-8">
         <Text variant="h3" as="h1" tone="primary">
-          Create your account
+          {t("Create your account", "创建账户")}
         </Text>
         <Text variant="body" tone="muted" className="mt-1">
-          Already a member?{" "}
+          {t("Already a member?", "已有账户？")}{" "}
           <Link href={loginHref} variant="secondary">
-            Log in
+            {t("Log in", "登录")}
           </Link>
         </Text>
       </div>
@@ -94,11 +98,14 @@ export default function SignupPage() {
             render={({ field }) => (
               <Input
                 id={field.name}
-                label="Email"
+                label={t("Email", "邮箱")}
                 placeholder="name@company.com"
                 type="email"
                 autoComplete="email"
-                error={form.formState.errors.email?.message}
+                error={
+                  translateAuthMessage(form.formState.errors.email?.message) ??
+                  undefined
+                }
                 {...field}
               />
             )}
@@ -109,11 +116,15 @@ export default function SignupPage() {
             render={({ field }) => (
               <Input
                 id={field.name}
-                label="Password"
-                placeholder="Create a password"
+                label={t("Password", "密码")}
+                placeholder={t("Create a password", "设置密码")}
                 type="password"
                 autoComplete="new-password"
-                error={form.formState.errors.password?.message}
+                error={
+                  translateAuthMessage(
+                    form.formState.errors.password?.message,
+                  ) ?? undefined
+                }
                 {...field}
               />
             )}
@@ -124,11 +135,11 @@ export default function SignupPage() {
             render={({ field }) => (
               <Input
                 id={field.name}
-                label="Confirm Password"
-                placeholder="Confirm your password"
+                label={t("Confirm Password", "确认密码")}
+                placeholder={t("Confirm your password", "请再次输入密码")}
                 type="password"
                 autoComplete="new-password"
-                error={confirmPasswordError}
+                error={translateAuthMessage(confirmPasswordError) ?? undefined}
                 {...field}
               />
             )}
@@ -140,7 +151,7 @@ export default function SignupPage() {
             type="submit"
             className="mt-6 w-full"
           >
-            {isLoading ? "Signing up..." : "Sign up"}
+            {isLoading ? t("Signing up...", "正在注册…") : t("Sign up", "注册")}
           </Button>
         </form>
 

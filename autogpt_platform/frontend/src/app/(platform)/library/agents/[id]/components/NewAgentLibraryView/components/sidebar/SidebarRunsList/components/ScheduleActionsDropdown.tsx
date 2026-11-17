@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV1ListGraphExecutionsQueryKey,
   usePostV1ExecuteGraphAgent,
@@ -38,6 +39,7 @@ export function ScheduleActionsDropdown({
   onDeleted,
   onRunCreated,
 }: Props) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -52,7 +54,7 @@ export function ScheduleActionsDropdown({
     try {
       await deleteSchedule({ scheduleId: schedule.id });
 
-      toast({ title: "Schedule deleted" });
+      toast({ title: t("Schedule deleted", "计划已删除") });
       setShowDeleteDialog(false);
 
       onDeleted?.();
@@ -64,7 +66,7 @@ export function ScheduleActionsDropdown({
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     }
@@ -101,7 +103,7 @@ export function ScheduleActionsDropdown({
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     }
@@ -114,14 +116,14 @@ export function ScheduleActionsDropdown({
           <button
             className="ml-auto shrink-0 rounded p-1 text-foreground-subtle hover:bg-surface-hover"
             onClick={(e) => e.stopPropagation()}
-            aria-label="More actions"
+            aria-label={t("More actions", "更多操作")}
           >
             <Icon icon={MoreVerticalIcon} className="h-5 w-5" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleRunNow} disabled={isRunning}>
-            {isRunning ? "Running..." : "Run now"}
+            {isRunning ? "Running..." : t("Run now", "立即运行")}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -130,7 +132,7 @@ export function ScheduleActionsDropdown({
               setShowDeleteDialog(true);
             }}
           >
-            Delete schedule
+            {t("Delete schedule", "删除计划")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -141,13 +143,15 @@ export function ScheduleActionsDropdown({
           set: setShowDeleteDialog,
         }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete schedule"
+        title={t("Delete schedule", "删除计划")}
       >
         <Dialog.Content>
           <div>
             <Text variant="large">
-              Are you sure you want to delete this schedule? This action cannot
-              be undone.
+              {t(
+                "Are you sure you want to delete this schedule? This action cannot be undone.",
+                "确定要删除此计划吗？此操作无法撤销。",
+              )}
             </Text>
             <Dialog.Footer>
               <Button
@@ -155,14 +159,14 @@ export function ScheduleActionsDropdown({
                 disabled={isDeleting}
                 onClick={() => setShowDeleteDialog(false)}
               >
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDelete}
                 loading={isDeleting}
               >
-                Delete Schedule
+                {t("Delete Schedule", "删除计划")}
               </Button>
             </Dialog.Footer>
           </div>

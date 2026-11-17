@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { User } from "@/lib/auth/types";
 import { motion, useReducedMotion } from "framer-motion";
 import { useState } from "react";
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export function AccountCard({ user, index = 0 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const { emailForm, onSubmitEmail, isUpdatingEmail, currentEmail } =
@@ -62,7 +64,7 @@ export function AccountCard({ user, index = 0 }: Props) {
       <div className="flex flex-col divide-y divide-border-base rounded-large border border-border-base bg-surface shadow-message-table">
         <div className="flex items-center justify-between gap-4 px-4 py-4">
           <Text variant="body-medium" as="span">
-            Email
+            {t("Email", "电子邮箱")}
           </Text>
 
           <div className="flex min-w-0 items-center gap-3">
@@ -71,7 +73,7 @@ export function AccountCard({ user, index = 0 }: Props) {
             </Text>
 
             <Dialog
-              title="Update email"
+              title={t("Update email", "更新邮箱")}
               styling={{ maxWidth: "420px" }}
               controlled={{
                 isOpen: emailDialogOpen,
@@ -87,7 +89,7 @@ export function AccountCard({ user, index = 0 }: Props) {
                   size="icon-xs"
                   shape="pill"
                   withTooltip={false}
-                  aria-label="Edit email"
+                  aria-label={t("Edit email", "修改邮箱")}
                 >
                   <Icon icon={PencilIcon} size={14} />
                 </Button>
@@ -96,8 +98,10 @@ export function AccountCard({ user, index = 0 }: Props) {
                 <Form form={emailForm} onSubmit={handleEmailSubmit}>
                   <div className="flex flex-col gap-4">
                     <Text variant="small" as="span" tone="muted">
-                      We&apos;ll send a confirmation link to verify your new
-                      address.
+                      {t(
+                        "We'll send a confirmation link to verify your new address.",
+                        "我们将发送确认链接，以验证你的新邮箱地址。",
+                      )}
                     </Text>
                     <FormField
                       control={emailForm.control}
@@ -108,7 +112,7 @@ export function AccountCard({ user, index = 0 }: Props) {
                           <FormControl>
                             <Input
                               id={field.name}
-                              label="Email"
+                              label={t("Email", "电子邮箱")}
                               type="email"
                               autoComplete="email"
                               size="medium"
@@ -129,7 +133,7 @@ export function AccountCard({ user, index = 0 }: Props) {
                       size="small"
                       onClick={() => setEmailDialogOpen(false)}
                     >
-                      Cancel
+                      {t("Cancel", "取消")}
                     </Button>
                     <Button
                       type="submit"
@@ -137,7 +141,9 @@ export function AccountCard({ user, index = 0 }: Props) {
                       disabled={disableEmailSubmit}
                       loading={isUpdatingEmail}
                     >
-                      {isUpdatingEmail ? "Saving" : "Update email"}
+                      {isUpdatingEmail
+                        ? t("Saving", "正在保存")
+                        : t("Update email", "更新邮箱")}
                     </Button>
                   </Dialog.Footer>
                 </Form>
@@ -148,7 +154,7 @@ export function AccountCard({ user, index = 0 }: Props) {
 
         <div className="flex items-center justify-between gap-4 px-4 py-4">
           <Text variant="body-medium" as="span">
-            Password
+            {t("Password", "密码")}
           </Text>
 
           <Button
@@ -157,7 +163,7 @@ export function AccountCard({ user, index = 0 }: Props) {
             size="small"
             variant="secondary"
           >
-            Reset password
+            {t("Reset password", "重置密码")}
           </Button>
         </div>
       </div>

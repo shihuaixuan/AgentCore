@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { MicOff01Icon } from "@hugeicons/core-free-icons";
@@ -12,10 +14,11 @@ interface Props {
 
 // The person's side of the chat, right-aligned like a sent message.
 export function YourMessage({ text }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex w-full flex-col items-end gap-1">
       <Text variant="eyebrow" tone="muted" as="span">
-        You
+        {t("You", "你")}
       </Text>
       <div className="max-w-[82%] rounded-2xl rounded-br-md border border-separator bg-surface px-3.5 py-2 text-left shadow-sm">
         {text ? (
@@ -34,7 +37,7 @@ export function YourMessage({ text }: Props) {
             className="flex items-center gap-2"
           >
             <Icon icon={MicOff01Icon} size={16} />
-            {NO_WORDS_HEARD}
+            {t(NO_WORDS_HEARD, "未识别到语音内容")}
           </Text>
         )}
       </div>

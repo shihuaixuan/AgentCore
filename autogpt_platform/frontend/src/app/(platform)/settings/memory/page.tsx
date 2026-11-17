@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { useEffect } from "react";
@@ -30,6 +31,7 @@ export default function SettingsMemoryPage() {
 }
 
 function MemorySettings() {
+  const { t } = useTranslation();
   const {
     scopeExpertID,
     selectScope,
@@ -54,7 +56,7 @@ function MemorySettings() {
     <div className="flex flex-col gap-4">
       <header className="flex min-w-0 flex-col pb-2 pl-4">
         <Text variant="h4" as="h1">
-          Memory
+          {t("Memory", "记忆")}
         </Text>
         <Text variant="body" tone="body" className="mt-4 max-w-[600px]">
           {"What AutoGPT remembers about you — and who remembers it."}

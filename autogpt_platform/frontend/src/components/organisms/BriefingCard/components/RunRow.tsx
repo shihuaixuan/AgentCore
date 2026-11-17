@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import Link from "next/link";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import type { BriefingRunItem } from "@/app/api/__generated__/models/briefingRunItem";
@@ -15,6 +18,7 @@ interface Props {
 // One row per run: the summary doubles as the row's subtitle, so the agent
 // name and its finding read as a single line.
 export function RunRow({ item, isHidden = false }: Props) {
+  const { t } = useTranslation();
   const isFailed = item.status !== "COMPLETED";
   const { attribution, text } = getSubtitleParts(item);
   const link = getSafeLink(item.link);
@@ -41,7 +45,7 @@ export function RunRow({ item, isHidden = false }: Props) {
               data-slot="briefing-card-run-row-status"
               className="shrink-0 rounded-full bg-error-surface px-2 py-0.5 text-caption-sm leading-inherit font-medium text-error-foreground"
             >
-              Failed
+              {t("Failed", "失败")}
             </span>
           ) : null}
         </div>

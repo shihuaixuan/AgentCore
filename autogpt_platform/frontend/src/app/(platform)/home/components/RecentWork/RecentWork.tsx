@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { WorkHistoryIcon } from "@hugeicons/core-free-icons";
 import type { HomeDashboardResponse } from "@/app/api/__generated__/models/homeDashboardResponse";
 import type { HomeRecentWorkGroup } from "@/app/api/__generated__/models/homeRecentWorkGroup";
@@ -19,6 +20,7 @@ interface Props {
 /** One card for what the agents did this week: the team (each expert and
  *  Otto) first, then the workflows that ran on their own. */
 export function RecentWork({ dashboard, className }: Props) {
+  const { t } = useTranslation();
   const { briefing } = dashboard;
   const groups = dashboard.recent_work?.groups ?? [];
   const { team, workflows } = splitGroupsBySection(groups);
@@ -34,7 +36,7 @@ export function RecentWork({ dashboard, className }: Props) {
     <HomeTile
       className={className}
       icon={WorkHistoryIcon}
-      title="Recent work"
+      title={t("Recent work", "最近工作")}
       meta={
         <>
           <Text
@@ -43,7 +45,7 @@ export function RecentWork({ dashboard, className }: Props) {
             tone="muted"
             className="hidden sm:inline"
           >
-            This week
+            {t("This week", "本周")}
           </Text>
           <span
             aria-hidden="true"
@@ -64,8 +66,11 @@ export function RecentWork({ dashboard, className }: Props) {
     >
       {isEmpty ? (
         <HomeTileEmpty
-          title="Nothing to show yet"
-          description="Runs, files, integrations and schedules from your experts and workflows will appear here."
+          title={t("Nothing to show yet", "暂无内容")}
+          description={t(
+            "Runs, files, integrations and schedules from your experts and workflows will appear here.",
+            "专家和工作流产生的运行记录、文件、集成和计划会显示在这里。",
+          )}
         />
       ) : (
         <div className="divide-y divide-border-base">

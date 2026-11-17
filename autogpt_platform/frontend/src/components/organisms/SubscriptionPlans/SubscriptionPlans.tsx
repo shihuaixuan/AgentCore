@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { ReactNode } from "react";
 import { PlanDetailsDialog } from "./components/PlanDetailsDialog/PlanDetailsDialog";
@@ -16,6 +17,7 @@ export function SubscriptionPlans({
   trialStatus?: ReactNode;
   header?: ReactNode;
 }) {
+  const { t } = useTranslation();
   const { dialog, setDialog, setDialogOpen } = useSubscriptionPlans();
   return (
     <div
@@ -24,7 +26,7 @@ export function SubscriptionPlans({
     >
       <section
         data-slot="subscription-plans-section"
-        aria-label="Choose your AutoGPT plan"
+        aria-label={t("Choose your AutoGPT plan", "选择你的 AutoGPT 套餐")}
       >
         <PlanHeader {...props} header={header} />
         <div

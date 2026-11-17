@@ -1,11 +1,13 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { WidgetProps } from "@rjsf/utils";
 import { FileInput } from "@/components/atoms/FileInput/FileInput";
 import { useWorkspaceUpload } from "./useWorkspaceUpload";
 
 export function FileWidget(props: WidgetProps) {
+  const { t } = useTranslation();
   const { onChange, disabled, readonly, value, schema, formContext } = props;
   const { size } = formContext || {};
-  const displayName = schema?.title || "File";
+  const displayName = schema?.title || t("File", "文件");
   const { handleUploadFile, handleDeleteFile } = useWorkspaceUpload();
 
   function handleChange(fileURI: string) {

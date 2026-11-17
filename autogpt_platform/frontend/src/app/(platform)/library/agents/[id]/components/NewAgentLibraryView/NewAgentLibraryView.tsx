@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { PublishAgentModal } from "@/components/contextual/PublishAgentModal/PublishAgentModal";
 import { Breadcrumbs } from "@/components/molecules/Breadcrumbs/Breadcrumbs";
@@ -36,6 +37,7 @@ import { PlusSignIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export function NewAgentLibraryView() {
+  const { t } = useTranslation();
   const {
     agentId,
     agent,
@@ -83,9 +85,9 @@ export function NewAgentLibraryView() {
 
   useEffect(() => {
     if (agent) {
-      document.title = `${agent.name} - Library - AutoGPT Platform`;
+      document.title = `${agent.name} - ${t("Library", "工作流库")} - AutoGPT Platform`;
     }
-  }, [agent]);
+  }, [agent, t]);
 
   function renderMarketplaceUpdateBanner() {
     return (
@@ -168,8 +170,10 @@ export function NewAgentLibraryView() {
           >
             <ErrorCard
               responseError={{
-                message:
+                message: t(
                   "Could not load this workflow's triggers. Check your connection and try again.",
+                  "无法加载此工作流的触发器。请检查连接后重试。",
+                ),
               }}
               context="triggers"
               onRetry={retryTriggerLists}
@@ -263,7 +267,8 @@ export function NewAgentLibraryView() {
                     activeTab,
                   })}
                 >
-                  <Icon icon={PlusSignIcon} size={16} /> New workflow task
+                  <Icon icon={PlusSignIcon} size={16} />{" "}
+                  {t("New workflow task", "新建工作流任务")}
                 </Button>
               }
               agent={agent}

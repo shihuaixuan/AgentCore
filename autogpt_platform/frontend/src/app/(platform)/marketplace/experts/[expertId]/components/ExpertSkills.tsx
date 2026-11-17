@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { ExpertBundledSkill } from "@/app/api/__generated__/models/expertBundledSkill";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
@@ -16,12 +19,13 @@ interface Props {
  *  skill there are one object — and the description a pill had no room for
  *  gets its line. */
 export function ExpertSkills({ skills, category }: Props) {
+  const { t } = useTranslation();
   const { accent, icon } = getCategoryAccent(category);
 
   if (skills.length === 0) return null;
 
   return (
-    <ExpertSection title="Skills">
+    <ExpertSection title={t("Skills", "技能")}>
       <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {skills.map((skill) => (
           <ShelfTile

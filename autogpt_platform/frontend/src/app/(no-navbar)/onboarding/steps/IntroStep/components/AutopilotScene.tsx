@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { motion } from "framer-motion";
@@ -17,6 +20,7 @@ function reveal(i: number) {
 }
 
 export function AutopilotScene() {
+  const { t } = useTranslation();
   return (
     <div className="flex h-full flex-col items-center justify-start gap-4">
       <AutopilotAvatar size={120} transparent />
@@ -44,7 +48,7 @@ export function AutopilotScene() {
           transition={reveal(POINTS.length)}
         >
           <p className="font-sans text-body-lg font-normal text-foreground-tertiary md:text-lead">
-            and more…
+            {t("and more…", "以及更多…")}
           </p>
         </motion.div>
       </div>

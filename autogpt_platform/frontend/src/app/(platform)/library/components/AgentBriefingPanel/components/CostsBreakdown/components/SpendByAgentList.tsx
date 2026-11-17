@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { UserAgentCostRollup } from "@/app/api/__generated__/models/userAgentCostRollup";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -17,6 +18,7 @@ interface Props {
 const INITIAL_VISIBLE = 5;
 
 export function SpendByAgentList({ rollups, agentLookup, totalCents }: Props) {
+  const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
 
   const billable = rollups.filter((r) => r.cost_cents > 0);
@@ -29,7 +31,7 @@ export function SpendByAgentList({ rollups, agentLookup, totalCents }: Props) {
     <section className="flex flex-col gap-2 lg:mt-4">
       <div className="flex items-baseline justify-between gap-2 lg:mb-2">
         <Text variant="body-medium" tone="emphasis">
-          Spend by workflow
+          {t("Spend by workflow", "按工作流统计支出")}
         </Text>
         <Text variant="small" tone="subtle">
           % of monthly spend

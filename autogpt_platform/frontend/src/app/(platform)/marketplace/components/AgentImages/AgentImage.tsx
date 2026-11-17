@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { ImageNotFound01Icon, YoutubeIcon } from "@hugeicons/core-free-icons";
@@ -15,6 +16,7 @@ interface AgentImagesProps {
 }
 
 export function AgentImages({ images }: AgentImagesProps) {
+  const { t } = useTranslation();
   const { playingVideoIndex, handlePlay, handlePause } = useAgentImage();
   // YouTube thumbnails come from YouTube, so they wait for the same consent
   // as the player.
@@ -92,7 +94,7 @@ export function AgentImages({ images }: AgentImagesProps) {
                   </div>
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-surface-active text-caption text-foreground-tertiary">
-                    Video
+                    {t("Video", "视频")}
                   </div>
                 )}
               </button>

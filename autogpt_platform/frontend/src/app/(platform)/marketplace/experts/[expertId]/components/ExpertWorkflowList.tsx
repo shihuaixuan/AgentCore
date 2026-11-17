@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Calendar03Icon, FlashIcon } from "@hugeicons/core-free-icons";
@@ -12,11 +15,12 @@ interface Props {
 /** A quiet list at the foot of the page: the name, one line on what it does
  *  and its cadence. The story above sells the expert; this is the detail. */
 export function ExpertWorkflowList({ name, workflows }: Props) {
+  const { t } = useTranslation();
   if (workflows.length === 0) return null;
 
   return (
     <ExpertSection
-      title="Workflows"
+      title={t("Workflows", "工作流")}
       count={workflows.length}
       description={`Installed and ready to run the moment ${name} joins your team.`}
       quiet

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import Image from "next/image";
 import { Button } from "../atoms/Button/Button";
 
@@ -8,6 +11,7 @@ interface Props {
 }
 
 export function MicrosoftOAuthButton({ onClick, isLoading, disabled }: Props) {
+  const { t } = useTranslation();
   return (
     <Button
       type="button"
@@ -18,7 +22,9 @@ export function MicrosoftOAuthButton({ onClick, isLoading, disabled }: Props) {
       loading={isLoading}
     >
       <Image src="/integrations/microsoft.webp" alt="" width={20} height={20} />
-      {isLoading ? "Connecting…" : "Continue with Microsoft"}
+      {isLoading
+        ? t("Connecting…", "正在连接…")
+        : t("Continue with Microsoft", "使用 Microsoft 继续")}
     </Button>
   );
 }

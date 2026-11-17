@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   File02Icon,
   Image01Icon,
@@ -30,8 +31,9 @@ export function LatestOutputs({
   isError,
   onRetry,
 }: Props) {
+  const { t } = useTranslation();
   return (
-    <OverviewCard title="Latest outputs">
+    <OverviewCard title={t("Latest outputs", "最新输出")}>
       {isLoading ? (
         <div className="flex flex-col gap-2">
           <Skeleton className="h-10 w-full rounded-lg" />
@@ -53,7 +55,7 @@ export function LatestOutputs({
               <Icon icon={File02Icon} size={22} />
             </span>,
           ]}
-          title="No outputs yet"
+          title={t("No outputs yet", "暂无输出")}
           description={`Documents and files ${expertName} creates show up here.`}
         />
       ) : (

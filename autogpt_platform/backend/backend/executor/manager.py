@@ -24,6 +24,7 @@ from backend.blocks import get_block, get_blocks
 from backend.blocks._base import BlockSchema
 from backend.blocks.agent import AgentExecutorBlock
 from backend.blocks.mcp.block import MCPToolBlock
+from backend.blocks.mcp.helpers import normalize_mcp_url
 from backend.copilot.rate_limit import platform_spend_refusal
 from backend.data import redis_client as redis
 from backend.data.block import BlockInput, BlockOutput, BlockOutputEntry
@@ -658,8 +659,53 @@ async def execute_node(
     runtime_credential_leases: dict[str, CredentialLease] = {}
     expert_allowed_credentials: set[str] | None = None
     try:
+        if (
+            isinstance(node_block, MCPToolBlock)
+            and input_data.get("connection_id")
+            and not execution_context.dry_run
+        ):
+            from backend.data import db
+            from backend.data.custom_mcp import get_custom_mcp_connection
+
+            if execution_context.expert_id:
+                raise ValueError(
+                    "Custom connections are not available to expert workflows yet."
+                )
+            lookup = (
+                get_custom_mcp_connection
+                if db.is_connected()
+                else get_database_manager_async_client().get_custom_mcp_connection
+            )
+            connection = await lookup(user_id, input_data["connection_id"])
+            if (
+                not connection
+                or not connection["enabled"]
+                or normalize_mcp_url(connection["serverUrl"])
+                != normalize_mcp_url(input_data.get("server_url", ""))
+            ):
+                raise ValueError(
+                    "This connection is unavailable or its server address changed."
+                )
+            credential_id = connection["credentialId"]
+            if credential_id:
+                lease = await creds_manager.acquire_lease(user_id, credential_id)
+                credential_leases["credentials"] = lease
+                extra_exec_kwargs["credentials"] = lease.credentials
+                input_data["credentials"] = {
+                    "id": credential_id,
+                    "provider": "mcp",
+                    "type": "oauth2",
+                }
+            else:
+                input_data["credentials"] = None
         # Handle regular credentials fields
         for field_name, input_type in input_model.get_credentials_fields().items():
+            if (
+                isinstance(node_block, MCPToolBlock)
+                and input_data.get("connection_id")
+                and field_name == "credentials"
+            ):
+                continue
             # Dry-run platform credentials bypass the credential store.
             # Keep the existing credential metadata so _execute's input_schema(**...)
             # doesn't fail on the required field.  If no metadata is present,

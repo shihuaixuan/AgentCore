@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -46,6 +47,7 @@ export function ProfileHeader({
   isUploading,
   onUpload,
 }: Props) {
+  const { t } = useTranslation();
   const fileRef = useRef<HTMLInputElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -76,7 +78,7 @@ export function ProfileHeader({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         disabled={isUploading}
-        aria-label="Change profile photo"
+        aria-label={t("Change profile photo", "更换头像")}
         className="group relative h-[112px] w-[112px] shrink-0 cursor-pointer rounded-full transition-transform duration-150 ease-out outline-none focus-visible:ring-2 focus-visible:ring-brand/80 focus-visible:ring-offset-2 active:scale-[0.97] disabled:cursor-wait"
       >
         {/* oxlint-disable-next-line design-system/no-restyle, design-system/no-arbitrary-values -- the profile photo floats on a soft shadow with a white rim */}
@@ -146,11 +148,11 @@ export function ProfileHeader({
       <div className="grid w-full gap-4 sm:grid-cols-2">
         <label htmlFor="profile-name" className="flex w-full flex-col gap-2">
           <Text variant="body-medium" as="span" className="mx-4">
-            Display name
+            {t("Display name", "显示名称")}
           </Text>
           <Input
             id="profile-name"
-            label="Display name"
+            label={t("Display name", "显示名称")}
             hideLabel
             placeholder="Jane Doe"
             value={name}
@@ -165,7 +167,7 @@ export function ProfileHeader({
         >
           <div className="flex items-center justify-between px-4">
             <Text variant="body-medium" as="span">
-              Handle
+              {t("Handle", "用户名")}
             </Text>
             <Text variant="small" as="span" tone="subtle">
               agpt.co/@your-handle
@@ -173,7 +175,7 @@ export function ProfileHeader({
           </div>
           <Input
             id="profile-username"
-            label="Handle"
+            label={t("Handle", "用户名")}
             hideLabel
             placeholder="jane_doe"
             value={username}

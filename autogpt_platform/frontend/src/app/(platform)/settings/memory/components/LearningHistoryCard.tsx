@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import type { LearningHistoryItem } from "@/app/api/__generated__/models/learningHistoryItem";
 import { Select } from "@/components/atoms/Select/Select";
@@ -29,6 +30,7 @@ export function LearningHistoryCard({
   onStateChange,
   onOpen,
 }: Props) {
+  const { t } = useTranslation();
   function expertName(expertId: string | null | undefined) {
     if (!expertId) return "Otto";
     return experts.find((expert) => expert.id === expertId)?.name ?? "Expert";
@@ -39,7 +41,7 @@ export function LearningHistoryCard({
       data-testid="learning-history-card"
     >
       <Text variant="body-medium" as="span">
-        Learning history
+        {t("Learning history", "学习记录")}
       </Text>
       <Text variant="small" as="span" tone="muted">
         What overnight learning changed, where it came from, and what it did not
@@ -48,7 +50,7 @@ export function LearningHistoryCard({
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
         <Select
           id="learning-origin"
-          label="Origin"
+          label={t("Origin", "来源")}
           hideLabel
           size="small"
           value={origin}
@@ -57,7 +59,7 @@ export function LearningHistoryCard({
         />
         <Select
           id="learning-state"
-          label="State"
+          label={t("State", "状态")}
           hideLabel
           size="small"
           value={state}

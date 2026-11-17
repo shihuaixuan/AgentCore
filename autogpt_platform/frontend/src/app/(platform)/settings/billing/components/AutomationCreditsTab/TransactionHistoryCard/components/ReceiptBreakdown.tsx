@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { activityName, isRunActive, type Transaction } from "../helpers";
 import { TransactionAmount } from "./TransactionAmount";
@@ -5,6 +8,7 @@ import { TransactionAmount } from "./TransactionAmount";
 type Props = { transaction: Transaction };
 
 export function ReceiptBreakdown({ transaction }: Props) {
+  const { t } = useTranslation();
   const usage =
     transaction.activity_type !== "other" &&
     transaction.transaction_type === "USAGE";
@@ -13,31 +17,33 @@ export function ReceiptBreakdown({ transaction }: Props) {
       {usage ? (
         <>
           <BreakdownLine
-            label="Block usage"
+            label={t("Block usage", "模块用量")}
             amount={transaction.usage_charge_amount ?? 0}
           />
           {!!transaction.usage_fee_amount && (
             <BreakdownLine
-              label="Execution fees"
+              label={t("Execution fees", "执行费用")}
               amount={transaction.usage_fee_amount}
             />
           )}
           {!!transaction.usage_adjustment_amount && (
             <BreakdownLine
-              label="Usage adjustment"
+              label={t("Usage adjustment", "用量调整")}
               amount={transaction.usage_adjustment_amount}
             />
           )}
         </>
       ) : (
         <BreakdownLine
-          label={activityName(transaction)}
+          label={activityName(transaction, t)}
           amount={transaction.amount}
         />
       )}
       <dt className="mt-1 border-t border-border-base pt-3">
         <Text variant="body-medium" as="span">
-          {isRunActive(transaction) ? "Net change so far" : "Net change"}
+          {isRunActive(transaction)
+            ? t("Net change so far", "截至目前的净变化")
+            : t("Net change", "净变化")}
         </Text>
       </dt>
       <dd className="mt-1 border-t border-border-base pt-3 text-right">

@@ -2,6 +2,7 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 import NextLink from "next/link";
 import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
 import { AdminSection } from "../../components/AdminSection";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getSpendingSearchHref, getUserPlatformCostsHref } from "../helpers";
 
 interface Props {
@@ -9,13 +10,14 @@ interface Props {
 }
 
 export function SpendingSection({ userId }: Props) {
+  const { t } = useTranslation();
   const links = [
-    { label: "Spending history", href: getSpendingSearchHref(userId) },
-    { label: "Platform cost", href: getUserPlatformCostsHref(userId) },
+    { label: t("Spending history", "消费记录"), href: getSpendingSearchHref(userId) },
+    { label: t("Platform cost", "平台成本"), href: getUserPlatformCostsHref(userId) },
   ];
 
   return (
-    <AdminSection title="Spending and cost">
+    <AdminSection title={t("Spending and cost", "消费与成本")}>
       <ul className="-mx-2 flex flex-col">
         {links.map((link) => (
           <li key={link.href}>

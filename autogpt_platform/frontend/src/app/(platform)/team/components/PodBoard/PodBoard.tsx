@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { ExpertPod } from "@/app/api/__generated__/models/expertPod";
 import { Button } from "@/components/atoms/Button/Button";
@@ -24,13 +27,17 @@ export function PodBoard({
   onNewPod,
   renderCard,
 }: Props) {
+  const { t } = useTranslation();
   const [openPodId, setOpenPodId] = useState<string | null>(null);
   const openGroup = podGroups.find((group) => group.pod.id === openPodId);
 
   if (openGroup) {
     return (
       <section
-        aria-label={`${openGroup.pod.name} pod`}
+        aria-label={t(
+          `${openGroup.pod.name} pod`,
+          `${openGroup.pod.name} 小组`,
+        )}
         className="flex flex-col gap-4"
       >
         <div className="flex items-center gap-2">
@@ -39,7 +46,7 @@ export function PodBoard({
             variant="ghost"
             size="icon-xs"
             leadingIcon={ArrowLeft01Icon}
-            aria-label="Back to pods"
+            aria-label={t("Back to pods", "返回小组")}
             onClick={() => setOpenPodId(null)}
           />
           <Text variant="large-medium" as="h5" tone="primary">
@@ -56,7 +63,10 @@ export function PodBoard({
           </div>
         ) : (
           <Text variant="body" tone="muted">
-            No experts in this pod yet. Move one in from its card menu.
+            {t(
+              "No experts in this pod yet. Move one in from its card menu.",
+              "此小组暂无专家。可通过专家卡片菜单将其移入。",
+            )}
           </Text>
         )}
       </section>
@@ -64,9 +74,9 @@ export function PodBoard({
   }
 
   return (
-    <section aria-label="Pods" className="flex flex-col gap-4">
+    <section aria-label={t("Pods", "小组")} className="flex flex-col gap-4">
       <Text variant="large-medium" as="h5" tone="primary">
-        Pods
+        {t("Pods", "小组")}
       </Text>
       {isLoading ? (
         <div className={FOLDER_GRID_CLASS}>
@@ -77,13 +87,16 @@ export function PodBoard({
       ) : podGroups.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border-strong bg-surface p-8 text-center">
           <Text variant="large-medium" tone="primary">
-            No pods yet
+            {t("No pods yet", "暂无小组")}
           </Text>
           <Text variant="body" tone="secondary" className="max-w-prose">
-            Group experts into pods to keep related work together.
+            {t(
+              "Group experts into pods to keep related work together.",
+              "将专家分组，集中管理相关工作。",
+            )}
           </Text>
           <Button variant="primary" size="small" onClick={onNewPod}>
-            New Pod
+            {t("New Pod", "新建小组")}
           </Button>
         </div>
       ) : (
@@ -109,11 +122,12 @@ interface PodFolderProps {
 }
 
 function PodFolder({ name, experts, onOpen }: PodFolderProps) {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
       onClick={onOpen}
-      aria-label={`Open ${name} pod`}
+      aria-label={t(`Open ${name} pod`, `打开 ${name} 小组`)}
       className="flex flex-col gap-3 rounded-2xl bg-surface p-4 text-left smooth-shadow-ring-sm transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-foreground-subtle focus-visible:outline-none"
     >
       <div className="flex items-center gap-3">
@@ -147,7 +161,7 @@ function PodFolder({ name, experts, onOpen }: PodFolderProps) {
         </ul>
       ) : (
         <Text variant="small" tone="muted">
-          No experts in this pod yet.
+          {t("No experts in this pod yet.", "此小组暂无专家。")}
         </Text>
       )}
     </button>

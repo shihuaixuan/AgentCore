@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import Image from "next/image";
@@ -26,6 +29,7 @@ export function AgentImageItem({
   handlePlay,
   handlePause,
 }: AgentImageItemProps) {
+  const { t } = useTranslation();
   const { videoRef } = useAgentImageItem({ playingVideoIndex, index });
   const isVideoFile = isValidVideoFile(image);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -52,10 +56,14 @@ export function AgentImageItem({
                 onPlay={() => handlePlay(index)}
                 onPause={() => handlePause(index)}
                 autoPlay={false}
-                title="Video"
+                title={t("Video", "视频")}
               >
                 <source src={image} type="video/mp4" />
-                Your browser does not support the video tag.
+
+                {t(
+                  "Your browser does not support the video tag.",
+                  "你的浏览器不支持视频播放。",
+                )}
               </video>
             </div>
           )
@@ -69,7 +77,7 @@ export function AgentImageItem({
                 <Image
                   src={image}
                   unoptimized={isLocalStoreMediaUrl(image)}
-                  alt="Image"
+                  alt={t("Image", "图片")}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="rounded-xl object-cover"

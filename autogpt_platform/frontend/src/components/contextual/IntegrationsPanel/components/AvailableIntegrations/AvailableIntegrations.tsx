@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -13,6 +14,8 @@ interface Props {
 }
 
 export function AvailableIntegrations({ query, onSelect }: Props) {
+  const { t } = useTranslation();
+
   const catalog = useAvailableIntegrations(query);
 
   return (
@@ -29,11 +32,13 @@ export function AvailableIntegrations({ query, onSelect }: Props) {
           transform="uppercase"
           tracking="eyebrow"
         >
-          Available integrations
+          {t("Available integrations", "可用集成")}
         </Text>
         <Text variant="small" tone="muted">
-          Connect your services, including official vendor integrations. Some
-          services need additional setup.
+          {t(
+            "Connect your services, including official vendor integrations. Some services need additional setup.",
+            "连接您的服务，包括服务商提供的官方集成。部分服务需要额外设置。",
+          )}
         </Text>
       </div>
       {catalog.isLoading ? (
@@ -65,14 +70,20 @@ export function AvailableIntegrations({ query, onSelect }: Props) {
             <Text variant="small" tone="muted" role="status">
               {catalog.total === 0
                 ? query.trim()
-                  ? "No available services match your search."
-                  : "No available services."
-                : `${catalog.providers.length} of ${catalog.total} services`}
+                  ? t(
+                      "No available services match your search.",
+                      "没有与搜索条件匹配的可用服务。",
+                    )
+                  : t("No available services.", "暂无可用服务。")
+                : t(
+                    `${catalog.providers.length} of ${catalog.total} services`,
+                    `显示 ${catalog.total} 个服务中的 ${catalog.providers.length} 个`,
+                  )}
             </Text>
           </div>
           {catalog.hasMore && (
             <Button variant="secondary" size="small" onClick={catalog.showMore}>
-              Show more services
+              {t("Show more services", "显示更多服务")}
             </Button>
           )}
         </>

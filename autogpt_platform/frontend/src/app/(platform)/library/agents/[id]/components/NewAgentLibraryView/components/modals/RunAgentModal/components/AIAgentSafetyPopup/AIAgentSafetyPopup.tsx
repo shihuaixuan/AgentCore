@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function AIAgentSafetyPopup({ agentId, onAcknowledge, isOpen }: Props) {
+  const { t } = useTranslation();
   function handleAcknowledge() {
     // Add this agent to the list of agents for which popup has been shown
     const seenAgentsJson = storage.get(Key.AI_AGENT_SAFETY_POPUP_SHOWN);
@@ -34,7 +36,7 @@ export function AIAgentSafetyPopup({ agentId, onAcknowledge, isOpen }: Props) {
 
   return (
     <Dialog
-      title="Safety Checks"
+      title={t("Safety Checks", "安全检查")}
       controlled={{ isOpen, set: () => {} }}
       styling={{ maxWidth: "480px" }}
     >
@@ -45,18 +47,21 @@ export function AIAgentSafetyPopup({ agentId, onAcknowledge, isOpen }: Props) {
           </div>
 
           <Text variant="h3" className="mb-4">
-            Safety Checks Enabled
+            {t("Safety Checks Enabled", "已启用安全检查")}
           </Text>
 
           <Text variant="body" tone="body" className="mb-2">
-            AI-generated workflows may take actions that affect your data or
-            external systems.
+            {t(
+              "AI-generated workflows may take actions that affect your data or external systems.",
+              "AI 生成的工作流可能执行影响你的数据或外部系统的操作。",
+            )}
           </Text>
 
           <Text variant="body" tone="body" className="mb-8">
-            AutoGPT includes safety checks so you&apos;ll always have the
-            opportunity to review and approve sensitive actions before they
-            happen.
+            {t(
+              "AutoGPT includes safety checks so you'll always have the opportunity to review and approve sensitive actions before they happen.",
+              "AutoGPT 内置安全检查，确保你始终能在敏感操作执行前进行审核和批准。",
+            )}
           </Text>
 
           <Button
@@ -65,7 +70,7 @@ export function AIAgentSafetyPopup({ agentId, onAcknowledge, isOpen }: Props) {
             className="w-full"
             onClick={handleAcknowledge}
           >
-            Got it
+            {t("Got it", "知道了")}
           </Button>
         </div>
       </Dialog.Content>

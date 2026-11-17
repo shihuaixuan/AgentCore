@@ -10,6 +10,7 @@ export async function storeMCPToken(
   token: string,
   scheme: MCPAuthScheme,
   signal: AbortSignal,
+  isolated = false,
 ) {
   signal.throwIfAborted();
   const authValue = prepareMCPAuthCredential(token, scheme);
@@ -26,6 +27,7 @@ export async function storeMCPToken(
     {
       server_url: serverURL,
       token: authValue,
+      ...(isolated ? { isolated: true } : {}),
     },
     { signal },
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useState } from "react";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Text } from "@/components/atoms/Text/Text";
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function WorkspaceFolders({ parentId, onSelectFolder }: Props) {
+  const { t } = useTranslation();
   const { folders, isLoading, isError, error, moveFilesToFolder } =
     useArtifactsFolders();
 
@@ -51,7 +53,7 @@ export function WorkspaceFolders({ parentId, onSelectFolder }: Props) {
   return (
     <div className="flex flex-col gap-3" data-testid="workspace-folders">
       <Text variant="large-medium" tone="body">
-        Folders
+        {t("Folders", "文件夹")}
       </Text>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {children.map((folder) => (

@@ -1,3 +1,4 @@
+import type { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { HomeDashboardResponse } from "@/app/api/__generated__/models/homeDashboardResponse";
 
 export function getTimeOfDayGreeting(hour = new Date().getHours()) {
@@ -6,19 +7,31 @@ export function getTimeOfDayGreeting(hour = new Date().getHours()) {
   return "Good evening";
 }
 
-export function getHomeStatusLine(dashboard: HomeDashboardResponse): string {
+export function getHomeStatusLine(
+  dashboard: HomeDashboardResponse,
+  t: ReturnType<typeof useTranslation>["t"] = (english) => english,
+): string {
   const attention = dashboard.attention.length;
   const active = dashboard.active_tasks.length;
   if (attention > 0 && active > 0) {
-    return `${attention} ${attention === 1 ? "decision" : "decisions"} waiting · ${active} ${active === 1 ? "workflow is" : "workflows are"} running now`;
+    return t(
+      `${attention} ${attention === 1 ? "decision" : "decisions"} waiting · ${active} ${active === 1 ? "workflow is" : "workflows are"} running now`,
+      `${attention} 项决策待处理 · ${active} 个工作流正在运行`,
+    );
   }
   if (attention > 0) {
-    return `${attention} ${attention === 1 ? "decision needs" : "decisions need"} you`;
+    return t(
+      `${attention} ${attention === 1 ? "decision needs" : "decisions need"} you`,
+      `${attention} 项决策需要你处理`,
+    );
   }
   if (active > 0) {
-    return `All clear · ${active} ${active === 1 ? "workflow is" : "workflows are"} running now`;
+    return t(
+      `All clear · ${active} ${active === 1 ? "workflow is" : "workflows are"} running now`,
+      `暂无待办 · ${active} 个工作流正在运行`,
+    );
   }
-  return "Nothing needs you right now";
+  return t("Nothing needs you right now", "目前没有需要你处理的事项");
 }
 
 export function formatHeaderDate(
@@ -42,20 +55,29 @@ export function formatHeaderDate(
   };
 }
 
-export function formatDuration(totalSeconds: number): string {
+export function formatDuration(
+  totalSeconds: number,
+  t: ReturnType<typeof useTranslation>["t"] = (english) => english,
+): string {
   const totalMinutes = Math.round(totalSeconds / 60);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
-  if (hours === 0) return `${minutes}m`;
-  if (minutes === 0) return `${hours}h`;
-  return `${hours}h ${minutes}m`;
+  if (hours === 0) return t(`${minutes}m`, `${minutes} 分钟`);
+  if (minutes === 0) return t(`${hours}h`, `${hours} 小时`);
+  return t(`${hours}h ${minutes}m`, `${hours} 小时 ${minutes} 分钟`);
 }
 
 // Null rather than "$0.00 this week" so a brand-new or idle expert reads as
 // having no spend line at all instead of an explicit zero.
-export function formatWeeklySpend(cents: number | undefined): string | null {
+export function formatWeeklySpend(
+  cents: number | undefined,
+  t: ReturnType<typeof useTranslation>["t"] = (english) => english,
+): string | null {
   if (!cents || cents <= 0) return null;
-  return `${formatCurrency(cents)} this week`;
+  return t(
+    `${formatCurrency(cents)} this week`,
+    `本周 ${formatCurrency(cents)}`,
+  );
 }
 
 export function formatCurrency(cents: number): string {

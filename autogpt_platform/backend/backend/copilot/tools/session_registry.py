@@ -16,7 +16,12 @@ from collections import OrderedDict
 
 from backend.api.features.experts.models import ExpertTemplate
 from backend.copilot.capabilities.index import CapabilityIndex
-from backend.copilot.capabilities.models import CapabilityEntry
+from backend.copilot.capabilities.models import (
+    CapabilityEntry,
+    Connection,
+    Implementation,
+    clip_purpose,
+)
 from backend.copilot.capabilities.registry import get_registry
 from backend.copilot.capabilities.resolve import resolve_entry
 from backend.copilot.capabilities.sources import (
@@ -26,8 +31,11 @@ from backend.copilot.capabilities.sources import (
     skill_name,
 )
 from backend.copilot.model import ChatSession
+from backend.data import db
+from backend.data.custom_mcp import list_custom_mcp_connections
 from backend.data.db_accessors import experts_db
 from backend.util.cache import cached
+from backend.util.clients import get_database_manager_async_client
 
 from .skills import SKILLS_INDEX_CACHE_TTL_S, is_skills_feature_enabled, list_all_skills
 
@@ -50,11 +58,12 @@ _layered: OrderedDict[
 
 async def session_registry(user_id: str, session: ChatSession) -> CapabilityIndex:
     """The platform index with this session's skills and experts layered on."""
-    skills, experts = await asyncio.gather(
+    skills, experts, custom = await asyncio.gather(
         session_skill_entries(user_id, session),
         session_expert_entries(user_id, session),
+        session_custom_mcp_entries(user_id, session),
     )
-    return layered_index(get_registry(), skills + experts)
+    return layered_index(get_registry(), skills + experts + custom)
 
 
 def layered_index(
@@ -64,7 +73,7 @@ def layered_index(
     for the same platform index and the same entries."""
     if not entries:
         return base
-    key = (id(base), len(base), tuple((e.id, e.description) for e in entries))
+    key = (id(base), len(base), tuple((e.id, e.model_dump_json()) for e in entries))
     now = time.monotonic()
     cached = _layered.get(key)
     if cached is not None and cached[0] > now:
@@ -88,6 +97,15 @@ async def resolve_session_entry(
     the registry's name match would let ``skill:web_search`` resolve to the
     platform tool of that name.
     """
+    if capability_id.startswith("custom_mcp:"):
+        return next(
+            (
+                entry
+                for entry in await session_custom_mcp_entries(user_id, session)
+                if entry.id == capability_id
+            ),
+            None,
+        )
     if expert_dispatch(capability_id) is not None:
         key = capability_id.strip().lower()
         return next(
@@ -109,6 +127,52 @@ async def resolve_session_entry(
         ),
         None,
     )
+
+
+async def session_custom_mcp_entries(
+    user_id: str, session: ChatSession
+) -> list[CapabilityEntry]:
+    lookup = (
+        list_custom_mcp_connections
+        if db.is_connected()
+        else get_database_manager_async_client().list_custom_mcp_connections
+    )
+    try:
+        connections = await lookup(user_id)
+    except Exception:
+        logger.warning("Could not load custom MCP connections", exc_info=True)
+        return []
+    allowed_ids = (
+        set(
+            await experts_db().expert_allowed_credential_ids(user_id, session.expert_id)
+        )
+        if session.expert_id
+        else None
+    )
+    rows = [
+        row
+        for row in connections
+        if row["enabled"]
+        and (
+            allowed_ids is None
+            or row["credentialId"] is None
+            or row["credentialId"] in allowed_ids
+        )
+    ]
+    return [
+        CapabilityEntry(
+            id=f"custom_mcp:{row['id']}",
+            kind="mcp_server",
+            name=row["name"],
+            purpose=clip_purpose(row["description"] or row["name"]),
+            description=row["description"] or row["name"],
+            implementations=[Implementation(kind="mcp_server", ref=row["serverUrl"])],
+            connection=Connection(required=True, connected=True),
+            custom_mcp=True,
+            custom_mcp_credential_id=row["credentialId"],
+        )
+        for row in rows
+    ]
 
 
 async def session_skill_entries(

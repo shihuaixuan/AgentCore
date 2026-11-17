@@ -1,4 +1,7 @@
+"use client";
+
 import { useRouter } from "next/navigation";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type {
   DeletionSource,
   ExitReason,
@@ -18,22 +21,26 @@ interface Args {
 }
 
 export function useReasonPanel({ reason, origin, onClose }: Args) {
+  const { locale } = useTranslation();
   const router = useRouter();
   const { apps, targets } = useConnectedApps();
   const { planState, pending, proMonthlyCents, trialEndsAt } = usePlanContext();
   const disconnect = useDisconnectApps();
   const { sendAlternative } = useExitFeedback();
 
-  const panel = getReasonPanel({
-    reason,
-    planState,
-    pending,
-    apps,
-    proMonthlyCents,
-    trialEndsAt,
-    origin,
-    disconnect: disconnect.state,
-  });
+  const panel = getReasonPanel(
+    {
+      reason,
+      planState,
+      pending,
+      apps,
+      proMonthlyCents,
+      trialEndsAt,
+      origin,
+      disconnect: disconnect.state,
+    },
+    locale,
+  );
 
   function runAction(kind: PanelActionKind) {
     if (!reason) return;

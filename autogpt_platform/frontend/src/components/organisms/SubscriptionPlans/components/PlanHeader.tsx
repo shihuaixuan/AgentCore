@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { ReactNode } from "react";
 import { AutoGPTLogo } from "@/components/atoms/AutoGPTLogo/AutoGPTLogo";
 import { Text } from "@/components/atoms/Text/Text";
@@ -24,21 +27,18 @@ export function PlanHeader({ header, ...billing }: Props) {
 }
 
 function DefaultHeading() {
+  const { t } = useTranslation();
   return (
     <>
       <AutoGPTLogo hideText className="relative right-5 mb-2 h-8 w-20" />
       <Text variant="h3" as="h1" className="leading-9">
-        Choose the plan that&apos;s right for{" "}
-        <span
-          data-slot="plan-header-heading-accent"
-          className="bg-gradient-to-r from-brand to-indigo bg-clip-text text-transparent"
-        >
-          you
-        </span>
+        {t("Choose the plan that's right for you", "选择适合你的套餐")}
       </Text>
       <Text variant="body" tone="muted" className="mt-1">
-        Upgrade, downgrade, or change plans anytime. All plans include core
-        features to get you started.
+        {t(
+          "Upgrade, downgrade, or change plans anytime. All plans include core features to get you started.",
+          "随时升级、降级或更换套餐。所有套餐均包含入门所需的核心功能。",
+        )}
       </Text>
     </>
   );

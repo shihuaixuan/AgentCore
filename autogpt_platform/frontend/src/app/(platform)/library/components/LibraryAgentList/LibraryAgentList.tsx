@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { LibraryAgentSort } from "@/app/api/__generated__/models/libraryAgentSort";
 import type { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
@@ -96,6 +97,7 @@ export function LibraryAgentList({
   fleetSummary,
   briefingAgents,
 }: Props) {
+  const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const activeContainerVariants = shouldReduceMotion
     ? reducedContainerVariants
@@ -188,7 +190,8 @@ export function LibraryAgentList({
               className="inline-flex items-center gap-1 text-body text-foreground-tertiary hover:text-foreground-strong"
             >
               <Icon icon={ArrowLeft02Icon} className="h-4 w-4" />
-              My Library
+
+              {t("My Library", "我的工作流库")}
             </button>
             {currentFolder && (
               <>
@@ -209,7 +212,9 @@ export function LibraryAgentList({
         ) : isFavoritesTab && agents.length === 0 ? (
           <div className="flex h-[200px] flex-col items-center justify-center gap-2 text-foreground-tertiary">
             <Icon icon={FavouriteIcon} className="h-10 w-10" />
-            <Text variant="body">No favorite workflows yet</Text>
+            <Text variant="body">
+              {t("No favorite workflows yet", "尚未收藏工作流")}
+            </Text>
           </div>
         ) : isPristineEmpty ? (
           <LibraryEmptyState />

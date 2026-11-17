@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getPostV1CreateNewGraphMutationOptions,
   getPutV1UpdateGraphVersionMutationOptions,
@@ -10,6 +11,7 @@ export const GraphLoadingBox = ({
 }: {
   flowContentLoading: boolean;
 }) => {
+  const { t } = useTranslation();
   const isCreating = useIsMutating({
     mutationKey: getPostV1CreateNewGraphMutationOptions().mutationKey,
   });
@@ -30,17 +32,27 @@ export const GraphLoadingBox = ({
           <div className="absolute inset-0 animate-spin rounded-full border-4 border-separator border-t-foreground-subtle"></div>
         </div>
         <div className="flex flex-col items-center gap-2">
-          {isSaving && <Text variant="h4">Saving Workflow</Text>}
-          {flowContentLoading && <Text variant="h4">Loading Flow</Text>}
+          {isSaving && (
+            <Text variant="h4">{t("Saving Workflow", "正在保存工作流")}</Text>
+          )}
+          {flowContentLoading && (
+            <Text variant="h4">{t("Loading Flow", "正在加载工作流")}</Text>
+          )}
 
           {isSaving && (
             <Text variant="small">
-              Please wait while we save your workflow...
+              {t(
+                "Please wait while we save your workflow...",
+                "正在保存工作流，请稍候…",
+              )}
             </Text>
           )}
           {flowContentLoading && (
             <Text variant="small">
-              Please wait while we load your workflow...
+              {t(
+                "Please wait while we load your workflow...",
+                "正在加载工作流，请稍候…",
+              )}
             </Text>
           )}
         </div>

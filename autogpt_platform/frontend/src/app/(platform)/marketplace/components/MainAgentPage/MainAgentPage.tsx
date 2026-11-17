@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { okData } from "@/app/api/helpers";
 import { Button } from "@/components/atoms/Button/Button";
 import { Breadcrumbs } from "@/components/molecules/Breadcrumbs/Breadcrumbs";
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function MainAgentPage({ params }: Props) {
+  const { t } = useTranslation();
   const {
     agent,
     user,
@@ -39,7 +41,12 @@ export function MainAgentPage({ params }: Props) {
           <div className="flex min-h-[400px] items-center justify-center">
             <ErrorCard
               isSuccess={false}
-              responseError={{ message: "Failed to load workflow data" }}
+              responseError={{
+                message: t(
+                  "Failed to load workflow data",
+                  "无法加载工作流数据",
+                ),
+              }}
               context="workflow page"
               onRetry={() => window.location.reload()}
               className="w-full max-w-md"
@@ -58,7 +65,9 @@ export function MainAgentPage({ params }: Props) {
           <div className="flex min-h-[400px] items-center justify-center">
             <ErrorCard
               isSuccess={false}
-              responseError={{ message: "Workflow not found" }}
+              responseError={{
+                message: t("Workflow not found", "未找到工作流"),
+              }}
               context="workflow page"
             />
           </div>
@@ -88,7 +97,7 @@ export function MainAgentPage({ params }: Props) {
             className="relative -left-2 lg:!-left-4"
             leftIcon={<Icon icon={ArrowLeft02Icon} size={16} />}
           >
-            Go back
+            {t("Go back", "返回")}
           </Button>
           <div className="hidden md:block">
             <Breadcrumbs items={breadcrumbs} />

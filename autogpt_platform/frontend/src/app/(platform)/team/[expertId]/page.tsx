@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getRaisedExpertAccent } from "@/app/(platform)/marketplace/components/ExpertsSection/helpers";
 import { Button } from "@/components/atoms/Button/Button";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -66,7 +67,20 @@ const TABS = [
   { value: "settings", label: "Settings", icon: Settings01Icon },
 ] as const;
 
+const TAB_LABELS: Record<string, string> = {
+  Overview: "概览",
+  Soul: "设定",
+  Schedules: "计划",
+  Workflows: "工作流",
+  Files: "文件",
+  Computer: "计算机",
+  Integrations: "集成",
+  Skills: "技能",
+  Settings: "设置",
+};
+
 export default function ExpertDetailPage() {
+  const { t } = useTranslation();
   const { expertId } = useParams<{ expertId: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -146,7 +160,7 @@ export default function ExpertDetailPage() {
         {isPaused ? (
           <div className="flex items-center justify-between gap-2 rounded-lg bg-warning-surface px-4 py-2.5 ring-1 ring-warning-border ring-inset">
             <Text variant="small" tone="warning">
-              Schedules paused
+              {t("Schedules paused", "计划已暂停")}
             </Text>
             <Button
               variant="secondary"
@@ -154,7 +168,7 @@ export default function ExpertDetailPage() {
               loading={isResuming}
               onClick={resumeSchedules}
             >
-              Resume schedules
+              {t("Resume schedules", "恢复计划")}
             </Button>
           </div>
         ) : null}
@@ -177,7 +191,9 @@ export default function ExpertDetailPage() {
                 value={tab.value}
                 icon={tab.icon}
               >
-                <span className="max-sm:sr-only">{tab.label}</span>
+                <span className="max-sm:sr-only">
+                  {t(tab.label, TAB_LABELS[tab.label] ?? tab.label)}
+                </span>
               </TabsLineTrigger>
             ))}
           </TabsLineList>

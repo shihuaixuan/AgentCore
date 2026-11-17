@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { useId, type MouseEvent } from "react";
 import { Text } from "@/components/atoms/Text/Text";
@@ -20,6 +23,7 @@ export function TransactionHistoryTable({
   isLoadMoreError,
   onLoadMore,
 }: Props) {
+  const { t } = useTranslation();
   const { selectedID, toggleReceipt, selectRelated } =
     useReceiptSelection(transactions);
   const loadMoreID = useId();
@@ -39,7 +43,7 @@ export function TransactionHistoryTable({
     <div className="overflow-hidden rounded-large border border-border-base bg-surface shadow-subtle">
       <table
         className="w-full table-fixed border-collapse text-left"
-        aria-label="Automation credit transactions"
+        aria-label={t("Automation credit transactions", "自动化额度交易")}
       >
         <colgroup>
           <col />
@@ -51,7 +55,7 @@ export function TransactionHistoryTable({
           <tr>
             <th scope="col" className="py-3 pr-2 pl-3 sm:pl-5">
               <Text variant="small-medium" as="span" tone="secondary">
-                Activity
+                {t("Activity", "活动")}
               </Text>
             </th>
             <th scope="col" className="p-0 sm:px-2 sm:py-3">
@@ -61,16 +65,16 @@ export function TransactionHistoryTable({
                 tone="secondary"
                 className="sr-only sm:not-sr-only"
               >
-                Last activity
+                {t("Last activity", "最近活动")}
               </Text>
             </th>
             <th scope="col" className="px-2 py-3 text-right">
               <Text variant="small-medium" as="span" tone="secondary">
-                Amount
+                {t("Amount", "金额")}
               </Text>
             </th>
             <th scope="col">
-              <span className="sr-only">Details</span>
+              <span className="sr-only">{t("Details", "详情")}</span>
             </th>
           </tr>
         </thead>
@@ -89,7 +93,7 @@ export function TransactionHistoryTable({
       </table>
       <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-3 sm:px-5">
         <Text variant="small" tone="secondary">
-          Latest charges and credits first
+          {t("Latest charges and credits first", "最新费用和积分变动优先显示")}
         </Text>
         {hasMore ? (
           <Button
@@ -100,7 +104,9 @@ export function TransactionHistoryTable({
             loading={isLoadingMore}
             onClick={(event) => void loadOlder(event)}
           >
-            {isLoadMoreError ? "Retry loading more" : "Load more"}
+            {isLoadMoreError
+              ? t("Retry loading more", "重试加载更多")
+              : t("Load more", "加载更多")}
           </Button>
         ) : (
           <Text
@@ -111,7 +117,7 @@ export function TransactionHistoryTable({
             // oxlint-disable-next-line design-system/no-restyle -- a programmatic focus target that shows no outline
             className="focus:outline-none"
           >
-            End of history
+            {t("End of history", "已显示全部记录")}
           </Text>
         )}
         {isLoadMoreError && (
@@ -121,15 +127,20 @@ export function TransactionHistoryTable({
             tone="secondary"
             className="w-full"
           >
-            We couldn’t load older transactions. Your loaded history is still
-            available.
+            {t(
+              "We couldn’t load older transactions. Your loaded history is still available.",
+              "无法加载更早的交易。已加载的历史记录仍可查看。",
+            )}
           </Text>
         )}
       </div>
       <Text variant="small" className="sr-only" role="status">
         {isLoadingMore
-          ? "Loading older transactions"
-          : `${transactions.length} transactions loaded`}
+          ? t("Loading older transactions", "正在加载更早的交易")
+          : t(
+              `${transactions.length} transactions loaded`,
+              `已加载 ${transactions.length} 笔交易`,
+            )}
       </Text>
     </div>
   );

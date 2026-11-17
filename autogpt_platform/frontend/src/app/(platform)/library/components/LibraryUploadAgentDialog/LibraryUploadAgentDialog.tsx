@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { FileInput } from "@/components/atoms/FileInput/FileInput";
 import { Input } from "@/components/atoms/Input/Input";
@@ -23,12 +24,13 @@ export const uploadAgentFormSchema = z.object({
 });
 
 export default function LibraryUploadAgentDialog() {
+  const { t } = useTranslation();
   const { onSubmit, isUploading, isOpen, setIsOpen, form, agentObject } =
     useLibraryUploadAgentDialog();
 
   return (
     <Dialog
-      title="Upload Workflow"
+      title={t("Upload Workflow", "上传工作流")}
       styling={{ maxWidth: "30rem" }}
       controlled={{
         isOpen,
@@ -46,7 +48,7 @@ export default function LibraryUploadAgentDialog() {
           size="small"
         >
           <Icon icon={Upload03Icon} width={18} height={18} />
-          <span>Upload workflow</span>
+          <span>{t("Upload workflow", "上传工作流")}</span>
         </Button>
       </Dialog.Trigger>
       <Dialog.Content>
@@ -64,7 +66,7 @@ export default function LibraryUploadAgentDialog() {
                   <Input
                     {...field}
                     id={field.name}
-                    label="Workflow name"
+                    label={t("Workflow name", "工作流名称")}
                     className="w-full"
                   />
                 </FormControl>
@@ -82,7 +84,7 @@ export default function LibraryUploadAgentDialog() {
                   <Input
                     {...field}
                     id={field.name}
-                    label="Workflow description"
+                    label={t("Workflow description", "工作流说明")}
                     type="textarea"
                     className="w-full"
                   />
@@ -103,7 +105,7 @@ export default function LibraryUploadAgentDialog() {
                     value={field.value}
                     onChange={field.onChange}
                     accept=".json,application/json"
-                    placeholder="Workflow file"
+                    placeholder={t("Workflow file", "工作流文件")}
                     maxFileSize={10 * 1024 * 1024}
                     showStorageNote={false}
                     className="mt-4 mb-8"
@@ -123,7 +125,7 @@ export default function LibraryUploadAgentDialog() {
             {isUploading ? (
               <div className="flex items-center gap-2">
                 <LoadingSpinner size="small" />
-                <span>Uploading...</span>
+                <span>{t("Uploading...", "正在上传…")}</span>
               </div>
             ) : (
               "Upload"

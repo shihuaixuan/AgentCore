@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -28,6 +29,7 @@ export interface PaymentPage {
 }
 
 export function useTrialPlanRequest(offer: TrialOfferResponse) {
+  const { t } = useTranslation();
   const userID = useAuthStore((state) => state.user?.id);
   const queryClient = useQueryClient();
   const { mutateAsync: updateTier } = useUpdateSubscriptionTier();
@@ -78,7 +80,9 @@ export function useTrialPlanRequest(offer: TrialOfferResponse) {
       toast({
         title: `Unable to start ${plan.label}`,
         description:
-          error instanceof Error ? error.message : "Please try again.",
+          error instanceof Error
+            ? error.message
+            : t("Please try again.", "请重试。"),
         variant: "destructive",
       });
       await refreshBilling();

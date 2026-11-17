@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import {
   BubbleChatIcon,
@@ -20,12 +21,13 @@ export function PanelHeader({
   revertTargetVersion,
   onRevert,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between border-b border-separator px-4 py-3">
       <div className="flex items-center gap-2">
         <Icon icon={BubbleChatIcon} size={18} tone="brand" />
         <Text variant="body-semibold-tight" tone="body" as="span">
-          Chat with Builder
+          {t("Chat with Builder", "与构建助手对话")}
         </Text>
       </div>
       <div className="flex items-center gap-1">
@@ -38,18 +40,21 @@ export function PanelHeader({
             aria-label={
               revertTargetVersion != null
                 ? `Revert to version ${revertTargetVersion}`
-                : "Revert to previous version"
+                : t("Revert to previous version", "恢复到上一版本")
             }
-            title="Revert to the workflow version that was active before the last edit"
+            title={t(
+              "Revert to the workflow version that was active before the last edit",
+              "恢复到上次编辑之前的工作流版本",
+            )}
           >
-            Revert
+            {t("Revert", "恢复")}
           </Button>
         )}
         <Button
           variant="ghost"
           size="icon"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t("Close", "关闭")}
         >
           <Icon icon={Cancel01Icon} size={16} />
         </Button>

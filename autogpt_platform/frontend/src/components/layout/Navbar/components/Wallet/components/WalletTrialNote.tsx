@@ -1,7 +1,11 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { TrialStatusResponse } from "@/app/api/__generated__/models/trialStatusResponse";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { CreditCardIcon } from "@hugeicons/core-free-icons";
+import { formatTrialEndDate } from "@/components/organisms/TrialCard/helpers";
 import { getTrialPlanLine } from "../helpers";
 
 interface Props {
@@ -10,7 +14,19 @@ interface Props {
 }
 
 export function WalletTrialNote({ id, trial }: Props) {
-  const line = getTrialPlanLine(trial);
+  const { t } = useTranslation();
+  const englishLine = getTrialPlanLine(trial);
+  const date = trial?.ends_at ? formatTrialEndDate(trial.ends_at) : null;
+  const line = englishLine
+    ? t(
+        englishLine,
+        trial?.cancel_at_period_end
+          ? `试用将于 ${date} 结束`
+          : date
+            ? `套餐将于 ${date} 开始`
+            : "试用结束后套餐将自动开始",
+      )
+    : null;
   if (!line) return null;
 
   return (

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { FormProvider } from "react-hook-form";
 import { FormDescription, FormField } from "@/components/molecules/Form/Form";
 import { Button } from "@/components/atoms/Button/Button";
@@ -25,6 +28,8 @@ export function APIKeyCredentialsModal({
   onCredentialsCreate,
   siblingInputs,
 }: Props) {
+  const { t } = useTranslation();
+
   const {
     form,
     isLoading,
@@ -41,7 +46,10 @@ export function APIKeyCredentialsModal({
 
   return (
     <Dialog
-      title={`Add new API key for ${providerName ?? ""}`}
+      title={t(
+        `Add new API key for ${providerName ?? ""}`,
+        `为 ${providerName ?? ""} 添加新 API 密钥`,
+      )}
       controlled={{
         isOpen: open,
         set: (isOpen) => {
@@ -71,9 +79,12 @@ export function APIKeyCredentialsModal({
               render={({ field }) => (
                 <Input
                   id="title"
-                  label="Name"
+                  label={t("Name", "名称")}
                   type="text"
-                  placeholder="Enter a name for this API Key..."
+                  placeholder={t(
+                    "Enter a name for this API Key...",
+                    "为此 API 密钥输入名称…",
+                  )}
                   {...field}
                 />
               )}
@@ -85,13 +96,16 @@ export function APIKeyCredentialsModal({
                 <>
                   <Input
                     id="apiKey"
-                    label="API Key"
+                    label={t("API Key", "API 密钥")}
                     type="password"
-                    placeholder="Enter API Key..."
+                    placeholder={t("Enter API Key...", "输入 API 密钥…")}
                     hint={
                       schema.credentials_scopes ? (
                         <FormDescription className="text-body-sm leading-inherit">
-                          Required scope(s) for this block:{" "}
+                          {t(
+                            "Required scope(s) for this block:",
+                            "此模块所需的权限范围：",
+                          )}{" "}
                           {schema.credentials_scopes?.map((s, i, a) => (
                             <span key={i}>
                               <Text
@@ -119,9 +133,9 @@ export function APIKeyCredentialsModal({
               render={({ field }) => (
                 <Input
                   id="expiresAt"
-                  label="Expiration Date"
+                  label={t("Expiration Date", "到期日期")}
                   type="datetime-local"
-                  placeholder="Select expiration date..."
+                  placeholder={t("Select expiration date...", "选择到期日期…")}
                   value={field.value}
                   onChange={(e) => {
                     const value = e.target.value;
@@ -151,7 +165,7 @@ export function APIKeyCredentialsModal({
               loading={isSubmitting}
               disabled={isSubmitting}
             >
-              Add API Key
+              {t("Add API Key", "添加 API 密钥")}
             </Button>
           </form>
         </FormProvider>

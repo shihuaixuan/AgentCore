@@ -4,6 +4,10 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import {
+  LocalizedCloseLabel,
+  LocalizedDialogDescription,
+} from "@/lib/i18n/LocalizedCloseLabel";
 
 import { cn } from "@/lib/utils";
 
@@ -120,7 +124,7 @@ const DialogContent = React.forwardRef<
             data-slot="dialog-description"
             className="sr-only"
           >
-            Dialog
+            <LocalizedDialogDescription />
           </DialogPrimitive.Description>
         ) : null}
         <DialogPrimitive.Close
@@ -134,7 +138,7 @@ const DialogContent = React.forwardRef<
             className="h-4 w-4"
           />
           <span data-slot="dialog-close-label" className="sr-only">
-            Close
+            <LocalizedCloseLabel />
           </span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>

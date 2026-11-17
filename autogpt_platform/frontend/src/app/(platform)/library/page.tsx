@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useEffect, useState, useCallback } from "react";
 import { useQueryState } from "nuqs";
 import { AgentsTabIntro } from "./components/AgentsTabIntro/AgentsTabIntro";
@@ -18,6 +19,7 @@ const LIBRARY_TABS: LibraryTab[] = [
 ];
 
 export default function LibraryPage() {
+  const { t } = useTranslation();
   const { searchTerm, setSearchTerm, librarySort, setLibrarySort } =
     useLibraryListPage();
   // In the URL, so a link can open a folder (the approval card links one).
@@ -29,8 +31,11 @@ export default function LibraryPage() {
   const fleetSummary = useLibraryFleetSummary(agents);
 
   useEffect(() => {
-    document.title = "Library – AutoGPT Platform";
-  }, []);
+    document.title = t(
+      "Library – AutoGPT Platform",
+      "工作流库 – AutoGPT Platform",
+    );
+  }, [t]);
 
   function handleTabChange(tabId: string) {
     setActiveTab(tabId);
@@ -58,7 +63,11 @@ export default function LibraryPage() {
           setLibrarySort={setLibrarySort}
           selectedFolderId={selectedFolderId}
           onFolderSelect={setSelectedFolderId}
-          tabs={LIBRARY_TABS}
+          tabs={LIBRARY_TABS.map((tab) => ({
+            ...tab,
+            title:
+              tab.id === "all" ? t(tab.title, "全部") : t(tab.title, "收藏"),
+          }))}
           activeTab={activeTab}
           onTabChange={handleTabChange}
           statusFilter={statusFilter}

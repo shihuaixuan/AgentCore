@@ -124,7 +124,9 @@ class CatalogSource(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-def load_release(root: Path) -> LoadedRelease:
+def load_release(
+    root: Path, *, allow_noncanonical_categories: bool = False
+) -> LoadedRelease:
     manifest_bytes = _read_bytes(root / RELEASE_FILE)
     manifest = _parse_manifest(manifest_bytes)
     release_key = _require_str(manifest, "release_key")
@@ -132,7 +134,12 @@ def load_release(root: Path) -> LoadedRelease:
     catalog_bytes = _read_bytes(root / CATALOG_FILE)
     if manifest.get("catalog_sha256") != file_sha256(catalog_bytes):
         raise CatalogError(f"{CATALOG_FILE} does not match its hash in {RELEASE_FILE}")
-    entries = {entry["slug"]: entry for entry in load_catalog(root)}
+    entries = {
+        entry["slug"]: entry
+        for entry in load_catalog(
+            root, allow_noncanonical_categories=allow_noncanonical_categories
+        )
+    }
 
     raw_packages = manifest.get("packages")
     if not isinstance(raw_packages, list) or not raw_packages:
@@ -184,7 +191,9 @@ def _parse_manifest(manifest_bytes: bytes) -> dict:
     return manifest
 
 
-def load_catalog(root: Path) -> list[CatalogEntry]:
+def load_catalog(
+    root: Path, *, allow_noncanonical_categories: bool = False
+) -> list[CatalogEntry]:
     """The catalog's entries, each with a canonical category set."""
     raw = yaml.safe_load(_read_bytes(root / CATALOG_FILE).decode("utf-8")) or {}
     if not isinstance(raw, dict):
@@ -195,7 +204,9 @@ def load_catalog(root: Path) -> list[CatalogEntry]:
     entries: list[CatalogEntry] = []
     seen: set[str] = set()
     for item in skills:
-        entry = _catalog_entry(item)
+        entry = _catalog_entry(
+            item, allow_noncanonical_categories=allow_noncanonical_categories
+        )
         if entry["slug"] in seen:
             raise CatalogError(f"{CATALOG_FILE}: '{entry['slug']}' is listed twice")
         seen.add(entry["slug"])
@@ -205,7 +216,9 @@ def load_catalog(root: Path) -> list[CatalogEntry]:
     return entries
 
 
-def _catalog_entry(item: object) -> CatalogEntry:
+def _catalog_entry(
+    item: object, *, allow_noncanonical_categories: bool = False
+) -> CatalogEntry:
     if not isinstance(item, dict):
         raise CatalogError(f"{CATALOG_FILE}: every skill must be a mapping")
     slug = str(item.get("slug") or "").strip()
@@ -220,10 +233,20 @@ def _catalog_entry(item: object) -> CatalogEntry:
             raise CatalogError(
                 f"{CATALOG_FILE}: '{slug}' {label} must be a list of strings"
             )
-    try:
-        canonical = validate_canonical_categories(categories)
-    except ValueError as exc:
-        raise CatalogError(f"{CATALOG_FILE}: '{slug}': {exc}") from exc
+    if allow_noncanonical_categories:
+        canonical = list(dict.fromkeys(value.strip().lower() for value in categories))
+        if not canonical:
+            raise CatalogError(f"{CATALOG_FILE}: '{slug}' has no categories")
+        for category in canonical:
+            if not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,63}", category):
+                raise CatalogError(
+                    f"{CATALOG_FILE}: '{slug}' has an invalid market category"
+                )
+    else:
+        try:
+            canonical = validate_canonical_categories(categories)
+        except ValueError as exc:
+            raise CatalogError(f"{CATALOG_FILE}: '{slug}': {exc}") from exc
     return CatalogEntry(
         slug=slug,
         categories=canonical,
@@ -262,8 +285,10 @@ def _load_package(root: Path, entry: CatalogEntry, raw: dict) -> LoadedPackage:
         if path != SKILL_MD
     ]
     try:
-        validate_skill_content(parsed.description, parsed.body, list(parsed.triggers))
         validate_package(SkillPackage(skill_md=text, files=files))
+        validate_skill_content(
+            parsed.description, parsed.body, list(parsed.triggers), name=slug
+        )
     except (ValueError, SkillPackageError) as exc:
         raise CatalogError(f"{slug}: {exc}") from exc
     return LoadedPackage(

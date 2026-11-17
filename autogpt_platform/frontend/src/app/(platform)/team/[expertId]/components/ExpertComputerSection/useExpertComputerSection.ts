@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV2GetExpertComputerQueryKey,
   useGetV2GetExpertComputer,
@@ -15,6 +16,7 @@ interface Args {
 }
 
 export function useExpertComputerSection({ expertId }: Args) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   // Kept with the expert it was opened for: the section can be re-rendered
@@ -44,7 +46,7 @@ export function useExpertComputerSection({ expertId }: Args) {
         },
         onError: (error) => {
           toast({
-            title: "Could not open the desktop",
+            title: t("Could not open the desktop", "无法打开桌面"),
             description: desktopStartFailure(error),
             variant: "destructive",
           });

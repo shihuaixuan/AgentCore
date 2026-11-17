@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { Input } from "@/components/atoms/Input/Input";
 import { CredentialsInput } from "@/components/contextual/CredentialsInput/CredentialsInput";
@@ -35,6 +36,7 @@ export function SelectedTriggerView({
   onSwitchToRunsTab,
   banner,
 }: Props) {
+  const { t } = useTranslation();
   const {
     trigger,
     isLoading,
@@ -115,24 +117,24 @@ export function SelectedTriggerView({
           <div className="flex flex-col gap-4">
             <RunDetailHeader agent={agent} run={undefined} />
 
-            <RunDetailCard title="Trigger Details">
+            <RunDetailCard title={t("Trigger Details", "触发器详情")}>
               <div className="flex flex-col gap-2">
                 <Input
                   id="trigger-name"
-                  label="Name"
+                  label={t("Name", "名称")}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter trigger name"
+                  placeholder={t("Enter trigger name", "输入触发器名称")}
                 />
 
                 <Input
                   id="trigger-description"
-                  label="Description"
+                  label={t("Description", "描述")}
                   type="textarea"
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter trigger description"
+                  placeholder={t("Enter trigger description", "输入触发器描述")}
                 />
               </div>
             </RunDetailCard>
@@ -145,7 +147,7 @@ export function SelectedTriggerView({
             )}
 
             {triggerConfigFields.length > 0 && (
-              <RunDetailCard title="Trigger Configuration">
+              <RunDetailCard title={t("Trigger Configuration", "触发器配置")}>
                 <div className="flex flex-col gap-4">
                   {triggerConfigFields.map(([key, inputSubSchema]) => (
                     <RunAgentInputs
@@ -161,7 +163,7 @@ export function SelectedTriggerView({
             )}
 
             {inputFields.length > 0 && (
-              <RunDetailCard title="Your Input">
+              <RunDetailCard title={t("Your Input", "你的输入")}>
                 <div className="flex flex-col gap-4">
                   {inputFields.map(([key, inputSubSchema]) => (
                     <RunAgentInputs
@@ -177,7 +179,7 @@ export function SelectedTriggerView({
             )}
 
             {credentialFields.length > 0 && (
-              <RunDetailCard title="Task Credentials">
+              <RunDetailCard title={t("Task Credentials", "任务凭据")}>
                 <div className="flex flex-col gap-6">
                   {credentialFields.map(([key, inputSubSchema]) => (
                     <CredentialsInput

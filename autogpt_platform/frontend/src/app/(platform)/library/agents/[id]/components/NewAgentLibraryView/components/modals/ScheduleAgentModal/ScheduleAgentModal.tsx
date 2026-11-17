@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { Button } from "@/components/atoms/Button/Button";
 import { useState } from "react";
@@ -25,6 +26,7 @@ export function ScheduleAgentModal({
   inputCredentials,
   onScheduleCreated,
 }: Props) {
+  const { t } = useTranslation();
   const [isScheduleFormValid, setIsScheduleFormValid] = useState(true);
 
   const {
@@ -63,7 +65,7 @@ export function ScheduleAgentModal({
 
   return (
     <Dialog
-      title="Schedule Run"
+      title={t("Schedule Run", "计划运行")}
       controlled={{ isOpen, set: handleClose }}
       styling={{ maxWidth: "600px", maxHeight: "90vh" }}
     >
@@ -88,7 +90,7 @@ export function ScheduleAgentModal({
               onClick={handleClose}
               disabled={isCreatingSchedule}
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               variant="primary"
@@ -96,7 +98,7 @@ export function ScheduleAgentModal({
               loading={isCreatingSchedule}
               disabled={!canSchedule}
             >
-              Schedule
+              {t("Schedule", "计划")}
             </Button>
           </div>
         </div>

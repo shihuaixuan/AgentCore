@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
 import {
@@ -102,6 +103,7 @@ function HomeIcon() {
 }
 
 function HomeItem() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const navItemClassName = useNavItemClassName();
 
@@ -109,13 +111,13 @@ function HomeItem() {
     <SidebarMenuItem>
       <SidebarMenuButton
         asChild
-        tooltip="Home"
+        tooltip={t("Home", "首页")}
         isActive={isLinkActive(pathname, "/home")}
         className={navItemClassName}
       >
         <Link href="/home">
           <HomeIcon />
-          <span className="truncate">Home</span>
+          <span className="truncate">{t("Home", "首页")}</span>
           <ShortcutHint letter="O" />
         </Link>
       </SidebarMenuButton>
@@ -128,6 +130,19 @@ interface NavItemProps {
 }
 
 function NavItem({ link }: NavItemProps) {
+  const { t } = useTranslation();
+  const label = t(
+    link.name,
+    (
+      {
+        Workflows: "工作流",
+        Marketplace: "市场",
+        Build: "构建",
+        Files: "文件",
+        Team: "团队",
+      } as Record<string, string>
+    )[link.name] ?? link.name,
+  );
   const pathname = usePathname();
   const navItemClassName = useNavItemClassName();
 
@@ -135,7 +150,7 @@ function NavItem({ link }: NavItemProps) {
     <SidebarMenuItem {...(link.tourTarget && tourTarget(link.tourTarget))}>
       <SidebarMenuButton
         asChild
-        tooltip={link.name}
+        tooltip={label}
         isActive={isLinkActive(pathname, link.href)}
         className={navItemClassName}
       >
@@ -145,7 +160,7 @@ function NavItem({ link }: NavItemProps) {
             tone="emphasis-soft"
             className="size-4 group-data-[collapsible=icon]:size-4.5"
           />
-          <span className="truncate">{link.name}</span>
+          <span className="truncate">{label}</span>
           <NavLinkLoader />
         </Link>
       </SidebarMenuButton>
@@ -173,6 +188,7 @@ function NavMenu({
 type Props = ComponentProps<typeof Sidebar>;
 
 export function AppSidebar(props: Props) {
+  const { t } = useTranslation();
   const { isLoggedIn } = useAuth();
   const reduceMotion = useReducedMotion();
   const { isMobile } = useSidebar();
@@ -229,7 +245,7 @@ export function AppSidebar(props: Props) {
 
           {workspaceLinks.length > 0 ? (
             <motion.div variants={itemVariants} {...tourTarget("workspace")}>
-              <CollapsibleNavGroup label="Workspace">
+              <CollapsibleNavGroup label={t("Workspace", "工作区")}>
                 <NavMenu links={workspaceLinks} />
               </CollapsibleNavGroup>
             </motion.div>

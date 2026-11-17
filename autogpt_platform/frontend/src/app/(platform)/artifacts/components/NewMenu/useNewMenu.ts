@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetWorkspaceStorageUsageQueryKey,
   getListWorkspaceFoldersQueryKey,
@@ -11,6 +12,7 @@ import { ARTIFACTS_LIST_QUERY_KEY } from "../../useArtifactsPage";
 import { uploadFiles } from "./helpers";
 
 export function useNewMenu(selectedFolderId: string | null) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { createFolder, isCreating } = useArtifactsFolders();
@@ -28,7 +30,7 @@ export function useNewMenu(selectedFolderId: string | null) {
       }
       if (leftAtRoot.length > 0) {
         toast({
-          title: "Uploaded to the root instead",
+          title: t("Uploaded to the root instead", "已上传至根目录"),
           description: `${leftAtRoot.join(", ")} couldn't be moved into this folder.`,
         });
       }

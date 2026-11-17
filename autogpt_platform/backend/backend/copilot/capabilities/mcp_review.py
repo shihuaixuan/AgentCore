@@ -30,12 +30,12 @@ _WRITE_VERBS = re.compile(
     r"(^|[_\-.\s])(create|update|delete|remove|send|post|write|set|add|upload|"
     r"publish|archive|merge|close|assign|move|rename|execute|run|trigger|"
     r"cancel|approve|reject|pay|transfer|invite|grant|revoke|reset)([_\-.\s]|$)",
-    re.I,
+    re.IGNORECASE,
 )
 _READ_VERBS = re.compile(
     r"(^|[_\-.\s])(get|list|search|find|read|fetch|query|describe|show|"
     r"lookup|check|count|view)([_\-.\s]|$)",
-    re.I,
+    re.IGNORECASE,
 )
 
 
@@ -45,6 +45,8 @@ class MCPReviewPayload(BaseModel):
     server_url: str
     tool: str
     arguments: dict[str, Any]
+    connection_id: str | None = None
+    credential_id: str | None = None
 
 
 def looks_like_write(tool_name: str) -> bool:
@@ -80,14 +82,20 @@ async def open_mcp_review(
     review so a retried ``run_capability`` does not stack approvals.
     """
     node_id = mcp_review_node_id(host)
-    data = payload.model_dump()
+    data = payload.model_dump(exclude_none=True)
     for review in await review_db().get_pending_reviews_for_chat_session(
         session_id, user_id
     ):
+        try:
+            previous = MCPReviewPayload.model_validate(review.payload).model_dump(
+                exclude_none=True
+            )
+        except (ValueError, TypeError):
+            continue
         if (
             review.node_id == node_id
             and review.status.value == "WAITING"
-            and same_json(review.payload, data)
+            and same_json(previous, data)
         ):
             return review.node_exec_id
     review_id = f"{node_id}{COPILOT_NODE_EXEC_ID_SEPARATOR}{uuid.uuid4().hex[:8]}"

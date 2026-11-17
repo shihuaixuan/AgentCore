@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
 import { Button } from "@/components/atoms/Button/Button";
@@ -40,6 +41,8 @@ export function GraphScheduleListItem({
   actionClassName,
   textSize = "body",
 }: Props) {
+  const { t } = useTranslation();
+
   const {
     nextRunLabel,
     nextRunValue,
@@ -105,7 +108,7 @@ export function GraphScheduleListItem({
               data-testid="schedule-kind-badge"
             >
               <Text variant="small-tight" as="span" tone="success-strong">
-                Workflow run
+                {t("Workflow run", "工作流运行")}
               </Text>
             </span>
           </div>
@@ -120,10 +123,10 @@ export function GraphScheduleListItem({
           onClick={openView}
           className={actionClassName}
           data-testid="schedule-view-button"
-          aria-label="View schedule"
+          aria-label={t("View schedule", "查看计划")}
         >
           <Icon icon={EyeIcon} className="mr-1 h-4 w-4" />
-          View
+          {t("View", "查看")}
         </Button>
         <Button
           variant="secondary"
@@ -131,17 +134,17 @@ export function GraphScheduleListItem({
           onClick={openDelete}
           className={actionClassName}
           data-testid="schedule-delete-button"
-          aria-label="Delete schedule"
+          aria-label={t("Delete schedule", "删除计划")}
         >
           <Icon icon={Delete02Icon} className="mr-1 h-4 w-4" />
-          Delete
+          {t("Delete", "删除")}
         </Button>
       </div>
 
       <Dialog
         controlled={{ isOpen: isViewOpen, set: closeView }}
         styling={{ maxWidth: "26rem" }}
-        title="Scheduled workflow run"
+        title={t("Scheduled workflow run", "定时工作流运行")}
       >
         <Dialog.Content>
           <div className="flex flex-col gap-5">
@@ -154,20 +157,26 @@ export function GraphScheduleListItem({
                   {agentLabel}
                 </Text>
                 <Text variant="small" tone="muted">
-                  Recurring workflow run
+                  {t("Recurring workflow run", "周期性工作流运行")}
                 </Text>
               </div>
             </div>
             <dl className="divide-y divide-separator overflow-hidden rounded-xl border border-border-base/80 bg-surface-muted/60">
               <ScheduleMetaRow
-                label="Next run"
+                label={t("Next run", "下次运行")}
                 value={nextRunValue}
                 title={nextRunTitle}
               />
-              <ScheduleMetaRow label="Repeats" value={recurrenceLabel} />
-              <ScheduleMetaRow label="Schedule name" value={schedule.name} />
               <ScheduleMetaRow
-                label="Workflow"
+                label={t("Repeats", "重复规则")}
+                value={recurrenceLabel}
+              />
+              <ScheduleMetaRow
+                label={t("Schedule name", "计划名称")}
+                value={schedule.name}
+              />
+              <ScheduleMetaRow
+                label={t("Workflow", "工作流")}
                 value={`${schedule.graph_id} · v${schedule.graph_version}`}
                 mono
               />
@@ -179,14 +188,15 @@ export function GraphScheduleListItem({
       <Dialog
         controlled={{ isOpen: isDeleteOpen, set: closeDelete }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete scheduled workflow run"
+        title={t("Delete scheduled workflow run", "删除定时工作流运行")}
       >
         <Dialog.Content>
           <div className="flex flex-col gap-4">
             <Text variant="large">
-              Delete this scheduled workflow run? The workflow will stop running
-              on this schedule and you can recreate it from the builder if
-              needed.
+              {t(
+                "Delete this scheduled workflow run? The workflow will stop running on this schedule and you can recreate it from the builder if needed.",
+                "要删除此定时工作流运行吗？工作流将不再按此计划运行。如有需要，可在构建器中重新创建。",
+              )}
             </Text>
             <Dialog.Footer>
               <Button
@@ -194,7 +204,7 @@ export function GraphScheduleListItem({
                 disabled={isDeleting}
                 onClick={() => closeDelete(false)}
               >
-                Keep it
+                {t("Keep it", "保留")}
               </Button>
               <Button
                 variant="destructive"
@@ -202,7 +212,7 @@ export function GraphScheduleListItem({
                 loading={isDeleting}
                 data-testid="schedule-confirm-delete"
               >
-                Yes, delete
+                {t("Yes, delete", "确认删除")}
               </Button>
             </Dialog.Footer>
           </div>

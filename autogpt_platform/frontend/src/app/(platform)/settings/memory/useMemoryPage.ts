@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetMyBusinessUnderstandingQueryKey,
   getGetMyExpertMemoryOverviewQueryKey,
@@ -19,6 +20,7 @@ import { useMemoryScope } from "./useMemoryScope";
 import { RECENT_FACTS_LIMIT } from "./helpers";
 
 export function useMemoryPage() {
+  const { t } = useTranslation();
   const scope = useMemoryScope();
   const { scopeExpertID } = scope;
   const queryClient = useQueryClient();
@@ -70,13 +72,13 @@ export function useMemoryPage() {
 
   function onForgotten() {
     invalidateScopeQueries();
-    toast({ title: "Forgotten" });
+    toast({ title: t("Forgotten", "已忘记") });
   }
 
   function onForgetError() {
     toast({
-      title: "Could not forget that memory",
-      description: "Please try again.",
+      title: t("Could not forget that memory", "无法忘记该记忆"),
+      description: t("Please try again.", "请重试。"),
       variant: "destructive",
     });
   }
@@ -112,13 +114,13 @@ export function useMemoryPage() {
 
   function onErased() {
     invalidateScopeQueries();
-    toast({ title: "Memory erased" });
+    toast({ title: t("Memory erased", "记忆已清除") });
   }
 
   function onEraseError() {
     toast({
-      title: "Could not erase memory",
-      description: "Please try again.",
+      title: t("Could not erase memory", "无法清除记忆"),
+      description: t("Please try again.", "请重试。"),
       variant: "destructive",
     });
   }

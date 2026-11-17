@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getExpertAccent,
   getExpertAccessProviders,
@@ -31,13 +32,15 @@ const MAIN_CLASS =
   "mx-auto flex w-full max-w-[1120px] flex-col px-4 pb-24 pt-8 sm:px-6 md:px-8";
 
 function BackToMarketplaceLink() {
+  const { t } = useTranslation();
   return (
     <Link
       href="/marketplace#experts"
       className="mb-6 inline-flex w-fit items-center gap-1.5 text-body-sm leading-inherit text-foreground-tertiary transition-colors hover:text-foreground-strong"
     >
       <Icon icon={ArrowLeft02Icon} size={14} />
-      Back to marketplace
+
+      {t("Back to marketplace", "返回市场")}
     </Link>
   );
 }

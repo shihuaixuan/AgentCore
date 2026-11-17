@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { CredentialMentionEditor } from "../CredentialMention/CredentialMentionEditor";
 import type { MentionInput } from "./useChatMentions";
 import {
@@ -159,7 +160,7 @@ export const ChatInput = memo(function ChatInput({
   isUploadingFiles = false,
   onStop,
   onEnqueue,
-  placeholder = "Type your message...",
+  placeholder,
   className,
   inputId = "chat-input",
   draftKey,
@@ -181,6 +182,7 @@ export const ChatInput = memo(function ChatInput({
   canAttachWhileStreaming = false,
   atReset,
 }: Props) {
+  const { t } = useTranslation();
   const isDryRun = useCopilotUIStore((s) => s.isDryRun);
   const setIsDryRun = useCopilotUIStore((s) => s.setIsDryRun);
   // Still the CHAT_MODE_OPTION flag, which no longer names what it gates: the
@@ -195,15 +197,22 @@ export const ChatInput = memo(function ChatInput({
   const [refusedCount, setRefusedCount] = useState(0);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isMultiline, setIsMultiline] = useState(false);
-
   function handleToggleDryRun() {
     const next = !isDryRun;
     setIsDryRun(next);
     toast({
-      title: next ? "Test mode enabled" : "Test mode disabled",
+      title: next
+        ? t("Test mode enabled", "测试模式已开启")
+        : t("Test mode disabled", "测试模式已关闭"),
       description: next
-        ? "New chats will run workflows in test mode."
-        : "New chats will run workflows normally.",
+        ? t(
+            "New chats will run workflows in test mode.",
+            "新对话将以测试模式运行工作流。",
+          )
+        : t(
+            "New chats will run workflows normally.",
+            "新对话将正常运行工作流。",
+          ),
     });
   }
 
@@ -349,8 +358,8 @@ export const ChatInput = memo(function ChatInput({
   const resolvedPlaceholder = isRecording
     ? ""
     : isTranscribing
-      ? "Transcribing..."
-      : placeholder;
+      ? t("Transcribing...", "正在转写…")
+      : (placeholder ?? t("Type your message...", "输入消息…"));
 
   // Narrows to string, so the render site needn't re-test sessionId.
   const devtoolSessionId = isTokenDevtoolEnabled() ? sessionId : null;
@@ -401,7 +410,7 @@ export const ChatInput = memo(function ChatInput({
       ? [
           {
             key: "voice",
-            label: "Voice mode",
+            label: t("Voice mode", "语音模式"),
             icon: VoiceIcon,
             disabled: voiceMode.disabled,
             onSelect: voiceMode.onStart,
@@ -412,7 +421,7 @@ export const ChatInput = memo(function ChatInput({
       ? [
           {
             key: "model",
-            label: "Model and connection",
+            label: t("Model and connection", "模型与连接"),
             icon: FlashIcon,
             onSelect: () => setPlusPanel("model"),
           },
@@ -422,7 +431,7 @@ export const ChatInput = memo(function ChatInput({
       ? [
           {
             key: "devtool",
-            label: "Token usage",
+            label: t("Token usage", "Token 用量"),
             icon: DashboardSpeed02Icon,
             onSelect: () => setPlusPanel("devtool"),
           },
@@ -640,7 +649,7 @@ export const ChatInput = memo(function ChatInput({
             {isStreaming && isTurnStarting ? (
               <PromptInputSubmit
                 status="submitted"
-                aria-label="Sending"
+                aria-label={t("Sending", "正在发送")}
                 className={sendButtonClass}
               />
             ) : isStreaming ? (
@@ -663,7 +672,10 @@ export const ChatInput = memo(function ChatInput({
         </div>
 
         <span id={`${inputId}-hint`} className="sr-only">
-          Press Enter to send, Shift+Enter for new line, Space to record voice
+          {t(
+            "Press Enter to send, Shift+Enter for new line, Space to record voice",
+            "按 Enter 发送，Shift+Enter 换行，空格键录音",
+          )}
         </span>
       </InputGroup>
       {showModelControl && (

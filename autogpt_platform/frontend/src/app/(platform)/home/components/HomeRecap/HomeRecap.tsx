@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { useTrackFunnelViewOnce } from "@/services/experts/use-track-funnel-view-once";
@@ -15,6 +16,7 @@ const CONTENT_CLASS = "relative mx-auto w-full max-w-[1120px]";
 const GRID_CLASS = "grid grid-cols-1 items-start gap-4 xl:grid-cols-12";
 
 export function HomeRecap() {
+  const { t } = useTranslation();
   const { dashboard, isLoading, isError, refetch } = useHomePage();
 
   useTrackFunnelViewOnce(
@@ -32,7 +34,12 @@ export function HomeRecap() {
         <div className={CONTENT_CLASS}>
           <ErrorCard
             context="home"
-            httpError={{ message: "Your Home briefing could not be loaded" }}
+            httpError={{
+              message: t(
+                "Your Home briefing could not be loaded",
+                "无法加载你的首页简报",
+              ),
+            }}
             onRetry={() => refetch()}
           />
         </div>
@@ -62,8 +69,12 @@ export function HomeRecap() {
 }
 
 function HomeSkeleton() {
+  const { t } = useTranslation();
   return (
-    <section className={SHELL_CLASS} aria-label="Loading Home…">
+    <section
+      className={SHELL_CLASS}
+      aria-label={t("Loading Home…", "正在加载首页…")}
+    >
       <div className={CONTENT_CLASS}>
         <div className="flex items-end justify-between gap-6 px-1 pt-1 pb-5">
           <div className="space-y-2">

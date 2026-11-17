@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
@@ -27,6 +28,7 @@ export function FolderFormDialog({
   isSubmitting,
   onSubmit,
 }: Props) {
+  const { t } = useTranslation();
   const [name, setName] = useState(initialName);
 
   useEffect(() => {
@@ -48,14 +50,16 @@ export function FolderFormDialog({
     <Dialog
       controlled={{ isOpen, set: setIsOpen }}
       styling={{ maxWidth: "28rem" }}
-      title={mode === "create" ? "Create folder" : "Rename folder"}
+      title={
+        mode === "create" ? t("Create folder", "创建文件夹") : "Rename folder"
+      }
     >
       <Dialog.Content>
         <div className="flex flex-col gap-3">
           <Input
             id="folder-name"
-            label="Folder name"
-            placeholder="Enter folder name"
+            label={t("Folder name", "文件夹名称")}
+            placeholder={t("Enter folder name", "输入文件夹名称")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
@@ -77,7 +81,7 @@ export function FolderFormDialog({
             onClick={handleSubmit}
             data-testid="folder-form-submit"
           >
-            {mode === "create" ? "Create" : "Save"}
+            {mode === "create" ? t("Create", "创建") : t("Save", "保存")}
           </Button>
         </div>
       </Dialog.Content>

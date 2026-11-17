@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import { Text } from "@/components/atoms/Text/Text";
 import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
@@ -25,6 +26,7 @@ const POSITIONS = [
 /** Otto flanked by the first two hires, over the page title and a line on
  *  what the team is for. */
 export function TeamPageHeader({ experts }: Props) {
+  const { t } = useTranslation();
   const flank = experts.slice(0, 2);
 
   return (
@@ -54,10 +56,13 @@ export function TeamPageHeader({ experts }: Props) {
         </div>
         <div className="flex min-w-0 flex-col gap-0.5">
           <Text variant="h4" as="h1" tone="primary">
-            Team
+            {t("Team", "团队")}
           </Text>
           <Text variant="body" tone="muted">
-            Otto and your hired experts, ready to work.
+            {t(
+              "Otto and your hired experts, ready to work.",
+              "Otto 和你聘用的专家已准备就绪。",
+            )}
           </Text>
         </div>
       </div>

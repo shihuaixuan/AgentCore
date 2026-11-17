@@ -1,6 +1,7 @@
 import { useLayoutEffect, useState } from "react";
 import { useHomePage } from "@/app/(platform)/home/useHomePage";
 import { getInputPlaceholder } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Args {
   enabled: boolean;
@@ -13,6 +14,7 @@ const TEAM_PLACEHOLDER =
 const AFTER_DUMP_PLACEHOLDER = "What should Otto take on first?";
 
 export function useHomeComposer({ enabled, greetingPath = null }: Args) {
+  const { t } = useTranslation();
   const { dashboard } = useHomePage({ enabled });
   const hasExistingWork = Boolean(
     enabled &&
@@ -47,9 +49,13 @@ export function useHomeComposer({ enabled, greetingPath = null }: Args) {
   }, []);
 
   if (greetingPath === "A") {
-    return { inputPlaceholder: AFTER_DUMP_PLACEHOLDER };
+    return {
+      inputPlaceholder: t(AFTER_DUMP_PLACEHOLDER, "你希望 Otto 先处理什么？"),
+    };
   }
   return {
-    inputPlaceholder: hasExistingWork ? TEAM_PLACEHOLDER : discoveryPlaceholder,
+    inputPlaceholder: hasExistingWork
+      ? t(TEAM_PLACEHOLDER, "你希望团队处理什么？例如：跟进昨天的潜在客户")
+      : t(discoveryPlaceholder, "你的工作是什么？哪些事情最耗时间？"),
   };
 }

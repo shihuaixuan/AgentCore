@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { Text } from "@/components/atoms/Text/Text";
 import { CredentialsInput } from "@/components/contextual/CredentialsInput/CredentialsInput";
@@ -19,6 +20,7 @@ export function AgentInputsReadOnly({
   inputs,
   credentialInputs,
 }: Props) {
+  const { t } = useTranslation();
   const inputFields = getAgentInputFields(agent);
   const credentialFieldEntries = Object.entries(
     getAgentCredentialsFields(agent),
@@ -38,7 +40,7 @@ export function AgentInputsReadOnly({
   if (!hasInputs && !hasCredentials) {
     return (
       <Text variant="body" tone="body">
-        No input for this run.
+        {t("No input for this run.", "此次运行没有输入。")}
       </Text>
     );
   }

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { toastIfPlanRequired } from "@/components/contextual/PaywallToast/helpers";
 import { useEffect, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -29,6 +32,7 @@ export function useAgentInfoStep({
   initialData,
   isMarketplaceUpdate = false,
 }: Props) {
+  const { t } = useTranslation();
   const [agentId, setAgentId] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,7 +40,7 @@ export function useAgentInfoStep({
   const { toast } = useToast();
 
   const form = useForm<PublishAgentFormData>({
-    resolver: zodResolver(publishAgentSchemaFactory(isMarketplaceUpdate)),
+    resolver: zodResolver(publishAgentSchemaFactory(isMarketplaceUpdate, t)),
     defaultValues: {
       changesSummary: "",
       title: "",
@@ -101,7 +105,7 @@ export function useAgentInfoStep({
     if (images.length === 0) {
       form.setError("root", {
         type: "manual",
-        message: "At least one image is required",
+        message: t("At least one image is required", "请至少添加一张图片"),
       });
       return;
     }
@@ -109,8 +113,11 @@ export function useAgentInfoStep({
     // Validate that an agent is selected before submission
     if (!selectedAgentId || !selectedAgentVersion) {
       toast({
-        title: "Workflow Selection Required",
-        description: "Please select a workflow before submitting to the store.",
+        title: t("Workflow Selection Required", "请选择工作流"),
+        description: t(
+          "Please select a workflow before submitting to the store.",
+          "提交到市场前，请先选择工作流。",
+        ),
         variant: "destructive",
       });
       return;
@@ -144,7 +151,7 @@ export function useAgentInfoStep({
       if (toastIfPlanRequired(error, "Publishing needs an active plan")) return;
       Sentry.captureException(error);
       toast({
-        title: "Submit Workflow Error",
+        title: t("Submit Workflow Error", "提交工作流失败"),
         description:
           (error instanceof Error ? error.message : undefined) ||
           "An error occurred while submitting the workflow. Please try again.",

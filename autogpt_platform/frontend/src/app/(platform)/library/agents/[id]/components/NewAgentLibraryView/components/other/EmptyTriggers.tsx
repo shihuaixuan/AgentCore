@@ -1,9 +1,11 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { EmptySchedulesIllustration } from "./EmptySchedulesIllustration";
 
 export function EmptyTriggers() {
+  const { t } = useTranslation();
   return (
     <div className="flex h-full flex-col items-center justify-center gap-20">
       <EmptySchedulesIllustration />
@@ -13,11 +15,13 @@ export function EmptyTriggers() {
           // oxlint-disable-next-line design-system/no-restyle -- no heading variant keeps the parent line height; h4 alone would move the empty state by 9px
           className="text-center leading-inherit"
         >
-          No triggers yet
+          {t("No triggers yet", "暂无触发器")}
         </Text>
         <Text variant="large" tone="body">
-          Set up automatic triggers for your workflow to run tasks automatically
-          — they&apos;ll show up here.
+          {t(
+            "Set up automatic triggers for your workflow to run tasks automatically — they'll show up here.",
+            "为工作流设置自动触发器以自动执行任务，触发器会显示在这里。",
+          )}
         </Text>
       </div>
     </div>

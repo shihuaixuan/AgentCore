@@ -57,11 +57,14 @@ function BlockCard({
 
     const customNode = addBlockWithPlacement(blockData, {
       server_url: result.serverUrl,
+      connection_id: result.connectionID ?? "",
       server_name: serverLabel,
       selected_tool: result.selectedTool,
       tool_input_schema: result.toolInputSchema,
       available_tools: result.availableTools,
-      credentials: result.credentials ?? undefined,
+      credentials: result.connectionID
+        ? undefined
+        : (result.credentials ?? undefined),
     });
     if (customNode) {
       const displayName = result.selectedTool

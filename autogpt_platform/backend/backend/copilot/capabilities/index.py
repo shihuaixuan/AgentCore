@@ -393,7 +393,9 @@ class CapabilityIndex:
         names: connect_integration's purpose lists "github", and it led every
         GitHub query over the GitHub blocks and MCP server."""
         entry = self.entries[idx]
-        if entry.kind != "tool" or entry.name in CONNECTION_HELPER_TOOLS:
+        if (
+            entry.kind != "tool" and not entry.custom_mcp
+        ) or entry.name in CONNECTION_HELPER_TOOLS:
             return False
         document = {
             *tokenize(entry.name),

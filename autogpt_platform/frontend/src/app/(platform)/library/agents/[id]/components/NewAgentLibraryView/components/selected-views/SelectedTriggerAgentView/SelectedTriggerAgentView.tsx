@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useGetV2ListTriggerAgents } from "@/app/api/__generated__/endpoints/library/library";
 import { useGetV1ListExecutionSchedulesForAGraph } from "@/app/api/__generated__/endpoints/schedules/schedules";
 import type { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
@@ -27,6 +28,7 @@ export function SelectedTriggerAgentView({
   onClearSelectedRun,
   banner,
 }: Props) {
+  const { t } = useTranslation();
   const { data, isLoading, error } = useGetV2ListTriggerAgents(agent.id, {
     query: { select: okData },
   });
@@ -69,9 +71,12 @@ export function SelectedTriggerAgentView({
   if (!triggerAgent) {
     return (
       <SelectedViewLayout agent={agent} banner={banner}>
-        <RunDetailCard title="Trigger not found">
+        <RunDetailCard title={t("Trigger not found", "未找到触发器")}>
           <Text variant="body" tone="muted">
-            This trigger workflow no longer exists.
+            {t(
+              "This trigger workflow no longer exists.",
+              "此触发工作流已不存在。",
+            )}
           </Text>
         </RunDetailCard>
       </SelectedViewLayout>
@@ -101,7 +106,7 @@ export function SelectedTriggerAgentView({
             </RunDetailCard>
 
             {schedule && (
-              <RunDetailCard title="Schedule">
+              <RunDetailCard title={t("Schedule", "计划")}>
                 <div className="flex flex-col gap-6">
                   {schedule.graph_version !== triggerAgent.graph_version && (
                     <div className="rounded-md bg-warning-surface px-3 py-2">
@@ -115,7 +120,9 @@ export function SelectedTriggerAgentView({
                     </div>
                   )}
                   <div className="flex flex-col gap-1.5">
-                    <Text variant="large-medium">Recurrence</Text>
+                    <Text variant="large-medium">
+                      {t("Recurrence", "重复周期")}
+                    </Text>
                     <div className="flex items-center gap-3">
                       <Text variant="body" as="span">
                         {humanizeCronExpression(schedule.cron)}
@@ -131,7 +138,9 @@ export function SelectedTriggerAgentView({
                     </div>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <Text variant="large-medium">Next run</Text>
+                    <Text variant="large-medium">
+                      {t("Next run", "下次运行")}
+                    </Text>
                     <div className="flex items-center gap-3">
                       <Text variant="body" as="span">
                         {formatInTimezone(
@@ -162,9 +171,12 @@ export function SelectedTriggerAgentView({
             )}
 
             {!schedule && !isSchedulesLoading && (
-              <RunDetailCard title="Schedule">
+              <RunDetailCard title={t("Schedule", "计划")}>
                 <Text variant="body" tone="muted">
-                  No schedule configured for this trigger workflow.
+                  {t(
+                    "No schedule configured for this trigger workflow.",
+                    "尚未为此触发工作流配置计划。",
+                  )}
                 </Text>
               </RunDetailCard>
             )}

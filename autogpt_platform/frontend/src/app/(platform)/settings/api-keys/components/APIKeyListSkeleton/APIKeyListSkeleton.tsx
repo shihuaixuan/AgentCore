@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 import type { Variants } from "framer-motion";
 
@@ -24,12 +25,13 @@ const SKELETON_ITEM_VARIANTS: Variants = {
 };
 
 export function APIKeyListSkeleton() {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   return (
     <motion.div
       role="status"
-      aria-label="Loading API keys"
+      aria-label={t("Loading API keys", "正在加载 API 密钥")}
       className="flex w-full flex-col divide-y divide-border-base overflow-hidden rounded-2xl border border-border-base bg-surface"
       initial={reduceMotion ? false : "hidden"}
       animate={reduceMotion ? undefined : "show"}

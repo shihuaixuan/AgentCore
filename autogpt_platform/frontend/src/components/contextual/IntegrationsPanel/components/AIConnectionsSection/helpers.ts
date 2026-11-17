@@ -29,10 +29,27 @@ const MICROSOFT_SCOPE_LABELS: Record<string, string> = {
 
 export function microsoftAccessLabels(
   scopes: string[] | null | undefined,
+  t: (english: string, chinese: string) => string = (english) => english,
 ): string[] {
+  const chinese: Record<string, string> = {
+    "User.Read": "基本账户资料",
+    "Sites.Read.All": "SharePoint 和 OneDrive 文件",
+    "Mail.Read": "Outlook 邮件",
+    "People.Read.All": "组织中的人员",
+    "OnlineMeetingTranscript.Read.All": "Teams 会议转录",
+    "Chat.Read": "Teams 聊天",
+    "ChannelMessage.Read.All": "Teams 频道消息",
+    "ExternalItem.Read.All": "外部 Microsoft Search 项目",
+    offline_access: "保持连接",
+    openid: "登录身份",
+    profile: "基本账户资料",
+    email: "电子邮件地址",
+  };
   return Array.from(
     new Set(
-      (scopes ?? []).map((scope) => MICROSOFT_SCOPE_LABELS[scope] ?? scope),
+      (scopes ?? []).map((scope) =>
+        t(MICROSOFT_SCOPE_LABELS[scope] ?? scope, chinese[scope] ?? scope),
+      ),
     ),
   );
 }

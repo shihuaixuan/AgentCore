@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Input } from "@/components/atoms/Input/Input";
 import {
@@ -21,6 +22,8 @@ interface Props {
 // small text, and no submit button of its own — the panel footer's
 // Continue drives the same submit (Enter still works via the form).
 export function InlineApiKeyForm({ form, providerName, onSubmit }: Props) {
+  const { t } = useTranslation();
+
   return (
     <Form form={form} onSubmit={onSubmit} className="space-y-2.5">
       <FormField
@@ -33,7 +36,7 @@ export function InlineApiKeyForm({ form, providerName, onSubmit }: Props) {
                 {...field}
                 id={field.name}
                 autoComplete="off"
-                label="Name"
+                label={t("Name", "名称")}
                 labelVariant="small-medium"
                 size="small"
                 placeholder={`My ${providerName} key`}
@@ -57,7 +60,7 @@ export function InlineApiKeyForm({ form, providerName, onSubmit }: Props) {
                 type="password"
                 autoComplete="new-password"
                 spellCheck={false}
-                label="API key"
+                label={t("API key", "API 密钥")}
                 labelVariant="small-medium"
                 size="small"
                 placeholder="sk-..."
@@ -80,7 +83,7 @@ export function InlineApiKeyForm({ form, providerName, onSubmit }: Props) {
                 value={field.value ?? ""}
                 id={field.name}
                 type="date"
-                label="Expires (optional)"
+                label={t("Expires (optional)", "到期时间（可选）")}
                 labelVariant="small-medium"
                 size="small"
                 wrapperClassName="!mb-0"

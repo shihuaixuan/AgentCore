@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useId } from "react";
 import {
   ArrowDown01Icon,
@@ -37,8 +40,9 @@ export function TransactionRow({
   loadedTransactions,
   onSelectRelated,
 }: Props) {
+  const { t, locale } = useTranslation();
   const receiptID = useId();
-  const posted = formatActivityDate(transaction.transaction_time);
+  const posted = formatActivityDate(transaction.transaction_time, t, locale);
   return (
     <>
       <tr className="border-b border-separator">
@@ -57,7 +61,7 @@ export function TransactionRow({
           <TransactionAmount amount={transaction.amount} />
           {isRunActive(transaction) && (
             <Text variant="small" tone="secondary">
-              so far
+              {t("so far", "截至目前")}
             </Text>
           )}
         </td>
@@ -70,14 +74,17 @@ export function TransactionRow({
             // oxlint-disable-next-line design-system/no-restyle -- a text toggle with 4px side padding; no Button size has it at the small height
             className="min-h-11 w-full min-w-0 px-1"
             onClick={() => onToggle(transaction.id)}
-            aria-label={`${open ? "Close" : "Open"} details for ${activityName(transaction)}, ${posted.date} at ${posted.time}`}
+            aria-label={t(
+              `${open ? "Close" : "Open"} details for ${activityName(transaction)}, ${posted.date} at ${posted.time}`,
+              `${open ? "关闭" : "打开"} ${activityName(transaction, t)} 的详情，${posted.date} ${posted.time}`,
+            )}
             aria-expanded={open}
             aria-controls={open ? receiptID : undefined}
             rightIcon={
               <Icon icon={open ? ArrowUp01Icon : ArrowDown01Icon} size={16} />
             }
           >
-            <span className="hidden sm:inline">Details</span>
+            <span className="hidden sm:inline">{t("Details", "详情")}</span>
           </Button>
         </td>
       </tr>
@@ -98,9 +105,10 @@ export function TransactionRow({
 }
 
 function TransactionActivity({ transaction }: { transaction: Transaction }) {
+  const { t, locale } = useTranslation();
   const href = libraryHref(transaction.library_agent_id);
-  const name = activityName(transaction);
-  const posted = formatActivityDate(transaction.transaction_time);
+  const name = activityName(transaction, t);
+  const posted = formatActivityDate(transaction.transaction_time, t, locale);
   const agent = transaction.activity_type === "agent_run";
   return (
     <div className="flex items-center gap-3">
@@ -130,8 +138,8 @@ function TransactionActivity({ transaction }: { transaction: Transaction }) {
         )}
         <Text variant="small" tone="secondary" className="mt-1">
           {isRunActive(transaction)
-            ? statusLabel(transaction.execution_status || "")
-            : activityDescription(transaction)}
+            ? statusLabel(transaction.execution_status || "", t)
+            : activityDescription(transaction, t)}
         </Text>
         <Text
           variant="small"

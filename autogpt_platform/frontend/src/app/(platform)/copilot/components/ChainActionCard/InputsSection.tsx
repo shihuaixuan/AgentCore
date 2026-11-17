@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { FormRenderer } from "@/components/renderers/InputRenderer/FormRenderer";
 import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
@@ -13,6 +15,7 @@ interface Props {
 /** One card per block/agent asking for inputs, titled by its name so two
  *  blocks' forms never blend into one table. */
 export function InputsSection({ requests }: Props) {
+  const { t } = useTranslation();
   const visible = requests.filter(
     (request) => request.schema !== null || request.hasAdvanced,
   );
@@ -30,7 +33,7 @@ export function InputsSection({ requests }: Props) {
             <Text variant="body-medium-tight" as="span" tone="primary">
               {request.title
                 ? formatInputsTitle(request.title)
-                : "Fill in the details"}
+                : t("Fill in the details", "填写详细信息")}
             </Text>
             {request.title && (
               <Text
@@ -39,7 +42,7 @@ export function InputsSection({ requests }: Props) {
                 tone="subtle"
                 className="ml-auto"
               >
-                Fill in the details
+                {t("Fill in the details", "填写详细信息")}
               </Text>
             )}
           </div>
@@ -70,8 +73,8 @@ export function InputsSection({ requests }: Props) {
                 onClick={request.onToggleAdvanced}
               >
                 {request.showAdvanced
-                  ? "Hide advanced fields"
-                  : "Show advanced fields"}
+                  ? t("Hide advanced fields", "隐藏高级字段")
+                  : t("Show advanced fields", "显示高级字段")}
               </button>
             )}
           </div>

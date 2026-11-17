@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   expertPastel,
   getCategoryHex,
@@ -36,6 +39,7 @@ interface Props {
  *  behind its contents: a card that is itself a link cannot hold the hire
  *  button, since an anchor may not contain one. */
 export function ExpertCard({ expert, isHired, category }: Props) {
+  const { t } = useTranslation();
   const selectedCategory =
     category && expert.categories?.includes(category) ? category : undefined;
   // The expert's own visual family, whatever filter the shelf is under: the
@@ -145,7 +149,7 @@ export function ExpertCard({ expert, isHired, category }: Props) {
 
         <div className="mt-auto flex items-center justify-end pt-2">
           <span className="flex items-center gap-1.5 text-body-lg font-medium text-foreground-subtle transition-colors duration-200 group-hover:text-foreground-strong">
-            View
+            {t("View", "查看")}
             <Icon
               icon={ArrowRight02Icon}
               size={16}

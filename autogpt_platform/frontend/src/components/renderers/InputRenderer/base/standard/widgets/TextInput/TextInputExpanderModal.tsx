@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import React, { FC, useEffect, useId, useState } from "react";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -33,6 +35,7 @@ export const InputExpanderModal: FC<InputExpanderModalProps> = ({
   placeholder,
   inputType = "text",
 }) => {
+  const { t } = useTranslation();
   const inputId = useId();
   const [tempValue, setTempValue] = useState(defaultValue);
   const [isCopied, setIsCopied] = useState(false);
@@ -58,7 +61,7 @@ export const InputExpanderModal: FC<InputExpanderModalProps> = ({
     navigator.clipboard.writeText(tempValue).then(() => {
       setIsCopied(true);
       toast({
-        title: "Copied to clipboard!",
+        title: t("Copied to clipboard!", "已复制到剪贴板！"),
         duration: 2000,
       });
       setTimeout(() => setIsCopied(false), 2000);
@@ -67,7 +70,7 @@ export const InputExpanderModal: FC<InputExpanderModalProps> = ({
 
   return (
     <Dialog
-      title={title || "Edit Text"}
+      title={title || t("Edit Text", "编辑文本")}
       controlled={{
         isOpen,
         set: async (open) => {
@@ -83,7 +86,7 @@ export const InputExpanderModal: FC<InputExpanderModalProps> = ({
           <div className="mb-6 flex flex-col gap-2">
             <Input
               type="textarea"
-              label={title || "Edit value"}
+              label={title || t("Edit value", "编辑值")}
               hideLabel
               id={inputId}
               value={tempValue}
@@ -93,7 +96,7 @@ export const InputExpanderModal: FC<InputExpanderModalProps> = ({
                 inputType === "json" && "font-mono text-body",
               )}
               onChange={(e) => setTempValue(e.target.value)}
-              placeholder={placeholder || "Enter text..."}
+              placeholder={placeholder || t("Enter text...", "输入文本…")}
               aria-describedby={longNumberHintId}
               autoFocus
             />
@@ -111,7 +114,9 @@ export const InputExpanderModal: FC<InputExpanderModalProps> = ({
               withTooltip={false}
               onClick={copyValue}
               aria-label={
-                isCopied ? "Copied to clipboard" : "Copy to clipboard"
+                isCopied
+                  ? t("Copied to clipboard", "已复制到剪贴板")
+                  : t("Copy to clipboard", "复制到剪贴板")
               }
             >
               {isCopied ? (
@@ -124,10 +129,10 @@ export const InputExpanderModal: FC<InputExpanderModalProps> = ({
 
           <Dialog.Footer>
             <Button variant="secondary" size="small" onClick={onClose}>
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button variant="primary" size="small" onClick={handleSave}>
-              Save
+              {t("Save", "保存")}
             </Button>
           </Dialog.Footer>
         </div>

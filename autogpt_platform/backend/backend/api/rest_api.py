@@ -137,6 +137,12 @@ async def lifespan_context(app: fastapi.FastAPI):
     verify_auth_settings()
 
     await backend.data.db.connect()
+    from backend.integrations.mcp_catalog import load_mcp_catalog_from_database
+
+    try:
+        await load_mcp_catalog_from_database()
+    except Exception:
+        logger.warning("Local MCP marketplace catalog is unavailable", exc_info=True)
     # Eager connect to fail-fast if Redis is unreachable.
     await backend.data.redis_client.get_redis_async()
 

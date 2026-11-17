@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import {
@@ -42,6 +43,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
   isViewMoreData = false,
   dataType = "output",
 }) => {
+  const { t } = useTranslation();
   const executionResults = useNodeStore(
     useShallow((state) =>
       nodeId ? state.getNodeExecutionResults(nodeId) : [],
@@ -86,7 +88,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
 
   const shouldGroupExecutions = groupedExecutions.length > 0;
   return (
-    <Dialog title="Data Preview" styling={{ width: "600px" }}>
+    <Dialog title={t("Data Preview", "数据预览")} styling={{ width: "600px" }}>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -105,7 +107,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
             </Dialog.Trigger>
           </TooltipTrigger>
           <TooltipContent>
-            <p>View Data</p>
+            <p>{t("View Data", "查看数据")}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -114,28 +116,24 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Text variant="large-medium" tone="primary">
-                Full {dataType === "input" ? "Input" : "Output"} Preview
+                {dataType === "input"
+                  ? t("Full Input Preview", "完整输入预览")
+                  : t("Full Output Preview", "完整输出预览")}
               </Text>
             </div>
             <div className="rounded-full border border-border-strong bg-surface-hover px-3 py-1.5">
               <Text variant="small-medium-tight" as="div">
-                {shouldGroupExecutions ? totalGroupedItems : dataArray.length}{" "}
-                item
-                {shouldGroupExecutions
-                  ? totalGroupedItems !== 1
-                    ? "s"
-                    : ""
-                  : dataArray.length !== 1
-                    ? "s"
-                    : ""}{" "}
-                total
+                {t(
+                  `${shouldGroupExecutions ? totalGroupedItems : dataArray.length} item${(shouldGroupExecutions ? totalGroupedItems : dataArray.length) !== 1 ? "s" : ""} total`,
+                  `共 ${shouldGroupExecutions ? totalGroupedItems : dataArray.length} 项`,
+                )}
               </Text>
             </div>
           </div>
           <Text variant="body-tight" tone="secondary" as="div">
             {shouldGroupExecutions ? (
               <div>
-                Pin:{" "}
+                {t("Pin: ", "连接点：")}
                 <Text variant="body-semibold-tight" as="span" tone="inherit">
                   {beautifyString(pinName)}
                 </Text>
@@ -144,7 +142,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
               <>
                 <div className="flex items-center gap-2">
                   <Text variant="body" tone="secondary">
-                    Execution ID:
+                    {t("Execution ID:", "运行 ID：")}
                   </Text>
                   <div className="rounded-full border border-border-strong bg-surface-muted px-2 py-1">
                     <Text variant="small-medium-mono-tight" as="p">
@@ -161,7 +159,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
                   </Button>
                 </div>
                 <div className="mt-2">
-                  Pin:{" "}
+                  {t("Pin: ", "连接点：")}
                   <Text variant="body-semibold-tight" as="span" tone="inherit">
                     {beautifyString(pinName)}
                   </Text>
@@ -182,7 +180,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
                   >
                     <div className="flex items-center gap-2">
                       <Text variant="body" tone="secondary">
-                        Execution ID:
+                        {t("Execution ID:", "运行 ID：")}
                       </Text>
                       <div className="rounded-full border border-border-strong bg-surface-muted px-2 py-1">
                         <Text variant="small-medium-mono-tight" as="p">
@@ -212,7 +210,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
                                     item,
                                   )
                                 }
-                                aria-label="Copy item"
+                                aria-label={t("Copy item", "复制项目")}
                               >
                                 {copiedKey ===
                                 `${execution.execId}-${index}` ? (
@@ -235,7 +233,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
                                 shape="pill"
                                 withTooltip={false}
                                 onClick={() => handleDownloadGroupedItem(item)}
-                                aria-label="Download item"
+                                aria-label={t("Download item", "下载项目")}
                               >
                                 <Icon
                                   icon={Download04Icon}
@@ -248,7 +246,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
                         ))
                       ) : (
                         <div className="py-4 text-center text-foreground-tertiary">
-                          No data available
+                          {t("No data available", "暂无数据")}
                         </div>
                       )}
                     </div>
@@ -271,7 +269,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
                         shape="pill"
                         withTooltip={false}
                         onClick={() => handleCopyItem(index)}
-                        aria-label="Copy item"
+                        aria-label={t("Copy item", "复制项目")}
                       >
                         {copiedIndex === index ? (
                           <Icon
@@ -293,7 +291,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
                         shape="pill"
                         withTooltip={false}
                         onClick={() => handleDownloadItem(index)}
-                        aria-label="Download item"
+                        aria-label={t("Download item", "下载项目")}
                       >
                         <Icon
                           icon={Download04Icon}
@@ -307,7 +305,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
               </div>
             ) : (
               <div className="py-8 text-center text-foreground-tertiary">
-                No data available
+                {t("No data available", "暂无数据")}
               </div>
             )}
           </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ExpertWorkflowRef } from "@/app/api/__generated__/models/expertWorkflowRef";
 import { Button } from "@/components/atoms/Button/Button";
 import { PencilEdit02Icon, SparklesIcon } from "@hugeicons/core-free-icons";
@@ -31,6 +32,7 @@ export function ExpertWorkflowActions({
   variant = "floating",
   size = "icon-xs",
 }: Props) {
+  const { t } = useTranslation();
   return (
     <>
       {builderHref ? (
@@ -39,7 +41,7 @@ export function ExpertWorkflowActions({
           href={builderHref}
           variant={variant}
           size={size}
-          aria-label="Edit workflow"
+          aria-label={t("Edit workflow", "编辑工作流")}
           leadingIcon={PencilEdit02Icon}
         />
       ) : null}
@@ -48,7 +50,7 @@ export function ExpertWorkflowActions({
           type="button"
           variant={variant}
           size={size}
-          aria-label="Ask about this workflow"
+          aria-label={t("Ask about this workflow", "询问此工作流")}
           leadingIcon={SparklesIcon}
           onClick={() => onAsk(chatPrompt)}
         />
@@ -58,7 +60,7 @@ export function ExpertWorkflowActions({
           href={chatHref}
           variant={variant}
           size={size}
-          aria-label="Ask about this workflow"
+          aria-label={t("Ask about this workflow", "询问此工作流")}
           leadingIcon={SparklesIcon}
         />
       )}

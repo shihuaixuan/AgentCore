@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { toastIfPlanRequired } from "@/components/contextual/PaywallToast/helpers";
 import { useContext, useState } from "react";
@@ -12,7 +13,10 @@ import { toast } from "@/components/molecules/Toast/use-toast";
 import { invalidateConnectionQueries } from "@/lib/react-query/invalidateConnections";
 import { CredentialsActionsContext } from "@/providers/agent-credentials/credentials-provider";
 
-import { apiKeyConnectSchema, type ApiKeyConnectFormValues } from "./schema";
+import {
+  createApiKeyConnectSchema,
+  type ApiKeyConnectFormValues,
+} from "./schema";
 
 interface Args {
   provider: string;
@@ -27,12 +31,14 @@ function toUnixSeconds(value: string | undefined): number | undefined {
 }
 
 export function useApiKeyConnectForm({ provider, onSuccess }: Args) {
+  const { t } = useTranslation();
+
   const queryClient = useQueryClient();
   const credentialsActions = useContext(CredentialsActionsContext);
   const [isPending, setIsPending] = useState(false);
 
   const form = useForm<ApiKeyConnectFormValues>({
-    resolver: zodResolver(apiKeyConnectSchema),
+    resolver: zodResolver(createApiKeyConnectSchema(t)),
     defaultValues: { title: "", apiKey: "", expiresAt: "" },
     mode: "onChange",
   });
@@ -52,7 +58,10 @@ export function useApiKeyConnectForm({ provider, onSuccess }: Args) {
         expires_at: toUnixSeconds(values.expiresAt),
       });
 
-      toast({ title: "API key saved", variant: "success" });
+      toast({
+        title: t("API key saved", "API 密钥已保存"),
+        variant: "success",
+      });
       await invalidateConnectionQueries(queryClient);
       // Invalidation emits no cache event unless something already
       // subscribed to the credentials query.
@@ -66,9 +75,11 @@ export function useApiKeyConnectForm({ provider, onSuccess }: Args) {
       )
         return;
       toast({
-        title: "Couldn't save API key",
+        title: t("Couldn't save API key", "无法保存 API 密钥"),
         description:
-          error instanceof Error ? error.message : "Unexpected error",
+          error instanceof Error
+            ? error.message
+            : t("Unexpected error", "发生意外错误"),
         variant: "destructive",
       });
     } finally {

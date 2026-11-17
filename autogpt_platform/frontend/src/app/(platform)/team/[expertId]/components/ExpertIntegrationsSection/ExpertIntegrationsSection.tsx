@@ -1,9 +1,11 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { Text } from "@/components/atoms/Text/Text";
+import { Link } from "@/components/atoms/Link/Link";
 import { useState } from "react";
 import { ExpertConnectServiceDialog } from "./ExpertConnectServiceDialog";
 import { ExpertIntegrationGroups } from "./ExpertIntegrationGroups";
@@ -18,6 +20,7 @@ import { useExpertIntegrationsSection } from "./useExpertIntegrationsSection";
 import { IntegrationLogo } from "@/components/molecules/IntegrationLogo/IntegrationLogo";
 import { SectionEmptyState } from "../../../components/SectionEmptyState";
 import { ToolbarSearch } from "../../../components/ToolbarSearch";
+import { connectionSearchText } from "./helpers";
 
 interface Props {
   expertId: string;
@@ -25,6 +28,7 @@ interface Props {
 }
 
 export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
+  const { t } = useTranslation();
   const {
     granted,
     grantable,
@@ -41,6 +45,7 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
     isRevoking,
     isLoading,
     isError,
+    isCustomError,
     isGrantableLoading,
     isGrantableError,
     refetch,
@@ -49,9 +54,7 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
   const needle = query.trim().toLowerCase();
   const visible = needle
     ? granted.filter((integration) =>
-        `${integration.title} ${integration.provider}`
-          .toLowerCase()
-          .includes(needle),
+        connectionSearchText(integration).includes(needle),
       )
     : granted;
 
@@ -71,11 +74,15 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
                   textSize="body-md"
                   leadingIcon={Share01Icon}
                   disabled={
-                    grantable.length === 0 || isError || isGrantableError
+                    grantable.length === 0 ||
+                    isLoading ||
+                    isGrantableLoading ||
+                    isError ||
+                    isGrantableError
                   }
                   onClick={openUseExisting}
                 >
-                  Use existing
+                  {t("Use existing", "使用现有连接")}
                 </Button>
               </span>
             </TooltipTrigger>
@@ -85,11 +92,14 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
               </TooltipContent>
             ) : isGrantableError ? (
               <TooltipContent side="bottom">
-                Couldn&apos;t load your services.
+                {t("Couldn't load your services.", "无法加载你的服务。")}
               </TooltipContent>
             ) : grantable.length === 0 && !isGrantableLoading ? (
               <TooltipContent side="bottom">
-                {expertName} can already use everything in your account.
+                {t(
+                  "No available connections to add.",
+                  "没有可添加的可用连接。",
+                )}
               </TooltipContent>
             ) : null}
           </Tooltip>
@@ -100,16 +110,38 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
             leadingIcon={PlusSignIcon}
             onClick={openConnect}
           >
-            Add integration
+            {t("Add integration", "添加集成")}
           </Button>
           <ToolbarSearch
             textSize="body-md"
             id="expert-integrations-search"
-            label="Search integrations"
+            label={t("Search integrations", "搜索集成")}
             value={query}
             onChange={setQuery}
           />
         </div>
+      </div>
+
+      <div className="mb-3 flex flex-col gap-1">
+        <Link href="/settings/integrations">
+          {t("Manage custom connectors", "管理自定义连接器")}
+        </Link>
+        <Text variant="small" tone="muted">
+          {t(
+            "Create custom connectors in Settings, then select Use existing here. Saved keys do not need to be entered again.",
+            "在设置中创建自定义连接器后，在这里选择“使用现有连接”，无需再次填写已保存的密钥。",
+          )}
+        </Text>
+        {isCustomError && (
+          <div className="flex items-center gap-2">
+            <Text variant="small" tone="muted">
+              {t("Could not load custom connectors.", "无法加载自定义连接器。")}
+            </Text>
+            <Button variant="secondary" size="small" onClick={refetch}>
+              {t("Retry", "重试")}
+            </Button>
+          </div>
+        )}
       </div>
 
       {isLoading ? (
@@ -128,7 +160,7 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
             <IntegrationLogo key="notion" provider="notion" size={24} />,
             <IntegrationLogo key="google" provider="google" size={24} />,
           ]}
-          title="No integrations yet"
+          title={t("No integrations yet", "暂无集成")}
           description={`Connect a tool and ${expertName} can use it on your behalf.`}
         >
           <Button
@@ -138,7 +170,7 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
             leadingIcon={PlusSignIcon}
             onClick={openConnect}
           >
-            Add integration
+            {t("Add integration", "添加集成")}
           </Button>
           {grantable.length > 0 && !isGrantableError ? (
             <Button
@@ -148,13 +180,13 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
               leadingIcon={Share01Icon}
               onClick={openUseExisting}
             >
-              Use existing
+              {t("Use existing", "使用现有连接")}
             </Button>
           ) : null}
         </SectionEmptyState>
       ) : visible.length === 0 ? (
         <Text variant="body-md" tone="muted" className="mt-4">
-          No integrations match.
+          {t("No integrations match.", "没有匹配的集成。")}
         </Text>
       ) : (
         <ExpertIntegrationGroups

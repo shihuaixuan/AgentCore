@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getListExpertsQueryKey,
   useHireExpert,
@@ -9,6 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 export function useExpertTeamCard(expert: Expert) {
+  const { t } = useTranslation();
   const expertId = expert.id;
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -23,7 +25,7 @@ export function useExpertTeamCard(expert: Expert) {
         },
         onError: () => {
           toast({
-            title: "Could not resume schedules",
+            title: t("Could not resume schedules", "无法恢复计划"),
             variant: "destructive",
           });
         },
@@ -37,7 +39,10 @@ export function useExpertTeamCard(expert: Expert) {
         queryClient.invalidateQueries({ queryKey: getListExpertsQueryKey() });
       },
       onError: () => {
-        toast({ title: "Could not retry setup", variant: "destructive" });
+        toast({
+          title: t("Could not retry setup", "无法重试设置"),
+          variant: "destructive",
+        });
       },
     },
   });

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getFeaturedUsagePercent,
   getUsageStatus,
@@ -15,18 +16,19 @@ export interface UsageWindowView {
 }
 
 export function useAutopilotUsageCard() {
+  const { t } = useTranslation();
   const { experience, usage, trial, isLoading, isError, retry } =
     useUsageExperience();
   const today: UsageWindowView | null = usage?.daily
     ? {
-        label: "Today",
+        label: t("Today", "今天"),
         percent: usage.daily.percent_used,
         ...formatRelativeReset(usage.daily.resets_at),
       }
     : null;
   const week: UsageWindowView | null = usage?.weekly
     ? {
-        label: "This week",
+        label: t("This week", "本周"),
         percent: usage.weekly.percent_used,
         ...formatRelativeReset(usage.weekly.resets_at),
       }
@@ -37,7 +39,7 @@ export function useAutopilotUsageCard() {
   const trialWindow: UsageWindowView | null =
     showTrialWindow && experience.trialPercent != null
       ? {
-          label: "Trial usage",
+          label: t("Trial usage", "试用用量"),
           percent: experience.trialPercent,
           prefix: "Trial ends",
           value: formatShortDate(trial?.ends_at),

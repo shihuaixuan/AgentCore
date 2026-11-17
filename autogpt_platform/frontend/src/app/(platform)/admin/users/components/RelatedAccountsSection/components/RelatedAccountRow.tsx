@@ -4,6 +4,7 @@ import type { RelatedAccount } from "@/app/api/__generated__/models/relatedAccou
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { Link } from "@/components/atoms/Link/Link";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   formatBlockedAddress,
   formatDate,
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function RelatedAccountRow({ account }: Props) {
+  const { t } = useTranslation();
   const ips = account.via_ips.map(formatBlockedAddress);
   const hidden = ips.length - SHOWN_IPS;
 
@@ -55,12 +57,12 @@ export function RelatedAccountRow({ account }: Props) {
         ) : null}
         {account.via_domain ? (
           <Badge variant="info" size="small">
-            Domain
+            {t("Domain", "域名")}
           </Badge>
         ) : null}
         {account.has_profile ? null : (
           <Badge variant="info" size="small">
-            No profile
+            {t("No profile", "无个人资料")}
           </Badge>
         )}
       </div>
@@ -70,7 +72,7 @@ export function RelatedAccountRow({ account }: Props) {
       <span className="md:text-right">
         {account.banned ? (
           <Badge variant="error" size="small">
-            Banned
+            {t("Banned", "已封禁")}
           </Badge>
         ) : null}
       </span>

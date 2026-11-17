@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
@@ -51,6 +54,7 @@ export function ExpertTeamCard({
   onEditSoul,
   onChat,
 }: Props) {
+  const { t } = useTranslation();
   const rosterStatus = getExpertRosterStatus(expert);
   const weeklySpend = getWeeklySpend(expert);
   const cover = getExpertCover(expert);
@@ -84,7 +88,7 @@ export function ExpertTeamCard({
         <Button
           variant="secondary"
           size="icon-sm"
-          aria-label="Edit Soul"
+          aria-label={t("Edit Soul", "编辑设定")}
           leadingIcon={PencilEdit02Icon}
           onClick={handleEditSoulClick}
         />
@@ -97,7 +101,7 @@ export function ExpertTeamCard({
 
       <Link
         href={`/team/${expert.id}`}
-        aria-label={`View ${expert.name}`}
+        aria-label={t(`View ${expert.name}`, `查看 ${expert.name}`)}
         className="flex flex-1 flex-col items-center p-2 pb-4"
       >
         <ExpertCover
@@ -122,12 +126,12 @@ export function ExpertTeamCard({
           <div className="mt-2 flex min-w-0 flex-1 flex-col gap-1">
             <div className="flex items-baseline justify-between gap-2 tabular-nums">
               <Text variant="small-medium" tone="secondary">
-                Budget
+                {t("Budget", "预算")}
               </Text>
               <Text variant="small-medium" tone="secondary">
                 {weeklySpend
                   ? `${creditsToUsdLabel(weeklySpend.spent)} / ${creditsToUsdLabel(weeklySpend.budget)}`
-                  : "No budget"}
+                  : t("No budget", "未设置预算")}
               </Text>
             </div>
             <SpendMeter
@@ -150,7 +154,7 @@ export function ExpertTeamCard({
             {topic ? <CategoryTag category={topic} /> : null}
             {isAutoModeEnabled && expert.autopilot_mode === "unsupervised" ? (
               <Badge variant="warning" size="small">
-                Unsupervised
+                {t("Unsupervised", "自主执行")}
               </Badge>
             ) : null}
             <IntegrationIcons
@@ -165,19 +169,19 @@ export function ExpertTeamCard({
           <CardStats>
             <CardStat
               icon={Calendar03Icon}
-              label="Schedules"
+              label={t("Schedules", "计划")}
               singular="schedule"
               count={schedules.length}
             />
             <CardStat
               icon={SparklesIcon}
-              label="Skills"
+              label={t("Skills", "技能")}
               singular="skill"
               count={expert.skills.length}
             />
             <CardStat
               icon={FlashIcon}
-              label="Workflows"
+              label={t("Workflows", "工作流")}
               singular="workflow"
               count={expert.workflows.length}
             />
@@ -194,7 +198,7 @@ export function ExpertTeamCard({
       {isPaused ? (
         <div className="mx-4 mb-3 flex items-center justify-between gap-2 rounded-lg bg-warning-surface px-3 py-2 ring-1 ring-warning-border ring-inset">
           <Text variant="body" tone="warning">
-            Schedules paused
+            {t("Schedules paused", "计划已暂停")}
           </Text>
           <Button
             variant="secondary"
@@ -202,7 +206,7 @@ export function ExpertTeamCard({
             loading={isResuming}
             onClick={handleResume}
           >
-            Resume schedules
+            {t("Resume schedules", "恢复计划")}
           </Button>
         </div>
       ) : null}
@@ -215,7 +219,7 @@ export function ExpertTeamCard({
           leadingIcon={BubbleChatIcon}
           onClick={() => onChat(expert.id)}
         >
-          Chat
+          {t("Chat", "聊天")}
         </Button>
         <Button
           variant="secondary"
@@ -224,7 +228,7 @@ export function ExpertTeamCard({
           leadingIcon={PlusSignIcon}
           onClick={handleInstallClick}
         >
-          Install workflow
+          {t("Install workflow", "安装工作流")}
         </Button>
       </div>
 

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { Link } from "@/components/atoms/Link/Link";
@@ -10,12 +13,13 @@ interface ModalHeaderProps {
 }
 
 export function ModalHeader({ agent }: ModalHeaderProps) {
+  const { t } = useTranslation();
   const creator = agent.marketplace_listing?.creator;
 
   return (
     <div className="flex flex-col gap-4">
       <Badge variant="info" className="w-fit">
-        New Task
+        {t("New Task", "新建任务")}
       </Badge>
       <div>
         <Text variant="h2">{agent.name}</Text>
@@ -39,7 +43,7 @@ export function ModalHeader({ agent }: ModalHeaderProps) {
         {agent.recommended_schedule_cron && !agent.has_external_trigger ? (
           <div className="flex flex-col gap-4 rounded-medium border border-info/30 bg-info-surface p-4">
             <Text variant="lead-semibold" tone="info-strong">
-              Tip
+              {t("Tip", "提示")}
             </Text>
             <div className="h-px w-full bg-info/20" />
 
@@ -55,7 +59,7 @@ export function ModalHeader({ agent }: ModalHeaderProps) {
         {agent.instructions ? (
           <div className="mt-4 flex flex-col gap-4 rounded-medium border border-accent-surface bg-accent-surface/50 p-4">
             <Text variant="lead-semibold" tone="brand-strong">
-              Instructions
+              {t("Instructions", "说明")}
             </Text>
 
             <div className="h-px w-full bg-brand/10" />

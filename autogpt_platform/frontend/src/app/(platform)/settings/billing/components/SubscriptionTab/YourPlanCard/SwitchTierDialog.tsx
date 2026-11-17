@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { formatCents } from "../../../helpers";
@@ -39,19 +40,26 @@ export function SwitchTierDialog({
   usageMultiplier,
   upgradeReview,
 }: Props) {
+  const { t } = useTranslation();
   const preview = upgradeReview?.preview;
   const reviewing = upgradeReview?.required;
   const cannotConfirm = isSaving || (reviewing && !preview);
   const action = preview
-    ? `Pay ${formatUpgradeAmount(preview.amount_due, preview.currency)} and upgrade`
-    : (confirmLabel ?? `Upgrade to ${targetTierLabel}`);
+    ? t(
+        `Pay ${formatUpgradeAmount(preview.amount_due, preview.currency)} and upgrade`,
+        `支付 ${formatUpgradeAmount(preview.amount_due, preview.currency)} 并升级`,
+      )
+    : (confirmLabel ??
+      t(`Upgrade to ${targetTierLabel}`, `升级至 ${targetTierLabel}`));
   return (
     <Dialog
       variant="compact"
       title={
         <div className="space-y-2 pr-7">
           <Text variant="small" tone="muted">
-            {title ? "Your subscription" : `Upgrade to ${targetTierLabel}`}
+            {title
+              ? t("Your subscription", "你的订阅")
+              : t(`Upgrade to ${targetTierLabel}`, `升级至 ${targetTierLabel}`)}
           </Text>
           <Text
             variant="h3-tracking-tight"
@@ -59,7 +67,8 @@ export function SwitchTierDialog({
             // oxlint-disable-next-line design-system/no-restyle -- the dialog title sits on a 32px line under its eyebrow
             className="block leading-8"
           >
-            {title ?? `Upgrade to ${targetTierLabel}`}
+            {title ??
+              t(`Upgrade to ${targetTierLabel}`, `升级至 ${targetTierLabel}`)}
           </Text>
         </div>
       }
@@ -70,8 +79,14 @@ export function SwitchTierDialog({
         {usageCarriesOver && (
           <Text variant="body" tone="secondary" className="mb-5">
             {usageMultiplier
-              ? `${usageMultiplier} times the usage of Pro and priority support.`
-              : "More room for demanding work and priority support."}
+              ? t(
+                  `${usageMultiplier} times the usage of Pro and priority support.`,
+                  `享受 Pro ${usageMultiplier} 倍的用量和优先支持。`,
+                )
+              : t(
+                  "More room for demanding work and priority support.",
+                  "获得更多用量，满足高负载工作需求，并享受优先支持。",
+                )}
           </Text>
         )}
         {reviewing ? (
@@ -87,7 +102,10 @@ export function SwitchTierDialog({
                   </Text>
                   <Text variant="small" as="span" tone="secondary">
                     {" "}
-                    / {billingCycle === "yearly" ? "year" : "month"}
+                    /{" "}
+                    {billingCycle === "yearly"
+                      ? t("year", "年")
+                      : t("month", "月")}
                   </Text>
                 </div>
               </div>
@@ -105,11 +123,10 @@ export function SwitchTierDialog({
               // oxlint-disable-next-line design-system/no-restyle -- the carry-over note is set at a 24px line height; no Text variant has it
               className="leading-6"
             >
-              You can keep going once payment goes through. What you’ve already
-              used counts toward Max’s limit
-              {usageMultiplier
-                ? `, which is ${usageMultiplier} times as high as Pro’s.`
-                : "."}
+              {t(
+                `You can keep going once payment goes through. What you’ve already used counts toward Max’s limit${usageMultiplier ? `, which is ${usageMultiplier} times as high as Pro’s.` : "."}`,
+                `支付成功后即可继续使用。已使用的用量会计入 Max 的额度${usageMultiplier ? `，该额度是 Pro 的 ${usageMultiplier} 倍。` : "。"}`,
+              )}
             </Text>
           </div>
         )}
@@ -135,7 +152,7 @@ export function SwitchTierDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isSaving}
               >
-                Keep Pro
+                {t("Keep Pro", "保留 Pro")}
               </Button>
             </>
           ) : (
@@ -147,7 +164,7 @@ export function SwitchTierDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isSaving}
               >
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
               <ConfirmButton
                 label={action}

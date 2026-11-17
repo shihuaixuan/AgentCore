@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import type { AIConnectionOffer } from "@/app/api/__generated__/models/aIConnectionOffer";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { IntegrationLogo } from "@/components/molecules/IntegrationLogo/IntegrationLogo";
@@ -34,6 +36,7 @@ interface Props {
 
 /** The picker's sheet: which connection a turn runs on and at what tier. */
 export function ConnectionPickerPanel({ picker, rows }: Props) {
+  const { t } = useTranslation();
   const {
     active,
     chooseConnection,
@@ -56,10 +59,10 @@ export function ConnectionPickerPanel({ picker, rows }: Props) {
     <>
       {rows.length > 0 && (
         <>
-          <SectionLabel>Runs on</SectionLabel>
+          <SectionLabel>{t("Runs on", "运行连接")}</SectionLabel>
           <div
             role="radiogroup"
-            aria-label="Connection this chat runs on"
+            aria-label={t("Connection this chat runs on", "此对话使用的连接")}
             // The connections read as plain rows on the sheet: a card around
             // them would frame the choice twice, once here and once around
             // the tiers below.
@@ -94,7 +97,9 @@ export function ConnectionPickerPanel({ picker, rows }: Props) {
                 leading={<OfferMark offer={offer} />}
                 title={offer.display_name}
                 subtitle={offerSubtitle(offer)}
-                badge={isLinkedAccount(offer) ? "Connected" : undefined}
+                badge={
+                  isLinkedAccount(offer) ? t("Connected", "已连接") : undefined
+                }
                 // A selectable row's models are named by the tier toggle
                 // right below it, so repeating them here only crowds the
                 // choice. A locked row has no toggle, so it keeps them.
@@ -121,7 +126,7 @@ export function ConnectionPickerPanel({ picker, rows }: Props) {
 
       {showTiers && (
         <>
-          <SectionLabel>Model tier</SectionLabel>
+          <SectionLabel>{t("Model tier", "模型档位")}</SectionLabel>
           <div
             className={cn(
               "overflow-hidden rounded-xl border border-border-base bg-surface",
@@ -161,7 +166,7 @@ export function ConnectionPickerPanel({ picker, rows }: Props) {
             showMaxUpgrade && "border-t border-border-base pt-4",
           )}
         >
-          <SectionLabel>Add a connection</SectionLabel>
+          <SectionLabel>{t("Add a connection", "添加连接")}</SectionLabel>
           <ConnectAccountRow
             onConnect={connectChatGPT}
             isConnecting={isConnecting}

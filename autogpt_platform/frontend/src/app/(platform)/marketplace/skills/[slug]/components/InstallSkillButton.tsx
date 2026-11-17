@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import {
   Avatar,
@@ -33,6 +36,7 @@ export function InstallSkillButton({
   onAddToLibrary,
   onAddToExpert,
 }: Props) {
+  const { t } = useTranslation();
   if (experts.length === 0) {
     return (
       <Button
@@ -43,7 +47,7 @@ export function InstallSkillButton({
         className="w-full sm:w-auto"
         data-testid="skill-install-button"
       >
-        Install skill
+        {t("Install skill", "安装技能")}
       </Button>
     );
   }
@@ -59,7 +63,7 @@ export function InstallSkillButton({
         className="!rounded-r-none border-r-0 sm:w-auto"
         data-testid="skill-install-button"
       >
-        Install skill
+        {t("Install skill", "安装技能")}
       </Button>
       <ExpertInstallMenu
         experts={experts}

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   Popover,
   PopoverContent,
@@ -14,6 +17,16 @@ import { AccountMenuRow } from "./components/AccountMenuRow";
 import { AccountMenuTourRow } from "./components/AccountMenuTourRow";
 import { InitialAvatar } from "./components/InitialAvatar";
 import { getAccountMenuIcon } from "./helpers";
+
+const MENU_LABELS: Record<string, string> = {
+  Profile: "个人资料",
+  Settings: "设置",
+  Billing: "账单",
+  "What's new": "更新动态",
+  "Help & Docs": "帮助与文档",
+  Admin: "管理",
+  "Log out": "退出登录",
+};
 
 interface Props {
   userName?: string;
@@ -36,6 +49,7 @@ export function AccountMenu({
   side = "top",
   align = "start",
 }: Props) {
+  const { t } = useTranslation();
   const popupId = React.useId();
 
   return (
@@ -44,7 +58,7 @@ export function AccountMenu({
         <button
           type="button"
           className="flex cursor-pointer items-center space-x-3 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-border-strong"
-          aria-label="Open profile menu"
+          aria-label={t("Open profile menu", "打开账户菜单")}
           aria-controls={popupId}
           aria-haspopup="true"
           data-testid="profile-popout-menu-trigger"
@@ -116,7 +130,10 @@ export function AccountMenu({
                             href={item.href}
                             external={item.external}
                             icon={icon}
-                            label={item.text}
+                            label={t(
+                              item.text,
+                              MENU_LABELS[item.text] ?? item.text,
+                            )}
                           />
                         </li>
                       );
@@ -128,7 +145,10 @@ export function AccountMenu({
                           as="button"
                           onClick={item.onClick}
                           icon={icon}
-                          label={item.text}
+                          label={t(
+                            item.text,
+                            MENU_LABELS[item.text] ?? item.text,
+                          )}
                         />
                       </li>
                     );

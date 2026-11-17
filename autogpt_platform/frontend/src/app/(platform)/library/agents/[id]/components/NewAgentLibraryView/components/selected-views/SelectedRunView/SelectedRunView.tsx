@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AgentExecutionStatus } from "@/app/api/__generated__/models/agentExecutionStatus";
 import type { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
@@ -43,6 +44,7 @@ export function SelectedRunView({
   onClearSelectedRun,
   banner,
 }: Props) {
+  const { t } = useTranslation();
   const { run, preset, isLoading, responseError, httpError } =
     useSelectedRunView(agent.graph_id, runId);
 
@@ -121,14 +123,14 @@ export function SelectedRunView({
                 )}
                 {withSummary && (
                   <ScrollableTabsTrigger value="summary">
-                    Summary
+                    {t("Summary", "摘要")}
                   </ScrollableTabsTrigger>
                 )}
                 <ScrollableTabsTrigger value="output">
-                  Output
+                  {t("Output", "输出")}
                 </ScrollableTabsTrigger>
                 <ScrollableTabsTrigger value="input">
-                  Your input
+                  {t("Your input", "你的输入")}
                 </ScrollableTabsTrigger>
               </ScrollableTabsList>
               <div className="my-6 flex flex-col gap-6">
@@ -143,11 +145,17 @@ export function SelectedRunView({
                           <PendingReviewsList
                             reviews={pendingReviews}
                             onReviewComplete={refetchReviews}
-                            emptyMessage="No pending reviews for this execution"
+                            emptyMessage={t(
+                              "No pending reviews for this execution",
+                              "此次运行没有待审核项目",
+                            )}
                           />
                         ) : (
                           <Text variant="body" tone="body">
-                            No pending reviews for this execution
+                            {t(
+                              "No pending reviews for this execution",
+                              "此次运行没有待审核项目",
+                            )}
                           </Text>
                         )}
                       </RunDetailCard>
@@ -162,10 +170,15 @@ export function SelectedRunView({
                       <RunDetailCard
                         title={
                           <div className="flex items-center gap-1">
-                            <Text variant="lead-semibold">Summary</Text>
+                            <Text variant="lead-semibold">
+                              {t("Summary", "摘要")}
+                            </Text>
                             <InformationTooltip
                               iconSize={20}
-                              description="This AI-generated summary describes how the workflow handled your task. It's an experimental feature and may occasionally be inaccurate."
+                              description={t(
+                                "This AI-generated summary describes how the workflow handled your task. It's an experimental feature and may occasionally be inaccurate.",
+                                "这份 AI 生成的摘要描述了工作流处理任务的过程。这是一项实验性功能，偶尔可能不准确。",
+                              )}
                             />
                           </div>
                         }
@@ -179,7 +192,7 @@ export function SelectedRunView({
                 {/* Output Section */}
                 <ScrollableTabsContent value="output">
                   <div className="scroll-mt-4">
-                    <RunDetailCard title="Output">
+                    <RunDetailCard title={t("Output", "输出")}>
                       {isLoading ? (
                         <div className="text-foreground-tertiary">
                           <LoadingSpinner />
@@ -191,7 +204,7 @@ export function SelectedRunView({
                         />
                       ) : (
                         <Text variant="body" tone="secondary">
-                          No output from this run.
+                          {t("No output from this run.", "此次运行没有输出。")}
                         </Text>
                       )}
                     </RunDetailCard>
@@ -204,10 +217,15 @@ export function SelectedRunView({
                     <RunDetailCard
                       title={
                         <div className="flex items-center gap-1">
-                          <Text variant="lead-semibold">Your input</Text>
+                          <Text variant="lead-semibold">
+                            {t("Your input", "你的输入")}
+                          </Text>
                           <InformationTooltip
                             iconSize={20}
-                            description="This is the input that was provided to the workflow for running this task."
+                            description={t(
+                              "This is the input that was provided to the workflow for running this task.",
+                              "这是执行此任务时提供给工作流的输入。",
+                            )}
                           />
                         </div>
                       }

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { toastIfPlanRequired } from "@/components/contextual/PaywallToast/helpers";
 import useCredentials from "@/hooks/useCredentials";
 import { useBackendAPI } from "@/lib/autogpt-server-api/context";
@@ -51,6 +54,8 @@ export function useCredentialsInput({
   readOnly = false,
   isOptional = false,
 }: Params) {
+  const { t } = useTranslation();
+
   const [isAPICredentialsModalOpen, setAPICredentialsModalOpen] =
     useState(false);
   const [
@@ -309,7 +314,7 @@ export function useCredentialsInput({
       if (popupBlocked && !fallbackBlocked) {
         setOAuthPopupBlocked(true);
         toast({
-          title: "Popup blocked",
+          title: t("Popup blocked", "弹出窗口被阻止"),
           description: OAUTH_ERROR_POPUP_BLOCKED,
         });
       }
@@ -337,7 +342,7 @@ export function useCredentialsInput({
               "credential_scope_shortfall_blocked_selection",
               { provider },
             );
-            setOAuthError(getScopeShortfallMessage(missingScopes));
+            setOAuthError(getScopeShortfallMessage(missingScopes, t));
             return;
           }
         }
@@ -501,7 +506,9 @@ export function useCredentialsInput({
       setCredentialToDelete(state.credentialToDelete);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Something went wrong";
+        error instanceof Error
+          ? error.message
+          : t("Something went wrong", "出现错误");
       toast({
         title: "Failed to delete credential",
         description: message,
@@ -549,6 +556,7 @@ export function useCredentialsInput({
       userCredentials.length > 0,
       provider,
       supportsDeviceCode,
+      t,
     ),
     setAPICredentialsModalOpen,
     setUserPasswordCredentialsModalOpen,

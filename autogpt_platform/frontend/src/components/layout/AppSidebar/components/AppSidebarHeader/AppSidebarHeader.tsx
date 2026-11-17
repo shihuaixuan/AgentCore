@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AutoGPTLogo } from "@/components/atoms/AutoGPTLogo/AutoGPTLogo";
 import {
   SidebarHeader,
@@ -18,6 +19,7 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 import { SidebarSearch } from "../SidebarSearch/SidebarSearch";
 
 export function AppSidebarHeader() {
+  const { t } = useTranslation();
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
 
@@ -26,7 +28,11 @@ export function AppSidebarHeader() {
       <TooltipTrigger asChild>
         <button
           type="button"
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={
+            isCollapsed
+              ? t("Expand sidebar", "展开侧栏")
+              : t("Collapse sidebar", "收起侧栏")
+          }
           onClick={toggleSidebar}
           className={cn(
             "size-8 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-surface-active max-md:size-10",
@@ -44,7 +50,9 @@ export function AppSidebarHeader() {
       </TooltipTrigger>
       <TooltipPortal>
         <TooltipContent side="right">
-          {isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          {isCollapsed
+            ? t("Expand sidebar", "展开侧栏")
+            : t("Collapse sidebar", "收起侧栏")}
         </TooltipContent>
       </TooltipPortal>
     </Tooltip>

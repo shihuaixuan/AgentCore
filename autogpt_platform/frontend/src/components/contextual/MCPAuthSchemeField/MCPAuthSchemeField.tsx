@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useId } from "react";
 
@@ -30,9 +31,11 @@ export function MCPAuthSchemeField({
   labelVariant,
   selectClassName,
 }: Props) {
+  const { t } = useTranslation();
+
   const id = useId();
   const accessibleName = nameSuffix
-    ? `Authentication type for ${nameSuffix}`
+    ? t(`Authentication type for ${nameSuffix}`, `${nameSuffix} 的身份验证类型`)
     : undefined;
 
   return (
@@ -45,11 +48,11 @@ export function MCPAuthSchemeField({
           htmlFor={id}
           className={labelClassName}
         >
-          Authentication type
+          {t("Authentication type", "身份验证类型")}
         </Text>
       ) : (
         <label htmlFor={id} className={labelClassName}>
-          Authentication type
+          {t("Authentication type", "身份验证类型")}
         </label>
       )}
       <select
@@ -60,8 +63,12 @@ export function MCPAuthSchemeField({
         disabled={disabled}
         className={selectClassName}
       >
-        <option value="bearer">API token (Bearer)</option>
-        <option value="basic">Basic authentication</option>
+        <option value="bearer">
+          {t("API token (Bearer)", "API 令牌（Bearer）")}
+        </option>
+        <option value="basic">
+          {t("Basic authentication", "基本身份验证")}
+        </option>
       </select>
     </div>
   );

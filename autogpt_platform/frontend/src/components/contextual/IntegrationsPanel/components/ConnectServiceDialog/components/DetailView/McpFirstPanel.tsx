@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import type { ProviderMetadata } from "@/app/api/__generated__/models/providerMetadata";
@@ -26,6 +27,8 @@ export function McpFirstPanel({
   onSuccess,
   onBack,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <MCPPresetPanel
       server={withoutDuplicateKeyMethod(server, nativeMethods)}
@@ -40,12 +43,12 @@ export function McpFirstPanel({
               leadingIcon={MoreHorizontalCircle01Icon}
               onClick={onUseNative}
             >
-              More ways to connect
+              {t("More ways to connect", "更多连接方式")}
             </Button>
           ) : null}
           {onBack ? (
             <Button variant="secondary" size="small" onClick={onBack}>
-              Back
+              {t("Back", "返回")}
             </Button>
           ) : null}
         </>

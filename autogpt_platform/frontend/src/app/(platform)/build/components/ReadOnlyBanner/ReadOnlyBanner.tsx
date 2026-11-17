@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { useState } from "react";
@@ -6,6 +7,7 @@ import { Cancel01Icon, Copy01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export function ReadOnlyBanner() {
+  const { t } = useTranslation();
   const { duplicate, isDuplicating, canDuplicate, isCheckingLibrary } =
     useDuplicateGraph();
   const [isDismissed, setIsDismissed] = useState(false);
@@ -25,11 +27,17 @@ export function ReadOnlyBanner() {
     >
       <div className="px-2">
         <Text variant="body" tone="body">
-          You&apos;re viewing a read-only copy of this workflow.
+          {t(
+            "You&apos;re viewing a read-only copy of this workflow.",
+            "你正在查看此工作流的只读副本。",
+          )}
           <br />
           {showDuplicate
-            ? "Duplicate it to make changes."
-            : "Add it to your library to enable duplication."}
+            ? t("Duplicate it to make changes.", "创建副本后即可修改。")
+            : t(
+                "Add it to your library to enable duplication.",
+                "添加到工作流库后即可创建副本。",
+              )}
         </Text>
       </div>
       {showDuplicate && (
@@ -41,15 +49,15 @@ export function ReadOnlyBanner() {
           disabled={!canDuplicate}
           leftIcon={<Icon icon={Copy01Icon} className="size-4" />}
         >
-          Duplicate
+          {t("Duplicate", "创建副本")}
         </Button>
       )}
       <Button
         variant="ghost"
         size="icon"
         onClick={() => setIsDismissed(true)}
-        aria-label="Dismiss"
-        title="Dismiss"
+        aria-label={t("Dismiss", "关闭")}
+        title={t("Dismiss", "关闭")}
       >
         <Icon icon={Cancel01Icon} className="h-4 w-4" />
       </Button>

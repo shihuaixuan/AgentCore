@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getPaginationNextPageNumber, unpaginate } from "@/app/api/helpers";
 import { getGetV2GetBuilderItemCountsQueryKey } from "@/app/api/__generated__/endpoints/default/default";
 import {
@@ -17,6 +18,7 @@ import { useState } from "react";
 import { useAddAgentToBuilder } from "../hooks/useAddAgentToBuilder";
 
 export const useMarketplaceAgentsContent = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [addingAgent, setAddingAgent] = useState<string | null>(null);
   const { addAgentToBuilder } = useAddAgentToBuilder();
@@ -60,10 +62,13 @@ export const useMarketplaceAgentsContent = () => {
       onError: (error) => {
         Sentry.captureException(error);
         toast({
-          title: "Failed to add workflow to library",
+          title: t(
+            "Failed to add workflow to library",
+            "无法将工作流添加到工作库",
+          ),
           description:
             ((error as any).message as string) ||
-            "An unexpected error occurred.",
+            t("An unexpected error occurred.", "发生意外错误。"),
           variant: "destructive",
         });
       },
@@ -106,15 +111,22 @@ export const useMarketplaceAgentsContent = () => {
       addAgentToBuilder(libraryAgentDetails as LibraryAgent);
 
       toast({
-        title: "Workflow Added",
-        description: "Workflow has been added to your library and builder",
+        title: t("Workflow Added", "工作流已添加"),
+        description: t(
+          "Workflow has been added to your library and builder",
+          "工作流已添加到工作库和编辑器",
+        ),
       });
     } catch (error) {
       Sentry.captureException(error);
       toast({
-        title: "Failed to add workflow to library",
+        title: t(
+          "Failed to add workflow to library",
+          "无法将工作流添加到工作库",
+        ),
         description:
-          ((error as any).message as string) || "An unexpected error occurred.",
+          ((error as any).message as string) ||
+          t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     } finally {

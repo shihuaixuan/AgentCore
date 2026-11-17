@@ -16,6 +16,7 @@ import { AdminSection } from "../../../components/AdminSection";
 import { getErrorMessage } from "../../helpers";
 import { BlockRow } from "./components/BlockRow";
 import { type KindFilter, useBlocksTab } from "./useBlocksTab";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const KIND_CHIPS: Array<{
   value: KindFilter;
@@ -28,6 +29,7 @@ const KIND_CHIPS: Array<{
 ];
 
 export function BlocksTab() {
+  const { t } = useTranslation();
   const tab = useBlocksTab();
 
   if (tab.isLoading) {
@@ -56,10 +58,9 @@ export function BlocksTab() {
         <span className="flex text-foreground-subtle">
           <Icon icon={SecurityBlockIcon} size={32} />
         </span>
-        <Text variant="large-medium">No active blocks</Text>
+        <Text variant="large-medium">{t("No active blocks", "没有生效的拦截规则")}</Text>
         <Text variant="body" className="max-w-[420px]" tone="secondary">
-          Block an address from an account&apos;s Sign-ins, or an email domain
-          from its Related accounts.
+          {t("Block an address from an account's Sign-ins, or an email domain from its Related accounts.", "可在账户的“登录记录”中拦截地址，或在“关联账户”中拦截邮箱域名。")}
         </Text>
       </div>
     );
@@ -73,8 +74,8 @@ export function BlocksTab() {
             size="small"
             value={tab.search}
             onChange={tab.setSearch}
-            placeholder="Filter by address, domain or reason"
-            aria-label="Filter blocks"
+            placeholder={t("Filter by address, domain or reason", "按地址、域名或原因筛选")}
+            aria-label={t("Filter blocks", "筛选拦截规则")}
           />
         </div>
         <div className="flex items-center gap-1 rounded-full bg-surface-hover p-0.5">
@@ -82,9 +83,9 @@ export function BlocksTab() {
             <ToggleChip
               key={chip.value}
               icon={<Icon icon={chip.icon} size={14} />}
-              label={chip.label}
-              tooltip={`Show ${chip.label.toLowerCase()}`}
-              ariaLabel={chip.label}
+              label={t(chip.label, chip.value === "all" ? "全部" : chip.value === "IP" ? "IP 地址" : "域名")}
+              tooltip={`${t("Show", "显示")} ${t(chip.label, chip.value === "all" ? "全部" : chip.value === "IP" ? "IP 地址" : "域名")}`}
+              ariaLabel={t(chip.label, chip.value === "all" ? "全部" : chip.value === "IP" ? "IP 地址" : "域名")}
               pressed={tab.kind === chip.value}
               onToggle={() => tab.setKind(chip.value)}
             />
@@ -93,7 +94,7 @@ export function BlocksTab() {
       </div>
       {tab.visible.length === 0 ? (
         <Text variant="small" tone="muted">
-          No blocks match.
+          {t("No blocks match.", "没有匹配的拦截规则。")}
         </Text>
       ) : (
         <ul className="divide-y divide-border-base">
@@ -105,7 +106,7 @@ export function BlocksTab() {
       {tab.hasMore ? (
         <div className="mt-3 flex justify-center">
           <Button variant="ghost" size="small" onClick={tab.showMore}>
-            Show 50 more
+            {t("Show 50 more", "再显示 50 条")}
           </Button>
         </div>
       ) : null}

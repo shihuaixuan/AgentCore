@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { factText, type Reference } from "../helpers";
 
@@ -9,6 +12,7 @@ interface Props {
 }
 
 export function ReferenceCard({ reference }: Props) {
+  const { t } = useTranslation();
   const facts = reference.kind
     ? reference.meta.map(factText).join(" · ")
     : reference.summary;
@@ -71,7 +75,7 @@ export function ReferenceCard({ reference }: Props) {
             data-slot="reference-card-skills-label"
             className="text-foreground-tertiary"
           >
-            Skills:{" "}
+            {t("Skills:", "技能：")}{" "}
           </span>
           {skillsText(reference.skills)}
         </p>

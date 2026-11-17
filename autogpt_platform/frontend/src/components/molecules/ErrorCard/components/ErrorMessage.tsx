@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 
 interface Props {
@@ -14,10 +17,14 @@ export function ErrorMessage({
   hint,
   textSize = "body",
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div data-slot="error-card-message" className="space-y-2">
       <Text variant={textSize} data-slot="error-card-context" tone="body">
-        We had the following error when retrieving {context ?? "your data"}:
+        {t(
+          `We had the following error when retrieving ${context ?? "your data"}:`,
+          `获取${context ?? "数据"}时发生以下错误：`,
+        )}
       </Text>
       <div
         data-slot="error-card-detail"

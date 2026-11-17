@@ -39,32 +39,34 @@ const DAY_MS = 86_400_000;
 
 export function formatRelativeDate(
   value: string | Date | null | undefined,
+  t: (english: string, chinese: string) => string = (english) => english,
 ): string | null {
   if (!value) return null;
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return null;
 
   const days = Math.floor((Date.now() - date.getTime()) / DAY_MS);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 7) return `${days} days ago`;
+  if (days <= 0) return t("today", "今天");
+  if (days === 1) return t("yesterday", "昨天");
+  if (days < 7) return t(`${days} days ago`, `${days} 天前`);
   if (days < 30) {
     const weeks = Math.floor(days / 7);
-    return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+    return t(`${weeks} week${weeks > 1 ? "s" : ""} ago`, `${weeks} 周前`);
   }
   if (days < 365) {
     const months = Math.floor(days / 30);
-    return `${months} month${months > 1 ? "s" : ""} ago`;
+    return t(`${months} month${months > 1 ? "s" : ""} ago`, `${months} 个月前`);
   }
   const years = Math.floor(days / 365);
-  return `${years} year${years > 1 ? "s" : ""} ago`;
+  return t(`${years} year${years > 1 ? "s" : ""} ago`, `${years} 年前`);
 }
 
 function dateItem(
   label: string,
   value: string | Date | null | undefined,
+  t: (english: string, chinese: string) => string,
 ): SubmissionMetaItem | null {
-  const relative = formatRelativeDate(value);
+  const relative = formatRelativeDate(value, t);
   if (!relative) return null;
   return {
     label,
@@ -82,36 +84,45 @@ interface SubmissionMetaArgs {
   runCount: number | undefined;
 }
 
-export function getSubmissionMeta({
-  status,
-  version,
-  category,
-  submittedAt,
-  reviewedAt,
-  runCount,
-}: SubmissionMetaArgs): SubmissionMetaItem[] {
+export function getSubmissionMeta(
+  {
+    status,
+    version,
+    category,
+    submittedAt,
+    reviewedAt,
+    runCount,
+  }: SubmissionMetaArgs,
+  t: (english: string, chinese: string) => string = (english) => english,
+): SubmissionMetaItem[] {
   const items: SubmissionMetaItem[] = [];
 
   if (typeof version === "number") {
-    items.push({ label: "Version", value: `v${version}` });
+    items.push({ label: t("Version", "版本"), value: `v${version}` });
   }
   if (category) {
-    items.push({ label: "Category", value: category });
+    items.push({ label: t("Category", "分类"), value: category });
   }
 
   if (status === SubmissionStatus.APPROVED) {
-    const liveSince = dateItem("Live since", reviewedAt);
+    const liveSince = dateItem(t("Live since", "上线时间"), reviewedAt, t);
     if (liveSince) items.push(liveSince);
     if (typeof runCount === "number") {
-      items.push({ label: "Runs", value: runCount.toLocaleString() });
+      items.push({
+        label: t("Runs", "运行次数"),
+        value: runCount.toLocaleString(),
+      });
     }
   } else if (status === SubmissionStatus.REJECTED) {
-    const reviewed = dateItem("Reviewed", reviewedAt);
+    const reviewed = dateItem(t("Reviewed", "审核时间"), reviewedAt, t);
     if (reviewed) items.push(reviewed);
   } else if (status === SubmissionStatus.DRAFT) {
-    items.push({ label: "Status", value: "Not submitted yet" });
+    items.push({
+      label: t("Status", "状态"),
+      value: t("Not submitted yet", "尚未提交"),
+    });
   } else {
-    const submitted = dateItem("Submitted", submittedAt);
+    const submitted = dateItem(t("Submitted", "提交时间"), submittedAt, t);
     if (submitted) items.push(submitted);
   }
 

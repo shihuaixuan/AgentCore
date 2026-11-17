@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { SubmissionStatus } from "@/app/api/__generated__/models/submissionStatus";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function StatusColumnFilter({ value, onChange }: Props) {
+  const { t } = useTranslation();
   function toggle(status: SubmissionStatus) {
     if (value.includes(status)) {
       onChange(value.filter((s) => s !== status));
@@ -24,10 +26,14 @@ export function StatusColumnFilter({ value, onChange }: Props) {
   }
 
   return (
-    <ColumnFilter active={value.length > 0} label="Status" align="start">
+    <ColumnFilter
+      active={value.length > 0}
+      label={t("Status", "状态")}
+      align="start"
+    >
       <div className="flex flex-col gap-2">
         <Text variant="small-medium" as="span" className="mx-2">
-          Filter by status
+          {t("Filter by status", "按状态筛选")}
         </Text>
         <ul className="flex flex-col gap-1">
           {STATUS_OPTIONS.map((option) => {
@@ -74,7 +80,7 @@ export function StatusColumnFilter({ value, onChange }: Props) {
             onClick={() => onChange([])}
             className="self-end"
           >
-            Clear
+            {t("Clear", "清除")}
           </Button>
         ) : null}
       </div>

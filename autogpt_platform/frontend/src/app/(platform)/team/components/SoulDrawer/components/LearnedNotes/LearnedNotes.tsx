@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { formatWhen } from "@/app/(platform)/settings/memory/helpers";
 import type { MemoryFact } from "@/app/api/__generated__/models/memoryFact";
 import { Button } from "@/components/atoms/Button/Button";
@@ -14,21 +15,30 @@ interface Props {
 }
 
 export function LearnedNotes({ expertId }: Props) {
+  const { t } = useTranslation();
   const { facts, isLoading, isError, forget, forgettingUuid } =
     useLearnedNotes(expertId);
 
   return (
     <section className="mb-8">
-      <SoulSectionTitle>What I&apos;ve learned</SoulSectionTitle>
+      <SoulSectionTitle>
+        {t("What I've learned", "我学到的内容")}
+      </SoulSectionTitle>
       {isLoading ? (
         <NotesSkeleton />
       ) : isError ? (
         <Text variant="small" tone="muted">
-          Couldn&apos;t load what this expert has learned.
+          {t(
+            "Couldn't load what this expert has learned.",
+            "无法加载这位专家学到的内容。",
+          )}
         </Text>
       ) : facts.length === 0 ? (
         <Text variant="small" tone="muted">
-          Nothing recorded yet. What this expert learns will appear here.
+          {t(
+            "Nothing recorded yet. What this expert learns will appear here.",
+            "暂无记录。这位专家学到的内容会显示在这里。",
+          )}
         </Text>
       ) : (
         <NotesList
@@ -55,11 +65,14 @@ function NotesList({
   forgettingUuid,
   onForget,
 }: NotesListProps) {
+  const { t } = useTranslation();
   return (
     <>
       <Text variant="small" tone="muted">
-        Picked up from your conversations. Forget anything that shouldn&apos;t
-        stick.
+        {t(
+          "Picked up from your conversations. Forget anything that shouldn't stick.",
+          "这些内容来自你们的对话。你可以让专家忘记不应保留的内容。",
+        )}
       </Text>
       <div className="mt-2 flex flex-col divide-y divide-separator">
         {facts.map((fact) => (
@@ -84,7 +97,7 @@ function NotesList({
               loading={forgettingUuid === fact.uuid}
               onClick={() => onForget(fact.uuid)}
             >
-              Forget
+              {t("Forget", "忘记")}
             </Button>
           </div>
         ))}
@@ -95,7 +108,7 @@ function NotesList({
         // oxlint-disable-next-line design-system/no-restyle -- Link has no secondary-colour tone (src/components is P9's)
         className="mt-3 inline-block text-foreground-secondary"
       >
-        See all in memory settings
+        {t("See all in memory settings", "在记忆设置中查看全部")}
       </Link>
     </>
   );

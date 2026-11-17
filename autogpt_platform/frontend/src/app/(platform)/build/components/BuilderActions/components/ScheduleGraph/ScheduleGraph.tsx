@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import {
   Tooltip,
@@ -12,6 +13,7 @@ import { Clock01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export const ScheduleGraph = ({ flowID }: { flowID: string | null }) => {
+  const { t } = useTranslation();
   const {
     openScheduleInputDialog,
     setOpenScheduleInputDialog,
@@ -35,7 +37,7 @@ export const ScheduleGraph = ({ flowID }: { flowID: string | null }) => {
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Schedule Workflow</p>
+            <p>{t("Schedule Workflow", "定时运行工作流")}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

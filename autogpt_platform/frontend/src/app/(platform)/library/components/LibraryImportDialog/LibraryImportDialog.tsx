@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import {
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export default function LibraryImportDialog({ isOpen, onOpenChange }: Props) {
+  const { t } = useTranslation();
   const importWorkflow = useExternalWorkflowTab();
 
   function handleClose() {
@@ -31,7 +33,7 @@ export default function LibraryImportDialog({ isOpen, onOpenChange }: Props) {
 
   return (
     <Dialog
-      title="Import"
+      title={t("Import", "导入")}
       styling={{ maxWidth: "32rem" }}
       controlled={{
         isOpen,
@@ -47,14 +49,18 @@ export default function LibraryImportDialog({ isOpen, onOpenChange }: Props) {
           size="small"
         >
           <Icon icon={Upload03Icon} width={18} height={18} />
-          <span>Import</span>
+          <span>{t("Import", "导入")}</span>
         </Button>
       </Dialog.Trigger>
       <Dialog.Content>
         <TabsLine defaultValue="agent">
           <TabsLineList>
-            <TabsLineTrigger value="agent">AutoGPT workflow</TabsLineTrigger>
-            <TabsLineTrigger value="platform">Another platform</TabsLineTrigger>
+            <TabsLineTrigger value="agent">
+              {t("AutoGPT workflow", "AutoGPT 工作流")}
+            </TabsLineTrigger>
+            <TabsLineTrigger value="platform">
+              {t("Another platform", "其他平台")}
+            </TabsLineTrigger>
           </TabsLineList>
 
           {/* Tab: Import from any platform (file upload + n8n URL) */}

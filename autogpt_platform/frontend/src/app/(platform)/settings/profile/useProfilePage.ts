@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { toastIfPlanRequired } from "@/components/contextual/PaywallToast/helpers";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -37,6 +38,7 @@ const EMPTY_FORM: ProfileFormState = {
 };
 
 export function useProfilePage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const logoutInProgress = isLogoutInProgress();
@@ -187,11 +189,14 @@ export function useProfilePage() {
         void queryClient.invalidateQueries({
           queryKey: getGetV2GetUserProfileQueryKey(),
         });
-        toast({ title: "Profile saved", variant: "success" });
+        toast({
+          title: t("Profile saved", "个人资料已保存"),
+          variant: "success",
+        });
       },
       onError: (err) => {
         toast({
-          title: "Failed to save profile",
+          title: t("Failed to save profile", "无法保存个人资料"),
           description: err instanceof Error ? err.message : undefined,
           variant: "destructive",
         });

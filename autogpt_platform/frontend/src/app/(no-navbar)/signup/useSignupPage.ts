@@ -1,4 +1,5 @@
 import { useToast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useCaptureMarketingPrompt } from "@/hooks/useCaptureMarketingPrompt";
 import {
   getAuthDeepLink,
@@ -21,6 +22,7 @@ import { isTeamEmail } from "@/lib/auth/team-email";
 import { clearImpersonationEverywhere } from "@/lib/impersonation";
 
 export function useSignupPage() {
+  const { t } = useTranslation();
   useCaptureMarketingPrompt();
 
   const { user, isUserLoading, isLoggedIn } = useAuth();
@@ -123,7 +125,9 @@ export function useSignupPage() {
           return;
         }
 
-        throw new Error(error || "Failed to start OAuth flow");
+        throw new Error(
+          error || t("Failed to start OAuth flow", "无法启动第三方登录"),
+        );
       }
 
       const { url } = await response.json();
@@ -133,7 +137,9 @@ export function useSignupPage() {
       setIsSigningUp(false);
       toast({
         title:
-          error instanceof Error ? error.message : "Failed to start OAuth flow",
+          error instanceof Error
+            ? error.message
+            : t("Failed to start OAuth flow", "无法启动第三方登录"),
         variant: "destructive",
       });
     }
@@ -148,8 +154,10 @@ export function useSignupPage() {
 
     if (isTeamEmail(data.email)) {
       toast({
-        title:
+        title: t(
           "Please use Google SSO to create an account using an AutoGPT email.",
+          "使用 AutoGPT 团队邮箱时，请通过 Google 单点登录注册账户。",
+        ),
         variant: "default",
       });
 
@@ -171,7 +179,7 @@ export function useSignupPage() {
 
       if (!result.success) {
         if (result.error === "user_already_exists") {
-          setFeedback("User with this email already exists");
+          setFeedback(t("User with this email already exists", "此邮箱已注册"));
           setIsSigningUp(false);
           return;
         }
@@ -182,7 +190,7 @@ export function useSignupPage() {
         }
 
         toast({
-          title: result.error || "Signup failed",
+          title: result.error || t("Signup failed", "注册失败"),
           variant: "destructive",
         });
         setIsSigningUp(false);
@@ -210,7 +218,7 @@ export function useSignupPage() {
         title:
           error instanceof Error
             ? error.message
-            : "Unexpected error during signup",
+            : t("Unexpected error during signup", "注册时发生意外错误"),
         variant: "destructive",
       });
     } finally {

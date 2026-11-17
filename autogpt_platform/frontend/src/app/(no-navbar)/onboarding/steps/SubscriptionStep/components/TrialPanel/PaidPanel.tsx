@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import type { ReactNode } from "react";
 import { CheckoutAction } from "./CheckoutAction";
@@ -23,28 +26,46 @@ export function PaidPanel({
   onContinue,
   notice,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <TrialPanelShell>
       <header className="flex flex-col items-start gap-2">
         <Text variant="eyebrow" as="p">
-          Pro plan
+          {t("Pro plan", "Pro 套餐")}
         </Text>
         <Text variant="h3" as="h1" id={TRIAL_TITLE_ID} className="text-balance">
-          Start with Pro
+          {t("Start with Pro", "开始使用 Pro")}
         </Text>
         <Text variant="large" tone="secondary" className="text-pretty">
-          {price} a {cadence}, plus any applicable tax. No contract, and you can
-          cancel any time in Settings.
+          {t(
+            `${price} a ${cadence}, plus any applicable tax. No contract, and you can cancel any time in Settings.`,
+            `每${cadence === "year" ? "年" : "月"} ${price}，另加适用税费。无需签约，可随时在设置中取消。`,
+          )}
         </Text>
       </header>
       {notice}
       <TrialTimeline
-        label="How your plan works"
-        milestones={getPaidMilestones({ price, cadence })}
+        label={t("How your plan works", "套餐说明")}
+        milestones={getPaidMilestones({ price, cadence }).map((milestone) => ({
+          ...milestone,
+          when: milestone.date
+            ? t(milestone.when, milestone.date.toLocaleDateString("zh-CN"))
+            : t(milestone.when, "今天"),
+          title: t(
+            milestone.title,
+            milestone.key === "today" ? "套餐开始生效" : "套餐续订",
+          ),
+          detail: t(
+            milestone.detail,
+            milestone.key === "today"
+              ? `支付 ${price}，另加适用税费，即可立即获得完整访问权限。`
+              : `每${cadence === "year" ? "年" : "月"} ${price}，直到你在设置中取消。`,
+          ),
+        }))}
       />
       <CheckoutAction
-        label="Continue to checkout"
-        lockLine="Secure checkout by Stripe"
+        label={t("Continue to checkout", "前往结账")}
+        lockLine={t("Secure checkout by Stripe", "由 Stripe 提供安全结账服务")}
         isProcessing={isProcessing}
         isBlocked={isBlocked}
         onClick={onContinue}

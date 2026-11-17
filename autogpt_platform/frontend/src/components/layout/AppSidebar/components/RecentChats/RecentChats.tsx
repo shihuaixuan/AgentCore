@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { DeleteChatDialog } from "@/app/(platform)/copilot/components/DeleteChatDialog/DeleteChatDialog";
 import { ShareChatDialog } from "@/app/(platform)/copilot/sharing/ShareChatDialog";
 import { useExpertMap } from "@/app/(platform)/copilot/useExpertMap";
@@ -18,6 +19,7 @@ import { getNewChatHref, getNewExpertsWithoutChats } from "./helpers";
 import { useRecentChats } from "./useRecentChats";
 
 export function RecentChats() {
+  const { t } = useTranslation();
   const chatPinningEnabled = useGetFlag(Flag.CHAT_PINNING);
 
   const isLearningEnabled = useGetFlag(Flag.DREAM_SKILL_LEARNING_ENABLED);
@@ -70,7 +72,7 @@ export function RecentChats() {
     return (
       <div className="px-2 py-2">
         <Text variant="body-tight" as="p" tone="muted">
-          No conversations yet
+          {t("No conversations yet", "暂无对话")}
         </Text>
       </div>
     );
@@ -123,7 +125,11 @@ export function RecentChats() {
       <ExpertChatGroup
         key={group.expertId ?? "autopilot"}
         label={group.expertId ? (expert?.name ?? "Expert") : "Otto"}
-        role={group.expertId ? expert?.jobTitle || expert?.role : "Head of AI"}
+        role={
+          group.expertId
+            ? expert?.jobTitle || expert?.role
+            : t("Head of AI", "AI 负责人")
+        }
         avatarUrl={expert?.avatarUrl ?? null}
         color={expert?.color ?? null}
         newChatHref={getNewChatHref(group.expertId, activeExpertIds)}
@@ -147,7 +153,7 @@ export function RecentChats() {
                 tone="muted"
                 className="truncate"
               >
-                Pinned
+                {t("Pinned", "已置顶")}
               </Text>
             </div>
             <SidebarMenu>{pinnedSessions.map(renderItem)}</SidebarMenu>
@@ -174,7 +180,9 @@ export function RecentChats() {
             />
           )}
           <Text as="span" variant="body-tight-touch" tone="inherit">
-            {isLoadingMore ? "Loading…" : "Load more"}
+            {isLoadingMore
+              ? t("Loading…", "加载中…")
+              : t("Load more", "加载更多")}
           </Text>
         </button>
       )}

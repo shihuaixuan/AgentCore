@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV2ListPresetsQueryKey,
   getV2ListPresets,
@@ -35,6 +36,7 @@ export function SelectedTriggerActions({
   isSaving,
   onSwitchToRunsTab,
 }: Props) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -70,8 +72,10 @@ export function SelectedTriggerActions({
       },
       onError: (error: any) => {
         toast({
-          title: "Failed to delete trigger",
-          description: error.message || "An unexpected error occurred.",
+          title: t("Failed to delete trigger", "无法删除触发器"),
+          description:
+            error.message ||
+            t("An unexpected error occurred.", "发生意外错误。"),
           variant: "destructive",
         });
       },
@@ -88,7 +92,7 @@ export function SelectedTriggerActions({
         <Button
           variant="icon"
           size="icon"
-          aria-label="Save changes"
+          aria-label={t("Save changes", "保存更改")}
           onClick={onSaveChanges}
           disabled={isSaving || deleteMutation.isPending}
         >
@@ -101,7 +105,7 @@ export function SelectedTriggerActions({
         <Button
           variant="icon"
           size="icon"
-          aria-label="Delete trigger"
+          aria-label={t("Delete trigger", "删除触发器")}
           onClick={() => setShowDeleteDialog(true)}
           disabled={isSaving || deleteMutation.isPending}
         >
@@ -120,12 +124,14 @@ export function SelectedTriggerActions({
           set: setShowDeleteDialog,
         }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete trigger"
+        title={t("Delete trigger", "删除触发器")}
       >
         <Dialog.Content>
           <Text variant="large">
-            Are you sure you want to delete this trigger? This action cannot be
-            undone.
+            {t(
+              "Are you sure you want to delete this trigger? This action cannot be undone.",
+              "确定要删除此触发器吗？此操作无法撤销。",
+            )}
           </Text>
           <Dialog.Footer>
             <Button
@@ -133,14 +139,14 @@ export function SelectedTriggerActions({
               onClick={() => setShowDeleteDialog(false)}
               disabled={deleteMutation.isPending}
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               variant="destructive"
               onClick={handleDelete}
               loading={deleteMutation.isPending}
             >
-              Delete
+              {t("Delete", "删除")}
             </Button>
           </Dialog.Footer>
         </Dialog.Content>

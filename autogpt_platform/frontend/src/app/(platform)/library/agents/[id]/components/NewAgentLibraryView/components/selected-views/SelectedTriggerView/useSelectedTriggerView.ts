@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV2GetASpecificPresetQueryKey,
   getGetV2ListPresetsQueryKey,
@@ -21,6 +22,7 @@ type Args = {
 };
 
 export function useSelectedTriggerView({ triggerId, graphId }: Args) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -58,7 +60,7 @@ export function useSelectedTriggerView({ triggerId, graphId }: Args) {
       onSuccess: (response) => {
         if (response.status === 200) {
           toast({
-            title: "Trigger updated",
+            title: t("Trigger updated", "触发器已更新"),
           });
           queryClient.invalidateQueries({
             queryKey: getGetV2GetASpecificPresetQueryKey(triggerId),
@@ -70,7 +72,7 @@ export function useSelectedTriggerView({ triggerId, graphId }: Args) {
       },
       onError: (error: any) => {
         toast({
-          title: "Failed to update trigger",
+          title: t("Failed to update trigger", "无法更新触发器"),
           description: error.message || "An unexpected error occurred.",
           variant: "destructive",
         });
@@ -85,7 +87,7 @@ export function useSelectedTriggerView({ triggerId, graphId }: Args) {
     // so a graph input saved now would land inside it.
     if (!maskKey && Object.keys(inputs).length > 0) {
       toast({
-        title: "Failed to update trigger",
+        title: t("Failed to update trigger", "无法更新触发器"),
         description:
           "This trigger was saved in an older format. " +
           "Save its trigger settings first, then set its inputs.",

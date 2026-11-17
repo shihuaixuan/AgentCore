@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { SearchResultItem } from "@/app/api/__generated__/models/searchResultItem";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { SearchCommandModal } from "@/components/organisms/SearchCommandModal/SearchCommandModal";
@@ -15,6 +18,7 @@ interface Props {
 }
 
 export function GlobalSearchModal({ isOpen, onClose, onSelectItem }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
@@ -43,14 +47,22 @@ export function GlobalSearchModal({ isOpen, onClose, onSelectItem }: Props) {
   async function runAction(id: string) {
     if (id === COPY_USER_ID_ACTION) {
       if (!user?.id) {
-        toast({ title: "You're not signed in", variant: "destructive" });
+        toast({
+          title: t("You're not signed in", "你尚未登录"),
+          variant: "destructive",
+        });
         return;
       }
       try {
         await navigator.clipboard.writeText(user.id);
-        toast({ title: "User ID copied to clipboard" });
+        toast({
+          title: t("User ID copied to clipboard", "用户 ID 已复制到剪贴板"),
+        });
       } catch {
-        toast({ title: "Couldn't copy User ID", variant: "destructive" });
+        toast({
+          title: t("Couldn't copy User ID", "无法复制用户 ID"),
+          variant: "destructive",
+        });
       }
     }
   }
@@ -85,10 +97,13 @@ export function GlobalSearchModal({ isOpen, onClose, onSelectItem }: Props) {
       buckets={buckets}
       isLoading={isFetching}
       isError={isError}
-      placeholder="Search workflows, files, chats..."
-      inputAriaLabel="Global search"
-      idleEmptyLabel="No recent items"
-      searchingEmptyLabel="No results found"
+      placeholder={t(
+        "Search workflows, files, chats...",
+        "搜索工作流、文件、对话…",
+      )}
+      inputAriaLabel={t("Global search", "全局搜索")}
+      idleEmptyLabel={t("No recent items", "暂无最近项目")}
+      searchingEmptyLabel={t("No results found", "未找到结果")}
       loadingItemId={busyItemId ?? undefined}
       onSelectItem={(item, bucketKey) => handleSelect(item.id, bucketKey)}
     />

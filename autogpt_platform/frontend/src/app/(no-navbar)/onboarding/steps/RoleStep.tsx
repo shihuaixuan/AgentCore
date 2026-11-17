@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
 import { Text } from "@/components/atoms/Text/Text";
@@ -68,6 +70,17 @@ const ROLES = [
 ] as const;
 
 export function RoleStep() {
+  const { t } = useTranslation();
+  const labels: Record<string, string> = {
+    "Founder/CEO": t("Founder / CEO", "创始人 / CEO"),
+    Operations: t("Operations", "运营"),
+    "Sales/BD": t("Sales / BD", "销售 / 商务拓展"),
+    Marketing: t("Marketing", "市场营销"),
+    "Product/PM": t("Product / PM", "产品 / 产品经理"),
+    Engineering: t("Engineering", "研发"),
+    "HR/People": t("HR / People", "人力资源"),
+    Other: t("Other", "其他"),
+  };
   const role = useOnboardingWizardStore((s) => s.role);
   const otherRole = useOnboardingWizardStore((s) => s.otherRole);
   const setRole = useOnboardingWizardStore((s) => s.setRole);
@@ -87,7 +100,9 @@ export function RoleStep() {
       <div className="flex w-full flex-col items-center gap-8 px-4">
         <div className="mx-auto flex w-full max-w-lg flex-col items-center gap-4 px-4 text-center">
           <AutopilotAvatar size={120} transparent />
-          <Text variant="h4">What best describes you?</Text>
+          <Text variant="h4">
+            {t("What best describes you?", "以下哪项最符合你的角色？")}
+          </Text>
         </div>
 
         <div className="grid w-full max-w-lg grid-cols-2 gap-3 md:w-auto md:max-w-none md:grid-cols-4 md:gap-4 md:overflow-hidden">
@@ -95,7 +110,7 @@ export function RoleStep() {
             <SelectableCard
               key={r.id}
               icon={r.icon}
-              label={r.label}
+              label={labels[r.id] ?? r.label}
               selected={role === r.id}
               onClick={() => setRole(r.id)}
               className="h-20 w-full md:h-28 md:w-[11.5rem]"
@@ -119,9 +134,9 @@ export function RoleStep() {
               <div className="w-full px-8 py-1 md:px-0">
                 <Input
                   id="other-role"
-                  label="Other role"
+                  label={t("Other role", "其他角色")}
                   hideLabel
-                  placeholder="Describe your role..."
+                  placeholder={t("Describe your role...", "请描述你的角色…")}
                   value={otherRole}
                   onChange={(e) => setOtherRole(e.target.value)}
                   maxLength={OTHER_ROLE_MAX_LENGTH}
@@ -139,7 +154,7 @@ export function RoleStep() {
           disabled={!canContinue}
           className="h-10 w-56"
         >
-          Next
+          {t("Next", "下一步")}
         </Button>
       </div>
     </FadeIn>

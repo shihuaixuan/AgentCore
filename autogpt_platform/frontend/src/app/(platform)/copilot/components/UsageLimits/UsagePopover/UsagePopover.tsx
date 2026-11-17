@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -25,6 +27,7 @@ interface Props {
 }
 
 export function UsagePopover({ trigger, align = "start" }: Props) {
+  const { t } = useTranslation();
   const { usage, experience, isLoading, isError, retry, isBillingEnabled } =
     useUsagePopover();
 
@@ -38,7 +41,11 @@ export function UsagePopover({ trigger, align = "start" }: Props) {
     <Popover>
       <PopoverTrigger asChild>
         {trigger ?? (
-          <Button variant="ghost" size="icon" aria-label="Usage limits">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={t("Usage limits", "用量限制")}
+          >
             <Icon icon={GaugeIcon} className="!size-5" />
           </Button>
         )}
@@ -49,7 +56,7 @@ export function UsagePopover({ trigger, align = "start" }: Props) {
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2">
             <Text tone="emphasis" variant="body-medium">
-              Usage limits
+              {t("Usage limits", "用量限制")}
             </Text>
             {tierLabel && (
               <Badge
@@ -63,9 +70,11 @@ export function UsagePopover({ trigger, align = "start" }: Props) {
           </div>
           {isError && (
             <div>
-              <Text variant="small">We couldn’t check your usage.</Text>
+              <Text variant="small">
+                {t("We couldn’t check your usage.", "无法查询你的用量。")}
+              </Text>
               <Button size="small" variant="ghost" onClick={() => void retry()}>
-                Try again
+                {t("Try again", "重试")}
               </Button>
             </div>
           )}
@@ -73,25 +82,28 @@ export function UsagePopover({ trigger, align = "start" }: Props) {
             experience.isActiveTrial &&
             experience.trialPercent !== null && (
               <UsageMeter
-                label="Trial allowance"
+                label={t("Trial allowance", "试用额度")}
                 percent={experience.trialPercent}
                 detail={
                   experience.trialEndsAt
-                    ? `Trial ends ${formatUsageDate(experience.trialEndsAt)}`
-                    : "Your allowance for this trial"
+                    ? t(
+                        `Trial ends ${formatUsageDate(experience.trialEndsAt)}`,
+                        `试用将于 ${formatUsageDate(experience.trialEndsAt)} 结束`,
+                      )
+                    : t("Your allowance for this trial", "本次试用的可用额度")
                 }
               />
             )}
           {!isError && !experience.isLifetimeTrial && usage?.daily && (
             <UsageBar
-              label="Today"
+              label={t("Today", "今日")}
               percentUsed={usage.daily.percent_used}
               resetsAt={usage.daily.resets_at}
             />
           )}
           {!isError && !experience.isLifetimeTrial && usage?.weekly && (
             <UsageBar
-              label="This week"
+              label={t("This week", "本周")}
               percentUsed={usage.weekly.percent_used}
               resetsAt={usage.weekly.resets_at}
             />
@@ -102,7 +114,7 @@ export function UsagePopover({ trigger, align = "start" }: Props) {
               href="/settings/billing"
               className="text-body text-info-foreground hover:underline"
             >
-              Manage billing
+              {t("Manage billing", "管理账单")}
             </Link>
           )}
         </div>

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { AutoGPTLogo } from "@/components/atoms/AutoGPTLogo/AutoGPTLogo";
@@ -63,43 +64,6 @@ export const METHOD_ORDER: AuthMethod[] = [
   AuthType.host_scoped,
 ];
 
-const METHOD_COPY: Record<
-  AuthMethod,
-  {
-    label: string;
-    description: string;
-    icon: IconSvgElement;
-    recommended?: boolean;
-  }
-> = {
-  [AuthType.oauth2]: {
-    label: "OAuth",
-    description: "One-click secure access.",
-    icon: SecurityCheckIcon,
-    recommended: true,
-  },
-  [AuthType.api_key]: {
-    label: "API Key",
-    description: "Paste your token for a custom setup.",
-    icon: Key01Icon,
-  },
-  [AuthType.user_password]: {
-    label: "Username & password",
-    description: "Sign in with account credentials.",
-    icon: UserIcon,
-  },
-  [AuthType.host_scoped]: {
-    label: "Website access",
-    description: "Paste a key or headers used only for one website.",
-    icon: GlobeIcon,
-  },
-  [AuthType.device_code]: {
-    label: "Device auth",
-    description: "Approve on your phone with a short code.",
-    icon: SmartPhone01Icon,
-  },
-};
-
 // The connect step behind a provider click: logo pair, "Connect AutoGPT
 // to X", method radio cards. Form methods expand their inputs inline as
 // an accordion; OAuth is driven by the panel footer's Continue.
@@ -114,6 +78,53 @@ export function ConnectMethodView({
   onInlineConnectSuccess,
   mcpSignIn,
 }: Props) {
+  const { t } = useTranslation();
+  const METHOD_COPY: Record<
+    AuthMethod,
+    {
+      label: string;
+      description: string;
+      icon: IconSvgElement;
+      recommended?: boolean;
+    }
+  > = {
+    [AuthType.oauth2]: {
+      label: "OAuth",
+      description: t("One-click secure access.", "一键安全连接。"),
+      icon: SecurityCheckIcon,
+      recommended: true,
+    },
+    [AuthType.api_key]: {
+      label: t("API Key", "API 密钥"),
+      description: t(
+        "Paste your token for a custom setup.",
+        "粘贴令牌以进行自定义设置。",
+      ),
+      icon: Key01Icon,
+    },
+    [AuthType.user_password]: {
+      label: t("Username & password", "用户名和密码"),
+      description: t("Sign in with account credentials.", "使用账户凭据登录。"),
+      icon: UserIcon,
+    },
+    [AuthType.host_scoped]: {
+      label: t("Website access", "网站访问"),
+      description: t(
+        "Paste a key or headers used only for one website.",
+        "粘贴仅用于一个网站的密钥或请求头。",
+      ),
+      icon: GlobeIcon,
+    },
+    [AuthType.device_code]: {
+      label: t("Device auth", "设备授权"),
+      description: t(
+        "Approve on your phone with a short code.",
+        "使用短代码在手机上批准授权。",
+      ),
+      icon: SmartPhone01Icon,
+    },
+  };
+
   const methods = METHOD_ORDER.filter((method) =>
     provider.supportedAuthTypes.includes(method),
   );
@@ -167,13 +178,18 @@ export function ConnectMethodView({
         <div className="flex flex-col gap-1.5 text-center">
           <Text variant="h3" tone="primary" className="!text-lead !leading-10">
             {showMcp
-              ? `Connect ${provider.name}`
-              : `Connect AutoGPT to ${provider.name}`}
+              ? t(`Connect ${provider.name}`, `连接 ${provider.name}`)
+              : t(
+                  `Connect AutoGPT to ${provider.name}`,
+                  `将 AutoGPT 连接到 ${provider.name}`,
+                )}
           </Text>
           {showMcp ? null : (
             <Text variant="body" tone="muted">
-              Choose how you&apos;d like to connect your {provider.name}{" "}
-              account.
+              {t(
+                `Choose how you'd like to connect your ${provider.name} account.`,
+                `选择连接 ${provider.name} 账户的方式。`,
+              )}
             </Text>
           )}
         </div>
@@ -223,7 +239,7 @@ export function ConnectMethodView({
                           </Text>
                           {copy.recommended && (
                             <span className="rounded-md bg-accent-surface px-1.5 py-0.5 text-tiny leading-inherit font-semibold tracking-wide text-accent-strong">
-                              RECOMMENDED
+                              {t("RECOMMENDED", "推荐")}
                             </span>
                           )}
                         </span>
@@ -294,7 +310,7 @@ export function ConnectMethodView({
             </div>
             {offersMcp ? (
               <Button variant="ghost" size="small" onClick={handleUseSignIn}>
-                {getSignInFallbackLabel(provider)}
+                {getSignInFallbackLabel(provider, t)}
               </Button>
             ) : null}
           </div>

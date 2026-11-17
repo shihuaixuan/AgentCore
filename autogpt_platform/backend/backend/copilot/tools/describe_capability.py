@@ -233,7 +233,17 @@ async def _describe_mcp(
             message=setup_hint(entry.schema_ref or entry.id),
             session_id=session.session_id,
         )
-    result = await RunMCPToolTool()._execute(user_id, session, server_url=server_url)
+    result = await RunMCPToolTool()._execute(
+        user_id,
+        session,
+        server_url=server_url,
+        custom_connection_id=entry.id.removeprefix("custom_mcp:")
+        if entry.custom_mcp
+        else None,
+        custom_credential_id=entry.custom_mcp_credential_id
+        if entry.custom_mcp
+        else None,
+    )
     if isinstance(result, MCPToolsDiscoveredResponse):
         result.message = (
             f"{entry.name} exposes {len(result.tools)} tool(s); `params` lists each "

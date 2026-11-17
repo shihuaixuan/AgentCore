@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   Alert02Icon,
   CheckmarkCircle02Icon,
@@ -49,6 +51,7 @@ const VERDICTS: Record<string, VerdictStyle> = {
  *  so they render as plain text — never markdown, never HTML. The backend
  *  tag-escapes them for the model; the card shows them as written. */
 export function ConsultVerdictCard({ output }: Props) {
+  const { t } = useTranslation();
   const verdict = str(output, "verdict") ?? "";
   const style = VERDICTS[verdict];
   const reviewer = asObject(output.reviewer);
@@ -72,10 +75,10 @@ export function ConsultVerdictCard({ output }: Props) {
         />
         <div className="min-w-0 flex-1">
           <Text tone="emphasis" variant="body-medium" className="truncate">
-            {str(reviewer, "name") ?? "A teammate"}
+            {str(reviewer, "name") ?? t("A teammate", "一位队友")}
           </Text>
           <Text tone="muted" variant="small" className="truncate">
-            {str(reviewer, "role") ?? "checked this"}
+            {str(reviewer, "role") ?? t("checked this", "已检查此内容")}
           </Text>
         </div>
         <span
@@ -85,7 +88,18 @@ export function ConsultVerdictCard({ output }: Props) {
           )}
         >
           <Icon icon={style.icon} size={14} />
-          <Text variant="small-medium">{style.label}</Text>
+          <Text variant="small-medium">
+            {t(
+              style.label,
+              (
+                {
+                  pass: "无异议",
+                  block: "已阻止",
+                  insufficient: "未检查",
+                } as Record<string, string>
+              )[verdict],
+            )}
+          </Text>
         </span>
       </div>
       {reason ? (

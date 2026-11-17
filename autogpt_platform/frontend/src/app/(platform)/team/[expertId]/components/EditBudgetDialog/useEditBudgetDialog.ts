@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetExpertQueryKey,
   getListExpertsQueryKey,
@@ -24,6 +25,7 @@ function toUsdInput(credits: number | null | undefined) {
 }
 
 export function useEditBudgetDialog({ expert, open, onClose }: Args) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [value, setValue] = useState(() => toUsdInput(expert.weekly_budget));
 
@@ -44,13 +46,13 @@ export function useEditBudgetDialog({ expert, open, onClose }: Args) {
           queryKey: getGetExpertQueryKey(expert.id),
         });
         queryClient.invalidateQueries({ queryKey: getListExpertsQueryKey() });
-        toast({ title: "Budget updated" });
+        toast({ title: t("Budget updated", "预算已更新") });
         onClose();
       },
       onError: () => {
         toast({
-          title: "Could not update the budget",
-          description: "Please try again.",
+          title: t("Could not update the budget", "无法更新预算"),
+          description: t("Please try again.", "请重试。"),
           variant: "destructive",
         });
       },

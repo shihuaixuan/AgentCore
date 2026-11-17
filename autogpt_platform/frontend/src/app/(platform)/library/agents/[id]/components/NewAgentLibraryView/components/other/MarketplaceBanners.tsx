@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 
@@ -22,6 +23,7 @@ export function MarketplaceBanners({
   onUpdate,
   onPublish,
 }: Props) {
+  const { t } = useTranslation();
   const renderUpdateBanner = () => {
     if (hasUpdate && latestVersion) {
       return (
@@ -29,7 +31,7 @@ export function MarketplaceBanners({
           <div className="flex flex-col gap-3">
             <div>
               <Text variant="large-medium" tone="primary" className="mb-2">
-                Update available
+                {t("Update available", "有可用更新")}
               </Text>
               <Text variant="body" tone="body">
                 You should update your workflow in order to get the latest /
@@ -57,7 +59,7 @@ export function MarketplaceBanners({
           <div className="flex flex-col gap-3">
             <div>
               <Text variant="large-medium" tone="primary" className="mb-2">
-                Unpublished changes
+                {t("Unpublished changes", "未发布的更改")}
               </Text>
               <Text variant="body" tone="body">
                 You&apos;ve made changes to this workflow that aren&apos;t
@@ -67,7 +69,7 @@ export function MarketplaceBanners({
             {onPublish && (
               <div className="flex justify-start">
                 <Button size="small" onClick={onPublish}>
-                  Publish changes
+                  {t("Publish changes", "发布更改")}
                 </Button>
               </div>
             )}

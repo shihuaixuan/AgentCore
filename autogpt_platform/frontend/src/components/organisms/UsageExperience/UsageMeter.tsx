@@ -1,7 +1,10 @@
+"use client";
+
 import type { CSSProperties } from "react";
 import { Text } from "@/components/atoms/Text/Text";
 import { formatUsagePercent } from "@/services/usageExperience/helpers";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   label: string;
@@ -10,6 +13,7 @@ interface Props {
 }
 
 export function UsageMeter({ label, percent, detail }: Props) {
+  const { t } = useTranslation();
   const value = Math.min(100, Math.max(0, percent));
   return (
     <div data-slot="usage-meter" className="space-y-2">
@@ -21,7 +25,10 @@ export function UsageMeter({ label, percent, detail }: Props) {
           {label}
         </Text>
         <Text variant="small" tone="muted" tabular>
-          {formatUsagePercent(value)} used
+          {t(
+            `${formatUsagePercent(value)} used`,
+            `已使用 ${formatUsagePercent(value)}`,
+          )}
         </Text>
       </div>
       <div

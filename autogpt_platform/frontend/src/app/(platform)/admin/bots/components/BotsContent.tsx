@@ -19,8 +19,10 @@ import {
   formatPercent,
   PLATFORM_OPTIONS,
 } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function BotsContent() {
+  const { t } = useTranslation();
   const state = useBotsContent();
   const { summary } = state;
 
@@ -29,20 +31,20 @@ export function BotsContent() {
   const showPlatform = state.platform === "all";
 
   const tiles = [
-    { label: "Live servers", value: formatNumber(summary?.live_servers) },
+    { label: t("Live servers", "在线服务器"), value: formatNumber(summary?.live_servers) },
     {
-      label: "Messages received",
+      label: t("Messages received", "收到的消息"),
       value: formatNumber(summary?.messages_received),
     },
-    { label: "Replies sent", value: formatNumber(summary?.replies_sent) },
-    { label: "Commands used", value: formatNumber(summary?.commands_used) },
+    { label: t("Replies sent", "发送的回复"), value: formatNumber(summary?.replies_sent) },
+    { label: t("Commands used", "使用的命令"), value: formatNumber(summary?.commands_used) },
     {
-      label: "Error rate",
+      label: t("Error rate", "错误率"),
       value: formatPercent(summary?.error_rate),
-      subtitle: `${formatNumber(summary?.stream_errors)} stream errors`,
+      subtitle: `${formatNumber(summary?.stream_errors)} ${t("stream errors", "流错误")}`,
     },
     {
-      label: "Avg reply time",
+      label: t("Avg reply time", "平均回复时间"),
       value: formatDuration(summary?.avg_reply_ms),
     },
   ];
@@ -52,7 +54,7 @@ export function BotsContent() {
       <div className="flex flex-wrap gap-3">
         <Select
           id="platform-filter"
-          label="Platform"
+          label={t("Platform", "平台")}
           hideLabel
           value={state.platform}
           onValueChange={state.setPlatform}
@@ -61,7 +63,7 @@ export function BotsContent() {
         />
         <Select
           id="days-filter"
-          label="Range"
+          label={t("Range", "时间范围")}
           hideLabel
           value={String(state.days)}
           onValueChange={(value) => state.setDays(Number(value))}
@@ -76,10 +78,10 @@ export function BotsContent() {
             message:
               state.error instanceof Error
                 ? state.error.message
-                : "Failed to load bot analytics",
+                : t("Failed to load bot analytics", "无法加载机器人分析数据"),
           }}
           context="bot analytics"
-          hint="Make sure the backend is running the latest build and try again."
+          hint={t("Make sure the backend is running the latest build and try again.", "请确认后端运行的是最新版本，然后重试。")}
         />
       ) : state.isLoading ? (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
@@ -103,20 +105,20 @@ export function BotsContent() {
           </Card>
 
           <Card>
-            <h2 className="mb-4 text-lead font-semibold">Message volume</h2>
+            <h2 className="mb-4 text-lead font-semibold">{t("Message volume", "消息量")}</h2>
             <MessageVolumeChart data={state.messages} />
           </Card>
 
           <Card>
             <h2 className="mb-4 text-lead font-semibold">
-              Top servers by activity
+              {t("Top servers by activity", "活跃度最高的服务器")}
             </h2>
             <SimpleTable
               columns={[
-                ...(showPlatform ? ["Platform"] : []),
-                "Server",
-                "Messages",
-                "Commands",
+                ...(showPlatform ? [t("Platform", "平台")] : []),
+                t("Server", "服务器"),
+                t("Messages", "消息"),
+                t("Commands", "命令"),
               ]}
               rows={state.topServers.map((server) => [
                 ...(showPlatform
@@ -131,12 +133,12 @@ export function BotsContent() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             <Card>
-              <h2 className="mb-4 text-lead font-semibold">Command usage</h2>
+              <h2 className="mb-4 text-lead font-semibold">{t("Command usage", "命令使用情况")}</h2>
               <SimpleTable
                 columns={[
-                  ...(showPlatform ? ["Platform"] : []),
-                  "Command",
-                  "Uses",
+                  ...(showPlatform ? [t("Platform", "平台")] : []),
+                  t("Command", "命令"),
+                  t("Uses", "使用次数"),
                 ]}
                 rows={state.commands.map((command) => [
                   ...(showPlatform
@@ -149,20 +151,20 @@ export function BotsContent() {
             </Card>
 
             <Card>
-              <h2 className="mb-4 text-lead font-semibold">Server roster</h2>
+              <h2 className="mb-4 text-lead font-semibold">{t("Server roster", "服务器列表")}</h2>
               <SimpleTable
                 columns={[
-                  ...(showPlatform ? ["Platform"] : []),
-                  "Server",
-                  "Status",
-                  "Joined",
+                  ...(showPlatform ? [t("Platform", "平台")] : []),
+                  t("Server", "服务器"),
+                  t("Status", "状态"),
+                  t("Joined", "加入时间"),
                 ]}
                 rows={state.roster.map((guild) => [
                   ...(showPlatform
                     ? [<PlatformBadge key="p" platform={guild.platform} />]
                     : []),
                   guild.name || guild.server_id,
-                  guild.active ? "Active" : "Left",
+                  guild.active ? t("Active", "活跃") : t("Left", "已离开"),
                   formatDate(guild.joined_at),
                 ])}
               />

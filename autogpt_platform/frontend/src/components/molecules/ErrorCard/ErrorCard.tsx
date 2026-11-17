@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getErrorMessage, getHttpErrorMessage } from "./helpers";
 import { CardWrapper } from "./components/CardWrapper";
 import { ErrorHeader } from "./components/ErrorHeader";
@@ -36,6 +39,7 @@ export function ErrorCard({
   className = "",
   textSize = "body",
 }: ErrorCardProps) {
+  const { locale } = useTranslation();
   if (isSuccess && !responseError && !httpError) {
     return null;
   }
@@ -51,7 +55,7 @@ export function ErrorCard({
 
   const errorMessage = hasResponseDetail
     ? getErrorMessage(responseError)
-    : getHttpErrorMessage(httpError);
+    : getHttpErrorMessage(httpError, locale);
 
   return (
     <CardWrapper className={className}>

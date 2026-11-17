@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,7 @@ export function FolderTree({
   onSelect,
   onToggleExpanded,
 }: Props) {
+  const { t } = useTranslation();
   const listRef = useRef<HTMLUListElement>(null);
   // One row in the tab order: the selected one, else the first.
   const tabbableIndex = Math.max(
@@ -78,7 +80,7 @@ export function FolderTree({
     <ul
       ref={listRef}
       role="tree"
-      aria-label="Destination folders"
+      aria-label={t("Destination folders", "目标文件夹")}
       className="max-h-[20rem] overflow-y-auto py-1"
     >
       {rows.map((row, index) => {

@@ -25,6 +25,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
 import { ApproveRejectButtons } from "./ApproveRejectButton";
 import { DownloadAgentAdminButton } from "./DownloadAgentButton";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const STATUS_CHIP =
   "inline-flex cursor-default items-center rounded-md border border-transparent px-2.5 py-0.5 text-caption font-semibold leading-4 text-action-foreground shadow";
@@ -33,14 +34,14 @@ const STATUS_CHIP =
 const getStatusBadge = (status: SubmissionStatus) => {
   switch (status) {
     case SubmissionStatus.PENDING:
-      return <span className={cn(STATUS_CHIP, "bg-warning")}>Pending</span>;
+      return <span className={cn(STATUS_CHIP, "bg-warning")}>待处理</span>;
     case SubmissionStatus.APPROVED:
-      return <span className={cn(STATUS_CHIP, "bg-success")}>Approved</span>;
+      return <span className={cn(STATUS_CHIP, "bg-success")}>已通过</span>;
     case SubmissionStatus.REJECTED:
-      return <span className={cn(STATUS_CHIP, "bg-error")}>Rejected</span>;
+      return <span className={cn(STATUS_CHIP, "bg-error")}>已拒绝</span>;
     default:
       return (
-        <span className={cn(STATUS_CHIP, "bg-foreground-tertiary")}>Draft</span>
+        <span className={cn(STATUS_CHIP, "bg-foreground-tertiary")}>草稿</span>
       );
   }
 };
@@ -52,6 +53,7 @@ export function ExpandableRow({
   listing: StoreListingWithVersionsAdminView;
   latestVersion: StoreSubmissionAdminView | null;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -66,14 +68,14 @@ export function ExpandableRow({
         </TableCell>
         <TableCell onClick={() => setExpanded(!expanded)}>
           <span className="font-medium">
-            {latestVersion?.name || "Unnamed Agent"}
+            {latestVersion?.name || t("Unnamed Agent", "未命名工作流")}
           </span>
         </TableCell>
         <TableCell onClick={() => setExpanded(!expanded)}>
-          {listing.creator_email || "Unknown"}
+          {listing.creator_email || t("Unknown", "未知")}
         </TableCell>
         <TableCell onClick={() => setExpanded(!expanded)}>
-          {latestVersion?.sub_heading || "No description"}
+          {latestVersion?.sub_heading || t("No description", "暂无描述")}
         </TableCell>
         <TableCell onClick={() => setExpanded(!expanded)}>
           {latestVersion?.status && getStatusBadge(latestVersion.status)}
@@ -83,7 +85,7 @@ export function ExpandableRow({
             ? formatDistanceToNow(new Date(latestVersion.submitted_at), {
                 addSuffix: true,
               })
-            : "Unknown"}
+            : t("Unknown", "未知")}
         </TableCell>
         <TableCell className="text-right">
           <div className="flex justify-end gap-2">
@@ -94,7 +96,7 @@ export function ExpandableRow({
                 >
                   <Button size="xs" variant="secondary">
                     <Icon aria-hidden icon={EyeIcon} className="h-4 w-4" />
-                    Preview
+                    {t("Preview", "预览")}
                   </Button>
                 </Link>
                 <DownloadAgentAdminButton
@@ -122,23 +124,23 @@ export function ExpandableRow({
                 tone="inherit"
                 className="mb-2"
               >
-                Version History
+                {t("Version History", "版本历史")}
               </Text>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Version</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Changes</TableHead>
-                    <TableHead>Submitted</TableHead>
-                    <TableHead>Reviewed</TableHead>
-                    <TableHead>External Comments</TableHead>
-                    <TableHead>Internal Comments</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Sub Heading</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Categories</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t("Version", "版本")}</TableHead>
+                    <TableHead>{t("Status", "状态")}</TableHead>
+                    <TableHead>{t("Changes", "变更")}</TableHead>
+                    <TableHead>{t("Submitted", "提交时间")}</TableHead>
+                    <TableHead>{t("Reviewed", "审核时间")}</TableHead>
+                    <TableHead>{t("External Comments", "外部评论")}</TableHead>
+                    <TableHead>{t("Internal Comments", "内部评论")}</TableHead>
+                    <TableHead>{t("Name", "名称")}</TableHead>
+                    <TableHead>{t("Sub Heading", "副标题")}</TableHead>
+                    <TableHead>{t("Description", "描述")}</TableHead>
+                    <TableHead>{t("Categories", "分类")}</TableHead>
+                    <TableHead className="text-right">{t("Actions", "操作")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -154,13 +156,13 @@ export function ExpandableRow({
                           {version.listing_version_id ===
                             listing.active_listing_version_id && (
                             <span className={cn(STATUS_CHIP, "ml-2 bg-info")}>
-                              Active
+                              {t("Active", "生效中")}
                             </span>
                           )}
                         </TableCell>
                         <TableCell>{getStatusBadge(version.status)}</TableCell>
                         <TableCell>
-                          {version.changes_summary || "No summary"}
+                          {version.changes_summary || t("No summary", "暂无摘要")}
                         </TableCell>
                         <TableCell>
                           {version.submitted_at
@@ -168,7 +170,7 @@ export function ExpandableRow({
                                 new Date(version.submitted_at),
                                 { addSuffix: true },
                               )
-                            : "Unknown"}
+                            : t("Unknown", "未知")}
                         </TableCell>
                         <TableCell>
                           {version.reviewed_at
@@ -178,7 +180,7 @@ export function ExpandableRow({
                                   addSuffix: true,
                                 },
                               )
-                            : "Not reviewed"}
+                            : t("Not reviewed", "未审核")}
                         </TableCell>
                         <TableCell className="max-w-xs overflow-hidden">
                           {version.review_comments ? (
@@ -190,7 +192,7 @@ export function ExpandableRow({
                             </div>
                           ) : (
                             <span className="block truncate text-foreground-subtle">
-                              No external comments
+                              {t("No external comments", "暂无外部评论")}
                             </span>
                           )}
                         </TableCell>
@@ -204,7 +206,7 @@ export function ExpandableRow({
                             </div>
                           ) : (
                             <span className="block truncate text-foreground-subtle">
-                              No internal comments
+                              {t("No internal comments", "暂无内部评论")}
                             </span>
                           )}
                         </TableCell>
@@ -214,7 +216,7 @@ export function ExpandableRow({
                         <TableCell>
                           {version.categories.length > 0
                             ? version.categories.join(", ")
-                            : "None"}
+                            : t("None", "无")}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
@@ -229,7 +231,7 @@ export function ExpandableRow({
                                       icon={EyeIcon}
                                       className="h-4 w-4"
                                     />
-                                    Preview
+                                    {t("Preview", "预览")}
                                   </Button>
                                 </Link>
                                 <DownloadAgentAdminButton

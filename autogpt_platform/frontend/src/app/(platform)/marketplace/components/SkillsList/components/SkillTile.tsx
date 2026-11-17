@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { MarketplaceSkill } from "@/app/api/__generated__/models/marketplaceSkill";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
@@ -12,6 +15,7 @@ interface Props {
 }
 
 export function SkillTile({ skill, isInstalled, onSee }: Props) {
+  const { t } = useTranslation();
   const { accent } = getCategoryAccent(skill.categories[0]);
 
   return (
@@ -26,7 +30,8 @@ export function SkillTile({ skill, isInstalled, onSee }: Props) {
         isInstalled ? (
           <span className="flex shrink-0 items-center gap-1 pr-1 text-body-sm leading-inherit font-medium text-success">
             <Icon icon={CheckmarkCircle02Icon} size={14} aria-hidden />
-            Added
+
+            {t("Added", "已添加")}
           </span>
         ) : null
       }

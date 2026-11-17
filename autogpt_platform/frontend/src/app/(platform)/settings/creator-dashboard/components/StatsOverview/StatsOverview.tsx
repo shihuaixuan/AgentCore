@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Text } from "@/components/atoms/Text/Text";
@@ -27,30 +28,31 @@ interface StatTile {
 }
 
 export function StatsOverview({ stats, index = 0 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   const tiles: StatTile[] = [
     {
-      label: "Total submissions",
+      label: t("Total submissions", "提交总数"),
       value: stats.total.toLocaleString(),
       Icon: Layers01Icon,
       iconClass: "bg-accent-surface text-accent-strong ring-brand/20",
     },
     {
-      label: "Approved",
+      label: t("Approved", "已批准"),
       value: stats.approved.toLocaleString(),
       Icon: CheckmarkCircle02Icon,
       iconClass: "bg-success-surface text-success-foreground ring-success/30",
     },
     {
-      label: "In review",
+      label: t("In review", "审核中"),
       value: stats.pending.toLocaleString(),
       Icon: Clock01Icon,
       iconClass:
         "bg-warning-surface text-warning-foreground ring-warning-border",
     },
     {
-      label: "Total runs",
+      label: t("Total runs", "总运行次数"),
       value: formatRuns(stats.totalRuns),
       Icon: PlayIcon,
       iconClass: "bg-info-surface text-sky-foreground ring-sky/30",
@@ -71,7 +73,7 @@ export function StatsOverview({ stats, index = 0 }: Props) {
             }
       }
       className="grid w-full grid-cols-2 gap-3 lg:grid-cols-4"
-      aria-label="Submission stats"
+      aria-label={t("Submission stats", "提交统计")}
     >
       {tiles.map((tile) => (
         <StatTileCard key={tile.label} tile={tile} />
@@ -85,10 +87,13 @@ export function StatsOverview({ stats, index = 0 }: Props) {
             </div>
             <div className="flex flex-col">
               <Text variant="body-medium" as="span">
-                Average rating
+                {t("Average rating", "平均评分")}
               </Text>
               <Text variant="small" tone="muted">
-                Across all submissions with reviews.
+                {t(
+                  "Across all submissions with reviews.",
+                  "基于所有已有评价的提交统计。",
+                )}
               </Text>
             </div>
           </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import type { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { useScheduleDetailHeader } from "../../../RunDetailHeader/useScheduleDetailHeader";
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function DeleteScheduleButton({ agent, scheduleId, onDeleted }: Props) {
+  const { t } = useTranslation();
   const { deleteSchedule, isDeleting } = useScheduleDetailHeader(
     agent.graph_id,
     scheduleId,
@@ -29,7 +31,7 @@ export function DeleteScheduleButton({ agent, scheduleId, onDeleted }: Props) {
       }}
       loading={isDeleting}
     >
-      <Icon icon={Delete02Icon} size={16} /> Delete schedule
+      <Icon icon={Delete02Icon} size={16} /> {t("Delete schedule", "删除计划")}
     </Button>
   );
 }

@@ -13,7 +13,9 @@ describe("WalletRefill", () => {
 
     // The "top-up" tab is the default, so the extracted TopUpForm (with its
     // single "Amount" field) must render after the WalletRefill extraction.
-    expect(await screen.findByLabelText("Amount")).toBeDefined();
-    expect(screen.getByRole("button", { name: /top up/i })).toBeDefined();
+    expect(await screen.findByLabelText(/^(Amount|金额)$/)).toBeDefined();
+    expect(
+      screen.getByRole("button", { name: /^(top up|充值)$/i }),
+    ).toBeDefined();
   });
 });

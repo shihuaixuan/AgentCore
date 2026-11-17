@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { useCostReplyMoment } from "@/app/(platform)/components/ContextualTips/useTipMoment";
 import { parseSpecialMarkers } from "../../helpers/messageMarkers";
 import { CredentialMentionText } from "../CredentialMention/CredentialMentionText";
@@ -295,6 +299,7 @@ export function ChatMessagesContainer({
   variant = "default",
   showThreadHeader = true,
 }: Props) {
+  const { t } = useTranslation();
   const isCompact = variant === "compact";
   const messages = useMemo(
     () => hideKickoffMessages(allMessages),
@@ -616,7 +621,9 @@ export function ChatMessagesContainer({
                 ) : (
                   <div className="flex items-center gap-2 text-body text-foreground-tertiary">
                     <LoadingSpinner className="h-4 w-4 text-foreground-tertiary" />
-                    <span>Retrieving latest messages</span>
+                    <span>
+                      {t("Retrieving latest messages", "正在获取最新消息")}
+                    </span>
                   </div>
                 )}
               </MessageContent>

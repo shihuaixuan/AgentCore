@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,11 +9,15 @@ import { ArrowLeft02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export default function FollowupsPage() {
+  const { t } = useTranslation();
   const router = useRouter();
 
   useEffect(() => {
-    document.title = "Scheduled – AutoGPT Platform";
-  }, []);
+    document.title = t(
+      "Scheduled – AutoGPT Platform",
+      "计划 – AutoGPT Platform",
+    );
+  }, [t]);
 
   function handleGuidedPrompt(prompt: string) {
     router.push(`/home#prompt=${encodeURIComponent(prompt)}`);
@@ -26,7 +31,8 @@ export default function FollowupsPage() {
         data-testid="followups-back-to-library"
       >
         <Icon icon={ArrowLeft02Icon} size={14} />
-        Back to Library
+
+        {t("Back to Library", "返回工作流库")}
       </Link>
       <SchedulesPanel onGuidedPrompt={handleGuidedPrompt} />
     </main>

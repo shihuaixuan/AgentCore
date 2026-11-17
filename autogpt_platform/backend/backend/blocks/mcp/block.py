@@ -70,6 +70,9 @@ class MCPToolBlock(Block):
     """
 
     class Input(BlockSchemaInput):
+        connection_id: str = SchemaField(
+            description="Saved MCP connection ID", default="", hidden=True
+        )
         server_url: str = SchemaField(
             description="URL of the MCP server (Streamable HTTP endpoint)",
             placeholder="https://mcp.example.com/mcp",
@@ -205,6 +208,53 @@ class MCPToolBlock(Block):
         credentials: OAuth2Credentials | None = None,
         **kwargs,
     ) -> BlockOutput:
+        if input_data.connection_id:
+            from backend.data import db
+            from backend.data.custom_mcp import get_custom_mcp_connection
+            from backend.util.clients import get_database_manager_async_client
+
+            execution_context = kwargs.get("execution_context")
+            if execution_context and execution_context.expert_id:
+                yield (
+                    "error",
+                    "Custom connections are not available to expert workflows yet.",
+                )
+                return
+            lookup = (
+                get_custom_mcp_connection
+                if db.is_connected()
+                else get_database_manager_async_client().get_custom_mcp_connection
+            )
+            connection = await lookup(user_id, input_data.connection_id)
+            if not connection or not connection["enabled"]:
+                yield (
+                    "error",
+                    "This connection is unavailable. Select another connection.",
+                )
+                return
+            if normalize_mcp_url(connection["serverUrl"]) != normalize_mcp_url(
+                input_data.server_url
+            ):
+                yield (
+                    "error",
+                    "This connection's server address changed. Select its tool again.",
+                )
+                return
+            credential_id = connection["credentialId"]
+            if credential_id:
+                if (
+                    not isinstance(credentials, OAuth2Credentials)
+                    or credentials.id != credential_id
+                ):
+                    yield "error", "This connection's credential is unavailable."
+                    return
+            else:
+                if credentials is not None:
+                    yield (
+                        "error",
+                        "This connection's credentials changed. Run it again.",
+                    )
+                    return
         if not input_data.server_url:
             yield "error", "MCP server URL is required"
             return
@@ -271,4 +321,4 @@ class MCPToolBlock(Block):
             yield "error", f"MCP tool call failed: {e}"
         except Exception as e:
             logger.exception(f"MCP tool call failed: {e}")
-            yield "error", f"MCP tool call failed: {str(e)}"
+            yield "error", f"MCP tool call failed: {e!s}"

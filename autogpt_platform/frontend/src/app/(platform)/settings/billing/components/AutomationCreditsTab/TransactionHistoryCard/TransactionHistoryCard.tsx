@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 import { useId } from "react";
 import { Button } from "@/components/atoms/Button/Button";
@@ -13,6 +14,7 @@ import { useTransactionHistoryCard } from "./useTransactionHistoryCard";
 type Props = { index?: number };
 
 export function TransactionHistoryCard({ index = 0 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const history = useTransactionHistoryCard();
   const headingID = useId();
@@ -25,7 +27,7 @@ export function TransactionHistoryCard({ index = 0 }: Props) {
     <motion.section
       {...getSectionMotionProps(index, Boolean(reduceMotion))}
       className="flex w-full flex-col gap-3"
-      aria-label="Transaction history"
+      aria-label={t("Transaction history", "交易记录")}
     >
       <div className="flex flex-wrap items-end justify-between gap-2 px-4">
         <div>
@@ -37,7 +39,7 @@ export function TransactionHistoryCard({ index = 0 }: Props) {
             // oxlint-disable-next-line design-system/no-restyle -- a programmatic focus target that shows no outline
             className="focus:outline-none"
           >
-            Transaction history
+            {t("Transaction history", "交易记录")}
           </Text>
           <Text variant="small" tone="secondary" className="mt-1">
             Changes to your automation credit balance.
@@ -72,14 +74,17 @@ export function TransactionHistoryCard({ index = 0 }: Props) {
           role="alert"
         >
           <Text variant="small" tone="secondary">
-            History couldn’t be refreshed. Showing previously loaded activity.
+            {t(
+              "History couldn’t be refreshed. Showing previously loaded activity.",
+              "无法刷新记录，正在显示之前加载的活动。",
+            )}
           </Text>
           <Button
             variant="ghost"
             size="small"
             onClick={() => void retryHistory()}
           >
-            Try again
+            {t("Try again", "重试")}
           </Button>
         </div>
       )}
@@ -92,10 +97,11 @@ export function TransactionHistoryCard({ index = 0 }: Props) {
 }
 
 function HistorySkeleton() {
+  const { t } = useTranslation();
   return (
     <div
       role="status"
-      aria-label="Loading transaction history"
+      aria-label={t("Loading transaction history", "正在加载交易记录")}
       className="rounded-large border border-border-base bg-surface p-5"
     >
       <div className="space-y-6">
@@ -111,9 +117,12 @@ function HistorySkeleton() {
 }
 
 function EmptyHistory() {
+  const { t } = useTranslation();
   return (
     <div className="rounded-large border border-border-base bg-surface px-5 py-10 text-center">
-      <Text variant="body-medium">No transactions yet.</Text>
+      <Text variant="body-medium">
+        {t("No transactions yet.", "暂无交易记录。")}
+      </Text>
       <Text variant="small" tone="secondary" className="mt-2">
         Credit purchases and paid activity will appear here.
       </Text>

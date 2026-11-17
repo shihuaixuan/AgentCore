@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Delete02Icon } from "@hugeicons/core-free-icons";
@@ -18,6 +21,7 @@ export function APIKeySelectionBar({
   onDeselectAll,
   onDeleteSelected,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex w-full items-center justify-between rounded-xsmall border border-border-base bg-surface-hover px-4 py-2">
       <div className="flex items-center gap-5">
@@ -26,11 +30,11 @@ export function APIKeySelectionBar({
         </Text>
         {!allSelected && (
           <Button variant="ghost" size="small" onClick={onSelectAll}>
-            Select All
+            {t("Select All", "全选")}
           </Button>
         )}
         <Button variant="ghost" size="small" onClick={onDeselectAll}>
-          Deselect
+          {t("Deselect", "取消选择")}
         </Button>
       </div>
       <Button
@@ -39,7 +43,7 @@ export function APIKeySelectionBar({
         leftIcon={<Icon icon={Delete02Icon} size={16} />}
         onClick={onDeleteSelected}
       >
-        Delete selected
+        {t("Delete selected", "删除所选项")}
       </Button>
     </div>
   );

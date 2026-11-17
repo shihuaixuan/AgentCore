@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { Button } from "@/components/atoms/Button/Button";
 import {
@@ -24,6 +25,7 @@ export function TriggerAgentActionsDropdown({
   triggerAgent,
   onDeleted,
 }: Props) {
+  const { t } = useTranslation();
   const { openDialog, dialog } = useRemoveTriggerAgent({
     parentAgent,
     triggerAgent,
@@ -38,7 +40,7 @@ export function TriggerAgentActionsDropdown({
             variant="icon"
             size="icon"
             onClick={(e) => e.stopPropagation()}
-            aria-label="More actions"
+            aria-label={t("More actions", "更多操作")}
             className="ml-auto min-w-fit shrink-0"
           >
             <Icon icon={MoreVerticalIcon} size={18} />
@@ -50,7 +52,7 @@ export function TriggerAgentActionsDropdown({
               href={`/library/agents/${triggerAgent.id}`}
               onClick={(e) => e.stopPropagation()}
             >
-              View in library
+              {t("View in library", "在工作流库中查看")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
@@ -58,7 +60,7 @@ export function TriggerAgentActionsDropdown({
               href={`/build?flowID=${triggerAgent.graph_id}`}
               onClick={(e) => e.stopPropagation()}
             >
-              Open in builder
+              {t("Open in builder", "在构建器中打开")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -67,7 +69,7 @@ export function TriggerAgentActionsDropdown({
               openDialog();
             }}
           >
-            Remove trigger
+            {t("Remove trigger", "移除触发器")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

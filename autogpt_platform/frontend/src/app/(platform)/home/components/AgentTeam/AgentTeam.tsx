@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AiEraserIcon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import type { HomeDashboardResponse } from "@/app/api/__generated__/models/homeDashboardResponse";
@@ -17,18 +20,22 @@ interface Props {
 }
 
 export function AgentTeam({ dashboard, className }: Props) {
+  const { t } = useTranslation();
   const { team, agents } = dashboard;
-  const teamSpend = formatWeeklySpend(team.spend_cents);
+  const teamSpend = formatWeeklySpend(team.spend_cents, t);
   const statusLine =
     team.working > 0
-      ? `${team.working} working now · ${team.ready} ready`
-      : `${team.ready} ready for work`;
+      ? t(
+          `${team.working} working now · ${team.ready} ready`,
+          `${team.working} 位正在工作 · ${team.ready} 位已就绪`,
+        )
+      : t(`${team.ready} ready for work`, `${team.ready} 位已就绪`);
 
   return (
     <HomeTile
       className={className}
       icon={AiEraserIcon}
-      title="Your team"
+      title={t("Your team", "你的团队")}
       meta={
         team.total > 0 ? (
           <span className="tabular-nums">
@@ -39,9 +46,15 @@ export function AgentTeam({ dashboard, className }: Props) {
     >
       {agents.length === 0 ? (
         <HomeTileEmpty
-          title="Build your team"
-          description="Hire an expert to start delegating work."
-          action={{ href: "/marketplace", label: "Browse experts" }}
+          title={t("Build your team", "组建团队")}
+          description={t(
+            "Hire an expert to start delegating work.",
+            "聘用专家，开始委派工作。",
+          )}
+          action={{
+            href: "/marketplace",
+            label: t("Browse experts", "浏览专家"),
+          }}
         />
       ) : (
         <div className="divide-y divide-separator">
@@ -64,8 +77,11 @@ export function AgentTeam({ dashboard, className }: Props) {
             className="group-hover:text-foreground-strong"
           >
             {team.total > LISTED_EXPERTS
-              ? `View all ${team.total} experts`
-              : "Open team"}
+              ? t(
+                  `View all ${team.total} experts`,
+                  `查看全部 ${team.total} 位专家`,
+                )
+              : t("Open team", "打开团队")}
           </Text>
           <Icon icon={ArrowRight01Icon} size={14} aria-hidden="true" />
         </Link>

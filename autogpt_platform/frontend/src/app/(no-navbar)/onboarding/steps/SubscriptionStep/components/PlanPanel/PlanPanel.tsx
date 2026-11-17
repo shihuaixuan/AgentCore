@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { PlanProgress } from "@/app/api/__generated__/models/planProgress";
 import type { PlanResponse } from "@/app/api/__generated__/models/planResponse";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -43,6 +46,7 @@ export function PlanPanel({
   isPageTitle = standalone,
   footer,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       data-testid="plan-panel"
@@ -54,7 +58,7 @@ export function PlanPanel({
       <div className="flex items-center gap-2">
         <AutopilotAvatar size={26} />
         <Text variant="small-medium" as="span" tone="secondary">
-          Otto&apos;s plan
+          {t("Otto's plan", "Otto 的计划")}
         </Text>
       </div>
       <Text
@@ -63,11 +67,13 @@ export function PlanPanel({
         id={PLAN_HEADING_ID}
         className="text-balance"
       >
-        Here&apos;s what your team does first
+        {t("Here's what your team does first", "团队将优先完成这些工作")}
       </Text>
       {/* Outside the busy skeleton, so the plan landing is announced. */}
       <span className="sr-only" role="status">
-        {plan ? "Your plan is ready" : "Otto is writing your plan"}
+        {plan
+          ? t("Your plan is ready", "计划已准备就绪")
+          : t("Otto is writing your plan", "Otto 正在制定计划")}
       </span>
       {plan ? (
         <PlanBody plan={plan} moment={moment} />
@@ -86,16 +92,30 @@ function PlanBody({
   plan: PlanResponse;
   moment: ConsentMoment;
 }) {
+  const { t } = useTranslation();
   const role = useOnboardingWizardStore((s) => s.role);
   const team = plan.team ?? [];
   const heard = plan.source === "llm" ? plan.heard : null;
   return (
     <>
       <HeardCard
-        label={heard ? "What I heard" : "Based on your role"}
-        text={heard ?? roleHeard({ role, skippedDump: plan.skipped_dump })}
+        label={
+          heard
+            ? t("What I heard", "我了解到的情况")
+            : t("Based on your role", "根据你的角色")
+        }
+        text={
+          heard ??
+          t(
+            roleHeard({ role, skippedDump: plan.skipped_dump }),
+            `${plan.skipped_dump ? "你跳过了工作描述，" : ""}这是根据你的角色拟定的初步计划。开始使用后，告诉我更多工作情况，我会进一步完善。`,
+          )
+        }
       />
-      <ul aria-label="Your first tasks" className="flex flex-col gap-2">
+      <ul
+        aria-label={t("Your first tasks", "首批任务")}
+        className="flex flex-col gap-2"
+      >
         {getStepTasks(plan).map((task, index) => (
           <PlanTaskCard
             key={task.id}

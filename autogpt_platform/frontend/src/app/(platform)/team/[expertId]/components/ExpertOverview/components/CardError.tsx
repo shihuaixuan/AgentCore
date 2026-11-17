@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 
@@ -9,6 +12,7 @@ interface Props {
 /** A card's failed load, said plainly with a way to try again, so it never
  *  reads as an empty history. */
 export function CardError({ message, onRetry }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between gap-3 py-2">
       <Text variant="body-md" tone="muted">
@@ -20,7 +24,7 @@ export function CardError({ message, onRetry }: Props) {
         textSize="body-md"
         onClick={() => void onRetry()}
       >
-        Retry
+        {t("Retry", "重试")}
       </Button>
     </div>
   );

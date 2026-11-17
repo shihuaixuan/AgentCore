@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -9,6 +12,7 @@ interface Props {
 }
 
 export function SetupStatus({ expert, isRetrying, onRetry }: Props) {
+  const { t } = useTranslation();
   if (expert.setup_status === "installing") {
     return (
       <div
@@ -16,7 +20,8 @@ export function SetupStatus({ expert, isRetrying, onRetry }: Props) {
         className="mx-4 mb-3 rounded-lg bg-info-surface px-3 py-2 text-sky-foreground ring-1 ring-sky/30 ring-inset"
       >
         <Text variant="body" tone="inherit">
-          Setting up {expert.name}&apos;s skills and workflows…
+          {t("Setting up", "正在设置")} {expert.name}&apos;s skills and
+          workflows…
         </Text>
       </div>
     );
@@ -40,7 +45,7 @@ export function SetupStatus({ expert, isRetrying, onRetry }: Props) {
           loading={isRetrying}
           onClick={onRetry}
         >
-          Retry setup
+          {t("Retry setup", "重试设置")}
         </Button>
       ) : null}
     </div>

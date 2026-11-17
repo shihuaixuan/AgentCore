@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { UsageBar } from "@/app/(platform)/copilot/components/UsageLimits/UsageBar";
 import { useCopilotUsage } from "@/app/(platform)/copilot/components/UsageLimits/useCopilotUsage";
 import {
@@ -17,18 +18,24 @@ import { cn } from "@/lib/utils";
 import { useTrialStatus } from "@/services/trials/useTrialStatus";
 
 export function WalletCopilotUsage() {
+  const { t } = useTranslation();
   const { data: usage, isError, refetch } = useCopilotUsage();
   const tierLabel = formatTierLabel(usage?.tier);
 
   return (
-    <section aria-label="Chat usage" className="flex flex-col gap-4">
+    <section
+      aria-label={t("Chat usage", "对话用量")}
+      className="flex flex-col gap-4"
+    >
       <div className="flex items-center justify-between gap-3">
         <Text variant="large-medium" as="h2">
-          Chat usage
+          {t("Chat usage", "对话用量")}
         </Text>
         {tierLabel && (
           <Badge variant="info" size="small" className={TIER_BADGE_CLASS_NAME}>
-            {tierLabel === "Trial" ? "Free trial" : `${tierLabel} plan`}
+            {tierLabel === "Trial"
+              ? t("Free trial", "免费试用")
+              : t(`${tierLabel} plan`, `${tierLabel} 套餐`)}
           </Badge>
         )}
       </div>
@@ -44,11 +51,12 @@ export function WalletCopilotUsage() {
 }
 
 function UsageWindows({ usage }: { usage: CoPilotUsagePublic }) {
+  const { t } = useTranslation();
   if (usage.tier === "TRIAL") return <TrialUsage />;
   if (!usage.daily && !usage.weekly) {
     return (
       <Text variant="body" tone="secondary">
-        No usage limits
+        {t("No usage limits", "用量不限")}
       </Text>
     );
   }
@@ -57,14 +65,14 @@ function UsageWindows({ usage }: { usage: CoPilotUsagePublic }) {
     <div className="flex flex-col gap-4">
       {usage.daily && (
         <UsageBar
-          label="Today"
+          label={t("Today", "今天")}
           percentUsed={usage.daily.percent_used}
           resetsAt={usage.daily.resets_at}
         />
       )}
       {usage.weekly && (
         <UsageBar
-          label="This week"
+          label={t("This week", "本周")}
           percentUsed={usage.weekly.percent_used}
           resetsAt={usage.weekly.resets_at}
         />
@@ -74,6 +82,7 @@ function UsageWindows({ usage }: { usage: CoPilotUsagePublic }) {
 }
 
 function TrialUsage() {
+  const { t } = useTranslation();
   const { data: trial, isPending, refetch } = useTrialStatus();
   if (isPending) return <UsageLoading />;
   if (trial?.allowance_used_percent == null) {
@@ -86,16 +95,19 @@ function TrialUsage() {
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between gap-3">
         <Text variant="body-medium" tone="body">
-          Trial allowance
+          {t("Trial allowance", "试用额度")}
         </Text>
         <Text variant="body" tone="muted" tabular>
-          {formatTrialPercent(percent)} used
+          {t(
+            `${formatTrialPercent(percent)} used`,
+            `已使用 ${formatTrialPercent(percent)}`,
+          )}
         </Text>
       </div>
       <Progress
         value={percent}
         role="progressbar"
-        aria-label="Trial allowance usage"
+        aria-label={t("Trial allowance usage", "试用额度用量")}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={percent}
@@ -105,7 +117,8 @@ function TrialUsage() {
         )}
       />
       <Text variant="small" tone="muted">
-        {trial.active ? "Ends" : "Ended"} {formatTrialEnd(trial.ends_at)}
+        {trial.active ? t("Ends", "结束时间：") : t("Ended", "已结束：")}{" "}
+        {formatTrialEnd(trial.ends_at)}
       </Text>
     </div>
   );
@@ -120,10 +133,11 @@ function formatTrialPercent(percent: number) {
 }
 
 function UsageLoading() {
+  const { t } = useTranslation();
   return (
     <div
       role="status"
-      aria-label="Loading chat usage"
+      aria-label={t("Loading chat usage", "正在加载对话用量")}
       className="flex flex-col gap-4"
     >
       {[0, 1].map((index) => (
@@ -141,10 +155,11 @@ function UsageLoading() {
 }
 
 function UsageUnavailable({ onRetry }: { onRetry: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between gap-3">
       <Text variant="small" tone="secondary">
-        Usage is unavailable right now.
+        {t("Usage is unavailable right now.", "暂时无法获取用量。")}
       </Text>
       <Button
         variant="ghost"
@@ -153,7 +168,7 @@ function UsageUnavailable({ onRetry }: { onRetry: () => void }) {
         onClick={onRetry}
         className="min-w-20"
       >
-        Retry
+        {t("Retry", "重试")}
       </Button>
     </div>
   );

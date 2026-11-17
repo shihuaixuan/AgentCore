@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Download04Icon } from "@hugeicons/core-free-icons";
 
@@ -12,6 +15,7 @@ export function DownloadOnly({
   downloadUrl,
   message = "This file type can't be previewed.",
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
       <p className="text-body text-foreground-tertiary">{message}</p>
@@ -21,7 +25,8 @@ export function DownloadOnly({
         className="inline-flex items-center gap-1.5 rounded-md border border-border-base bg-surface px-3 py-1.5 text-body font-medium text-foreground-body transition-colors hover:bg-surface-muted"
       >
         <Icon icon={Download04Icon} size={16} />
-        Download
+
+        {t("Download", "下载")}
       </a>
     </div>
   );

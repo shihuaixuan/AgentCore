@@ -1,5 +1,7 @@
 "use client";
 
+import { useOnboardingTranslation } from "../../../useOnboardingTranslation";
+
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { SwapFade } from "@/components/atoms/SwapFade/SwapFade";
 import { Text } from "@/components/atoms/Text/Text";
@@ -19,6 +21,7 @@ export function RecordingStatus({
   showSilenceNudge,
   isOffline,
 }: Props) {
+  const { translateCopy } = useOnboardingTranslation();
   const feedback = showSilenceNudge
     ? null
     : recordingFeedbackAt(elapsedSeconds);
@@ -28,14 +31,14 @@ export function RecordingStatus({
       <div className="mt-2 h-6">
         <SwapFade swapKey={feedback ?? "idle"} className="flex justify-center">
           <Text variant="body-medium" tone="muted" className="text-center">
-            {feedback ?? ""}
+            {translateCopy(feedback ?? "")}
           </Text>
         </SwapFade>
       </div>
 
       {showSilenceNudge && (
         <Text variant="small" tone="muted" className="max-w-sm text-center">
-          {SILENCE_NUDGE_COPY}
+          {translateCopy(SILENCE_NUDGE_COPY)}
         </Text>
       )}
 
@@ -45,7 +48,7 @@ export function RecordingStatus({
         <div className="flex items-center gap-2 rounded-md bg-surface-hover px-2.5 py-1 text-foreground-subtle">
           <Icon icon={CloudOffIcon} size={14} className="shrink-0" />
           <Text variant="small" tone="muted">
-            {OFFLINE_COPY}
+            {translateCopy(OFFLINE_COPY)}
           </Text>
         </div>
       )}

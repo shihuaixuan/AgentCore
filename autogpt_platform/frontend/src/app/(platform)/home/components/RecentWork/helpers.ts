@@ -1,3 +1,4 @@
+import type { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { File01Icon, PlugIcon, RepeatIcon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import type { HomeBriefingOutcome } from "@/app/api/__generated__/models/homeBriefingOutcome";
@@ -23,10 +24,11 @@ export function splitGroupsBySection(groups: HomeRecentWorkGroup[]) {
 
 export function getRunTriggerLabel(
   trigger: HomeBriefingOutcome["trigger"],
+  t: ReturnType<typeof useTranslation>["t"] = (english) => english,
 ): string {
-  if (trigger === "schedule") return "Scheduled run";
-  if (trigger === "webhook") return "Triggered run";
-  return "Manual run";
+  if (trigger === "schedule") return t("Scheduled run", "计划运行");
+  if (trigger === "webhook") return t("Triggered run", "触发运行");
+  return t("Manual run", "手动运行");
 }
 
 type ActorChip = { label: string; className: string };
@@ -63,7 +65,7 @@ export function formatWorkTime(
   timeZone: string,
   locale?: string,
 ): string {
-  if (!value) return "Recently";
+  if (!value) return locale === "zh-CN" ? "最近" : "Recently";
   return new Intl.DateTimeFormat(locale, {
     timeZone,
     weekday: "short",
@@ -72,12 +74,27 @@ export function formatWorkTime(
   }).format(new Date(value));
 }
 
-export function formatGroupCounts(group: HomeRecentWorkGroup): string {
+export function formatGroupCounts(
+  group: HomeRecentWorkGroup,
+  t: ReturnType<typeof useTranslation>["t"] = (english) => english,
+): string {
   return [
-    countLabel(group.run_count ?? 0, "run"),
-    countLabel(group.file_count ?? 0, "file"),
-    countLabel(group.integration_count ?? 0, "action"),
-    countLabel(group.schedule_count ?? 0, "schedule"),
+    t(
+      countLabel(group.run_count ?? 0, "run") ?? "",
+      (group.run_count ?? 0) ? `${group.run_count} 次运行` : "",
+    ),
+    t(
+      countLabel(group.file_count ?? 0, "file") ?? "",
+      (group.file_count ?? 0) ? `${group.file_count} 个文件` : "",
+    ),
+    t(
+      countLabel(group.integration_count ?? 0, "action") ?? "",
+      (group.integration_count ?? 0) ? `${group.integration_count} 项操作` : "",
+    ),
+    t(
+      countLabel(group.schedule_count ?? 0, "schedule") ?? "",
+      (group.schedule_count ?? 0) ? `${group.schedule_count} 项计划` : "",
+    ),
   ]
     .filter(Boolean)
     .join(" · ");

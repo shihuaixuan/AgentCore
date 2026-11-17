@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -36,6 +37,9 @@ export function CancelTrialFeedbackDialog({
   onReason,
   onConfirm,
 }: Props) {
+  const { t, locale } = useTranslation();
+  const localizedEndDate =
+    locale === "zh-CN" && endDate === "November 4" ? "11 月 4 日" : endDate;
   const flow = useCancelTrialFeedback({
     startsOpen: !trigger,
     initialReason,
@@ -46,7 +50,7 @@ export function CancelTrialFeedbackDialog({
 
   return (
     <Dialog
-      title="Cancel your trial?"
+      title={t("Cancel your trial?", "取消试用？")}
       styling={{ maxWidth: "38rem", minWidth: "auto" }}
       controlled={{ isOpen: flow.isOpen, set: flow.setOpen }}
     >
@@ -59,27 +63,25 @@ export function CancelTrialFeedbackDialog({
             className="flex flex-col gap-3"
           >
             <Text variant="body" tone="emphasis">
-              Your trial won&apos;t convert to a paid plan and your card
-              won&apos;t be charged.
+              {t(
+                "Your trial won't convert to a paid plan and your card won't be charged.",
+                "你的试用不会转为付费套餐，也不会向银行卡扣款。",
+              )}
             </Text>
             <Text variant="body" tone="emphasis">
-              You keep full access until{" "}
-              <strong
-                data-slot="cancel-trial-dialog-end-date"
-                className="font-semibold"
-              >
-                {endDate}
-              </strong>
-              , and you can resume your trial any time before then.
+              {t(
+                `You keep full access until ${endDate}, and you can resume your trial any time before then.`,
+                `你仍可完整使用至 ${localizedEndDate}，并可在此之前随时恢复试用。`,
+              )}
             </Text>
           </div>
           <div className="flex flex-col gap-3">
             <Text variant="body-medium" tone="primary">
-              {REASON_LABEL}
+              {t(REASON_LABEL, "主要原因是什么？（选填）")}
             </Text>
             <ReasonTiles
               reasons={TRIAL_CANCEL_REASONS}
-              label={REASON_LABEL}
+              label={t(REASON_LABEL, "主要原因是什么？（选填）")}
               selected={flow.reason}
               onSelect={flow.pickReason}
               size="compact"
@@ -90,8 +92,14 @@ export function CancelTrialFeedbackDialog({
                 rows={2}
                 value={flow.note}
                 onChange={(e) => flow.setNote(e.target.value)}
-                aria-label="Tell us a bit more (optional)"
-                placeholder="Tell us a bit more (optional)"
+                aria-label={t(
+                  "Tell us a bit more (optional)",
+                  "请详细说明（选填）",
+                )}
+                placeholder={t(
+                  "Tell us a bit more (optional)",
+                  "请详细说明（选填）",
+                )}
                 className="min-h-0 resize-none"
               />
             ) : null}
@@ -103,10 +111,10 @@ export function CancelTrialFeedbackDialog({
             size="small"
             onClick={() => flow.setOpen(false)}
           >
-            Keep trial
+            {t("Keep trial", "保留试用")}
           </Button>
           <Button size="small" disabled={isCanceling} onClick={flow.confirm}>
-            Cancel trial
+            {t("Cancel trial", "取消试用")}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

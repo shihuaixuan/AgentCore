@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { useState } from "react";
 import { Button } from "@/components/atoms/Button/Button";
 import { toast } from "@/components/molecules/Toast/use-toast";
@@ -20,6 +22,7 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 // and chat) plug into the same header.  Keeping the CTAs in one
 // component means a future addition lands in one place.
 export function ShareActions() {
+  const { t } = useTranslation();
   const { isLoggedIn, isUserLoading } = useAuth();
   const [copied, setCopied] = useState(false);
 
@@ -33,7 +36,7 @@ export function ShareActions() {
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast({
-        title: "Failed to copy link",
+        title: t("Failed to copy link", "复制链接失败"),
         variant: "destructive",
       });
     }
@@ -53,14 +56,14 @@ export function ShareActions() {
           )
         }
       >
-        {copied ? "Copied" : "Copy link"}
+        {copied ? t("Copied", "已复制") : t("Copy link", "复制链接")}
       </Button>
       {/* While the auth state is still loading we suppress the Sign up
           CTA — flickering it in then out on hydration looks broken to
           signed-in users opening their own share. */}
       {!isUserLoading && !isLoggedIn && (
         <Button size="small" variant="primary" as="NextLink" href="/signup">
-          Sign up
+          {t("Sign up", "注册")}
         </Button>
       )}
     </>

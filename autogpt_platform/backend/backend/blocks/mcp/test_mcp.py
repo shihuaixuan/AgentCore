@@ -699,6 +699,36 @@ class TestMCPToolBlock:
         assert captured_tokens == [None]
         assert outputs == [("result", "ok")]
 
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_saved_connection_uses_database_manager_in_worker(self):
+        block = MCPToolBlock()
+        data = MCPToolBlock.Input(
+            connection_id="conn-1",
+            server_url="https://mcp.example.com/mcp",
+            selected_tool="test_tool",
+        )
+        manager = AsyncMock()
+        manager.get_custom_mcp_connection.return_value = {
+            "serverUrl": data.server_url,
+            "credentialId": None,
+            "enabled": True,
+        }
+        with (
+            patch("backend.data.db.is_connected", return_value=False),
+            patch(
+                "backend.util.clients.get_database_manager_async_client",
+                return_value=manager,
+            ),
+            patch.object(
+                block, "_call_mcp_tool", new_callable=AsyncMock, return_value="ok"
+            ),
+        ):
+            outputs = [output async for output in block.run(data, user_id=MOCK_USER_ID)]
+        assert outputs == [("result", "ok")]
+        manager.get_custom_mcp_connection.assert_awaited_once_with(
+            MOCK_USER_ID, "conn-1"
+        )
+
 
 @pytest.mark.asyncio
 async def test_verification_client_does_not_follow_redirects():

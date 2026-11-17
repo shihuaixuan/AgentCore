@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft02Icon } from "@hugeicons/core-free-icons";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function SectionSidebar({ items, className }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   const container = {
@@ -38,12 +40,12 @@ export function SectionSidebar({ items, className }: Props) {
     >
       <Link
         href="/copilot"
-        aria-label="Back to home"
+        aria-label={t("Back to home", "返回首页")}
         className="mb-[16px] flex w-fit items-center gap-2 rounded-lg px-4 py-1 text-foreground-body transition-colors hover:text-foreground-base"
       >
         <Icon icon={ArrowLeft02Icon} size={16} />
         <Text variant="body" as="span" weight="medium">
-          Back
+          {t("Back", "返回")}
         </Text>
       </Link>
       <motion.nav

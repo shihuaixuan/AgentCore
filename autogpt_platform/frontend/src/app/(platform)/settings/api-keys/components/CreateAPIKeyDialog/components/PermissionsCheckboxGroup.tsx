@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { APIKeyPermission } from "@/app/api/__generated__/models/aPIKeyPermission";
 import { Text } from "@/components/atoms/Text/Text";
 
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function PermissionsCheckboxGroup({ value, onChange }: Props) {
+  const { t } = useTranslation();
   function toggle(permission: APIKeyPermission) {
     if (value.includes(permission)) {
       onChange(value.filter((p) => p !== permission));
@@ -23,7 +25,7 @@ export function PermissionsCheckboxGroup({ value, onChange }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <Text id="api-key-permissions-label" variant="large-medium" as="span">
-        Permissions
+        {t("Permissions", "权限")}
       </Text>
       <div
         role="group"

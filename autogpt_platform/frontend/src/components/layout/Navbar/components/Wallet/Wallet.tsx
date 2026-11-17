@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   Popover,
   PopoverContent,
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function Wallet({ compact = false }: Props) {
+  const { t } = useTranslation();
   const isBillingEnabled = useIsBillingEnabled();
   const {
     state,
@@ -66,7 +68,11 @@ export function Wallet({ compact = false }: Props) {
           onCloseAutoFocus={(event) => {
             if (topUpOpen || explainerOpen) event.preventDefault();
           }}
-          aria-label={compact ? "Usage and credits" : "Automation credits"}
+          aria-label={
+            compact
+              ? t("Usage and credits", "用量与额度")
+              : t("Automation credits", "自动化额度")
+          }
           aria-describedby={compact ? trialNoteID : undefined}
           className={cn(
             "z-50",

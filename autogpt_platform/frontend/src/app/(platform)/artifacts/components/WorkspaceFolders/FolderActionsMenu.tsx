@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import {
   DropdownMenu,
@@ -31,6 +32,7 @@ export function FolderActionsMenu({
   onDelete,
   className,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -58,7 +60,8 @@ export function FolderActionsMenu({
           data-testid="folder-rename-menu"
         >
           <Icon icon={PencilEdit02Icon} size={16} className="mr-2" />
-          Rename
+
+          {t("Rename", "重命名")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={(e) => {
@@ -68,7 +71,8 @@ export function FolderActionsMenu({
           data-testid="folder-move-menu"
         >
           <Icon icon={Folder01Icon} size={16} className="mr-2" />
-          Move to folder
+
+          {t("Move to folder", "移动到文件夹")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -81,7 +85,8 @@ export function FolderActionsMenu({
           data-testid="folder-delete-menu"
         >
           <Icon icon={Delete02Icon} size={16} className="mr-2" />
-          Delete
+
+          {t("Delete", "删除")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

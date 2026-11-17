@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -31,12 +34,14 @@ export function MicrosoftSignIn({
   onDeviceError,
   onSkip,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4">
       <Text variant="body">
-        Connecting lets Otto read and send your email, manage your calendar and
-        work with your OneDrive files when you ask. Work or school accounts can
-        also add Teams chats, Microsoft 365 Copilot and Work IQ.
+        {t(
+          "Connecting lets Otto read and send your email, manage your calendar and work with your OneDrive files when you ask. Work or school accounts can also add Teams chats, Microsoft 365 Copilot and Work IQ.",
+          "连接后，Otto 可按您的要求读取和发送邮件、管理日历以及处理 OneDrive 文件。工作或学校账户还可添加 Teams 聊天、Microsoft 365 Copilot 和 Work IQ。",
+        )}
       </Text>
       {browserAvailable ? (
         <Button
@@ -45,7 +50,7 @@ export function MicrosoftSignIn({
           disabled={loading || pending}
           onClick={onSignIn}
         >
-          Sign in with Microsoft
+          {t("Sign in with Microsoft", "使用 Microsoft 登录")}
         </Button>
       ) : (
         <DeviceAuthConnectButton
@@ -65,7 +70,7 @@ export function MicrosoftSignIn({
       )}
       {onSkip && (
         <Button variant="ghost" onClick={onSkip}>
-          Not now
+          {t("Not now", "暂不")}
         </Button>
       )}
     </div>

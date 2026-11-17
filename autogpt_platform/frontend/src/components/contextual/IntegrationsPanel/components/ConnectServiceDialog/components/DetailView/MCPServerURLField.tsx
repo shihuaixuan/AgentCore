@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useState } from "react";
 import { Input } from "@/components/atoms/Input/Input";
 import { Select } from "@/components/atoms/Select/Select";
@@ -18,6 +21,8 @@ export function MCPServerURLField({
   disabled,
   options = [],
 }: Props) {
+  const { t } = useTranslation();
+
   const [customSelected, setCustomSelected] = useState(false);
   const matched = options.find((option) => option.url === serverURL);
   const selection = customSelected ? "custom" : (matched?.url ?? "");
@@ -37,8 +42,8 @@ export function MCPServerURLField({
       {!readOnly && options.length > 0 && (
         <Select
           id="mcp-server-region"
-          label="Server region"
-          placeholder="Choose your account's region"
+          label={t("Server region", "服务器区域")}
+          placeholder={t("Choose your account's region", "选择账户所在区域")}
           value={selection}
           onValueChange={selectURL}
           disabled={disabled}
@@ -47,13 +52,13 @@ export function MCPServerURLField({
               label: option.label,
               value: option.url,
             })),
-            { label: "Custom URL", value: "custom" },
+            { label: t("Custom URL", "自定义 URL"), value: "custom" },
           ]}
         />
       )}
       <Input
         id="mcp-server-url"
-        label="Server URL"
+        label={t("Server URL", "服务器 URL")}
         type="url"
         placeholder="https://mcp.example.com"
         value={serverURL}

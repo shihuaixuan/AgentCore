@@ -1,9 +1,11 @@
 import ipaddress
-from functools import cache
+import json
+from functools import cache, lru_cache
 from pathlib import Path
 from typing import Literal
 from urllib.parse import urlsplit
 
+from prisma import Prisma
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -12,6 +14,8 @@ from pydantic import (
     field_validator,
     model_validator,
 )
+
+from backend.data import db as database
 
 
 class MCPServerURLPreset(BaseModel):
@@ -149,8 +153,64 @@ class MCPCatalogEntry(BaseModel):
     mcp_server: MCPServerMetadata
 
 
-@cache
+_database_catalog: tuple[MCPCatalogEntry, ...] | None = None
+
+
+def set_mcp_catalog(entries: tuple[MCPCatalogEntry, ...] | None) -> None:
+    global _database_catalog
+    _database_catalog = entries
+    get_mcp_catalog.cache_clear()
+
+
+async def publish_mcp_catalog(
+    entries: tuple[MCPCatalogEntry, ...], source: str, tx: Prisma | None = None
+) -> None:
+    if tx is None:
+        async with database.transaction() as transaction:
+            await publish_mcp_catalog(entries, source, transaction)
+        return
+    for entry in entries:
+        await database.execute_raw_with_schema(
+            'INSERT INTO {schema_prefix}"MCPMarketplaceEntry" '
+            '("name", "payload", "source") VALUES ($1, $2::jsonb, $3) '
+            'ON CONFLICT ("name") DO UPDATE SET '
+            '"payload" = EXCLUDED."payload", "source" = EXCLUDED."source", '
+            '"updatedAt" = CURRENT_TIMESTAMP',
+            entry.name,
+            json.dumps(entry.model_dump()),
+            source,
+            client=tx,
+        )
+
+
+async def load_mcp_catalog_from_database() -> bool:
+    try:
+        rows = await database.query_raw_with_schema(
+            'SELECT "payload" FROM {schema_prefix}"MCPMarketplaceEntry" ORDER BY "name"'
+        )
+    except Exception as exc:
+        if '"MCPMarketplaceEntry"' in str(exc):
+            return False
+        raise
+    if rows:
+        entries = tuple(
+            MCPCatalogEntry.model_validate(
+                row["payload"]
+                if isinstance(row["payload"], dict)
+                else json.loads(row["payload"])
+            )
+            for row in rows
+        )
+        set_mcp_catalog(entries)
+        return True
+    set_mcp_catalog(())
+    return True
+
+
+@lru_cache(maxsize=1)
 def get_mcp_catalog() -> tuple[MCPCatalogEntry, ...]:
+    if _database_catalog is not None:
+        return _database_catalog
     content = Path(__file__).with_suffix(".json").read_text(encoding="utf-8")
     return parse_mcp_catalog(content)
 
@@ -244,7 +304,13 @@ def get_mcp_effect_maps() -> dict[str, MCPEffectMap]:
 
 def parse_mcp_effect_maps(content: str) -> dict[str, MCPEffectMap]:
     maps = TypeAdapter(dict[str, MCPEffectMap]).validate_json(content)
-    unknown = set(maps) - {entry.name for entry in get_mcp_catalog()}
+    bundled = parse_mcp_catalog(
+        Path(__file__).with_suffix(".json").read_text(encoding="utf-8")
+    )
+    known = {entry.name for entry in get_mcp_catalog()} | {
+        entry.name for entry in bundled
+    }
+    unknown = set(maps) - known
     if unknown:
         raise ValueError(f"Effect maps for servers not in the catalog: {unknown}")
     return maps

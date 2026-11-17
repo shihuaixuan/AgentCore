@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { useReadEveryRender } from "@/hooks/useReadEveryRender";
 import { Text } from "@/components/atoms/Text/Text";
 import { formatResetTime } from "../usageHelpers";
@@ -9,10 +13,13 @@ interface Props {
 }
 
 export function UsageBar({ label, percentUsed, resetsAt }: Props) {
+  const { t } = useTranslation();
   const percent = Math.min(100, Math.max(0, Math.round(percentUsed)));
   const isHigh = percent >= 80;
   const percentLabel =
-    percentUsed > 0 && percent === 0 ? "<1% used" : `${percent}% used`;
+    percentUsed > 0 && percent === 0
+      ? t("<1% used", "已用不足 1%")
+      : t(`${percent}% used`, `已用 ${percent}%`);
   // Relative to the clock, so read on every render rather than cached.
   const resetLabel = useReadEveryRender(() => formatResetTime(resetsAt));
 
@@ -29,7 +36,7 @@ export function UsageBar({ label, percentUsed, resetsAt }: Props) {
       <div className="h-2 w-full overflow-hidden rounded-full bg-surface-active">
         <div
           role="progressbar"
-          aria-label={`${label} usage`}
+          aria-label={t(`${label} usage`, `${label}用量`)}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={percent}
@@ -40,7 +47,7 @@ export function UsageBar({ label, percentUsed, resetsAt }: Props) {
         />
       </div>
       <Text tone="muted" variant="small">
-        Resets {resetLabel}
+        {t(`Resets ${resetLabel}`, `${resetLabel}重置`)}
       </Text>
     </div>
   );

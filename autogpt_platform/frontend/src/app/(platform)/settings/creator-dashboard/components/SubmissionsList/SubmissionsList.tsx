@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 
 import type { Pagination as PaginationModel } from "@/app/api/__generated__/models/pagination";
@@ -66,6 +67,7 @@ export function SubmissionsList({
   creatorUsername,
   index = 0,
 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   function setStatuses(statuses: SubmissionStatus[]) {
@@ -91,7 +93,7 @@ export function SubmissionsList({
       <div className="flex items-center justify-between pr-1 pl-4">
         <div className="flex items-center gap-2">
           <Text variant="body-medium" as="span">
-            Submissions
+            {t("Submissions", "提交记录")}
           </Text>
         </div>
         <Text variant="small" tone="muted">
@@ -103,8 +105,11 @@ export function SubmissionsList({
         <SearchInput
           value={searchInput}
           onChange={onSearchChange}
-          placeholder="Search by workflow or listing name"
-          aria-label="Search submissions"
+          placeholder={t(
+            "Search by workflow or listing name",
+            "按工作流或上架名称搜索",
+          )}
+          aria-label={t("Search submissions", "搜索提交记录")}
           maxLength={100}
           loading={isFetching}
           size="medium"
@@ -116,9 +121,9 @@ export function SubmissionsList({
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-separator bg-surface-muted/60">
-                <ColumnHeader label="Workflow" />
+                <ColumnHeader label={t("Workflow", "工作流")} />
                 <ColumnHeader
-                  label="Status"
+                  label={t("Status", "状态")}
                   width="140px"
                   filter={
                     <StatusColumnFilter
@@ -128,7 +133,7 @@ export function SubmissionsList({
                   }
                 />
                 <ColumnHeader
-                  label="Submitted"
+                  label={t("Submitted", "已提交")}
                   width="160px"
                   filter={
                     <SortColumnFilter
@@ -142,7 +147,7 @@ export function SubmissionsList({
                   }
                 />
                 <ColumnHeader
-                  label="Runs"
+                  label={t("Runs", "运行记录")}
                   align="right"
                   width="110px"
                   filter={
@@ -159,7 +164,7 @@ export function SubmissionsList({
                 <th
                   scope="col"
                   className="w-[60px] px-2 py-3"
-                  aria-label="Actions"
+                  aria-label={t("Actions", "操作")}
                 />
               </tr>
             </thead>
@@ -191,7 +196,7 @@ export function SubmissionsList({
                           size="small"
                           onClick={() => onSearchChange("")}
                         >
-                          Clear search
+                          {t("Clear search", "清除搜索")}
                         </Button>
                       ) : (
                         <Button
@@ -199,7 +204,7 @@ export function SubmissionsList({
                           size="small"
                           onClick={onResetFilters}
                         >
-                          Clear filters
+                          {t("Clear filters", "清除筛选")}
                         </Button>
                       )}
                     </div>

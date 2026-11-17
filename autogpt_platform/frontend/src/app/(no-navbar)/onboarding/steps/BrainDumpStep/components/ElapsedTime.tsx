@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { formatElapsed } from "../helpers";
@@ -7,13 +9,14 @@ import { formatElapsed } from "../helpers";
 // Each digit is its own slot, so only the digits that actually changed pop:
 // the seconds tick every second while the minutes sit still.
 export function ElapsedTime({ seconds }: { seconds: number }) {
+  const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
   const characters = formatElapsed(seconds).split("");
 
   return (
     <span
       className="flex items-center font-poppins text-title leading-10 font-medium text-foreground-strong tabular-nums"
-      aria-label={`${seconds} seconds recorded`}
+      aria-label={t(`${seconds} seconds recorded`, `已录制 ${seconds} 秒`)}
       role="timer"
     >
       {characters.map((character, index) => (

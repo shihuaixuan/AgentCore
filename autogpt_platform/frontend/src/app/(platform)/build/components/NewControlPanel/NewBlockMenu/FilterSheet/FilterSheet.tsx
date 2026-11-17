@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { FilterChip } from "../FilterChip";
 import { cn } from "@/lib/utils";
 import { CategoryKey } from "../BlockMenuFilters/types";
@@ -16,6 +17,7 @@ export function FilterSheet({
 }: {
   categories: Array<{ key: CategoryKey; name: string }>;
 }) {
+  const { t } = useTranslation();
   const {
     isOpen,
     localCategories,
@@ -37,7 +39,11 @@ export function FilterSheet({
   return (
     <div className="m-0 inline w-fit p-0">
       <FilterChip
-        name={hasActiveFilters() ? "Edit filters" : "All filters"}
+        name={
+          hasActiveFilters()
+            ? t("Edit filters", "编辑筛选条件")
+            : t("All filters", "全部筛选条件")
+        }
         onClick={handleOpenFilters}
       />
 
@@ -54,7 +60,7 @@ export function FilterSheet({
           >
             {/* Top section */}
             <div className="flex items-center justify-between px-5 pt-4">
-              <Text variant="body">Filters</Text>
+              <Text variant="body">{t("Filters", "筛选条件")}</Text>
               <Button
                 variant="ghost"
                 size="icon-2xs"
@@ -69,7 +75,7 @@ export function FilterSheet({
 
             {/* Category section */}
             <div className="space-y-4 px-5">
-              <Text variant="large">Categories</Text>
+              <Text variant="large">{t("Categories", "分类")}</Text>
               <div className="space-y-2">
                 {categories.map((category) => (
                   <div
@@ -97,10 +103,10 @@ export function FilterSheet({
               </div>
             </div>
 
-            {/* Created by section */}
+            {/* {t("Created by", "创建者")} section */}
             <div className="space-y-4 px-5">
               <Text variant="large-medium-tight" tone="emphasis">
-                Created by
+                {t("Created by", "创建者")}
               </Text>
               <div className="space-y-2">
                 {visibleCreators.map((creator, i) => (
@@ -130,7 +136,9 @@ export function FilterSheet({
                   onClick={handleToggleShowMoreCreators}
                 >
                   <Text variant="body-medium" as="span" tone="inherit">
-                    {displayedCreatorsCount < creators.length ? "More" : "Less"}
+                    {displayedCreatorsCount < creators.length
+                      ? t("More", "展开更多")
+                      : t("Less", "收起")}
                   </Text>
                 </Button>
               )}
@@ -144,7 +152,7 @@ export function FilterSheet({
                 variant={"outline"}
                 onClick={handleClearFilters}
               >
-                Clear
+                {t("Clear", "清除")}
               </Button>
 
               <Button
@@ -153,7 +161,7 @@ export function FilterSheet({
                 onClick={handleApplyFilters}
                 disabled={!hasLocalActiveFilters()}
               >
-                Apply filters
+                {t("Apply filters", "应用筛选")}
               </Button>
             </div>
           </motion.div>

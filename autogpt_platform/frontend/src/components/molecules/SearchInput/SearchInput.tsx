@@ -8,6 +8,7 @@ import {
   Search01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   value: string;
@@ -41,7 +42,7 @@ export const SearchInput = forwardRef<HTMLInputElement, Props>(
     {
       value,
       onChange,
-      placeholder = "Search",
+      placeholder,
       "aria-label": ariaLabel,
       disabled,
       loading,
@@ -54,6 +55,8 @@ export const SearchInput = forwardRef<HTMLInputElement, Props>(
     },
     ref,
   ) {
+    const { t } = useTranslation();
+    const searchPlaceholder = placeholder ?? t("Search", "搜索");
     const hasValue = value.length > 0;
     return (
       <div
@@ -78,8 +81,8 @@ export const SearchInput = forwardRef<HTMLInputElement, Props>(
           data-slot="search-input-control"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          aria-label={ariaLabel ?? placeholder}
+          placeholder={searchPlaceholder}
+          aria-label={ariaLabel ?? searchPlaceholder}
           disabled={disabled}
           maxLength={maxLength}
           name={name}
@@ -94,7 +97,7 @@ export const SearchInput = forwardRef<HTMLInputElement, Props>(
         {loading ? (
           <span
             role="status"
-            aria-label="Searching"
+            aria-label={t("Searching", "正在搜索")}
             data-slot="search-input-spinner"
             className={cn(
               "absolute top-1/2 flex size-6 -translate-y-1/2 items-center justify-center text-foreground-tertiary",
@@ -112,7 +115,7 @@ export const SearchInput = forwardRef<HTMLInputElement, Props>(
           <button
             type="button"
             onClick={() => onChange("")}
-            aria-label="Clear search"
+            aria-label={t("Clear search", "清空搜索")}
             data-slot="search-input-clear"
             className={cn(
               "absolute top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-foreground-tertiary transition hover:bg-surface-hover hover:text-foreground-base focus-visible:ring-2 focus-visible:ring-focus focus-visible:outline-none",

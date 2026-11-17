@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React from "react";
 import { Text } from "@/components/atoms/Text/Text";
 import { MultiToggle } from "@/components/molecules/MultiToggle/MultiToggle";
@@ -21,6 +22,7 @@ export function WeeklyPicker({
   values: number[];
   onChange: (v: number[]) => void;
 }) {
+  const { t } = useTranslation();
   function toggleAll() {
     if (values.length === weekDays.length) onChange([]);
     else onChange(weekDays.map((d) => d.value));
@@ -40,7 +42,7 @@ export function WeeklyPicker({
   return (
     <div className="mb-8 space-y-3">
       <Text variant="body-medium" as="span">
-        Repeats on
+        {t("Repeats on", "重复日期")}
       </Text>
       <div className="flex flex-wrap gap-2">
         <button
@@ -48,28 +50,28 @@ export function WeeklyPicker({
           className="h-[2.25rem] rounded-full border border-foreground-body px-4 py-2 text-body leading-4 font-medium text-foreground-base hover:bg-surface-hover"
           onClick={toggleAll}
         >
-          Select all
+          {t("Select all", "全选")}
         </button>
         <button
           type="button"
           className="h-[2.25rem] rounded-full border border-foreground-body px-4 py-2 text-body leading-4 font-medium text-foreground-base hover:bg-surface-hover"
           onClick={setWeekdays}
         >
-          Weekdays
+          {t("Weekdays", "工作日")}
         </button>
         <button
           type="button"
           className="h-[2.25rem] rounded-full border border-foreground-body px-4 py-2 text-body leading-4 font-medium text-foreground-base hover:bg-surface-hover"
           onClick={setWeekends}
         >
-          Weekends
+          {t("Weekends", "周末")}
         </button>
       </div>
       <MultiToggle
         items={items}
         selectedValues={selectedValues}
         onChange={(sv) => onChange(sv.map((s) => parseInt(s)))}
-        aria-label="Select days of week"
+        aria-label={t("Select days of week", "选择星期")}
       />
     </div>
   );

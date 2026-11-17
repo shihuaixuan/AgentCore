@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
 import { GridViewIcon, ListViewIcon } from "@hugeicons/core-free-icons";
@@ -23,10 +24,11 @@ const OPTIONS: Option[] = [
 ];
 
 export function ViewToggle({ value, onChange }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       role="group"
-      aria-label="Layout"
+      aria-label={t("Layout", "布局")}
       className="flex items-center gap-1"
       data-testid="artifacts-view-toggle"
     >

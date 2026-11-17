@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 import React from "react";
 import { BaseInput } from "@/components/atoms/Input/BaseInput";
@@ -13,6 +14,7 @@ interface BlockMenuSearchBarProps {
 export const BlockMenuSearchBar: React.FC<BlockMenuSearchBarProps> = ({
   className = "",
 }) => {
+  const { t } = useTranslation();
   const {
     handleClear,
     inputRef,
@@ -45,7 +47,10 @@ export const BlockMenuSearchBar: React.FC<BlockMenuSearchBarProps> = ({
           setLocalQuery(e.target.value);
           debouncedSetSearchQuery(e.target.value);
         }}
-        placeholder={"Blocks, Workflows, Integrations or Keywords..."}
+        placeholder={t(
+          "Blocks, Workflows, Integrations or Keywords...",
+          "搜索模块、工作流、集成或关键词…",
+        )}
         className={cn(
           "m-0 border-none p-0 font-sans text-body-lg leading-6 font-normal text-foreground-emphasis shadow-none outline-none",
           "placeholder:text-foreground-subtle focus:shadow-none focus:ring-0 focus:outline-none",
@@ -55,7 +60,7 @@ export const BlockMenuSearchBar: React.FC<BlockMenuSearchBarProps> = ({
         <Button
           variant="ghost"
           size="icon-xs"
-          aria-label="Clear search"
+          aria-label={t("Clear search", "清除搜索")}
           withTooltip={false}
           onClick={handleClear}
         >

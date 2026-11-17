@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
@@ -19,6 +20,7 @@ export function DeleteAPIKeyDialog({
   onOpenChange,
   onDeleted,
 }: Props) {
+  const { t } = useTranslation();
   const { revoke, isPending } = useRevokeAPIKey();
   const isBatch = keyIds.length > 1;
 
@@ -31,7 +33,14 @@ export function DeleteAPIKeyDialog({
 
   return (
     <Dialog
-      title={isBatch ? `Revoke ${keyIds.length} API keys?` : "Revoke API key?"}
+      title={
+        isBatch
+          ? t(
+              `Revoke ${keyIds.length} API keys?`,
+              `撤销 ${keyIds.length} 个 API 密钥？`,
+            )
+          : t("Revoke API key?", "撤销 API 密钥？")
+      }
       styling={{ maxWidth: "28rem" }}
       controlled={{
         isOpen: open,
@@ -44,8 +53,10 @@ export function DeleteAPIKeyDialog({
       <Dialog.Content>
         <div className="flex flex-col gap-4 px-1">
           <Text variant="body" tone="body">
-            This action cannot be undone. Integrations using{" "}
-            {isBatch ? "these keys" : "this key"} will immediately lose access.
+            {t(
+              `This action cannot be undone. Integrations using ${isBatch ? "these keys" : "this key"} will immediately lose access.`,
+              `此操作无法撤销。使用${isBatch ? "这些密钥" : "此密钥"}的集成将立即失去访问权限。`,
+            )}
           </Text>
 
           <div className="flex justify-end gap-2 pt-2">
@@ -54,14 +65,16 @@ export function DeleteAPIKeyDialog({
               onClick={() => onOpenChange(false)}
               disabled={isPending}
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               variant="destructive"
               loading={isPending}
               onClick={handleConfirm}
             >
-              {isBatch ? "Revoke keys" : "Revoke key"}
+              {isBatch
+                ? t("Revoke keys", "撤销密钥")
+                : t("Revoke key", "撤销密钥")}
             </Button>
           </div>
         </div>

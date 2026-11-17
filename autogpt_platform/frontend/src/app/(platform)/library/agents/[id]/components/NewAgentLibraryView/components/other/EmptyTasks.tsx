@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getV1GetGraphVersion } from "@/app/api/__generated__/endpoints/graphs/graphs";
 import {
   getGetV2ListLibraryAgentsQueryKey,
@@ -37,6 +38,7 @@ export function EmptyTasks({
   onTriggerSetup,
   onScheduleCreated,
 }: Props) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -66,7 +68,7 @@ export function EmptyTasks({
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     } finally {
@@ -118,8 +120,10 @@ export function EmptyTasks({
                   Ready to get started?
                 </Text>
                 <Text variant="large" className="text-center">
-                  Run your workflow and this space will fill with your
-                  workflow&apos;s activity
+                  {t(
+                    "Run your workflow and this space will fill with your workflow's activity",
+                    "运行工作流后，这里将显示其活动记录",
+                  )}
                 </Text>
               </div>
             </div>
@@ -144,7 +148,7 @@ export function EmptyTasks({
 
       <div className="mt-4 flex flex-col gap-10 rounded-large border border-border-base p-6 lg:mt-0 lg:w-[29.5rem]">
         <Text variant="label" tone="muted">
-          About this workflow
+          {t("About this workflow", "关于此工作流")}
         </Text>
         <div className="flex flex-col gap-2">
           <Text variant="h4">{agent.name}</Text>
@@ -166,14 +170,18 @@ export function EmptyTasks({
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-20">
             <div className="flex flex-col gap-0">
-              <Text variant="body-medium">Workflow created on</Text>
+              <Text variant="body-medium">
+                {t("Workflow created on", "工作流创建于")}
+              </Text>
               <Text variant="body" tone="body">
                 {createdAt}
               </Text>
             </div>
             {isUpdated ? (
               <div className="flex flex-col gap-0">
-                <Text variant="body-medium">Workflow updated on</Text>
+                <Text variant="body-medium">
+                  {t("Workflow updated on", "工作流更新于")}
+                </Text>
                 <Text variant="body" tone="body">
                   {updatedAt}
                 </Text>
@@ -186,18 +194,18 @@ export function EmptyTasks({
                 href={`/build?flowID=${agent.graph_id}&flowVersion=${agent.graph_version}`}
                 target="_blank"
               >
-                Edit workflow
+                {t("Edit workflow", "编辑工作流")}
               </Link>
             </Button>
             <Button variant="secondary" size="small" onClick={handleExport}>
-              Export workflow to file
+              {t("Export workflow to file", "将工作流导出为文件")}
             </Button>
             <Button
               variant="secondary"
               size="small"
               onClick={() => setShowDeleteDialog(true)}
             >
-              Delete workflow
+              {t("Delete workflow", "删除工作流")}
             </Button>
           </div>
         </div>
@@ -209,13 +217,15 @@ export function EmptyTasks({
           set: setShowDeleteDialog,
         }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete workflow"
+        title={t("Delete workflow", "删除工作流")}
       >
         <Dialog.Content>
           <div>
             <Text variant="large">
-              Are you sure you want to delete this workflow? This action cannot
-              be undone.
+              {t(
+                "Are you sure you want to delete this workflow? This action cannot be undone.",
+                "确定要删除此工作流吗？此操作无法撤销。",
+              )}
             </Text>
             <Dialog.Footer>
               <Button
@@ -223,14 +233,14 @@ export function EmptyTasks({
                 disabled={isDeletingAgent}
                 onClick={() => setShowDeleteDialog(false)}
               >
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDeleteAgent}
                 loading={isDeletingAgent}
               >
-                Delete Workflow
+                {t("Delete Workflow", "删除工作流")}
               </Button>
             </Dialog.Footer>
           </div>

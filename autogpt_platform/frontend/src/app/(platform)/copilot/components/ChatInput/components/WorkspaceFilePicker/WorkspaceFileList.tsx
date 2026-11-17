@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   formatFileSize,
   formatRelativeDate,
@@ -52,6 +54,7 @@ export function WorkspaceFileList({
   emptyMessage,
   emptyAction,
 }: Props) {
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   // Show the top/bottom scroll-fade only when there's content hidden in that
   // direction — no fade when pinned to the very top or bottom.
@@ -84,9 +87,12 @@ export function WorkspaceFileList({
     return (
       <ErrorCard
         responseError={{
-          message: error instanceof Error ? error.message : "Failed to load",
+          message:
+            error instanceof Error
+              ? error.message
+              : t("Failed to load", "加载失败"),
         }}
-        context="workspace files"
+        context={t("workspace files", "工作区文件")}
       />
     );
   }
@@ -181,7 +187,7 @@ export function WorkspaceFileList({
               onClick={onLoadMore}
               loading={isLoadingMore}
             >
-              Load more
+              {t("Load more", "加载更多")}
             </Button>
           </div>
         )}

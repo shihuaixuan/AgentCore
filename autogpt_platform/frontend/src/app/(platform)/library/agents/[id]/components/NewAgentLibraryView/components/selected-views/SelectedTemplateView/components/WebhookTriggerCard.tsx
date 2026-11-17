@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { GraphTriggerInfo } from "@/app/api/__generated__/models/graphTriggerInfo";
 import { LibraryAgentPreset } from "@/app/api/__generated__/models/libraryAgentPreset";
 import { Button } from "@/components/atoms/Button/Button";
@@ -21,6 +22,7 @@ function getTriggerStatus(
 }
 
 export function WebhookTriggerCard({ template, triggerSetupInfo }: Props) {
+  const { t } = useTranslation();
   const status = getTriggerStatus(template);
   const webhook = template.webhook;
 
@@ -31,10 +33,10 @@ export function WebhookTriggerCard({ template, triggerSetupInfo }: Props) {
   }
 
   return (
-    <RunDetailCard title="Trigger Status">
+    <RunDetailCard title={t("Trigger Status", "触发器状态")}>
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
-          <Text variant="large-medium">Status</Text>
+          <Text variant="large-medium">{t("Status", "状态")}</Text>
           <span
             className={`rounded-full px-2 py-0.5 text-caption font-medium ${
               status === "active"
@@ -64,7 +66,9 @@ export function WebhookTriggerCard({ template, triggerSetupInfo }: Props) {
               up the trigger connection with the service of your choosing.
             </Text>
             <div className="flex flex-col gap-1">
-              <Text variant="body-medium">Webhook URL:</Text>
+              <Text variant="body-medium">
+                {t("Webhook URL:", "Webhook 地址：")}
+              </Text>
               <div className="flex gap-2 rounded-md bg-surface-muted p-2">
                 <code className="ph-no-capture flex-1 text-body select-all">
                   {webhook.url}
@@ -75,7 +79,7 @@ export function WebhookTriggerCard({ template, triggerSetupInfo }: Props) {
                   shape="pill"
                   className="flex-none"
                   onClick={handleCopyWebhookUrl}
-                  title="Copy webhook URL"
+                  title={t("Copy webhook URL", "复制 Webhook 链接")}
                 >
                   <Icon icon={Copy01Icon} className="size-4" />
                 </Button>

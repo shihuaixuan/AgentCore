@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Search01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -10,6 +11,8 @@ interface Props {
 }
 
 export function IntegrationsSearch({ value, onChange, disabled }: Props) {
+  const { t } = useTranslation();
+
   return (
     <div className="relative w-full">
       <Icon
@@ -22,8 +25,8 @@ export function IntegrationsSearch({ value, onChange, disabled }: Props) {
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Search integrations..."
-        aria-label="Search integrations"
+        placeholder={t("Search integrations...", "搜索集成…")}
+        aria-label={t("Search integrations", "搜索集成")}
         disabled={disabled}
         className="h-[46px] w-full rounded-3xl border border-border-base bg-surface pr-4 pl-12 text-body leading-5.5 text-foreground-base placeholder:text-placeholder focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
       />

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { skillDetailHref } from "@/services/skill-learning/helpers";
 import { BookBookmarkIcon } from "@hugeicons/core-free-icons";
@@ -13,10 +15,11 @@ interface Props {
 }
 
 export function SkillLoadedCard({ output }: Props) {
+  const { t } = useTranslation();
   const name = str(output, "name");
   const version = output.version;
   if (!name || typeof version !== "number") return null;
-  const origin = str(output, "origin_label") ?? "Saved";
+  const origin = str(output, "origin_label") ?? t("Saved", "已保存");
   const href = skillDetailHref({
     expertId: str(output, "expert_id"),
     skillName: name,
@@ -36,17 +39,23 @@ export function SkillLoadedCard({ output }: Props) {
           tone="emphasis"
           className="truncate"
         >
-          Skill loaded: {name} v{version} · {origin}
+          {t(
+            `Skill loaded: ${name} v${version} · ${origin}`,
+            `已加载技能：${name} v${version} · ${origin}`,
+          )}
         </Text>
         <Text variant="small-tight" tone="muted" className="truncate">
-          Loaded for this task; loading is not a success record.
+          {t(
+            "Loaded for this task; loading is not a success record.",
+            "已为此任务加载；加载本身不代表执行成功。",
+          )}
         </Text>
       </div>
       <Link
         href={href}
         className="shrink-0 rounded-full bg-surface-hover px-2 py-0.5 text-caption-sm leading-inherit text-foreground-secondary hover:bg-surface-active"
       >
-        View change
+        {t("View change", "查看变更")}
       </Link>
     </div>
   );

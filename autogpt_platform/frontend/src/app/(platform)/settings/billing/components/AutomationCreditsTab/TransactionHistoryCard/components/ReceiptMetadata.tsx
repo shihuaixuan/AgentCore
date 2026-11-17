@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { Button } from "@/components/atoms/Button/Button";
@@ -13,16 +16,21 @@ import {
 type Props = { transaction: Transaction };
 
 export function ReceiptMetadata({ transaction }: Props) {
-  const started = formatActivityDate(transaction.execution_started_at);
-  const posted = formatActivityDate(transaction.transaction_time);
-  const cutoff = formatActivityDate(transaction.receipt_as_of);
+  const { t, locale } = useTranslation();
+  const started = formatActivityDate(
+    transaction.execution_started_at,
+    t,
+    locale,
+  );
+  const posted = formatActivityDate(transaction.transaction_time, t, locale);
+  const cutoff = formatActivityDate(transaction.receipt_as_of, t, locale);
   return (
     <div className="mt-4 flex flex-wrap items-end justify-between gap-4 border-t border-border-base pt-4">
       <div className="flex flex-wrap gap-x-6 gap-y-3">
         {transaction.execution_status && (
           <div className="flex flex-col items-start gap-1">
             <Text variant="small" tone="secondary">
-              Run status
+              {t("Run status", "运行状态")}
             </Text>
             <Badge
               variant={
@@ -34,31 +42,31 @@ export function ReceiptMetadata({ transaction }: Props) {
               }
               size="small"
             >
-              {statusLabel(transaction.execution_status)}
+              {statusLabel(transaction.execution_status, t)}
             </Badge>
           </div>
         )}
         {transaction.execution_started_at && (
           <MetadataField
-            label="Started"
+            label={t("Started", "开始时间")}
             value={`${started.date} · ${started.time}`}
             title={started.full}
           />
         )}
         {transaction.execution_graph_version != null && (
           <MetadataField
-            label="Version"
+            label={t("Version", "版本")}
             value={`v${transaction.execution_graph_version}`}
           />
         )}
         <MetadataField
-          label="Last activity"
+          label={t("Last activity", "最近活动")}
           value={`${posted.date} · ${posted.time}`}
           title={posted.full}
         />
         {transaction.receipt_as_of && (
           <MetadataField
-            label="Credits as of"
+            label={t("Credits as of", "积分统计截至")}
             value={`${cutoff.date} · ${cutoff.time}`}
             title={cutoff.full}
           />
@@ -91,6 +99,7 @@ function MetadataField({
 }
 
 function ReceiptDestination({ transaction }: Props) {
+  const { t } = useTranslation();
   const href = taskHref(transaction);
   const conversationHref = transaction.conversation_id
     ? `/copilot?sessionId=${encodeURIComponent(transaction.conversation_id)}`
@@ -105,16 +114,16 @@ function ReceiptDestination({ transaction }: Props) {
         className="min-h-11 min-w-0"
         rightIcon={<Icon icon={ArrowUpRight01Icon} size={16} />}
       >
-        {href ? "View task" : "View conversation"}
+        {href ? t("View task", "查看任务") : t("View conversation", "查看对话")}
       </Button>
     );
   }
   if (transaction.activity_type === "agent_run") {
     const label = transaction.library_agent_id
-      ? "Run unavailable"
+      ? t("Run unavailable", "运行不可用")
       : transaction.execution_available
-        ? "Not in your library"
-        : "Workflow and run unavailable";
+        ? t("Not in your library", "不在你的工作流库中")
+        : t("Workflow and run unavailable", "工作流和运行均不可用");
     return (
       <Text variant="small" tone="secondary">
         {label}
@@ -124,7 +133,7 @@ function ReceiptDestination({ transaction }: Props) {
   if (transaction.activity_type === "copilot_tools")
     return (
       <Text variant="small" tone="secondary">
-        Conversation unavailable
+        {t("Conversation unavailable", "对话不可用")}
       </Text>
     );
   return null;

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -33,6 +34,7 @@ interface Props {
 }
 
 export function ExpertComputerSection({ expertId, expertName }: Props) {
+  const { t } = useTranslation();
   const { computer, isLoading, refetch, stream, openDesktop, isOpening } =
     useExpertComputerSection({ expertId });
 
@@ -63,7 +65,7 @@ export function ExpertComputerSection({ expertId, expertName }: Props) {
   const resources = formatResources(box);
   const mounts = Object.entries(computer.mounts ?? {});
 
-  const status = running ? "Running" : box ? "Suspended" : "None";
+  const status = running ? "Running" : box ? "Suspended" : t("None", "无");
 
   return (
     <section className="space-y-4">
@@ -111,7 +113,7 @@ export function ExpertComputerSection({ expertId, expertName }: Props) {
                 disabled={!computer.e2b_active}
                 onClick={openDesktop}
               >
-                Reconnect desktop
+                {t("Reconnect desktop", "重新连接桌面")}
               </Button>
             </div>
           </div>
@@ -165,12 +167,12 @@ export function ExpertComputerSection({ expertId, expertName }: Props) {
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <DetailTile icon={ComputerTerminalIcon} label="Machine">
+        <DetailTile icon={ComputerTerminalIcon} label={t("Machine", "机器")}>
           {box
             ? formatSandboxState(box)
             : "Created on the first message that runs a command."}
         </DetailTile>
-        <DetailTile icon={CpuIcon} label="Resources">
+        <DetailTile icon={CpuIcon} label={t("Resources", "资源")}>
           {resources
             ? `${resources}${box?.mounts_attached === false ? " · no volumes attached" : ""}`
             : "Assigned when the machine is created."}

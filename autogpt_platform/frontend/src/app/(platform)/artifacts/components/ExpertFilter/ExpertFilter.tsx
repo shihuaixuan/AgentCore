@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ const snappySpring: Transition = {
 };
 
 export function ExpertFilter({ experts, value, onChange }: Props) {
+  const { t } = useTranslation();
   // Keep the control while a selection exists so a filter on an expert who
   // has since been fired can still be cleared.
   if (experts.length === 0 && value === null) return null;
@@ -37,12 +39,12 @@ export function ExpertFilter({ experts, value, onChange }: Props) {
         </Text>
         <div
           role="tablist"
-          aria-label="Filter by expert"
+          aria-label={t("Filter by expert", "按专家筛选")}
           className="flex flex-wrap items-center gap-1"
           data-testid="artifacts-expert-filter"
         >
           <ExpertTab
-            label="Everyone"
+            label={t("Everyone", "所有人")}
             active={value === null}
             onClick={() => onChange(null)}
             testId="artifacts-expert-filter-everyone"

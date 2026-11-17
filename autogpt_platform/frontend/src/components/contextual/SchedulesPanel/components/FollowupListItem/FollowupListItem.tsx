@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { CopilotTurnJobInfo } from "@/app/api/__generated__/models/copilotTurnJobInfo";
 import { Button } from "@/components/atoms/Button/Button";
@@ -18,6 +19,8 @@ interface Props {
 }
 
 export function FollowupListItem({ followup }: Props) {
+  const { t } = useTranslation();
+
   const {
     sessionHref,
     nextRunLabel,
@@ -35,7 +38,9 @@ export function FollowupListItem({ followup }: Props) {
     fullMessage,
   } = useFollowupListItem({ followup });
 
-  const kindBadgeLabel = followup.session_id ? "Same chat" : "New chat";
+  const kindBadgeLabel = followup.session_id
+    ? t("Same chat", "当前聊天")
+    : t("New chat", "新聊天");
   const kindBadge = (
     <span
       className="rounded-full bg-surface-hover px-2 py-0.5 text-caption text-foreground-secondary"
@@ -102,27 +107,27 @@ export function FollowupListItem({ followup }: Props) {
           size="small"
           onClick={openView}
           data-testid="followup-view-button"
-          aria-label="View follow-up"
+          aria-label={t("View follow-up", "查看跟进")}
         >
           <Icon icon={EyeIcon} className="mr-1 h-4 w-4" />
-          View
+          {t("View", "查看")}
         </Button>
         <Button
           variant="secondary"
           size="small"
           onClick={openDelete}
           data-testid="followup-delete-button"
-          aria-label="Delete follow-up"
+          aria-label={t("Delete follow-up", "删除跟进")}
         >
           <Icon icon={Delete02Icon} className="mr-1 h-4 w-4" />
-          Delete
+          {t("Delete", "删除")}
         </Button>
       </div>
 
       <Dialog
         controlled={{ isOpen: isViewOpen, set: closeView }}
         styling={{ maxWidth: "40rem" }}
-        title="Follow-up details"
+        title={t("Follow-up details", "跟进详情")}
       >
         <Dialog.Content>
           <div className="flex flex-col gap-3">
@@ -150,13 +155,15 @@ export function FollowupListItem({ followup }: Props) {
       <Dialog
         controlled={{ isOpen: isDeleteOpen, set: closeDelete }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete follow-up"
+        title={t("Delete follow-up", "删除跟进")}
       >
         <Dialog.Content>
           <div className="flex flex-col gap-4">
             <Text variant="large">
-              Delete this scheduled follow-up? The message will not be sent. You
-              can recreate it from chat if needed.
+              {t(
+                "Delete this scheduled follow-up? The message will not be sent. You can recreate it from chat if needed.",
+                "要删除此定时跟进吗？该消息将不再发送。如有需要，可在聊天中重新创建。",
+              )}
             </Text>
             <Dialog.Footer>
               <Button
@@ -164,7 +171,7 @@ export function FollowupListItem({ followup }: Props) {
                 disabled={isDeleting}
                 onClick={() => closeDelete(false)}
               >
-                Keep it
+                {t("Keep it", "保留")}
               </Button>
               <Button
                 variant="destructive"
@@ -172,7 +179,7 @@ export function FollowupListItem({ followup }: Props) {
                 loading={isDeleting}
                 data-testid="followup-confirm-delete"
               >
-                Yes, delete
+                {t("Yes, delete", "确认删除")}
               </Button>
             </Dialog.Footer>
           </div>

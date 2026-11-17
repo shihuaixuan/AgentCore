@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useState } from "react";
 import { useGetV1ListCredentials } from "@/app/api/__generated__/endpoints/integrations/integrations";
 import { useMCPAuthScheme } from "@/components/contextual/MCPAuthSchemeField/useMCPAuthScheme";
@@ -12,6 +13,7 @@ export function useMCPManualAuth(
   serverURL: string,
   allowedSchemes: MCPAuthScheme[],
 ) {
+  const { t } = useTranslation();
   const [token, setToken] = useState("");
   const { data: credentials } = useGetV1ListCredentials({
     query: {
@@ -50,10 +52,16 @@ export function useMCPManualAuth(
     const detected = detectMCPAuthScheme(token);
     if (detected && !allowedSchemes.includes(detected)) {
       return detected === "basic"
-        ? "This connection does not support Basic authentication."
-        : "This connection does not support Bearer tokens.";
+        ? t(
+            "This connection does not support Basic authentication.",
+            "此连接不支持基本身份验证。",
+          )
+        : t(
+            "This connection does not support Bearer tokens.",
+            "此连接不支持 Bearer 令牌。",
+          );
     }
-    return validateMCPAuthCredential(token.trim(), scheme);
+    return validateMCPAuthCredential(token.trim(), scheme, t);
   }
 
   function reset() {

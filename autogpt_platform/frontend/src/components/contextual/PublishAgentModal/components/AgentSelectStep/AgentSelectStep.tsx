@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Text } from "../../../../atoms/Text/Text";
@@ -48,6 +49,8 @@ export function AgentSelectStep({
   onNext,
   onOpenBuilder,
 }: Props) {
+  const { t } = useTranslation();
+
   const {
     myAgents,
     isLoading,
@@ -77,21 +80,26 @@ export function AgentSelectStep({
     return (
       <div className="mx-auto flex w-full flex-col">
         <StepHeader
-          title="Choose a workflow"
-          description="Pick the saved workflow version you want to send to marketplace review."
+          title={t("Choose a workflow", "选择工作流")}
+          description={t(
+            "Pick the saved workflow version you want to send to marketplace review.",
+            "选择要提交市场审核的已保存工作流版本。",
+          )}
           currentStep="select"
         />
         <div className="mt-5 flex min-h-[320px] flex-col items-center justify-center gap-4 rounded-2xl border border-error/10 bg-error-surface px-6 py-8 text-center">
           <Icon icon={AlertCircleIcon} size={32} tone="danger" />
           <Text variant="large-medium" tone="error-strong">
-            We could not load your workflows
+            {t("We could not load your workflows", "无法加载您的工作流")}
           </Text>
           <Text variant="body" tone="error-strong" className="max-w-[420px]">
-            Refresh the list and try again. Your current marketplace submissions
-            are unchanged.
+            {t(
+              "Refresh the list and try again. Your current marketplace submissions are unchanged.",
+              "请刷新列表后重试。您当前在市场中的提交内容未更改。",
+            )}
           </Text>
           <Button onClick={() => window.location.reload()} variant="secondary">
-            Retry
+            {t("Retry", "重试")}
           </Button>
         </div>
       </div>
@@ -110,8 +118,11 @@ export function AgentSelectStep({
   return (
     <div className="mx-auto flex w-full flex-col">
       <StepHeader
-        title="Choose a workflow"
-        description="Pick the saved workflow version you want to send to marketplace review."
+        title={t("Choose a workflow", "选择工作流")}
+        description={t(
+          "Pick the saved workflow version you want to send to marketplace review.",
+          "选择要提交市场审核的已保存工作流版本。",
+        )}
         currentStep="select"
       />
 
@@ -120,12 +131,18 @@ export function AgentSelectStep({
           <div className="flex size-11 items-center justify-center rounded-full bg-surface text-foreground-body shadow-subtle">
             <Icon icon={PlusSignIcon} size={20} />
           </div>
-          <Text variant="large-medium">No publishable workflows yet</Text>
-          <Text variant="body" tone="secondary" className="max-w-[460px]">
-            Create and save a workflow in the builder. It will appear here when
-            a version is ready to submit.
+          <Text variant="large-medium">
+            {t("No publishable workflows yet", "暂无可发布的工作流")}
           </Text>
-          <Button onClick={onOpenBuilder}>Open builder</Button>
+          <Text variant="body" tone="secondary" className="max-w-[460px]">
+            {t(
+              "Create and save a workflow in the builder. It will appear here when a version is ready to submit.",
+              "在构建器中创建并保存工作流。有可提交的版本后，它将显示在此处。",
+            )}
+          </Text>
+          <Button onClick={onOpenBuilder}>
+            {t("Open builder", "打开构建器")}
+          </Button>
         </div>
       ) : (
         <>
@@ -134,8 +151,8 @@ export function AgentSelectStep({
               <SearchInput
                 value={searchInput}
                 onChange={setSearchInput}
-                placeholder="Search your workflows"
-                aria-label="Search your workflows"
+                placeholder={t("Search your workflows", "搜索您的工作流")}
+                aria-label={t("Search your workflows", "搜索您的工作流")}
                 maxLength={100}
                 loading={isFetching || isDebouncingSearch}
                 size="small"
@@ -144,7 +161,7 @@ export function AgentSelectStep({
             <div className="w-full sm:w-[220px]">
               <Select
                 id="agent-sort"
-                label="Sort workflows"
+                label={t("Sort workflows", "工作流排序")}
                 hideLabel
                 size="small"
                 value={sortBy}
@@ -156,7 +173,7 @@ export function AgentSelectStep({
           </div>
 
           <div className="mt-1 flex-grow overflow-hidden pb-3">
-            <h3 className="sr-only">List of workflows</h3>
+            <h3 className="sr-only">{t("List of workflows", "工作流列表")}</h3>
             <div
               className={cn(
                 scrollbarStyles,
@@ -167,7 +184,7 @@ export function AgentSelectStep({
               aria-busy={isFetching}
             >
               <div id="agentListHeading" className="sr-only">
-                Scrollable list of workflows
+                {t("Scrollable list of workflows", "可滚动的工作流列表")}
               </div>
               {isLoading ? (
                 <div className="grid grid-cols-1 gap-2 p-1 sm:grid-cols-2">
@@ -189,17 +206,23 @@ export function AgentSelectStep({
                   data-testid="agent-search-no-matches"
                 >
                   <Text variant="body-medium">
-                    No workflows match &ldquo;{debouncedSearch}&rdquo;
+                    {t(
+                      `No workflows match “${debouncedSearch}”`,
+                      `没有与“${debouncedSearch}”匹配的工作流`,
+                    )}
                   </Text>
                   <Text variant="small" tone="muted">
-                    Try a different name or clear the search.
+                    {t(
+                      "Try a different name or clear the search.",
+                      "请尝试其他名称，或清除搜索条件。",
+                    )}
                   </Text>
                   <Button
                     variant="secondary"
                     size="small"
                     onClick={() => setSearchInput("")}
                   >
-                    Clear search
+                    {t("Clear search", "清除搜索")}
                   </Button>
                 </div>
               ) : (
@@ -285,7 +308,10 @@ export function AgentSelectStep({
                             >
                               {agent.description
                                 ? agent.description
-                                : `Edited ${agent.lastEdited}`}
+                                : t(
+                                    `Edited ${agent.lastEdited}`,
+                                    `编辑于 ${agent.lastEdited}`,
+                                  )}
                             </Text>
                           </div>
                           {isSelected ? (
@@ -325,7 +351,7 @@ export function AgentSelectStep({
                 onClick={onCancel}
                 className="w-full sm:w-auto"
               >
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
             }
             primary={
@@ -335,7 +361,7 @@ export function AgentSelectStep({
                 disabled={isNextDisabled}
                 className="w-full sm:w-auto"
               >
-                Continue
+                {t("Continue", "继续")}
               </Button>
             }
           />
@@ -360,6 +386,8 @@ function PaginationBar({
   pageSize,
   onChange,
 }: PaginationBarProps) {
+  const { t } = useTranslation();
+
   const start = (page - 1) * pageSize + 1;
   const end = Math.min(page * pageSize, totalItems);
   const pages = buildPageRange(page, totalPages);
@@ -367,12 +395,13 @@ function PaginationBar({
   return (
     <div className="flex flex-col items-center justify-between gap-3 pt-1 pb-3 text-foreground-tertiary sm:flex-row">
       <Text variant="small" tone="muted">
-        {start}–{end} of {totalItems}
+        {start}–{end} {t("of", "共")}
+        {totalItems}
       </Text>
       <div className="flex items-center gap-2">
         <button
           type="button"
-          aria-label="Previous page"
+          aria-label={t("Previous page", "上一页")}
           disabled={page <= 1}
           onClick={() => onChange(page - 1)}
           className="flex size-9 items-center justify-center rounded-full border border-border-base text-foreground-tertiary transition hover:border-border-strong hover:text-foreground-body disabled:cursor-not-allowed disabled:opacity-40"
@@ -426,7 +455,7 @@ function PaginationBar({
         )}
         <button
           type="button"
-          aria-label="Next page"
+          aria-label={t("Next page", "下一页")}
           disabled={page >= totalPages}
           onClick={() => onChange(page + 1)}
           className="flex size-9 items-center justify-center rounded-full border border-border-base text-foreground-tertiary transition hover:border-border-strong hover:text-foreground-body disabled:cursor-not-allowed disabled:opacity-40"

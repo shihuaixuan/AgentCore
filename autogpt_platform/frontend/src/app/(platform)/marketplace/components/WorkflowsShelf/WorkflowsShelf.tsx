@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { StoreAgent } from "@/app/api/__generated__/models/storeAgent";
 import { Button } from "@/components/atoms/Button/Button";
 import { PublishAgentModal } from "@/components/contextual/PublishAgentModal/PublishAgentModal";
@@ -27,6 +28,7 @@ export function WorkflowsShelf({
   total,
   onPublish,
 }: Props) {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const ordered = featuredFirst(agents, featuredAgents);
 
@@ -35,7 +37,7 @@ export function WorkflowsShelf({
   const shown = isExpanded ? ordered : ordered.slice(0, SHELF_PREVIEW_SIZE);
   const publishTrigger = (
     <Button variant="secondary" size="small" onClick={onPublish}>
-      Publish your workflows
+      {t("Publish your workflows", "发布你的工作流")}
     </Button>
   );
 
@@ -46,9 +48,12 @@ export function WorkflowsShelf({
       className="mb-16 scroll-mt-24"
     >
       <SectionHeader
-        title="Workflows"
+        title={t("Workflows", "工作流")}
         titleId={HEADING_ID}
-        subtitle="Automations your experts can run — or install one yourself."
+        subtitle={t(
+          "Automations your experts can run — or install one yourself.",
+          "供你的专家运行的自动化工作流，你也可以自行安装。",
+        )}
       />
       <ul className={SHELF_GRID}>
         {shown.map((agent) => (

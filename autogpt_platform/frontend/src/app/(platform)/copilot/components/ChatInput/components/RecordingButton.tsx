@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { cn } from "@/lib/utils";
 import { Loading03Icon, Mic01Icon } from "@hugeicons/core-free-icons";
@@ -27,12 +29,17 @@ export function RecordingButton({
   highlight = false,
   className,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <Button
       type="button"
       variant="tray"
       size="icon"
-      aria-label={isRecording ? "Stop recording" : "Start recording"}
+      aria-label={
+        isRecording
+          ? t("Stop recording", "停止录音")
+          : t("Start recording", "开始录音")
+      }
       disabled={disabled}
       onClick={onClick}
       className={cn(

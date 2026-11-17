@@ -1,8 +1,10 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { descriptionId, FieldProps, getTemplate, titleId } from "@rjsf/utils";
 import { Table, RowData } from "@/components/molecules/Table/Table";
 import { useMemo } from "react";
 
 export const TableField = (props: FieldProps) => {
+  const { t } = useTranslation();
   const { schema, formData, onChange, fieldPathId, registry, uiSchema } = props;
 
   const itemSchema = schema.items as any;
@@ -45,7 +47,7 @@ export const TableField = (props: FieldProps) => {
         onChange={handleChange}
         allowAddRow={true}
         allowDeleteRow={true}
-        addRowLabel="Add row"
+        addRowLabel={t("Add row", "添加行")}
       />
     </div>
   );

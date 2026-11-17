@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { Button } from "@/components/atoms/Button/Button";
 import { FileInput } from "@/components/atoms/FileInput/FileInput";
@@ -19,10 +20,14 @@ type AgentUploadTabProps = {
 };
 
 export default function AgentUploadTab({ upload }: AgentUploadTabProps) {
+  const { t } = useTranslation();
   return (
     <TabsLineContent value="agent">
       <Text variant="body-tight" tone="muted" className="mb-4">
-        Upload a previously exported AutoGPT workflow file (.json).
+        {t(
+          "Upload a previously exported AutoGPT workflow file (.json).",
+          "上传之前导出的 AutoGPT 工作流文件（.json）。",
+        )}
       </Text>
       <Form
         form={upload.form}
@@ -38,7 +43,7 @@ export default function AgentUploadTab({ upload }: AgentUploadTabProps) {
                 <Input
                   {...field}
                   id={field.name}
-                  label="Workflow name"
+                  label={t("Workflow name", "工作流名称")}
                   className="w-full"
                 />
               </FormControl>
@@ -55,7 +60,7 @@ export default function AgentUploadTab({ upload }: AgentUploadTabProps) {
                 <Input
                   {...field}
                   id={field.name}
-                  label="Workflow description"
+                  label={t("Workflow description", "工作流说明")}
                   type="textarea"
                   className="w-full"
                 />
@@ -75,7 +80,7 @@ export default function AgentUploadTab({ upload }: AgentUploadTabProps) {
                   value={field.value}
                   onChange={field.onChange}
                   accept=".json,application/json"
-                  placeholder="Workflow file"
+                  placeholder={t("Workflow file", "工作流文件")}
                   maxFileSize={10 * 1024 * 1024}
                   showStorageNote={false}
                   className="mt-4 mb-8"
@@ -94,7 +99,7 @@ export default function AgentUploadTab({ upload }: AgentUploadTabProps) {
           {upload.isUploading ? (
             <div className="flex items-center gap-2">
               <LoadingSpinner size="small" />
-              <span>Uploading...</span>
+              <span>{t("Uploading...", "正在上传…")}</span>
             </div>
           ) : (
             "Upload"

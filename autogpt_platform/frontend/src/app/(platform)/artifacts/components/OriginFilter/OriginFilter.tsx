@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
 import { LayoutGroup, motion, type Transition } from "framer-motion";
@@ -29,15 +30,16 @@ const snappySpring: Transition = {
 };
 
 export function OriginFilter({ value, onChange }: Props) {
+  const { t } = useTranslation();
   return (
     <LayoutGroup id="artifacts-origin-filter">
       <div className="flex flex-col gap-1">
         <Text variant="small" as="span" tone="muted" className="ml-4">
-          Type
+          {t("Type", "类型")}
         </Text>
         <div
           role="tablist"
-          aria-label="Filter by type"
+          aria-label={t("Filter by type", "按类型筛选")}
           className="flex items-center gap-1"
           data-testid="artifacts-origin-filter"
         >

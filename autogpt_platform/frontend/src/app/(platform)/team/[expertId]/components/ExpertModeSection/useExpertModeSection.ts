@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetExpertQueryKey,
   getListExpertIdentitiesQueryKey,
@@ -19,6 +20,7 @@ interface Args {
 }
 
 export function useExpertModeSection({ expert }: Args) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const mode: AutopilotMode = expert.autopilot_mode ?? DEFAULT_AUTOPILOT_MODE;
@@ -43,7 +45,9 @@ export function useExpertModeSection({ expert }: Args) {
           title: isDisabled
             ? "Approval modes are not enabled for your account"
             : "Could not update the approval mode",
-          description: isDisabled ? undefined : "Please try again.",
+          description: isDisabled
+            ? undefined
+            : t("Please try again.", "请重试。"),
           variant: "destructive",
         });
       },

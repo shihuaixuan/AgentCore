@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AgentsSection } from "@/app/(platform)/marketplace/components/AgentsSection/AgentsSection";
 import { CreatorLinks } from "@/app/(platform)/marketplace/components/CreatorLinks/CreatorLinks";
 import { CreatorPageLoading } from "@/app/(platform)/marketplace/components/CreatorPageLoading";
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function MainCreatorPage({ params }: Props) {
+  const { t } = useTranslation();
   const { creatorAgents, creator, isLoading, hasError } = useMainCreatorPage({
     params,
   });
@@ -35,7 +37,9 @@ export function MainCreatorPage({ params }: Props) {
         <div className="flex min-h-[60vh] items-center justify-center">
           <ErrorCard
             isSuccess={false}
-            responseError={{ message: "Failed to load creator data" }}
+            responseError={{
+              message: t("Failed to load creator data", "无法加载创作者数据"),
+            }}
             context="creator page"
             onRetry={() => window.location.reload()}
             className="w-full max-w-md"
@@ -64,7 +68,7 @@ export function MainCreatorPage({ params }: Props) {
             className="relative -left-2 lg:!-left-4"
             leftIcon={<Icon icon={ArrowLeft02Icon} size={16} />}
           >
-            Go back
+            {t("Go back", "返回")}
           </Button>
           <div className="hidden md:block">
             <Breadcrumbs items={breadcrumbs} />
@@ -118,7 +122,7 @@ export function MainCreatorPage({ params }: Props) {
                   {creator.top_categories.length > 0 && (
                     <div className="mb-6">
                       <Text variant="h5" className="mb-2">
-                        Top categories
+                        {t("Top categories", "热门分类")}
                       </Text>
                       <div className="flex flex-wrap gap-2">
                         {creator.top_categories.map((category, index) => (

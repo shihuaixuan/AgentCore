@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { HomeDashboardResponse } from "@/app/api/__generated__/models/homeDashboardResponse";
 import { Text } from "@/components/atoms/Text/Text";
 import { formatHeaderDate, getHomeStatusLine } from "../../helpers";
@@ -7,8 +10,13 @@ interface Props {
 }
 
 export function HomeHeader({ dashboard }: Props) {
-  const date = formatHeaderDate(dashboard.generated_at, dashboard.timezone);
-  const status = getHomeStatusLine(dashboard);
+  const { t, locale } = useTranslation();
+  const date = formatHeaderDate(
+    dashboard.generated_at,
+    dashboard.timezone,
+    locale,
+  );
+  const status = getHomeStatusLine(dashboard, t);
 
   return (
     <header className="flex items-end justify-between gap-6 px-1 pt-1 pb-5">
@@ -20,7 +28,7 @@ export function HomeHeader({ dashboard }: Props) {
           tracking="title"
           className="text-pretty"
         >
-          Your recap
+          {t("Your recap", "你的工作概览")}
         </Text>
         <Text variant="body" tone="primary" className="mt-0.5 text-pretty">
           {status.split(/(\d+)/).map((part, index) =>

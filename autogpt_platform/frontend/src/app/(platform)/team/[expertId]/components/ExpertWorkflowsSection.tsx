@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ExpertWorkflowRef } from "@/app/api/__generated__/models/expertWorkflowRef";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -51,6 +52,7 @@ export function ExpertWorkflowsSection({
   onInstallWorkflow,
   onAskWorkflow,
 }: Props) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<WorkflowFilter>("all");
   const { view, setView } = useExpertWorkflowsView();
@@ -72,19 +74,19 @@ export function ExpertWorkflowsSection({
               leadingIcon={PlusSignIcon}
               onClick={onInstallWorkflow}
             >
-              Install workflow
+              {t("Install workflow", "安装工作流")}
             </Button>
           ) : null}
           <ToolbarSearch
             textSize="body-md"
             id="expert-workflows-search"
-            label="Search workflows"
+            label={t("Search workflows", "搜索工作流")}
             value={query}
             onChange={setQuery}
           />
           <PillFilterMenu
             textSize="body-md"
-            label="Filter workflows"
+            label={t("Filter workflows", "筛选工作流")}
             value={filter}
             defaultValue="all"
             options={WORKFLOW_FILTERS}
@@ -106,7 +108,7 @@ export function ExpertWorkflowsSection({
               <Icon icon={Calendar03Icon} size={22} />
             </span>,
           ]}
-          title="No workflows yet"
+          title={t("No workflows yet", "暂无工作流")}
           description={
             emptyMessage ??
             `Install a workflow to give ${expertName} something to run.`
@@ -120,13 +122,13 @@ export function ExpertWorkflowsSection({
               leadingIcon={PlusSignIcon}
               onClick={onInstallWorkflow}
             >
-              Install workflow
+              {t("Install workflow", "安装工作流")}
             </Button>
           ) : null}
         </SectionEmptyState>
       ) : visible.length === 0 ? (
         <Text variant="body-md" tone="muted">
-          No workflows match.
+          {t("No workflows match.", "没有匹配的工作流。")}
         </Text>
       ) : view === "list" ? (
         <div className="flex flex-col gap-3 pt-4" data-testid="workflow-list">

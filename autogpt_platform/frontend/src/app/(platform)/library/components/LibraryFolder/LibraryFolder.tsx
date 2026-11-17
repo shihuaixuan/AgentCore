@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { Button } from "@/components/atoms/Button/Button";
 import { FolderIcon, FolderColor } from "./FolderIcon";
@@ -35,6 +36,7 @@ export function LibraryFolder({
   onClick,
   worstStatus,
 }: Props) {
+  const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -114,7 +116,7 @@ export function LibraryFolder({
           variant="icon"
           size="icon-sm"
           shape="pill"
-          aria-label="Edit folder"
+          aria-label={t("Edit folder", "编辑文件夹")}
           onClick={(e) => {
             e.stopPropagation();
             onEdit?.();
@@ -128,7 +130,7 @@ export function LibraryFolder({
           variant="icon"
           size="icon-sm"
           shape="pill"
-          aria-label="Delete folder"
+          aria-label={t("Delete folder", "删除文件夹")}
           onClick={(e) => {
             e.stopPropagation();
             onDelete?.();

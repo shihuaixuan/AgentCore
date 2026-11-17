@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   Avatar,
   AvatarFallback,
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export function SkillPage({ slug }: Props) {
+  const { t } = useTranslation();
   const {
     skill,
     isLoggedIn,
@@ -72,7 +74,12 @@ export function SkillPage({ slug }: Props) {
         <BackToMarketplaceLink />
         <ErrorCard
           isSuccess={false}
-          responseError={{ message: "Couldn't load this skill right now" }}
+          responseError={{
+            message: t(
+              "Couldn't load this skill right now",
+              "暂时无法加载此技能",
+            ),
+          }}
           context="marketplace skill"
           onRetry={() => refetch()}
           className="max-w-md"
@@ -147,7 +154,7 @@ export function SkillPage({ slug }: Props) {
           <span aria-hidden>·</span>
           <span>
             {skill.install_count === 0
-              ? "New"
+              ? t("New", "新建")
               : `${skill.install_count.toLocaleString()} installed`}
           </span>
           {skill.updated_at ? (
@@ -186,7 +193,7 @@ export function SkillPage({ slug }: Props) {
             <>
               <span aria-hidden>·</span>
               <span className="inline-flex items-center gap-1.5">
-                Works with
+                {t("Works with", "适用服务")}
                 <IntegrationLogo provider={providers[0]} size={14} alt="" />
                 {formatProviderList(providers)}
               </span>
@@ -201,11 +208,14 @@ export function SkillPage({ slug }: Props) {
 
       <div className="mt-8 flex flex-col gap-10 border-t border-border-base pt-8">
         <ExpertSection
-          title="Instructions"
+          title={t("Instructions", "说明")}
           description={
             skill.body.trim()
-              ? "Instructions your experts follow when using this skill."
-              : "This skill has no instructions yet."
+              ? t(
+                  "Instructions your experts follow when using this skill.",
+                  "专家使用此技能时遵循的操作说明。",
+                )
+              : t("This skill has no instructions yet.", "此技能尚无说明。")
           }
         >
           {skill.body.trim() ? (
@@ -220,9 +230,12 @@ export function SkillPage({ slug }: Props) {
 
         {files.length > 0 ? (
           <ExpertSection
-            title="Package contents"
+            title={t("Package contents", "包内容")}
             count={files.length}
-            description="Files installed alongside these instructions."
+            description={t(
+              "Files installed alongside these instructions.",
+              "与这些说明一起安装的文件。",
+            )}
           >
             <SkillPackageFileList files={files} onOpenFile={openFile} />
           </ExpertSection>
@@ -230,9 +243,12 @@ export function SkillPage({ slug }: Props) {
 
         {skill.triggers.length > 0 ? (
           <ExpertSection
-            title="Triggers"
+            title={t("Triggers", "触发器")}
             count={skill.triggers.length}
-            description="Phrases that help your experts find this skill."
+            description={t(
+              "Phrases that help your experts find this skill.",
+              "帮助专家找到此技能的关键词。",
+            )}
           >
             <div className="flex flex-wrap gap-2">
               {skill.triggers.map((trigger) => (
@@ -248,7 +264,7 @@ export function SkillPage({ slug }: Props) {
         ) : null}
 
         {moreSkills.length > 0 ? (
-          <ExpertSection title="More skills">
+          <ExpertSection title={t("More skills", "更多技能")}>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {moreSkills.map((other) => (
                 <SkillCard key={other.slug} skill={other} isInstalled={false} />
@@ -277,6 +293,7 @@ export function SkillPage({ slug }: Props) {
 }
 
 function BackToMarketplaceLink() {
+  const { t } = useTranslation();
   return (
     <Link
       href="/marketplace#skills"
@@ -284,7 +301,8 @@ function BackToMarketplaceLink() {
       data-testid="skill-back-to-marketplace"
     >
       <Icon icon={ArrowLeft02Icon} size={14} aria-hidden />
-      Back to marketplace
+
+      {t("Back to marketplace", "返回市场")}
     </Link>
   );
 }

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { GraphExecution } from "@/app/api/__generated__/models/graphExecution";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { Button } from "@/components/atoms/Button/Button";
@@ -29,6 +32,7 @@ export function SelectedRunActions({
   onSelectRun,
   onClearSelectedRun,
 }: Props) {
+  const { t } = useTranslation();
   const {
     canRunManually,
     handleRunAgain,
@@ -57,7 +61,7 @@ export function SelectedRunActions({
         <Button
           variant="icon"
           size="icon"
-          aria-label="Rerun task"
+          aria-label={t("Rerun task", "重新运行任务")}
           onClick={handleRunAgain}
           disabled={isRunningAgain}
         >
@@ -83,7 +87,7 @@ export function SelectedRunActions({
         <Button
           variant="destructive"
           size="icon"
-          aria-label="Stop task"
+          aria-label={t("Stop task", "停止任务")}
           onClick={handleStopRun}
           disabled={isStopping}
         >
@@ -97,7 +101,7 @@ export function SelectedRunActions({
           as="NextLink"
           href={openInBuilderHref}
           target="_blank"
-          aria-label="View task details"
+          aria-label={t("View task details", "查看任务详情")}
         >
           <Icon icon={EyeIcon} size={18} />
         </Button>
@@ -113,9 +117,9 @@ export function SelectedRunActions({
           <Button
             variant="icon"
             size="icon"
-            aria-label="Save task as template"
+            aria-label={t("Save task as template", "将任务保存为模板")}
             onClick={() => setIsCreateTemplateModalOpen(true)}
-            title="Create template"
+            title={t("Create template", "创建模板")}
           >
             <Icon icon={Album01Icon} size={18} />
           </Button>

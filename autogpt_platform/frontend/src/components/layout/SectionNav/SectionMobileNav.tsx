@@ -1,5 +1,7 @@
 "use client";
 
+import { sectionLabel } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowDown01Icon, ArrowLeft02Icon } from "@hugeicons/core-free-icons";
@@ -20,6 +22,7 @@ interface Props {
 }
 
 export function SectionMobileNav({ items, sectionName, showBackLink }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const current = items.find((i) => i.isActive) ?? items[0];
 
@@ -33,7 +36,7 @@ export function SectionMobileNav({ items, sectionName, showBackLink }: Props) {
       {showBackLink ? (
         <Link
           href="/copilot"
-          aria-label="Back to home"
+          aria-label={t("Back to home", "返回首页")}
           className="flex items-center gap-1 rounded-lg py-1 pr-2 text-foreground-body transition-colors hover:text-foreground-base"
         >
           <UIIcon icon={ArrowLeft02Icon} size={16} />
@@ -44,12 +47,15 @@ export function SectionMobileNav({ items, sectionName, showBackLink }: Props) {
           <button
             type="button"
             className="flex w-fit items-center gap-2 rounded-full border border-border-base bg-surface px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-action"
-            aria-label={`${sectionName} navigation, current: ${current.label}`}
+            aria-label={t(
+              `${sectionName} navigation, current: ${current.label}`,
+              `${sectionLabel(sectionName)}导航，当前：${sectionLabel(current.label)}`,
+            )}
           >
             <span className="flex items-center gap-2">
               <UIIcon icon={current.Icon} size={16} tone="base" />
               <Text variant="body" as="span" weight="medium">
-                {current.label}
+                {t(current.label, sectionLabel(current.label))}
               </Text>
             </span>
             <UIIcon
@@ -86,7 +92,7 @@ export function SectionMobileNav({ items, sectionName, showBackLink }: Props) {
                   weight={isActive ? "medium" : "normal"}
                   className="flex-1"
                 >
-                  {label}
+                  {t(label, sectionLabel(label))}
                 </Text>
               </Link>
             ))}

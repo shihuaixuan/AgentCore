@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { SelectOption } from "@/components/atoms/Select/Select";
 import { Select } from "@/components/atoms/Select/Select";
 import type { AgentStatusFilter, FleetSummary } from "../../types";
@@ -25,21 +26,40 @@ function buildOptions(summary: FleetSummary): SelectOption[] {
 }
 
 export function AgentFilterMenu({ value, onChange, summary }: Props) {
+  const { t } = useTranslation();
   function handleChange(val: string) {
     onChange(val as AgentStatusFilter);
   }
 
-  const options = buildOptions(summary);
+  const labels: Record<string, string> = {
+    all: "全部工作流",
+    running: "运行中",
+    attention: "需要处理",
+    listening: "监听中",
+    scheduled: "已计划",
+    idle: "空闲 / 长期未运行",
+    healthy: "正常",
+  };
+  const options = buildOptions(summary).map((option) => ({
+    ...option,
+    label: t(
+      option.label,
+      labels[option.value] +
+        (option.value === "all" || option.value === "healthy"
+          ? ""
+          : " " + (option.label.match(/\(.*\)/)?.[0] ?? "")),
+    ),
+  }));
 
   return (
     <div className="flex items-center" data-testid="agent-filter-dropdown">
       <span className="hidden text-body whitespace-nowrap text-foreground-tertiary sm:inline">
-        filter
+        {t("filter", "筛选")}
       </span>
       <Icon icon={FunnelIcon} className="ml-1 h-4 w-4 sm:hidden" />
       <Select
         id="agent-status-filter"
-        label="Filter workflows"
+        label={t("Filter workflows", "筛选工作流")}
         hideLabel
         value={value}
         onValueChange={handleChange}

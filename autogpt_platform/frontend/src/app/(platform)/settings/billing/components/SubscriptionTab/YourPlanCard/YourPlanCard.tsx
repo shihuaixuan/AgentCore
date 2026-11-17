@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { Button } from "@/components/atoms/Button/Button";
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export function YourPlanCard({ index = 0, showUsage = false }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const controller = useYourPlanCard();
   const {
@@ -78,20 +80,20 @@ export function YourPlanCard({ index = 0, showUsage = false }: Props) {
   }
 
   const planBadgeLabel = !plan.isPaidPlan
-    ? "Inactive"
+    ? t("Inactive", "未启用")
     : plan.isPendingCancel
-      ? "Cancellation scheduled"
+      ? t("Cancellation scheduled", "已安排取消")
       : plan.isPendingDowngrade
-        ? "Downgrade scheduled"
+        ? t("Downgrade scheduled", "已安排降级")
         : plan.isPendingCycleSwitch
-          ? "Cycle switch scheduled"
-          : "Active";
+          ? t("Cycle switch scheduled", "已安排周期切换")
+          : t("Active", "有效");
 
   return (
     <motion.section {...sectionMotion} className="flex w-full flex-col gap-4">
       <div className="sr-only">
         <Text variant="body-medium" as="span">
-          Your plan
+          {t("Your plan", "你的套餐")}
         </Text>
       </div>
 
@@ -132,22 +134,36 @@ export function YourPlanCard({ index = 0, showUsage = false }: Props) {
                 href={ENTERPRISE_CONTACT_URL}
                 className="font-medium text-brand no-underline hover:text-brand-hover"
               >
-                Contact us
+                {t("Contact us", "联系我们")}
               </a>{" "}
               for changes.
             </Text>
           ) : plan.isPaidPlan ? (
             <Text variant="body" as="span" tone="body">
               {formatCents(plan.monthlyCostCents)}
-              {plan.billingCycle === "yearly" ? " / year" : " / month"}
+              {plan.billingCycle === "yearly"
+                ? t(" / year", " / 年")
+                : t(" / month", " / 月")}
               {plan.isPendingCancel && plan.pendingEffectiveAt
-                ? ` · Ends on ${formatShortDate(plan.pendingEffectiveAt)}`
+                ? t(
+                    ` · Ends on ${formatShortDate(plan.pendingEffectiveAt)}`,
+                    ` · 于 ${formatShortDate(plan.pendingEffectiveAt)} 结束`,
+                  )
                 : plan.isPendingDowngrade && plan.pendingEffectiveAt
-                  ? ` · Switches to ${plan.pendingTierLabel} on ${formatShortDate(plan.pendingEffectiveAt)}`
+                  ? t(
+                      ` · Switches to ${plan.pendingTierLabel} on ${formatShortDate(plan.pendingEffectiveAt)}`,
+                      ` · 于 ${formatShortDate(plan.pendingEffectiveAt)} 切换至 ${plan.pendingTierLabel}`,
+                    )
                   : plan.isPendingCycleSwitch && plan.pendingEffectiveAt
-                    ? ` · Active until ${formatShortDate(plan.pendingEffectiveAt)}`
+                    ? t(
+                        ` · Active until ${formatShortDate(plan.pendingEffectiveAt)}`,
+                        ` · 有效期至 ${formatShortDate(plan.pendingEffectiveAt)}`,
+                      )
                     : plan.currentPeriodEnd
-                      ? ` · Renews on ${formatShortDate(plan.currentPeriodEnd * 1000)}`
+                      ? t(
+                          ` · Renews on ${formatShortDate(plan.currentPeriodEnd * 1000)}`,
+                          ` · 于 ${formatShortDate(plan.currentPeriodEnd * 1000)} 续订`,
+                        )
                       : null}
             </Text>
           ) : (
@@ -176,10 +192,10 @@ export function YourPlanCard({ index = 0, showUsage = false }: Props) {
               loading={isUpdatingTier}
             >
               {plan.isPendingCancel
-                ? "Resume subscription"
+                ? t("Resume subscription", "恢复订阅")
                 : plan.isPendingCycleSwitch
-                  ? "Cancel cycle switch"
-                  : "Cancel downgrade"}
+                  ? t("Cancel cycle switch", "取消周期切换")
+                  : t("Cancel downgrade", "取消降级")}
             </Button>
           ) : null}
           {canDowngrade && plan.previousTierLabel ? (
@@ -200,7 +216,7 @@ export function YourPlanCard({ index = 0, showUsage = false }: Props) {
               onClick={onManage}
               disabled={!canManagePortal}
             >
-              Manage subscription
+              {t("Manage subscription", "管理订阅")}
             </Button>
           ) : null}
           {canUpgrade &&
@@ -219,10 +235,19 @@ export function YourPlanCard({ index = 0, showUsage = false }: Props) {
               }
             >
               {!plan.isPaidPlan
-                ? `Start ${plan.nextTierLabel}`
+                ? t(
+                    `Start ${plan.nextTierLabel}`,
+                    `开始使用 ${plan.nextTierLabel}`,
+                  )
                 : plan.nextTierIsTeamLink
-                  ? `Talk to sales — ${plan.nextTierLabel}`
-                  : `Upgrade to ${plan.nextTierLabel}`}
+                  ? t(
+                      `Talk to sales — ${plan.nextTierLabel}`,
+                      `联系销售 — ${plan.nextTierLabel}`,
+                    )
+                  : t(
+                      `Upgrade to ${plan.nextTierLabel}`,
+                      `升级至 ${plan.nextTierLabel}`,
+                    )}
             </Button>
           ) : null}
         </div>
@@ -276,8 +301,14 @@ export function YourPlanCard({ index = 0, showUsage = false }: Props) {
             if (!open) onCancelTierDowngrade();
           }}
           targetTierLabel={pendingTierDowngradeLabel}
-          title={`Downgrade to ${pendingTierDowngradeLabel}?`}
-          confirmLabel={`Downgrade to ${pendingTierDowngradeLabel}`}
+          title={t(
+            `Downgrade to ${pendingTierDowngradeLabel}?`,
+            `降级至 ${pendingTierDowngradeLabel}？`,
+          )}
+          confirmLabel={t(
+            `Downgrade to ${pendingTierDowngradeLabel}`,
+            `降级至 ${pendingTierDowngradeLabel}`,
+          )}
           body={tierDowngradeDialogBody}
           isSaving={isUpdatingTier}
           onConfirm={onConfirmTierDowngrade}

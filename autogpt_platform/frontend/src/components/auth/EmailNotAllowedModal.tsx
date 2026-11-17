@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Dialog } from "../molecules/Dialog/Dialog";
 import { WaitlistErrorContent } from "./WaitlistErrorContent";
 
@@ -7,9 +10,10 @@ interface Props {
 }
 
 export function EmailNotAllowedModal({ isOpen, onClose }: Props) {
+  const { t } = useTranslation();
   return (
     <Dialog
-      title="Email Not Allowed"
+      title={t("Email Not Allowed", "此邮箱不允许注册")}
       controlled={{ isOpen, set: onClose }}
       styling={{ maxWidth: "35rem" }}
     >

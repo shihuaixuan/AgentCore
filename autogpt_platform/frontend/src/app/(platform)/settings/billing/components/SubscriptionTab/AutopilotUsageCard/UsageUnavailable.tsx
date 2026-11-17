@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Alert02Icon, RefreshIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -9,20 +12,21 @@ interface Props {
 }
 
 export function UsageUnavailable({ onRetry }: Props) {
+  const { t } = useTranslation();
   return (
     <section
-      aria-label="Usage"
+      aria-label={t("Usage", "用量")}
       className="flex h-full min-h-80 flex-col rounded-2xl border border-border-base bg-surface p-6"
     >
       <Text variant="large-medium" as="h2">
-        Usage
+        {t("Usage", "用量")}
       </Text>
       <div className="my-auto py-8">
         <span className="mb-4 flex size-9 items-center justify-center rounded-xl bg-surface-hover text-foreground-secondary">
           <Icon icon={Alert02Icon} size={18} />
         </span>
         <Text variant="large-medium" className="mb-2">
-          We couldn’t load your usage
+          {t("We couldn’t load your usage", "无法加载你的用量")}
         </Text>
         {/* oxlint-disable-next-line design-system/no-restyle -- caption copy at a 24px line height; no Text variant has it */}
         <Text variant="small" tone="secondary" className="leading-6">
@@ -35,7 +39,7 @@ export function UsageUnavailable({ onRetry }: Props) {
             onClick={onRetry}
             leftIcon={<Icon icon={RefreshIcon} size={14} aria-hidden="true" />}
           >
-            Try again
+            {t("Try again", "重试")}
           </Button>
           <Button
             as="NextLink"
@@ -43,7 +47,7 @@ export function UsageUnavailable({ onRetry }: Props) {
             variant="ghost"
             size="small"
           >
-            Contact support
+            {t("Contact support", "联系支持")}
           </Button>
         </div>
       </div>

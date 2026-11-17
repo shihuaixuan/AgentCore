@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { PublishAgentModal } from "@/components/contextual/PublishAgentModal/PublishAgentModal";
 
 interface BecomeACreatorProps {
@@ -14,6 +15,7 @@ export function BecomeACreator({
   buttonText = "Publish your workflow",
   onPublish,
 }: BecomeACreatorProps) {
+  const { t } = useTranslation();
   const publishTrigger = (
     <button
       // oxlint-disable-next-line design-system/no-arbitrary-values -- the button's resting and hover shadows have no shadow token
@@ -28,8 +30,8 @@ export function BecomeACreator({
     <div className="relative mx-auto w-full max-w-[1360px] py-24">
       <div className="mx-auto w-full max-w-2xl px-4 text-center">
         <h2 className="mb-4 text-heading font-semibold tracking-heading text-foreground-strong md:text-title">
-          Build AI workflows and share <span className="text-brand">your</span>{" "}
-          vision
+          {t("Build AI workflows and share", "构建并分享 AI 工作流")}{" "}
+          <span className="text-brand">your</span> vision
         </h2>
 
         <p className="mx-auto mb-8 max-w-xl text-body-md leading-relaxed text-foreground-tertiary md:text-lead">

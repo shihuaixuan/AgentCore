@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Button } from "@/components/atoms/Button/Button";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function CookieSettingsCard({ index = 0 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const status = useConsentManagerStatus();
 
@@ -35,10 +37,13 @@ export function CookieSettingsCard({ index = 0 }: Props) {
       <div className="flex items-center justify-between gap-4 rounded-large border border-border-base bg-surface px-4 py-4 shadow-message-table">
         <div className="flex min-w-0 flex-col gap-0.5">
           <Text variant="body-medium" as="span">
-            Cookies
+            {t("Cookies", "Cookie")}
           </Text>
           <Text variant="small" as="span" tone="muted">
-            Choose which optional cookies AutoGPT may use.
+            {t(
+              "Choose which optional cookies AutoGPT may use.",
+              "选择允许 AutoGPT 使用哪些可选 Cookie。",
+            )}
           </Text>
         </div>
 
@@ -61,7 +66,7 @@ export function CookieSettingsCard({ index = 0 }: Props) {
             disabled={status !== "ready"}
             onClick={openConsentSettings}
           >
-            Cookie settings
+            {t("Cookie settings", "Cookie 设置")}
           </Button>
         )}
       </div>

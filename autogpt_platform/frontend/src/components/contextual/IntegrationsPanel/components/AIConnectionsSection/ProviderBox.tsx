@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -29,6 +30,8 @@ export function ProviderBox({
   isBusy = false,
   onClick,
 }: Props) {
+  const { t } = useTranslation();
+
   const body = (
     <>
       <span className="relative flex h-12 w-12 shrink-0 items-center justify-center">
@@ -66,12 +69,12 @@ export function ProviderBox({
         {state === "connected" && (
           <span className="inline-flex items-center gap-1 rounded-lg bg-success-surface px-2 py-0.5 text-body-sm leading-5 font-medium text-success-foreground">
             <Icon icon={CheckmarkCircle02Icon} size={13} />
-            Connected
+            {t("Connected", "已连接")}
           </span>
         )}
         {state === "coming-soon" && (
           <span className="inline-flex items-center rounded-lg bg-surface-hover px-2 py-0.5 text-body-sm leading-5 font-medium text-foreground-tertiary">
-            Coming soon
+            {t("Coming soon", "即将推出")}
           </span>
         )}
       </span>

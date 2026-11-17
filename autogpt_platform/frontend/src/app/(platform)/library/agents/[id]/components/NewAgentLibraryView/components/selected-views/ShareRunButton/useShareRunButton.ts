@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useState, useEffect } from "react";
 import {
   usePostV1EnableExecutionSharing,
@@ -19,6 +20,7 @@ export function useShareRunButton({
   isShared: initialIsShared = false,
   shareToken: initialShareToken,
 }: UseShareRunButtonProps) {
+  const { t } = useTranslation();
   const [isShared, setIsShared] = useState(initialIsShared);
   const [shareToken, setShareToken] = useState(initialShareToken || null);
   const [copied, setCopied] = useState(false);
@@ -57,14 +59,14 @@ export function useShareRunButton({
         });
       } else {
         toast({
-          title: "Error",
+          title: t("Error", "错误"),
           description: "Failed to enable sharing. Please try again.",
           variant: "destructive",
         });
       }
     } catch {
       toast({
-        title: "Error",
+        title: t("Error", "错误"),
         description: "Failed to enable sharing. Please try again.",
         variant: "destructive",
       });
@@ -86,7 +88,7 @@ export function useShareRunButton({
       });
     } catch {
       toast({
-        title: "Error",
+        title: t("Error", "错误"),
         description: "Failed to disable sharing. Please try again.",
         variant: "destructive",
       });
@@ -104,7 +106,7 @@ export function useShareRunButton({
       });
     } catch {
       toast({
-        title: "Error",
+        title: t("Error", "错误"),
         description: "Failed to copy link. Please try again.",
         variant: "destructive",
       });

@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useCopyPasteStore } from "@/app/(platform)/build/stores/copyPasteStore";
 import { useNodeStore } from "@/app/(platform)/build/stores/nodeStore";
 import {
@@ -24,6 +25,7 @@ type Props = {
 };
 
 export const NodeContextMenu = ({ nodeId, subGraphID }: Props) => {
+  const { t } = useTranslation();
   const { deleteElements } = useReactFlow();
 
   function handleCopy() {
@@ -50,7 +52,7 @@ export const NodeContextMenu = ({ nodeId, subGraphID }: Props) => {
       <SecondaryDropdownMenuContent side="right" align="start">
         <SecondaryDropdownMenuItem onClick={handleCopy}>
           <Icon icon={Copy01Icon} size={20} className="mr-2" />
-          <span>Copy</span>
+          <span>{t("Copy", "复制")}</span>
         </SecondaryDropdownMenuItem>
         <SecondaryDropdownMenuSeparator />
 
@@ -60,7 +62,7 @@ export const NodeContextMenu = ({ nodeId, subGraphID }: Props) => {
               onClick={() => window.open(`/build?flowID=${subGraphID}`)}
             >
               <Icon icon={LinkSquare01Icon} size={20} className="mr-2" />
-              <span>Open workflow</span>
+              <span>{t("Open workflow", "打开工作流")}</span>
             </SecondaryDropdownMenuItem>
             <SecondaryDropdownMenuSeparator />
           </>
@@ -68,7 +70,7 @@ export const NodeContextMenu = ({ nodeId, subGraphID }: Props) => {
 
         <SecondaryDropdownMenuItem variant="destructive" onClick={handleDelete}>
           <Icon icon={Delete02Icon} size={20} tone="error" className="mr-2" />
-          <span>Delete</span>
+          <span>{t("Delete", "删除")}</span>
         </SecondaryDropdownMenuItem>
       </SecondaryDropdownMenuContent>
     </DropdownMenu>

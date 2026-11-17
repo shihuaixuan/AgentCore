@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   AlertCircleIcon,
   CoinsDollarIcon,
@@ -30,6 +33,7 @@ const ICONS: Record<HomeAttentionItem["kind"], IconSvgElement> = {
 };
 
 export function AttentionRow({ item, isProcessing, onDecision }: Props) {
+  const { t } = useTranslation();
   const [confirmDecline, setConfirmDecline] = useState(false);
   const reason = attentionReason(item.review);
 
@@ -69,7 +73,7 @@ export function AttentionRow({ item, isProcessing, onDecision }: Props) {
                   as="span"
                   className="block"
                 >
-                  Waiting
+                  {t("Waiting", "等待中")}
                 </Text>
               </span>
             ) : null}

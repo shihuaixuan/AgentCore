@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { SessionSummaryResponse } from "@/app/api/__generated__/models/sessionSummaryResponse";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -59,6 +60,7 @@ export function ExpertChatGroup({
   sessions,
   renderItem,
 }: Props) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(!!isAutopilot);
   const [visibleCount, setVisibleCount] = useState(
     isAutopilot ? OTTO_PREVIEW_COUNT : EXPERT_CHAT_PAGE_SIZE,
@@ -78,7 +80,7 @@ export function ExpertChatGroup({
           long labels then truncate against the link rather than under it. */}
       <div className="group/expert-header relative mb-1 flex items-center rounded-md hover:bg-surface-hover">
         <CollapsibleTrigger
-          aria-label={`${label} chats`}
+          aria-label={t(`${label} chats`, `${label}的对话`)}
           // The size and weight reach ManagedExpertImage's fallback initials (a
           // span that sets its colour, not its size or weight), and the weight
           // ExpertAvatar's initial; every other piece of copy is a toned Text.
@@ -127,7 +129,10 @@ export function ExpertChatGroup({
           {hasHiddenSessions && (
             <button
               type="button"
-              aria-label={`${isAutopilot ? "Load all" : "Load more"} ${label} chats`}
+              aria-label={t(
+                `${isAutopilot ? "Load all" : "Load more"} ${label} chats`,
+                `${isAutopilot ? "加载全部" : "加载更多"}${label}的对话`,
+              )}
               onClick={() =>
                 setVisibleCount((count) =>
                   isAutopilot ? Infinity : count + EXPERT_CHAT_PAGE_SIZE,
@@ -141,7 +146,9 @@ export function ExpertChatGroup({
                 tone="inherit"
                 className="block"
               >
-                {isAutopilot ? "Load all" : "Load more"}
+                {isAutopilot
+                  ? t("Load all", "加载全部")
+                  : t("Load more", "加载更多")}
               </Text>
             </button>
           )}
@@ -211,7 +218,8 @@ function SessionCount({ count }: { count: number }) {
 }
 
 function NewChatLink({ href, label }: { href: string; label: string }) {
-  const name = `New chat with ${label}`;
+  const { t } = useTranslation();
+  const name = t(`New chat with ${label}`, `与${label}开始新对话`);
 
   return (
     <Tooltip>

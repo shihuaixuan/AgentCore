@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React from "react";
 import { Button } from "@/components/atoms/Button/Button";
 import {
@@ -27,6 +28,7 @@ export function SubAgentUpdateFeature({
   nodeID,
   nodeData,
 }: SubAgentUpdateFeatureProps) {
+  const { t } = useTranslation();
   const {
     updateInfo,
     isInResolutionMode,
@@ -36,7 +38,7 @@ export function SubAgentUpdateFeature({
     handleConfirmIncompatibleUpdate,
   } = useSubAgentUpdateState({ nodeID: nodeID, nodeData: nodeData });
 
-  const agentName = nodeData.title || "Workflow";
+  const agentName = nodeData.title || t("Workflow", "工作流");
 
   if (!updateInfo.hasUpdate && !isInResolutionMode) {
     return null;
@@ -83,12 +85,16 @@ function SubAgentUpdateAvailableBar({
   isCompatible,
   onUpdate,
 }: SubAgentUpdateAvailableBarProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between gap-2 rounded-t-xl bg-info-surface px-3 py-2">
       <div className="flex items-center gap-2">
         <Icon icon={ArrowUp02Icon} tone="info-strong" className="h-4 w-4" />
         <Text variant="body-tight" as="span" tone="info-strong">
-          Update available (v{currentVersion} → v{latestVersion})
+          {t(
+            `Update available (v${currentVersion} → v${latestVersion})`,
+            `有可用更新（v${currentVersion} → v${latestVersion}）`,
+          )}
         </Text>
         {!isCompatible && (
           <Tooltip>
@@ -101,10 +107,10 @@ function SubAgentUpdateAvailableBar({
             </TooltipTrigger>
             <TooltipContent className="max-w-xs">
               <Text variant="small-medium-lh-normal" tone="inherit">
-                Incompatible changes detected
+                {t("Incompatible changes detected", "检测到不兼容的变更")}
               </Text>
               <Text variant="small-tight" tone="subtle">
-                Click Update to see details
+                {t("Click Update to see details", "点击更新查看详情")}
               </Text>
             </TooltipContent>
           </Tooltip>
@@ -121,7 +127,7 @@ function SubAgentUpdateAvailableBar({
         )}
       >
         <Text variant="small-medium-tight" as="span" tone="inherit">
-          Update
+          {t("Update", "更新")}
         </Text>
       </Button>
     </div>

@@ -8,12 +8,14 @@ import type { TrialStatusResponse } from "@/app/api/__generated__/models/trialSt
 import { useTrialStatus } from "@/services/trials/useTrialStatus";
 import { getUsageExperience } from "./helpers";
 import { formatPaymentDue } from "./payment";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 // The open invoice is paid in another tab, so keep checking until the
 // conversion lands; the trial query already pauses while this tab is hidden.
 const PAYMENT_CHECK_MS = 15_000;
 
 export function usePaymentRecovery(tier: string | null | undefined) {
+  const { locale } = useTranslation();
   const queryClient = useQueryClient();
   const trial = useTrialStatus({
     refetchInterval: (current) =>
@@ -35,7 +37,9 @@ export function usePaymentRecovery(tier: string | null | undefined) {
   }, [paymentFailed, queryClient]);
   return {
     paymentFailed,
-    payment: paymentFailed ? formatPaymentDue(experience.payment) : null,
+    payment: paymentFailed
+      ? formatPaymentDue(experience.payment, locale)
+      : null,
   };
 }
 

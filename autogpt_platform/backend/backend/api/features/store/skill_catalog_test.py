@@ -2,6 +2,7 @@
 that are immutable and content-addressed so re-publishing is a no-op and
 rolling back is publishing an older commit."""
 
+import json
 import uuid
 from pathlib import Path
 
@@ -22,6 +23,7 @@ from backend.api.features.store.skill_catalog_fixture import (
 from backend.api.features.store.skill_catalog_release import load_release
 from backend.api.features.store.skill_db_test import _make_listing
 from backend.api.features.store.skill_submission_db import snapshot_version_files
+from backend.data import db as database
 from backend.util.test import SpinTestServer
 
 pytestmark = pytest.mark.asyncio(loop_scope="session")
@@ -51,6 +53,17 @@ def _key() -> str:
 async def _publish(root: Path, *, revision: str = "a" * 40, **kwargs):
     return await publish_catalog(
         load_release(root), repository="test/catalog", revision=revision, **kwargs
+    )
+
+
+async def _publish_lobehub(root: Path, *, dry_run: bool = False, **kwargs):
+    return await publish_catalog(
+        load_release(root, allow_noncanonical_categories=True),
+        repository="LobeHub/market",
+        revision="b" * 40,
+        dry_run=dry_run,
+        seed_experts=False,
+        **kwargs,
     )
 
 
@@ -241,6 +254,85 @@ async def test_a_dry_run_reports_the_plan_and_writes_nothing(tmp_path: Path):
     assert await prisma.models.SkillListing.prisma().count() == 0
     assert await prisma.models.Expert.prisma().count(where={"templateKey": key}) == 0
     assert await prisma.models.SkillCatalogRelease.prisma().count() == 0
+
+
+async def test_lobehub_publish_retires_legacy_platform_skills_and_keeps_user_skills(
+    tmp_path: Path,
+):
+    await _make_listing("old-platform-skill")
+    user = await prisma.models.User.prisma().create(
+        data={"id": str(uuid.uuid4()), "email": f"{uuid.uuid4().hex}@example.com"}
+    )
+    await prisma.models.SkillListing.prisma().create(
+        data={"slug": "user-owned-skill", "owningUserId": user.id}
+    )
+    write_catalog(tmp_path, {"lobehub-example": {}})
+
+    summary = await _publish_lobehub(tmp_path)
+
+    old_platform = await prisma.models.SkillListing.prisma().find_unique(
+        where={"slug": "old-platform-skill"}
+    )
+    user_skill = await prisma.models.SkillListing.prisma().find_unique(
+        where={"slug": "user-owned-skill"}
+    )
+    assert old_platform is not None and old_platform.isDeleted
+    assert user_skill is not None and not user_skill.isDeleted
+    assert summary.retired == ["old-platform-skill"]
+    await prisma.models.SkillListing.prisma().delete_many(
+        where={"slug": "user-owned-skill"}
+    )
+    await prisma.models.User.prisma().delete(where={"id": user.id})
+
+
+async def test_lobehub_publish_replaces_mcp_catalog_as_a_local_snapshot(tmp_path: Path):
+    from backend.integrations.mcp_catalog import (
+        MCPCatalogEntry,
+        get_mcp_catalog,
+        set_mcp_catalog,
+    )
+
+    old = MCPCatalogEntry.model_validate(
+        {
+            "name": "mcp_old",
+            "display_name": "Old server",
+            "description": "Old server",
+            "mcp_server": {
+                "server_url": "https://old.example/mcp",
+                "documentation_url": "https://old.example/docs",
+                "setup_instructions": "Connect",
+                "connection_mode": "hosted",
+                "auth_methods": ["oauth"],
+            },
+        }
+    )
+    incoming = old.model_copy(update={"name": "mcp_new", "display_name": "New server"})
+    await database.execute_raw_with_schema(
+        'INSERT INTO {schema_prefix}"MCPMarketplaceEntry" '
+        '("name", "payload", "source", "updatedAt") '
+        "VALUES ($1, $2::jsonb, $3, CURRENT_TIMESTAMP)",
+        old.name,
+        json.dumps(old.model_dump()),
+        "old-source",
+    )
+    write_catalog(tmp_path, {"lobehub-example": {}})
+
+    await _publish_lobehub(tmp_path, mcp_entries=[incoming.model_dump()])
+
+    rows = await database.query_raw_with_schema(
+        'SELECT "name" FROM {schema_prefix}"MCPMarketplaceEntry"'
+    )
+    assert [row["name"] for row in rows] == [incoming.name]
+    assert get_mcp_catalog() == (incoming,)
+    set_mcp_catalog(None)
+    await database.execute_raw_with_schema(
+        'DELETE FROM {schema_prefix}"MCPMarketplaceEntry" '
+        'WHERE "name" = ANY($1::text[])',
+        [old.name, incoming.name],
+    )
+    await prisma.models.SkillListingVersion.prisma().delete_many()
+    await prisma.models.SkillListing.prisma().delete_many()
+    await prisma.models.SkillCatalogRelease.prisma().delete_many()
 
 
 async def test_a_legacy_version_is_hashed_so_existing_copies_can_be_matched(

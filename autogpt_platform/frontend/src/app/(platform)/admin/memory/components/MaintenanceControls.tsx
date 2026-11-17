@@ -1,6 +1,7 @@
 "use client";
 
 import type { AnyJobStatus } from "./memoryJobStatus";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   onRebuild: () => void;
@@ -33,6 +34,7 @@ export function MaintenanceControls({
   nightlyActive,
   nightlyStatus,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <>
       <RebuildControl
@@ -50,7 +52,7 @@ export function MaintenanceControls({
         className="rounded-md bg-brand-hover px-3 py-1.5 text-body font-medium text-action-foreground hover:bg-accent-strong disabled:opacity-50"
         title="Run ONLY the dream pass (consolidate → recombine → sanitize) — skips community rebuild and ratification."
       >
-        {dreamActive ? jobButtonLabel(dreamStatus, "Dreaming…") : "Dream pass"}
+        {dreamActive ? jobButtonLabel(dreamStatus, t("Dreaming…", "正在整理…")) : t("Dream pass", "记忆整理")}
       </button>
       <button
         type="button"
@@ -59,7 +61,7 @@ export function MaintenanceControls({
         className="rounded-md bg-success px-3 py-1.5 text-body font-medium text-action-foreground hover:bg-success-foreground disabled:opacity-50"
         title="Run ONLY the ratification supersession sweep — promotes hit tentatives, supersedes unratified ones past their grace period."
       >
-        {ratificationPending ? "Ratifying…" : "Ratification"}
+        {ratificationPending ? t("Ratifying…", "正在确认…") : t("Ratification", "确认")}
       </button>
       <button
         type="button"
@@ -69,8 +71,8 @@ export function MaintenanceControls({
         title="Run the FULL nightly batch — what the 03:00 cron does. Fans out dream pass + ratification sweep (+ future P2/P3/P4/P11 stages) in one pass."
       >
         {nightlyActive
-          ? jobButtonLabel(nightlyStatus, "Running nightly…")
-          : "Nightly batch"}
+          ? jobButtonLabel(nightlyStatus, t("Running nightly…", "正在运行夜间批处理…"))
+          : t("Nightly batch", "夜间批处理")}
       </button>
       <span className="mx-2 h-5 border-l border-border-base" />
     </>
@@ -89,6 +91,7 @@ function RebuildControl({
   force,
   setForce,
 }: RebuildControlProps) {
+  const { t } = useTranslation();
   return (
     <>
       <button
@@ -97,7 +100,7 @@ function RebuildControl({
         disabled={active}
         className="rounded-md bg-info-foreground px-3 py-1.5 text-body font-medium text-action-foreground hover:bg-info-foreground/90 disabled:opacity-50"
       >
-        {active ? jobButtonLabel(status, "Rebuilding…") : "Rebuild communities"}
+        {active ? jobButtonLabel(status, t("Rebuilding…", "正在重建…")) : t("Rebuild communities", "重建社区")}
       </button>
       <label className="flex items-center gap-2 text-foreground-body">
         <input
@@ -105,7 +108,7 @@ function RebuildControl({
           checked={force}
           onChange={(event) => setForce(event.target.checked)}
         />
-        Force
+        {t("Force", "强制")}
       </label>
     </>
   );

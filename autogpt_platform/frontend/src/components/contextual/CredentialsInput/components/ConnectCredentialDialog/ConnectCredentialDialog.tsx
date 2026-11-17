@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { Button } from "@/components/atoms/Button/Button";
@@ -58,6 +59,8 @@ export function ConnectCredentialDialog({
   onClose,
   onConnected,
 }: Props) {
+  const { t } = useTranslation();
+
   const [addingNew, setAddingNew] = useState(false);
   const [chosenId, setChosenId] = useState<string | null>(null);
   // The account the user chose to sign in to again. It becomes the upgrade
@@ -209,7 +212,7 @@ export function ConnectCredentialDialog({
           )}
           <div className="flex items-center justify-end gap-3">
             <Button variant="secondary" size="small" onClick={handleClose}>
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             {showExisting ? (
               <>
@@ -219,7 +222,7 @@ export function ConnectCredentialDialog({
                   disabled={existing?.isPending}
                   onClick={() => setAddingNew(true)}
                 >
-                  Add new
+                  {t("Add new", "新增")}
                 </Button>
                 <Button
                   variant="primary"
@@ -231,10 +234,10 @@ export function ConnectCredentialDialog({
                   {existing?.isPending
                     ? "Granting…"
                     : isUpdating
-                      ? "Update this account"
+                      ? t("Update this account", "更新此账户")
                       : isChoosing
-                        ? "Use this account"
-                        : "Use existing"}
+                        ? t("Use this account", "使用此账户")
+                        : t("Use existing", "使用已有账户")}
                 </Button>
               </>
             ) : (
@@ -247,7 +250,7 @@ export function ConnectCredentialDialog({
                   loading={isConnecting}
                   onClick={handleContinue}
                 >
-                  {isConnecting ? "Connecting…" : "Continue"}
+                  {isConnecting ? "Connecting…" : t("Continue", "继续")}
                 </Button>
               )
             )}

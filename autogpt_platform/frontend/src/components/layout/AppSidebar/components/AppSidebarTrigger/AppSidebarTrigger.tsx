@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Button } from "@/components/atoms/Button/Button";
 import { useSidebar } from "@/components/molecules/Sidebar/Sidebar";
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export function AppSidebarTrigger({ className }: Props) {
+  const { t } = useTranslation();
   const toggleSidebar = useAppSidebarToggle();
 
   if (!toggleSidebar) return null;
@@ -51,7 +53,7 @@ export function AppSidebarTrigger({ className }: Props) {
       onClick={toggleSidebar}
     >
       <Icon icon={SidebarLeftIcon} className="!size-5" />
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only">{t("Toggle Sidebar", "切换侧栏")}</span>
     </Button>
   );
 }

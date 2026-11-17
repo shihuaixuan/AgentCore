@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { FormProvider } from "react-hook-form";
 import { Card, CardContent, CardFooter } from "@/components/atoms/Card/Card";
 import { FormField } from "@/components/molecules/Form/Form";
@@ -20,6 +21,7 @@ import { FloppyDiskIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export const NewSaveControl = () => {
+  const { t } = useTranslation();
   const { form, isSaving, graphVersion, handleSave } = useNewSaveControl();
   const { saveControlOpen, setSaveControlOpen, forceOpenSave } =
     useControlPanelStore();
@@ -46,7 +48,7 @@ export const NewSaveControl = () => {
             </ControlPanelButton>
           </PopoverTrigger>
         </TooltipTrigger>
-        <TooltipContent side="right">Save</TooltipContent>
+        <TooltipContent side="right">{t("Save", "保存")}</TooltipContent>
       </Tooltip>
       <PopoverContent
         side="right"
@@ -66,9 +68,12 @@ export const NewSaveControl = () => {
                     render={({ field }) => (
                       <Input
                         id="name"
-                        label="Name"
+                        label={t("Name", "名称")}
                         size="small"
-                        placeholder="Enter your workflow name"
+                        placeholder={t(
+                          "Enter your workflow name",
+                          "输入工作流名称",
+                        )}
                         data-id="save-control-name-input"
                         data-testid="save-control-name-input"
                         maxLength={100}
@@ -85,8 +90,11 @@ export const NewSaveControl = () => {
                       <Input
                         id="description"
                         size="small"
-                        label="Description"
-                        placeholder="Your workflow description"
+                        label={t("Description", "描述")}
+                        placeholder={t(
+                          "Your workflow description",
+                          "工作流描述",
+                        )}
                         data-id="save-control-description-input"
                         data-testid="save-control-description-input"
                         maxLength={500}
@@ -99,13 +107,13 @@ export const NewSaveControl = () => {
                   {graphVersion && (
                     <Input
                       id="version"
-                      placeholder="Version"
+                      placeholder={t("Version", "版本")}
                       size="small"
                       value={graphVersion || "-"}
                       disabled
                       data-testid="save-control-version-output"
                       data-tutorial-id="save-control-version-output"
-                      label="Version"
+                      label={t("Version", "版本")}
                       wrapperClassName="!mb-0"
                     />
                   )}
@@ -123,7 +131,7 @@ export const NewSaveControl = () => {
                   disabled={isSaving}
                   loading={isSaving}
                 >
-                  Save Workflow
+                  {t("Save Workflow", "保存工作流")}
                 </Button>
               </CardFooter>
             </form>

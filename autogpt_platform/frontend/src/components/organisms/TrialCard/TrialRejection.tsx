@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { TrialRejectionReason } from "@/app/api/__generated__/models/trialRejectionReason";
 import { Text } from "@/components/atoms/Text/Text";
 import { Button } from "@/components/atoms/Button/Button";
@@ -8,6 +11,7 @@ interface Props {
 }
 
 export function TrialRejection({ reason }: Props) {
+  const { t } = useTranslation();
   const alreadyUsed = reason === "intro_offer_already_used";
   return (
     <div
@@ -17,17 +21,31 @@ export function TrialRejection({ reason }: Props) {
     >
       <TrialTitle>
         {alreadyUsed
-          ? "This introductory offer has already been used"
-          : "We couldn’t verify your card for this trial"}
+          ? t(
+              "This introductory offer has already been used",
+              "已使用过此首次优惠",
+            )
+          : t(
+              "We couldn’t verify your card for this trial",
+              "无法为本次试用验证银行卡",
+            )}
       </TrialTitle>
       <Text variant="body" tone="emphasis">
         {alreadyUsed
-          ? "This card or account has already redeemed an introductory offer. Each card and account can use one introductory offer."
-          : "Your card could not be verified for trial eligibility, so this trial was not activated."}
+          ? t(
+              "This card or account has already redeemed an introductory offer. Each card and account can use one introductory offer.",
+              "此银行卡或账户已使用过首次优惠。每张卡和每个账户仅能使用一次首次优惠。",
+            )
+          : t(
+              "Your card could not be verified for trial eligibility, so this trial was not activated.",
+              "无法验证此银行卡的试用资格，因此未激活本次试用。",
+            )}
       </Text>
       <Text variant="body" tone="emphasis">
-        This trial will not convert to a paid subscription. You can choose a
-        paid plan below. If you think this is a mistake, contact support.
+        {t(
+          "This trial will not convert to a paid subscription. You can choose a paid plan below. If you think this is a mistake, contact support.",
+          "本次试用不会转为付费订阅。你可以在下方选择付费套餐。如有疑问，请联系客服。",
+        )}
       </Text>
       <Button
         as="NextLink"
@@ -38,7 +56,7 @@ export function TrialRejection({ reason }: Props) {
         size="small"
         className="self-start"
       >
-        Contact support
+        {t("Contact support", "联系客服")}
       </Button>
     </div>
   );

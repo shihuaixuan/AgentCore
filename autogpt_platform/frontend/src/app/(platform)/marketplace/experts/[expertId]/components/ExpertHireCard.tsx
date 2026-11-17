@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { creditsToUsdLabel } from "@/lib/credits";
@@ -14,6 +17,7 @@ interface Props {
  *  wide screens, straight under the hero on phones. It carries the price
  *  terms so the decision and its cost sit together. */
 export function ExpertHireCard({ expert, firstName, actions }: Props) {
+  const { t } = useTranslation();
   const weeklyBudget = expert.weekly_budget ?? null;
   const workflowCount = expert.workflows.length;
 
@@ -22,22 +26,27 @@ export function ExpertHireCard({ expert, firstName, actions }: Props) {
       <div className="[&_a]:w-full [&_button]:w-full">{actions}</div>
 
       <ul className="mt-5 flex flex-col gap-2.5">
-        <Perk icon={CheckmarkCircle02Icon}>No extra cost</Perk>
-        <Perk icon={CheckmarkCircle02Icon}>Joins your team instantly</Perk>
+        <Perk icon={CheckmarkCircle02Icon}>
+          {t("No extra cost", "无额外费用")}
+        </Perk>
+        <Perk icon={CheckmarkCircle02Icon}>
+          {t("Joins your team instantly", "立即加入你的团队")}
+        </Perk>
         {workflowCount > 0 ? (
           <Perk icon={CheckmarkCircle02Icon}>
             {`${workflowCount} ${workflowCount === 1 ? "workflow" : "workflows"} installed and ready to run`}
           </Perk>
         ) : null}
         <Perk icon={CheckmarkCircle02Icon}>
-          Asks before acting on your behalf
+          {t("Asks before acting on your behalf", "代表你执行操作前先征求确认")}
         </Perk>
       </ul>
 
       <div className="mt-5 border-t border-separator pt-4">
         <h2 className="flex items-center gap-2 text-body font-semibold text-foreground-strong">
           <Icon icon={Coins01Icon} size={16} tone="muted" />
-          Included with your plan
+
+          {t("Included with your plan", "套餐内包含")}
         </h2>
         <p className="mt-1.5 text-body leading-6 text-foreground-secondary">
           {`Hiring ${firstName} costs nothing extra. Their work draws on your existing balance`}

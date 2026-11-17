@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getGetV1ListGraphExecutionsQueryKey } from "@/app/api/__generated__/endpoints/graphs/graphs";
 import { usePatchV1UpdateExecutionSchedule } from "@/app/api/__generated__/endpoints/schedules/schedules";
 import type { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
@@ -27,6 +28,7 @@ export function useEditScheduleModal(
   graphId: string,
   schedule: GraphExecutionJobInfo,
 ) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -58,7 +60,7 @@ export function useEditScheduleModal(
         },
         onError: (error) => {
           toast({
-            title: "Failed to update schedule",
+            title: t("Failed to update schedule", "无法更新计划"),
             description:
               error instanceof Error
                 ? error.message

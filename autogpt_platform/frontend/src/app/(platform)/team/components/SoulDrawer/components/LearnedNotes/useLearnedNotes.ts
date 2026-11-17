@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getListMyExpertMemoryFactsQueryKey,
   useForgetMyExpertMemoryFact,
@@ -11,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 const SOUL_NOTES_LIMIT = 5;
 
 export function useLearnedNotes(expertId: string) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const factsQuery = useListMyExpertMemoryFacts(expertId, {
@@ -25,12 +27,12 @@ export function useLearnedNotes(expertId: string) {
         queryClient.invalidateQueries({
           queryKey: getListMyExpertMemoryFactsQueryKey(expertId),
         });
-        toast({ title: "Forgotten" });
+        toast({ title: t("Forgotten", "已忘记") });
       },
       onError: () => {
         toast({
-          title: "Could not forget that memory",
-          description: "Please try again.",
+          title: t("Could not forget that memory", "无法忘记该记忆"),
+          description: t("Please try again.", "请重试。"),
           variant: "destructive",
         });
       },

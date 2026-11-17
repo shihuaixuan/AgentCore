@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Delete02Icon } from "@hugeicons/core-free-icons";
@@ -21,11 +23,13 @@ export function IntegrationsSelectionBar({
   onDeleteSelected,
   isDeleting = false,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex w-full items-center justify-between rounded-sm border border-border-base bg-surface-hover px-4 py-2">
       <div className="flex items-center gap-5">
         <Text variant="body" as="span" tone="body">
-          {selectedCount} selected
+          {selectedCount} {t("selected", "已选择")}
         </Text>
         {!allSelected && (
           <button
@@ -34,7 +38,7 @@ export function IntegrationsSelectionBar({
             className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-action"
           >
             <Text variant="body-medium" as="span">
-              Select All
+              {t("Select All", "全选")}
             </Text>
           </button>
         )}
@@ -44,7 +48,7 @@ export function IntegrationsSelectionBar({
           className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-action"
         >
           <Text variant="body-medium" as="span">
-            Deselect
+            {t("Deselect", "取消选择")}
           </Text>
         </button>
       </div>
@@ -56,7 +60,7 @@ export function IntegrationsSelectionBar({
         loading={isDeleting}
         disabled={isDeleting}
       >
-        Delete selected
+        {t("Delete selected", "删除所选项")}
       </Button>
     </div>
   );

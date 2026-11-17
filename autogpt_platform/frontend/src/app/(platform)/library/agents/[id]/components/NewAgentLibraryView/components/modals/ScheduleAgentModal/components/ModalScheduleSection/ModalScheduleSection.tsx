@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Input } from "@/components/atoms/Input/Input";
 import { Text } from "@/components/atoms/Text/Text";
 import { useCallback, useState } from "react";
@@ -22,6 +25,7 @@ export function ModalScheduleSection({
   onCronExpressionChange,
   onValidityChange,
 }: Props) {
+  const { t } = useTranslation();
   function handleScheduleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
     onScheduleNameChange(e.target.value);
   }
@@ -44,14 +48,14 @@ export function ModalScheduleSection({
     <div className="mt-6">
       <Input
         id="schedule-name"
-        label="Schedule Name"
+        label={t("Schedule Name", "计划名称")}
         value={scheduleName}
         size="small"
         onChange={(e) => {
           handleScheduleNameChange(e);
           validateNow({ scheduleName: e.target.value });
         }}
-        placeholder="Enter a name for this schedule"
+        placeholder={t("Enter a name for this schedule", "输入计划名称")}
         error={errors.scheduleName}
         className="max-w-80"
       />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { CopilotSkillInfo } from "@/app/api/__generated__/models/copilotSkillInfo";
 import { Text } from "@/components/atoms/Text/Text";
 import { useState } from "react";
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function AutopilotSkillsSection({ skills }: Props) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const needle = query.trim().toLowerCase();
   const visible = needle
@@ -26,27 +28,32 @@ export function AutopilotSkillsSection({ skills }: Props) {
     <section>
       <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
         <Text variant="large-medium" tone="primary">
-          Otto&apos;s Skills
+          {t("Otto's Skills", "Otto 的技能")}
         </Text>
         <ToolbarSearch
           textSize="body-md"
           id="otto-skills-search"
-          label="Search skills"
+          label={t("Search skills", "搜索技能")}
           value={query}
           onChange={setQuery}
         />
       </div>
       {skills.length === 0 ? (
         <Text variant="body-md" tone="muted" className="mt-4">
-          No skills yet. Skills in your library that no expert has claimed show
-          up here.
+          {t(
+            "No skills yet. Skills in your library that no expert has claimed show up here.",
+            "暂无技能。技能库中尚未分配给专家的技能会显示在这里。",
+          )}
         </Text>
       ) : visible.length === 0 ? (
         <Text variant="body-md" tone="muted" className="mt-4">
-          No skills match.
+          {t("No skills match.", "没有匹配的技能。")}
         </Text>
       ) : (
-        <ul className="flex flex-col gap-3 pt-4" aria-label="Otto skills">
+        <ul
+          className="flex flex-col gap-3 pt-4"
+          aria-label={t("Otto skills", "Otto 技能")}
+        >
           {visible.map((skill) => (
             <li key={skill.name}>
               <ExpertSkillListItem

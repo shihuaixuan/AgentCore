@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { Button } from "@/components/atoms/Button/Button";
@@ -26,6 +29,7 @@ export function ExpertHireActions({
   isHiring,
   onHire,
 }: Props) {
+  const { t } = useTranslation();
   if (!isLoggedIn) {
     const next = encodeURIComponent(`/marketplace/experts/${expert.id}`);
     return (
@@ -36,7 +40,7 @@ export function ExpertHireActions({
         size="small"
         className="w-full sm:w-auto"
       >
-        Get started
+        {t("Get started", "开始使用")}
       </Button>
     );
   }
@@ -49,7 +53,8 @@ export function ExpertHireActions({
           className={`${STATUS_CLASS} w-full justify-center`}
         >
           <Icon icon={CheckmarkCircle02Icon} size={16} />
-          On your team
+
+          {t("On your team", "已加入你的团队")}
         </Badge>
         <Button
           as="NextLink"

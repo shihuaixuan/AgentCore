@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { downloadOutputs } from "@/components/contextual/OutputRenderers/utils/download";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { beautifyString } from "@/lib/utils";
@@ -23,6 +24,7 @@ export const useNodeDataViewer = (
   executionResults?: NodeExecutionResult[],
   dataType?: NodeDataType,
 ) => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -58,7 +60,10 @@ export const useNodeDataViewer = (
   const copyExecutionId = () => {
     navigator.clipboard.writeText(execId).then(() => {
       toast({
-        title: "Execution ID copied to clipboard!",
+        title: t(
+          "Execution ID copied to clipboard!",
+          "运行 ID 已复制到剪贴板！",
+        ),
         duration: 2000,
       });
     });

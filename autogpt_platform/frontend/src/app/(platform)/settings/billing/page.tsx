@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useEffect, useRef, useState } from "react";
 import { notFound, useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -59,6 +60,7 @@ export default function SettingsBillingRoute() {
 }
 
 function SettingsBillingPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -100,9 +102,11 @@ function SettingsBillingPage() {
 
       if (topupStatus === "success") {
         toast({
-          title: "Payment successful",
-          description:
+          title: t("Payment successful", "付款成功"),
+          description: t(
             "Your credits will appear shortly. Refresh if you don't see them.",
+            "额度即将到账。如果未显示，请刷新页面。",
+          ),
         });
         fulfillCheckout().catch(() => {
           // Background fulfillment call — webhook is the source of truth,
@@ -111,8 +115,11 @@ function SettingsBillingPage() {
       } else if (topupStatus === "cancel") {
         trackCheckoutAbandoned({ checkout_kind: "top_up", surface: "billing" });
         toast({
-          title: "Payment cancelled",
-          description: "Your payment method was not charged.",
+          title: t("Payment cancelled", "付款已取消"),
+          description: t(
+            "Your payment method was not charged.",
+            "你的支付方式未被扣款。",
+          ),
           variant: "destructive",
         });
       }
@@ -165,28 +172,33 @@ function SettingsBillingPage() {
       <header className="space-y-1">
         <div className="flex items-center gap-1">
           <Text variant="h3-tracking-tight" as="h1">
-            Billing &amp; usage
+            {t("Billing & usage", "账单与用量")}
           </Text>
           <Button
             type="button"
             variant="ghost"
             size="icon-sm"
             leadingIcon={InformationCircleIcon}
-            aria-label="How usage and credits work"
+            aria-label={t("How usage and credits work", "用量和积分的使用方式")}
             tone="muted"
             onClick={() => setIsExplainerOpen(true)}
           />
         </div>
         <Text variant="body" tone="secondary">
-          Everything you need to manage your plan.
+          {t(
+            "Everything you need to manage your plan.",
+            "在这里管理你的套餐。",
+          )}
         </Text>
       </header>
 
       <TabsLine value={activeTab} onValueChange={handleTabChange}>
         <TabsLineList flush className="overflow-x-auto">
-          <TabsLineTrigger value="subscription">Subscription</TabsLineTrigger>
+          <TabsLineTrigger value="subscription">
+            {t("Subscription", "订阅")}
+          </TabsLineTrigger>
           <TabsLineTrigger value="automation-credits">
-            Automation Credits
+            {t("Automation Credits", "自动化额度")}
           </TabsLineTrigger>
         </TabsLineList>
 

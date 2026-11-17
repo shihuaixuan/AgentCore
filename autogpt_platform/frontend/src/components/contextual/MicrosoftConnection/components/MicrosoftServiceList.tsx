@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { MicrosoftAccessCheck } from "@/app/api/__generated__/models/microsoftAccessCheck";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -23,6 +26,7 @@ export function MicrosoftServiceList({
   browserAvailable,
   onAllow,
 }: Props) {
+  const { t } = useTranslation();
   if (!check) {
     if (refused && !checking) return null;
     return (
@@ -36,7 +40,7 @@ export function MicrosoftServiceList({
 
   return (
     <ul
-      aria-label="Microsoft services"
+      aria-label={t("Microsoft services", "Microsoft 服务")}
       aria-live="polite"
       className="flex flex-col divide-y divide-separator rounded-lg border border-border-base"
     >
@@ -61,7 +65,7 @@ export function MicrosoftServiceList({
               aria-label={`Allow ${item.name}`}
               onClick={() => onAllow(item.scopes ?? [])}
             >
-              Allow
+              {t("Allow", "允许")}
             </Button>
           ) : null}
         </li>

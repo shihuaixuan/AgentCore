@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { FileInput } from "@/components/atoms/FileInput/FileInput";
 import { Input } from "@/components/atoms/Input/Input";
@@ -18,18 +19,24 @@ type ExternalWorkflowTabProps = {
 export default function ExternalWorkflowTab({
   importWorkflow,
 }: ExternalWorkflowTabProps) {
+  const { t } = useTranslation();
   return (
     <TabsLineContent value="platform">
       <p className="mb-4 text-body text-foreground-tertiary">
-        Upload a workflow exported from n8n, Make.com, Zapier, or any other
-        platform. Otto will convert it into an AutoGPT workflow for you.
+        {t(
+          "Upload a workflow exported from n8n, Make.com, Zapier, or any other platform. Otto will convert it into an AutoGPT workflow for you.",
+          "上传从 n8n、Make.com、Zapier 或其他平台导出的工作流，Otto 会将其转换为 AutoGPT 工作流。",
+        )}
       </p>
       <FileInput
         mode="base64"
         value={importWorkflow.fileValue}
         onChange={importWorkflow.setFileValue}
         accept=".json,application/json"
-        placeholder="Workflow file (n8n, Make.com, Zapier, ...)"
+        placeholder={t(
+          "Workflow file (n8n, Make.com, Zapier, ...)",
+          "工作流文件（n8n、Make.com、Zapier 等）",
+        )}
         maxFileSize={10 * 1024 * 1024}
         showStorageNote={false}
         className="mt-2 mb-4"
@@ -44,17 +51,17 @@ export default function ExternalWorkflowTab({
         {importWorkflow.submittingMode === "file" ? (
           <div className="flex items-center gap-2">
             <LoadingSpinner size="small" />
-            <span>Importing...</span>
+            <span>{t("Importing...", "正在导入…")}</span>
           </div>
         ) : (
-          "Import to Otto"
+          t("Import to Otto", "导入至 Otto")
         )}
       </Button>
 
       <div className="my-5 flex items-center gap-3">
         <div className="h-px flex-1 bg-surface-active" />
         <span className="text-caption text-foreground-subtle">
-          or import from URL
+          {t("or import from URL", "或通过链接导入")}
         </span>
         <div className="h-px flex-1 bg-surface-active" />
       </div>
@@ -76,7 +83,7 @@ export default function ExternalWorkflowTab({
         id="template-url"
         value={importWorkflow.urlValue}
         onChange={(e) => importWorkflow.setUrlValue(e.target.value)}
-        label="Workflow URL"
+        label={t("Workflow URL", "工作流链接")}
         placeholder="https://n8n.io/workflows/1234"
         className="mb-4 w-full"
       />
@@ -90,10 +97,10 @@ export default function ExternalWorkflowTab({
         {importWorkflow.submittingMode === "url" ? (
           <div className="flex items-center gap-2">
             <LoadingSpinner size="small" />
-            <span>Importing...</span>
+            <span>{t("Importing...", "正在导入…")}</span>
           </div>
         ) : (
-          "Import from URL"
+          t("Import from URL", "通过链接导入")
         )}
       </Button>
     </TabsLineContent>

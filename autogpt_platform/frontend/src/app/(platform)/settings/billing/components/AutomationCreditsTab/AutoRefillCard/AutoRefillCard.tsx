@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Button } from "@/components/atoms/Button/Button";
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function AutoRefillCard({ index = 0 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const {
     config,
@@ -43,12 +45,18 @@ export function AutoRefillCard({ index = 0 }: Props) {
         </div>
         <div className="flex min-w-0 flex-col gap-1">
           <Text variant="body-medium" as="span">
-            Auto-refill
+            {t("Auto-refill", "自动充值")}
           </Text>
           <Text variant="body" as="span" tone="muted">
             {isEnabled && config
-              ? `Refills $${(config.amount / 100).toFixed(0)} when balance drops below $${(config.threshold / 100).toFixed(0)}.`
-              : "Top up automatically when your balance gets low."}
+              ? t(
+                  `Refills ${(config.amount / 100).toFixed(0)} when balance drops below ${(config.threshold / 100).toFixed(0)}.`,
+                  `余额低于 ${(config.threshold / 100).toFixed(0)} 时自动充值 ${(config.amount / 100).toFixed(0)}。`,
+                )
+              : t(
+                  "Top up automatically when your balance gets low.",
+                  "余额不足时自动充值。",
+                )}
           </Text>
         </div>
       </div>
@@ -59,7 +67,9 @@ export function AutoRefillCard({ index = 0 }: Props) {
         onClick={() => setOpen(true)}
         disabled={isLoading}
       >
-        {isEnabled ? "Edit" : "Set up auto-refill"}
+        {isEnabled
+          ? t("Edit", "编辑")
+          : t("Set up auto-refill", "设置自动充值")}
       </Button>
 
       <AutoRefillDialog

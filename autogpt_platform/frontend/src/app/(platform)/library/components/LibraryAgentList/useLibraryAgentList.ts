@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useGetV2ListLibraryAgentsInfinite } from "@/app/api/__generated__/endpoints/library/library";
 import { getGetV2ListLibraryAgentsQueryKey } from "@/app/api/__generated__/endpoints/library/library";
 import {
@@ -46,6 +47,7 @@ export function useLibraryAgentList({
   activeTab,
   statusFilter = "all",
 }: Props) {
+  const { t } = useTranslation();
   const isFavoritesTab = activeTab === "favorites";
   const { toast } = useToast();
   const stableQueryClient = getQueryClient();
@@ -176,8 +178,11 @@ export function useLibraryAgentList({
           }
         }
         toast({
-          title: "Error",
-          description: "Failed to move workflow. Please try again.",
+          title: t("Error", "错误"),
+          description: t(
+            "Failed to move workflow. Please try again.",
+            "移动工作流失败，请重试。",
+          ),
           variant: "destructive",
         });
       },

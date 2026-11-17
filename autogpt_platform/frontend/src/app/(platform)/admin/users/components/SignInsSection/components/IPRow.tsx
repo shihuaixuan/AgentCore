@@ -17,6 +17,7 @@ import {
   SquareLock01Icon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   formatDateTime,
   pluralize,
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export function IPRow({ ip, ownIP }: Props) {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const hiddenEvents = ip.event_count - ip.events.length;
 
@@ -40,7 +42,7 @@ export function IPRow({ ip, ownIP }: Props) {
         <Button
           variant="icon"
           size="icon-xs"
-          aria-label={`${isExpanded ? "Hide" : "Show"} sign-ins from ${ip.display_address}`}
+          aria-label={`${t(isExpanded ? "Hide" : "Show", isExpanded ? "隐藏" : "显示")} ${t("sign-ins from", "来自此地址的登录记录")} ${ip.display_address}`}
           aria-expanded={isExpanded}
           onClick={() => setIsExpanded(!isExpanded)}
         >
@@ -49,7 +51,7 @@ export function IPRow({ ip, ownIP }: Props) {
         <Address ip={ip} />
         {ip.has_sign_up ? (
           <Badge variant="success" size="small">
-            Sign-up
+            {t("Sign-up", "注册")}
           </Badge>
         ) : null}
         {ip.sign_in_count > 0 ? (
@@ -63,7 +65,7 @@ export function IPRow({ ip, ownIP }: Props) {
               <Badge variant="warning" size="small">
                 <span className="flex items-center gap-1">
                   <Icon icon={SquareLock01Icon} size={12} />
-                  Blocked
+            {t("Blocked", "已拦截")}
                 </span>
               </Badge>
               <UnblockDialog block={ip.block} triggerVariant="link" />
@@ -80,7 +82,7 @@ export function IPRow({ ip, ownIP }: Props) {
             </Text>
           </TooltipTrigger>
           <TooltipContent>
-            {ip.last_user_agent ?? "No user agent"}
+          {ip.last_user_agent ?? t("No user agent", "未知浏览器")}
           </TooltipContent>
         </Tooltip>
         <Text variant="small" as="span" tone="muted">
@@ -88,7 +90,7 @@ export function IPRow({ ip, ownIP }: Props) {
         </Text>
         <Text variant="small" as="span" tone="secondary">
           {ip.other_account_count > 0
-            ? pluralize(ip.other_account_count, "other account")
+            ? `${ip.other_account_count} ${t("other accounts", "个其他账户")}`
             : "—"}
         </Text>
       </div>
@@ -100,15 +102,15 @@ export function IPRow({ ip, ownIP }: Props) {
             >
               <Text variant="small" className="break-words" tone="muted">
                 {formatDateTime(event.created_at)} ·{" "}
-                {event.kind === "SIGN_UP" ? "Sign-up" : "Sign-in"} ·{" "}
-                {event.user_agent ?? "No user agent"}
+                {event.kind === "SIGN_UP" ? t("Sign-up", "注册") : t("Sign-in", "登录")} ·{" "}
+                {event.user_agent ?? t("No user agent", "未知浏览器")}
               </Text>
             </li>
           ))}
           {hiddenEvents > 0 ? (
             <li>
               <Text variant="small" tone="muted">
-                and {hiddenEvents.toLocaleString("en-GB")} more
+                {t("and", "以及")} {hiddenEvents.toLocaleString("en-GB")} {t("more", "条记录")}
               </Text>
             </li>
           ) : null}
@@ -119,6 +121,7 @@ export function IPRow({ ip, ownIP }: Props) {
 }
 
 function Address({ ip }: { ip: AccountIP }) {
+  const { t } = useTranslation();
   const address = (
     <Text variant="body-mono-tight" as="span" translate="no">
       {ip.display_address}
@@ -129,7 +132,7 @@ function Address({ ip }: { ip: AccountIP }) {
     <Tooltip>
       <TooltipTrigger asChild>{address}</TooltipTrigger>
       <TooltipContent>
-        IPv6 is recorded and blocked by its /64 prefix.
+        {t("IPv6 is recorded and blocked by its /64 prefix.", "IPv6 地址按 /64 前缀记录和拦截。")}
       </TooltipContent>
     </Tooltip>
   );

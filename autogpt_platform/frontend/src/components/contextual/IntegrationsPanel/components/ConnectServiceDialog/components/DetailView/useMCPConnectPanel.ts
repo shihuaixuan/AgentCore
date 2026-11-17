@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,6 +28,7 @@ export function useMCPConnectPanel({
   oauthScopes,
   oauthWriteScopes = [],
 }: Args) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [serverURL, setServerURL] = useState(initialServerURL);
   const initialPhase =
@@ -89,8 +91,14 @@ export function useMCPConnectPanel({
         setError(
           reason ??
             (manualSchemes.length
-              ? "This server doesn't support OAuth sign-in. Choose how its API credential should be sent."
-              : "Sign-in is unavailable for this connection. Check its setup instructions and try again."),
+              ? t(
+                  "This server doesn't support OAuth sign-in. Choose how its API credential should be sent.",
+                  "此服务器不支持 OAuth 登录。请选择发送 API 凭据的方式。",
+                )
+              : t(
+                  "Sign-in is unavailable for this connection. Check its setup instructions and try again.",
+                  "此连接暂时无法登录。请检查设置说明后重试。",
+                )),
         );
         return;
       }
@@ -103,7 +111,10 @@ export function useMCPConnectPanel({
       if (message === OAUTH_ERROR_FLOW_CANCELED) return;
       setError(
         message === "OAuth flow timed out"
-          ? "OAuth sign-in timed out. Please try again."
+          ? t(
+              "OAuth sign-in timed out. Please try again.",
+              "OAuth 登录超时。请重试。",
+            )
           : message,
       );
     } finally {

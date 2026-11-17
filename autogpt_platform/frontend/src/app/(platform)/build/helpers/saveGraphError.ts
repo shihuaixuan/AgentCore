@@ -5,18 +5,26 @@ import { useNodeStore } from "../stores/nodeStore";
 // A graph the backend refuses to save comes back as a structured validation
 // error naming each node's bad fields, e.g. "Agent Output › Name: This field
 // is required"; anything else is shown as it arrives.
-export function describeSaveError(error: unknown) {
+export function describeSaveError(
+  error: unknown,
+  t: (english: string, chinese: string) => string = (english) => english,
+) {
   if (isValidationError(error)) {
     return {
-      title: "Couldn't save your workflow",
-      description: `${error.response.detail.message}. Fix the highlighted fields and save again.`,
+      title: t("Couldn't save your workflow", "无法保存工作流"),
+      description: t(
+        `${error.response.detail.message}. Fix the highlighted fields and save again.`,
+        `${error.response.detail.message}。请修复高亮字段后重新保存。`,
+      ),
       variant: "destructive" as const,
     };
   }
   return {
-    title: "Error saving workflow",
+    title: t("Error saving workflow", "保存工作流时出错"),
     description:
-      error instanceof Error ? error.message : "An unexpected error occurred.",
+      error instanceof Error
+        ? error.message
+        : t("An unexpected error occurred.", "发生意外错误。"),
     variant: "destructive" as const,
   };
 }

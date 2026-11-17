@@ -1,4 +1,7 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { selectableCardClassName, type SelectableCardColors } from "../helpers";
 
 const MAX_CUSTOM_VOICE_SAMPLE_CHARACTERS = 2_000;
@@ -27,6 +30,7 @@ export function CustomVoiceOption({
   onFocus,
   onChange,
 }: Props) {
+  const { t } = useTranslation();
   const characterCountId = `${textareaId}-character-count`;
 
   return (
@@ -52,14 +56,14 @@ export function CustomVoiceOption({
           data-slot="custom-voice-option-radio"
           className="sr-only"
         />
-        Paste your own
+        {t("Paste your own", "粘贴自己的示例")}
       </label>
       <label
         htmlFor={textareaId}
         data-slot="custom-voice-option-textarea-label"
         className="sr-only"
       >
-        Custom voice sample
+        {t("Custom voice sample", "自定义写作风格示例")}
       </label>
       <textarea
         id={textareaId}
@@ -69,7 +73,10 @@ export function CustomVoiceOption({
         rows={compact ? 2 : CUSTOM_VOICE_TEXTAREA_ROWS}
         maxLength={MAX_CUSTOM_VOICE_SAMPLE_CHARACTERS}
         aria-describedby={characterCountId}
-        placeholder="Paste a few sentences written the way you'd like this expert to sound."
+        placeholder={t(
+          "Paste a few sentences written the way you'd like this expert to sound.",
+          "粘贴几句示例，展示你希望这位专家使用的写作风格。",
+        )}
         data-slot="custom-voice-option-textarea"
         className={cn(
           "w-full resize-none border bg-canvas text-body leading-relaxed text-foreground-base placeholder:text-foreground-tertiary focus:ring-1 focus:ring-focus focus:outline-none",
@@ -84,8 +91,10 @@ export function CustomVoiceOption({
         data-slot="custom-voice-option-count"
         className="mt-1.5 text-right text-caption text-foreground-tertiary"
       >
-        {customText.length.toLocaleString()} /{" "}
-        {MAX_CUSTOM_VOICE_SAMPLE_CHARACTERS.toLocaleString()} characters
+        {t(
+          `${customText.length.toLocaleString()} / ${MAX_CUSTOM_VOICE_SAMPLE_CHARACTERS.toLocaleString()} characters`,
+          `${customText.length.toLocaleString()} / ${MAX_CUSTOM_VOICE_SAMPLE_CHARACTERS.toLocaleString()} 字符`,
+        )}
       </p>
     </div>
   );

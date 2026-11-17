@@ -14,7 +14,21 @@ const ADMIN_LINKS = [
   { text: "Block Cost Estimates", href: "/admin/block-cost-estimates" },
   { text: "Memory Inspector", href: "/admin/memory" },
   { text: "Admin settings", href: "/admin/settings" },
+  { text: "Test Data", href: "/admin/test-data" },
 ];
+
+const ADMIN_LINK_LABELS_ZH: Record<string, string> = {
+  Users: "用户管理",
+  "Marketplace Management": "市场管理",
+  "User Spending": "用户消费",
+  "System Diagnostics": "系统诊断",
+  "Platform Costs": "平台成本",
+  "Execution Analytics": "执行分析",
+  "Bot Analytics": "机器人分析",
+  "Block Cost Estimates": "模块成本估算",
+  "Memory Inspector": "记忆检查器",
+  "Admin settings": "管理设置",
+};
 
 describe("AdminLayout", () => {
   afterEach(() => {
@@ -30,14 +44,31 @@ describe("AdminLayout", () => {
     expect(screen.getByText("Test Child")).toBeDefined();
   });
 
+  it("translates admin navigation labels to Chinese", () => {
+    render(
+      <AdminLayout>
+        <div />
+      </AdminLayout>,
+    );
+
+    const links = screen.getAllByRole("link");
+    for (const { text, href } of ADMIN_LINKS) {
+      const link = links.find((element) => element.getAttribute("href") === href);
+      expect(link?.textContent).toContain(ADMIN_LINK_LABELS_ZH[text]);
+    }
+  });
+
   it("renders every admin sidebar link with the correct href", () => {
+    vi.spyOn(testDataHelpers, "isTestDataSurfaceEnabled").mockReturnValue(
+      true,
+    );
     render(
       <AdminLayout>
         <div />
       </AdminLayout>,
     );
     const links = screen.getAllByRole("link");
-    for (const { text, href } of ADMIN_LINKS) {
+    for (const { text, href } of ADMIN_LINKS.slice(0, -1)) {
       const link = links.find((el) => el.getAttribute("href") === href);
       expect(link).toBeDefined();
       expect(link?.textContent).toContain(text);
@@ -55,6 +86,7 @@ describe("AdminLayout", () => {
       .getAllByRole("link")
       .find((el) => el.getAttribute("href") === "/admin/test-data");
     expect(link).toBeDefined();
+    expect(link?.textContent).toContain("测试数据");
   });
 
   it("hides the Test Data link outside a local stack", () => {

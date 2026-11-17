@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { CronScheduler } from "@/app/(platform)/library/agents/[id]/components/NewAgentLibraryView/components/modals/ScheduleAgentModal/components/CronScheduler/CronScheduler";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
@@ -21,10 +22,11 @@ export function CronSchedulerDialog({
   setOpen,
 
   defaultCronExpression = "",
-  title = "Schedule Workflow",
+  title,
   inputs,
   credentials,
 }: CronSchedulerDialogProps) {
+  const { t } = useTranslation();
   const {
     setCronExpression,
     userTimezone,
@@ -44,15 +46,15 @@ export function CronSchedulerDialog({
   return (
     <Dialog
       controlled={{ isOpen: open, set: setOpen }}
-      title={title}
+      title={title ?? t("Schedule Workflow", "定时运行工作流")}
       styling={{ maxWidth: "600px", minWidth: "600px" }}
     >
       <Dialog.Content>
         <div className="flex flex-col gap-4">
           <Input
             id="schedule-name"
-            label="Schedule Name"
-            placeholder="Enter schedule name"
+            label={t("Schedule Name", "计划名称")}
+            placeholder={t("Enter schedule name", "输入计划名称")}
             size="small"
             className="max-w-80"
             value={scheduleName}
@@ -77,10 +79,13 @@ export function CronSchedulerDialog({
                 />
               </span>
               <Text variant="body" tone="warning">
-                No timezone set. Schedule will run in UTC.
+                {t(
+                  "No timezone set. Schedule will run in UTC.",
+                  "尚未设置时区。计划将按 UTC 时间运行。",
+                )}
                 <a href="/settings/account" className="ml-1 underline">
                   <Text variant="body" as="span" tone="inherit">
-                    Set your timezone
+                    {t("Set your timezone", "设置时区")}
                   </Text>
                 </a>
               </Text>
@@ -95,7 +100,10 @@ export function CronSchedulerDialog({
                 />
               </span>
               <Text variant="body">
-                Schedule will run in your timezone:{" "}
+                {t(
+                  "Schedule will run in your timezone: ",
+                  "计划将按你的时区运行：",
+                )}
                 <Text variant="body-medium" as="span">
                   {timezoneDisplay}
                 </Text>
@@ -109,7 +117,7 @@ export function CronSchedulerDialog({
             onClick={() => setOpen(false)}
             className="h-fit"
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button
             loading={isCreatingSchedule}
@@ -117,7 +125,9 @@ export function CronSchedulerDialog({
             onClick={handleCreateSchedule}
             className="h-fit"
           >
-            {isCreatingSchedule ? "Creating schedule..." : "Done"}
+            {isCreatingSchedule
+              ? t("Creating schedule...", "正在创建计划…")
+              : t("Done", "完成")}
           </Button>
         </div>
       </Dialog.Content>

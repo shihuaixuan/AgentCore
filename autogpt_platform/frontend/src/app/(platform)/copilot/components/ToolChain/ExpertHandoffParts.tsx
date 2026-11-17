@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { ArrowDown01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { type ReactNode, useId, useState } from "react";
 import { Button } from "@/components/atoms/Button/Button";
@@ -52,6 +54,7 @@ export function HandoffProposal({
   stepClassName,
   stepKey,
 }: ProposalProps) {
+  const { t } = useTranslation();
   const copy = NEW_EXPERT_COPY[kind];
   return (
     <div className="flex gap-3 p-4">
@@ -65,12 +68,18 @@ export function HandoffProposal({
       <div className="min-w-0 flex-1">
         <div key={stepKey} className={stepClassName}>
           <p className="text-body leading-snug font-medium [overflow-wrap:anywhere] text-foreground-emphasis">
-            {copy.Verb} {name} to take on {task.title}?
+            {t(
+              `${copy.Verb} ${name} to take on ${task.title}?`,
+              `${kind === "raise" ? "创建" : "聘用"} ${name} 来处理“${task.title}”？`,
+            )}
           </p>
           <p className="mt-0.5 text-body [overflow-wrap:anywhere] text-foreground-tertiary">
             {role
-              ? `${role} · works on it in their own chat`
-              : "Works on it in their own chat"}
+              ? t(
+                  `${role} · works on it in their own chat`,
+                  `${role} · 在自己的对话中处理任务`,
+                )
+              : t("Works on it in their own chat", "在自己的对话中处理任务")}
           </p>
         </div>
         {actions && (
@@ -81,7 +90,10 @@ export function HandoffProposal({
               disabled={actions.disabled}
               onClick={actions.onStart}
             >
-              {copy.Verb} and start
+              {t(
+                `${copy.Verb} and start`,
+                `${kind === "raise" ? "创建" : "聘用"}并开始`,
+              )}
             </Button>
             <Button
               variant="ghost"
@@ -89,7 +101,7 @@ export function HandoffProposal({
               disabled={actions.disabled}
               onClick={actions.onNotNow}
             >
-              Not now
+              {t("Not now", "暂不")}
             </Button>
           </div>
         )}
@@ -112,6 +124,7 @@ interface DetailsProps {
 }
 
 function HandoffDetails({ name, about, task, onShowProfile }: DetailsProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const panelId = useId();
   return (
@@ -123,7 +136,7 @@ function HandoffDetails({ name, about, task, onShowProfile }: DetailsProps) {
         onClick={() => setOpen(!open)}
         className="inline-flex items-center gap-1 rounded text-caption font-medium text-foreground-secondary underline-offset-2 hover:underline focus-visible:ring-1 focus-visible:ring-focus focus-visible:outline-none"
       >
-        What {name} will get
+        {t(`What ${name} will get`, `${name} 将收到的内容`)}
         <Icon
           icon={ArrowDown01Icon}
           size={12}
@@ -142,7 +155,7 @@ function HandoffDetails({ name, about, task, onShowProfile }: DetailsProps) {
         </p>
         {about && (
           <p className="text-caption [overflow-wrap:anywhere] text-foreground-subtle">
-            About {name}: {about}
+            {t(`About ${name}: ${about}`, `关于 ${name}：${about}`)}
           </p>
         )}
         {onShowProfile && (
@@ -151,7 +164,7 @@ function HandoffDetails({ name, about, task, onShowProfile }: DetailsProps) {
             onClick={onShowProfile}
             className="self-start rounded text-caption font-medium text-foreground-secondary underline-offset-2 hover:underline focus-visible:ring-1 focus-visible:ring-focus focus-visible:outline-none"
           >
-            See {name}&apos;s full profile
+            {t(`See ${name}'s full profile`, `查看 ${name} 的完整档案`)}
           </button>
         )}
       </div>

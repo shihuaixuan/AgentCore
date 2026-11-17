@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { DEFAULT_AUTOPILOT_MODE } from "@/app/(platform)/copilot/autopilotModeStore";
 import { AUTOPILOT_MODE_OPTIONS } from "@/app/(platform)/copilot/components/ChatInput/components/AutopilotModeSelector/helpers";
@@ -21,6 +22,7 @@ export function ExpertModeSection({ expert }: Props) {
 }
 
 function ExpertModeOptions({ expert }: Props) {
+  const { t } = useTranslation();
   const {
     mode,
     isPending,
@@ -35,7 +37,7 @@ function ExpertModeOptions({ expert }: Props) {
       aria-label={`${expert.name} approval mode`}
       className="rounded-xl border border-border-base bg-surface p-4"
     >
-      <Text variant="large-medium">Approvals</Text>
+      <Text variant="large-medium">{t("Approvals", "审批")}</Text>
       <Text variant="small" tone="secondary" className="mt-1">
         How every new web chat with {expert.name} starts. You can still change
         it per chat from the composer, and chats already open keep their own
@@ -44,7 +46,8 @@ function ExpertModeOptions({ expert }: Props) {
       </Text>
       <fieldset className="mt-4 flex flex-col gap-2" disabled={isPending}>
         <legend className="sr-only">
-          Approval mode for new chats with {expert.name}
+          {t("Approval mode for new chats with", "新对话的审批模式：")}{" "}
+          {expert.name}
         </legend>
         {AUTOPILOT_MODE_OPTIONS.map((option) => {
           const isSelected = option.value === mode;

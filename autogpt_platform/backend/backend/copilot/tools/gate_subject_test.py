@@ -46,7 +46,12 @@ from backend.copilot.gate.policy import Effect
 from backend.copilot.gate.reads import screen_read
 from backend.copilot.gate.review import review_payload
 from backend.copilot.gate.subject import workflow_subject
-from backend.copilot.model import AutopilotMode, ChatSession, ChatSessionMetadata
+from backend.copilot.model import (
+    AutopilotMode,
+    ChatMessage,
+    ChatSession,
+    ChatSessionMetadata,
+)
 from backend.copilot.tools.bash_exec import BashExecTool
 from backend.copilot.tools.models import (
     BashExecResponse,
@@ -1492,3 +1497,65 @@ async def test_an_approved_call_replays_the_content_it_was_approved_for(
     assert ran.await_args.args[3]["table_name"] == files["name.txt"]
     assert ran.await_args.args[7] is True  # run as resolved, not expanded again
     assert gate.open_review.await_count == 1
+
+
+async def test_custom_connection_approval_binds_server_and_survives_wake(gate):
+    connection_id = "64f37e61-dbbc-4057-8df1-f2fd8612e309"
+    session = _session()
+    session.messages = [
+        ChatMessage(role="user", content=f"Send it [custom_mcp:{connection_id}]")
+    ]
+    row = {
+        "id": connection_id,
+        "name": "My service",
+        "description": "",
+        "serverUrl": "https://mcp.example.com/mcp",
+        "credentialId": None,
+        "enabled": True,
+    }
+    remember = AsyncMock(return_value=True)
+    run = AsyncMock(
+        return_value=ErrorResponse(message="ran", session_id=session.session_id)
+    )
+    with (
+        patch("backend.data.db.is_connected", return_value=True),
+        patch(
+            "backend.copilot.tools.session_registry.list_custom_mcp_connections",
+            new_callable=AsyncMock,
+            return_value=[row],
+        ),
+        patch(
+            "backend.data.custom_mcp.get_custom_mcp_connection",
+            new_callable=AsyncMock,
+            return_value=row,
+        ) as lookup,
+        patch(f"{_GATE}.held.remember", remember),
+        patch("backend.copilot.tools.run_mcp_tool.RunMCPToolTool._execute", run),
+    ):
+        result = await _run_capability(
+            session,
+            f"custom_mcp:{connection_id}",
+            {"tool": "send_message", "arguments": {}},
+        )
+        assert _is_held(result)
+        call = remember.await_args.args[1]
+        assert call.args["_custom_mcp_snapshot"]["server_url"] == row["serverUrl"]
+        session.messages.append(
+            ChatMessage(
+                role="user", content="approved", metadata={"held_calls_answered": True}
+            )
+        )
+        with patch(
+            "backend.copilot.gate.review_store.find_review",
+            _approve_only(call.review_id),
+        ):
+            await held._run("user-1", session, call, RunCapabilityTool())
+        run.assert_awaited_once()
+        run.reset_mock()
+        lookup.return_value = {**row, "serverUrl": "https://other.example.com/mcp"}
+        with patch(
+            "backend.copilot.gate.review_store.find_review",
+            _approve_only(call.review_id),
+        ):
+            await held._run("user-1", session, call, RunCapabilityTool())
+        run.assert_not_awaited()

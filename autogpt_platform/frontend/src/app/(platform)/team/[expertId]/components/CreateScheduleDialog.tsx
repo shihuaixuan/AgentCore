@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useGetV2GetLibraryAgent } from "@/app/api/__generated__/endpoints/library/library";
 import { ExpertWorkflowRef } from "@/app/api/__generated__/models/expertWorkflowRef";
 import { okData } from "@/app/api/helpers";
@@ -25,6 +26,7 @@ export function CreateScheduleDialog({
   open,
   onClose,
 }: Props) {
+  const { t } = useTranslation();
   const { handleScheduleCreated } = useCreateScheduleDialog(expertId, onClose);
   const schedulable = workflows.filter((workflow) => workflow.library_agent_id);
   const { attachList } = useFitListToDialog<HTMLUListElement>();
@@ -39,19 +41,22 @@ export function CreateScheduleDialog({
         },
       }}
       styling={{ maxWidth: "28rem", maxHeight: "60vh" }}
-      title="Create schedule"
+      title={t("Create schedule", "创建计划")}
     >
       <Dialog.Content>
         <div className="flex flex-col">
           {schedulable.length === 0 ? (
             <Text variant="body" tone="secondary">
-              Install a workflow first, then schedule it here.
+              {t(
+                "Install a workflow first, then schedule it here.",
+                "先安装工作流，再在这里设置计划。",
+              )}
             </Text>
           ) : (
             <ul
               ref={attachList}
               className="flex flex-col gap-2 overflow-y-auto pr-1"
-              aria-label="Schedulable workflows"
+              aria-label={t("Schedulable workflows", "可设置计划的工作流")}
             >
               {schedulable.map((workflow) => (
                 <li key={workflow.id}>
@@ -65,7 +70,7 @@ export function CreateScheduleDialog({
           )}
           <div className="flex justify-end pt-1">
             <Button variant="secondary" size="small" onClick={onClose}>
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
           </div>
         </div>

@@ -459,6 +459,112 @@ async def test_mcp_node_takes_the_run_credentials_from_its_input_mask():
     assert call_tool.await_args.kwargs["authorization"] == "Bearer run-token"
 
 
+@pytest.mark.asyncio
+async def test_custom_mcp_node_uses_connection_credential_and_lease():
+    credentials = OAuth2Credentials(
+        id="isolated-cred",
+        provider="mcp",
+        access_token=SecretStr("token"),
+        scopes=[],
+        metadata={
+            "mcp_server_url": "https://mcp.example.com/mcp",
+            "mcp_isolated": True,
+        },
+    )
+    lease = MagicMock(credentials=credentials)
+    lease.release = AsyncMock()
+    manager = MagicMock()
+    manager.acquire_lease = AsyncMock(return_value=lease)
+    block = MCPToolBlock()
+    node = _node(block)
+    node.input_default = {
+        "connection_id": "conn-1",
+        "server_url": "https://mcp.example.com/mcp",
+        "selected_tool": "a_tool",
+    }
+    connection = {
+        "id": "conn-1",
+        "serverUrl": "https://mcp.example.com/mcp",
+        "credentialId": "isolated-cred",
+        "enabled": True,
+    }
+    with (
+        patch("backend.data.db.is_connected", return_value=True),
+        patch(
+            "backend.data.custom_mcp.get_custom_mcp_connection",
+            new_callable=AsyncMock,
+            return_value=connection,
+        ),
+        patch.object(
+            block, "_call_mcp_tool", new_callable=AsyncMock, return_value="ok"
+        ) as call_tool,
+    ):
+        outputs = [
+            item
+            async for item in execute_node(
+                node, _entry({}), SimpleNamespace(creds_manager=manager)
+            )
+        ]
+    assert outputs == [("result", "ok")]
+    manager.acquire_lease.assert_awaited_once_with("user-1", "isolated-cred")
+    lease.release.assert_awaited_once()
+    assert call_tool.await_args.kwargs["authorization"] == "Bearer token"
+
+
+@pytest.mark.asyncio
+async def test_expert_workflow_cannot_use_public_custom_connection():
+    block = MCPToolBlock()
+    node = _node(block)
+    node.input_default = {
+        "connection_id": "public-connection",
+        "server_url": "https://mcp.example.com/mcp",
+        "selected_tool": "a_tool",
+    }
+    with pytest.raises(ValueError, match="not available to expert workflows"):
+        _ = [
+            item
+            async for item in execute_node(
+                node,
+                _entry({}, expert_id="expert-1"),
+                SimpleNamespace(creds_manager=MagicMock()),
+            )
+        ]
+
+
+@pytest.mark.asyncio
+async def test_custom_mcp_dry_run_does_not_load_connection_or_credential():
+    block = MCPToolBlock()
+    node = _node(block)
+    node.input_default = {
+        "connection_id": "conn-1",
+        "server_url": "https://mcp.example.com/mcp",
+        "selected_tool": "a_tool",
+    }
+    entry = _entry({})
+    entry.execution_context.dry_run = True
+    manager = MagicMock()
+    manager.acquire_lease = AsyncMock()
+
+    async def simulated(*args, **kwargs):
+        yield "result", "simulated"
+
+    with (
+        patch(
+            "backend.data.custom_mcp.get_custom_mcp_connection", new_callable=AsyncMock
+        ) as lookup,
+        patch("backend.executor.manager.simulate_block", simulated),
+    ):
+        outputs = [
+            item
+            async for item in execute_node(
+                node, entry, SimpleNamespace(creds_manager=manager)
+            )
+        ]
+    assert outputs == [("result", "simulated")]
+    lookup.assert_not_awaited()
+    manager.acquire_lease.assert_not_awaited()
+
+
 def _block_with_credentials(
     credential_fields: dict[str, type[CodexCredentialsInput]],
     captured: dict[str, object],

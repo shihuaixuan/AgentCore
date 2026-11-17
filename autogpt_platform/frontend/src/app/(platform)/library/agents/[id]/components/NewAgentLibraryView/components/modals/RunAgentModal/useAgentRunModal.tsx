@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV1ListGraphExecutionsQueryKey,
   usePostV1ExecuteGraphAgent,
@@ -42,6 +45,7 @@ export function useAgentRunModal(
   agent: LibraryAgent,
   callbacks?: UseAgentRunModalCallbacks,
 ) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
@@ -172,7 +176,7 @@ export function useAgentRunModal(
       onSuccess: (response) => {
         if (response.status === 200) {
           toast({
-            title: "Workflow execution started",
+            title: t("Workflow execution started", "工作流已开始运行"),
           });
           queryClient.invalidateQueries({
             queryKey: getGetV1ListGraphExecutionsQueryKey(agent.graph_id),
@@ -182,10 +186,15 @@ export function useAgentRunModal(
         }
       },
       onError: (error: any) => {
-        showExecutionErrorToast(toast, error, {
-          graph_id: agent.graph_id,
-          graph_version: agent.graph_version,
-        });
+        showExecutionErrorToast(
+          toast,
+          error,
+          {
+            graph_id: agent.graph_id,
+            graph_version: agent.graph_version,
+          },
+          t,
+        );
       },
     },
   });
@@ -195,7 +204,7 @@ export function useAgentRunModal(
       onSuccess: (response) => {
         if (response.status === 200) {
           toast({
-            title: "Trigger setup complete",
+            title: t("Trigger setup complete", "触发器设置完成"),
           });
           queryClient.invalidateQueries({
             queryKey: getGetV2ListPresetsQueryKey({ graph_id: agent.graph_id }),
@@ -207,7 +216,9 @@ export function useAgentRunModal(
       onError: (error: any) => {
         toast({
           title: "❌ Failed to setup trigger",
-          description: error.message || "An unexpected error occurred.",
+          description:
+            error.message ||
+            t("An unexpected error occurred.", "发生意外错误。"),
           variant: "destructive",
         });
       },
@@ -326,7 +337,10 @@ export function useAgentRunModal(
       if (!presetName.trim()) {
         toast({
           title: "⚠️ Trigger name required",
-          description: "Please provide a name for your trigger.",
+          description: t(
+            "Please provide a name for your trigger.",
+            "请填写触发器名称。",
+          ),
           variant: "destructive",
         });
         return;

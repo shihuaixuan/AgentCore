@@ -1,10 +1,14 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useDeleteV1DeleteExecutionSchedule } from "@/app/api/__generated__/endpoints/schedules/schedules";
 import type { CopilotTurnJobInfo } from "@/app/api/__generated__/models/copilotTurnJobInfo";
 import { useToast } from "@/components/molecules/Toast/use-toast";
-import { safeHumanizeCronExpression } from "@/lib/cron-expression-utils";
+import { describeCron } from "@/components/contextual/CronScheduler/helpers";
 import { invalidateAllScheduleQueries } from "@/services/schedules/invalidate-schedules";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
+import { zhCN } from "date-fns/locale";
 import { useState } from "react";
 import { describeFollowup, formatNextRunTitle } from "./helpers";
 
@@ -13,6 +17,8 @@ interface Args {
 }
 
 export function useFollowupListItem({ followup }: Args) {
+  const { t } = useTranslation();
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -21,23 +27,27 @@ export function useFollowupListItem({ followup }: Args) {
   const { mutateAsync: deleteSchedule, isPending: isDeleting } =
     useDeleteV1DeleteExecutionSchedule();
 
-  const { messagePreview, sessionHref } = describeFollowup(followup);
+  const { messagePreview, sessionHref } = describeFollowup(followup, t);
 
   const nextRunDate = followup.next_run_time
     ? new Date(followup.next_run_time)
     : null;
   const nextRunLabel =
     nextRunDate && !Number.isNaN(nextRunDate.valueOf())
-      ? `Next ${formatDistanceToNow(nextRunDate, { addSuffix: true })}`
-      : "Pending";
+      ? t(
+          `Next ${formatDistanceToNow(nextRunDate, { addSuffix: true })}`,
+          `下次：${formatDistanceToNow(nextRunDate, { addSuffix: true, locale: zhCN })}`,
+        )
+      : t("Pending", "等待中");
   const nextRunTitle = formatNextRunTitle(
     followup.next_run_time,
     followup.user_timezone ?? followup.timezone,
+    t,
   );
 
   const recurrenceLabel = followup.cron
-    ? safeHumanizeCronExpression(followup.cron)
-    : "Runs once";
+    ? describeCron(followup.cron, t)
+    : t("Runs once", "仅运行一次");
 
   function openDelete() {
     setIsDeleteOpen(true);
@@ -58,16 +68,16 @@ export function useFollowupListItem({ followup }: Args) {
   async function handleDelete() {
     try {
       await deleteSchedule({ scheduleId: followup.id });
-      toast({ title: "Follow-up deleted" });
+      toast({ title: t("Follow-up deleted", "跟进已删除") });
       setIsDeleteOpen(false);
       invalidateAllScheduleQueries(queryClient);
     } catch (error) {
       toast({
-        title: "Failed to delete follow-up",
+        title: t("Failed to delete follow-up", "删除跟进失败"),
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     }
@@ -87,6 +97,6 @@ export function useFollowupListItem({ followup }: Args) {
     isViewOpen,
     openView,
     closeView,
-    fullMessage: followup.message || "(no message)",
+    fullMessage: followup.message || t("(no message)", "（无消息）"),
   };
 }

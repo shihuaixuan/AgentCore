@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Button } from "@/components/atoms/Button/Button";
 import { useTrackFunnelViewOnce } from "@/services/experts/use-track-funnel-view-once";
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function ExpertsSection({ category }: Props) {
+  const { t } = useTranslation();
   const { isLoggedIn, templates, hiredTemplateIds, isLoading, isError } =
     useExpertsSection({ category });
 
@@ -50,8 +52,11 @@ export function ExpertsSection({ category }: Props) {
   return (
     <section id="experts" className="mb-20 scroll-mt-24">
       <SectionHeader
-        title="Meet the AI Experts"
-        subtitle="Hire a ready-made specialist — competent on day one, working for you in minutes."
+        title={t("Meet the AI Experts", "认识 AI 专家")}
+        subtitle={t(
+          "Hire a ready-made specialist — competent on day one, working for you in minutes.",
+          "聘请一位经验丰富的专家，即刻上手，几分钟内即可为你工作。",
+        )}
         actions={
           isLoggedIn ? (
             <div className="flex items-center gap-2">
@@ -61,7 +66,7 @@ export function ExpertsSection({ category }: Props) {
                 variant="secondary"
                 size="small"
               >
-                View your team
+                {t("View your team", "查看团队")}
               </Button>
               <Button as="NextLink" href={RAISE_HREF} size="small">
                 {RAISE_LABEL}

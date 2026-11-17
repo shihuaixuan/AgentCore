@@ -34,6 +34,11 @@ from pydantic import BaseModel
 
 from backend.api.features.experts import seed as expert_seed
 from backend.data import db as database
+from backend.integrations.mcp_catalog import (
+    MCPCatalogEntry,
+    publish_mcp_catalog,
+    set_mcp_catalog,
+)
 from backend.util.json import SafeJson
 
 from . import skill_db
@@ -74,6 +79,8 @@ class PublishSummary(BaseModel):
     backfilled: int = 0
     experts: dict[str, list[str]] = {}
     release_id: str | None = None
+    mcp_updated: list[str] = []
+    mcp_removed: list[str] = []
 
 
 async def publish_catalog(
@@ -84,6 +91,7 @@ async def publish_catalog(
     dry_run: bool = False,
     seed_experts: bool = True,
     skip_missing_preloads: bool = False,
+    mcp_entries: list[dict] | None = None,
 ) -> PublishSummary:
     """Make the marketplace serve *loaded*. Idempotent: publishing the same
     release twice changes nothing the second time.
@@ -92,6 +100,11 @@ async def publish_catalog(
     in the expert seed's own steps, as it did before the catalog owned it.
     A dry run reads the same state and reports the plan without writing.
     """
+    parsed_mcp_entries = tuple(
+        MCPCatalogEntry.model_validate(entry) for entry in (mcp_entries or [])
+    )
+    if len({entry.name for entry in parsed_mcp_entries}) != len(parsed_mcp_entries):
+        raise ValueError("MCP marketplace provider names must be unique")
     summary = PublishSummary(
         repository=repository,
         revision=revision,
@@ -103,6 +116,13 @@ async def publish_catalog(
             "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
             _PUBLISH_LOCK_KEY,
         )
+        if repository == "LobeHub/market":
+            legacy_platform_slugs = await _retire_except(
+                tx,
+                {package.slug for package in loaded.packages},
+                dry_run=dry_run,
+            )
+            summary.retired.extend(legacy_platform_slugs)
         summary.backfilled = await _backfill_legacy_hashes(tx, dry_run=dry_run)
         for package in loaded.packages:
             outcome = await _publish_package(tx, package, dry_run=dry_run)
@@ -112,8 +132,32 @@ async def publish_catalog(
                 summary.updated.append(package.slug)
             else:
                 summary.unchanged += 1
-        summary.retired = await _retire(tx, loaded.retirements, dry_run=dry_run)
+        summary.retired.extend(await _retire(tx, loaded.retirements, dry_run=dry_run))
         summary.orphaned = await _orphaned(tx, loaded)
+        if parsed_mcp_entries:
+            summary.mcp_updated = [entry.name for entry in parsed_mcp_entries]
+            current_entries = await database.query_raw_with_schema(
+                'SELECT "name" FROM {schema_prefix}"MCPMarketplaceEntry" '
+                'ORDER BY "name"',
+                client=tx,
+            )
+            current_names = {entry.name for entry in parsed_mcp_entries}
+            summary.mcp_removed = [
+                row["name"]
+                for row in current_entries
+                if row["name"] not in current_names
+            ]
+            if not dry_run:
+                if summary.mcp_removed:
+                    await database.execute_raw_with_schema(
+                        'DELETE FROM {schema_prefix}"MCPMarketplaceEntry" '
+                        'WHERE NOT ("name" = ANY($1::text[]))',
+                        summary.mcp_removed,
+                        client=tx,
+                    )
+                await publish_mcp_catalog(parsed_mcp_entries, repository, tx)
+    if parsed_mcp_entries and not dry_run:
+        set_mcp_catalog(parsed_mcp_entries)
     if seed_experts:
         summary.experts = await expert_seed.seed_roster(
             loaded.experts,
@@ -141,7 +185,7 @@ async def _drop_active_versions_cache() -> None:
         await asyncio.wait_for(
             skill_db.invalidate_active_versions_cache(), timeout=_CACHE_DROP_TIMEOUT_S
         )
-    except (asyncio.TimeoutError, Exception):
+    except (TimeoutError, OSError, ConnectionError):
         logger.warning(
             "Active skill versions cache not dropped; copies will see the "
             f"publish within {skill_db.ACTIVE_VERSIONS_CACHE_TTL_S}s"
@@ -309,6 +353,40 @@ async def _retire(
             await prisma.models.SkillListingVersion.prisma(tx).update(
                 where={"id": listing.activeVersionId}, data={"isAvailable": False}
             )
+    return retired
+
+
+async def _retire_except(
+    tx: prisma.Prisma, keep: set[str], *, dry_run: bool
+) -> list[str]:
+    listings = await database.query_raw_with_schema(
+        'SELECT "slug" FROM {schema_prefix}"SkillListing" '
+        'WHERE "owningUserId" IS NULL AND "owningOrgId" IS NULL '
+        'AND "isDeleted" = false AND NOT ("slug" = ANY($1::text[])) '
+        'ORDER BY "slug"',
+        list(keep),
+        client=tx,
+    )
+    retired = [row["slug"] for row in listings]
+    if retired and not dry_run:
+        await database.execute_raw_with_schema(
+            'UPDATE {schema_prefix}"SkillListingVersion" '
+            'SET "isAvailable" = false '
+            'WHERE "id" IN (SELECT "activeVersionId" '
+            'FROM {schema_prefix}"SkillListing" '
+            'WHERE "owningUserId" IS NULL AND "owningOrgId" IS NULL '
+            'AND "isDeleted" = false AND NOT ("slug" = ANY($1::text[])) '
+            'AND "activeVersionId" IS NOT NULL)',
+            list(keep),
+            client=tx,
+        )
+        await database.execute_raw_with_schema(
+            'UPDATE {schema_prefix}"SkillListing" SET "isDeleted" = true '
+            'WHERE "owningUserId" IS NULL AND "owningOrgId" IS NULL '
+            'AND "isDeleted" = false AND NOT ("slug" = ANY($1::text[]))',
+            list(keep),
+            client=tx,
+        )
     return retired
 
 

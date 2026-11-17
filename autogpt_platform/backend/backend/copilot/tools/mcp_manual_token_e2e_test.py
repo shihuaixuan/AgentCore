@@ -183,6 +183,30 @@ async def test_trailing_slash_variant_still_resolves(client, store):
     assert MockClient.call_args.kwargs["authorization"] == _AUTHORIZATION
 
 
+async def test_isolated_tokens_keep_separate_accounts_and_do_not_override_default(
+    client, store
+):
+    from backend.blocks.mcp.helpers import auto_lookup_mcp_credential
+
+    with patch("backend.api.features.mcp.routes.MCPClient", return_value=_mcp_client()):
+        default = await client.post(
+            "/token", json={"server_url": _SERVER_URL, "token": "default-token"}
+        )
+        first = await client.post(
+            "/token",
+            json={"server_url": _SERVER_URL, "token": "first-token", "isolated": True},
+        )
+        second = await client.post(
+            "/token",
+            json={"server_url": _SERVER_URL, "token": "second-token", "isolated": True},
+        )
+    assert default.status_code == first.status_code == second.status_code == 200
+    assert len({default.json()["id"], first.json()["id"], second.json()["id"]}) == 3
+    selected = await auto_lookup_mcp_credential(_USER_ID, _SERVER_URL)
+    assert selected and selected.id == default.json()["id"]
+    assert len(store.rows) == 3
+
+
 async def test_scheme_less_server_url_resolves_after_storing(client, store):
     """Storing and looking up must apply the same scheme rule.
 

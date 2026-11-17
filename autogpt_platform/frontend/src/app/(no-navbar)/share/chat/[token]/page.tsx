@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { useCallback, useMemo, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
@@ -66,6 +68,7 @@ const ArtifactPanel = dynamic(
 async function noopSend() {}
 
 export default function SharedChatPage() {
+  const { t } = useTranslation();
   const params = useParams();
   const token = params.token as string;
   const isMobile = useIsMobile();
@@ -154,19 +157,26 @@ export default function SharedChatPage() {
           // share is real) and show an inline retry instead of the
           // permanent not-found card.
           <div className="flex shrink-0 items-center justify-between gap-3 border-b border-warning-border bg-warning-surface px-4 py-2 text-caption text-warning-foreground">
-            <span>Couldn&apos;t load messages. The share link is valid.</span>
+            <span>
+              {t(
+                "Couldn't load messages. The share link is valid.",
+                "无法加载消息，分享链接仍然有效。",
+              )}
+            </span>
             <button
               onClick={retry}
               className="rounded border border-warning-border bg-surface px-2 py-0.5 font-medium hover:bg-warning-surface"
             >
-              Try again
+              {t("Try again", "重试")}
             </button>
           </div>
         )}
         {hasMore && (
           <div className="shrink-0 border-b border-border-base bg-surface-muted px-4 py-2 text-center text-caption text-foreground-secondary">
-            Showing the most recent {uiMessages.length} messages — older history
-            is not visible in this shared view.
+            {t(
+              `Showing the most recent ${uiMessages.length} messages — older history is not visible in this shared view.`,
+              `当前显示最近 ${uiMessages.length} 条消息，更早的历史记录在此分享视图中不可见。`,
+            )}
           </div>
         )}
         <div

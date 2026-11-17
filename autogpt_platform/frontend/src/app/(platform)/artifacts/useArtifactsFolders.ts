@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   getListWorkspaceFoldersQueryKey,
@@ -13,6 +14,7 @@ import { useToast } from "@/components/molecules/Toast/use-toast";
 import { ARTIFACTS_LIST_QUERY_KEY } from "./useArtifactsPage";
 
 export function useArtifactsFolders() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -31,12 +33,15 @@ export function useArtifactsFolders() {
     mutation: {
       onSuccess: () => {
         invalidate();
-        toast({ title: "Folder created" });
+        toast({ title: t("Folder created", "文件夹已创建") });
       },
       onError: () => {
         toast({
-          title: "Failed to create folder",
-          description: "A folder with this name may already exist.",
+          title: t("Failed to create folder", "无法创建文件夹"),
+          description: t(
+            "A folder with this name may already exist.",
+            "可能已存在同名文件夹。",
+          ),
           variant: "destructive",
         });
       },
@@ -47,11 +52,11 @@ export function useArtifactsFolders() {
     mutation: {
       onSuccess: () => {
         invalidate();
-        toast({ title: "Folder updated" });
+        toast({ title: t("Folder updated", "文件夹已更新") });
       },
       onError: () => {
         toast({
-          title: "Failed to update folder",
+          title: t("Failed to update folder", "无法更新文件夹"),
           variant: "destructive",
         });
       },
@@ -64,7 +69,7 @@ export function useArtifactsFolders() {
     mutation: {
       onSuccess: () => {
         invalidate();
-        toast({ title: "Folder moved" });
+        toast({ title: t("Folder moved", "文件夹已移动") });
       },
     },
   });
@@ -73,11 +78,14 @@ export function useArtifactsFolders() {
     mutation: {
       onSuccess: () => {
         invalidate();
-        toast({ title: "Folder deleted", description: "Files moved to root." });
+        toast({
+          title: t("Folder deleted", "文件夹已删除"),
+          description: t("Files moved to root.", "文件已移至根目录。"),
+        });
       },
       onError: () => {
         toast({
-          title: "Failed to delete folder",
+          title: t("Failed to delete folder", "无法删除文件夹"),
           variant: "destructive",
         });
       },

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { expertKickoffHref } from "@/app/(platform)/copilot/expertKickoff";
 import type { ExpertIdentity } from "@/app/(platform)/copilot/useExpertMap";
 import { Badge } from "@/components/atoms/Badge/Badge";
@@ -23,6 +25,7 @@ interface Props {
  *  New, over one row that opens their first chat, where they introduce
  *  themselves. */
 export function NewExpertGroup({ expert }: Props) {
+  const { t } = useTranslation();
   return (
     <div role="group" aria-label={expert.name}>
       {/* Spaced and sized like ExpertChatGroup's header, so nothing moves
@@ -35,7 +38,7 @@ export function NewExpertGroup({ expert }: Props) {
           color={expert.color}
           nameAccessory={
             <Badge variant="success" size="small">
-              New
+              {t("New", "新成员")}
             </Badge>
           }
         />
@@ -53,7 +56,7 @@ export function NewExpertGroup({ expert }: Props) {
                 tone="inherit"
                 className="truncate"
               >
-                Say hello to {expert.name}
+                {t(`Say hello to ${expert.name}`, `向${expert.name}打个招呼`)}
               </Text>
               <PendingSpinner />
             </Link>

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import {
   DropdownMenu,
@@ -30,6 +31,7 @@ interface Props {
 const MAX_CRUMBS_BESIDE_ROOT = 3;
 
 export function FolderBreadcrumb({ items, onNavigate, compact }: Props) {
+  const { t } = useTranslation();
   const { hidden, visible } = splitForOverflow(items);
   const separator = (
     <span aria-hidden className="flex shrink-0 text-foreground-subtle">
@@ -39,7 +41,7 @@ export function FolderBreadcrumb({ items, onNavigate, compact }: Props) {
 
   return (
     <nav
-      aria-label="Breadcrumb"
+      aria-label={t("Breadcrumb", "面包屑导航")}
       data-testid="folder-breadcrumb"
       className="min-w-0"
     >
@@ -58,7 +60,7 @@ export function FolderBreadcrumb({ items, onNavigate, compact }: Props) {
           >
             <Icon icon={Home01Icon} size={compact ? 14 : 16} />
             <Text variant="small-medium" as="span">
-              Files
+              {t("Files", "文件")}
             </Text>
           </button>
         </li>
@@ -69,7 +71,7 @@ export function FolderBreadcrumb({ items, onNavigate, compact }: Props) {
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  aria-label="Show hidden folders"
+                  aria-label={t("Show hidden folders", "显示隐藏文件夹")}
                   className={CRUMB_BUTTON_CLASS}
                   data-testid="folder-breadcrumb-overflow"
                 >

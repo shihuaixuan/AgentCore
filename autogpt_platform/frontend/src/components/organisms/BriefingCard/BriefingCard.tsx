@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -26,6 +27,7 @@ interface Props {
 // needs-attention list on the home page. They stay in the thread markdown,
 // where there is no such list.
 export function BriefingCard({ briefing, className }: Props) {
+  const { t } = useTranslation();
   const { run_items } = briefing.content;
   const {
     listRef,
@@ -52,7 +54,7 @@ export function BriefingCard({ briefing, className }: Props) {
       >
         <Icon icon={News01Icon} size={16} tone="subtle" />
         <Text variant="body" tone="body">
-          Recap
+          {t("Recap", "回顾")}
         </Text>
         {/* Both stops stay at or below purple-600 so the lightest painted
             pixel still clears WCAG AA (4.5:1) against the white card. */}
@@ -123,7 +125,7 @@ export function BriefingCard({ briefing, className }: Props) {
           >
             <Text variant="small-medium" tone="inherit">
               {isShowingAll
-                ? "Show less"
+                ? t("Show less", "收起")
                 : `Show all results (${run_items.length})`}
             </Text>
             <Icon
@@ -148,6 +150,7 @@ function ScrollArrow({
   isVisible: boolean;
   onScroll: () => void;
 }) {
+  const { t } = useTranslation();
   const isUp = direction === "up";
   const shouldReduceMotion = useReducedMotion();
 
@@ -169,7 +172,9 @@ function ScrollArrow({
         onClick={onScroll}
         tabIndex={isVisible ? 0 : -1}
         aria-hidden={!isVisible}
-        aria-label={isUp ? "Scroll up" : "Scroll down"}
+        aria-label={
+          isUp ? t("Scroll up", "向上滚动") : t("Scroll down", "向下滚动")
+        }
         data-slot="briefing-card-scroll-arrow-control"
         className={cn(
           "flex size-8 items-center justify-center rounded-full bg-surface text-foreground-tertiary smooth-shadow-ring-sm shadow-foreground-base transition-colors hover:text-foreground-strong",

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
 import { Text } from "@/components/atoms/Text/Text";
@@ -28,6 +29,7 @@ export function TeamRoster({
   renderCard,
   onAutopilotChat,
 }: Props) {
+  const { t } = useTranslation();
   // Otto reports on the whole team, so its summary ignores the toolbar.
   const summary = getAutopilotSummary({ experts, schedulesForExpert });
   const autopilot = (
@@ -40,7 +42,7 @@ export function TeamRoster({
   );
 
   return (
-    <section aria-label="Experts" className="flex flex-col gap-4">
+    <section aria-label={t("Experts", "专家")} className="flex flex-col gap-4">
       {isLoading ? (
         <div className={TEAM_GRID_CLASS}>
           {autopilot}
@@ -59,7 +61,10 @@ export function TeamRoster({
 
       {!isLoading && isNarrowed && visibleExperts.length === 0 ? (
         <Text variant="body" tone="muted" className="mx-4">
-          No experts match that search or filter.
+          {t(
+            "No experts match that search or filter.",
+            "没有符合搜索或筛选条件的专家。",
+          )}
         </Text>
       ) : null}
     </section>

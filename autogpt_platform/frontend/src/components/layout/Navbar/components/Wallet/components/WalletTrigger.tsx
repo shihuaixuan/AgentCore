@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import {
@@ -37,6 +38,7 @@ export function WalletTrigger({
   flash,
   unseen,
 }: Props) {
+  const { t } = useTranslation();
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
   return (
@@ -50,7 +52,9 @@ export function WalletTrigger({
             <button
               ref={walletRef}
               type="button"
-              aria-label={compact ? "Usage and credits" : undefined}
+              aria-label={
+                compact ? t("Usage and credits", "用量与额度") : undefined
+              }
               data-state={open ? "open" : "closed"}
               onClick={onClick}
               className={cn(
@@ -92,7 +96,11 @@ export function WalletTrigger({
           )}
         />
       </div>
-      {compact && <TooltipContent side="top">Usage and credits</TooltipContent>}
+      {compact && (
+        <TooltipContent side="top">
+          {t("Usage and credits", "用量与额度")}
+        </TooltipContent>
+      )}
     </Tooltip>
   );
 }
@@ -102,9 +110,12 @@ function ClassicBalance({
   completedCount,
   totalCount,
 }: Pick<Props, "formattedCredits" | "completedCount" | "totalCount">) {
+  const { t } = useTranslation();
   return (
     <div>
-      <span className="mr-1 hidden xl:inline-block">Earn credits </span>
+      <span className="mr-1 hidden xl:inline-block">
+        {t("Earn credits", "赚取额度")}{" "}
+      </span>
       <Text variant="body-semibold-tight" as="span" tone="inherit">
         {formattedCredits}
       </Text>
@@ -113,7 +124,10 @@ function ClassicBalance({
       )}
       <div className="absolute bottom-[-2.5rem] left-1/2 z-50 hidden -translate-x-1/2 transform rounded-small bg-surface px-4 py-2 whitespace-nowrap shadow-md group-hover:block">
         <Text variant="body-medium">
-          {completedCount} of {totalCount} rewards claimed
+          {t(
+            `${completedCount} of ${totalCount} rewards claimed`,
+            `已领取 ${completedCount}/${totalCount} 项奖励`,
+          )}
         </Text>
       </div>
     </div>

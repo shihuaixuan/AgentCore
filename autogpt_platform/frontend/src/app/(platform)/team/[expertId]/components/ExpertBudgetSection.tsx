@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function ExpertBudgetSection({ expert, color, className }: Props) {
+  const { t } = useTranslation();
   const weeklySpend = getWeeklySpend(expert);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -38,14 +40,14 @@ export function ExpertBudgetSection({ expert, color, className }: Props) {
       <div className="flex items-center justify-between gap-2 tabular-nums">
         <div className="flex items-center gap-1">
           <Text variant="body-medium" tone={color ? "inherit" : "secondary"}>
-            Budget
+            {t("Budget", "预算")}
           </Text>
           <Button
             type="button"
             variant="ghost"
             size="icon-xs"
             leadingIcon={PencilEdit02Icon}
-            aria-label="Edit budget"
+            aria-label={t("Edit budget", "编辑预算")}
             tone={color ? "inherit" : undefined}
             // oxlint-disable-next-line design-system/no-restyle -- the ghost Button has no variant with a tinted card's translucent hover
             className={cn(color && "hover:bg-surface/50")}
@@ -55,7 +57,7 @@ export function ExpertBudgetSection({ expert, color, className }: Props) {
         <Text variant="body-medium" tone={color ? "inherit" : "secondary"}>
           {weeklySpend
             ? `${creditsToUsdLabel(weeklySpend.spent)} / ${creditsToUsdLabel(weeklySpend.budget)}`
-            : "No budget"}
+            : t("No budget", "未设置预算")}
         </Text>
       </div>
       <SpendMeter

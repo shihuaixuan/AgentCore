@@ -35,7 +35,10 @@ function readDetail(value: unknown): string | null {
 // returns a non-string `detail` (FastAPI 422 array, or a dict), `error.message`
 // is coerced to the useless string "[object Object]". Prefer the structured
 // `response.detail` and only fall back to `error.message` when it's usable.
-export function getOAuthErrorMessage(error: unknown): string {
+export function getOAuthErrorMessage(
+  error: unknown,
+  t: (english: string, chinese: string) => string = (english) => english,
+): string {
   if (typeof error === "object" && error !== null) {
     const fromResponse = readDetail((error as { response?: unknown }).response);
     if (fromResponse) return fromResponse;
@@ -52,7 +55,7 @@ export function getOAuthErrorMessage(error: unknown): string {
     return error.message;
   }
 
-  return "Something went wrong. Please try again.";
+  return t("Something went wrong. Please try again.", "出现错误。请重试。");
 }
 
 /**

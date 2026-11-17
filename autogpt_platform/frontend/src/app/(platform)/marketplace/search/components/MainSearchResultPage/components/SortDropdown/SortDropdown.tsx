@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import {
   DropdownMenu,
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function SortDropdown({ onSort }: Props) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState(SORT_OPTIONS[0]);
 
   function handleSelect(option: (typeof SORT_OPTIONS)[number]) {
@@ -38,7 +40,7 @@ export function SortDropdown({ onSort }: Props) {
           className="flex items-center gap-1.5 text-foreground-emphasis focus:outline-none"
         >
           <Text variant="large" as="span" tone="emphasis">
-            Sort by
+            {t("Sort by", "排序方式")}
           </Text>
           <Text variant="large" as="span" tone="emphasis">
             {selected.label}

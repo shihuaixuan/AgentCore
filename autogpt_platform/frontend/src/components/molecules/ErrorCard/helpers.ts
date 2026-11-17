@@ -1,4 +1,5 @@
 import { ErrorCardProps } from "./ErrorCard";
+import type { Locale } from "@/lib/i18n/locale";
 
 export function getErrorMessage(
   error: ErrorCardProps["responseError"],
@@ -16,6 +17,7 @@ export function getErrorMessage(
 
 export function getHttpErrorMessage(
   httpError: ErrorCardProps["httpError"],
+  locale: Locale = "en",
 ): string {
   if (!httpError) return "";
 
@@ -23,6 +25,14 @@ export function getHttpErrorMessage(
 
   if (httpError.message || httpError.statusText)
     return httpError.message || httpError.statusText || "Unknown error";
+  if (locale === "zh-CN") {
+    if (status >= 500) return "服务器内部发生错误，请稍后重试。";
+    if (status === 404) return "未找到请求的内容，请检查地址后重试。";
+    if (status === 403) return "无权访问此内容，请检查权限或重新登录。";
+    if (status === 429) return "请求过于频繁，请稍后重试。";
+    if (status >= 400) return "无法处理请求，请检查输入后重试。";
+    return "发生了意外错误，团队已收到通知并正在处理。";
+  }
 
   if (status >= 500) {
     return "An internal server error has occurred. Please try again in a few minutes.";

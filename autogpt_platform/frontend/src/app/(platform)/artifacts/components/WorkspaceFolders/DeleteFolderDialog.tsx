@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
@@ -23,20 +24,25 @@ export function DeleteFolderDialog({
   isDeleting,
   onConfirm,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <Dialog
       controlled={{ isOpen, set: setIsOpen }}
       styling={{ maxWidth: "28rem" }}
-      title="Delete folder"
+      title={t("Delete folder", "删除文件夹")}
     >
       <Dialog.Content>
         <div className="flex flex-col gap-4">
           <Text variant="body" tone="secondary">
-            Delete{" "}
-            <span className="font-medium">&ldquo;{folderName}&rdquo;</span>
             {subfolderCount > 0
-              ? ` and its ${subfolderCount} ${subfolderCount === 1 ? "folder" : "folders"}? Files inside them will be moved back to the root, not deleted.`
-              : "? Files inside it will be moved back to the root, not deleted."}
+              ? t(
+                  `Delete “${folderName}” and its ${subfolderCount} ${subfolderCount === 1 ? "folder" : "folders"}? Files inside them will be moved back to the root, not deleted.`,
+                  `删除“${folderName}”及其 ${subfolderCount} 个子文件夹？其中的文件会移回根目录，不会被删除。`,
+                )
+              : t(
+                  `Delete “${folderName}”? Files inside it will be moved back to the root, not deleted.`,
+                  `删除“${folderName}”？其中的文件会移回根目录，不会被删除。`,
+                )}
           </Text>
           <div className="flex justify-end gap-2">
             <Button
@@ -44,7 +50,7 @@ export function DeleteFolderDialog({
               onClick={() => setIsOpen(false)}
               disabled={isDeleting}
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               variant="destructive"
@@ -53,7 +59,7 @@ export function DeleteFolderDialog({
               disabled={isDeleting}
               data-testid="confirm-delete-folder"
             >
-              Delete
+              {t("Delete", "删除")}
             </Button>
           </div>
         </div>

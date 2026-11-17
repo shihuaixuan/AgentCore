@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV2ListTriggerAgentsQueryKey,
   useDeleteV2DeleteLibraryAgent,
@@ -35,6 +36,7 @@ export function useRemoveTriggerAgent({
   isDeleting: boolean;
   dialog: ReactNode;
 } {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showDialog, setShowDialog] = useState(false);
@@ -52,11 +54,11 @@ export function useRemoveTriggerAgent({
         },
         onError: (error) => {
           toast({
-            title: "Failed to remove trigger",
+            title: t("Failed to remove trigger", "无法移除触发器"),
             description:
               error instanceof Error
                 ? error.message
-                : "An unexpected error occurred.",
+                : t("An unexpected error occurred.", "发生意外错误。"),
             variant: "destructive",
           });
         },
@@ -71,12 +73,14 @@ export function useRemoveTriggerAgent({
     <Dialog
       controlled={{ isOpen: showDialog, set: setShowDialog }}
       styling={{ maxWidth: "32rem" }}
-      title="Remove trigger"
+      title={t("Remove trigger", "移除触发器")}
     >
       <Dialog.Content>
         <Text variant="large">
-          Are you sure you want to remove this trigger? The trigger workflow and
-          its schedule will be deleted. This action cannot be undone.
+          {t(
+            "Are you sure you want to remove this trigger? The trigger workflow and its schedule will be deleted. This action cannot be undone.",
+            "确定要移除此触发器吗？触发工作流及其计划将被删除。此操作无法撤销。",
+          )}
         </Text>
         <Dialog.Footer>
           <Button
@@ -84,14 +88,14 @@ export function useRemoveTriggerAgent({
             disabled={isPending}
             onClick={() => setShowDialog(false)}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button
             variant="destructive"
             onClick={handleDelete}
             loading={isPending}
           >
-            Remove trigger
+            {t("Remove trigger", "移除触发器")}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

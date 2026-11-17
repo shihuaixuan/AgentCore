@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
 import { Form, FormField } from "@/components/molecules/Form/Form";
@@ -9,6 +12,7 @@ interface Props {
 }
 
 export function TopUpForm({ submitLabel = "Top up", size = "normal" }: Props) {
+  const { t } = useTranslation();
   const { form, isLoading, isRedirecting, submitTopUp } = useTopUpForm();
   const inputSize = size === "small" ? "small" : "medium";
   const buttonSize = size === "small" ? "small" : "large";
@@ -20,7 +24,7 @@ export function TopUpForm({ submitLabel = "Top up", size = "normal" }: Props) {
         name="amount"
         render={({ field }) => (
           <Input
-            label="Amount"
+            label={t("Amount", "金额")}
             type="amount"
             size={inputSize}
             decimalCount={0}
@@ -36,7 +40,9 @@ export function TopUpForm({ submitLabel = "Top up", size = "normal" }: Props) {
         disabled={isLoading || isRedirecting}
         size={buttonSize}
       >
-        {isLoading ? "Redirecting…" : submitLabel}
+        {isLoading
+          ? t("Redirecting…", "正在跳转…")
+          : t(submitLabel, submitLabel === "Top up" ? "充值" : submitLabel)}
       </Button>
     </Form>
   );

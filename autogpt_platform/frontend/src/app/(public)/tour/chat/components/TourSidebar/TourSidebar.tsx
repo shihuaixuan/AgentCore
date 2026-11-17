@@ -39,6 +39,7 @@ import {
 import type { IconSvgElement } from "@hugeicons/react";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { CookieSettingsLink } from "@/components/molecules/CookieSettingsLink/CookieSettingsLink";
 
 function DisabledMenuItem({
@@ -72,6 +73,7 @@ interface Props {
 const SHEET_CLOSE_MS = 200;
 
 export function TourSidebar({ variant = "tour" }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const itemVariants = getSidebarItemVariants(!!reduceMotion);
   // In the tour, the end card replaces the sidebar upsell after completion.
@@ -110,12 +112,14 @@ export function TourSidebar({ variant = "tour" }: Props) {
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       aria-disabled="true"
-                      tooltip="New Task"
+                      tooltip={t("New Task", "新建任务")}
                       // oxlint-disable-next-line design-system/no-restyle -- the copilot's dark New Task button; SidebarMenuButton has no primary variant
                       className="cursor-not-allowed justify-center rounded-lg bg-action font-medium text-action-foreground group-data-[collapsible=icon]:justify-start"
                     >
                       <Icon icon={SparklesIcon} className="size-4" />
-                      <span className="truncate">New Task</span>
+                      <span className="truncate">
+                        {t("New Task", "新建任务")}
+                      </span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
@@ -129,22 +133,33 @@ export function TourSidebar({ variant = "tour" }: Props) {
               <SidebarGroupContent>
                 {/* oxlint-disable-next-line design-system/no-restyle -- the copilot sidebar's collapsed item gap; SidebarMenu has no size for it */}
                 <SidebarMenu className="group-data-[collapsible=icon]:gap-1">
-                  <DisabledMenuItem icon={Search01Icon} label="Search" />
-                  <DisabledMenuItem icon={GridViewIcon} label="Workflows" />
+                  <DisabledMenuItem
+                    icon={Search01Icon}
+                    label={t("Search", "搜索")}
+                  />
+                  <DisabledMenuItem
+                    icon={GridViewIcon}
+                    label={t("Workflows", "工作流")}
+                  />
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
-                      tooltip="Marketplace"
+                      tooltip={t("Marketplace", "市场")}
                       // oxlint-disable-next-line design-system/no-restyle -- the tour sidebar's darker hover and 20px-icon collapsed padding; SidebarMenuButton has no variant for them
                       className="group-data-[collapsible=icon]:!p-1.5 hover:!bg-surface-active [&>svg]:size-5"
                     >
                       <Link href="/marketplace">
                         <Icon icon={Store01Icon} className="size-5" />
-                        <span className="truncate">Marketplace</span>
+                        <span className="truncate">
+                          {t("Marketplace", "市场")}
+                        </span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                  <DisabledMenuItem icon={FlowIcon} label="Build" />
+                  <DisabledMenuItem
+                    icon={FlowIcon}
+                    label={t("Build", "构建")}
+                  />
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -161,7 +176,7 @@ export function TourSidebar({ variant = "tour" }: Props) {
                       variant="body-sm-medium-inherit"
                       tone="inherit"
                     >
-                      Workspace
+                      {t("Workspace", "工作空间")}
                     </Text>
                     <span className="ml-auto flex shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180 motion-reduce:transition-none">
                       <Icon icon={ArrowDown01Icon} className="size-4" />
@@ -173,7 +188,10 @@ export function TourSidebar({ variant = "tour" }: Props) {
                   <SidebarGroupContent>
                     {/* oxlint-disable-next-line design-system/no-restyle -- the copilot sidebar's collapsed item gap; SidebarMenu has no size for it */}
                     <SidebarMenu className="group-data-[collapsible=icon]:gap-1">
-                      <DisabledMenuItem icon={Folder01Icon} label="Files" />
+                      <DisabledMenuItem
+                        icon={Folder01Icon}
+                        label={t("Files", "文件")}
+                      />
                     </SidebarMenu>
                   </SidebarGroupContent>
                 </CollapsibleContent>

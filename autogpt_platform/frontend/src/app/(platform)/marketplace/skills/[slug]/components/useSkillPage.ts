@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetExpertQueryKey,
   useListExperts,
@@ -27,6 +28,7 @@ import { useState } from "react";
 const MORE_SKILLS_PAGE_SIZE = 3;
 
 export function useSkillPage(slug: string) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { isLoggedIn, isUserLoading } = useAuth();
   const { toast } = useToast();
@@ -101,7 +103,7 @@ export function useSkillPage(slug: string) {
                 ? "Sign in and try again."
                 : error instanceof Error
                   ? error.message
-                  : "Please try again.",
+                  : t("Please try again.", "请重试。"),
             variant: "destructive",
           });
         },

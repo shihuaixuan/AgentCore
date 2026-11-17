@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV1ListGraphExecutionsQueryKey,
   usePostV1ExecuteGraphAgent,
@@ -28,6 +29,7 @@ export function useSelectedScheduleActions({
   onDeleted,
   onSelectRun,
 }: UseSelectedScheduleActionsProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -35,7 +37,7 @@ export function useSelectedScheduleActions({
   const deleteMutation = useDeleteV1DeleteExecutionSchedule({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Schedule deleted" });
+        toast({ title: t("Schedule deleted", "计划已删除") });
         setShowDeleteDialog(false);
 
         onDeleted?.();

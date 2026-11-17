@@ -126,6 +126,10 @@ from backend.data.credit import (
     reconcile_stripe_tier_for_user,
     sync_subscription_from_stripe,
 )
+from backend.data.custom_mcp import (
+    get_custom_mcp_connection,
+    list_custom_mcp_connections,
+)
 from backend.data.execution import (
     create_graph_execution,
     get_block_error_stats,
@@ -451,6 +455,8 @@ class DatabaseManager(AppService):
     # Exposed for the scheduler's auth-identity invariant monitor.
     heal_orphaned_auth_identities = _(heal_orphaned_auth_identities)
     get_user_integrations = _(get_user_integrations)
+    get_custom_mcp_connection = _(get_custom_mcp_connection)
+    list_custom_mcp_connections = _(list_custom_mcp_connections)
     update_user_integrations = _(update_user_integrations)
     get_near_expiry_oauth_credentials = _(get_near_expiry_oauth_credentials)
     get_user_credentials = _(get_user_credentials)
@@ -1043,6 +1049,8 @@ class DatabaseManagerAsyncClient(AppServiceClient):
     is_account_closed = d.is_account_closed
     heal_orphaned_auth_identities = d.heal_orphaned_auth_identities
     get_user_integrations = d.get_user_integrations
+    get_custom_mcp_connection = d.get_custom_mcp_connection
+    list_custom_mcp_connections = d.list_custom_mcp_connections
     update_user_integrations = d.update_user_integrations
     get_near_expiry_oauth_credentials = d.get_near_expiry_oauth_credentials
     get_user_credentials = d.get_user_credentials

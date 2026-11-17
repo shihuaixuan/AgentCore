@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useGlobalSearchStore } from "@/app/(platform)/components/GlobalSearchModal/useGlobalSearchStore";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import {
@@ -11,6 +12,7 @@ import {
 import { Search01Icon } from "@hugeicons/core-free-icons";
 
 export function SidebarSearch() {
+  const { t } = useTranslation();
   const openSearch = useGlobalSearchStore((state) => state.openSearch);
 
   return (
@@ -18,7 +20,7 @@ export function SidebarSearch() {
       <TooltipTrigger asChild>
         <button
           type="button"
-          aria-label="Search"
+          aria-label={t("Search", "搜索")}
           onClick={openSearch}
           className="flex size-8 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-surface-active max-md:size-10"
         >
@@ -30,7 +32,7 @@ export function SidebarSearch() {
         </button>
       </TooltipTrigger>
       <TooltipPortal>
-        <TooltipContent side="right">Search</TooltipContent>
+        <TooltipContent side="right">{t("Search", "搜索")}</TooltipContent>
       </TooltipPortal>
     </Tooltip>
   );

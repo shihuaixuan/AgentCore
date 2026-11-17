@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { Button } from "@/components/atoms/Button/Button";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -69,6 +70,7 @@ function ExpandedBody({
   isError,
   hasAnySpend,
 }: ExpandedBodyProps) {
+  const { t } = useTranslation();
   if (isError) {
     return (
       <Text variant="body" tone="muted">
@@ -92,7 +94,7 @@ function ExpandedBody({
   if (!hasAnySpend) {
     return (
       <Text variant="body" tone="muted">
-        No spend this month yet.
+        {t("No spend this month yet.", "本月暂无支出。")}
       </Text>
     );
   }
@@ -113,10 +115,10 @@ function ExpandedBody({
       <StatRow
         items={[
           {
-            label: "Total this month",
+            label: t("Total this month", "本月总计"),
             value: formatCents(summary.total_cents),
           },
-          { label: "Tasks", value: String(summary.run_count) },
+          { label: t("Tasks", "任务"), value: String(summary.run_count) },
           {
             label: "Avg / task",
             value: formatCents(Math.round(avgCostCents)),

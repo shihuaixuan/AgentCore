@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import Image from "next/image";
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { Button } from "@/components/atoms/Button/Button";
@@ -19,13 +20,25 @@ type Props = {
 };
 
 export function BotCard({ platform }: Props) {
+  const { t } = useTranslation();
   const { isPending, unlinkServerLink, unlinkDmLink } = useBotCard();
   const serverLinks = platform.server_links ?? [];
   const pendingInstall = platform.pending_install ?? null;
   // Optional in the generated client (it has a server-side default).
   const serverNoun = platform.server_noun ?? "server";
   const dmUrl = platform.dm_url ?? null;
-  const addBotLabel = getAddBotLabel(platform, serverNoun);
+  const serverLabel =
+    serverNoun === "workspace"
+      ? t("workspace", "工作区")
+      : serverNoun === "group"
+        ? t("group", "群组")
+        : t("server", "服务器");
+  const addBotLabel = t(
+    getAddBotLabel(platform, serverNoun),
+    platform.dm_url
+      ? `添加至${serverLabel}`
+      : `将机器人添加至 ${platform.display_name}`,
+  );
 
   return (
     // oxlint-disable-next-line design-system/no-restyle -- bot cards are tighter than the Card default
@@ -44,7 +57,10 @@ export function BotCard({ platform }: Props) {
           </Text>
           {pendingInstall ? (
             <Badge variant="info" size="small">
-              Pending — finish in {platform.display_name}
+              {t(
+                `Pending — finish in ${platform.display_name}`,
+                `待完成 — 请在 ${platform.display_name} 中完成绑定`,
+              )}
             </Badge>
           ) : null}
         </div>
@@ -59,7 +75,10 @@ export function BotCard({ platform }: Props) {
               size="small"
               rightIcon={<Icon icon={ArrowUpRight01Icon} size={16} />}
             >
-              Open AutoGPT in {platform.display_name}
+              {t(
+                `Open AutoGPT in ${platform.display_name}`,
+                `在 ${platform.display_name} 中打开 AutoGPT`,
+              )}
             </Button>
           ) : null}
           {dmUrl ? (
@@ -72,7 +91,10 @@ export function BotCard({ platform }: Props) {
               size="small"
               rightIcon={<Icon icon={ArrowUpRight01Icon} size={16} />}
             >
-              Message bot on {platform.display_name}
+              {t(
+                `Message bot on ${platform.display_name}`,
+                `在 ${platform.display_name} 中联系机器人`,
+              )}
             </Button>
           ) : null}
           {/* Kept alongside the pending action, not replaced by it: adding the
@@ -102,7 +124,7 @@ export function BotCard({ platform }: Props) {
           transform="uppercase"
           tracking="wide"
         >
-          Direct messages
+          {t("Direct messages", "私信")}
         </Text>
         <BotCardDmTile
           platformName={platform.display_name}
@@ -122,7 +144,7 @@ export function BotCard({ platform }: Props) {
           transform="uppercase"
           tracking="wide"
         >
-          Linked {serverNoun}s
+          {t(`Linked ${serverNoun}s`, `已连接的${serverLabel}`)}
         </Text>
         <BotCardServerList
           platformName={platform.display_name}

@@ -7,6 +7,7 @@ import { DialogCtx } from "../useDialogCtx";
 import { compactStyles, drawerStyles, modalStyles } from "./styles";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type BaseProps = DialogCtx & PropsWithChildren;
 
@@ -25,7 +26,8 @@ export function DrawerWrap({
   isForceOpen,
   className,
 }: Props) {
-  const accessibleTitle = title || "Dialog";
+  const { t } = useTranslation();
+  const accessibleTitle = title || t("Dialog", "对话框");
   const hasVisibleTitle = Boolean(title);
   const isCompact = variant === "compact";
 
@@ -38,7 +40,7 @@ export function DrawerWrap({
   const closeBtn = (
     <button
       type="button"
-      aria-label="Close"
+      aria-label={t("Close", "关闭")}
       onClick={handleClose}
       data-slot="drawer-close"
       className="inline-flex h-9 items-center justify-center rounded-md text-foreground-strong transition-colors focus-visible:ring-1 focus-visible:ring-focus focus-visible:outline-none"
@@ -107,7 +109,7 @@ export function DrawerWrap({
           ) : null}
         </div>
         <Drawer.Description data-slot="drawer-description" className="sr-only">
-          Dialog
+          {t("Dialog", "对话框")}
         </Drawer.Description>
         <div
           data-slot="drawer-body"

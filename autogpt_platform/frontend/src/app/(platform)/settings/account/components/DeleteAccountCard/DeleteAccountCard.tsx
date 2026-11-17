@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Button } from "@/components/atoms/Button/Button";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function DeleteAccountCard({ index = 0 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const { isFlowOpen, openFlow, handleFlowOpenChange } =
     useDeleteAccountFlowOpener("settings");
@@ -36,7 +38,7 @@ export function DeleteAccountCard({ index = 0 }: Props) {
       <div className="flex flex-col items-start gap-3 rounded-large border border-border-base bg-surface px-4 py-4 shadow-message-table sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="flex min-w-0 flex-col gap-0.5">
           <Text variant="body-medium" as="span">
-            Delete account
+            {t("Delete account", "删除账户")}
           </Text>
           <Text variant="small" as="span" tone="muted">
             Close your account, disconnect your apps and cancel your plan.
@@ -52,7 +54,7 @@ export function DeleteAccountCard({ index = 0 }: Props) {
           onClick={openFlow}
           className="shrink-0"
         >
-          Delete account
+          {t("Delete account", "删除账户")}
         </Button>
       </div>
 

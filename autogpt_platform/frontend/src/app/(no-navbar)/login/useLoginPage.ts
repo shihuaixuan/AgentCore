@@ -1,4 +1,5 @@
 import { useToast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useCaptureMarketingPrompt } from "@/hooks/useCaptureMarketingPrompt";
 import { getAuthDeepLink, sanitizeAuthNext } from "@/lib/auth-redirect";
 import { providerCallbackPath } from "@/lib/auth/provider-callback";
@@ -25,6 +26,7 @@ import { isTeamEmail } from "@/lib/auth/team-email";
 import { clearImpersonationEverywhere } from "@/lib/impersonation";
 
 export function useLoginPage() {
+  const { t } = useTranslation();
   useCaptureMarketingPrompt();
 
   const { user, isUserLoading, isLoggedIn } = useAuth();
@@ -101,7 +103,9 @@ export function useLoginPage() {
 
       if (!response.ok) {
         const { error } = await response.json();
-        throw new Error(error || "Failed to start OAuth flow");
+        throw new Error(
+          error || t("Failed to start OAuth flow", "无法启动第三方登录"),
+        );
       }
 
       const { url } = await response.json();
@@ -110,7 +114,9 @@ export function useLoginPage() {
       setLoadingProvider(null);
       setIsLoggingIn(false);
       setFeedback(
-        error instanceof Error ? error.message : "Failed to start OAuth flow",
+        error instanceof Error
+          ? error.message
+          : t("Failed to start OAuth flow", "无法启动第三方登录"),
       );
     }
   }
@@ -121,7 +127,10 @@ export function useLoginPage() {
 
     if (isTeamEmail(data.email)) {
       toast({
-        title: "Please use Google SSO to login using an AutoGPT email.",
+        title: t(
+          "Please use Google SSO to login using an AutoGPT email.",
+          "使用 AutoGPT 团队邮箱时，请通过 Google 单点登录。",
+        ),
         variant: "default",
       });
 
@@ -143,7 +152,7 @@ export function useLoginPage() {
       }
 
       if (!result.success) {
-        throw new Error(result.error || "Login failed");
+        throw new Error(result.error || t("Login failed", "登录失败"));
       }
 
       // Use full page navigation to ensure middleware processes the new auth cookies.
@@ -160,7 +169,7 @@ export function useLoginPage() {
         title:
           error instanceof Error
             ? error.message
-            : "Unexpected error during login",
+            : t("Unexpected error during login", "登录时发生意外错误"),
         variant: "destructive",
       });
 

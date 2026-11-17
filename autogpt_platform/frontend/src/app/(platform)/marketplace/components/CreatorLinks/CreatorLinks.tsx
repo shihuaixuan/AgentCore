@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import {
@@ -64,11 +67,12 @@ function getSocialIcon(url: string) {
 }
 
 export function CreatorLinks({ links }: CreatorLinksProps) {
+  const { t } = useTranslation();
   if (!links || links.length === 0) return null;
 
   return (
     <div className="flex flex-col items-start gap-3">
-      <Text variant="h5">Links</Text>
+      <Text variant="h5">{t("Links", "链接")}</Text>
       <div className="flex flex-wrap gap-2">
         {links.map((link) => (
           <Button

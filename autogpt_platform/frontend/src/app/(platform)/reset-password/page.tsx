@@ -1,5 +1,7 @@
 "use client";
 import { Button } from "@/components/atoms/Button/Button";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { useAuthTranslation } from "@/components/auth/useAuthTranslation";
 import { Input } from "@/components/atoms/Input/Input";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { CookieSettingsLink } from "@/components/molecules/CookieSettingsLink/CookieSettingsLink";
@@ -16,6 +18,8 @@ import { z } from "zod";
 import { changePassword, sendResetEmail } from "./actions";
 
 function ResetPasswordContent() {
+  const { t } = useTranslation();
+  const { translateAuthMessage } = useAuthTranslation();
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -50,7 +54,7 @@ function ResetPasswordContent() {
         // Also show a toast with the error detail for debugging
         if (errorDescription) {
           toast({
-            title: "Link Expired",
+            title: t("Link Expired", "链接已过期"),
             description: errorDescription,
             variant: "destructive",
           });
@@ -58,9 +62,11 @@ function ResetPasswordContent() {
       } else {
         // Show toast for other errors
         const errorMessage =
-          errorDescription || error || "Password reset failed";
+          errorDescription ||
+          error ||
+          t("Password reset failed", "密码重置失败");
         toast({
-          title: "Password Reset Failed",
+          title: t("Password Reset Failed", "密码重置失败"),
           description: errorMessage,
           variant: "destructive",
         });
@@ -73,7 +79,7 @@ function ResetPasswordContent() {
       newUrl.searchParams.delete("error_description");
       router.replace(newUrl.pathname + newUrl.search);
     }
-  }, [searchParams, toast, router]);
+  }, [searchParams, toast, router, t]);
 
   const sendEmailForm = useForm<z.infer<typeof sendEmailFormSchema>>({
     resolver: zodResolver(sendEmailFormSchema),
@@ -103,7 +109,7 @@ function ResetPasswordContent() {
       setIsLoading(false);
       if (error) {
         toast({
-          title: "Error",
+          title: t("Error", "错误"),
           description: error,
           variant: "destructive",
         });
@@ -111,13 +117,15 @@ function ResetPasswordContent() {
       }
       setDisabled(true);
       toast({
-        title: "Check your email",
-        description:
+        title: t("Check your email", "请查收邮件"),
+        description: t(
           "If an account exists for this address, we've sent a reset link.",
+          "如果此邮箱已注册，我们已发送密码重置链接。",
+        ),
         variant: "default",
       });
     },
-    [sendEmailForm, toast],
+    [sendEmailForm, toast, t],
   );
 
   function handleShowEmailForm() {
@@ -139,26 +147,29 @@ function ResetPasswordContent() {
       setIsLoading(false);
       if (error) {
         toast({
-          title: "Error",
+          title: t("Error", "错误"),
           description: error,
           variant: "destructive",
         });
         return;
       }
       toast({
-        title: "Success",
-        description: "Password changed successfully. Redirecting to login.",
+        title: t("Success", "成功"),
+        description: t(
+          "Password changed successfully. Redirecting to login.",
+          "密码修改成功，正在跳转到登录页。",
+        ),
         variant: "default",
       });
     },
-    [changePasswordForm, resetToken, toast],
+    [changePasswordForm, resetToken, toast, t],
   );
 
   // Show expired link message if detected
   if (showExpiredMessage && !resetToken) {
     return (
       <div className="flex h-full min-h-[85vh] w-full flex-col items-center justify-center">
-        <AuthCard title="Reset Password">
+        <AuthCard title={t("Reset Password", "重置密码")}>
           <ExpiredLinkMessage onRequestNewLink={handleShowEmailForm} />
         </AuthCard>
         <CookieSettingsLink className="mt-6" />
@@ -168,7 +179,7 @@ function ResetPasswordContent() {
 
   return (
     <div className="flex h-full min-h-[85vh] w-full flex-col items-center justify-center">
-      <AuthCard title="Reset Password">
+      <AuthCard title={t("Reset Password", "重置密码")}>
         {resetToken ? (
           <form
             onSubmit={changePasswordForm.handleSubmit(onChangePassword)}
@@ -181,11 +192,13 @@ function ResetPasswordContent() {
                 render={({ field }) => (
                   <Input
                     id={field.name}
-                    label="Password"
+                    label={t("Password", "密码")}
                     type="password"
                     placeholder="••••••••••••••••"
                     error={
-                      changePasswordForm.formState.errors.password?.message
+                      translateAuthMessage(
+                        changePasswordForm.formState.errors.password?.message,
+                      ) ?? undefined
                     }
                     {...field}
                   />
@@ -197,12 +210,14 @@ function ResetPasswordContent() {
                 render={({ field }) => (
                   <Input
                     id={field.name}
-                    label="Confirm Password"
+                    label={t("Confirm Password", "确认密码")}
                     type="password"
                     placeholder="••••••••••••••••"
                     error={
-                      changePasswordForm.formState.errors.confirmPassword
-                        ?.message
+                      translateAuthMessage(
+                        changePasswordForm.formState.errors.confirmPassword
+                          ?.message,
+                      ) ?? undefined
                     }
                     {...field}
                   />
@@ -215,7 +230,9 @@ function ResetPasswordContent() {
                 type="submit"
                 className="mt-6 w-full"
               >
-                {isLoading ? "Updating password..." : "Update password"}
+                {isLoading
+                  ? t("Updating password...", "正在更新密码…")
+                  : t("Update password", "更新密码")}
               </Button>
             </FormProvider>
           </form>
@@ -231,10 +248,14 @@ function ResetPasswordContent() {
                 render={({ field }) => (
                   <Input
                     id={field.name}
-                    label="Email"
+                    label={t("Email", "邮箱")}
                     placeholder="m@example.com"
                     type="email"
-                    error={sendEmailForm.formState.errors.email?.message}
+                    error={
+                      translateAuthMessage(
+                        sendEmailForm.formState.errors.email?.message,
+                      ) ?? undefined
+                    }
                     {...field}
                   />
                 )}
@@ -247,7 +268,7 @@ function ResetPasswordContent() {
                 type="submit"
                 className="mt-6 w-full"
               >
-                Send reset email
+                {t("Send reset email", "发送重置邮件")}
               </Button>
             </FormProvider>
           </form>

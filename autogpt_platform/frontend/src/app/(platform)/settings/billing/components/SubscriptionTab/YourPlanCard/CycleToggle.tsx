@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -11,10 +12,11 @@ interface Props {
 const CYCLES = ["monthly", "yearly"] as const;
 
 export function CycleToggle({ value, onChange, disabled }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       role="radiogroup"
-      aria-label="Billing cycle"
+      aria-label={t("Billing cycle", "计费周期")}
       className="inline-flex rounded-full border border-border-base bg-surface-hover p-0.5"
     >
       {CYCLES.map((cycle) => {
@@ -39,7 +41,7 @@ export function CycleToggle({ value, onChange, disabled }: Props) {
               "Monthly"
             ) : (
               <>
-                Yearly{" "}
+                {t("Yearly", "每年")}{" "}
                 <span className="ml-1 bg-gradient-to-r from-success via-success to-sky bg-clip-text text-caption-sm leading-inherit font-semibold text-transparent">
                   Save 15%
                 </span>

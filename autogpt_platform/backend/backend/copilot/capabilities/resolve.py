@@ -101,6 +101,10 @@ def connection_state_from(credentials: list[Credentials]) -> ConnectionState:
         # value, so an un-normalised one reads as a service the user never
         # connected.
         provider = canonical_provider(credential.provider)
+        if provider == ProviderName.MCP.value and (credential.metadata or {}).get(
+            "mcp_isolated"
+        ):
+            continue
         providers.add(provider)
         if isinstance(credential, HostScopedCredentials):
             hosts.add(credential.host.lower())

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   BubbleChatIcon,
   File02Icon,
@@ -37,6 +38,7 @@ export function ExpertOverview({
   isActivityError,
   onChat,
 }: Props) {
+  const { t } = useTranslation();
   const overview = useExpertOverview(expert.id, activity);
 
   return (
@@ -49,25 +51,29 @@ export function ExpertOverview({
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <StatTile
-          label="Conversations"
+          label={t("Conversations", "对话")}
           icon={BubbleChatIcon}
           value={activity ? overview.conversations.current : null}
           detail={
             activity
               ? formatDelta(overview.conversations.delta)
-              : "Last 30 days"
+              : t("Last 30 days", "最近 30 天")
           }
           isLoading={isActivityLoading}
         />
         <StatTile
-          label="Workflow runs"
+          label={t("Workflow runs", "工作流运行记录")}
           icon={PlayIcon}
           value={activity ? overview.runs.current : null}
-          detail={activity ? formatDelta(overview.runs.delta) : "Last 30 days"}
+          detail={
+            activity
+              ? formatDelta(overview.runs.delta)
+              : t("Last 30 days", "最近 30 天")
+          }
           isLoading={isActivityLoading}
         />
         <StatTile
-          label="Outputs"
+          label={t("Outputs", "输出")}
           icon={File02Icon}
           value={overview.isOutputsError ? null : overview.outputCount}
           detail={
@@ -82,7 +88,7 @@ export function ExpertOverview({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
-        <OverviewCard title="Last 30 days">
+        <OverviewCard title={t("Last 30 days", "最近 30 天")}>
           {isActivityLoading ? (
             <Skeleton className="h-56 w-full rounded-lg" />
           ) : isActivityError ? (
@@ -105,7 +111,7 @@ export function ExpertOverview({
                   <Icon icon={File02Icon} size={22} />
                 </span>,
               ]}
-              title="Nothing to chart yet"
+              title={t("Nothing to chart yet", "暂无可绘制的数据")}
               description={`Once ${expert.name} starts chatting and running workflows, each day shows up here.`}
             />
           )}

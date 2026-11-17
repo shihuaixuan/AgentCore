@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import {
   AnimatePresence,
@@ -53,13 +54,14 @@ const reducedVariants = {
 export function ConnectServiceDialog({
   open,
   onOpenChange,
-  title = DEFAULT_TITLE,
-  description = DEFAULT_DESCRIPTION,
+  title,
+  description,
   onConnected,
   initialProviderId,
   initialQuery,
   preferMcp,
 }: Props) {
+  const { t } = useTranslation();
   const {
     query,
     setQuery,
@@ -89,7 +91,7 @@ export function ConnectServiceDialog({
 
   return (
     <Dialog
-      title={title}
+      title={title ?? t(DEFAULT_TITLE, "连接服务")}
       styling={{ maxWidth: "40rem" }}
       controlled={{
         isOpen: open,
@@ -133,7 +135,13 @@ export function ConnectServiceDialog({
                         providers={providers}
                         popular={popular}
                         onSelect={handleSelect}
-                        description={description}
+                        description={
+                          description ??
+                          t(
+                            DEFAULT_DESCRIPTION,
+                            "选择服务以连接账户或查看设置说明。",
+                          )
+                        }
                       />
                     )}
                   </motion.div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
@@ -32,6 +34,7 @@ export function TranscriptionErrorBar({
   onDismiss,
   className,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       role="alert"
@@ -51,7 +54,7 @@ export function TranscriptionErrorBar({
         disabled={isRetrying}
         onClick={onRetry}
       >
-        Retry
+        {t("Retry", "重试")}
       </Button>
       <Button
         type="button"
@@ -60,13 +63,13 @@ export function TranscriptionErrorBar({
         leadingIcon={Download04Icon}
         onClick={onDownload}
       >
-        Download recording
+        {t("Download recording", "下载录音")}
       </Button>
       <Button
         type="button"
         variant="icon"
         size="icon-xs"
-        aria-label="Dismiss"
+        aria-label={t("Dismiss", "关闭")}
         onClick={onDismiss}
       >
         <Icon icon={Cancel01Icon} className="h-3.5 w-3.5" />

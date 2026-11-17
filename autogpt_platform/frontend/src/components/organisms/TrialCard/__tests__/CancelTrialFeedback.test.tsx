@@ -97,8 +97,10 @@ test("one dialog confirms, shows the real end date and keeps both buttons", asyn
   setup();
   const dialog = await openDialog();
   expect(
-    within(dialog).getByText(formatTrialEnd(trialResponse().ends_at)).tagName,
-  ).toBe("STRONG");
+    within(dialog).getByText(
+      `You keep full access until ${formatTrialEnd(trialResponse().ends_at)}, and you can resume your trial any time before then.`,
+    ).tagName,
+  ).toBe("P");
   clickIn(dialog, "It costs too much");
   expect(
     within(dialog).getByRole("button", { name: "Keep trial" }),

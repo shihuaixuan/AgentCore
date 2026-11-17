@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { UseFormReturn } from "react-hook-form";
 
 import { Button } from "@/components/atoms/Button/Button";
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export function CreateAPIKeyForm({ form, onSubmit, isPending }: Props) {
+  const { t } = useTranslation();
   return (
     // oxlint-disable-next-line design-system/no-restyle -- the key form stacks its fields with a 4px inset for focus rings
     <Form form={form} onSubmit={onSubmit} className="flex flex-col gap-4 px-1">
@@ -34,8 +36,8 @@ export function CreateAPIKeyForm({ form, onSubmit, isPending }: Props) {
               <Input
                 {...field}
                 id={field.name}
-                label="Name"
-                placeholder="My integration key"
+                label={t("Name", "名称")}
+                placeholder={t("My integration key", "我的集成密钥")}
                 wrapperClassName="!mb-0"
               />
             </FormControl>
@@ -53,8 +55,11 @@ export function CreateAPIKeyForm({ form, onSubmit, isPending }: Props) {
               <Input
                 {...field}
                 id={field.name}
-                label="Description (optional)"
-                placeholder="Describe what this key is used for"
+                label={t("Description (optional)", "说明（可选）")}
+                placeholder={t(
+                  "Describe what this key is used for",
+                  "描述此密钥的用途",
+                )}
                 wrapperClassName="!mb-0"
               />
             </FormControl>
@@ -86,7 +91,7 @@ export function CreateAPIKeyForm({ form, onSubmit, isPending }: Props) {
         disabled={!form.formState.isValid || isPending}
         loading={isPending}
       >
-        Create Key
+        {t("Create Key", "创建密钥")}
       </Button>
     </Form>
   );

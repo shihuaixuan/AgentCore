@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { useTallyFeedback } from "@/components/molecules/TallyPoup/useTallyFeedback";
@@ -11,6 +12,7 @@ const rowClasses =
   "group relative flex w-full items-center gap-3 rounded-lg py-2 pl-3 pr-2 text-left text-foreground-body outline-none transition-colors duration-200 ease-out hover:bg-surface-hover focus-visible:bg-surface-hover focus-visible:outline-none";
 
 export function AccountMenuFeedbackRow() {
+  const { t } = useTranslation();
   const { isLoggedIn, isUserLoading } = useAuth();
   const feedback = useTallyFeedback(isUserLoading ? null : isLoggedIn);
   const sidebar = useOptionalSidebar();
@@ -45,7 +47,7 @@ export function AccountMenuFeedbackRow() {
         tone="inherit"
         className="relative z-10 flex-1 truncate"
       >
-        Give feedback
+        {t("Give feedback", "提交反馈")}
       </Text>
     </button>
   );

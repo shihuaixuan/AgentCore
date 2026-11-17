@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
 import { GraphExecutionMeta } from "@/app/api/__generated__/models/graphExecutionMeta";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
@@ -51,6 +52,7 @@ export function RunAgentModal({
   title = "Run Workflow",
   dialogVariant = "default",
 }: Props) {
+  const { t } = useTranslation();
   const {
     // UI state
     isOpen,
@@ -294,14 +296,16 @@ export function RunAgentModal({
                                   !allRequiredInputsAreSet
                                 }
                               >
-                                Schedule Task
+                                {t("Schedule Task", "计划任务")}
                               </Button>
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>
-                              Please set up all required inputs and credentials
-                              before scheduling
+                              {t(
+                                "Please set up all required inputs and credentials before scheduling",
+                                "设置计划前，请配置所有必填输入和凭据",
+                              )}
                             </p>
                           </TooltipContent>
                         </Tooltip>
@@ -312,7 +316,7 @@ export function RunAgentModal({
                         onClick={handleOpenScheduleModal}
                         disabled={isExecuting || isSettingUpTrigger}
                       >
-                        Schedule Task
+                        {t("Schedule Task", "计划任务")}
                       </Button>
                     )
                   }

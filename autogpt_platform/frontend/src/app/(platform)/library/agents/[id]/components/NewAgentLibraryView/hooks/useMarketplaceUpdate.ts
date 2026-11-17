@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   useGetV2GetSpecificAgent,
   useGetV2ListMySubmissions,
@@ -20,6 +21,7 @@ interface UseMarketplaceUpdateProps {
 }
 
 export function useMarketplaceUpdate({ agent }: UseMarketplaceUpdateProps) {
+  const { t } = useTranslation();
   const [modalOpen, setModalOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -56,16 +58,22 @@ export function useMarketplaceUpdate({ agent }: UseMarketplaceUpdateProps) {
     mutation: {
       onError: (err) => {
         toast({
-          title: "Update Failed",
-          description: "Failed to update workflow to latest version",
+          title: t("Update Failed", "更新失败"),
+          description: t(
+            "Failed to update workflow to latest version",
+            "无法将工作流更新至最新版本",
+          ),
           variant: "destructive",
         });
         console.error("Failed to update agent:", err);
       },
       onSuccess: () => {
         toast({
-          title: "Workflow Updated",
-          description: "Workflow updated to latest version successfully",
+          title: t("Workflow Updated", "工作流已更新"),
+          description: t(
+            "Workflow updated to latest version successfully",
+            "工作流已成功更新至最新版本",
+          ),
         });
         // Invalidate to get the updated agent data from the server
         if (agent?.id) {

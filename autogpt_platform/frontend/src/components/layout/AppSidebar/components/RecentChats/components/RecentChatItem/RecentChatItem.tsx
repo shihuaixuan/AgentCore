@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { ChatOriginIcon } from "@/app/(platform)/copilot/components/ChatOriginIcon/ChatOriginIcon";
 import { resolvePlatformLogo } from "@/app/(platform)/copilot/components/ChatOriginIcon/platformLogos";
@@ -95,7 +96,8 @@ export const RecentChatItem = memo(function RecentChatItem({
   onExcludeFromLearning,
   onDelete,
 }: Props) {
-  const title = session.title || "Untitled chat";
+  const { t } = useTranslation();
+  const title = session.title || t("Untitled chat", "未命名对话");
   const hasPlatformLogo = !!resolvePlatformLogo(session.source_platform);
 
   // Enter and Escape both blur the input, which would otherwise trigger a
@@ -108,7 +110,7 @@ export const RecentChatItem = memo(function RecentChatItem({
       <SidebarMenuItem>
         <input
           autoFocus
-          aria-label="Rename chat"
+          aria-label={t("Rename chat", "重命名对话")}
           value={editingTitle}
           onChange={(e) => onEditingTitleChange(e.target.value)}
           onKeyDown={(e) => {
@@ -164,7 +166,7 @@ export const RecentChatItem = memo(function RecentChatItem({
         <DropdownMenuTrigger asChild>
           <SidebarMenuAction
             showOnHover
-            aria-label="Chat actions"
+            aria-label={t("Chat actions", "对话操作")}
             className="max-md:!top-1.5 max-md:w-8 max-md:[&>svg]:size-5"
           >
             <Icon icon={MoreHorizontalIcon} tone="emphasis-soft" />
@@ -180,12 +182,14 @@ export const RecentChatItem = memo(function RecentChatItem({
               ) : (
                 <Icon icon={PinIcon} className="mr-2 h-4 w-4" />
               )}
-              {session.is_pinned ? "Unpin chat" : "Pin chat"}
+              {session.is_pinned
+                ? t("Unpin chat", "取消置顶对话")
+                : t("Pin chat", "置顶对话")}
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={() => onRename(session.id, session.title)}>
             <Icon icon={PencilIcon} className="mr-2 h-4 w-4" />
-            Rename
+            {t("Rename", "重命名")}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => onExport(session.id, session.title)}
@@ -199,16 +203,18 @@ export const RecentChatItem = memo(function RecentChatItem({
             ) : (
               <Icon icon={Download04Icon} className="mr-2 h-4 w-4" />
             )}
-            {isExporting ? "Exporting…" : "Export chat"}
+            {isExporting
+              ? t("Exporting…", "正在导出…")
+              : t("Export chat", "导出对话")}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => onShare(session.id)}>
             <Icon icon={Share03Icon} className="mr-2 h-4 w-4" />
-            Share chat
+            {t("Share chat", "分享对话")}
           </DropdownMenuItem>
           {isLearningEnabled && (
             <DropdownMenuItem onClick={() => onExcludeFromLearning(session.id)}>
               <Icon icon={BookOpen01Icon} className="mr-2 h-4 w-4" />
-              Exclude from learning
+              {t("Exclude from learning", "不用于学习")}
             </DropdownMenuItem>
           )}
           <DropdownMenuItem
@@ -217,7 +223,7 @@ export const RecentChatItem = memo(function RecentChatItem({
             className="text-error-foreground focus:bg-error-surface focus:text-error-foreground"
           >
             <Icon icon={Delete02Icon} className="mr-2 h-4 w-4" />
-            Delete chat
+            {t("Delete chat", "删除对话")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

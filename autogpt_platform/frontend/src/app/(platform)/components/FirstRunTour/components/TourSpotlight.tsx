@@ -15,6 +15,8 @@ import { useStepViewed } from "../useStepViewed";
 import { useTourStops } from "../useTourStops";
 import { TourScrim } from "./TourScrim";
 import { TourStepCard } from "./TourStepCard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { TOUR_COPY } from "../step-translations";
 
 interface Props {
   tour: ReturnType<typeof useFirstRunTour>;
@@ -39,6 +41,7 @@ function anchorRect(box: Box | null) {
 }
 
 export function TourSpotlight({ tour }: Props) {
+  const { t } = useTranslation();
   const step = tour.steps[tour.stepIndex];
   const [measured] = useTourStops(stepListOf(step));
   const stop = measured?.stepID === step.id ? measured : undefined;
@@ -58,10 +61,12 @@ export function TourSpotlight({ tour }: Props) {
   const { isMobile, openMobile } = useSidebar();
   const isOverSheet = isMobile && openMobile;
   const layer = useLayerAboveSheet(isOverSheet);
-  const body = withMenuHint(
-    tour.bodyFor(tour.stepIndex, stop),
-    stop?.viaMenu ?? false,
+  const originalBody = tour.bodyFor(tour.stepIndex, stop);
+  const body = t(
+    withMenuHint(originalBody, stop?.viaMenu ?? false),
+    `${TOUR_COPY[originalBody] ?? originalBody}${stop?.viaMenu ? "打开菜单即可找到。" : ""}`,
   );
+  const title = t(step.title, TOUR_COPY[step.title] ?? step.title);
   const target = stop?.target ?? null;
   const element = stop?.element ?? null;
 
@@ -109,7 +114,7 @@ export function TourSpotlight({ tour }: Props) {
         >
           <TourStepCard
             icon={step.icon}
-            title={step.title}
+            title={title}
             body={body}
             titleID={titleID}
             bodyID={bodyID}
@@ -123,7 +128,7 @@ export function TourSpotlight({ tour }: Props) {
             altAction={
               tour.isLastStep
                 ? {
-                    label: "Or connect your tools first",
+                    label: t("Or connect your tools first", "也可以先连接工具"),
                     onClick: tour.connectToolsFirst,
                   }
                 : undefined
@@ -133,7 +138,10 @@ export function TourSpotlight({ tour }: Props) {
               from assistive tech, and focus stays on the same button from
               step to step, so this is what announces each new step. */}
           <p className="sr-only" aria-live="polite">
-            {`Step ${tour.stepIndex + 1} of ${tour.steps.length}. ${step.title}. ${body}`}
+            {t(
+              `Step ${tour.stepIndex + 1} of ${tour.steps.length}. ${title}. ${body}`,
+              `第 ${tour.stepIndex + 1} 步，共 ${tour.steps.length} 步。${title}。${body}`,
+            )}
           </p>
         </PopoverContent>
       </Popover>

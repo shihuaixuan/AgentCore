@@ -6,11 +6,16 @@ import {
   type UsageExperience,
 } from "./helpers";
 import { formatPaymentDue } from "./payment";
+import type { Locale } from "@/lib/i18n/locale";
+import { chineseUsagePresentation } from "./presentation-zh";
 
 export function usagePresentation(
   experience: UsageExperience,
   usageMultiplier?: number,
+  locale: Locale = "en",
 ) {
+  if (locale === "zh-CN")
+    return chineseUsagePresentation(experience, usageMultiplier);
   const { tier, window, isTopTier, isActiveTrial } = experience;
   if (experience.inactiveTrialStatus) {
     const canceled = experience.inactiveTrialStatus === "canceled";

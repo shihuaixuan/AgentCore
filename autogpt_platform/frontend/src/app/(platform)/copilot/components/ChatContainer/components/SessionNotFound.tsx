@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -6,6 +7,7 @@ import { BubbleChatBlockedIcon } from "@hugeicons/core-free-icons";
 import { parseAsString, useQueryState } from "nuqs";
 
 export function SessionNotFound() {
+  const { t } = useTranslation();
   const [, setSessionId] = useQueryState("sessionId", parseAsString);
   const [, setExpertId] = useQueryState("expertId", parseAsString);
 
@@ -27,10 +29,16 @@ export function SessionNotFound() {
       >
         <Icon icon={BubbleChatBlockedIcon} size={28} tone="muted" />
         <Text variant="large-medium" as="h2">
-          This chat isn&apos;t available on this account
+          {t(
+            "This chat isn't available on this account",
+            "此账户无法访问该对话",
+          )}
         </Text>
         <Text variant="body" tone="muted">
-          It may belong to another account you use, or it no longer exists.
+          {t(
+            "It may belong to another account you use, or it no longer exists.",
+            "该对话可能属于你的另一个账户，或已被删除。",
+          )}
         </Text>
         <Button
           type="button"
@@ -39,7 +47,7 @@ export function SessionNotFound() {
           className="mt-2"
           onClick={handleNewChat}
         >
-          Start a new chat
+          {t("Start a new chat", "开始新对话")}
         </Button>
       </div>
     </div>

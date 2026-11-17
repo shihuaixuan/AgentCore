@@ -5,6 +5,7 @@ import { HomeRecap } from "@/app/(platform)/home/components/HomeRecap/HomeRecap"
 import { tourTarget } from "@/lib/tour-targets";
 import { useFirstRunTourAutoStart } from "@/app/(platform)/components/FirstRunTour/useFirstRunTourAutoStart";
 import { useAuth } from "@/lib/auth/hooks/useAuth";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import type { ComponentProps, ReactNode } from "react";
@@ -76,6 +77,7 @@ export function EmptySession({
   usageNotice,
   lowHint,
 }: Props) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const greetingName = getGreetingName(user);
   const intro = useOnboardingIntroCard();
@@ -112,7 +114,14 @@ export function EmptySession({
     isRecipientResolving: isLoadingRecipient,
   });
   const collapse = useCollapsedSuggestions();
-  const introLine = isLoadingRecipient ? null : getIntroLine(selectedExpert);
+  const introLine = isLoadingRecipient
+    ? null
+    : t(
+        getIntroLine(selectedExpert),
+        selectedExpert
+          ? `我是 ${selectedExpert.name}，你希望我处理什么？`
+          : "说说你的工作，我来帮你找到适合自动化的事情。",
+      );
   const recipientPicker = (
     <RecipientChip
       recipient={recipient}
@@ -204,9 +213,15 @@ export function EmptySession({
                   isUploadingFiles={isUploadingFiles}
                   placeholder={
                     atReset
-                      ? SEND_AT_RESET_PLACEHOLDER
+                      ? t(
+                          SEND_AT_RESET_PLACEHOLDER,
+                          "现在撰写，额度重置后自动发送……",
+                        )
                       : selectedExpert
-                        ? getExpertInputPlaceholder(selectedExpert.name)
+                        ? t(
+                            getExpertInputPlaceholder(selectedExpert.name),
+                            `你希望 ${selectedExpert.name} 处理什么？`,
+                          )
                         : inputPlaceholder
                   }
                   className={cn(

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
 import { useIsNarrowScreen } from "../useIsNarrowScreen";
@@ -15,6 +17,7 @@ interface Props {
 // are in the DOM from the first render, so a screen reader reads them at
 // once; only their opacity waits for the typing dots.
 export function OttoReply({ firstLine }: Props) {
+  const { t } = useTranslation();
   const isNarrow = useIsNarrowScreen();
   const { isTyping, reduceMotion } = useOttoTyping();
 
@@ -47,7 +50,7 @@ export function OttoReply({ firstLine }: Props) {
             as="h2"
             className="mt-0.5 text-balance"
           >
-            {OFF_YOUR_PLATE_QUESTION}
+            {t(OFF_YOUR_PLATE_QUESTION, "你最想交出哪些工作？")}
           </Text>
         </div>
       </div>

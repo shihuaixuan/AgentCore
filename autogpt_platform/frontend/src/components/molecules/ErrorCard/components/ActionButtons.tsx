@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { handleReportError } from "../helpers";
 import { ErrorCardProps } from "../ErrorCard";
 import { Button } from "@/components/atoms/Button/Button";
@@ -24,6 +27,7 @@ export function ActionButtons({
   context,
   textSize = "body",
 }: ActionButtonsProps) {
+  const { t } = useTranslation();
   return (
     <div
       data-slot="error-card-actions"
@@ -42,7 +46,7 @@ export function ActionButtons({
             icon={Refresh01Icon}
             size={16}
           />
-          Try Again
+          {t("Try Again", "重试")}
         </Button>
       )}
 
@@ -54,7 +58,7 @@ export function ActionButtons({
         data-slot="error-card-report"
       >
         <Icon data-slot="error-card-report-icon" icon={Bug01Icon} size={16} />
-        Report Error
+        {t("Report Error", "报告错误")}
       </Button>
 
       <Button
@@ -68,7 +72,7 @@ export function ActionButtons({
         data-slot="error-card-help"
       >
         <Icon data-slot="error-card-help-icon" icon={DiscordIcon} size={16} />
-        Get Help
+        {t("Get Help", "获取帮助")}
       </Button>
     </div>
   );

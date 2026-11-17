@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { StoreSubmission } from "@/app/api/__generated__/models/storeSubmission";
@@ -23,11 +24,13 @@ export function EditAgentModal({
   submission,
   onSuccess,
 }: EditAgentModalProps) {
+  const { t } = useTranslation();
+
   if (!submission) return null;
 
   return (
     <Dialog
-      title="Edit submission"
+      title={t("Edit submission", "编辑提交")}
       styling={{
         maxWidth: "48rem",
       }}

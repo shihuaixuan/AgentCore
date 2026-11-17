@@ -1,6 +1,7 @@
 import { withRoleAccess } from "@/lib/withRoleAccess";
 import { Suspense } from "react";
 import { PlatformCostContent } from "./components/PlatformCostContent";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type SearchParams = {
   start?: string;
@@ -20,20 +21,21 @@ function PlatformCostDashboard({
 }: {
   searchParams: SearchParams;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="mx-auto p-6">
       <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-heading font-bold">Platform Costs</h1>
+          <h1 className="text-heading font-bold">{t("Platform Costs", "平台成本")}</h1>
           <p className="text-foreground-tertiary">
-            Track real API costs incurred by system credentials across providers
+            {t("Track real API costs incurred by system credentials across providers", "跟踪系统凭据在各服务提供商处产生的实际 API 成本")}
           </p>
         </div>
 
         <Suspense
           key={JSON.stringify(searchParams)}
           fallback={
-            <div className="py-10 text-center">Loading cost data...</div>
+            <div className="py-10 text-center">{t("Loading cost data...", "正在加载成本数据...")}</div>
           }
         >
           <PlatformCostContent searchParams={searchParams} />

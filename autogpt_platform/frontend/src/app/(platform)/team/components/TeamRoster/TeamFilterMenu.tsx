@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   Alert01Icon,
   Calendar03Icon,
@@ -22,9 +23,10 @@ interface Props {
 }
 
 export function TeamFilterMenu({ value, onChange }: Props) {
+  const { t } = useTranslation();
   return (
     <PillFilterMenu
-      label="Filter experts"
+      label={t("Filter experts", "筛选专家")}
       value={value}
       defaultValue="all"
       options={OPTIONS}

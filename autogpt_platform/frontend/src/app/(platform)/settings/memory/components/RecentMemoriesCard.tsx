@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { MemoryFact } from "@/app/api/__generated__/models/memoryFact";
 import { Button } from "@/components/atoms/Button/Button";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -21,13 +22,17 @@ export function RecentMemoriesCard({
   onForget,
   onForgetTopic,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col rounded-large border border-border-base bg-surface px-4 py-4 shadow-message-table">
       <Text variant="body-medium" as="span">
-        Recent memories
+        {t("Recent memories", "最近记忆")}
       </Text>
       <Text variant="small" as="span" tone="muted">
-        The latest things this memory has learned. Forget any of them.
+        {t(
+          "The latest things this memory has learned. Forget any of them.",
+          "这里显示最近学到的内容，你可以忘记其中任意一项。",
+        )}
       </Text>
 
       <div className="mt-2 flex flex-col divide-y divide-separator">
@@ -39,7 +44,10 @@ export function RecentMemoriesCard({
           </div>
         ) : facts.length === 0 ? (
           <Text variant="small" as="p" tone="muted" className="my-3">
-            Nothing remembered yet. Memories show up here as you chat.
+            {t(
+              "Nothing remembered yet. Memories show up here as you chat.",
+              "暂无记忆。聊天过程中形成的记忆会显示在这里。",
+            )}
           </Text>
         ) : (
           facts.map((fact) => (
@@ -66,7 +74,7 @@ export function RecentMemoriesCard({
                 loading={forgettingUuid === fact.uuid}
                 onClick={() => onForget(fact.uuid)}
               >
-                Forget
+                {t("Forget", "忘记")}
               </Button>
             </div>
           ))
@@ -75,7 +83,7 @@ export function RecentMemoriesCard({
 
       <div className="mt-3">
         <Button variant="secondary" size="small" onClick={onForgetTopic}>
-          Forget a topic…
+          {t("Forget a topic…", "忘记一个主题…")}
         </Button>
       </div>
     </div>

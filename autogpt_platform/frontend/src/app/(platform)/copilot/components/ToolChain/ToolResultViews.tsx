@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   CheckmarkCircle02Icon,
   CircleIcon,
@@ -10,6 +12,7 @@ import {
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { useLayoutEffect, useRef, useState } from "react";
 import type { ChainRow } from "./helpers";
+import { useResultLabels } from "./useResultLabels";
 import { CARD, HALF } from "./ResultCards";
 import {
   asItems,
@@ -18,7 +21,6 @@ import {
   formatBytes,
   isBlankOutput,
   NOTHING_FOUND,
-  humanizeKey,
   inline,
   parseTruncatedOutput,
   resultItemKey,
@@ -141,6 +143,7 @@ export function SearchResults({ items, answer }: SearchResultsProps) {
 }
 
 export function Terminal({ row }: RowProps) {
+  const { t } = useTranslation();
   const input = asObject(row.input);
   const output = asObject(row.output);
   const command = input ? str(input, "command") : null;
@@ -160,7 +163,9 @@ export function Terminal({ row }: RowProps) {
         </pre>
       )}
       {typeof exitCode === "number" && exitCode !== 0 && (
-        <p className="mt-1.5 text-error-inverse">exit {exitCode}</p>
+        <p className="mt-1.5 text-error-inverse">
+          {t(`exit ${exitCode}`, `退出码 ${exitCode}`)}
+        </p>
       )}
     </div>
   );
@@ -261,12 +266,14 @@ export function FileCard({ row }: RowProps) {
 }
 
 export function OutputList({ items }: ItemsProps) {
+  const { t } = useTranslation();
   return (
     <div className={`${CARD} ${HALF} divide-y divide-separator`}>
       {items.map((item, i) => (
         <div key={resultItemKey(item, i)} className="p-2.5">
           <p className="text-caption-sm leading-inherit tracking-wide text-foreground-subtle uppercase">
-            {str(item, "name", "key", "label") ?? `Output ${i + 1}`}
+            {str(item, "name", "key", "label") ??
+              t(`Output ${i + 1}`, `输出 ${i + 1}`)}
           </p>
           <p className="mt-0.5 text-body-sm leading-inherit break-words whitespace-pre-wrap text-foreground-emphasis">
             {displayValue(item.value ?? item)}
@@ -278,7 +285,10 @@ export function OutputList({ items }: ItemsProps) {
 }
 
 export function KeyValueList({ value }: ValueProps) {
-  if (isBlankOutput(value)) return <KeyValueList value={NOTHING_FOUND} />;
+  const { t } = useTranslation();
+  const resultLabel = useResultLabels();
+  if (isBlankOutput(value))
+    return <KeyValueList value={t(NOTHING_FOUND, "未找到结果。")} />;
   const obj = asObject(value);
   if (!obj || Object.keys(obj).length === 0) {
     if (typeof value !== "string" || !value.trim()) return null;
@@ -295,8 +305,10 @@ export function KeyValueList({ value }: ValueProps) {
         </div>
         {truncated && (
           <p className="mt-2 text-caption-sm leading-inherit text-foreground-subtle">
-            Preview of {truncated.totalChars.toLocaleString()} characters — full
-            output saved to the workspace
+            {t(
+              `Preview of ${truncated.totalChars.toLocaleString()} characters — full output saved to the workspace`,
+              `共 ${truncated.totalChars.toLocaleString()} 个字符的预览 — 完整输出已保存到工作区`,
+            )}
           </p>
         )}
       </div>
@@ -305,7 +317,8 @@ export function KeyValueList({ value }: ValueProps) {
   const entries = Object.entries(obj).filter(
     ([, entryValue]) => entryValue !== null && entryValue !== undefined,
   );
-  if (entries.length === 0) return <KeyValueList value={NOTHING_FOUND} />;
+  if (entries.length === 0)
+    return <KeyValueList value={t(NOTHING_FOUND, "未找到结果。")} />;
   return (
     <div className={`${CARD} ${HALF} p-2.5`}>
       {entries.map(([key, entryValue]) => (
@@ -314,7 +327,7 @@ export function KeyValueList({ value }: ValueProps) {
           className="flex items-baseline gap-3 py-1 text-caption first:pt-0 last:pb-0"
         >
           <span className="shrink-0 text-foreground-subtle">
-            {humanizeKey(key)}
+            {resultLabel(key)}
           </span>
           <span className="ml-auto min-w-0 text-right font-medium break-words text-foreground-body">
             {displayValue(entryValue)}

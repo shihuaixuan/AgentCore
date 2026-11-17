@@ -21,6 +21,7 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { InstallWorkflowSource, WorkflowInstallData } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const SEARCH_DEBOUNCE_MS = 300;
 const RESULTS_PAGE_SIZE = 10;
@@ -40,6 +41,7 @@ export function useInstallWorkflowPicker({
   open,
   onClose,
 }: Args) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [source, setSource] = useState<InstallWorkflowSource>("library");
   const [searchQuery, setSearchQuery] = useState("");
@@ -159,8 +161,14 @@ export function useInstallWorkflowPicker({
       });
     } catch {
       toast({
-        title: `Couldn't install on ${targetExpert.name}`,
-        description: "Something went wrong. Please try again.",
+        title: t(
+          `Couldn't install on ${targetExpert.name}`,
+          `无法为 ${targetExpert.name} 安装工作流`,
+        ),
+        description: t(
+          "Something went wrong. Please try again.",
+          "出现了问题，请重试。",
+        ),
         variant: "destructive",
       });
     } finally {
@@ -171,7 +179,10 @@ export function useInstallWorkflowPicker({
   async function install(expert: Expert, data: WorkflowInstallData) {
     if (isAlreadyInstalled(expert, data)) {
       toast({
-        title: `Already installed on ${expert.name}`,
+        title: t(
+          `Already installed on ${expert.name}`,
+          `已为 ${expert.name} 安装`,
+        ),
         variant: "success",
       });
       onClose();
@@ -187,12 +198,21 @@ export function useInstallWorkflowPicker({
           queryKey: getGetExpertQueryKey(expert.id),
         }),
       ]);
-      toast({ title: `Installed on ${expert.name}`, variant: "success" });
+      toast({
+        title: t(`Installed on ${expert.name}`, `已为 ${expert.name} 安装`),
+        variant: "success",
+      });
       onClose();
     } catch {
       toast({
-        title: `Couldn't install on ${expert.name}`,
-        description: "Something went wrong. Please try again.",
+        title: t(
+          `Couldn't install on ${expert.name}`,
+          `无法为 ${expert.name} 安装工作流`,
+        ),
+        description: t(
+          "Something went wrong. Please try again.",
+          "出现了问题，请重试。",
+        ),
         variant: "destructive",
       });
     }
@@ -200,8 +220,11 @@ export function useInstallWorkflowPicker({
 
   const title =
     mode === "pick-expert"
-      ? "Install on an expert"
-      : `Install a workflow${targetExpert ? ` on ${targetExpert.name}` : ""}`;
+      ? t("Install on an expert", "为专家安装工作流")
+      : t(
+          `Install a workflow${targetExpert ? ` on ${targetExpert.name}` : ""}`,
+          targetExpert ? `为 ${targetExpert.name} 安装工作流` : "安装工作流",
+        );
 
   const resultsQuery =
     source === "library" ? libraryResultsQuery : marketplaceResultsQuery;

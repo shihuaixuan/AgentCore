@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function useLibraryAgentCard({ agent, onFavoriteAdd }: Props) {
+  const { t } = useTranslation();
   const { id, is_favorite, creator_image_url, marketplace_listing } = agent;
 
   const isFromMarketplace = Boolean(marketplace_listing);
@@ -81,7 +83,7 @@ export function useLibraryAgentCard({ agent, onFavoriteAdd }: Props) {
       updateQueryData(!newIsFavorite);
 
       toast({
-        title: "Error",
+        title: t("Error", "错误"),
         description: "Failed to update favorite status. Please try again.",
         variant: "destructive",
       });

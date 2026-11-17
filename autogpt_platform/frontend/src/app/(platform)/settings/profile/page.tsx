@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 
@@ -11,6 +12,7 @@ import { SaveBar } from "./components/SaveBar/SaveBar";
 import { useProfilePage } from "./useProfilePage";
 
 export default function SettingsProfilePage() {
+  const { t } = useTranslation();
   const {
     user,
     isLoading,
@@ -51,11 +53,13 @@ export default function SettingsProfilePage() {
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-col pb-2">
         <Text variant="h4" as="h1">
-          Profile
+          {t("Profile", "个人资料")}
         </Text>
         <Text variant="body" tone="body" className="mt-4 max-w-[600px]">
-          Manage how you appear on the marketplace — your photo, handle, bio,
-          and links.
+          {t(
+            "Manage how you appear on the marketplace — your photo, handle, bio, and links.",
+            "管理你在市场中展示的头像、用户名、简介和链接。",
+          )}
         </Text>
       </div>
 

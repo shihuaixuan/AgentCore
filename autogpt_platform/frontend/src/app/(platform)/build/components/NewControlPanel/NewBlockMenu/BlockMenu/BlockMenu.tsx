@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useControlPanelStore } from "@/app/(platform)/build/stores/controlPanelStore";
 import {
   Popover,
@@ -15,6 +16,7 @@ import { ToyBrickIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export const BlockMenu = () => {
+  const { t } = useTranslation();
   const { blockMenuOpen, setBlockMenuOpen, forceOpenBlockMenu } =
     useControlPanelStore();
   return (
@@ -39,7 +41,7 @@ export const BlockMenu = () => {
             </ControlPanelButton>
           </PopoverTrigger>
         </TooltipTrigger>
-        <TooltipContent side="right">Blocks</TooltipContent>
+        <TooltipContent side="right">{t("Blocks", "模块")}</TooltipContent>
       </Tooltip>
 
       {/* rounded-medium is the 12px corner this menu renders today, the old

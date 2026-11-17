@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useDeleteWorkspaceFile } from "@/app/api/__generated__/endpoints/workspace/workspace";
 import type { WorkspaceFileItem } from "@/app/api/__generated__/models/workspaceFileItem";
 import { useToast } from "@/components/molecules/Toast/use-toast";
@@ -10,6 +11,7 @@ import {
 } from "./helpers";
 
 export function useFileActionsMenu(file: WorkspaceFileItem) {
+  const { t } = useTranslation();
   const origin = deriveFileOrigin(file.path);
   const [isMoveOpen, setIsMoveOpen] = useState(false);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
@@ -21,13 +23,15 @@ export function useFileActionsMenu(file: WorkspaceFileItem) {
       mutation: {
         onSuccess: () => {
           invalidateWorkspaceFileQueries(queryClient);
-          toast({ title: "File deleted" });
+          toast({ title: t("File deleted", "文件已删除") });
         },
         onError: (error) => {
           toast({
-            title: "Failed to delete file",
+            title: t("Failed to delete file", "无法删除文件"),
             description:
-              error instanceof Error ? error.message : "Please try again.",
+              error instanceof Error
+                ? error.message
+                : t("Please try again.", "请重试。"),
             variant: "destructive",
           });
         },
@@ -43,7 +47,9 @@ export function useFileActionsMenu(file: WorkspaceFileItem) {
       toast({
         title: "Failed to download file",
         description:
-          error instanceof Error ? error.message : "Please try again.",
+          error instanceof Error
+            ? error.message
+            : t("Please try again.", "请重试。"),
         variant: "destructive",
       });
     } finally {
@@ -63,7 +69,10 @@ export function useFileActionsMenu(file: WorkspaceFileItem) {
   }
 
   return {
-    goLabel: origin.kind === "session" ? "Open chat" : "Open in Builder",
+    goLabel:
+      origin.kind === "session"
+        ? t("Open chat", "打开聊天")
+        : "Open in Builder",
     goHref: origin.href,
     isMoveOpen,
     setIsMoveOpen,

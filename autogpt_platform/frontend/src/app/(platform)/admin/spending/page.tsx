@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { AdminUserGrantHistory } from "./components/AdminUserGrantHistory";
 import { ExportCopilotUsageButton } from "./components/ExportCopilotUsageButton";
 import { ExportCreditTransactionsButton } from "./components/ExportCreditTransactionsButton";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type SpendingDashboardPageSearchParams = {
   page?: string;
@@ -16,6 +17,7 @@ function SpendingDashboard({
 }: {
   searchParams: SpendingDashboardPageSearchParams;
 }) {
+  const { t } = useTranslation();
   const page = searchParams.page ? Number.parseInt(searchParams.page) : 1;
   const search = searchParams.search;
   const status = searchParams.status as CreditTransactionType | undefined;
@@ -25,9 +27,9 @@ function SpendingDashboard({
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-heading font-bold">User Spending</h1>
+            <h1 className="text-heading font-bold">{t("User Spending", "用户消费")}</h1>
             <p className="text-foreground-tertiary">
-              Manage user spending balances
+              {t("Manage user spending balances", "管理用户消费余额")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -39,7 +41,7 @@ function SpendingDashboard({
         <Suspense
           key={`${page}-${status}-${search}`}
           fallback={
-            <div className="py-10 text-center">Loading submissions...</div>
+            <div className="py-10 text-center">{t("Loading submissions...", "正在加载提交内容...")}</div>
           }
         >
           <AdminUserGrantHistory

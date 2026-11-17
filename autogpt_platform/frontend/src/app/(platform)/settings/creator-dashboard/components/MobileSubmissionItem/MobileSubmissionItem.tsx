@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import Image from "next/image";
 import { isLocalStoreMediaUrl } from "@/lib/store-media";
 import Link from "next/link";
@@ -52,6 +53,7 @@ export function MobileSubmissionItem({
   onDelete,
   creatorUsername,
 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const {
     canModify,
@@ -167,7 +169,7 @@ export function MobileSubmissionItem({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              aria-label="Submission actions"
+              aria-label={t("Submission actions", "提交操作")}
               data-testid="submission-actions"
               className="-mr-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground-tertiary transition-colors hover:bg-surface-hover hover:text-foreground-strong active:scale-[0.92] motion-reduce:active:scale-100"
             >
@@ -183,14 +185,16 @@ export function MobileSubmissionItem({
               <DropdownMenuItem onSelect={handleEdit}>
                 <span className="flex items-center gap-2">
                   <UIIcon icon={PencilIcon} size={14} />
-                  Edit details
+
+                  {t("Edit details", "编辑详情")}
                 </span>
               </DropdownMenuItem>
             ) : (
               <DropdownMenuItem onSelect={handleView}>
                 <span className="flex items-center gap-2">
                   <UIIcon icon={EyeIcon} size={14} />
-                  View submission
+
+                  {t("View submission", "查看提交")}
                 </span>
               </DropdownMenuItem>
             )}
@@ -204,7 +208,8 @@ export function MobileSubmissionItem({
                   data-testid="submission-marketplace-menu-link"
                 >
                   <UIIcon icon={LinkSquare01Icon} size={14} />
-                  View on marketplace
+
+                  {t("View on marketplace", "在市场查看")}
                 </Link>
               </DropdownMenuItem>
             ) : null}
@@ -218,7 +223,8 @@ export function MobileSubmissionItem({
                 >
                   <span className="flex items-center gap-2">
                     <UIIcon icon={Delete02Icon} size={14} />
-                    Delete
+
+                    {t("Delete", "删除")}
                   </span>
                 </DropdownMenuItem>
               </>
@@ -258,7 +264,7 @@ export function MobileSubmissionItem({
       </div>
 
       <Dialog
-        title="Delete submission?"
+        title={t("Delete submission?", "删除此提交？")}
         styling={{ maxWidth: "420px" }}
         controlled={{
           isOpen: confirmDeleteOpen,
@@ -277,7 +283,7 @@ export function MobileSubmissionItem({
               onClick={() => setConfirmDeleteOpen(false)}
               disabled={isDeleting}
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               variant="destructive"

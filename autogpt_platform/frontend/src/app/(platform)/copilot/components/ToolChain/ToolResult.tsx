@@ -1,6 +1,8 @@
 "use client";
 
 import type { SetupRequirementsResponse } from "@/app/api/__generated__/models/setupRequirementsResponse";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { useResultLabels } from "./useResultLabels";
 import { HeldCallDetail } from "./HeldCallRowParts";
 import { heldShowsOwnCall } from "./heldRow";
 import { useContext } from "react";
@@ -74,36 +76,49 @@ import {
 } from "./ToolResultViews";
 import { Text } from "@/components/atoms/Text/Text";
 
-const BOOLEAN_LABELS: Record<string, string> = {
-  ok: "Done",
-  success: "Done",
-};
+type Translate = ReturnType<typeof useTranslation>["t"];
 
-function shapeCard(obj: Record<string, unknown>) {
+function shapeCard(
+  obj: Record<string, unknown>,
+  t: Translate,
+  resultLabel: ReturnType<typeof useResultLabels>,
+) {
   const entries = Object.entries(obj);
   if (entries.length !== 1) return null;
   const [key, value] = entries[0];
 
   if (typeof value === "boolean")
     return (
-      <StatusCard ok={value} label={BOOLEAN_LABELS[key] ?? humanizeKey(key)} />
+      <StatusCard
+        ok={value}
+        label={
+          key === "ok" || key === "success"
+            ? t("Done", "已完成")
+            : resultLabel(key)
+        }
+      />
     );
 
   if (typeof value === "number")
-    return <StatCard value={value} label={humanizeKey(key).toLowerCase()} />;
+    return (
+      <StatCard
+        value={value}
+        label={t(humanizeKey(key).toLowerCase(), resultLabel(key))}
+      />
+    );
 
   if (
     Array.isArray(value) &&
     value.length > 0 &&
     value.every((item) => typeof item === "string")
   )
-    return <ChipList label={humanizeKey(key)} items={value as string[]} />;
+    return <ChipList label={resultLabel(key)} items={value as string[]} />;
 
   if (key === "status" && typeof value === "string")
     return (
       <div className={`${CARD} ${HALF} flex items-center gap-2 p-2.5`}>
         <Text variant="small-tight" as="span" tone="subtle">
-          Status
+          {t("Status", "状态")}
         </Text>
         <span className="ml-auto">
           <StatusPill status={value} />
@@ -209,7 +224,11 @@ function capabilityAsBlockItem(
   };
 }
 
-function setupRequirementsCard(row: ChainRow, output: Record<string, unknown>) {
+function setupRequirementsCard(
+  row: ChainRow,
+  output: Record<string, unknown>,
+  t: Translate,
+) {
   const setupInfo = asObject(output.setup_info);
   if (!setupInfo) return null;
   const setupOutput = output as unknown as SetupRequirementsResponse;
@@ -228,7 +247,7 @@ function setupRequirementsCard(row: ChainRow, output: Record<string, unknown>) {
       <SetupRequirementsCard
         output={setupOutput}
         inputsMode="trigger"
-        credentialsLabel="Account"
+        credentialsLabel={t("Account", "账户")}
       />
     );
   }
@@ -242,7 +261,10 @@ function setupRequirementsCard(row: ChainRow, output: Record<string, unknown>) {
       output={setupOutput}
       credentialsLabel={
         row.tool === "connect_integration"
-          ? `${str(setupInfo, "agent_name") ?? "Integration"} credentials`
+          ? t(
+              `${str(setupInfo, "agent_name") ?? "Integration"} credentials`,
+              `${str(setupInfo, "agent_name") ?? "集成服务"}凭据`,
+            )
           : undefined
       }
       retryInstruction={
@@ -323,11 +345,12 @@ function toolCard(
   row: ChainRow,
   output: Record<string, unknown> | null,
   readOnly: boolean,
+  t: Translate,
 ) {
   const input = asObject(row.input);
 
   if (output) {
-    const setupCard = setupRequirementsCard(row, output);
+    const setupCard = setupRequirementsCard(row, output, t);
     if (setupCard) return setupCard;
     const questions = asItems(output.questions);
     if (questions) return <QuestionsCard questions={questions} />;
@@ -525,12 +548,17 @@ function toolCard(
       return output ? <SkillCard output={output} /> : null;
     case "list_skills": {
       const names = output && chipStrings(output.skills, "name");
-      return names ? <ChipList label="Skills" items={names} /> : null;
+      return names ? (
+        <ChipList label={t("Skills", "技能")} items={names} />
+      ) : null;
     }
     case "list_chat_platform_channels": {
       const names = output && chipStrings(output.channels, "name");
       return names ? (
-        <ChipList label="Channels" items={names.map((name) => `#${name}`)} />
+        <ChipList
+          label={t("Channels", "频道")}
+          items={names.map((name) => `#${name}`)}
+        />
       ) : null;
     }
     case "web_search": {
@@ -610,18 +638,25 @@ export function ToolResult({ row, readOnly = false }: Props) {
 }
 
 function ToolOutput({ row, readOnly }: Required<Props>) {
+  const { t } = useTranslation();
+  const resultLabel = useResultLabels();
   const output = asObject(row.output);
   const target = capabilityTargetRow(row);
   const card =
-    toolCard(target, output, readOnly) ??
-    (target === row ? null : toolCard(row, output, readOnly));
+    toolCard(target, output, readOnly, t) ??
+    (target === row ? null : toolCard(row, output, readOnly, t));
   if (card) return card;
 
-  if (isBlankOutput(row.output)) return <KeyValueList value={NOTHING_FOUND} />;
+  if (isBlankOutput(row.output))
+    return <KeyValueList value={t(NOTHING_FOUND, "未找到结果。")} />;
   // An empty list can be the point of a change (the last grant revoked), so
   // what the tool said comes first.
   if (output && isEmptyResult(output))
-    return <KeyValueList value={str(output, "message") ?? NOTHING_FOUND} />;
+    return (
+      <KeyValueList
+        value={str(output, "message") ?? t(NOTHING_FOUND, "未找到结果。")}
+      />
+    );
   if (!output) return <KeyValueList value={row.output} />;
 
   const data = stripBaseFields(output);
@@ -634,6 +669,6 @@ function ToolOutput({ row, readOnly }: Required<Props>) {
 
   return (
     linkCard(data, asObject(target.input)) ??
-    shapeCard(data) ?? <KeyValueList value={data} />
+    shapeCard(data, t, resultLabel) ?? <KeyValueList value={data} />
   );
 }

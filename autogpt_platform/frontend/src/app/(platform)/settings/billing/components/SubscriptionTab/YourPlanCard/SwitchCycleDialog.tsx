@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
@@ -23,11 +24,19 @@ export function SwitchCycleDialog({
   isSaving,
   onConfirm,
 }: Props) {
-  const targetLabel = targetCycle === "yearly" ? "Yearly" : "Monthly";
+  const { t } = useTranslation();
+  const targetLabel =
+    targetCycle === "yearly" ? t("Yearly", "每年") : t("Monthly", "每月");
 
   return (
     <Dialog
-      title={title ?? `Switch billing to ${targetLabel}?`}
+      title={
+        title ??
+        t(
+          `Switch billing to ${targetCycle === "yearly" ? "Yearly" : "Monthly"}?`,
+          `将账单周期改为${targetLabel}？`,
+        )
+      }
       styling={{ maxWidth: "440px" }}
       controlled={{ isOpen, set: onOpenChange }}
     >
@@ -58,7 +67,7 @@ export function SwitchCycleDialog({
             onClick={() => onOpenChange(false)}
             disabled={isSaving}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button
             type="button"
@@ -68,7 +77,10 @@ export function SwitchCycleDialog({
             disabled={isSaving}
             loading={isSaving}
           >
-            Switch to {targetLabel}
+            {t(
+              `Switch to ${targetCycle === "yearly" ? "Yearly" : "Monthly"}`,
+              `改为${targetLabel}`,
+            )}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useReadEveryRender } from "@/hooks/useReadEveryRender";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { SubscriptionTier } from "@/app/api/__generated__/models/subscriptionTier";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -69,6 +70,7 @@ export function RateLimitResetDialog({
   onSendAtReset,
   isSchedulingAtReset,
 }: Props) {
+  const { t, locale } = useTranslation();
   const router = useRouter();
   const model =
     experience ??
@@ -79,24 +81,24 @@ export function RateLimitResetDialog({
         resets_at: resetsAt ? new Date(resetsAt).toISOString() : "",
       },
     });
-  const copy = usagePresentation(model, offer?.usageMultiplier);
+  const copy = usagePresentation(model, offer?.usageMultiplier, locale);
   // A top-tier plan has no upgrade to lead with, so waiting for the reset
   // leads instead.
   const waitTitle =
-    wait && model.isTopTier ? budgetOutTitle(wait.window) : null;
+    wait && model.isTopTier ? budgetOutTitle(wait.window, locale) : null;
   // Relative to the clock, so read on every render rather than cached.
   const resetSentence = useReadEveryRender(() =>
-    wait ? budgetResetSentence(wait) : null,
+    wait ? budgetResetSentence(wait, undefined, locale) : null,
   );
-  const payment = formatPaymentDue(model.payment);
+  const payment = formatPaymentDue(model.payment, locale);
   const fallbackTitle =
     failureWindow === "trial"
-      ? "You’ve used your trial allowance"
+      ? t("You’ve used your trial allowance", "你已用完试用额度")
       : failureWindow === "weekly"
-        ? "You’ve hit this week’s limit"
+        ? t("You’ve hit this week’s limit", "你已达到本周用量上限")
         : failureWindow === "daily"
-          ? "You’ve hit today’s limit"
-          : "We couldn’t check your usage.";
+          ? t("You’ve hit today’s limit", "你已达到今日用量上限")
+          : t("We couldn’t check your usage.", "无法查询你的用量。");
   function upgrade() {
     if (onUpgrade) onUpgrade();
     else {
@@ -111,14 +113,14 @@ export function RateLimitResetDialog({
         <div className="pr-6">
           <Text tone="muted" variant="small-tight" className="mb-2">
             {checking
-              ? "Checking your allowance"
+              ? t("Checking your allowance", "正在检查可用额度")
               : unavailable
-                ? "Usage temporarily unavailable"
+                ? t("Usage temporarily unavailable", "用量信息暂时不可用")
                 : copy.eyebrow}
           </Text>
           <Text as="span" variant="h3" className="!leading-8">
             {checking
-              ? "One moment. Your work is saved."
+              ? t("One moment. Your work is saved.", "请稍候。你的工作已保存。")
               : unavailable
                 ? fallbackTitle
                 : (waitTitle ?? copy.title)}
@@ -136,15 +138,17 @@ export function RateLimitResetDialog({
       <Dialog.Content>
         {checking ? (
           <Text tone="muted" variant="body-tight" role="status">
-            Refreshing your plan and usage…
+            {t("Refreshing your plan and usage…", "正在刷新你的套餐和用量…")}
           </Text>
         ) : unavailable ? (
           <div className="space-y-5">
             <Text tone="muted" variant="body" className="!text-body !leading-6">
-              Your work is saved. Try again to check your allowance before
-              continuing.
+              {t(
+                "Your work is saved. Try again to check your allowance before continuing.",
+                "你的工作已保存。请重试以检查可用额度，然后再继续。",
+              )}
             </Text>
-            <Button onClick={onRetry}>Try again</Button>
+            <Button onClick={onRetry}>{t("Try again", "重试")}</Button>
           </div>
         ) : (
           <>
@@ -158,9 +162,12 @@ export function RateLimitResetDialog({
             {copy.trialSpent && (
               <div className="mb-5">
                 <UsageMeter
-                  label="Trial allowance"
+                  label={t("Trial allowance", "试用额度")}
                   percent={model.trialPercent ?? 100}
-                  detail="One allowance for your trial. It doesn’t refresh."
+                  detail={t(
+                    "One allowance for your trial. It doesn’t refresh.",
+                    "试用期间共用一份额度，不会重置。",
+                  )}
                 />
               </div>
             )}
@@ -175,7 +182,7 @@ export function RateLimitResetDialog({
               <PlanOffer
                 tier={model.targetTier}
                 {...offer}
-                actionLabel={getUsageOfferAction(model, offer ?? {})}
+                actionLabel={getUsageOfferAction(model, offer ?? {}, locale)}
                 onUpgrade={upgrade}
               />
             )}
@@ -188,15 +195,20 @@ export function RateLimitResetDialog({
                 />
               ) : (
                 <Button className="w-full" onClick={upgrade}>
-                  Review billing details
+                  {t("Review billing details", "查看账单详情")}
                 </Button>
               ))}
             {isBillingEnabled && model.isTopTier && (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border-base p-4">
                 <div>
-                  <Text variant="small-medium">Need more capacity?</Text>
+                  <Text variant="small-medium">
+                    {t("Need more capacity?", "需要更多额度？")}
+                  </Text>
                   <Text tone="muted" variant="small" className="mt-1">
-                    We’ll help find the right fit.
+                    {t(
+                      "We’ll help find the right fit.",
+                      "我们会帮你找到合适的方案。",
+                    )}
                   </Text>
                 </div>
                 <Button
@@ -219,7 +231,9 @@ export function RateLimitResetDialog({
           />
         )}
         <Button variant="ghost" className="mt-3 w-full" onClick={onClose}>
-          {checking || unavailable ? "Back to my work" : copy.secondary}
+          {checking || unavailable
+            ? t("Back to my work", "返回工作")
+            : copy.secondary}
         </Button>
       </Dialog.Content>
     </Dialog>

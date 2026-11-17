@@ -18,7 +18,10 @@ import {
 } from "@/services/consent/cookiebot";
 import { environment } from "@/services/environment";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
+import { LOCALE_COOKIE_NAME, parseLocale } from "@/lib/i18n/locale";
+import { LanguageSwitcher } from "@/components/molecules/LanguageSwitcher/LanguageSwitcher";
 import Script from "next/script";
 import { getSiteUrl } from "@/lib/metadata";
 
@@ -70,13 +73,14 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const headersList = await headers();
+  const locale = parseLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
   const host = headersList.get("host") || "";
   const cookiebotCBID = environment.getCookiebotCBID();
   const cookiebotGeoRegions = environment.getCookiebotGeoRegions();
 
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${fonts.poppins.variable} ${fonts.sans.variable} ${fonts.mono.variable}`}
       suppressHydrationWarning
     >
@@ -116,35 +120,38 @@ export default async function RootLayout({
             />
           </>
         ) : null}
-        <ErrorBoundary context="application">
-          <Providers
-            attribute="class"
-            defaultTheme="light"
-            // Feel free to remove this line if you want to use the system theme by default
-            // enableSystem
-            disableTransitionOnChange
-          >
-            <SetupAnalytics
-              host={host}
-              ga={{ gaId: environment.getGAMeasurementID() }}
-            />
-            <div className="flex min-h-screen flex-col items-stretch justify-items-stretch supports-[min-height:100dvh]:min-h-dvh">
-              {children}
-              <VercelSpeedInsights />
+        <LanguageProvider initialLocale={locale}>
+          <ErrorBoundary context="application">
+            <Providers
+              attribute="class"
+              defaultTheme="light"
+              // Feel free to remove this line if you want to use the system theme by default
+              // enableSystem
+              disableTransitionOnChange
+            >
+              <SetupAnalytics
+                host={host}
+                ga={{ gaId: environment.getGAMeasurementID() }}
+              />
+              <div className="flex min-h-screen flex-col items-stretch justify-items-stretch supports-[min-height:100dvh]:min-h-dvh">
+                {children}
+                <VercelSpeedInsights />
 
-              {/* React Query DevTools is only available in development */}
-              {process.env.NEXT_PUBLIC_REACT_QUERY_DEVTOOL && (
-                <ReactQueryDevtools
-                  initialIsOpen={false}
-                  buttonPosition={"bottom-left"}
-                />
-              )}
-            </div>
-            <Toaster />
-            <TrackerCookieCleanup />
-            <ConsentWithdrawalReload />
-          </Providers>
-        </ErrorBoundary>
+                {/* React Query DevTools is only available in development */}
+                {process.env.NEXT_PUBLIC_REACT_QUERY_DEVTOOL && (
+                  <ReactQueryDevtools
+                    initialIsOpen={false}
+                    buttonPosition={"bottom-left"}
+                  />
+                )}
+              </div>
+              <Toaster />
+              <LanguageSwitcher />
+              <TrackerCookieCleanup />
+              <ConsentWithdrawalReload />
+            </Providers>
+          </ErrorBoundary>
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { PublishAgentModal } from "@/components/contextual/PublishAgentModal/PublishAgentModal";
 import type { PublishState } from "@/components/contextual/PublishAgentModal/usePublishAgentModal";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
@@ -16,6 +17,7 @@ import { WorkflowsShelf } from "../WorkflowsShelf/WorkflowsShelf";
 import { useMainMarketplacePage } from "./useMainMarketplacePage";
 
 export function MainMarkeplacePage() {
+  const { t } = useTranslation();
   const [publishState, setPublishState] = useState<PublishState>({
     isOpen: false,
     step: "select",
@@ -52,7 +54,12 @@ export function MainMarkeplacePage() {
           <div className="flex min-h-[400px] items-center justify-center">
             <ErrorCard
               isSuccess={false}
-              responseError={{ message: "Failed to load marketplace data" }}
+              responseError={{
+                message: t(
+                  "Failed to load marketplace data",
+                  "无法加载市场数据",
+                ),
+              }}
               context="marketplace page"
               onRetry={() => window.location.reload()}
               className="w-full max-w-md"
@@ -88,7 +95,10 @@ export function MainMarkeplacePage() {
             shelf instead, where it cannot outshout the shelf itself. */}
         {!hasWorkflowShelf ? (
           <BecomeACreator
-            description="Join our ever-growing community of hackers and tinkerers"
+            description={t(
+              "Join our ever-growing community of hackers and tinkerers",
+              "加入我们不断壮大的开发者和探索者社区",
+            )}
             buttonText="Publish your workflows"
             onPublish={openPublishing}
           />

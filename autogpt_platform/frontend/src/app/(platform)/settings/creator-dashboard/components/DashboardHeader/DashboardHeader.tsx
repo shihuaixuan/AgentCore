@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Button } from "@/components/atoms/Button/Button";
@@ -24,6 +25,7 @@ export function DashboardHeader({
   onOpenSubmit,
   onRequestEdit,
 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   return (
@@ -35,11 +37,13 @@ export function DashboardHeader({
     >
       <div className="flex min-w-0 flex-col">
         <Text variant="h4" as="h1">
-          Creator dashboard
+          {t("Creator dashboard", "创作者面板")}
         </Text>
         <Text variant="body" tone="body" className="mt-3 max-w-[640px]">
-          Track your store submissions, see how they perform, and ship updates
-          for the workflows you publish.
+          {t(
+            "Track your store submissions, see how they perform, and ship updates for the workflows you publish.",
+            "跟踪市场提交记录、查看表现，并更新已发布的工作流。",
+          )}
         </Text>
       </div>
 
@@ -54,7 +58,7 @@ export function DashboardHeader({
             onClick={onOpenSubmit}
             leftIcon={<Icon icon={PlusSignIcon} size={18} />}
           >
-            Submit workflow
+            {t("Submit workflow", "提交工作流")}
           </Button>
         }
       />

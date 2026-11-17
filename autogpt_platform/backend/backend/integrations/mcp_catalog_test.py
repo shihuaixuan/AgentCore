@@ -4,6 +4,7 @@ from unittest.mock import patch
 import pytest
 from pydantic import ValidationError
 
+from backend.integrations import mcp_catalog
 from backend.integrations.mcp_catalog import (
     MCPCatalogEntry,
     MCPServerMetadata,
@@ -18,6 +19,44 @@ from backend.integrations.mcp_catalog import (
 
 def test_catalog_loads_validated_entries():
     assert get_mcp_catalog()
+
+
+def test_mcp_catalog_uses_database_snapshot_when_set():
+    bundled = get_mcp_catalog()
+    entry = bundled[0]
+    mcp_catalog.set_mcp_catalog((entry,))
+    assert get_mcp_catalog() == (entry,)
+    mcp_catalog.set_mcp_catalog(())
+    assert get_mcp_catalog() == ()
+    mcp_catalog.set_mcp_catalog(None)
+    assert get_mcp_catalog() == bundled
+
+
+@pytest.mark.asyncio
+async def test_load_empty_database_catalog_suppresses_bundled_catalog():
+    with patch.object(mcp_catalog.database, "query_raw_with_schema", return_value=[]):
+        assert await mcp_catalog.load_mcp_catalog_from_database()
+
+    assert get_mcp_catalog() == ()
+    mcp_catalog.set_mcp_catalog(None)
+
+
+@pytest.mark.asyncio
+async def test_publish_mcp_catalog_upserts_each_entry_in_the_transaction():
+    entries = get_mcp_catalog()[:2]
+    calls = []
+
+    async def execute(query, *args, client=None):
+        calls.append((query, args, client))
+        return 1
+
+    transaction = object()
+    with patch.object(mcp_catalog.database, "execute_raw_with_schema", execute):
+        await mcp_catalog.publish_mcp_catalog(entries, "test-source", transaction)
+
+    assert len(calls) == 2
+    assert [call[1][0] for call in calls] == [entry.name for entry in entries]
+    assert all(call[2] is transaction for call in calls)
 
 
 def test_posthog_catalog_entry_uses_hosted_authentication():

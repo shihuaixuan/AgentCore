@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Text } from "@/components/atoms/Text/Text";
 import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
@@ -35,13 +36,19 @@ const MAIN_CLASS =
   "container min-h-screen max-w-[1180px] space-y-5 px-4 pb-16 pt-6 sm:px-8 md:px-12";
 
 const TABS = [
-  { value: "basics", label: "Basics", icon: UserIcon },
-  { value: "schedules", label: "Schedules", icon: Calendar03Icon },
-  { value: "workflows", label: "Workflows", icon: WorkflowSquare01Icon },
-  { value: "skills", label: "Skills", icon: SparklesIcon },
+  { value: "basics", label: "Basics", zh: "基本信息", icon: UserIcon },
+  { value: "schedules", label: "Schedules", zh: "计划", icon: Calendar03Icon },
+  {
+    value: "workflows",
+    label: "Workflows",
+    zh: "工作流",
+    icon: WorkflowSquare01Icon,
+  },
+  { value: "skills", label: "Skills", zh: "技能", icon: SparklesIcon },
 ] as const;
 
 export default function AutopilotPage() {
+  const { t } = useTranslation();
   const { activeTab, onTabChange } = useAutopilotTab();
   const { schedules, workflows, skills, isLoading, isError, refetch } =
     useAutopilotPage();
@@ -62,7 +69,7 @@ export default function AutopilotPage() {
         <BackToTeamLink />
         <ErrorCard
           context={AUTOPILOT_NAME}
-          hint="We could not load your team."
+          hint={t("We could not load your team.", "无法加载你的团队。")}
           onRetry={() => refetch()}
         />
       </main>
@@ -75,7 +82,7 @@ export default function AutopilotPage() {
       <AutopilotHeader />
 
       <Text variant="body" tone="muted">
-        Built in, always on your team.
+        {t("Built in, always on your team.", "内置成员，始终与你的团队同行。")}
       </Text>
 
       <TabsLine variant="compact" value={activeTab} onValueChange={onTabChange}>
@@ -94,7 +101,7 @@ export default function AutopilotPage() {
               value={tab.value}
               icon={tab.icon}
             >
-              <span className="max-sm:sr-only">{tab.label}</span>
+              <span className="max-sm:sr-only">{t(tab.label, tab.zh)}</span>
             </TabsLineTrigger>
           ))}
         </TabsLineList>
@@ -105,8 +112,8 @@ export default function AutopilotPage() {
 
         <TabsLineContent value="schedules">
           <ExpertSchedulesSection
-            title="Team schedules"
-            expertName="your team"
+            title={t("Team schedules", "团队计划")}
+            expertName={t("your team", "你的团队")}
             schedules={schedules}
             lastRunLabel={null}
           />
@@ -117,7 +124,10 @@ export default function AutopilotPage() {
             expertName={AUTOPILOT_NAME}
             workflows={workflows}
             coverColor={AUTOPILOT_HEX}
-            emptyMessage="Workflows in your library that no expert owns show up here."
+            emptyMessage={t(
+              "Workflows in your library that no expert owns show up here.",
+              "工作流库中尚未分配给专家的工作流会显示在这里。",
+            )}
           />
         </TabsLineContent>
 

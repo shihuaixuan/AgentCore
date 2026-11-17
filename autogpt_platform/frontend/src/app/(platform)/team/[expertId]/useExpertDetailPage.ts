@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetExpertQueryKey,
   getListExpertsQueryKey,
@@ -17,6 +18,7 @@ interface Args {
 }
 
 export function useExpertDetailPage({ expertId }: Args) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -54,7 +56,7 @@ export function useExpertDetailPage({ expertId }: Args) {
         },
         onError: () => {
           toast({
-            title: "Could not resume schedules",
+            title: t("Could not resume schedules", "无法恢复计划"),
             variant: "destructive",
           });
         },

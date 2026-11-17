@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { useState } from "react";
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function SkillsList({ category }: Props) {
+  const { t } = useTranslation();
   // Seeded from the page filter and reset with it by the parent's `key`, so
   // the chips narrow the shelf further without fighting the page.
   const [topic, setTopic] = useState(category ?? null);
@@ -52,9 +54,12 @@ export function SkillsList({ category }: Props) {
       className="mb-16 scroll-mt-24"
     >
       <SectionHeader
-        title="Skills"
+        title={t("Skills", "技能")}
         titleId={HEADING_ID}
-        subtitle="Playbooks your experts pick up as they work."
+        subtitle={t(
+          "Playbooks your experts pick up as they work.",
+          "专家在工作中学习使用的操作指南。",
+        )}
         filters={
           <SkillTopicChips
             selected={topic}
@@ -67,7 +72,7 @@ export function SkillsList({ category }: Props) {
         <div
           role="status"
           aria-busy="true"
-          aria-label="Loading skills"
+          aria-label={t("Loading skills", "正在加载技能")}
           className={SHELF_GRID}
         >
           {Array.from({ length: SHELF_PREVIEW_SIZE }, (_, i) => (
@@ -76,13 +81,15 @@ export function SkillsList({ category }: Props) {
         </div>
       ) : isError ? (
         <div className="flex items-center gap-2 text-body text-foreground-secondary">
-          <span>Couldn&apos;t load skills right now.</span>
+          <span>
+            {t("Couldn't load skills right now.", "暂时无法加载技能。")}
+          </span>
           <button
             type="button"
             onClick={() => refetch()}
             className="font-medium text-brand underline-offset-2 transition-colors hover:underline"
           >
-            Retry
+            {t("Retry", "重试")}
           </button>
         </div>
       ) : isEmpty ? (
@@ -90,7 +97,7 @@ export function SkillsList({ category }: Props) {
           <span>
             {topic
               ? `No ${formatCategoryLabel(topic).toLowerCase()} skills yet.`
-              : "No skills yet."}
+              : t("No skills yet.", "暂无技能。")}
           </span>
           {topic ? (
             <button
@@ -98,7 +105,7 @@ export function SkillsList({ category }: Props) {
               onClick={() => selectTopic(null)}
               className="font-medium text-brand underline-offset-2 transition-colors hover:underline"
             >
-              Show all
+              {t("Show all", "显示全部")}
             </button>
           ) : null}
         </div>
@@ -136,7 +143,7 @@ export function SkillsList({ category }: Props) {
           variant="secondary"
           size="small"
         >
-          Browse all skills
+          {t("Browse all skills", "浏览全部技能")}
         </Button>
       </div>
       {openSlug ? (

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
 import NextLink from "next/link";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -43,6 +45,7 @@ export function HandoffStatus({
   color,
   onSend,
 }: Props) {
+  const { t } = useTranslation();
   const live = useSubSessionEffectiveStatus(
     outcome.subSessionId,
     frozenStatusOf(outcome),
@@ -74,7 +77,7 @@ export function HandoffStatus({
           </p>
           {unknown && (
             <span className="inline-flex shrink-0 items-center rounded-full bg-surface-hover px-2 py-0.5 text-caption-sm leading-inherit font-medium text-foreground-tertiary">
-              Status unknown
+              {t("Status unknown", "状态未知")}
             </span>
           )}
           {outcome.link && (
@@ -82,7 +85,7 @@ export function HandoffStatus({
               href={outcome.link}
               className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border-base bg-surface px-3 py-1.5 text-body font-medium text-foreground-emphasis shadow-sm transition-colors hover:border-border-strong hover:bg-surface-muted focus-visible:ring-1 focus-visible:ring-focus focus-visible:outline-none"
             >
-              Open {possessive(name)} chat
+              {t(`Open ${possessive(name)} chat`, `打开与 ${name} 的对话`)}
               <Icon
                 icon={ArrowUpRight01Icon}
                 size={14}
@@ -127,7 +130,7 @@ export function HandoffStatus({
                 href={outcome.link}
                 className="inline-flex shrink-0 items-center gap-1 rounded text-body font-medium text-foreground-emphasis underline-offset-2 hover:underline focus-visible:ring-1 focus-visible:ring-focus focus-visible:outline-none"
               >
-                Open {possessive(name)} chat
+                {t(`Open ${possessive(name)} chat`, `打开与 ${name} 的对话`)}
                 <Icon
                   icon={ArrowUpRight01Icon}
                   size={14}
@@ -149,22 +152,24 @@ interface SentenceProps {
 }
 
 function HandoffSentence({ outcome, kind, name, state }: SentenceProps) {
-  const who = (
-    <span className="font-medium text-foreground-emphasis">{name}</span>
-  );
+  const { t } = useTranslation();
   switch (state) {
     case "failed":
       return (
         <>
-          {who} is {NEW_EXPERT_COPY[kind].done}, but {outcome.title} didn&apos;t
-          start.
+          {t(
+            `${name} is ${NEW_EXPERT_COPY[kind].done}, but ${outcome.title} didn't start.`,
+            `${name} 已${kind === "raise" ? "创建" : "聘用"}，但“${outcome.title}”尚未开始。`,
+          )}
         </>
       );
     case "unconfirmed":
       return (
         <>
-          {outcome.title} may have started in {possessive(name)} chat. Open it
-          to check.
+          {t(
+            `${outcome.title} may have started in ${possessive(name)} chat. Open it to check.`,
+            `“${outcome.title}”可能已在 ${name} 的对话中开始，请打开对话确认。`,
+          )}
         </>
       );
     // An idle thread holds a result, a question for the user or an error;
@@ -172,28 +177,38 @@ function HandoffSentence({ outcome, kind, name, state }: SentenceProps) {
     case "stopped":
       return (
         <>
-          {who} stopped working on {outcome.title}. Their chat has the result,
-          or a question for you.
+          {t(
+            `${name} stopped working on ${outcome.title}. Their chat has the result, or a question for you.`,
+            `${name} 已停止处理“${outcome.title}”。其对话中有结果或需要你回答的问题。`,
+          )}
         </>
       );
     case "waiting":
       return (
         <>
-          {who} starts on {outcome.title} as soon as one of your other tasks
-          finishes.
+          {t(
+            `${name} starts on ${outcome.title} as soon as one of your other tasks finishes.`,
+            `你的其他任务之一完成后，${name} 就会开始处理“${outcome.title}”。`,
+          )}
         </>
       );
     case "working":
       return (
         <>
-          {who} is working on {outcome.title}.
+          {t(
+            `${name} is working on ${outcome.title}.`,
+            `${name} 正在处理“${outcome.title}”。`,
+          )}
         </>
       );
     // The live status can't be read: say only what is known.
     case "unknown":
       return (
         <>
-          Sent {outcome.title} to {who}. Open their chat to see where it stands.
+          {t(
+            `Sent ${outcome.title} to ${name}. Open their chat to see where it stands.`,
+            `已将“${outcome.title}”发送给 ${name}。请打开其对话查看进展。`,
+          )}
         </>
       );
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 import {
   isConsentManagerConfigured,
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function CookieSettingsLink({ className, beforeOpen }: Props) {
+  const { t } = useTranslation();
   const status = useConsentManagerStatus();
 
   if (!isConsentManagerConfigured() || status === "unavailable") return null;
@@ -43,7 +45,7 @@ export function CookieSettingsLink({ className, beforeOpen }: Props) {
         data-slot="cookie-settings-link-label"
         className="underline-offset-2 group-hover:text-foreground-strong group-hover:underline group-disabled:no-underline"
       >
-        Cookie settings
+        {t("Cookie settings", "Cookie 设置")}
       </Text>
     </button>
   );

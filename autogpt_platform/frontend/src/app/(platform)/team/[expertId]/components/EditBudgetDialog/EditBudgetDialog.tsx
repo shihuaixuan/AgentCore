@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function EditBudgetDialog({ expert, open, onClose }: Props) {
+  const { t } = useTranslation();
   const { value, setValue, isInvalid, isPending, save } = useEditBudgetDialog({
     expert,
     open,
@@ -23,7 +25,7 @@ export function EditBudgetDialog({ expert, open, onClose }: Props) {
   return (
     <Dialog
       variant="compact"
-      title="Weekly budget"
+      title={t("Weekly budget", "每周预算")}
       styling={{ maxWidth: "24rem" }}
       controlled={{
         isOpen: open,
@@ -38,7 +40,7 @@ export function EditBudgetDialog({ expert, open, onClose }: Props) {
             <Input
               id="expert-weekly-budget"
               size="small"
-              label="Weekly budget"
+              label={t("Weekly budget", "每周预算")}
               labelVariant="small-medium"
               placeholder="e.g. 25"
               value={value}
@@ -60,7 +62,7 @@ export function EditBudgetDialog({ expert, open, onClose }: Props) {
               variant="secondary"
               onClick={onClose}
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               size="small"
@@ -69,7 +71,7 @@ export function EditBudgetDialog({ expert, open, onClose }: Props) {
               disabled={isInvalid}
               loading={isPending}
             >
-              Save budget
+              {t("Save budget", "保存预算")}
             </Button>
           </div>
         </form>

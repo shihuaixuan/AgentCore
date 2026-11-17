@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
@@ -10,6 +11,7 @@ import { useUnderstandingCard } from "./useUnderstandingCard";
 const LONG_VALUE_CHARS = 280;
 
 export function UnderstandingCard() {
+  const { t } = useTranslation();
   const {
     rows,
     isError,
@@ -39,7 +41,7 @@ export function UnderstandingCard() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-col">
           <Text variant="body-medium" as="h2" id="understanding-title">
-            What Otto knows about your work
+            {t("What Otto knows about your work", "Otto 对你工作的了解")}
           </Text>
           <Text variant="small" as="span" tone="muted">
             From your onboarding and your chats. Every new chat with Otto starts
@@ -47,13 +49,16 @@ export function UnderstandingCard() {
           </Text>
         </div>
         <Dialog
-          title="Forget what Otto knows about your work"
+          title={t(
+            "Forget what Otto knows about your work",
+            "忘记 Otto 对你工作的了解",
+          )}
           styling={{ maxWidth: "440px" }}
           controlled={{ isOpen: isConfirmOpen, set: setIsConfirmOpen }}
         >
           <Dialog.Trigger>
             <Button variant="secondary" size="small">
-              Forget this
+              {t("Forget this", "忘记此项")}
             </Button>
           </Dialog.Trigger>
           <Dialog.Content>
@@ -68,7 +73,7 @@ export function UnderstandingCard() {
                   size="small"
                   onClick={() => setIsConfirmOpen(false)}
                 >
-                  Cancel
+                  {t("Cancel", "取消")}
                 </Button>
                 <Button
                   variant="destructive"
@@ -76,7 +81,7 @@ export function UnderstandingCard() {
                   loading={isForgetting}
                   onClick={forget}
                 >
-                  Forget
+                  {t("Forget", "忘记")}
                 </Button>
               </div>
             </div>
@@ -101,6 +106,7 @@ export function UnderstandingCard() {
 }
 
 function UnderstandingValue({ value }: { value: string }) {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   // By code point, so the cut never splits an emoji's surrogate pair.
   const chars = Array.from(value);
@@ -119,7 +125,7 @@ function UnderstandingValue({ value }: { value: string }) {
           className="ml-1 text-foreground-tertiary underline"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          {isExpanded ? "Show less" : "Show all"}
+          {isExpanded ? "Show less" : t("Show all", "显示全部")}
         </button>
       ) : null}
     </dd>

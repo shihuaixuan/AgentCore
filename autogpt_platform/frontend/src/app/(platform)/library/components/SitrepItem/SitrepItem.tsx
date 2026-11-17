@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { OverflowText } from "@/components/atoms/OverflowText/OverflowText";
 import { Text } from "@/components/atoms/Text/Text";
 import NextLink from "next/link";
@@ -79,6 +80,7 @@ const PRIORITY_CONFIG: Record<
 };
 
 export function SitrepItem({ item }: Props) {
+  const { t } = useTranslation();
   const config = PRIORITY_CONFIG[item.priority];
   const { showImage, handleImageError } = useImageFallback(item.agentImageUrl);
   const router = useRouter();
@@ -141,7 +143,8 @@ export function SitrepItem({ item }: Props) {
             className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-body-sm leading-inherit font-medium text-foreground-secondary transition-colors hover:bg-surface-muted hover:text-foreground-emphasis"
           >
             <Icon icon={EyeIcon} size={14} className="shrink-0" />
-            See task
+
+            {t("See task", "查看任务")}
           </NextLink>
         ) : (
           <ContextualActionButton
@@ -156,7 +159,8 @@ export function SitrepItem({ item }: Props) {
           className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-body-sm leading-inherit font-medium text-foreground-secondary transition-colors hover:bg-surface-muted hover:text-foreground-emphasis"
         >
           <Icon icon={Chatting01Icon} size={14} className="shrink-0" />
-          Ask Otto
+
+          {t("Ask Otto", "询问 Otto")}
         </button>
       </div>
     </div>

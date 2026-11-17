@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import {
   DropdownMenu,
@@ -54,6 +56,7 @@ export function ComposerPlusMenu({
   className,
   extraItems = [],
 }: Props) {
+  const { t } = useTranslation();
   const {
     fileInputRef,
     openModal,
@@ -94,7 +97,7 @@ export function ComposerPlusMenu({
             type="button"
             variant="tray"
             size="icon"
-            aria-label="Add files and more"
+            aria-label={t("Add files and more", "添加文件及更多操作")}
             data-testid="composer-plus-button"
             disabled={disabled}
             className={cn(className)}
@@ -111,7 +114,7 @@ export function ComposerPlusMenu({
             }}
           >
             <Icon icon={Attachment01Icon} className="mr-2 h-4 w-4" />
-            Attach file
+            {t("Attach file", "添加附件")}
             {isAtCap && <CapLabel />}
           </DropdownMenuItem>
           {showCameraOption && (
@@ -123,7 +126,7 @@ export function ComposerPlusMenu({
               }}
             >
               <Icon icon={Camera01Icon} className="mr-2 h-4 w-4" />
-              Take photo
+              {t("Take photo", "拍照")}
               {isAtCap && <CapLabel />}
             </DropdownMenuItem>
           )}
@@ -136,7 +139,7 @@ export function ComposerPlusMenu({
               }}
             >
               <Icon icon={FolderOpenIcon} className="mr-2 h-4 w-4" />
-              Use File from Workspace
+              {t("Use File from Workspace", "使用工作区文件")}
               {isAtCap && <CapLabel />}
             </DropdownMenuItem>
           )}
@@ -147,15 +150,15 @@ export function ComposerPlusMenu({
             }}
           >
             <Icon icon={PlugSocketIcon} className="mr-2 h-4 w-4" />
-            Connect service
+            {t("Connect service", "连接服务")}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => openModal("skills")}>
             <Icon icon={BookOpen01Icon} className="mr-2 h-4 w-4" />
-            Skills
+            {t("Skills", "技能")}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => openModal("scheduled")}>
             <Icon icon={Calendar03Icon} className="mr-2 h-4 w-4" />
-            Scheduled
+            {t("Scheduled", "定时任务")}
           </DropdownMenuItem>
           {extraItems.length > 0 && <DropdownMenuSeparator />}
           {extraItems.map((item) => (
@@ -175,9 +178,10 @@ export function ComposerPlusMenu({
 }
 
 function CapLabel() {
+  const { t } = useTranslation();
   return (
     <span className="ml-auto pl-3 text-caption text-foreground-tertiary">
-      {MAX_ATTACHMENTS} max
+      {t(MAX_ATTACHMENTS + " max", "最多 " + MAX_ATTACHMENTS + " 个")}
     </span>
   );
 }

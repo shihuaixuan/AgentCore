@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { makeCronExpression } from "@/lib/cron-expression-utils";
 import { FrequencySelect } from "./FrequencySelect";
@@ -27,6 +28,7 @@ export function CronScheduler({
   onCronExpressionChange,
   initialCronExpression,
 }: Props) {
+  const { t } = useTranslation();
   const [frequency, setFrequency] = useState<CronFrequency>("daily");
   const [selectedMinute, setSelectedMinute] = useState<string>("0");
   const [selectedTime, setSelectedTime] = useState<string>("09:00");
@@ -267,7 +269,7 @@ export function CronScheduler({
             label={
               frequency === "custom" && customInterval.unit === "days"
                 ? "Starting at"
-                : "At"
+                : t("At", "于")
             }
           />
         )}

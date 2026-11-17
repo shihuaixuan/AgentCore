@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getV2GetSession,
   usePatchV2UpdateSessionPinned,
@@ -19,6 +20,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export function useRecentChats() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { sessions, isLoading, hasMore, isLoadingMore, loadMore } =
     useSessionList();
@@ -48,9 +50,11 @@ export function useRecentChats() {
       },
       onError: (error) => {
         toast({
-          title: "Failed to update chat",
+          title: t("Failed to update chat", "更新对话失败"),
           description:
-            error instanceof Error ? error.message : "An error occurred",
+            error instanceof Error
+              ? error.message
+              : t("An error occurred", "发生错误"),
           variant: "destructive",
         });
       },
@@ -65,9 +69,11 @@ export function useRecentChats() {
       },
       onError: (error) => {
         toast({
-          title: "Failed to rename chat",
+          title: t("Failed to rename chat", "重命名对话失败"),
           description:
-            error instanceof Error ? error.message : "An error occurred",
+            error instanceof Error
+              ? error.message
+              : t("An error occurred", "发生错误"),
           variant: "destructive",
         });
         setEditingSessionId(null);
@@ -79,19 +85,24 @@ export function useRecentChats() {
     mutation: {
       onSuccess: () => {
         toast({
-          title: "Excluded from learning",
-          description:
+          title: t("Excluded from learning", "已排除学习"),
+          description: t(
             "This chat will not be used for future skill learning. Skills " +
-            "that depended on it were restored or paused.",
+              "that depended on it were restored or paused.",
+            "此对话不会用于今后的技能学习。依赖此对话的技能已恢复或暂停。",
+          ),
         });
       },
       onError: (error) => {
         toast({
-          title: "Could not exclude this chat",
+          title: t("Could not exclude this chat", "无法排除此对话"),
           description:
             error instanceof ApiError
               ? error.message
-              : "Nothing has been recorded for this chat yet.",
+              : t(
+                  "Nothing has been recorded for this chat yet.",
+                  "此对话尚无学习记录。",
+                ),
           variant: "destructive",
         });
       },
@@ -135,14 +146,17 @@ export function useRecentChats() {
     setExportingIds((prev) => new Set(prev).add(id));
     try {
       await fetchAndExportChat(id, title, getV2GetSession);
-      toast({ title: "Chat exported" });
+      toast({ title: t("Chat exported", "对话已导出") });
     } catch (error) {
       toast({
-        title: "Export failed",
+        title: t("Export failed", "导出失败"),
         description:
           error instanceof Error
             ? error.message
-            : "Could not export this chat. Please try again.",
+            : t(
+                "Could not export this chat. Please try again.",
+                "无法导出此对话，请重试。",
+              ),
         variant: "destructive",
       });
     } finally {

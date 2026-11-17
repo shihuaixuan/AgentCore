@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 // oxlint-disable-next-line design-system/no-legacy-import -- a menu trigger the size of its label; the Button atom's min-width would widen it
 import { extendedButtonVariants } from "@/components/atoms/Button/helpers";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export function NewMenu({ selectedFolderId, selectedFolderName }: Props) {
+  const { t } = useTranslation();
   const {
     fileInputRef,
     isUploading,
@@ -56,7 +58,7 @@ export function NewMenu({ selectedFolderId, selectedFolderName }: Props) {
                 <Icon icon={Loading03Icon} size={16} />
               </span>
             ) : null}
-            {isUploading ? "Uploading…" : "New"}
+            {isUploading ? t("Uploading…", "上传中……") : t("New", "新建")}
             <Icon icon={ArrowDown01Icon} size={16} />
           </button>
         </DropdownMenuTrigger>
@@ -66,14 +68,16 @@ export function NewMenu({ selectedFolderId, selectedFolderName }: Props) {
             data-testid="artifacts-upload-file"
           >
             <Icon icon={Upload03Icon} size={16} className="mr-2" />
-            Upload file
+
+            {t("Upload file", "上传文件")}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => setIsCreateOpen(true)}
             data-testid="create-folder-button"
           >
             <Icon icon={FolderAddIcon} size={16} className="mr-2" />
-            New folder
+
+            {t("New folder", "新建文件夹")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

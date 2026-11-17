@@ -9,6 +9,7 @@ import {
   trackingValue,
 } from "../helpers";
 import { TrackingBadge } from "./TrackingBadge";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   data: ProviderCostSummary[];
@@ -17,54 +18,55 @@ interface Props {
 }
 
 function ProviderTable({ data, rateOverrides, onRateOverride }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-body">
         <thead className="border-b text-caption text-foreground-tertiary uppercase">
           <tr>
             <th scope="col" className="px-4 py-3">
-              Provider
+              {t("Provider", "服务提供商")}
             </th>
             <th scope="col" className="px-4 py-3">
-              Model
+              {t("Model", "模型")}
             </th>
             <th scope="col" className="px-4 py-3">
-              Type
+              {t("Type", "类型")}
             </th>
             <th scope="col" className="px-4 py-3 text-right">
-              Usage
+              {t("Usage", "使用量")}
             </th>
             <th
               scope="col"
               className="px-4 py-3 text-right"
               title="Only populated for token-tracking providers (e.g. LLM calls). Non-token rows (per_run, characters, etc.) show —."
             >
-              Input Tokens
+              {t("Input Tokens", "输入令牌")}
             </th>
             <th
               scope="col"
               className="px-4 py-3 text-right"
               title="Only populated for token-tracking providers (e.g. LLM calls). Non-token rows (per_run, characters, etc.) show —."
             >
-              Output Tokens
+              {t("Output Tokens", "输出令牌")}
             </th>
             <th scope="col" className="px-4 py-3 text-right">
-              Requests
+              {t("Requests", "请求数")}
             </th>
             <th scope="col" className="px-4 py-3 text-right">
-              Known Cost
+              {t("Known Cost", "已知成本")}
             </th>
             <th scope="col" className="px-4 py-3 text-right">
-              Est. Cost
+              {t("Est. Cost", "估算成本")}
             </th>
             <th
               scope="col"
               className="px-4 py-3 text-right"
               title="Per-session only"
             >
-              {"Rate "}
+              {t("Rate", "费率")} {" "}
               <span className="text-tiny leading-inherit font-normal">
-                (unsaved)
+                {t("(unsaved)", "（未保存）")}
               </span>
             </th>
           </tr>
@@ -144,7 +146,7 @@ function ProviderTable({ data, rateOverrides, onRateOverride }: Props) {
                     </div>
                   ) : (
                     <span className="text-caption text-foreground-tertiary">
-                      auto
+                {t("auto", "自动")}
                     </span>
                   )}
                 </td>
@@ -157,7 +159,7 @@ function ProviderTable({ data, rateOverrides, onRateOverride }: Props) {
                 colSpan={10}
                 className="px-4 py-8 text-center text-foreground-tertiary"
               >
-                No cost data yet
+                {t("No cost data yet", "暂无成本数据")}
               </td>
             </tr>
           )}

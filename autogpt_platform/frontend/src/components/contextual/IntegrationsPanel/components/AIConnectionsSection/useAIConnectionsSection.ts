@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -18,6 +19,8 @@ import { useOAuthConnect } from "../ConnectServiceDialog/components/DetailView/u
 import { isProviderLinked, routeOf, visibleOffers } from "./helpers";
 
 export function useAIConnectionsSection() {
+  const { t } = useTranslation();
+
   const queryClient = useQueryClient();
 
   // The offers endpoint rather than transports: transports answers "what may
@@ -79,9 +82,11 @@ export function useAIConnectionsSection() {
         onError: () => {
           toast({
             variant: "destructive",
-            title: "Could not save that connection",
-            description:
+            title: t("Could not save that connection", "无法保存该连接"),
+            description: t(
               "Your default is unchanged. Check the connection is still linked, then try again.",
+              "默认连接未更改。请检查此连接是否仍然关联，然后重试。",
+            ),
           });
         },
       },

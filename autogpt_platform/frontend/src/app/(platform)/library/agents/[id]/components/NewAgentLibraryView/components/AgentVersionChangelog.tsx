@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -25,6 +26,7 @@ export function AgentVersionChangelog({
   isOpen,
   onClose,
 }: AgentVersionChangelogProps) {
+  const { t } = useTranslation();
   // Get marketplace data if agent has marketplace listing
   const { data: storeAgentData, isLoading } = useGetV2GetSpecificAgent(
     agent?.marketplace_listing?.creator.slug || "",
@@ -68,7 +70,7 @@ export function AgentVersionChangelog({
             {versionInfo.isCurrentVersion && (
               <span className="rounded-full bg-info/20 px-2 py-1 text-info-foreground">
                 <Text variant="small-medium-tight" as="span" tone="inherit">
-                  Current
+                  {t("Current", "当前")}
                 </Text>
               </span>
             )}
@@ -76,7 +78,7 @@ export function AgentVersionChangelog({
         </div>
 
         <Text variant="small" tone="secondary" className="mt-1">
-          Available marketplace version
+          {t("Available marketplace version", "市场中可用的版本")}
         </Text>
       </div>
     );
@@ -84,7 +86,7 @@ export function AgentVersionChangelog({
 
   return (
     <Dialog
-      title={`Version History - ${agent.name}`}
+      title={t(`Version History - ${agent.name}`, `版本历史 - ${agent.name}`)}
       styling={{
         maxWidth: "45rem",
       }}
@@ -109,15 +111,20 @@ export function AgentVersionChangelog({
           ) : agentVersions.length > 0 ? (
             <div className="space-y-4">
               <Text variant="small" tone="secondary">
-                View changes and updates across different versions of this
-                workflow.
+                {t(
+                  "View changes and updates across different versions of this workflow.",
+                  "查看此工作流不同版本的变更和更新。",
+                )}
               </Text>
               {agentVersions.map(renderVersionItem)}
             </div>
           ) : (
             <div className="py-8 text-center">
               <Text variant="body" tone="secondary">
-                No version history available for this workflow.
+                {t(
+                  "No version history available for this workflow.",
+                  "此工作流暂无版本记录。",
+                )}
               </Text>
             </div>
           )}

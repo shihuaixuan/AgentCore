@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { ExpertSidePanel } from "@/app/(platform)/team/components/ExpertSidePanel/ExpertSidePanel";
 import { Button } from "@/components/atoms/Button/Button";
@@ -55,6 +56,7 @@ export function SkillLearningSheet({
   onChanged,
   onClose,
 }: Props) {
+  const { t } = useTranslation();
   const review = useSkillReviewState(
     scope.expertId,
     skillName,
@@ -74,7 +76,7 @@ export function SkillLearningSheet({
       }
       title={skillName ?? ""}
       panelId="skill-learning"
-      closeLabel="Close skill learning panel"
+      closeLabel={t("Close skill learning panel", "关闭技能学习面板")}
       onClose={onClose}
     >
       {skillName ? (
@@ -112,6 +114,7 @@ function SheetBody({
   rememberScroll,
   onChanged,
 }: BodyProps) {
+  const { t } = useTranslation();
   const sheet = useSkillLearningSheet({
     expertId,
     skillName,
@@ -136,8 +139,11 @@ function SheetBody({
     return (
       <div data-slot="skill-learning-sheet-error" className="p-5">
         <ErrorCard
-          context="this skill's learning history"
-          hint="We could not load learning details for this skill."
+          context={t("this skill's learning history", "此技能的学习历史")}
+          hint={t(
+            "We could not load learning details for this skill.",
+            "无法加载此技能的学习详情。",
+          )}
           onRetry={() => sheet.refetch()}
         />
       </div>
@@ -178,7 +184,15 @@ function SheetBody({
             <TabsLineList className="overflow-x-auto">
               {VIEWS.map((item) => (
                 <TabsLineTrigger key={item.value} value={item.value}>
-                  {item.label}
+                  {t(
+                    item.label,
+                    {
+                      summary: "概览",
+                      changes: "变更",
+                      sources: "来源",
+                      history: "历史",
+                    }[item.value],
+                  )}
                 </TabsLineTrigger>
               ))}
             </TabsLineList>
@@ -266,7 +280,7 @@ function SheetBody({
             disabled={sheet.isBusy || !restorable}
             onClick={() => sheet.restoreVersion(version.id)}
           >
-            Restore v{version.version}
+            {t(`Restore v${version.version}`, `恢复 v${version.version}`)}
           </Button>
         </div>
       ) : null}

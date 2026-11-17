@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Icon } from "@/components/atoms/Icon/Icon";
 import {
   DropdownMenu,
@@ -30,6 +32,7 @@ export function AutopilotModeSelector({
   persistedMode,
   disabled = false,
 }: Props) {
+  const { t } = useTranslation();
   const {
     mode,
     isDefault,
@@ -39,7 +42,26 @@ export function AutopilotModeSelector({
     cancelUnsupervised,
     assistantName,
   } = useAutopilotModeSelector({ sessionId, persistedMode });
-  const current = getModeOption(mode);
+  const labels = {
+    ask_first: t("Ask first", "始终询问"),
+    auto: t("Auto", "自动"),
+    unsupervised: t("Unsupervised", "自主执行"),
+  };
+  const descriptions = {
+    ask_first: t(
+      AUTOPILOT_MODE_OPTIONS[0].description,
+      "每次编辑或对外操作前询问；沙箱内的工作可直接执行。",
+    ),
+    auto: t(
+      AUTOPILOT_MODE_OPTIONS[1].description,
+      "信息离开平台前，以及执行看似有风险的编辑或命令前询问。",
+    ),
+    unsupervised: t(
+      AUTOPILOT_MODE_OPTIONS[2].description,
+      "不再询问，所有操作无需批准即可执行。",
+    ),
+  };
+  const current = { ...getModeOption(mode), label: labels[mode] };
 
   return (
     <>
@@ -47,8 +69,14 @@ export function AutopilotModeSelector({
         <DropdownMenuTrigger asChild disabled={disabled}>
           <button
             type="button"
-            aria-label={`Approval mode: ${current.label}. Change mode`}
-            title={`Approval mode: ${current.label}`}
+            aria-label={t(
+              `Approval mode: ${current.label}. Change mode`,
+              `审批模式：${current.label}。更改模式`,
+            )}
+            title={t(
+              `Approval mode: ${current.label}`,
+              `审批模式：${current.label}`,
+            )}
             className={cn(
               "inline-flex h-8 items-center justify-center gap-1 rounded-full text-caption font-medium transition-colors focus-visible:ring-2 focus-visible:ring-foreground-subtle focus-visible:outline-none",
               isDefault
@@ -67,7 +95,7 @@ export function AutopilotModeSelector({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-72">
           <DropdownMenuLabel className="text-caption font-medium text-foreground-tertiary">
-            Approvals in this chat
+            {t("Approvals in this chat", "此对话的审批设置")}
           </DropdownMenuLabel>
           <DropdownMenuRadioGroup value={mode} onValueChange={selectMode}>
             {AUTOPILOT_MODE_OPTIONS.map((option) => (
@@ -78,10 +106,10 @@ export function AutopilotModeSelector({
               >
                 <span className="flex flex-col gap-0.5">
                   <span className="font-medium text-foreground-strong">
-                    {option.label}
+                    {labels[option.value]}
                   </span>
                   <span className="text-caption text-foreground-tertiary">
-                    {option.description}
+                    {descriptions[option.value]}
                   </span>
                 </span>
               </DropdownMenuRadioItem>
@@ -93,7 +121,11 @@ export function AutopilotModeSelector({
         isOpen={isConfirmOpen}
         onConfirm={confirmUnsupervised}
         onCancel={cancelUnsupervised}
-        description={unsupervisedChatDescription(assistantName)}
+        description={t(
+          unsupervisedChatDescription(assistantName),
+          assistantName +
+            " 不会在此对话中请求确认。编辑、命令以及发送消息或邮件等平台外操作都将直接执行，无需你的批准。",
+        )}
       />
     </>
   );

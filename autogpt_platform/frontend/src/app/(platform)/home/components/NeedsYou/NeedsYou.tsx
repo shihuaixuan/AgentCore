@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AlertCircleIcon } from "@hugeicons/core-free-icons";
 import type { HomeDashboardResponse } from "@/app/api/__generated__/models/homeDashboardResponse";
 import { Text } from "@/components/atoms/Text/Text";
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function NeedsYou({ dashboard, className }: Props) {
+  const { t } = useTranslation();
   const {
     visibleRows,
     pendingCount,
@@ -34,7 +36,7 @@ export function NeedsYou({ dashboard, className }: Props) {
     <HomeTile
       className={className}
       icon={AlertCircleIcon}
-      title="Needs you"
+      title={t("Needs you", "需要你处理")}
       badge={
         <span className="rounded-md bg-surface-hover px-1.5 py-0.5">
           <Text

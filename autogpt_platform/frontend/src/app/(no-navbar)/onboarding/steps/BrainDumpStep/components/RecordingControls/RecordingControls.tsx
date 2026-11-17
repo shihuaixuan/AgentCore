@@ -1,5 +1,9 @@
 "use client";
 
+import { useOnboardingTranslation } from "../../../../useOnboardingTranslation";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { useEffect, useRef, useState } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/atoms/Button/Button";
@@ -35,6 +39,8 @@ export function RecordingControls({
   showSilenceNudge,
   isOffline,
 }: Props) {
+  const { translateCopy } = useOnboardingTranslation();
+  const { t } = useTranslation();
   const [pendingAction, setPendingAction] = useState<RecordingAction | null>(
     null,
   );
@@ -80,8 +86,8 @@ export function RecordingControls({
       <div className="flex items-center gap-4">
         <div ref={cancelControlRef}>
           <RecordingControlButton
-            label="Cancel recording"
-            pendingLabel="Canceling recording"
+            label={t("Cancel recording", "取消录音")}
+            pendingLabel={translateCopy("Canceling recording")}
             icon={Cancel01Icon}
             action="cancel"
             pendingAction={pendingAction}
@@ -89,8 +95,8 @@ export function RecordingControls({
           />
         </div>
         <RecordingControlButton
-          label="Send recording"
-          pendingLabel="Sending recording"
+          label={t("Send recording", "发送录音")}
+          pendingLabel={translateCopy("Sending recording")}
           icon={SentIcon}
           action="send"
           pendingAction={pendingAction}
@@ -98,8 +104,8 @@ export function RecordingControls({
           primary
         />
         <RecordingControlButton
-          label="Retry recording"
-          pendingLabel="Restarting recording"
+          label={t("Retry recording", "重新录音")}
+          pendingLabel={translateCopy("Restarting recording")}
           icon={ArrowReloadHorizontalIcon}
           action="retry"
           pendingAction={pendingAction}
@@ -115,7 +121,7 @@ export function RecordingControls({
             <div className="flex h-8 items-start justify-center pt-2">
               <SwapFade swapKey={pendingAction ?? "idle"}>
                 <p className="text-body text-foreground-tertiary">
-                  {pendingStatus}
+                  {translateCopy(pendingStatus)}
                 </p>
               </SwapFade>
             </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   Popover,
   PopoverContent,
@@ -16,6 +17,7 @@ const rowClasses =
   "group relative flex w-full items-center gap-3 rounded-lg py-2 pl-3 pr-2 text-left text-body font-normal text-foreground-body outline-none transition-colors duration-200 ease-out hover:bg-surface-hover focus-visible:bg-surface-hover focus-visible:outline-none data-[state=open]:bg-surface-hover";
 
 export function AccountMenuActivityRow() {
+  const { t } = useTranslation();
   const { activeExecutions, recentCompletions, recentFailures } =
     useAgentActivityDropdown();
 
@@ -41,7 +43,9 @@ export function AccountMenuActivityRow() {
           <span className="relative z-10 flex shrink-0 items-center">
             <Icon icon={Pulse01Icon} className="h-[18px] w-[18px] shrink-0" />
           </span>
-          <span className="relative z-10 truncate">Activity</span>
+          <span className="relative z-10 truncate">
+            {t("Activity", "动态")}
+          </span>
           {totalCount > 0 && (
             <span
               data-testid="account-menu-activity-total"

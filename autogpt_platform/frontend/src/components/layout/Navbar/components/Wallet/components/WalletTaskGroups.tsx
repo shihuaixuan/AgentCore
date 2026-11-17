@@ -1,3 +1,7 @@
+"use client";
+
+import { taskLabel } from "../taskLabels";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 import { useOnboarding } from "@/providers/onboarding/onboarding-provider";
 import {
@@ -16,6 +20,7 @@ interface Props {
 }
 
 export function TaskGroups({ groups }: Props) {
+  const { t } = useTranslation();
   const { state, updateState } = useOnboarding();
   const refs = useRef<Record<string, HTMLDivElement | null>>({});
   const confettiTimers = useRef(new Set<ReturnType<typeof setTimeout>>());
@@ -174,7 +179,7 @@ export function TaskGroups({ groups }: Props) {
     <div className="space-y-2">
       {groups.map((group) => (
         <div
-          key={group.name}
+          key={t(group.name, taskLabel(group.name))}
           ref={setRef(group.name)}
           className="mt-3 overflow-hidden rounded-lg border border-separator bg-surface-muted"
         >
@@ -189,17 +194,19 @@ export function TaskGroups({ groups }: Props) {
                 {group.name}
               </div>
               <div className="mt-1 text-caption leading-tight font-normal text-foreground-tertiary">
-                {group.details}
+                {t(group.details, taskLabel(group.details))}
                 <br />
-                {getCompletedCount(group.tasks)} of {group.tasks.length}{" "}
-                completed
+                {t(
+                  `${getCompletedCount(group.tasks)} of ${group.tasks.length} completed`,
+                  `已完成 ${getCompletedCount(group.tasks)}/${group.tasks.length} 项`,
+                )}
               </div>
             </div>
             {/* Reward and chevron */}
             <div className="flex items-center gap-2">
               {isGroupCompleted(group) ? (
                 <div className="rounded-full bg-success/40 px-2.5 py-0.5 font-sans text-caption font-medium text-success-foreground">
-                  Done
+                  {t("Done", "已完成")}
                 </div>
               ) : (
                 <div className="text-caption leading-tight font-medium text-brand">
@@ -261,7 +268,7 @@ export function TaskGroups({ groups }: Props) {
                           : "text-foreground-emphasis",
                       )}
                     >
-                      {task.name}
+                      {t(task.name, taskLabel(task.name))}
                     </span>
                   </div>
                   {/* Reward */}
@@ -312,7 +319,7 @@ export function TaskGroups({ groups }: Props) {
                           : "max-h-0 opacity-0",
                       )}
                     >
-                      {task.details}
+                      {t(task.details, taskLabel(task.details))}
                     </div>
                     {task.video ? (
                       <div
@@ -352,10 +359,13 @@ export function TaskGroups({ groups }: Props) {
           {/* Name and details */}
           <div className="flex-1">
             <div className="text-body font-medium text-foreground-strong">
-              Hidden Tasks
+              {t("Hidden Tasks", "更多任务")}
             </div>
             <div className="mt-1 text-caption leading-tight font-normal text-foreground-tertiary">
-              Check back later — new tasks are on the way
+              {t(
+                "Check back later — new tasks are on the way",
+                "稍后再来看看，更多任务即将上线",
+              )}
             </div>
           </div>
         </div>

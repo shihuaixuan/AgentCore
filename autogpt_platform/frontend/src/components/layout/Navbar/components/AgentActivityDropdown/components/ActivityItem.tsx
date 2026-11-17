@@ -19,6 +19,7 @@ import {
   StopCircleIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 function ActivityNavIndicator() {
   const { pending } = useLinkStatus();
@@ -47,6 +48,7 @@ interface Props {
 }
 
 export function ActivityItem({ execution }: Props) {
+  const { t, locale } = useTranslation();
   function getStatusIcon() {
     switch (execution.status) {
       case AgentExecutionStatus.QUEUED:
@@ -86,40 +88,45 @@ export function ActivityItem({ execution }: Props) {
 
     if (isActiveStatus) {
       const timeAgo = execution.started_at
-        ? formatTimeAgo(execution.started_at.toString())
-        : "recently";
+        ? formatTimeAgo(execution.started_at.toString(), locale)
+        : t("recently", "最近");
       const statusText =
-        execution.status === AgentExecutionStatus.QUEUED ? "queued" : "running";
+        execution.status === AgentExecutionStatus.QUEUED
+          ? t("queued", "排队中")
+          : t("running", "运行中");
       return [
-        `Started ${timeAgo}, ${getExecutionDuration(execution)} ${statusText}`,
+        t(
+          `Started ${timeAgo}, ${getExecutionDuration(execution)} ${statusText}`,
+          `${timeAgo}开始，${statusText}`,
+        ),
       ];
     }
 
     // Handle all other statuses with time display
     const timeAgo = execution.ended_at
-      ? formatTimeAgo(execution.ended_at.toString())
+      ? formatTimeAgo(execution.ended_at.toString(), locale)
       : execution.started_at
-        ? formatTimeAgo(execution.started_at.toString())
-        : "recently";
+        ? formatTimeAgo(execution.started_at.toString(), locale)
+        : t("recently", "最近");
 
-    let statusText = "ended";
+    let statusText = t("ended", "已结束");
     switch (execution.status) {
       case AgentExecutionStatus.COMPLETED:
         statusText = isCompletedWithErrors(execution)
-          ? "completed with errors"
-          : "completed";
+          ? t("completed with errors", "已完成，但有错误")
+          : t("completed", "已完成");
         break;
       case AgentExecutionStatus.FAILED:
-        statusText = "failed";
+        statusText = t("failed", "失败");
         break;
       case AgentExecutionStatus.TERMINATED:
-        statusText = "stopped";
+        statusText = t("stopped", "已停止");
         break;
       case AgentExecutionStatus.INCOMPLETE:
-        statusText = "incomplete";
+        statusText = t("incomplete", "未完成");
         break;
       case AgentExecutionStatus.REVIEW:
-        statusText = "awaiting approval";
+        statusText = t("awaiting approval", "等待批准");
         break;
     }
 

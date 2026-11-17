@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,10 +53,12 @@ export function InlineUserPasswordForm({
   providerName,
   onSuccess,
 }: Props) {
+  const { t } = useTranslation();
+
   const { submit, isPending } = useInlineConnectForm({
     provider,
-    successTitle: "Credentials saved",
-    failureTitle: "Couldn't save credentials",
+    successTitle: t("Credentials saved", "凭据已保存"),
+    failureTitle: t("Couldn't save credentials", "无法保存凭据"),
     onSuccess,
   });
 
@@ -102,7 +105,7 @@ export function InlineUserPasswordForm({
                 {...field}
                 id={field.name}
                 autoComplete="off"
-                label="Name"
+                label={t("Name", "名称")}
                 labelVariant="small-medium"
                 size="small"
                 placeholder={`My ${providerName} account`}
@@ -122,7 +125,7 @@ export function InlineUserPasswordForm({
             <FormItem>
               <Select
                 id={field.name}
-                label="Database type"
+                label={t("Database type", "数据库类型")}
                 labelVariant="small-medium"
                 size="small"
                 value={field.value}
@@ -147,7 +150,7 @@ export function InlineUserPasswordForm({
                   id={field.name}
                   autoComplete="off"
                   spellCheck={false}
-                  label="Server"
+                  label={t("Server", "服务器")}
                   labelVariant="small-medium"
                   size="small"
                   placeholder="host or host:port"
@@ -172,7 +175,7 @@ export function InlineUserPasswordForm({
                 id={field.name}
                 autoComplete="off"
                 spellCheck={false}
-                label="Username"
+                label={t("Username", "用户名")}
                 labelVariant="small-medium"
                 size="small"
                 wrapperClassName="!mb-0"
@@ -194,7 +197,7 @@ export function InlineUserPasswordForm({
                 id={field.name}
                 type="password"
                 autoComplete="new-password"
-                label="Password"
+                label={t("Password", "密码")}
                 labelVariant="small-medium"
                 size="small"
                 wrapperClassName="!mb-0"

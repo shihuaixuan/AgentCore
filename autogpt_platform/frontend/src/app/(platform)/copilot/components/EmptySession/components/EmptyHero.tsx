@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import type { ReactNode } from "react";
 import { Text } from "@/components/atoms/Text/Text";
 import { TextGenerateEffect } from "./TextGenerateEffect/TextGenerateEffect";
@@ -26,17 +28,18 @@ export function EmptyHero({
   isExpert,
   expertRole,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <>
       <div className="mb-1 flex items-center justify-center gap-3 pt-8 md:pt-0">
         <Text variant="h4" tone="primary">
-          Hey
+          {t("Hey", "你好")}
           {name ? (
             <>
               , <span className="text-foreground-strong">{name}</span>
             </>
           ) : (
-            " there"
+            t(" there", "")
           )}
           <EditNameDialog currentName={name ?? ""} />
         </Text>
@@ -47,13 +50,20 @@ export function EmptyHero({
         </div>
       ) : recipientPicker ? (
         <div className="mb-8 text-heading-sm leading-relaxed tracking-normal text-foreground-strong">
-          {isExpert ? "I'm" : "Tell"}{" "}
+          {isExpert ? t("I'm", "我是") : t("Tell", "告诉")}{" "}
           <span className="mr-1 inline-block align-middle [&_button]:ml-0 [&_button]:text-lead">
             {recipientPicker}
           </span>
           {isExpert
-            ? getExpertIntroSuffix(expertRole ?? null)
-            : " about your work, and it will find what to automate."}
+            ? t(
+                getExpertIntroSuffix(expertRole ?? null),
+                (expertRole ? "，你的 " + expertRole : "") +
+                  "。有什么工作需要我来做？",
+              )
+            : t(
+                " about your work, and it will find what to automate.",
+                "你的工作内容，帮你找到可自动化的事项。",
+              )}
         </div>
       ) : (
         // Keyed on the text so switching recipient re-types the line.

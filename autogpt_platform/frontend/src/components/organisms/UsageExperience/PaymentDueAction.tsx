@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { LinkSquare01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -17,6 +20,7 @@ export function PaymentDueAction({
   size = "large",
   layout = "stacked",
 }: Props) {
+  const { t } = useTranslation();
   const stacked = layout === "stacked";
   return (
     <div
@@ -47,7 +51,10 @@ export function PaymentDueAction({
         tone="muted"
         align={stacked ? "center" : undefined}
       >
-        Opens a secure Stripe page. You can use a different card there.
+        {t(
+          "Opens a secure Stripe page. You can use a different card there.",
+          "将在安全的 Stripe 页面中打开，你可以在该页面使用其他银行卡。",
+        )}
       </Text>
     </div>
   );

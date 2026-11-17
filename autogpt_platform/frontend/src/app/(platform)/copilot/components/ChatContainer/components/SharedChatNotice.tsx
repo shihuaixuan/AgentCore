@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { useState } from "react";
 import { useGetV2GetChatShareState } from "@/app/api/__generated__/endpoints/chat/chat";
 import { Button } from "@/components/atoms/Button/Button";
@@ -14,6 +16,7 @@ interface Props {
 }
 
 export function SharedChatNotice({ sessionId }: Props) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const { data: shareState } = useGetV2GetChatShareState(sessionId, {
@@ -34,7 +37,7 @@ export function SharedChatNotice({ sessionId }: Props) {
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast({
-        title: "Failed to copy link",
+        title: t("Failed to copy link", "复制链接失败"),
         variant: "destructive",
       });
     }
@@ -47,7 +50,9 @@ export function SharedChatNotice({ sessionId }: Props) {
       className="mb-2"
     >
       <AttentionCard.Row align="center" justify="between">
-        <span className="font-medium">This chat is shared</span>
+        <span className="font-medium">
+          {t("This chat is shared", "此对话已共享")}
+        </span>
         <Button
           size="small"
           variant="secondary"
@@ -60,7 +65,7 @@ export function SharedChatNotice({ sessionId }: Props) {
             )
           }
         >
-          {copied ? "Copied" : "Copy link"}
+          {copied ? t("Copied", "已复制") : t("Copy link", "复制链接")}
         </Button>
       </AttentionCard.Row>
     </AttentionCard.Root>

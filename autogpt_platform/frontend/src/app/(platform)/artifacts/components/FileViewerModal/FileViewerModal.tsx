@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { WorkspaceFileItem } from "@/app/api/__generated__/models/workspaceFileItem";
 import { ArtifactContent } from "@/app/(platform)/copilot/components/ArtifactPanel/components/ArtifactContent";
 import { classifyArtifact } from "@/app/(platform)/copilot/components/ArtifactPanel/helpers";
@@ -103,6 +104,7 @@ function Header({
   isSourceView,
   onToggleSource,
 }: HeaderProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -115,7 +117,9 @@ function Header({
       toast({
         title: "Failed to download file",
         description:
-          error instanceof Error ? error.message : "Please try again.",
+          error instanceof Error
+            ? error.message
+            : t("Please try again.", "请重试。"),
         variant: "destructive",
       });
     } finally {
@@ -154,7 +158,7 @@ function Header({
           leftIcon={<Icon icon={Download04Icon} size={14} />}
           data-testid="file-viewer-download"
         >
-          {isDownloading ? "Downloading…" : "Download"}
+          {isDownloading ? "Downloading…" : t("Download", "下载")}
         </Button>
       </div>
     </div>

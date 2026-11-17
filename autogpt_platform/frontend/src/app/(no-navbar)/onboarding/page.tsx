@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
@@ -19,6 +20,7 @@ import { useOnboardingWizardStore } from "./store";
 import { useOnboardingPage } from "./useOnboardingPage";
 
 export default function OnboardingPage() {
+  const { t } = useTranslation();
   const {
     currentStep,
     isLoading,
@@ -42,7 +44,7 @@ export default function OnboardingPage() {
   if (isLoading && paidConfirmation.error)
     return (
       <ErrorCard
-        context="your payment"
+        context={t("your payment", "付款")}
         responseError={{ message: paidConfirmation.error }}
         onRetry={paidConfirmation.retry}
       />
@@ -50,13 +52,16 @@ export default function OnboardingPage() {
   if (isLoading && paidConfirmation.pending)
     return (
       <Text variant="body" role="status">
-        Confirming your subscription…
+        {t("Confirming your subscription…", "正在确认订阅…")}
       </Text>
     );
   if (isLoading)
     return !trialConfirmation.ready ? (
       <Text variant="body" role="status">
-        Confirming your trial and card setup…
+        {t(
+          "Confirming your trial and card setup…",
+          "正在确认试用及银行卡设置…",
+        )}
       </Text>
     ) : progressError ? (
       <ProgressError
@@ -66,7 +71,7 @@ export default function OnboardingPage() {
       />
     ) : (
       <Text variant="body" role="status">
-        Loading your setup…
+        {t("Loading your setup…", "正在加载设置…")}
       </Text>
     );
 
@@ -94,14 +99,14 @@ export default function OnboardingPage() {
       )}
       {completionError && (
         <ErrorCard
-          context="your account setup"
+          context={t("your account setup", "账户设置")}
           responseError={{ message: completionError }}
           onRetry={handlePreparingComplete}
         />
       )}
       {trialConfirmation.error ? (
         <ErrorCard
-          context="your trial"
+          context={t("your trial", "试用")}
           responseError={{ message: trialConfirmation.error }}
           onRetry={trialConfirmation.retry}
         />
@@ -119,7 +124,7 @@ export default function OnboardingPage() {
           leadingIcon={ArrowLeft01Icon}
           className="absolute top-6 left-6"
         >
-          Back
+          {t("Back", "返回")}
         </Button>
       )}
 
@@ -169,7 +174,7 @@ export default function OnboardingPage() {
           leadingIcon={Logout03Icon}
           className="absolute bottom-6 left-6"
         >
-          Log out
+          {t("Log out", "退出登录")}
         </Button>
       )}
     </div>

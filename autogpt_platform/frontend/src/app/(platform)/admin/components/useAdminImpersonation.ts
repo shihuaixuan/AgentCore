@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useAuthStore } from "@/lib/auth/hooks/useAuthStore";
 import {
   ImpersonationState,
@@ -38,6 +39,7 @@ const OUTCOME_MESSAGES: Record<
 };
 
 export function useAdminImpersonation(): AdminImpersonationHook {
+  const { t } = useTranslation();
   // Re-read whenever the signed-in user changes: after the reload that starts
   // impersonation, the target only counts once the owning admin is known.
   const viewer = useAuthStore((state) => state.user);
@@ -57,7 +59,7 @@ export function useAdminImpersonation(): AdminImpersonationHook {
 
       if (!userId.trim()) {
         toast({
-          title: "User ID is required for impersonation",
+          title: t("User ID is required for impersonation", "模拟登录必须提供用户 ID"),
           variant: "destructive",
         });
         return;
@@ -73,8 +75,8 @@ export function useAdminImpersonation(): AdminImpersonationHook {
         );
         if (outcome !== "started") {
           toast({
-            title: "Couldn't start impersonation",
-            description: OUTCOME_MESSAGES[outcome],
+            title: t("Couldn't start impersonation", "无法开始模拟登录"),
+            description: t(OUTCOME_MESSAGES[outcome], outcome === "no-admin" ? "请重新登录后再模拟用户。" : outcome === "audit-failed" ? "审计告警失败，模拟登录已被阻止。" : "开始模拟登录时，你已退出登录或账户发生变化。"),
             variant: "destructive",
           });
           return;
@@ -84,8 +86,8 @@ export function useAdminImpersonation(): AdminImpersonationHook {
       } catch (error) {
         console.error("Failed to start impersonation:", error);
         toast({
-          title: "Failed to start impersonation",
-          description: error instanceof Error ? error.message : "Unknown error",
+          title: t("Failed to start impersonation", "开始模拟登录失败"),
+          description: error instanceof Error ? error.message : t("Unknown error", "未知错误"),
           variant: "destructive",
         });
       } finally {
@@ -102,8 +104,8 @@ export function useAdminImpersonation(): AdminImpersonationHook {
     } catch (error) {
       console.error("Failed to stop impersonation:", error);
       toast({
-        title: "Failed to stop impersonation",
-        description: error instanceof Error ? error.message : "Unknown error",
+        title: t("Failed to stop impersonation", "停止模拟登录失败"),
+        description: error instanceof Error ? error.message : t("Unknown error", "未知错误"),
         variant: "destructive",
       });
     }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Alert02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import Link from "next/link";
@@ -28,6 +29,7 @@ export function TopUpDialog({
   onClose,
   variant = "out-of-credits",
 }: Props) {
+  const { t } = useTranslation();
   const isOutOfCredits = variant === "out-of-credits";
   const dialog = useTopUpDialog({ onClose });
 
@@ -49,10 +51,10 @@ export function TopUpDialog({
                 className="h-[1.125rem] w-[1.125rem]"
               />
             </span>
-            You&apos;re out of automation credits
+            {t("You're out of automation credits", "自动化额度已用完")}
           </span>
         ) : (
-          "Add automation credits"
+          t("Add automation credits", "添加自动化额度")
         )
       }
       styling={{ maxWidth: "28rem" }}
@@ -76,7 +78,7 @@ export function TopUpDialog({
                   disabled={dialog.isClaiming}
                   onClick={dialog.notNow}
                 >
-                  Not now
+                  {t("Not now", "暂不充值")}
                 </Button>
               </div>
             ) : null}
@@ -92,18 +94,28 @@ interface OfferProps {
 }
 
 function TopUpOffer({ isOutOfCredits }: OfferProps) {
+  const { t } = useTranslation();
   return (
     <>
       <Text variant="large">
         {isOutOfCredits
-          ? "Top up to keep your workflows and experts running. You can also "
-          : "Credits are used to run your workflows and experts. You can also "}
+          ? t(
+              "Top up to keep your workflows and experts running. You can also ",
+              "充值即可继续运行工作流和专家。你也可以",
+            )
+          : t(
+              "Credits are used to run your workflows and experts. You can also ",
+              "额度用于运行工作流和专家。你也可以",
+            )}
         <Link href="/settings/billing" className="underline">
-          enable auto-refill in billing settings
+          {t(
+            "enable auto-refill in billing settings",
+            "在账单设置中启用自动充值",
+          )}
         </Link>
         .
       </Text>
-      <TopUpForm submitLabel="Top up" />
+      <TopUpForm submitLabel={t("Top up", "充值")} />
     </>
   );
 }

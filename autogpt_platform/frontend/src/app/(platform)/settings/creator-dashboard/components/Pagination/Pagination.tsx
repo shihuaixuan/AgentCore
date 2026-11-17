@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { Pagination as PaginationModel } from "@/app/api/__generated__/models/pagination";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -28,6 +29,7 @@ function getVisiblePages(current: number, total: number): number[] {
 }
 
 export function Pagination({ pagination, onPageChange, disabled }: Props) {
+  const { t } = useTranslation();
   const { current_page, total_pages, total_items, page_size } = pagination;
 
   if (total_pages <= 1) return null;
@@ -51,9 +53,9 @@ export function Pagination({ pagination, onPageChange, disabled }: Props) {
           leftIcon={<Icon icon={ArrowLeft01Icon} size={14} />}
           disabled={disabled || current_page <= 1}
           onClick={() => onPageChange(current_page - 1)}
-          aria-label="Previous page"
+          aria-label={t("Previous page", "上一页")}
         >
-          Previous
+          {t("Previous", "上一步")}
         </Button>
         <div className="flex items-center gap-1">
           {visiblePages.map((page) => {
@@ -84,9 +86,9 @@ export function Pagination({ pagination, onPageChange, disabled }: Props) {
           rightIcon={<Icon icon={ArrowRight01Icon} size={14} />}
           disabled={disabled || current_page >= total_pages}
           onClick={() => onPageChange(current_page + 1)}
-          aria-label="Next page"
+          aria-label={t("Next page", "下一页")}
         >
-          Next
+          {t("Next", "下一步")}
         </Button>
       </div>
     </div>

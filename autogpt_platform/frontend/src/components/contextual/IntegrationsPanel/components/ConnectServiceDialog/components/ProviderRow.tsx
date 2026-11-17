@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { ConnectableProvider } from "../helpers";
 import { PlusSignIcon } from "@hugeicons/core-free-icons";
@@ -12,6 +13,8 @@ interface Props {
 }
 
 export function ProviderRow({ provider, onSelect }: Props) {
+  const { t } = useTranslation();
+
   return (
     <button
       type="button"
@@ -25,7 +28,7 @@ export function ProviderRow({ provider, onSelect }: Props) {
           {provider.mcpServer &&
             provider.mcpServer.connection_mode !== "hosted" && (
               <Badge variant="warning" size="small">
-                Setup required
+                {t("Setup required", "需要设置")}
               </Badge>
             )}
         </span>

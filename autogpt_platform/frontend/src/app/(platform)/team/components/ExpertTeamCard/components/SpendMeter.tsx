@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Progress } from "@/components/atoms/Progress/Progress";
 import { creditsToUsdLabel } from "@/lib/credits";
 import { cn } from "@/lib/utils";
@@ -13,6 +16,7 @@ interface Props {
 }
 
 export function SpendMeter({ spent, budget, muted, color }: Props) {
+  const { t } = useTranslation();
   const ratio = budget > 0 ? Math.min(Math.max(spent / budget, 0), 1) : 0;
   const isOverBudget = spent > budget;
   const clampedSpent = Math.min(Math.max(spent, 0), Math.max(budget, 0));
@@ -25,7 +29,7 @@ export function SpendMeter({ spent, budget, muted, color }: Props) {
     <Progress
       value={ratio * 100}
       role="progressbar"
-      aria-label="Weekly spend"
+      aria-label={t("Weekly spend", "每周支出")}
       aria-valuenow={clampedSpent}
       aria-valuemin={0}
       aria-valuemax={budget}

@@ -90,6 +90,8 @@ class CapabilityEntry(BaseModel):
     sensitive: bool = False
     # An expert already on the user's team, as opposed to a roster template.
     hired: bool = False
+    custom_mcp_credential_id: str | None = None
+    custom_mcp: bool = False
 
     def listing(self) -> dict[str, object]:
         """Compact form for a search result (about 40-60 tokens)."""

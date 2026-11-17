@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { TrialStatusResponse } from "@/app/api/__generated__/models/trialStatusResponse";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -22,10 +25,11 @@ export function TrialCanceledDialog({
   onSubscribe,
   onClose,
 }: Props) {
+  const { t } = useTranslation();
   if (!trial.offer) return null;
   return (
     <Dialog
-      title="Cancellation confirmed"
+      title={t("Cancellation confirmed", "已确认取消")}
       styling={{ maxWidth: "29rem", minWidth: "auto" }}
       controlled={{
         isOpen,
@@ -40,7 +44,7 @@ export function TrialCanceledDialog({
           className="flex flex-col gap-4"
         >
           <Text variant="body" tone="emphasis">
-            Your card won&apos;t be charged.{" "}
+            {t("Your card won't be charged.", "不会向你的银行卡扣款。")}{" "}
             <TrialTimeLeft endsAt={trial.ends_at} />
           </Text>
           <WorthDoingPanel offer={trial.offer} endsAt={trial.ends_at} />
@@ -52,10 +56,10 @@ export function TrialCanceledDialog({
             loading={isResuming}
             disabled={isResuming}
           >
-            Resume trial
+            {t("Resume trial", "恢复试用")}
           </Button>
           <Button variant="primary" onClick={onSubscribe}>
-            Subscribe now
+            {t("Subscribe now", "立即订阅")}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

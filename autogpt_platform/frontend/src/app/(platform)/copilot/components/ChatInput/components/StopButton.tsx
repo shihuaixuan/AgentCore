@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { PromptInputSubmit } from "@/components/organisms/PromptInput/PromptInput";
 import {
   Tooltip,
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function StopButton({ onStop, className }: Props) {
+  const { t } = useTranslation();
   const [isArmed, setIsArmed] = useState(false);
 
   useEffect(() => {
@@ -29,13 +31,14 @@ export function StopButton({ onStop, className }: Props) {
       <TooltipTrigger asChild>
         <PromptInputSubmit
           status="streaming"
+          aria-label={t("Stop", "停止")}
           onStop={onStop}
           disabled={!isArmed}
           className={className}
         />
       </TooltipTrigger>
       <TooltipPortal>
-        <TooltipContent side="top">Stop</TooltipContent>
+        <TooltipContent side="top">{t("Stop", "停止")}</TooltipContent>
       </TooltipPortal>
     </Tooltip>
   );

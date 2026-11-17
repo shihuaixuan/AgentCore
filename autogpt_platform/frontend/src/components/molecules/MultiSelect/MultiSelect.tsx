@@ -21,6 +21,7 @@ import React, {
   useState,
 } from "react";
 import { isKey } from "@/lib/keyboard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type MultiSelectorProps = {
   values: string[];
@@ -168,6 +169,7 @@ const MultiSelectorTrigger = forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, children, ...props }, ref) => {
   const { value, onValueChange, activeIndex } = useMultiSelect();
+  const { t } = useTranslation();
 
   const mousePreventDefault = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -203,14 +205,14 @@ const MultiSelectorTrigger = forwardRef<
           </Text>
           <button
             data-slot="multi-select-remove"
-            aria-label={`Remove ${item} option`}
-            aria-roledescription="button to remove option"
+            aria-label={t(`Remove ${item} option`, `移除 ${item} 选项`)}
+            aria-roledescription={t("button to remove option", "移除选项按钮")}
             type="button"
             onMouseDown={mousePreventDefault}
             onClick={() => onValueChange(item)}
           >
             <span data-slot="multi-select-remove-label" className="sr-only">
-              Remove {item} option
+              {t(`Remove ${item} option`, `移除 ${item} 选项`)}
             </span>
             <Icon
               aria-hidden
@@ -277,6 +279,7 @@ const MultiSelectorList = forwardRef<
   React.ElementRef<typeof CommandPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>
 >(({ className, children }, ref) => {
+  const { t } = useTranslation();
   return (
     <CommandList
       ref={ref}
@@ -295,7 +298,7 @@ const MultiSelectorList = forwardRef<
           tone="muted"
           className="block"
         >
-          No results found
+          {t("No results found", "未找到结果")}
         </Text>
       </CommandEmpty>
     </CommandList>

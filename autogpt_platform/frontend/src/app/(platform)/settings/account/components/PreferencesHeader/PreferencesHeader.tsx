@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Text } from "@/components/atoms/Text/Text";
@@ -7,6 +8,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { EASE_OUT } from "../../helpers";
 
 export function PreferencesHeader() {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   return (
@@ -17,10 +19,10 @@ export function PreferencesHeader() {
       className="flex min-w-0 flex-col pb-2 pl-4"
     >
       <Text variant="h4" as="h1">
-        Account
+        {t("Account", "账户")}
       </Text>
       <Text variant="body" tone="body" className="mt-4 max-w-[600px]">
-        Tune your account and time zone.
+        {t("Tune your account and time zone.", "调整账户和时区设置。")}
       </Text>
     </motion.header>
   );

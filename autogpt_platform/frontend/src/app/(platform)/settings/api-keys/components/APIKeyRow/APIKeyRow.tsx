@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useState } from "react";
 import type { APIKeyInfo } from "@/app/api/__generated__/models/aPIKeyInfo";
 import { Text } from "@/components/atoms/Text/Text";
@@ -33,6 +34,7 @@ export function APIKeyRow({
   onToggleSelected,
   onDelete,
 }: Props) {
+  const { t } = useTranslation();
   const [infoOpen, setInfoOpen] = useState(false);
   const maskedKey = maskAPIKey(apiKey.head, apiKey.tail);
   const lastUsedLabel = formatLastUsed(apiKey.last_used_at);
@@ -47,7 +49,7 @@ export function APIKeyRow({
           type="button"
           role="checkbox"
           aria-checked={selected}
-          aria-label={`Select ${apiKey.name}`}
+          aria-label={t(`Select ${apiKey.name}`, `选择 ${apiKey.name}`)}
           onClick={onToggleSelected}
           className={`shrink-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-action ${
             selected
@@ -71,14 +73,19 @@ export function APIKeyRow({
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    aria-label={`View details for ${apiKey.name}`}
+                    aria-label={t(
+                      `View details for ${apiKey.name}`,
+                      `查看 ${apiKey.name} 的详情`,
+                    )}
                     onClick={() => setInfoOpen(true)}
                     className="shrink-0 rounded text-foreground-tertiary transition-colors hover:text-foreground-body focus:outline-none focus-visible:ring-2 focus-visible:ring-action"
                   >
                     <Icon icon={InformationCircleIcon} size={16} />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="top">View key details</TooltipContent>
+                <TooltipContent side="top">
+                  {t("View key details", "查看密钥详情")}
+                </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
@@ -95,7 +102,7 @@ export function APIKeyRow({
 
       <button
         type="button"
-        aria-label={`Delete ${apiKey.name}`}
+        aria-label={t(`Delete ${apiKey.name}`, `删除 ${apiKey.name}`)}
         onClick={onDelete}
         className="shrink-0 rounded text-foreground-tertiary transition-colors hover:text-foreground-body focus:outline-none focus-visible:ring-2 focus-visible:ring-action"
       >

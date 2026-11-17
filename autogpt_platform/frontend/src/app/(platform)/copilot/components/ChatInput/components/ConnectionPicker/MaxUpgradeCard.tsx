@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   AiBrain01Icon,
   ArrowRight02Icon,
@@ -17,6 +21,7 @@ interface Props {
 }
 
 export function MaxUpgradeCard({ label, name, model, reason, href }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="mt-3 rounded-xl border border-brand/20 bg-accent-surface p-4">
       <div
@@ -56,7 +61,7 @@ export function MaxUpgradeCard({ label, name, model, reason, href }: Props) {
         </span>
       </div>
       <p className="mt-5 mb-2 text-lead leading-snug font-medium tracking-tight text-foreground-strong">
-        Unlock {name} with Max.
+        {t(`Unlock ${name} with Max.`, `升级 Max 解锁 ${name}。`)}
       </p>
       <Text variant="small-relaxed" tone="secondary">
         {reason}
@@ -69,7 +74,7 @@ export function MaxUpgradeCard({ label, name, model, reason, href }: Props) {
         shape="soft"
         className="mt-5 h-11 w-full"
       >
-        Upgrade to Max
+        {t("Upgrade to Max", "升级到 Max")}
         <Icon icon={ArrowRight02Icon} size={16} aria-hidden />
       </Button>
     </div>

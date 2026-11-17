@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/locale";
+
 interface UsageWindow {
   percent_used: number;
   resets_at: string | Date;
@@ -227,7 +229,17 @@ export function formatOfferPrice(price?: number, currency = "USD") {
 export function getUsageOfferAction(
   experience: UsageExperience,
   offer: { price?: number; currency?: string },
+  locale: Locale = "en",
 ) {
+  if (locale === "zh-CN") {
+    if (experience.targetTier === "MAX") return "升级到 Max";
+    if (experience.freshProUsage) {
+      const amount = formatOfferPrice(offer.price, offer.currency);
+      return `立即启用 Pro${amount ? ` · ${amount}` : ""}`;
+    }
+    if (experience.isCancelPending) return "立即订阅";
+    return experience.tier === "BASIC" ? "升级到 Pro" : "开始使用 Pro";
+  }
   if (experience.targetTier === "MAX") return "Upgrade to Max";
   if (experience.freshProUsage) {
     const amount = formatOfferPrice(offer.price, offer.currency);

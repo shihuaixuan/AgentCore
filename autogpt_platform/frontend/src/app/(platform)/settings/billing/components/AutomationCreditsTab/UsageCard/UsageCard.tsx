@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -21,6 +22,7 @@ interface Props {
 const Y_TICK_COUNT = 4;
 
 export function UsageCard({ index = 0 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const { usage, isLoading } = useUsageCard();
 
@@ -51,7 +53,7 @@ export function UsageCard({ index = 0 }: Props) {
     <motion.section {...sectionMotion} className="flex w-full flex-col gap-2">
       <div className="px-4">
         <Text variant="body-medium" as="span">
-          Usage
+          {t("Usage", "用量")}
         </Text>
       </div>
 
@@ -63,11 +65,11 @@ export function UsageCard({ index = 0 }: Props) {
               ${totalSpent.toFixed(2)}
             </Text>
             <Text variant="body" as="span" tone="muted">
-              · {totalRuns} runs
+              {t(`· ${totalRuns} runs`, `· ${totalRuns} 次运行`)}
             </Text>
           </div>
           <Text variant="body" as="span" tone="body">
-            Last 30 days
+            {t("Last 30 days", "最近 30 天")}
           </Text>
         </div>
 
@@ -129,6 +131,7 @@ function UsageBar({
   max: number;
   reduceMotion: boolean;
 }) {
+  const { t } = useTranslation();
   const heightPercent = (day.amount / max) * 100;
   const isEmpty = day.amount <= 0;
 
@@ -139,8 +142,11 @@ function UsageBar({
           type="button"
           aria-label={
             isEmpty
-              ? `${day.date}: $0.00, 0 runs`
-              : `${day.date}: $${day.amount.toFixed(2)}, ${day.runs} runs`
+              ? t(`${day.date}: $0.00, 0 runs`, `${day.date}：$0.00，0 次运行`)
+              : t(
+                  `${day.date}: ${day.amount.toFixed(2)}, ${t(`${day.runs} runs`, `${day.runs} 次运行`)}`,
+                  `${day.date}：${day.amount.toFixed(2)}，${day.runs} 次运行`,
+                )
           }
           className="group flex h-full flex-1 flex-col justify-end focus-visible:ring-2 focus-visible:ring-foreground-subtle focus-visible:outline-none"
         >
@@ -175,7 +181,7 @@ function UsageBar({
             ${day.amount.toFixed(2)}
           </span>
           <span className="text-caption text-foreground-subtle tabular-nums">
-            {day.runs} runs
+            {t(`${day.runs} runs`, `${day.runs} 次运行`)}
           </span>
         </div>
       </TooltipContent>

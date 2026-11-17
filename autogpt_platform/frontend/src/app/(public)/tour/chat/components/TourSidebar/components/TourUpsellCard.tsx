@@ -11,12 +11,14 @@ import {
 } from "@hugeicons/core-free-icons";
 import { TOUR_GITHUB_URL } from "../../../constants";
 import { trackTourCtaClick } from "../../../tracking";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type Props = {
   surface: "tour" | "marketplace";
 };
 
 export function TourUpsellCard({ surface }: Props) {
+  const { t } = useTranslation();
   const isCloud = environment.isCloud();
 
   function handleSignupClick() {
@@ -37,15 +39,18 @@ export function TourUpsellCard({ surface }: Props) {
           <Icon icon={SparklesIcon} size={18} aria-hidden />
         </span>
         <Text variant="eyebrow" tone="secondary">
-          {isCloud ? "Free trial" : "Get started"}
+          {isCloud ? t("Free trial", "免费试用") : t("Get started", "开始使用")}
         </Text>
       </div>
       <div className="space-y-1.5">
         <Text variant="h5" as="h2" tone="primary">
-          Your AI team starts here
+          {t("Your AI team starts here", "从这里组建你的 AI 团队")}
         </Text>
         <Text variant="body" tone="secondary">
-          Build workflows and put AI experts to work on your everyday tasks.
+          {t(
+            "Build workflows and put AI experts to work on your everyday tasks.",
+            "创建工作流，让 AI 专家帮你处理日常任务。",
+          )}
         </Text>
       </div>
       <div className="flex flex-col gap-1">
@@ -58,7 +63,9 @@ export function TourUpsellCard({ surface }: Props) {
           rightIcon={<Icon icon={ArrowRight02Icon} size={16} aria-hidden />}
           className="w-full"
         >
-          {isCloud ? "Start free trial" : "Create account"}
+          {isCloud
+            ? t("Start free trial", "开始免费试用")
+            : t("Create account", "创建账户")}
         </Button>
         <Button
           as="NextLink"
@@ -73,7 +80,7 @@ export function TourUpsellCard({ surface }: Props) {
           // oxlint-disable-next-line design-system/no-restyle -- quiet 12px link; no Button size has caption text at this height
           className="w-full text-caption"
         >
-          Self-host instead
+          {t("Self-host instead", "自行部署")}
         </Button>
       </div>
     </div>

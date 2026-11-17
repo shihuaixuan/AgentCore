@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import useCredentials from "@/hooks/useCredentials";
 import {
   BlockIOCredentialsSubSchema,
@@ -34,12 +37,14 @@ export function useAPIKeyCredentialsModal({
   schemaDescription?: string;
   onSubmit: (values: APIKeyFormValues) => Promise<void>;
 } {
+  const { t } = useTranslation();
+
   const credentials = useCredentials(schema, siblingInputs);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formSchema = z.object({
-    apiKey: z.string().min(1, "API Key is required"),
-    title: z.string().min(1, "Name is required"),
+    apiKey: z.string().min(1, t("API Key is required", "请输入 API 密钥")),
+    title: z.string().min(1, t("Name is required", "请输入名称")),
     expiresAt: z.string().optional(),
   });
 

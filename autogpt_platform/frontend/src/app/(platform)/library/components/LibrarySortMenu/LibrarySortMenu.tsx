@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { LibraryAgentSort } from "@/app/api/__generated__/models/libraryAgentSort";
 import {
   Select,
@@ -17,11 +18,12 @@ interface Props {
 }
 
 export function LibrarySortMenu({ setLibrarySort }: Props) {
+  const { t } = useTranslation();
   const { handleSortChange } = useLibrarySortMenu({ setLibrarySort });
   return (
     <div className="flex items-center" data-testid="sort-by-dropdown">
       <span className="hidden text-body whitespace-nowrap text-foreground-tertiary sm:inline">
-        sort by
+        {t("sort by", "排序")}
       </span>
       <Select onValueChange={handleSortChange}>
         <SelectTrigger
@@ -33,17 +35,19 @@ export function LibrarySortMenu({ setLibrarySort }: Props) {
             icon={SortByDown02Icon}
             className="h-4 w-4 sm:hidden"
           />
-          <SelectValue placeholder="Last Modified" />
+          <SelectValue placeholder={t("Last Modified", "最后修改")} />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
             <SelectItem value={LibraryAgentSort.createdAt}>
-              Creation Date
+              {t("Creation Date", "创建日期")}
             </SelectItem>
             <SelectItem value={LibraryAgentSort.updatedAt}>
-              Last Modified
+              {t("Last Modified", "最后修改")}
             </SelectItem>
-            <SelectItem value={LibraryAgentSort.lastRunAt}>Last Run</SelectItem>
+            <SelectItem value={LibraryAgentSort.lastRunAt}>
+              {t("Last Run", "上次运行")}
+            </SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>

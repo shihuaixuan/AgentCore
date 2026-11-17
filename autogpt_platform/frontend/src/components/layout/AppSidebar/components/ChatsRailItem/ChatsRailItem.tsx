@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import {
   SidebarGroup,
@@ -13,6 +16,7 @@ interface Props {
 }
 
 export function ChatsRailItem({ onClick }: Props) {
+  const { t } = useTranslation();
   const navItemClassName = useNavItemClassName();
 
   return (
@@ -20,7 +24,7 @@ export function ChatsRailItem({ onClick }: Props) {
       <SidebarMenu className="group-data-[collapsible=icon]:gap-1">
         <SidebarMenuItem>
           <SidebarMenuButton
-            tooltip="Chats"
+            tooltip={t("Chats", "对话")}
             onClick={onClick}
             className={navItemClassName}
           >
@@ -29,7 +33,7 @@ export function ChatsRailItem({ onClick }: Props) {
               tone="emphasis-soft"
               className="size-4 group-data-[collapsible=icon]:size-4.5"
             />
-            <span className="truncate">Chats</span>
+            <span className="truncate">{t("Chats", "对话")}</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

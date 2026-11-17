@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { toastIfPlanRequired } from "@/components/contextual/PaywallToast/helpers";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
@@ -40,6 +41,8 @@ export function useDeviceAuthConnect({
   credentialID,
   onError,
 }: Args) {
+  const { t } = useTranslation();
+
   const queryClient = useQueryClient();
   const credentialsActions = useContext(CredentialsActionsContext);
   const [phase, setPhase] = useState<Phase>("idle");
@@ -96,7 +99,10 @@ export function useDeviceAuthConnect({
         if (status === "approved") {
           setPhase("done");
           stopPolling();
-          toast({ title: "Connected via device auth", variant: "success" });
+          toast({
+            title: t("Connected via device auth", "已通过设备授权连接"),
+            variant: "success",
+          });
           await invalidateConnectionQueries(queryClient);
           // Seed the credentials store directly. Invalidating the query keys
           // does not reach it — it is separate state filled by loadCredentials
@@ -180,7 +186,9 @@ export function useDeviceAuthConnect({
         toast({
           title: "Device auth polling failed",
           description:
-            error instanceof Error ? error.message : "Unexpected error",
+            error instanceof Error
+              ? error.message
+              : t("Unexpected error", "发生意外错误"),
           variant: "destructive",
         });
       }
@@ -244,7 +252,9 @@ export function useDeviceAuthConnect({
       toast({
         title: "Device auth initiation failed",
         description:
-          error instanceof Error ? error.message : "Unexpected error",
+          error instanceof Error
+            ? error.message
+            : t("Unexpected error", "发生意外错误"),
         variant: "destructive",
       });
     }

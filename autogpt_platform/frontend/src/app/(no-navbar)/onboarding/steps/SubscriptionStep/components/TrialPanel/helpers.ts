@@ -74,6 +74,30 @@ export function formatCadencePrice(offer: TrialOfferResponse) {
   return `${formatPlanAmount(offer)} a ${cadence}`;
 }
 
+export function getTrialMilestoneCopy(
+  milestone: Milestone,
+  offer: TrialOfferResponse,
+) {
+  if (milestone.key === "today")
+    return {
+      title: "免费试用开始",
+      detail: "立即获得完整访问权限，用量以试用额度为限。",
+    };
+  if (milestone.key === "reminder")
+    return {
+      title: "我们会发送邮件提醒",
+      detail: milestone.date
+        ? `在试用结束前 ${REMINDER_DAYS_BEFORE_CHARGE} 天发送，告知结束日期及取消方式。`
+        : "告知试用结束日期及取消方式。",
+    };
+  const lastFreeDay = new Date(milestone.date ?? new Date());
+  lastFreeDay.setDate(lastFreeDay.getDate() - 1);
+  return {
+    title: `首次付款：${formatPlanAmount(offer)}`,
+    detail: `此后每${offer.billing_cycle === "yearly" ? "年" : "月"} ${formatPlanAmount(offer)}，另加适用税费。在 ${lastFreeDay.toLocaleDateString("zh-CN")} 当天或之前取消即可免付费用。`,
+  };
+}
+
 export function formatDay(date: Date) {
   return date.toLocaleDateString(undefined, {
     weekday: "short",

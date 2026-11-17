@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { PausedScheduledChat } from "@/app/api/__generated__/models/pausedScheduledChat";
 import { Button } from "@/components/atoms/Button/Button";
@@ -14,6 +15,8 @@ interface Props {
 }
 
 export function PausedChatListItem({ paused }: Props) {
+  const { t } = useTranslation();
+
   const {
     sessionHref,
     handleResume,
@@ -63,20 +66,20 @@ export function PausedChatListItem({ paused }: Props) {
           size="small"
           loading={isResuming}
           onClick={handleResume}
-          aria-label={`Resume ${paused.title}`}
+          aria-label={t(`Resume ${paused.title}`, `恢复 ${paused.title}`)}
         >
           <Icon icon={PlayIcon} className="mr-1 h-4 w-4" />
-          Resume
+          {t("Resume", "恢复")}
         </Button>
         {canDelete ? (
           <Button
             variant="secondary"
             size="small"
             onClick={() => setIsDeleteOpen(true)}
-            aria-label={`Delete ${paused.title}`}
+            aria-label={t(`Delete ${paused.title}`, `删除 ${paused.title}`)}
           >
             <Icon icon={Delete02Icon} className="mr-1 h-4 w-4" />
-            Delete
+            {t("Delete", "删除")}
           </Button>
         ) : null}
       </div>
@@ -84,13 +87,15 @@ export function PausedChatListItem({ paused }: Props) {
       <Dialog
         controlled={{ isOpen: isDeleteOpen, set: setIsDeleteOpen }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete scheduled chat"
+        title={t("Delete scheduled chat", "删除定时聊天")}
       >
         <Dialog.Content>
           <div className="flex flex-col gap-4">
             <Text variant="large">
-              Delete “{paused.title}”? It won&apos;t run again. You can recreate
-              it from chat if needed.
+              {t(
+                `Delete “${paused.title}”? It won't run again. You can recreate it from chat if needed.`,
+                `要删除“${paused.title}”吗？它将不再运行。如有需要，可在聊天中重新创建。`,
+              )}
             </Text>
             <Dialog.Footer>
               <Button
@@ -98,14 +103,14 @@ export function PausedChatListItem({ paused }: Props) {
                 disabled={isDeleting}
                 onClick={() => setIsDeleteOpen(false)}
               >
-                Keep it
+                {t("Keep it", "保留")}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDelete}
                 loading={isDeleting}
               >
-                Yes, delete
+                {t("Yes, delete", "确认删除")}
               </Button>
             </Dialog.Footer>
           </div>

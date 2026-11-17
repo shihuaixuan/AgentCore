@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
 import type { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { Button } from "@/components/atoms/Button/Button";
@@ -28,6 +29,7 @@ export function SelectedScheduleActions({
   onDeleted,
   onSelectRun,
 }: Props) {
+  const { t } = useTranslation();
   const {
     openInBuilderHref,
     showDeleteDialog,
@@ -50,7 +52,7 @@ export function SelectedScheduleActions({
         <Button
           variant="icon"
           size="icon"
-          aria-label="Run now"
+          aria-label={t("Run now", "立即运行")}
           onClick={handleRunNow}
           disabled={isRunning || !schedule}
         >
@@ -67,7 +69,7 @@ export function SelectedScheduleActions({
             as="NextLink"
             href={openInBuilderHref}
             target="_blank"
-            aria-label="View scheduled task details"
+            aria-label={t("View scheduled task details", "查看计划任务详情")}
           >
             <Icon icon={EyeIcon} size={18} />
           </Button>
@@ -82,7 +84,7 @@ export function SelectedScheduleActions({
         <Button
           variant="icon"
           size="icon"
-          aria-label="Delete schedule"
+          aria-label={t("Delete schedule", "删除计划")}
           onClick={() => setShowDeleteDialog(true)}
           disabled={isDeleting}
         >
@@ -101,12 +103,14 @@ export function SelectedScheduleActions({
           set: setShowDeleteDialog,
         }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete schedule"
+        title={t("Delete schedule", "删除计划")}
       >
         <Dialog.Content>
           <Text variant="large">
-            Are you sure you want to delete this schedule? This action cannot be
-            undone.
+            {t(
+              "Are you sure you want to delete this schedule? This action cannot be undone.",
+              "确定要删除此计划吗？此操作无法撤销。",
+            )}
           </Text>
           <Dialog.Footer>
             <Button
@@ -114,14 +118,14 @@ export function SelectedScheduleActions({
               onClick={() => setShowDeleteDialog(false)}
               disabled={isDeleting}
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               variant="destructive"
               onClick={handleDelete}
               loading={isDeleting}
             >
-              Delete Schedule
+              {t("Delete Schedule", "删除计划")}
             </Button>
           </Dialog.Footer>
         </Dialog.Content>

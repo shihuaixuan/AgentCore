@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { CopilotSkillInfo } from "@/app/api/__generated__/models/copilotSkillInfo";
 import { MarketplaceSkill } from "@/app/api/__generated__/models/marketplaceSkill";
 import { Button } from "@/components/atoms/Button/Button";
@@ -54,6 +55,7 @@ export function AddSkillDialog({
   onAddMarketplace,
   onClose,
 }: Props) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const { attachList } = useFitListToDialog<HTMLUListElement>();
   const needle = query.trim().toLowerCase();
@@ -75,13 +77,15 @@ export function AddSkillDialog({
         },
       }}
       styling={{ maxWidth: "30rem", maxHeight: "60vh" }}
-      title="Add a skill"
+      title={t("Add a skill", "添加技能")}
     >
       <Dialog.Content>
         <div className="flex flex-col gap-3">
           <Text variant="body" tone="muted">
-            Skills are reusable instructions this expert follows for a specific
-            job. Pick one from your library or install one from the marketplace.
+            {t(
+              "Skills are reusable instructions this expert follows for a specific job. Pick one from your library or install one from the marketplace.",
+              "技能是专家执行特定工作时遵循的可复用说明。请从技能库选择，或从市场安装。",
+            )}
           </Text>
           <TabsLine
             variant="compact"
@@ -90,10 +94,10 @@ export function AddSkillDialog({
           >
             <TabsLineList>
               <TabsLineTrigger value="library" icon={BookOpen01Icon}>
-                Library
+                {t("Library", "工作流库")}
               </TabsLineTrigger>
               <TabsLineTrigger value="marketplace" icon={Store01Icon}>
-                Marketplace
+                {t("Marketplace", "市场")}
               </TabsLineTrigger>
             </TabsLineList>
           </TabsLine>
@@ -104,23 +108,26 @@ export function AddSkillDialog({
                 size="small"
                 value={query}
                 onChange={setQuery}
-                placeholder="Search your library"
+                placeholder={t("Search your library", "搜索工作流库")}
               />
               {isLoading ? (
                 <Text variant="small" tone="muted">
-                  Loading your skills…
+                  {t("Loading your skills…", "正在加载你的技能…")}
                 </Text>
               ) : visible.length === 0 ? (
                 <Text variant="small" tone="muted">
                   {skills.length === 0
-                    ? "Every library skill is already on this expert."
-                    : "No skills match."}
+                    ? t(
+                        "Every library skill is already on this expert.",
+                        "技能库中的所有技能都已添加给这位专家。",
+                      )
+                    : t("No skills match.", "没有匹配的技能。")}
                 </Text>
               ) : (
                 <ul
                   ref={attachList}
                   className="flex flex-col gap-2 overflow-y-auto pr-1"
-                  aria-label="Library skills"
+                  aria-label={t("Library skills", "技能库")}
                 >
                   {visible.map((skill) => (
                     <SkillOption
@@ -139,7 +146,10 @@ export function AddSkillDialog({
                 className="text-foreground-tertiary underline underline-offset-2"
               >
                 <Text variant="body" as="span" tone="inherit">
-                  Upload a new skill in your library
+                  {t(
+                    "Upload a new skill in your library",
+                    "在技能库中上传新技能",
+                  )}
                 </Text>
               </NextLink>
             </>
@@ -149,21 +159,21 @@ export function AddSkillDialog({
                 size="small"
                 value={marketQuery}
                 onChange={onMarketQueryChange}
-                placeholder="Search the marketplace"
+                placeholder={t("Search the marketplace", "搜索市场")}
               />
               {isMarketplaceLoading ? (
                 <Text variant="small" tone="muted">
-                  Searching the marketplace…
+                  {t("Searching the marketplace…", "正在搜索市场…")}
                 </Text>
               ) : marketplaceSkills.length === 0 ? (
                 <Text variant="small" tone="muted">
-                  No marketplace skills match.
+                  {t("No marketplace skills match.", "市场中没有匹配的技能。")}
                 </Text>
               ) : (
                 <ul
                   ref={attachList}
                   className="flex flex-col gap-2 overflow-y-auto pr-1"
-                  aria-label="Marketplace skills"
+                  aria-label={t("Marketplace skills", "市场技能")}
                 >
                   {marketplaceSkills.map((skill) => (
                     <SkillOption
@@ -181,7 +191,7 @@ export function AddSkillDialog({
           )}
           <div className="flex justify-end pt-1">
             <Button variant="secondary" size="small" onClick={onClose}>
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
           </div>
         </div>
@@ -205,6 +215,7 @@ function SkillOption({
   disabled,
   onAdd,
 }: OptionProps) {
+  const { t } = useTranslation();
   return (
     <li className="flex items-center gap-3 rounded-lg border border-border-base px-3 py-2.5">
       <span className="inline-flex shrink-0 text-foreground-tertiary">
@@ -230,7 +241,7 @@ function SkillOption({
         onClick={onAdd}
         leadingIcon={PlusSignIcon}
       >
-        Add
+        {t("Add", "添加")}
       </Button>
     </li>
   );

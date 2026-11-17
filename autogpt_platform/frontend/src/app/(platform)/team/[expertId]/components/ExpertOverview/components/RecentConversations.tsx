@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import Link from "next/link";
 import {
   BubbleChatIcon,
@@ -33,8 +34,9 @@ export function RecentConversations({
   onRetry,
   onChat,
 }: Props) {
+  const { t } = useTranslation();
   return (
-    <OverviewCard title="Recent conversations">
+    <OverviewCard title={t("Recent conversations", "最近对话")}>
       {isLoading ? (
         <div className="flex flex-col gap-2">
           <Skeleton className="h-10 w-full rounded-lg" />
@@ -56,7 +58,7 @@ export function RecentConversations({
               <Icon icon={BubbleChatIcon} size={22} />
             </span>,
           ]}
-          title="No conversations yet"
+          title={t("No conversations yet", "暂无对话")}
           description={`Ask ${expertName} for something and the chat shows up here.`}
         >
           <Button
@@ -66,7 +68,7 @@ export function RecentConversations({
             leadingIcon={BubbleChatIcon}
             onClick={onChat}
           >
-            Start a chat
+            {t("Start a chat", "开始聊天")}
           </Button>
         </PanelEmptyState>
       ) : (
@@ -91,7 +93,7 @@ export function RecentConversations({
                   </Text>
                   <Text variant="small" tone="muted" as="span">
                     {session.is_processing
-                      ? "Working now"
+                      ? t("Working now", "正在运行")
                       : formatRelativeDate(session.updated_at)}
                   </Text>
                 </span>

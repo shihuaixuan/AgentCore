@@ -37,16 +37,53 @@ export function getChatAllowance(
 }
 
 interface Args {
+  locale?: string;
   paymentEnabled: boolean;
   allowance: ChatAllowance;
   isTrial: boolean;
 }
 
 export function getUsageCreditsAnswers({
+  locale,
   paymentEnabled,
   allowance,
   isTrial,
 }: Args) {
+  if (locale === "zh-CN") {
+    const owner = isTrial ? "试用" : "套餐";
+    const allowances: Record<ChatAllowance, string> = {
+      unknown: "额度包含在套餐中。",
+      "no-plan": "选择套餐即可获得额度。",
+      "lifetime-trial": "整个试用期共用一份额度。",
+      unlimited: "额度包含在套餐中，没有每日或每周限制。",
+      daily: `额度包含在${owner}中，每日重置。`,
+      weekly: `额度包含在${owner}中，每周重置。`,
+      "daily-weekly": `额度包含在${owner}中，每日和每周重置。`,
+    };
+    return [
+      {
+        question: "对话用量涵盖哪些内容？",
+        answer: `你与 Otto 及专家的对话，包括他们为你完成的研究和写作。${allowances[allowance]}`,
+      },
+      {
+        question: "自动化积分有什么用途？",
+        answer: `用于工作流运行和生成图片等付费步骤。由 Otto 执行的工作流步骤会优先消耗对话额度，耗尽后才使用积分。${paymentEnabled ? "你可以购买积分、完成设置任务赚取积分，或开启自动充值。" : "你可以完成设置任务赚取积分。"}`,
+      },
+      ...(paymentEnabled
+        ? [
+            {
+              question: "什么时候会向银行卡扣款？",
+              answer:
+                "对话或单个步骤不会直接向银行卡扣款。套餐开始及每次续订、升级套餐、购买积分（包括自动充值）时才会扣款。如果续订付款失败，且自动化积分余额足够，将从积分余额中支付。",
+            },
+          ]
+        : []),
+      {
+        question: "如何获得更多额度？",
+        answer: `${paymentEnabled && allowance !== "unlimited" ? (allowance === "no-plan" ? "选择套餐即可获得对话额度。" : "选择更高档套餐即可获得更多对话额度。") : ""}${paymentEnabled ? "在钱包中选择添加积分，即可获得更多自动化积分。" : "在钱包中完成设置任务，即可获得更多自动化积分。"}`,
+      },
+    ];
+  }
   return [
     {
       question: "What does chat usage cover?",

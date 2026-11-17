@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AlertDiamondIcon, CheckListIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import type { HomeBriefingOutcome } from "@/app/api/__generated__/models/homeBriefingOutcome";
@@ -76,10 +79,11 @@ export function OutcomeRow({ outcome, timezone, showAgentName }: Props) {
 }
 
 function RunMeta({ outcome, timezone, showAgentName }: Props) {
+  const { t, locale } = useTranslation();
   const parts = [
     outcome.status === "failed" ? (
       <span key="status" className="font-medium text-error-hover">
-        Failed
+        {t("Failed", "失败")}
       </span>
     ) : null,
     showAgentName ? (
@@ -90,9 +94,9 @@ function RunMeta({ outcome, timezone, showAgentName }: Props) {
         {outcome.agent_name}
       </span>
     ) : null,
-    <span key="trigger">{getRunTriggerLabel(outcome.trigger)}</span>,
+    <span key="trigger">{getRunTriggerLabel(outcome.trigger, t)}</span>,
     <span key="time" className="tabular-nums">
-      {formatWorkTime(outcome.occurred_at, timezone)}
+      {formatWorkTime(outcome.occurred_at, timezone, locale)}
     </span>,
   ].filter(Boolean);
 

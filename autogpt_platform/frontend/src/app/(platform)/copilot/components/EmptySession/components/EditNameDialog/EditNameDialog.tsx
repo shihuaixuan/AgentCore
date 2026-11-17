@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
@@ -15,6 +17,7 @@ interface Props {
 }
 
 export function EditNameDialog({ currentName }: Props) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState(currentName);
   const [isSaving, setIsSaving] = useState(false);
@@ -42,8 +45,8 @@ export function EditNameDialog({ currentName }: Props) {
       if (!res.ok) {
         const body = await res.json();
         toast({
-          title: "Failed to update name",
-          description: body.error ?? "Unknown error",
+          title: t("Failed to update name", "更新名称失败"),
+          description: body.error ?? t("Unknown error", "未知错误"),
           variant: "destructive",
         });
         return;
@@ -52,7 +55,10 @@ export function EditNameDialog({ currentName }: Props) {
       const session = await refreshSession();
       if (session?.error) {
         toast({
-          title: "Name saved, but session refresh failed",
+          title: t(
+            "Name saved, but session refresh failed",
+            "名称已保存，但会话刷新失败",
+          ),
           description: session.error,
           variant: "destructive",
         });
@@ -60,7 +66,7 @@ export function EditNameDialog({ currentName }: Props) {
         return;
       }
       setIsOpen(false);
-      toast({ title: "Name updated" });
+      toast({ title: t("Name updated", "名称已更新") });
     }
     await save().finally(() => {
       setIsSaving(false);
@@ -69,7 +75,7 @@ export function EditNameDialog({ currentName }: Props) {
 
   return (
     <Dialog
-      title="Edit display name"
+      title={t("Edit display name", "修改显示名称")}
       styling={{ maxWidth: "24rem" }}
       controlled={{ isOpen, set: handleOpenChange }}
     >
@@ -85,8 +91,8 @@ export function EditNameDialog({ currentName }: Props) {
         <div className="flex flex-col gap-4 px-1">
           <Input
             id="display-name"
-            label="Display name"
-            placeholder="Your name"
+            label={t("Display name", "显示名称")}
+            placeholder={t("Your name", "你的名称")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
@@ -102,7 +108,7 @@ export function EditNameDialog({ currentName }: Props) {
             disabled={!name.trim() || isSaving}
             loading={isSaving}
           >
-            Save
+            {t("Save", "保存")}
           </Button>
         </div>
       </Dialog.Content>

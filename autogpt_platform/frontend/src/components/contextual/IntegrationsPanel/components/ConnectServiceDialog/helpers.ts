@@ -53,12 +53,21 @@ export function withoutDuplicateKeyMethod(
   return authMethods.length ? { ...server, auth_methods: authMethods } : server;
 }
 
-export function getSignInFallbackLabel(provider: ConnectableProvider): string {
+export function getSignInFallbackLabel(
+  provider: ConnectableProvider,
+  t: (english: string, chinese: string) => string = (english) => english,
+): string {
   if (provider.mcpServer?.auth_methods.includes("oauth")) {
-    return `Use the ${provider.name} sign-in instead`;
+    return t(
+      `Use the ${provider.name} sign-in instead`,
+      `改用 ${provider.name} 登录`,
+    );
   }
   const article = /^[aeiou]/i.test(provider.name) ? "an" : "a";
-  return `Use ${article} ${provider.name} token instead`;
+  return t(
+    `Use ${article} ${provider.name} token instead`,
+    `改用 ${provider.name} 令牌`,
+  );
 }
 
 export function toConnectableProviders(

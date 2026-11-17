@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -11,16 +12,19 @@ interface Props {
 }
 
 export function WorkIQAdminConsent({ tenantID, onRetry }: Props) {
+  const { t } = useTranslation();
   const approvalURL = tenantID ? getWorkIQAdminConsentURL(tenantID) : null;
 
   return (
     <section className="flex flex-col gap-3 rounded-lg border border-border-base p-4">
       <Text as="h3" variant="body-medium">
-        Set up Work IQ for your organization
+        {t("Set up Work IQ for your organization", "为组织设置 Work IQ")}
       </Text>
       <Text variant="small" tone="muted">
-        Microsoft turns Work IQ on per organization, and it bills by usage. Your
-        other Microsoft services keep working while this is pending.
+        {t(
+          "Microsoft turns Work IQ on per organization, and it bills by usage. Your other Microsoft services keep working while this is pending.",
+          "Microsoft 按组织启用 Work IQ，并按使用量收费。等待启用期间，其他 Microsoft 服务可继续使用。",
+        )}
       </Text>
       {approvalURL && (
         <Button
@@ -31,12 +35,12 @@ export function WorkIQAdminConsent({ tenantID, onRetry }: Props) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Turn on Work IQ (admins)
+          {t("Turn on Work IQ (admins)", "启用 Work IQ（管理员）")}
         </Button>
       )}
       <WorkIQInstructions />
       <Button variant="ghost" size="small" onClick={onRetry}>
-        Check again
+        {t("Check again", "重新检查")}
       </Button>
     </section>
   );

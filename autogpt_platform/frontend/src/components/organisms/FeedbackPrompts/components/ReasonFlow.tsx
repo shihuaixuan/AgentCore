@@ -1,4 +1,7 @@
 "use client";
+import { DISPLAY_LABELS } from "../display-labels";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Textarea } from "@/components/atoms/Textarea/Textarea";
@@ -30,6 +33,7 @@ export function ReasonFlow({
   onReason,
   onSubmit,
 }: Props) {
+  const { t } = useTranslation();
   const [reason, setReason] = useState<string | null>(initialReason);
   const [note, setNote] = useState("");
   const [sent, setSent] = useState(initialSent);
@@ -66,15 +70,21 @@ export function ReasonFlow({
           rows={2}
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          aria-label={notePlaceholder}
-          placeholder={notePlaceholder}
+          aria-label={t(
+            notePlaceholder,
+            DISPLAY_LABELS[notePlaceholder] ?? notePlaceholder,
+          )}
+          placeholder={t(
+            notePlaceholder,
+            DISPLAY_LABELS[notePlaceholder] ?? notePlaceholder,
+          )}
           className="min-h-0 resize-none"
         />
       ) : null}
       {reason ? (
         <div className="flex justify-end">
           <Button size="small" onClick={send}>
-            Send
+            {t("Send", "发送")}
           </Button>
         </div>
       ) : null}

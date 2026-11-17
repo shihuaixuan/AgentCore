@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
@@ -14,11 +15,12 @@ interface Props {
 }
 
 export function ExpertAbout({ text }: Props) {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const isClampable = text.length > CLAMPED_LENGTH;
 
   return (
-    <ExpertSection title="About">
+    <ExpertSection title={t("About", "关于")}>
       <p
         className={cn(
           "text-body-lg leading-7 whitespace-pre-line text-foreground-secondary",

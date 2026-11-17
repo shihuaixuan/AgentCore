@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React from "react";
 import { Text } from "@/components/atoms/Text/Text";
 import { MultiToggle } from "@/components/molecules/MultiToggle/MultiToggle";
@@ -11,6 +12,7 @@ export function MonthlyPicker({
   values: number[];
   onChange: (v: number[]) => void;
 }) {
+  const { t } = useTranslation();
   function allDays() {
     onChange(Array.from({ length: 31 }, (_, i) => i + 1));
   }
@@ -26,7 +28,7 @@ export function MonthlyPicker({
   return (
     <div className="mb-6 space-y-2">
       <Text variant="body-medium" as="span">
-        Days of Month
+        {t("Days of Month", "每月日期")}
       </Text>
       <div className="flex gap-2">
         <button
@@ -34,7 +36,7 @@ export function MonthlyPicker({
           className="h-[2.25rem] rounded-full border border-foreground-body px-4 py-2 text-body leading-4 font-medium text-foreground-base hover:bg-surface-hover"
           onClick={allDays}
         >
-          All Days
+          {t("All Days", "每天")}
         </button>
         <button
           type="button"
@@ -55,7 +57,7 @@ export function MonthlyPicker({
           className="h-[2.25rem] rounded-full border border-foreground-body px-4 py-2 text-body leading-4 font-medium text-foreground-base hover:bg-surface-hover"
           onClick={() => onChange([31])}
         >
-          Last Day
+          {t("Last Day", "最后一天")}
         </button>
       </div>
 
@@ -64,7 +66,7 @@ export function MonthlyPicker({
           items={items}
           selectedValues={selected}
           onChange={(sv) => onChange(sv.map((s) => parseInt(s)))}
-          aria-label="Select days of month"
+          aria-label={t("Select days of month", "选择每月日期")}
         />
       )}
     </div>

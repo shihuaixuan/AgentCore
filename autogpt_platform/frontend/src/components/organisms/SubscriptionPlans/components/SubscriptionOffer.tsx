@@ -1,3 +1,5 @@
+"use client";
+
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import type { TrialOfferResponse } from "@/app/api/__generated__/models/trialOfferResponse";
 import { Card } from "@/components/atoms/Card/Card";
@@ -5,6 +7,7 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import type { PlanDef } from "@/components/molecules/PlanCard/plans";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getPlanPresentation,
   isTeamPlan,
@@ -18,10 +21,11 @@ interface Props extends SubscriptionPlansProps {
 }
 
 export function SubscriptionOffer({ plan, onTrialDetails, ...props }: Props) {
-  const presentation = getPlanPresentation(plan, props);
+  const { t, locale } = useTranslation();
+  const presentation = getPlanPresentation(plan, props, locale);
   return (
     <section
-      aria-label={`${plan.name} plan`}
+      aria-label={t(`${plan.name} plan`, `${plan.name} 套餐`)}
       data-slot="subscription-offer"
       className="h-full"
     >
@@ -50,6 +54,7 @@ function OfferHeading({
   plan: PlanDef;
   trial: TrialOfferResponse | null;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       data-slot="offer-heading"
@@ -63,7 +68,7 @@ function OfferHeading({
           data-slot="offer-heading-usage"
           className="rounded-full bg-accent-surface px-2 py-0.5 text-caption text-accent-strong"
         >
-          {plan.usage} usage
+          {t(`${plan.usage} usage`, `${plan.usage} 用量额度`)}
         </span>
       )}
       {plan.badge && (
@@ -84,7 +89,10 @@ function OfferHeading({
           data-slot="offer-heading-trial"
           className="ml-auto rounded-full bg-accent-surface px-2 py-0.5 text-caption font-medium text-accent-strong"
         >
-          {trial.duration_days} days free
+          {t(
+            `${trial.duration_days} days free`,
+            `免费试用 ${trial.duration_days} 天`,
+          )}
         </span>
       )}
     </div>

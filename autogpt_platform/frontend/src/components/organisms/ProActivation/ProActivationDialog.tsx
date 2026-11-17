@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { Text } from "@/components/atoms/Text/Text";
 import { Button } from "@/components/atoms/Button/Button";
@@ -6,7 +9,7 @@ import { formatAmount } from "@/services/pro-activation/helpers";
 import { ActivationTerms } from "./ActivationTerms";
 import { ActivationStatus } from "./ActivationStatus";
 import { ActivationPaymentMethod } from "./ActivationPaymentMethod";
-import { billingCadence } from "@/services/pro-activation/reviewDetails";
+import { billingCadence } from "./display-helpers";
 import { useQuoteExpiry } from "@/services/pro-activation/useQuoteExpiry";
 
 interface Props {
@@ -14,6 +17,7 @@ interface Props {
 }
 
 export function ProActivationDialog({ activation }: Props) {
+  const { t, locale } = useTranslation();
   const {
     attempt,
     isOpen,
@@ -34,17 +38,20 @@ export function ProActivationDialog({ activation }: Props) {
   const refreshTerms = needsNewTerms || (expiry.expired && !retryConsent);
   const plan = (attempt?.terms?.plan ?? readyPlan) === "MAX" ? "Max" : "Pro";
   const title = isReady
-    ? `${plan} is active`
+    ? t(`${plan} is active`, `${plan} 已启用`)
     : review
-      ? `Start ${plan} today`
+      ? t(`Start ${plan} today`, `今天启用 ${plan}`)
       : attempt?.status === "not_applicable"
-        ? "Your plan has changed"
+        ? t("Your plan has changed", "你的套餐已变更")
         : attempt?.status === "failed"
-          ? "Your payment wasn’t completed."
+          ? t("Your payment wasn’t completed.", "你的付款未完成。")
           : attempt?.status === "action_required" ||
               attempt?.status === "payment_required"
-            ? `One more step to start ${plan}.`
-            : `Getting ${plan} ready.`;
+            ? t(
+                `One more step to start ${plan}.`,
+                `再完成一步即可启用 ${plan}。`,
+              )
+            : t(`Getting ${plan} ready.`, `正在准备 ${plan}。`);
   return (
     <Dialog
       variant="compact"
@@ -56,7 +63,7 @@ export function ProActivationDialog({ activation }: Props) {
           className="space-y-2 pr-7"
         >
           <Text variant="small-medium" tone="muted">
-            {review ? "Payment review" : `AutoGPT ${plan}`}
+            {review ? t("Payment review", "核对付款") : `AutoGPT ${plan}`}
           </Text>
           <span
             data-slot="pro-activation-dialog-title"
@@ -84,13 +91,18 @@ export function ProActivationDialog({ activation }: Props) {
               <ActivationPaymentMethod />
               {expiry.expiringSoon && !retryConsent && (
                 <Text variant="small" tone="warning">
-                  This price is held for a few more minutes.
+                  {t(
+                    "This price is held for a few more minutes.",
+                    "此价格还将保留几分钟。",
+                  )}
                 </Text>
               )}
               {expiry.expired && !retryConsent && (
                 <Text variant="small" tone="warning" role="status">
-                  This quote has expired. Review the current terms before
-                  paying.
+                  {t(
+                    "This quote has expired. Review the current terms before paying.",
+                    "此报价已过期，请在付款前查看当前条款。",
+                  )}
                 </Text>
               )}
               <Button
@@ -101,12 +113,17 @@ export function ProActivationDialog({ activation }: Props) {
                 onClick={confirm}
               >
                 {retryConsent
-                  ? "Retry same confirmation"
-                  : `Pay ${formatAmount(review.amount_due, review.currency)} and start ${plan}`}
+                  ? t("Retry same confirmation", "重试此次确认")
+                  : t(
+                      `Pay ${formatAmount(review.amount_due, review.currency)} and start ${plan}`,
+                      `支付 ${formatAmount(review.amount_due, review.currency)} 并启用 ${plan}`,
+                    )}
               </Button>
               <Text variant="small" tone="muted" className="text-center">
-                Renews {billingCadence(review)} until you cancel. Cancel anytime
-                in Billing.
+                {t(
+                  `Renews ${billingCadence(review, locale)} until you cancel. Cancel anytime in Billing.`,
+                  `按${billingCadence(review, locale)}的周期续订，直至取消。你可以随时在账单设置中取消。`,
+                )}
               </Text>
               {error && !needsNewTerms && retryConsent && (
                 <Button
@@ -115,7 +132,7 @@ export function ProActivationDialog({ activation }: Props) {
                   onClick={() => check()}
                   disabled={isBusy}
                 >
-                  Check existing payment
+                  {t("Check existing payment", "检查现有付款")}
                 </Button>
               )}
               {refreshTerms && (
@@ -125,7 +142,7 @@ export function ProActivationDialog({ activation }: Props) {
                   onClick={() => start(attempt.return_to)}
                   disabled={isBusy}
                 >
-                  Review current terms
+                  {t("Review current terms", "查看当前条款")}
                 </Button>
               )}
               <Button
@@ -134,7 +151,7 @@ export function ProActivationDialog({ activation }: Props) {
                 className="w-full"
                 onClick={() => setOpen(false)}
               >
-                Not now
+                {t("Not now", "暂时不用")}
               </Button>
             </>
           ) : attempt ? (
@@ -154,7 +171,9 @@ export function ProActivationDialog({ activation }: Props) {
               loading={isBusy}
               onClick={() => start()}
             >
-              {isBusy ? "Loading your upgrade details…" : "Try again"}
+              {isBusy
+                ? t("Loading your upgrade details…", "正在加载升级详情…")
+                : t("Try again", "重试")}
             </Button>
           )}
         </div>

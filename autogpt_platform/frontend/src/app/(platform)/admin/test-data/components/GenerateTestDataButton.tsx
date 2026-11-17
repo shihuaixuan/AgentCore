@@ -7,6 +7,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { Alert } from "@/components/molecules/Alert/Alert";
 import type { TestDataScriptType } from "@/app/api/__generated__/models/testDataScriptType";
 import { useGenerateTestDataButton } from "./useGenerateTestDataButton";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const scriptTypeOptions: SelectOption[] = [
   {
@@ -21,6 +22,7 @@ const scriptTypeOptions: SelectOption[] = [
 ];
 
 export function GenerateTestDataButton() {
+  const { t } = useTranslation();
   const {
     isDialogOpen,
     scriptType,
@@ -35,11 +37,11 @@ export function GenerateTestDataButton() {
   return (
     <>
       <Button size="large" variant="primary" onClick={openDialog}>
-        Generate Test Data
+        {t("Generate Test Data", "生成测试数据")}
       </Button>
 
       <Dialog
-        title="Generate Test Data"
+        title={t("Generate Test Data", "生成测试数据")}
         controlled={{
           isOpen: isDialogOpen,
           set: (open) => {
@@ -50,13 +52,12 @@ export function GenerateTestDataButton() {
       >
         <Dialog.Content>
           <Text variant="body" className="mb-4" tone="secondary">
-            This will populate the database with sample test data including
-            users, agents, graphs, store listings, and more.
+            {t("This will populate the database with sample test data including users, agents, graphs, store listings, and more.", "这会向数据库填充示例测试数据，包括用户、工作流、市场列表等。")}
           </Text>
 
           <div className="grid gap-4 py-4">
             <Select
-              label="Script Type"
+              label={t("Script Type", "脚本类型")}
               id="scriptType"
               value={scriptType}
               onValueChange={(value) =>
@@ -69,10 +70,9 @@ export function GenerateTestDataButton() {
             <Alert variant="warning">
               <Text variant="small" as="span">
                 <Text variant="small-medium" as="span">
-                  Warning:
+                  {t("Warning:", "警告：")}
                 </Text>{" "}
-                This will add significant data to your database. This endpoint
-                is only available in local environments.
+                {t("This will add significant data to your database. This endpoint is only available in local environments.", "这会向数据库添加大量数据，此接口仅在本地环境可用。")}
               </Text>
             </Alert>
 
@@ -103,7 +103,7 @@ export function GenerateTestDataButton() {
               onClick={closeDialog}
               disabled={isPending}
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               variant="primary"
@@ -111,7 +111,7 @@ export function GenerateTestDataButton() {
               disabled={isPending}
               loading={isPending}
             >
-              {isPending ? "Generating..." : "Generate Test Data"}
+              {isPending ? t("Generating...", "正在生成...") : t("Generate Test Data", "生成测试数据")}
             </Button>
           </Dialog.Footer>
         </Dialog.Content>

@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { usePostV1CreateExecutionSchedule as useCreateSchedule } from "@/app/api/__generated__/endpoints/schedules/schedules";
 import { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
@@ -17,6 +18,7 @@ export function useScheduleAgentModal(
   inputCredentials: Record<string, any>,
   callbacks?: UseScheduleAgentModalCallbacks,
 ) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -31,7 +33,7 @@ export function useScheduleAgentModal(
       onSuccess: (response) => {
         if (response.status === 200) {
           toast({
-            title: "Schedule created",
+            title: t("Schedule created", "计划已创建"),
           });
           callbacks?.onCreateSchedule?.(response.data);
           invalidateAllScheduleQueries(queryClient, agent.graph_id);
@@ -56,7 +58,10 @@ export function useScheduleAgentModal(
       if (!scheduleName.trim()) {
         toast({
           title: "⚠️ Schedule name required",
-          description: "Please provide a name for your schedule.",
+          description: t(
+            "Please provide a name for your schedule.",
+            "请填写计划名称。",
+          ),
           variant: "destructive",
         });
         return Promise.reject(new Error("Schedule name required"));

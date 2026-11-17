@@ -464,6 +464,7 @@ def find_matching_credential(
     the first fit there would run on whichever account was stored first.
     """
     fits = [c for c in available_creds if _credential_fits(c, field_info)]
+    fits = [c for c in fits if not (c.metadata or {}).get("mcp_isolated")]
     if selected:
         # A pick wins even after the provider refused its refresh: the run
         # then asks for that account to be reconnected instead of quietly

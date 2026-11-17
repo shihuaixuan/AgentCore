@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import {
@@ -15,6 +17,7 @@ interface Props {
 }
 
 export function FireExpertMenu({ expertName, onFire, testId }: Props) {
+  const { t } = useTranslation();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -23,7 +26,7 @@ export function FireExpertMenu({ expertName, onFire, testId }: Props) {
           variant="secondary"
           size="icon-sm"
           leadingIcon={MoreVerticalIcon}
-          aria-label={`${expertName} actions`}
+          aria-label={t(`${expertName} actions`, `${expertName} 的操作`)}
           withTooltip={false}
           data-testid={testId}
           onClick={(event) => event.stopPropagation()}
@@ -36,7 +39,7 @@ export function FireExpertMenu({ expertName, onFire, testId }: Props) {
           className="flex cursor-pointer items-center gap-2 text-error-foreground focus:bg-error-surface focus:text-error-foreground"
         >
           <Icon icon={Logout03Icon} size={14} />
-          Fire {expertName}
+          {t(`Fire ${expertName}`, `解雇 ${expertName}`)}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

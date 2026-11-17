@@ -254,6 +254,43 @@ def test_a_wrapping_directory_is_unwrapped():
     assert [f.relative_path for f in package.files] == ["scripts/run.py"]
 
 
+def test_wrapped_package_with_extra_directories_keeps_unknown_files():
+    package = package_from_zip(
+        _zip(
+            {
+                "sample/SKILL.md": SKILL_MD,
+                "sample/.skill-metadata.yaml": b"metadata",
+                "sample/scripts/run.py": b"print(1)",
+                "extra/notes.txt": b"keep me",
+                "__MACOSX/sample/._SKILL.md": b"metadata",
+            }
+        )
+    )
+    assert {f.relative_path: f.content for f in package.files} == {
+        ".skill-metadata.yaml": b"metadata",
+        "scripts/run.py": b"print(1)",
+        "extra/notes.txt": b"keep me",
+    }
+
+
+def test_wrapped_package_rejects_colliding_extra_files():
+    with pytest.raises(SkillPackageError, match="twice"):
+        package_from_zip(
+            _zip(
+                {
+                    "sample/SKILL.md": SKILL_MD,
+                    "sample/scripts/run.py": b"one",
+                    "scripts/run.py": b"two",
+                }
+            )
+        )
+
+
+def test_wrapping_directory_cannot_hide_a_path_escape():
+    with pytest.raises(SkillPackageError, match="unsafe path"):
+        package_from_zip(_zip({"../SKILL.md": SKILL_MD}))
+
+
 def test_a_package_with_its_own_root_is_never_unwrapped():
     package = package_from_zip(
         _zip({"SKILL.md": SKILL_MD, "scripts/run.py": b"print(1)"})

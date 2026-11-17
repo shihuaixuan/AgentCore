@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Input } from "@/components/atoms/Input/Input";
 import { Search01Icon } from "@hugeicons/core-free-icons";
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function ArtifactsSearchBar({ searchTerm, setSearchTerm }: Props) {
+  const { t } = useTranslation();
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     setSearchTerm(event.target.value);
   }
@@ -27,14 +29,14 @@ export function ArtifactsSearchBar({ searchTerm, setSearchTerm }: Props) {
         className="pointer-events-none absolute top-1/2 left-4 z-20 -translate-y-1/2"
       />
       <Input
-        label="Search files"
+        label={t("Search files", "搜索文件")}
         id="artifacts-search-bar"
         hideLabel
         type="text"
         size="small"
         value={searchTerm}
         onChange={handleChange}
-        placeholder="Search"
+        placeholder={t("Search", "搜索")}
         // oxlint-disable-next-line design-system/no-restyle -- a pill search field with a leading icon; SearchInput is rounded-xl, a shape change
         className="min-w-[16rem] rounded-full pl-10 lg:min-w-[20rem]"
         wrapperClassName="!mb-0"

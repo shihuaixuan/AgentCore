@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import {
   DropdownMenu,
@@ -49,6 +52,8 @@ export function CredentialRow({
   asSelectTrigger = false,
   variant = "default",
 }: CredentialRowProps) {
+  const { t } = useTranslation();
+
   const ProviderIcon = providerIcons[provider] || fallbackIcon;
   const isRealCredentialType = [
     "api_key",
@@ -118,11 +123,11 @@ export function CredentialRow({
               isNodeVariant ? "truncate" : "line-clamp-1 text-ellipsis",
             )}
           >
-            {getCredentialDisplayName(credential, displayName)}
+            {getCredentialDisplayName(credential, displayName, t)}
           </Text>
           {isRealCredentialType && (
             <span className="shrink-0 rounded bg-surface-hover px-1.5 py-0.5 text-tiny leading-tight font-medium text-foreground-tertiary">
-              {getCredentialTypeLabel(credType)}
+              {getCredentialTypeLabel(credType, t)}
             </span>
           )}
         </div>
@@ -164,7 +169,7 @@ export function CredentialRow({
                 onDelete();
               }}
             >
-              Delete
+              {t("Delete", "删除")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

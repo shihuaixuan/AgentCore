@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { toastIfPlanRequired } from "@/components/contextual/PaywallToast/helpers";
 import { useContext, useState } from "react";
@@ -25,6 +26,8 @@ export function useInlineConnectForm({
   failureTitle,
   onSuccess,
 }: Args) {
+  const { t } = useTranslation();
+
   const queryClient = useQueryClient();
   const credentialsActions = useContext(CredentialsActionsContext);
   const [isPending, setIsPending] = useState(false);
@@ -51,7 +54,9 @@ export function useInlineConnectForm({
       toast({
         title: failureTitle,
         description:
-          error instanceof Error ? error.message : "Unexpected error",
+          error instanceof Error
+            ? error.message
+            : t("Unexpected error", "发生意外错误"),
         variant: "destructive",
       });
     } finally {

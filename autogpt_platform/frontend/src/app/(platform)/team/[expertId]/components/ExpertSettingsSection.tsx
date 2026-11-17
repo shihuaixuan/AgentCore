@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
   BubbleChatIcon,
@@ -31,6 +32,7 @@ function plural(count: number, word: string) {
 /** Firing, spelled out before anyone reaches for the button: what pauses,
  *  what stays, and that the expert can come back. */
 export function ExpertSettingsSection({ expert, onFire }: Props) {
+  const { t } = useTranslation();
   const {
     pauseItems,
     isPreviewLoading,
@@ -85,7 +87,7 @@ export function ExpertSettingsSection({ expert, onFire }: Props) {
               className="mt-1 inline-flex text-foreground-body underline underline-offset-2 hover:text-foreground-base"
             >
               <Text variant="body-md-medium" as="span" tone="inherit">
-                Retry
+                {t("Retry", "重试")}
               </Text>
             </button>
           ) : null}
@@ -137,7 +139,7 @@ export function ExpertSettingsSection({ expert, onFire }: Props) {
         <Consequence
           icon={BubbleChatIcon}
           tag="Kept"
-          title="Chat history stays, read-only"
+          title={t("Chat history stays, read-only", "聊天记录会保留，变为只读")}
         />
         <Consequence
           icon={Store01Icon}

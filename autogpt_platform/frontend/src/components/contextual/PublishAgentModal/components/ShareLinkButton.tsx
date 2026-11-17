@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useState } from "react";
 import { Button } from "@/components/atoms/Button/Button";
@@ -11,6 +12,8 @@ interface Props {
 }
 
 export function ShareLinkButton({ url }: Props) {
+  const { t } = useTranslation();
+
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -19,11 +22,11 @@ export function ShareLinkButton({ url }: Props) {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast({ title: "Link copied to clipboard" });
+      toast({ title: t("Link copied to clipboard", "链接已复制到剪贴板") });
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast({
-        title: "Couldn't copy link",
+        title: t("Couldn't copy link", "无法复制链接"),
         variant: "destructive",
       });
     }
@@ -44,7 +47,7 @@ export function ShareLinkButton({ url }: Props) {
       className="w-full sm:w-auto"
       data-testid="copy-share-link-button"
     >
-      {copied ? "Copied" : "Copy share link"}
+      {copied ? "Copied" : t("Copy share link", "复制分享链接")}
     </Button>
   );
 }

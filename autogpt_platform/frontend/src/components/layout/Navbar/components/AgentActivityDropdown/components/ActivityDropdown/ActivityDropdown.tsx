@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
 import { Text } from "@/components/atoms/Text/Text";
@@ -46,6 +47,7 @@ export function ActivityDropdown({
   recentCompletions,
   recentFailures,
 }: Props) {
+  const { t } = useTranslation();
   const {
     isSearchVisible,
     searchQuery,
@@ -85,8 +87,11 @@ export function ActivityDropdown({
               <div className="relative w-full">
                 <Input
                   id="agent-search"
-                  label="Search workflows"
-                  placeholder="Search runs by workflow name..."
+                  label={t("Search workflows", "搜索工作流")}
+                  placeholder={t(
+                    "Search runs by workflow name...",
+                    "按工作流名称搜索运行记录…",
+                  )}
                   hideLabel
                   size="small"
                   value={searchQuery}
@@ -99,7 +104,7 @@ export function ActivityDropdown({
                 <button
                   onClick={handleClearSearch}
                   className="absolute top-1/2 right-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center"
-                  aria-label="Clear search"
+                  aria-label={t("Clear search", "清除搜索")}
                 >
                   <Icon icon={Cancel01Icon} size={16} tone="muted" />
                 </button>
@@ -108,14 +113,14 @@ export function ActivityDropdown({
           ) : (
             <div className={`${styles.headerContainer} py-0.5`}>
               <span className="text-caption font-medium text-foreground-tertiary uppercase">
-                Workflow Activity
+                {t("Workflow Activity", "工作流动态")}
               </span>
               {withSearch ? (
                 <Button
                   variant="toggle"
                   size="inline"
                   onClick={toggleSearch}
-                  aria-label="Search workflows"
+                  aria-label={t("Search workflows", "搜索工作流")}
                   className="w-fit"
                 >
                   <Icon
@@ -153,13 +158,16 @@ export function ActivityDropdown({
             <div className="flex flex-col items-center justify-center">
               <Text variant="body-medium">
                 {searchQuery
-                  ? "No matching workflows found"
-                  : "No recent runs to show yet"}
+                  ? t("No matching workflows found", "未找到匹配的工作流")
+                  : t("No recent runs to show yet", "暂无最近运行记录")}
               </Text>
               <Text variant="body" tone="muted">
                 {searchQuery
-                  ? "Try another search term"
-                  : "Start a workflow to get updates"}
+                  ? t("Try another search term", "请尝试其他搜索词")
+                  : t(
+                      "Start a workflow to get updates",
+                      "运行工作流即可查看动态",
+                    )}
               </Text>
             </div>
           </div>

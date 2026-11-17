@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { Button } from "@/components/atoms/Button/Button";
@@ -14,12 +15,20 @@ interface Props {
 }
 
 export function ServiceKeyForm({ provider, service, onConnected }: Props) {
+  const { t } = useTranslation();
+
   const keyID = useId();
   const [key, setKey] = useState("");
   const { submit, isPending } = useInlineConnectForm({
     provider,
-    successTitle: `${service.name} connection saved`,
-    failureTitle: `Couldn't connect ${service.name}`,
+    successTitle: t(
+      `${service.name} connection saved`,
+      `${service.name} 连接已保存`,
+    ),
+    failureTitle: t(
+      `Couldn't connect ${service.name}`,
+      `无法连接 ${service.name}`,
+    ),
     onSuccess: onConnected,
   });
 
@@ -40,14 +49,21 @@ export function ServiceKeyForm({ provider, service, onConnected }: Props) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2 rounded-xl bg-surface-muted p-4 text-body text-foreground-tertiary">
         <p>
-          This workflow needs an API key for {service.name}. Otto will use it
-          only for requests to {service.host}.
+          {t(
+            `This workflow needs an API key for ${service.name}. Otto will use it only for requests to ${service.host}.`,
+            `此工作流需要 ${service.name} 的 API 密钥。Otto 仅会在向 ${service.host} 发送请求时使用此密钥。`,
+          )}
         </p>
-        <p>{service.keyHelp}</p>
+        <p>
+          {t(
+            service.keyHelp ?? "",
+            service.keyHelpChinese ?? service.keyHelp ?? "",
+          )}
+        </p>
       </div>
       <Input
         id={keyID}
-        label="API key"
+        label={t("API key", "API 密钥")}
         type="password"
         autoComplete="new-password"
         spellCheck={false}
@@ -62,7 +78,7 @@ export function ServiceKeyForm({ provider, service, onConnected }: Props) {
         loading={isPending}
         disabled={!key.trim() || isPending}
       >
-        {isPending ? "Connecting…" : "Save and connect"}
+        {isPending ? "Connecting…" : t("Save and connect", "保存并连接")}
       </Button>
     </form>
   );

@@ -1,14 +1,16 @@
+"use client";
+import { nextPaymentDescription } from "./display-helpers";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { ActivationTerms } from "@/app/api/__generated__/models/activationTerms";
-import {
-  nextPaymentDescription,
-  shortDate,
-} from "@/services/pro-activation/reviewDetails";
+import { shortDate } from "@/services/pro-activation/reviewDetails";
 
 interface Props {
   terms: ActivationTerms;
 }
 
 export function ActivationTimeline({ terms }: Props) {
+  const { t, locale } = useTranslation();
   const plan = terms.plan === "MAX" ? "Max" : "Pro";
   return (
     <ol data-slot="activation-timeline" className="space-y-4 text-body">
@@ -25,14 +27,16 @@ export function ActivationTimeline({ terms }: Props) {
           data-slot="activation-timeline-date"
           className="font-medium text-foreground-strong"
         >
-          Today
+          {t("Today", "今天")}
         </span>
         <span
           data-slot="activation-timeline-description"
           className="leading-relaxed text-foreground-secondary"
         >
-          After payment succeeds, {plan} starts and your daily and weekly
-          allowances reset.
+          {t(
+            `After payment succeeds, ${plan} starts and your daily and weekly allowances reset.`,
+            `付款成功后将启用 ${plan}，并重置每日和每周额度。`,
+          )}
         </span>
       </li>
       <li
@@ -48,13 +52,15 @@ export function ActivationTimeline({ terms }: Props) {
           data-slot="activation-timeline-date"
           className="font-medium text-foreground-strong"
         >
-          {terms.next_payment_at ? shortDate(terms.next_payment_at) : "Renewal"}
+          {terms.next_payment_at
+            ? shortDate(terms.next_payment_at)
+            : t("Renewal", "续订")}
         </span>
         <span
           data-slot="activation-timeline-description"
           className="leading-relaxed text-foreground-secondary"
         >
-          {nextPaymentDescription(terms)}
+          {nextPaymentDescription(terms, locale)}
         </span>
       </li>
     </ol>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React from "react";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { Button } from "@/components/atoms/Button/Button";
@@ -25,6 +26,7 @@ export function EditScheduleModal({
   triggerClassName,
   iconOnly = false,
 }: Props) {
+  const { t } = useTranslation();
   const {
     isOpen,
     setIsOpen,
@@ -47,13 +49,17 @@ export function EditScheduleModal({
 
   return (
     <Dialog
-      title="Edit Schedule"
+      title={t("Edit Schedule", "编辑计划")}
       controlled={{ isOpen, set: setIsOpen }}
       styling={{ maxWidth: "22rem" }}
     >
       <Dialog.Trigger>
         {iconOnly ? (
-          <Button variant="icon" size="icon" aria-label="Edit schedule">
+          <Button
+            variant="icon"
+            size="icon"
+            aria-label={t("Edit schedule", "编辑计划")}
+          >
             <Icon icon={PencilEdit02Icon} size={18} />
           </Button>
         ) : (
@@ -63,7 +69,8 @@ export function EditScheduleModal({
             // oxlint-disable-next-line design-system/require-static-classes -- callers outside library pass layout/size overrides
             className={triggerClassName ?? "absolute -top-2 -right-2"}
           >
-            <Icon icon={PencilEdit02Icon} className="size-4" /> Edit schedule
+            <Icon icon={PencilEdit02Icon} className="size-4" />{" "}
+            {t("Edit schedule", "编辑计划")}
           </Button>
         )}
       </Dialog.Trigger>
@@ -71,7 +78,7 @@ export function EditScheduleModal({
         <div className="flex flex-col gap-6">
           <Input
             id="schedule-name"
-            label="Name"
+            label={t("Name", "名称")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             error={errors.scheduleName}
@@ -80,7 +87,7 @@ export function EditScheduleModal({
             <>
               <Select
                 id="repeat"
-                label="Repeats"
+                label={t("Repeats", "重复")}
                 value={repeat}
                 onValueChange={setRepeat}
                 options={repeatOptions}
@@ -91,7 +98,7 @@ export function EditScheduleModal({
                     items={dayItems}
                     selectedValues={selectedDays}
                     onChange={setSelectedDays}
-                    aria-label="Select days"
+                    aria-label={t("Select days", "选择日期")}
                   />
                   {errors.days && (
                     <Text variant="small" tone="danger">
@@ -102,7 +109,7 @@ export function EditScheduleModal({
               )}
               <Input
                 id="schedule-time"
-                label="At"
+                label={t("At", "于")}
                 value={time}
                 onChange={(e) => setTime(e.target.value.trim())}
                 placeholder="00:00"
@@ -111,8 +118,9 @@ export function EditScheduleModal({
             </>
           ) : (
             <Text variant="body" tone="muted">
-              Repeats {recurrenceLabel.toLowerCase()}. This timing can&apos;t be
-              changed here, so saving only renames the schedule.
+              {t("Repeats", "重复")} {recurrenceLabel.toLowerCase()}. This
+              timing can&apos;t be changed here, so saving only renames the
+              schedule.
             </Text>
           )}
         </div>
@@ -124,7 +132,7 @@ export function EditScheduleModal({
               onClick={() => setIsOpen(false)}
               className="min-w-32"
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               variant="primary"
@@ -133,7 +141,7 @@ export function EditScheduleModal({
               loading={isPending}
               className="min-w-32"
             >
-              {isPending ? "Saving…" : "Save"}
+              {isPending ? "Saving…" : t("Save", "保存")}
             </Button>
           </div>
         </Dialog.Footer>

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { ExpertSetupItem } from "@/app/api/__generated__/models/expertSetupItem";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -21,6 +24,7 @@ export function SetupNeededRow({
   onConnect,
   onAllow,
 }: Props) {
+  const { t } = useTranslation();
   const provider = item.providers[0];
   const isCredential = isCredentialItem(item);
   const { title, detail } = getSetupRowCopy(item);
@@ -55,12 +59,12 @@ export function SetupNeededRow({
             loading={isGranting}
             onClick={onAllow}
           >
-            Allow
+            {t("Allow", "允许")}
           </Button>
         ) : item.resolution === "connect" ? (
           isConnectable ? (
             <Button variant="primary" size="small" onClick={onConnect}>
-              Connect
+              {t("Connect", "连接")}
             </Button>
           ) : (
             <Text variant="small" as="span" tone="muted">
@@ -74,7 +78,7 @@ export function SetupNeededRow({
             variant="outline"
             size="small"
           >
-            Open workflow
+            {t("Open workflow", "打开工作流")}
           </Button>
         ) : null}
       </div>

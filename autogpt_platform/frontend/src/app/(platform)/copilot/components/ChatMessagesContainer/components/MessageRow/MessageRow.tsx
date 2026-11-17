@@ -208,7 +208,17 @@ export const MessageRow = memo(function MessageRow({
             {renderableParts.map((part, i) => (
               <MessagePartRenderer
                 key={`${message.id}-${i}`}
-                part={part}
+                part={
+                  part.type === "text"
+                    ? {
+                        ...part,
+                        text: part.text.replace(
+                          /\n\n\[custom_mcp:[0-9a-fA-F-]{36}\]$/,
+                          "",
+                        ),
+                      }
+                    : part
+                }
                 messageID={message.id}
                 partIndex={i}
                 fileUrlBuilder={fileUrlBuilder}

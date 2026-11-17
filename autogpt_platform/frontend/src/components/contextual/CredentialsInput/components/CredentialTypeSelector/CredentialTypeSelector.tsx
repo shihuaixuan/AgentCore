@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { FormProvider } from "react-hook-form";
 import { FormDescription, FormField } from "@/components/molecules/Form/Form";
@@ -48,11 +49,16 @@ export function CredentialTypeSelector({
   onOpenHostScopedModal,
   siblingInputs,
 }: Props) {
+  const { t } = useTranslation();
+
   const defaultTab = supportedTypes[0];
 
   return (
     <Dialog
-      title={`Add credential for ${providerName}`}
+      title={t(
+        `Add credential for ${providerName}`,
+        `为 ${providerName} 添加凭据`,
+      )}
       controlled={{
         isOpen: open,
         set: (isOpen) => {
@@ -74,7 +80,7 @@ export function CredentialTypeSelector({
                   className="inline-flex items-center gap-1.5"
                 >
                   <Icon size={16} />
-                  {getCredentialTypeLabel(type)}
+                  {getCredentialTypeLabel(type, t)}
                 </TabsLineTrigger>
               );
             })}
@@ -108,7 +114,10 @@ export function CredentialTypeSelector({
           {supportedTypes.includes("user_password") && (
             <TabsLineContent value="user_password">
               <SimpleActionTab
-                description="Add a username and password credential."
+                description={t(
+                  "Add a username and password credential.",
+                  "添加用户名和密码凭据。",
+                )}
                 buttonLabel="Enter credentials"
                 onClick={() => {
                   onClose();
@@ -121,7 +130,10 @@ export function CredentialTypeSelector({
           {supportedTypes.includes("host_scoped") && (
             <TabsLineContent value="host_scoped">
               <SimpleActionTab
-                description="Add host-scoped headers for authentication."
+                description={t(
+                  "Add host-scoped headers for authentication.",
+                  "添加限定主机的请求头以进行身份验证。",
+                )}
                 buttonLabel="Add headers"
                 onClick={() => {
                   onClose();
@@ -142,10 +154,14 @@ type OAuthTabContentProps = {
 };
 
 function OAuthTabContent({ providerName, onOAuthLogin }: OAuthTabContentProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       <Text variant="body-tight" as="p" tone="secondary">
-        Sign in with your {providerName} account using OAuth.
+        {t(
+          `Sign in with your ${providerName} account using OAuth.`,
+          `通过 OAuth 使用您的 ${providerName} 账户登录。`,
+        )}
       </Text>
       <Button
         variant="primary"
@@ -153,7 +169,7 @@ function OAuthTabContent({ providerName, onOAuthLogin }: OAuthTabContentProps) {
         onClick={onOAuthLogin}
         type="button"
       >
-        Sign in with {providerName}
+        {t(`Sign in with ${providerName}`, `使用 ${providerName} 登录`)}
       </Button>
     </div>
   );
@@ -170,6 +186,8 @@ function APIKeyTabContent({
   siblingInputs,
   onCredentialsCreate,
 }: APIKeyTabContentProps) {
+  const { t } = useTranslation();
+
   const {
     form,
     isLoading,
@@ -213,9 +231,12 @@ function APIKeyTabContent({
             render={({ field }) => (
               <Input
                 id="title"
-                label="Name"
+                label={t("Name", "名称")}
                 type="text"
-                placeholder="Enter a name for this API Key..."
+                placeholder={t(
+                  "Enter a name for this API Key...",
+                  "为此 API 密钥输入名称…",
+                )}
                 {...field}
               />
             )}
@@ -226,13 +247,16 @@ function APIKeyTabContent({
             render={({ field }) => (
               <Input
                 id="apiKey"
-                label="API Key"
+                label={t("API Key", "API 密钥")}
                 type="password"
-                placeholder="Enter API Key..."
+                placeholder={t("Enter API Key...", "输入 API 密钥…")}
                 hint={
                   schema.credentials_scopes ? (
                     <FormDescription className="text-body-sm leading-inherit">
-                      Required scope(s) for this block:{" "}
+                      {t(
+                        "Required scope(s) for this block:",
+                        "此模块所需的权限范围：",
+                      )}{" "}
                       {schema.credentials_scopes?.map((s, i, a) => (
                         <span key={i}>
                           <Text
@@ -258,9 +282,9 @@ function APIKeyTabContent({
             render={({ field }) => (
               <Input
                 id="expiresAt"
-                label="Expiration Date"
+                label={t("Expiration Date", "到期日期")}
                 type="datetime-local"
-                placeholder="Select expiration date..."
+                placeholder={t("Select expiration date...", "选择到期日期…")}
                 value={field.value}
                 onChange={(e) => field.onChange(e.target.value)}
                 onBlur={field.onBlur}
@@ -274,7 +298,7 @@ function APIKeyTabContent({
             loading={isSubmitting}
             disabled={isSubmitting}
           >
-            Add API Key
+            {t("Add API Key", "添加 API 密钥")}
           </Button>
         </form>
       </FormProvider>

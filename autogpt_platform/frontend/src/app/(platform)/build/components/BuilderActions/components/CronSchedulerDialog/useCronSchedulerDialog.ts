@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { ScheduleCreationRequest } from "@/app/api/__generated__/models/scheduleCreationRequest";
 import { usePostV1CreateExecutionSchedule } from "@/app/api/__generated__/endpoints/schedules/schedules";
 import { useToast } from "@/components/molecules/Toast/use-toast";
@@ -21,6 +22,7 @@ export function useCronSchedulerDialog({
   credentials: ScheduleCreationRequest["credentials"];
   defaultCronExpression?: string;
 }) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [cronExpression, setCronExpression] = useState<string>("");
@@ -43,8 +45,8 @@ export function useCronSchedulerDialog({
           if (response.status === 200) {
             setOpen(false);
             toast({
-              title: "Schedule created",
-              description: "Schedule created successfully",
+              title: t("Schedule created", "计划已创建"),
+              description: t("Schedule created successfully", "已成功创建计划"),
             });
             invalidateAllScheduleQueries(queryClient, flowID ?? undefined);
           }
@@ -52,9 +54,10 @@ export function useCronSchedulerDialog({
         onError: (error) => {
           toast({
             variant: "destructive",
-            title: "Failed to create schedule",
+            title: t("Failed to create schedule", "创建计划失败"),
             description:
-              (error.detail as string) ?? "An unexpected error occurred.",
+              (error.detail as string) ??
+              t("An unexpected error occurred.", "发生意外错误。"),
           });
         },
       },
@@ -82,11 +85,11 @@ export function useCronSchedulerDialog({
 
   async function handleCreateSchedule() {
     if (!scheduleName || scheduleName.trim() === "") {
-      setScheduleNameError("Schedule name is required");
+      setScheduleNameError(t("Schedule name is required", "请填写计划名称"));
       toast({
         variant: "destructive",
-        title: "Invalid schedule",
-        description: "Please enter a schedule name",
+        title: t("Invalid schedule", "计划无效"),
+        description: t("Please enter a schedule name", "请输入计划名称"),
       });
       return;
     }
@@ -94,8 +97,11 @@ export function useCronSchedulerDialog({
     if (!cronExpression || cronExpression.trim() === "") {
       toast({
         variant: "destructive",
-        title: "Invalid schedule",
-        description: "Please enter a valid cron expression",
+        title: t("Invalid schedule", "计划无效"),
+        description: t(
+          "Please enter a valid cron expression",
+          "请输入有效的 cron 表达式",
+        ),
       });
       return;
     }

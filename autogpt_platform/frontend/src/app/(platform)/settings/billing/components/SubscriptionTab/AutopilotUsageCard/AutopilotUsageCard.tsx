@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { CSSProperties } from "react";
 
 import { motion, useReducedMotion } from "framer-motion";
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function AutopilotUsageCard({ index = 0 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const state = useAutopilotUsageCard();
   if (state.isLoading) return <Skeleton className="h-80 rounded-2xl" />;
@@ -30,12 +32,12 @@ export function AutopilotUsageCard({ index = 0 }: Props) {
   return (
     <motion.section
       {...getSectionMotionProps(index, Boolean(reduceMotion))}
-      aria-label="Usage"
+      aria-label={t("Usage", "用量")}
       className="flex h-full min-h-80 flex-col rounded-2xl border border-border-base bg-surface p-6"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Text variant="large-medium" as="h2">
-          Usage
+          {t("Usage", "用量")}
         </Text>
         {!state.inactive && (
           <Text variant="small" tone={state.status.tone}>

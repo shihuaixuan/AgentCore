@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { StoreAgent } from "@/app/api/__generated__/models/storeAgent";
 import {
   Carousel,
@@ -43,6 +44,7 @@ export function AgentsSection({
   hideAvatars = false,
   children,
 }: Props) {
+  const { t } = useTranslation();
   const displayedAgents = allAgents;
   const { handleCardClick } = useAgentsSection();
 
@@ -64,7 +66,7 @@ export function AgentsSection({
         {children}
         {!displayedAgents || displayedAgents.length === 0 ? (
           <Text variant="body" tone="muted" className="mt-8 ml-4">
-            No workflows found
+            {t("No workflows found", "未找到工作流")}
           </Text>
         ) : (
           <>

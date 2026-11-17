@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   type listExpertsResponse,
   useListExperts,
@@ -16,6 +17,7 @@ function selectExperts(response: listExpertsResponse): Expert[] {
 }
 
 export function useMemoryScope() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [selectedScope, setSelectedScope] = useState(AUTOPILOT_MEMORY_SCOPE);
   const expertsQuery = useListExperts({
@@ -36,8 +38,8 @@ export function useMemoryScope() {
     if (!experts?.some(({ id }) => id === selectedScope)) {
       setSelectedScope(AUTOPILOT_MEMORY_SCOPE);
       toast({
-        title: "Expert no longer available",
-        description: "Showing Otto account memory instead.",
+        title: t("Expert no longer available", "工作流已不可用"),
+        description: t("Showing Otto account memory instead.", "正在改为显示 Otto 账户记忆。"),
       });
     }
   }, [

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   Popover,
   PopoverContent,
@@ -57,6 +59,7 @@ export function ConnectionPicker({
   connectionLocked = false,
   className,
 }: Props) {
+  const { t } = useTranslation();
   const picker = useConnectionPicker();
   const {
     offers,
@@ -76,7 +79,7 @@ export function ConnectionPicker({
   if (isError) {
     return (
       <span
-        aria-label="AI connections unavailable"
+        aria-label={t("AI connections unavailable", "AI 连接不可用")}
         className={cn(
           "inline-flex h-9 items-center rounded-full border border-error/20 bg-error/10 px-2.5",
           className,
@@ -89,7 +92,9 @@ export function ConnectionPicker({
           className="inline-flex items-center gap-1.5"
         >
           <Icon icon={AlertCircleIcon} size={14} />
-          <span className="hidden sm:inline">Connections unavailable</span>
+          <span className="hidden sm:inline">
+            {t("Connections unavailable", "连接不可用")}
+          </span>
         </Text>
       </span>
     );
@@ -99,7 +104,7 @@ export function ConnectionPicker({
     return (
       <Link
         href="/settings/integrations"
-        aria-label="Set up an AI connection"
+        aria-label={t("Set up an AI connection", "设置 AI 连接")}
         className={cn(
           "inline-flex h-9 items-center gap-1.5 rounded-full border border-border-base bg-surface-hover px-2.5 text-foreground-base transition-colors hover:bg-surface-hover/80",
           className,
@@ -112,7 +117,7 @@ export function ConnectionPicker({
           tone="inherit"
           className="hidden sm:inline"
         >
-          Set up AI connection
+          {t("Set up AI connection", "设置 AI 连接")}
         </Text>
       </Link>
     );
@@ -145,12 +150,14 @@ export function ConnectionPicker({
     (!hasConnectionChoice && Boolean(active));
   const label = showsTier
     ? tierName(active, tier)
-    : (active?.display_name ?? "Choose connection");
+    : (active?.display_name ?? t("Choose connection", "选择连接"));
   // "ChatGPT · your plan". Spending your own subscription rather than the
   // platform's is the thing worth noticing before sending, so the chip says
   // so.
   const triggerLabel =
-    runsOnOwnPlan && !showsTier ? `${label} · your plan` : label;
+    runsOnOwnPlan && !showsTier
+      ? t(`${label} · your plan`, `${label} · 你的套餐`)
+      : label;
 
   // Naming only the tier, the chip folds down to its glyph among the other
   // quiet icons on the composer's right; the tier and its model wait in the
@@ -166,8 +173,11 @@ export function ConnectionPicker({
         withTooltip={false}
         aria-label={
           showsTier
-            ? `Model tier ${label} — change`
-            : `Runs on ${triggerLabel} — change`
+            ? t(`Model tier ${label} — change`, `模型档位 ${label} — 更改`)
+            : t(
+                `Runs on ${triggerLabel} — change`,
+                `运行连接 ${triggerLabel} — 更改`,
+              )
         }
         className={cn(!showsTier && "min-w-0", className)}
       >

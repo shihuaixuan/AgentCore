@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ExpertWorkflowChainItem } from "@/app/api/__generated__/models/expertWorkflowChainItem";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,7 @@ interface Props {
 }
 
 export function WorkflowCredentialStack({ providers }: Props) {
+  const { t } = useTranslation();
   if (providers.length === 0) return null;
   const visible = providers.slice(0, MAX_VISIBLE);
   const hidden = providers.length - visible.length;
@@ -45,7 +47,7 @@ export function WorkflowCredentialStack({ providers }: Props) {
     <div
       className="flex items-center"
       role="list"
-      aria-label="Credentials used"
+      aria-label={t("Credentials used", "使用的凭据")}
       title={providers.map(toDisplayName).join(", ")}
     >
       {visible.map((provider, index) => (

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   getGetV2GetSessionComputerQueryKey,
   useGetV2GetSessionComputer,
@@ -42,6 +44,7 @@ function Pill({ tone, label }: PillProps) {
 }
 
 export function ComputerPanelContent({ sessionId }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const stream = useCopilotUIStore((s) => s.artifactPanel.computer);
@@ -74,7 +77,7 @@ export function ComputerPanelContent({ sessionId }: Props) {
       },
       onError: (error) => {
         toast({
-          title: "Could not open the desktop",
+          title: t("Could not open the desktop", "无法打开桌面"),
           description: desktopStartFailure(error),
           variant: "destructive",
         });
@@ -85,31 +88,41 @@ export function ComputerPanelContent({ sessionId }: Props) {
   const isExpert = computer?.owner_kind === "expert";
   const box = computer?.box ?? null;
   const machineLabel = !box
-    ? "None"
+    ? t("None", "无")
     : box.state === "running"
-      ? "Running"
-      : "Suspended";
+      ? t("Running", "运行中")
+      : t("Suspended", "已暂停");
   const machineTone = !box ? "none" : box.state === "running" ? "on" : "off";
   const screenOn = computer?.screen_on === true;
   const actionLabel = stream
-    ? "Refresh"
+    ? t("Refresh", "刷新")
     : screenOn
-      ? "Open desktop"
-      : "Turn on screen";
+      ? t("Open desktop", "打开桌面")
+      : t("Turn on screen", "开启屏幕");
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
       <div className="flex items-center justify-between gap-3 rounded-lg border border-border-base bg-surface px-3 py-2">
         <div className="flex items-center gap-3 text-body">
           <span className="flex items-center gap-1.5">
-            <span className="text-foreground-tertiary">Machine</span>
+            <span className="text-foreground-tertiary">
+              {t("Machine", "计算机")}
+            </span>
             <Pill tone={machineTone} label={machineLabel} />
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="text-foreground-tertiary">Screen</span>
+            <span className="text-foreground-tertiary">
+              {t("Screen", "屏幕")}
+            </span>
             <Pill
               tone={!box ? "none" : screenOn ? "on" : "off"}
-              label={!box ? "None" : screenOn ? "On" : "Off"}
+              label={
+                !box
+                  ? t("None", "无")
+                  : screenOn
+                    ? t("On", "已开启")
+                    : t("Off", "已关闭")
+              }
             />
           </span>
         </div>
@@ -130,18 +143,29 @@ export function ComputerPanelContent({ sessionId }: Props) {
         </div>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border-base p-6 text-center">
-          <Text variant="small-medium">Screen is not on this panel yet</Text>
+          <Text variant="small-medium">
+            {t("Screen is not on this panel yet", "此面板尚未显示屏幕")}
+          </Text>
           <Text tone="muted" variant="small" className="max-w-xs">
             {isExpert
-              ? "This chat runs on the expert's own computer. Turn on its screen to watch it work in a real browser, or ask for one in the chat."
-              : "Turn on this chat's screen to watch it work in a real browser, or ask for one in the chat. It is the same machine your commands run in."}
+              ? t(
+                  "This chat runs on the expert's own computer. Turn on its screen to watch it work in a real browser, or ask for one in the chat.",
+                  "此对话在专家自己的计算机上运行。开启屏幕即可查看其在真实浏览器中的操作，也可以在对话中请求开启。",
+                )
+              : t(
+                  "Turn on this chat's screen to watch it work in a real browser, or ask for one in the chat. It is the same machine your commands run in.",
+                  "开启此对话的屏幕即可查看其在真实浏览器中的操作，也可以在对话中请求开启。你的命令也在这台计算机上运行。",
+                )}
           </Text>
         </div>
       )}
 
       {computer && !computer.e2b_active ? (
         <Text tone="warning" variant="small">
-          Cloud sandboxes are not configured on this deployment.
+          {t(
+            "Cloud sandboxes are not configured on this deployment.",
+            "此部署尚未配置云沙箱。",
+          )}
         </Text>
       ) : null}
     </div>

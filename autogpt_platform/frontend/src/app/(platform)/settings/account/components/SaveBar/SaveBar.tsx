@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function SaveBar({ visible, saving, onDiscard, onSave }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-end gap-2 px-4">
       <Button
@@ -19,7 +21,7 @@ export function SaveBar({ visible, saving, onDiscard, onSave }: Props) {
         loading={saving}
         disabled={saving || !visible}
       >
-        Save changes
+        {t("Save changes", "保存更改")}
       </Button>
       <Button
         variant="secondary"
@@ -27,7 +29,7 @@ export function SaveBar({ visible, saving, onDiscard, onSave }: Props) {
         onClick={onDiscard}
         disabled={saving || !visible}
       >
-        Discard
+        {t("Discard", "放弃")}
       </Button>
     </div>
   );

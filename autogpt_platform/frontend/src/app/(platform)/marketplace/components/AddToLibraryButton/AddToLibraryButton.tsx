@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV2ListLibraryAgentsQueryKey,
   useDeleteV2DeleteLibraryAgent,
@@ -27,6 +28,7 @@ function UndoActions({
   libraryHref: string;
   onUndo: (id: string) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [isUndoing, setIsUndoing] = useState(false);
 
   return (
@@ -40,7 +42,7 @@ function UndoActions({
         className="bg-surface-active hover:bg-border-strong hover:text-foreground-emphasis"
         href={libraryHref}
       >
-        Open workflow
+        {t("Open workflow", "打开工作流")}
       </Button>
       <Button
         variant="ghost"
@@ -80,6 +82,7 @@ export function AddToLibraryButton({
   className,
   isInLibrary,
 }: Props) {
+  const { t } = useTranslation();
   const { isLoggedIn } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -172,7 +175,7 @@ export function AddToLibraryButton({
     } catch (error) {
       Sentry.captureException(error);
       toast({
-        title: "Error",
+        title: t("Error", "错误"),
         description: "Failed to add workflow to library. Please try again.",
         variant: "destructive",
       });
@@ -189,7 +192,7 @@ export function AddToLibraryButton({
       className={`z-10 ${className ?? ""}`}
       aria-label={`Add ${agentName} to library`}
     >
-      {isPending ? "Adding..." : "Add"}
+      {isPending ? t("Adding...", "正在添加…") : t("Add", "添加")}
     </Button>
   );
 }

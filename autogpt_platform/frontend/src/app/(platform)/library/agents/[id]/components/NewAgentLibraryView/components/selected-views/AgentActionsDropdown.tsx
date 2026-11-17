@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV1ListGraphExecutionsQueryKey,
   getV1GetGraphVersion,
@@ -49,6 +50,7 @@ export function AgentActionsDropdown({
   scheduleId,
   onClearSelectedRun,
 }: Props) {
+  const { t } = useTranslation();
   const { toast } = useToast();
 
   const { mutateAsync: deleteAgent } = useDeleteV2DeleteLibraryAgent();
@@ -88,7 +90,7 @@ export function AgentActionsDropdown({
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     } finally {
@@ -140,7 +142,7 @@ export function AgentActionsDropdown({
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     }
@@ -150,7 +152,7 @@ export function AgentActionsDropdown({
     setIsDeletingSchedule(true);
     try {
       await deleteSchedule({ scheduleId: scheduleId ?? "" });
-      toast({ title: "Schedule deleted" });
+      toast({ title: t("Schedule deleted", "计划已删除") });
 
       await queryClient.invalidateQueries({
         queryKey: getGetV1ListExecutionSchedulesForAGraphQueryOptions(
@@ -165,7 +167,7 @@ export function AgentActionsDropdown({
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     } finally {
@@ -180,7 +182,7 @@ export function AgentActionsDropdown({
           <Button
             variant="icon"
             size="icon"
-            aria-label="More actions"
+            aria-label={t("More actions", "更多操作")}
             className="min-w-fit"
           >
             <Icon icon={MoreHorizontalIcon} size={18} />
@@ -190,7 +192,7 @@ export function AgentActionsDropdown({
           {run ? (
             <>
               <DropdownMenuItem onClick={() => setShowDeleteRunDialog(true)}>
-                Delete this task
+                {t("Delete this task", "删除此任务")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
             </>
@@ -201,14 +203,14 @@ export function AgentActionsDropdown({
               target="_blank"
               className="flex items-center gap-2"
             >
-              Edit workflow
+              {t("Edit workflow", "编辑工作流")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleExport}>
-            Export workflow to file
+            {t("Export workflow to file", "将工作流导出为文件")}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>
-            Delete workflow
+            {t("Delete workflow", "删除工作流")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -219,13 +221,15 @@ export function AgentActionsDropdown({
           set: setShowDeleteRunDialog,
         }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete task"
+        title={t("Delete task", "删除任务")}
       >
         <Dialog.Content>
           <div>
             <Text variant="large">
-              Are you sure you want to delete this task? This action cannot be
-              undone.
+              {t(
+                "Are you sure you want to delete this task? This action cannot be undone.",
+                "确定要删除此任务吗？此操作无法撤销。",
+              )}
             </Text>
             <Dialog.Footer>
               <Button
@@ -233,14 +237,14 @@ export function AgentActionsDropdown({
                 disabled={isDeletingRun}
                 onClick={() => setShowDeleteRunDialog(false)}
               >
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDeleteRun}
                 loading={isDeletingRun}
               >
-                Delete Task
+                {t("Delete Task", "删除任务")}
               </Button>
             </Dialog.Footer>
           </div>
@@ -253,13 +257,15 @@ export function AgentActionsDropdown({
           set: setShowDeleteDialog,
         }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete workflow"
+        title={t("Delete workflow", "删除工作流")}
       >
         <Dialog.Content>
           <div>
             <Text variant="large">
-              Are you sure you want to delete this workflow? This action cannot
-              be undone.
+              {t(
+                "Are you sure you want to delete this workflow? This action cannot be undone.",
+                "确定要删除此工作流吗？此操作无法撤销。",
+              )}
             </Text>
             <Dialog.Footer>
               <Button
@@ -267,14 +273,14 @@ export function AgentActionsDropdown({
                 disabled={isDeletingAgent}
                 onClick={() => setShowDeleteDialog(false)}
               >
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDeleteAgent}
                 loading={isDeletingAgent}
               >
-                Delete Workflow
+                {t("Delete Workflow", "删除工作流")}
               </Button>
             </Dialog.Footer>
           </div>
@@ -287,13 +293,15 @@ export function AgentActionsDropdown({
           set: setShowDeleteScheduleDialog,
         }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete schedule"
+        title={t("Delete schedule", "删除计划")}
       >
         <Dialog.Content>
           <div>
             <Text variant="large">
-              Are you sure you want to delete this schedule? This action cannot
-              be undone.
+              {t(
+                "Are you sure you want to delete this schedule? This action cannot be undone.",
+                "确定要删除此计划吗？此操作无法撤销。",
+              )}
             </Text>
             <Dialog.Footer>
               <Button
@@ -301,14 +309,14 @@ export function AgentActionsDropdown({
                 disabled={isDeletingSchedule}
                 onClick={() => setShowDeleteScheduleDialog(false)}
               >
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDeleteSchedule}
                 loading={isDeletingSchedule}
               >
-                Delete Schedule
+                {t("Delete Schedule", "删除计划")}
               </Button>
             </Dialog.Footer>
           </div>

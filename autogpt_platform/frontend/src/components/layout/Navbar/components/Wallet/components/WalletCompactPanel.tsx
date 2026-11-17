@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -35,6 +36,7 @@ export function WalletCompactPanel({
   onOpenExplainer,
   onNavigate,
 }: Props) {
+  const { t } = useTranslation();
   const { isPaymentEnabled } = usePlatformPayment();
   const creditsHeadingID = useId();
   const { data: trial } = useTrialStatus();
@@ -56,7 +58,7 @@ export function WalletCompactPanel({
             variant="large-medium"
             tone="primary"
           >
-            Automation credits
+            {t("Automation credits", "自动化额度")}
           </Text>
           <Text variant="large-semibold" tone="primary" tabular>
             {formattedCredits}
@@ -71,7 +73,7 @@ export function WalletCompactPanel({
             onClick={onAddCredits}
             className="w-full"
           >
-            Add credits
+            {t("Add credits", "添加额度")}
           </Button>
         )}
       </section>
@@ -84,7 +86,7 @@ export function WalletCompactPanel({
           leadingIcon={InformationCircleIcon}
           onClick={onOpenExplainer}
         >
-          How it works
+          {t("How it works", "使用说明")}
         </Button>
         <Button
           as="NextLink"
@@ -94,7 +96,7 @@ export function WalletCompactPanel({
           rightIcon={<Icon icon={ArrowRight01Icon} size={14} aria-hidden />}
           onClick={onNavigate}
         >
-          Billing settings
+          {t("Billing settings", "账单设置")}
         </Button>
       </div>
     </div>

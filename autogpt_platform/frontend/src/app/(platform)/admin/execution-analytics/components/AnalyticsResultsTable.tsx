@@ -12,12 +12,14 @@ import {
   EyeIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   results: ExecutionAnalyticsResponse;
 }
 
 export function AnalyticsResultsTable({ results }: Props) {
+  const { t } = useTranslation();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
@@ -27,11 +29,11 @@ export function AnalyticsResultsTable({ results }: Props) {
       onClick={() => {
         navigator.clipboard.writeText(value);
         toast({
-          title: "Copied",
-          description: `${label} copied to clipboard`,
+          title: t("Copied", "已复制"),
+          description: `${label} ${t("copied to clipboard", "已复制到剪贴板")}`,
         });
       }}
-      title={`Click to copy ${label.toLowerCase()}`}
+      title={`${t("Click to copy", "点击复制")} ${label.toLowerCase()}`}
     >
       {value.substring(0, 8)}...
       <span className="block opacity-0 transition-opacity group-hover:opacity-100">
@@ -101,11 +103,11 @@ export function AnalyticsResultsTable({ results }: Props) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "success":
-        return <Badge variant="success">Success</Badge>;
+        return <Badge variant="success">{t("Success", "成功")}</Badge>;
       case "failed":
-        return <Badge variant="error">Failed</Badge>;
+        return <Badge variant="error">{t("Failed", "失败")}</Badge>;
       case "skipped":
-        return <Badge variant="info">Skipped</Badge>;
+        return <Badge variant="info">{t("Skipped", "已跳过")}</Badge>;
       default:
         return <Badge variant="info">{status}</Badge>;
     }
@@ -130,12 +132,12 @@ export function AnalyticsResultsTable({ results }: Props) {
       {/* Summary Stats */}
       <div className="rounded-lg bg-surface-muted p-4">
         <Text variant="h3" className="mb-3">
-          Analytics Summary
+          {t("Analytics Summary", "分析摘要")}
         </Text>
         <div className="grid grid-cols-2 gap-4 text-body md:grid-cols-5">
           <div>
             <Text variant="body" tone="secondary">
-              Total Executions:
+              {t("Total Executions:", "执行总数：")}
             </Text>
             <h4 className="font-poppins text-heading-sm font-semibold text-foreground-base">
               {results.total_executions}
@@ -143,7 +145,7 @@ export function AnalyticsResultsTable({ results }: Props) {
           </div>
           <div>
             <Text variant="body" tone="secondary">
-              Processed:
+              {t("Processed:", "已处理：")}
             </Text>
             <h4 className="font-poppins text-heading-sm font-semibold text-foreground-base">
               {results.processed_executions}
@@ -151,7 +153,7 @@ export function AnalyticsResultsTable({ results }: Props) {
           </div>
           <div>
             <Text variant="body" tone="secondary">
-              Successful:
+              {t("Successful:", "成功：")}
             </Text>
             <h4 className="font-poppins text-heading-sm font-semibold text-success">
               {results.successful_analytics}
@@ -159,7 +161,7 @@ export function AnalyticsResultsTable({ results }: Props) {
           </div>
           <div>
             <Text variant="body" tone="secondary">
-              Failed:
+              {t("Failed:", "失败：")}
             </Text>
             <h4 className="font-poppins text-heading-sm font-semibold text-error-foreground">
               {results.failed_analytics}
@@ -167,7 +169,7 @@ export function AnalyticsResultsTable({ results }: Props) {
           </div>
           <div>
             <Text variant="body" tone="secondary">
-              Skipped:
+              {t("Skipped:", "已跳过：")}
             </Text>
             <h4 className="font-poppins text-heading-sm font-semibold text-foreground-secondary">
               {results.skipped_executions}
@@ -184,7 +186,7 @@ export function AnalyticsResultsTable({ results }: Props) {
           disabled={results.results.length === 0}
         >
           <Icon icon={Download04Icon} size={16} className="mr-2" />
-          Export CSV
+          {t("Export CSV", "导出 CSV")}
         </Button>
       </div>
 
@@ -197,7 +199,7 @@ export function AnalyticsResultsTable({ results }: Props) {
                 <tr>
                   <th className="px-4 py-3 text-left">
                     <Text variant="body-medium" tone="secondary">
-                      Agent ID
+                      {t("Agent ID", "工作流 ID")}
                     </Text>
                   </th>
                   <th className="px-4 py-3 text-left">
@@ -207,27 +209,27 @@ export function AnalyticsResultsTable({ results }: Props) {
                   </th>
                   <th className="px-4 py-3 text-left">
                     <Text variant="body-medium" tone="secondary">
-                      User ID
+                      {t("User ID", "用户 ID")}
                     </Text>
                   </th>
                   <th className="px-4 py-3 text-left">
                     <Text variant="body-medium" tone="secondary">
-                      Execution ID
+                      {t("Execution ID", "执行 ID")}
                     </Text>
                   </th>
                   <th className="px-4 py-3 text-left">
                     <Text variant="body-medium" tone="secondary">
-                      Status
+                      {t("Status", "状态")}
                     </Text>
                   </th>
                   <th className="px-4 py-3 text-left">
                     <Text variant="body-medium" tone="secondary">
-                      Score
+                      {t("Score", "评分")}
                     </Text>
                   </th>
                   <th className="px-4 py-3 text-left">
                     <Text variant="body-medium" tone="secondary">
-                      Actions
+                      {t("Actions", "操作")}
                     </Text>
                   </th>
                 </tr>
@@ -280,7 +282,7 @@ export function AnalyticsResultsTable({ results }: Props) {
                                   variant="small-medium-tight"
                                   tone="secondary"
                                 >
-                                  Started At:
+                                  {t("Started At:", "开始时间：")}
                                 </Text>
                                 <Text variant="body-tight" tone="body">
                                   {result.started_at
@@ -295,7 +297,7 @@ export function AnalyticsResultsTable({ results }: Props) {
                                   variant="small-medium-tight"
                                   tone="secondary"
                                 >
-                                  Ended At:
+                                  {t("Ended At:", "结束时间：")}
                                 </Text>
                                 <Text variant="body-tight" tone="body">
                                   {result.ended_at
@@ -312,7 +314,7 @@ export function AnalyticsResultsTable({ results }: Props) {
                                   tone="body"
                                   className="mb-1"
                                 >
-                                  Summary:
+                                  {t("Summary:", "摘要：")}
                                 </Text>
                                 <Text variant="body" tone="secondary">
                                   {result.summary_text}
@@ -327,7 +329,7 @@ export function AnalyticsResultsTable({ results }: Props) {
                                   tone="danger"
                                   className="mb-1"
                                 >
-                                  Error:
+                                  {t("Error:", "错误：")}
                                 </Text>
                                 <Text variant="body" tone="danger">
                                   {result.error_message}
@@ -347,7 +349,7 @@ export function AnalyticsResultsTable({ results }: Props) {
       ) : (
         <div className="py-8 text-center">
           <Text variant="body" tone="muted">
-            No executions were processed.
+            {t("No executions were processed.", "没有处理任何执行。")}
           </Text>
         </div>
       )}

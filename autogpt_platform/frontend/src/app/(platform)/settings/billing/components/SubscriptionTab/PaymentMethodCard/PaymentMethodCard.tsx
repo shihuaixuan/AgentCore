@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Button } from "@/components/atoms/Button/Button";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function PaymentMethodCard({ index = 0 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const { canManage, isOpening, onManage } = usePaymentMethodCard();
 
@@ -24,7 +26,7 @@ export function PaymentMethodCard({ index = 0 }: Props) {
     >
       <div className="sr-only">
         <Text variant="body-medium" as="span">
-          Payment method
+          {t("Payment method", "支付方式")}
         </Text>
       </div>
 
@@ -35,7 +37,7 @@ export function PaymentMethodCard({ index = 0 }: Props) {
           </div>
           <div className="flex min-w-0 flex-col">
             <Text variant="body-medium" as="span">
-              Manage payment method
+              {t("Manage payment method", "管理支付方式")}
             </Text>
             <Text variant="small" as="span" tone="muted">
               Open the Stripe portal to update your card or download invoices.
@@ -50,7 +52,7 @@ export function PaymentMethodCard({ index = 0 }: Props) {
           disabled={!canManage}
           loading={isOpening}
         >
-          Open portal
+          {t("Open portal", "打开账单门户")}
           <Icon icon={LinkSquare01Icon} size={14} />
         </Button>
       </div>

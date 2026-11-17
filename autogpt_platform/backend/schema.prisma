@@ -248,6 +248,7 @@ model User {
   SkillVersionsReviewed SkillListingVersion[]   @relation("SkillVersionsReviewed")
   APIKeys               APIKey[]
   IntegrationWebhooks   IntegrationWebhook[]
+  CustomMCPConnections CustomMCPConnection[]
   NotificationBatches   UserNotificationBatch[]
   AlertConditions       AlertCondition[]
   PushSubscriptions     PushSubscription[]
@@ -3163,6 +3164,30 @@ model SkillCatalogRelease {
   summary        Json
 
   @@index([createdAt])
+}
+
+model MCPMarketplaceEntry {
+  name      String   @id
+  payload   Json
+  source    String
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model CustomMCPConnection {
+  id           String   @id @default(uuid())
+  userId       String
+  name         String
+  description  String   @default("")
+  serverUrl    String
+  authType     String
+  credentialId String?
+  enabled      Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 /// One file beside a published version's SKILL.md, snapshotted at submit time

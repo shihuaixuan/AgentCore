@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Text } from "@/components/atoms/Text/Text";
 import { Alert, AlertDescription } from "@/components/molecules/Alert/Alert";
@@ -55,6 +56,8 @@ export function CredentialsInput({
   showTitle = true,
   variant = "default",
 }: Props) {
+  const { t } = useTranslation();
+
   const hookData = useCredentialsInput({
     schema,
     selectedCredential,
@@ -244,6 +247,7 @@ export function CredentialsInput({
                     removedCredentialTitle,
                     selectedCredential,
                     displayName,
+                    t,
                   )}
                 </Text>
               </AlertDescription>
@@ -252,7 +256,8 @@ export function CredentialsInput({
 
           {oAuthError && (
             <Text variant="body" tone="error" className="mt-2">
-              Error: {oAuthError}
+              {t("Error:", "错误：")}
+              {oAuthError}
             </Text>
           )}
 

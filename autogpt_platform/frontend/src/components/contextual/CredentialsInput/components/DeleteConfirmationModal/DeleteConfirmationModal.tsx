@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
@@ -19,6 +22,8 @@ export function DeleteConfirmationModal({
   onConfirm,
   onForceConfirm,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <Dialog
       controlled={{
@@ -27,7 +32,7 @@ export function DeleteConfirmationModal({
           if (!open) onClose();
         },
       }}
-      title="Delete credential"
+      title={t("Delete credential", "删除凭据")}
       styling={{ maxWidth: "32rem" }}
     >
       <Dialog.Content>
@@ -35,13 +40,15 @@ export function DeleteConfirmationModal({
           <Text variant="large">{warningMessage}</Text>
         ) : (
           <Text variant="large">
-            Are you sure you want to delete &quot;{credentialToDelete?.title}
-            &quot;? This action cannot be undone.
+            {t(
+              `Are you sure you want to delete "${credentialToDelete?.title}"? This action cannot be undone.`,
+              `确定要删除“${credentialToDelete?.title}”吗？此操作无法撤销。`,
+            )}
           </Text>
         )}
         <Dialog.Footer>
           <Button variant="secondary" onClick={onClose} disabled={isDeleting}>
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           {warningMessage ? (
             <Button
@@ -49,7 +56,7 @@ export function DeleteConfirmationModal({
               onClick={onForceConfirm}
               loading={isDeleting}
             >
-              Force Delete
+              {t("Force Delete", "强制删除")}
             </Button>
           ) : (
             <Button
@@ -57,7 +64,7 @@ export function DeleteConfirmationModal({
               onClick={onConfirm}
               loading={isDeleting}
             >
-              Delete
+              {t("Delete", "删除")}
             </Button>
           )}
         </Dialog.Footer>

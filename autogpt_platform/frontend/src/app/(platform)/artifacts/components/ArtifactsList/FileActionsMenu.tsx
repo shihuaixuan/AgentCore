@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { WorkspaceFileItem } from "@/app/api/__generated__/models/workspaceFileItem";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import {
@@ -30,6 +31,7 @@ interface Props {
 }
 
 export function FileActionsMenu({ file, className }: Props) {
+  const { t } = useTranslation();
   const {
     goLabel,
     goHref,
@@ -72,7 +74,7 @@ export function FileActionsMenu({ file, className }: Props) {
             ) : (
               <Icon icon={Download04Icon} size={16} className="mr-2" />
             )}
-            {isDownloading ? "Downloading…" : "Download"}
+            {isDownloading ? "Downloading…" : t("Download", "下载")}
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href={goHref} data-testid="artifacts-origin-link">
@@ -90,7 +92,8 @@ export function FileActionsMenu({ file, className }: Props) {
             data-testid="artifacts-rename-menu"
           >
             <Icon icon={PencilEdit02Icon} size={16} className="mr-2" />
-            Rename
+
+            {t("Rename", "重命名")}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={(e) => {
@@ -100,7 +103,8 @@ export function FileActionsMenu({ file, className }: Props) {
             data-testid="artifacts-move-to-folder"
           >
             <Icon icon={Folder01Icon} size={16} className="mr-2" />
-            Move to folder
+
+            {t("Move to folder", "移动到文件夹")}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -117,7 +121,7 @@ export function FileActionsMenu({ file, className }: Props) {
             ) : (
               <Icon icon={Delete02Icon} size={16} className="mr-2" />
             )}
-            {isDeleting ? "Deleting…" : "Delete"}
+            {isDeleting ? "Deleting…" : t("Delete", "删除")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -20,12 +20,16 @@ from backend.copilot.capabilities.mcp_review import (
     needs_review,
     open_mcp_review,
 )
-from backend.copilot.capabilities.models import SKILL_TOOL, CapabilityEntry
+from backend.copilot.capabilities.models import (
+    SKILL_TOOL,
+    CapabilityEntry,
+    Implementation,
+)
 from backend.copilot.capabilities.registry import configured_tool, get_registry
 from backend.copilot.capabilities.resolve import resolve_entry
 from backend.copilot.capabilities.sources import skill_name
 from backend.copilot.capabilities.sources.mcp_catalog import setup_hint
-from backend.copilot.context import get_current_permissions
+from backend.copilot.context import args_already_bound, get_current_permissions
 from backend.copilot.gate import METERED, gate_active
 from backend.copilot.gate.subject import NO_OP, Subject, block_subject, mcp_subject
 from backend.copilot.model import ChatSession
@@ -68,6 +72,7 @@ from .session_registry import resolve_session_entry
 from .skills import ReadSkillTool
 
 logger = logging.getLogger(__name__)
+_CUSTOM_SNAPSHOT = "_custom_mcp_snapshot"
 
 
 class RunCapabilityTool(BaseTool):
@@ -127,6 +132,9 @@ class RunCapabilityTool(BaseTool):
             return NO_OP
         if skill_name(capability_id) is not None or not isinstance(payload or {}, dict):
             return NO_OP
+        snapshot = args.get(_CUSTOM_SNAPSHOT)
+        if args_already_bound() and isinstance(snapshot, dict):
+            return _mcp_subject(str(snapshot.get("server_url") or ""), payload or {})
         entry = await resolve_session_entry(user_id, session, capability_id)
         if entry is None and capability_id.strip().lower().startswith("https://"):
             return _mcp_subject(capability_id.strip(), payload or {})
@@ -170,6 +178,21 @@ class RunCapabilityTool(BaseTool):
         ``run_block`` would, so the card previews and the approval binds the
         content that runs rather than the reference to it."""
         payload = args.get("input")
+        clean_args = {
+            key: value for key, value in args.items() if key != _CUSTOM_SNAPSHOT
+        }
+        if user_id and str(args.get("id") or "").startswith("custom_mcp:"):
+            entry = await resolve_session_entry(user_id, session, str(args["id"]))
+            if entry and entry.custom_mcp:
+                return {
+                    **clean_args,
+                    _CUSTOM_SNAPSHOT: {
+                        "server_url": entry.implementations[0].ref,
+                        "credential_id": entry.custom_mcp_credential_id,
+                    },
+                }
+        if len(clean_args) != len(args):
+            return clean_args
         if not user_id or not isinstance(payload, dict) or not payload:
             return args
         if FILE_REF_PREFIX not in json.dumps(payload, default=str):
@@ -228,6 +251,42 @@ class RunCapabilityTool(BaseTool):
                 message="input must be an object", session_id=session_id
             ).from_outside()
         payload: dict[str, Any] = dict(input or {})
+        snapshot = kwargs.pop(_CUSTOM_SNAPSHOT, None)
+        if bound and id.startswith("custom_mcp:") and isinstance(snapshot, dict):
+            from backend.data import db
+            from backend.data.custom_mcp import get_custom_mcp_connection
+            from backend.util.clients import get_database_manager_async_client
+
+            lookup = (
+                get_custom_mcp_connection
+                if db.is_connected()
+                else get_database_manager_async_client().get_custom_mcp_connection
+            )
+            row = await lookup(user_id, id.removeprefix("custom_mcp:"))
+            if (
+                not row
+                or not row["enabled"]
+                or row["serverUrl"] != snapshot.get("server_url")
+                or row["credentialId"] != snapshot.get("credential_id")
+            ):
+                return ErrorResponse(
+                    message="This connection changed or is unavailable. Check its settings in Integrations.",
+                    session_id=session_id,
+                ).from_outside()
+            entry = CapabilityEntry(
+                id=id,
+                kind="mcp_server",
+                name=row["name"],
+                purpose=row["name"][:160],
+                implementations=[
+                    Implementation(kind="mcp_server", ref=row["serverUrl"])
+                ],
+                custom_mcp=True,
+                custom_mcp_credential_id=row["credentialId"],
+            )
+            return await _run_mcp(
+                entry, row["serverUrl"], user_id, session, payload, validate_only
+            )
         entry = await resolve_session_entry(user_id, session, id)
         if entry is None and id.strip().lower().startswith("https://"):
             # Open world: a server URL the catalog does not know.  The MCP
@@ -455,11 +514,23 @@ async def _run_mcp(
     if (
         tool_name
         and not session.dry_run
-        and needs_review(tool_name, catalog_server=entry is not None)
+        and needs_review(
+            tool_name, catalog_server=entry is not None and not entry.custom_mcp
+        )
         and not await gate_active(user_id, session)
     ):
         review = MCPReviewPayload(
-            server_url=server_url, tool=tool_name, arguments=dict(arguments or {})
+            server_url=server_url,
+            tool=tool_name,
+            arguments=dict(arguments or {}),
+            connection_id=(
+                entry.id.removeprefix("custom_mcp:")
+                if entry and entry.custom_mcp
+                else None
+            ),
+            credential_id=(
+                entry.custom_mcp_credential_id if entry and entry.custom_mcp else None
+            ),
         )
         review_id = await open_mcp_review(
             user_id=user_id,
@@ -491,4 +562,10 @@ async def _run_mcp(
         tool_name=tool_name,
         tool_arguments=dict(arguments or {}),
         surface_connect_card=connect,
+        custom_connection_id=(
+            entry.id.removeprefix("custom_mcp:") if entry and entry.custom_mcp else None
+        ),
+        custom_credential_id=(
+            entry.custom_mcp_credential_id if entry and entry.custom_mcp else None
+        ),
     )

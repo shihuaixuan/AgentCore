@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
@@ -39,10 +42,15 @@ export function FireExpertPreview({
   isReady,
   onRetry,
 }: PreviewProps) {
+  const { t } = useTranslation();
   function getAutomationLineText() {
-    if (isLoading) return "Checking what will pause…";
+    if (isLoading)
+      return t("Checking what will pause…", "正在检查将暂停的任务…");
     if (isError)
-      return "We couldn't preview what pauses, but you can still fire them.";
+      return t(
+        "We couldn't preview what pauses, but you can still fire them.",
+        "无法预览将暂停的任务，但你仍可解雇这位专家。",
+      );
     return automationLine;
   }
 
@@ -53,13 +61,28 @@ export function FireExpertPreview({
   return (
     <>
       <Text variant="body" tone="secondary">
-        Here is exactly what happens when you fire {expertName}.
+        {t(
+          `Here is exactly what happens when you fire ${expertName}.`,
+          `解雇 ${expertName} 后将发生以下变化。`,
+        )}
       </Text>
       <ul className="flex flex-col gap-2.5">
-        <FireLine>Installed workflows stay in your library.</FireLine>
+        <FireLine>
+          {t(
+            "Installed workflows stay in your library.",
+            "已安装的工作流会保留在你的工作流库中。",
+          )}
+        </FireLine>
         <FireLine>{getAutomationLineText()}</FireLine>
-        <FireLine>Any chat history stays available but read-only.</FireLine>
-        <FireLine>Their work stays yours.</FireLine>
+        <FireLine>
+          {t(
+            "Any chat history stays available but read-only.",
+            "所有聊天记录仍可查看，但将变为只读。",
+          )}
+        </FireLine>
+        <FireLine>
+          {t("Their work stays yours.", "这位专家的工作成果仍归你所有。")}
+        </FireLine>
       </ul>
       {isError ? (
         <div className="flex justify-end">
@@ -69,7 +92,7 @@ export function FireExpertPreview({
             onClick={handleRetry}
             data-testid="fire-preview-retry"
           >
-            Retry preview
+            {t("Retry preview", "重新预览")}
           </Button>
         </div>
       ) : null}
@@ -79,10 +102,11 @@ export function FireExpertPreview({
 }
 
 function PauseItemsPanel({ items }: PauseItemsPanelProps) {
+  const { t } = useTranslation();
   return (
     <div className="rounded-xl bg-surface-muted px-3.5 py-3 ring-1 ring-border-base/80 ring-inset">
       <Text variant="small" tone="muted">
-        Pausing now
+        {t("Pausing now", "即将暂停")}
       </Text>
       <ul className="mt-1 flex flex-col gap-0.5">
         {items.map((item) => (
@@ -108,6 +132,7 @@ export function FireExpertFooter({
   onClose,
   onFire,
 }: FooterProps) {
+  const { t } = useTranslation();
   return (
     <Dialog.Footer>
       <Button
@@ -116,7 +141,7 @@ export function FireExpertFooter({
         disabled={isFiring}
         onClick={onClose}
       >
-        Keep {expertName}
+        {t("Keep", "保留")} {expertName}
       </Button>
       <Button
         size="small"
@@ -126,7 +151,7 @@ export function FireExpertFooter({
         onClick={onFire}
         data-testid="fire-expert-confirm"
       >
-        Fire {expertName}
+        {t(`Fire ${expertName}`, `解雇 ${expertName}`)}
       </Button>
     </Dialog.Footer>
   );

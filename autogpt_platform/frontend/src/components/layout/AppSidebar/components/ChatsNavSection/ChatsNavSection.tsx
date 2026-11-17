@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { tourTarget } from "@/lib/tour-targets";
 import { motion, type Variants } from "framer-motion";
 import { Suspense } from "react";
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function ChatsNavSection({ itemVariants }: Props) {
+  const { t } = useTranslation();
   const {
     isRecentChatsOpen,
     setIsRecentChatsOpen,
@@ -32,7 +34,7 @@ export function ChatsNavSection({ itemVariants }: Props) {
         className="group-data-[collapsible=icon]:hidden"
       >
         <CollapsibleNavGroup
-          label="Recent chats"
+          label={t("Recent chats", "最近对话")}
           open={isRecentChatsOpen}
           onOpenChange={setIsRecentChatsOpen}
         >

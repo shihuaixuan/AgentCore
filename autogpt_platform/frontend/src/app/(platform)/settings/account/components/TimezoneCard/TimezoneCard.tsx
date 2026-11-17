@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Select } from "@/components/atoms/Select/Select";
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export function TimezoneCard({ value, onChange, index = 0 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   const options = TIMEZONES.some((t) => t.value === value)
@@ -45,32 +47,35 @@ export function TimezoneCard({ value, onChange, index = 0 }: Props) {
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Text variant="body-medium" as="span">
-              Time zone
+              {t("Time zone", "时区")}
             </Text>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   type="button"
-                  aria-label="Time zone info"
+                  aria-label={t("Time zone info", "时区信息")}
                   className="flex items-center text-foreground-subtle transition-colors hover:text-foreground-secondary focus-visible:text-foreground-secondary focus-visible:outline-none"
                 >
                   <Icon icon={InformationCircleIcon} size={16} />
                 </button>
               </TooltipTrigger>
               <TooltipContent>
-                Used for run schedules, summaries, and timestamps.
+                {t(
+                  "Used for run schedules, summaries, and timestamps.",
+                  "用于运行计划、摘要和时间戳。",
+                )}
               </TooltipContent>
             </Tooltip>
           </div>
 
           <Select
             id="timezone"
-            label="Timezone"
+            label={t("Timezone", "时区")}
             hideLabel
             value={value}
             onValueChange={onChange}
             options={options}
-            placeholder="Select your timezone"
+            placeholder={t("Select your timezone", "选择时区")}
             size="small"
             wrapperClassName="!mb-0 w-fit"
           />

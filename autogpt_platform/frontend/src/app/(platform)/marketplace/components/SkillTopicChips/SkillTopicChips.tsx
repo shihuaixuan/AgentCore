@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useStoreCategories } from "@/hooks/useStoreCategories";
 import { cn } from "@/lib/utils";
 import { CategoryChip, type ChipSize } from "../CategoryChip/CategoryChip";
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function SkillTopicChips({ selected, onSelect, size = "small" }: Props) {
+  const { t } = useTranslation();
   const { categories } = useStoreCategories();
 
   if (categories.length === 0) return null;
@@ -19,14 +21,14 @@ export function SkillTopicChips({ selected, onSelect, size = "small" }: Props) {
   return (
     <div
       role="group"
-      aria-label="Filter skills by topic"
+      aria-label={t("Filter skills by topic", "按主题筛选技能")}
       className={cn(
         "flex flex-wrap",
         size === "default" ? "gap-2" : "gap-1 sm:justify-end",
       )}
     >
       <CategoryChip
-        label="All"
+        label={t("All", "全部")}
         size={size}
         isSelected={selected === null}
         onClick={() => onSelect(null)}

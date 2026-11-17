@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Fragment } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Text } from "@/components/atoms/Text/Text";
@@ -20,6 +23,8 @@ function getStepIndex(currentStep: Props["currentStep"]) {
 }
 
 export function StepStrip({ currentStep }: Props) {
+  const { t } = useTranslation();
+
   const currentIndex = getStepIndex(currentStep);
   const shouldReduceMotion = useReducedMotion();
 
@@ -27,12 +32,12 @@ export function StepStrip({ currentStep }: Props) {
     <div className="flex flex-col gap-6 px-1 pb-6 sm:px-2">
       <div className="flex items-center gap-2 pr-12">
         <Text variant="lead-medium" as="span">
-          Publish workflow
+          {t("Publish workflow", "发布工作流")}
         </Text>
       </div>
 
       <ol
-        aria-label="Publish progress"
+        aria-label={t("Publish progress", "发布进度")}
         className="flex w-full items-center gap-3"
       >
         {steps.map((step, index) => {

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -13,6 +15,7 @@ import {
 // intro card's `layoutId`, so when the greeting lands this exact element
 // travels into the heading instead of being swapped out for a copy.
 export function GreetingLoader() {
+  const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
 
   return (
@@ -23,7 +26,9 @@ export function GreetingLoader() {
     >
       {/* The avatar alone doesn't say what is happening, so the wait needs
           saying out loud — the composer is withheld until it ends. */}
-      <span className="sr-only">Writing your greeting</span>
+      <span className="sr-only">
+        {t("Writing your greeting", "正在生成问候语")}
+      </span>
       <motion.span
         layoutId={GREETING_ORB_LAYOUT_ID}
         className="relative block size-16"

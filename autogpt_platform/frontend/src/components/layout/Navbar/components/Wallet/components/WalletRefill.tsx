@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { FormField } from "@/components/molecules/Form/Form";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
@@ -20,25 +23,48 @@ import { useCallback, useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 
-const autoRefillSchema = z
-  .object({
-    threshold: z
-      .number({ coerce: true, invalid_type_error: "Enter min. balance" })
-      .min(
-        5,
-        "Looks like your balance is too low for auto-refill. Try $5 or more.",
+function createAutoRefillSchema(
+  t: (english: string, chinese: string) => string,
+) {
+  return z
+    .object({
+      threshold: z
+        .number({
+          coerce: true,
+          invalid_type_error: t("Enter min. balance", "请输入最低余额"),
+        })
+        .min(
+          5,
+          t(
+            "Looks like your balance is too low for auto-refill. Try $5 or more.",
+            "自动充值的余额阈值过低，请设置为 5 美元或以上。",
+          ),
+        ),
+      refillAmount: z
+        .number({
+          coerce: true,
+          invalid_type_error: t("Enter top-up amount", "请输入充值金额"),
+        })
+        .min(
+          5,
+          t(
+            "Top-ups start at $5. Please enter a higher amount.",
+            "最低充值金额为 5 美元，请输入更高金额。",
+          ),
+        ),
+    })
+    .refine((data) => data.refillAmount >= data.threshold, {
+      message: t(
+        "Your refill amount must be equal to or greater than the balance you entered above.",
+        "充值金额必须大于或等于上方设置的余额阈值。",
       ),
-    refillAmount: z
-      .number({ coerce: true, invalid_type_error: "Enter top-up amount" })
-      .min(5, "Top-ups start at $5. Please enter a higher amount."),
-  })
-  .refine((data) => data.refillAmount >= data.threshold, {
-    message:
-      "Your refill amount must be equal to or greater than the balance you entered above.",
-    path: ["refillAmount"],
-  });
+      path: ["refillAmount"],
+    });
+}
 
 export function WalletRefill() {
+  const { t } = useTranslation();
+  const autoRefillSchema = createAutoRefillSchema(t);
   const { toast } = useToast();
   const toastOnFail = useToastOnFail();
 
@@ -72,14 +98,17 @@ export function WalletRefill() {
       await updateAutoTopUpConfig(data.refillAmount * 100, data.threshold * 100)
         .then(() => {
           toast({
-            title: "Auto top-up config updated! 🎉",
+            title: t(
+              "Auto top-up config updated! 🎉",
+              "自动充值设置已更新！🎉",
+            ),
             variant: "success",
           });
         })
-        .catch(toastOnFail("update auto top-up config"));
+        .catch(toastOnFail(t("update auto top-up config", "更新自动充值设置")));
       setIsLoading(false);
     },
-    [updateAutoTopUpConfig, toast, toastOnFail],
+    [updateAutoTopUpConfig, toast, toastOnFail, t],
   );
 
   return (
@@ -90,10 +119,13 @@ export function WalletRefill() {
         tone="accent"
         className="mx-0 mt-4"
       >
-        Add credits to your balance
+        {t("Add credits to your balance", "为余额添加额度")}
       </Text>
       <Text variant="small-tight" as="p" tone="muted" className="mx-0 my-1">
-        Choose a one-time top-up or set up automatic refills
+        {t(
+          "Choose a one-time top-up or set up automatic refills",
+          "选择单次充值或设置自动充值",
+        )}
       </Text>
       <TabsLine
         variant="pill"
@@ -101,8 +133,12 @@ export function WalletRefill() {
         className="mt-4 mb-6 flex w-full flex-col items-center"
       >
         <TabsLineList className="mx-auto">
-          <TabsLineTrigger value="top-up">One-time top up</TabsLineTrigger>
-          <TabsLineTrigger value="auto-refill">Auto-refill</TabsLineTrigger>
+          <TabsLineTrigger value="top-up">
+            {t("One-time top up", "单次充值")}
+          </TabsLineTrigger>
+          <TabsLineTrigger value="auto-refill">
+            {t("Auto-refill", "自动充值")}
+          </TabsLineTrigger>
         </TabsLineList>
         <div className="mt-4 w-full rounded-lg px-5 outline outline-1 outline-offset-2 outline-border-base">
           <TabsLineContent value="top-up" className="flex flex-col">
@@ -112,7 +148,7 @@ export function WalletRefill() {
               tone="primary"
               className="mt-2 justify-start"
             >
-              One-time top-up
+              {t("One-time top-up", "单次充值")}
             </Text>
             <Text
               variant="small-lh-tight"
@@ -120,9 +156,12 @@ export function WalletRefill() {
               tone="muted"
               className="mt-1 justify-start"
             >
-              Enter an amount (min. $5) and add credits instantly.
+              {t(
+                "Enter an amount (min. $5) and add credits instantly.",
+                "输入金额（最低 5 美元），立即添加额度。",
+              )}
             </Text>
-            <TopUpForm submitLabel="Top up" size="small" />
+            <TopUpForm submitLabel={t("Top up", "充值")} size="small" />
           </TabsLineContent>
           <TabsLineContent value="auto-refill" className="flex flex-col">
             <Text
@@ -131,7 +170,7 @@ export function WalletRefill() {
               tone="primary"
               className="justify-start"
             >
-              Auto-refill
+              {t("Auto-refill", "自动充值")}
             </Text>
             <Text
               variant="small-lh-tight"
@@ -139,7 +178,10 @@ export function WalletRefill() {
               tone="muted"
               className="mt-1 justify-start"
             >
-              Choose a one-time top-up or set up automatic refills.
+              {t(
+                "Choose a one-time top-up or set up automatic refills.",
+                "选择单次充值或设置自动充值。",
+              )}
             </Text>
 
             <FormProvider {...autoRefillForm}>
@@ -153,7 +195,10 @@ export function WalletRefill() {
                   render={({ field }) => (
                     <Input
                       type="amount"
-                      label="Refill when balance drops below:"
+                      label={t(
+                        "Refill when balance drops below:",
+                        "余额低于以下金额时充值：",
+                      )}
                       id={field.name}
                       size="small"
                       decimalCount={0}
@@ -169,7 +214,7 @@ export function WalletRefill() {
                   render={({ field }) => (
                     <Input
                       type="amount"
-                      label="Add this amount:"
+                      label={t("Add this amount:", "充值金额：")}
                       size="small"
                       decimalCount={0}
                       id={field.name}
@@ -187,7 +232,7 @@ export function WalletRefill() {
                   size="small"
                   className="mt-5"
                 >
-                  Enable Auto-refill
+                  {t("Enable Auto-refill", "启用自动充值")}
                 </Button>
               </form>
             </FormProvider>
@@ -205,7 +250,7 @@ export function WalletRefill() {
               href="/settings/billing"
               className="cursor-pointer text-foreground-emphasis underline"
             >
-              Billing settings
+              {t("Billing settings", "账单设置")}
             </Link>
           </Text>
         </div>

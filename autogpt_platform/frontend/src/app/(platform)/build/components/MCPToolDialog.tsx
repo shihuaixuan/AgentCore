@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import React, {
   useState,
   useCallback,
@@ -51,8 +53,11 @@ import { isKey } from "@/lib/keyboard";
 import { mcpServerIdentity, normalizeMcpUrl } from "@/lib/mcp-url";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { Select } from "@/components/atoms/Select/Select";
+import { useGetV2ListConnections } from "@/app/api/__generated__/endpoints/mcp/mcp";
 
 export type MCPToolDialogResult = {
+  connectionID?: string;
   serverUrl: string;
   serverName: string | null;
   selectedTool: string;
@@ -75,7 +80,12 @@ export function MCPToolDialog({
   onClose,
   onConfirm,
 }: MCPToolDialogProps) {
+  const { t } = useTranslation();
   const allProviders = useContext(CredentialsProvidersContext);
+  const savedConnections = useGetV2ListConnections({
+    query: { enabled: open },
+  });
+  const [connectionID, setConnectionID] = useState<string | undefined>();
 
   const [step, setStep] = useState<DialogStep>("url");
   const [serverUrl, setServerUrl] = useState("");
@@ -129,6 +139,7 @@ export function MCPToolDialog({
     oauthRequest.current = null;
     setStep("url");
     setServerUrl("");
+    setConnectionID(undefined);
     setManualToken("");
     resetScheme();
     setTools([]);
@@ -173,6 +184,8 @@ export function MCPToolDialog({
       try {
         const response = await postV2DiscoverAvailableToolsOnAnMcpServer({
           server_url: url,
+          credential_id: connectionID ? (credentials?.id ?? null) : null,
+          use_saved_credentials: !connectionID,
           auth_token: null,
         });
         if (response.status !== 200) {
@@ -182,6 +195,15 @@ export function MCPToolDialog({
       } catch (error: unknown) {
         const status = getErrorStatus(error);
         if (status === 401 || status === 403) {
+          if (connectionID) {
+            setError(
+              t(
+                "This connection needs to be reconnected in Integrations.",
+                "请在集成页面重新连接此服务。",
+              ),
+            );
+            return;
+          }
           setAuthRequired(true);
           setError(null);
           // Automatically start OAuth sign-in instead of requiring a second click
@@ -189,12 +211,17 @@ export function MCPToolDialog({
           startOAuthRef.current = true;
           return;
         }
-        setError(getErrorMessage(error, "Failed to connect to MCP server"));
+        setError(
+          getErrorMessage(
+            error,
+            t("Failed to connect to MCP server", "连接 MCP 服务器失败"),
+          ),
+        );
       } finally {
         setLoading(false);
       }
     },
-    [applyDiscoveredTools],
+    [applyDiscoveredTools, connectionID, credentials, t],
   );
 
   const connectWithManualCredential = useCallback(async () => {
@@ -252,7 +279,10 @@ export function MCPToolDialog({
       applyDiscoveredTools(toolsResponse);
     } catch (error: unknown) {
       setError(
-        getErrorMessage(error, "Failed to connect with this credential"),
+        getErrorMessage(
+          error,
+          t("Failed to connect with this credential", "无法使用此凭据连接"),
+        ),
       );
     } finally {
       setLoading(false);
@@ -263,6 +293,7 @@ export function MCPToolDialog({
     manualAuthScheme,
     manualToken,
     serverUrl,
+    t,
   ]);
 
   const handleDiscoverTools = useCallback(() => {
@@ -316,13 +347,23 @@ export function MCPToolDialog({
     } catch (error: unknown) {
       if (signal.aborted) return;
       const status = getErrorStatus(error);
-      const message = getErrorMessage(error, "Failed to complete sign-in");
+      const message = getErrorMessage(
+        error,
+        t("Failed to complete sign-in", "无法完成登录"),
+      );
       if (message === "OAuth flow timed out") {
-        setError("OAuth sign-in timed out. Please try again.");
+        setError(
+          t(
+            "OAuth sign-in timed out. Please try again.",
+            "OAuth 登录超时。请重试。",
+          ),
+        );
       } else if (status === 401 || status === 403) {
         setError(
-          "Authentication succeeded but the server still rejected the request. " +
-            "The token audience may not match. Please try again.",
+          t(
+            "Authentication succeeded but the server still rejected the request. The token audience may not match. Please try again.",
+            "身份验证成功，但服务器仍拒绝了请求。令牌的目标受众可能不匹配。请重试。",
+          ),
         );
       } else {
         setError(message);
@@ -336,7 +377,7 @@ export function MCPToolDialog({
         }
       }
     }
-  }, [serverUrl, allProviders, applyDiscoveredTools]);
+  }, [serverUrl, allProviders, applyDiscoveredTools, t]);
 
   // Auto-start OAuth sign-in when server returns 401/403
   useEffect(() => {
@@ -359,6 +400,7 @@ export function MCPToolDialog({
 
     onConfirm({
       serverUrl: serverUrl.trim(),
+      connectionID,
       serverName,
       selectedTool: selectedTool.name,
       toolInputSchema: selectedTool.input_schema,
@@ -371,6 +413,7 @@ export function MCPToolDialog({
     selectedTool,
     tools,
     serverUrl,
+    connectionID,
     serverName,
     credentials,
     credentialServerUrl,
@@ -384,20 +427,73 @@ export function MCPToolDialog({
         <DialogHeader>
           <DialogTitle>
             {step === "url"
-              ? "Connect to MCP Server"
-              : `Select a Tool${serverName ? ` — ${serverName}` : ""}`}
+              ? t("Connect to MCP Server", "连接 MCP 服务器")
+              : t(
+                  `Select a Tool${serverName ? ` — ${serverName}` : ""}`,
+                  `选择工具${serverName ? ` — ${serverName}` : ""}`,
+                )}
           </DialogTitle>
           <DialogDescription>
             {step === "url"
-              ? "Enter the URL of an MCP server to discover its available tools."
-              : `Found ${tools.length} tool${tools.length !== 1 ? "s" : ""}. Select one to add to your workflow.`}
+              ? t(
+                  "Enter the URL of an MCP server to discover its available tools.",
+                  "输入 MCP 服务器的网址以发现可用工具。",
+                )
+              : t(
+                  `Found ${tools.length} tool${tools.length !== 1 ? "s" : ""}. Select one to add to your workflow.`,
+                  `找到 ${tools.length} 个工具。选择一个添加到工作流。`,
+                )}
           </DialogDescription>
         </DialogHeader>
 
         {step === "url" && (
           <div className="flex flex-col gap-4 py-2">
+            {savedConnections.data?.status === 200 &&
+              savedConnections.data.data.some((item) => item.enabled) && (
+                <Select
+                  id="saved-mcp-connection"
+                  label={t("Saved connection", "已保存的连接")}
+                  value={connectionID ?? "none"}
+                  onValueChange={(value) => {
+                    const selected =
+                      savedConnections.data?.status === 200
+                        ? savedConnections.data.data.find(
+                            (item) => item.id === value,
+                          )
+                        : undefined;
+                    setConnectionID(selected?.id);
+                    if (!selected) return;
+                    setServerUrl(selected.server_url);
+                    const stored = allProviders?.mcp?.savedCredentials.find(
+                      (credential) => credential.id === selected.credential_id,
+                    );
+                    setCredentials(
+                      selected.credential_id
+                        ? {
+                            id: selected.credential_id,
+                            provider: "mcp",
+                            type: "oauth2",
+                            title: stored?.title ?? selected.name,
+                          }
+                        : null,
+                    );
+                    setCredentialServerUrl(selected.server_url);
+                  }}
+                  options={[
+                    {
+                      value: "none",
+                      label: t("Enter a server URL", "输入服务器地址"),
+                    },
+                    ...savedConnections.data.data
+                      .filter((item) => item.enabled)
+                      .map((item) => ({ value: item.id, label: item.name })),
+                  ]}
+                />
+              )}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="mcp-server-url">Server URL</Label>
+              <Label htmlFor="mcp-server-url">
+                {t("Server URL", "服务器网址")}
+              </Label>
               <BaseInput
                 id="mcp-server-url"
                 type="url"
@@ -405,6 +501,7 @@ export function MCPToolDialog({
                 value={serverUrl}
                 onChange={(e) => {
                   const nextUrl = e.target.value;
+                  setConnectionID(undefined);
                   // Only a change of server identity discards the credential.
                   const serverChanged =
                     mcpServerIdentity(serverUrl) !== mcpServerIdentity(nextUrl);
@@ -440,7 +537,10 @@ export function MCPToolDialog({
                   tone="inherit"
                   className="block"
                 >
-                  or enter an API credential manually
+                  {t(
+                    "or enter an API credential manually",
+                    "或手动输入 API 凭据",
+                  )}
                 </Text>
               </button>
             )}
@@ -525,7 +625,7 @@ export function MCPToolDialog({
                 setSelectedTool(null);
               }}
             >
-              Back
+              {t("Back", "返回")}
             </Button>
           )}
           <Button
@@ -533,7 +633,7 @@ export function MCPToolDialog({
             size="compact"
             onClick={handleClose}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           {step === "url" && (
             <Button
@@ -558,14 +658,16 @@ export function MCPToolDialog({
                     className="size-4"
                     aria-hidden="true"
                   />
-                  {oauthLoading ? "Waiting for sign-in..." : "Connecting..."}
+                  {oauthLoading
+                    ? t("Waiting for sign-in...", "等待登录…")
+                    : t("Connecting...", "正在连接…")}
                 </span>
               ) : authRequired && !showManualToken ? (
-                "Sign in & Connect"
+                t("Sign in & Connect", "登录并连接")
               ) : showManualToken ? (
-                "Connect & Discover"
+                t("Connect & Discover", "连接并发现工具")
               ) : (
-                "Discover Tools"
+                t("Discover Tools", "发现工具")
               )}
             </Button>
           )}
@@ -576,7 +678,7 @@ export function MCPToolDialog({
               onClick={handleConfirm}
               disabled={!selectedTool}
             >
-              Add Block
+              {t("Add Block", "添加模块")}
             </Button>
           )}
         </DialogFooter>
@@ -612,6 +714,7 @@ function MCPToolCard({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const schema = tool.input_schema as Record<string, any>;
   const properties = schema?.properties ?? {};
@@ -649,7 +752,10 @@ function MCPToolCard({
         </Text>
         {paramNames.length > 0 && (
           <Badge variant="secondary" size="tiny">
-            {paramNames.length} param{paramNames.length !== 1 ? "s" : ""}
+            {t(
+              `${paramNames.length} param${paramNames.length !== 1 ? "s" : ""}`,
+              `${paramNames.length} 个参数`,
+            )}
           </Badge>
         )}
       </div>
@@ -678,7 +784,10 @@ function MCPToolCard({
           ))}
           {paramNames.length > 6 && (
             <Badge variant="outline" size="tiny-normal">
-              +{paramNames.length - 6} more
+              {t(
+                `+${paramNames.length - 6} more`,
+                `另有 ${paramNames.length - 6} 项`,
+              )}
             </Badge>
           )}
         </div>
@@ -697,7 +806,7 @@ function MCPToolCard({
                     as="span"
                     className="block"
                   >
-                    Parameter
+                    {t("Parameter", "参数")}
                   </Text>
                 </th>
                 <th className="px-2 py-1 text-left">
@@ -707,7 +816,7 @@ function MCPToolCard({
                     as="span"
                     className="block"
                   >
-                    Type
+                    {t("Type", "类型")}
                   </Text>
                 </th>
                 <th className="px-2 py-1 text-left">
@@ -717,7 +826,7 @@ function MCPToolCard({
                     as="span"
                     className="block"
                   >
-                    Description
+                    {t("Description", "描述")}
                   </Text>
                 </th>
               </tr>
@@ -782,7 +891,9 @@ function MCPToolCard({
           className="flex w-full items-center justify-center gap-1 border-t border-separator py-1.5 text-foreground-subtle hover:text-foreground-secondary"
         >
           <Text variant="tiny-inherit" as="span" tone="inherit">
-            {expanded ? "Hide details" : "Show details"}
+            {expanded
+              ? t("Hide details", "收起详情")
+              : t("Show details", "显示详情")}
           </Text>
           <Icon
             icon={ArrowDown01Icon}

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -11,6 +14,7 @@ import {
 import { AUTOPILOT_HEX } from "@/components/molecules/ExpertAvatar/colors";
 
 export function AutopilotHeader() {
+  const { t } = useTranslation();
   return (
     <header>
       <ExpertCover
@@ -33,11 +37,12 @@ export function AutopilotHeader() {
             </h1>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border-base bg-surface-muted px-2.5 py-0.5 font-sans text-caption font-medium text-foreground-body">
               <Icon icon={SparklesIcon} size={12} />
-              {AUTOPILOT_ROLE}
+              {t(AUTOPILOT_ROLE, "AI 负责人")}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border-base bg-surface-muted px-2.5 py-0.5 font-sans text-caption font-medium text-foreground-body">
               <Icon icon={Tick02Icon} size={12} />
-              Built in
+
+              {t("Built in", "内置")}
             </span>
           </div>
         </div>
@@ -48,7 +53,7 @@ export function AutopilotHeader() {
           size="small"
           className="shrink-0"
         >
-          Chat
+          {t("Chat", "聊天")}
         </Button>
       </div>
     </header>

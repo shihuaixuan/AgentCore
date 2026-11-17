@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   Cancel01Icon,
   InformationCircleIcon,
@@ -25,6 +28,7 @@ const OUTCOME_ICONS = {
 } as const;
 
 export function ReviewSidebar({ carousel, sheet = false }: Props) {
+  const { t } = useTranslation();
   return (
     <nav
       aria-label={sheet ? "All held calls" : "Held calls"}
@@ -32,7 +36,7 @@ export function ReviewSidebar({ carousel, sheet = false }: Props) {
     >
       <div className="flex items-baseline gap-2 px-4 pt-4 pb-2">
         <Text variant="body-medium" as="h2">
-          To review
+          {t("To review", "待审核")}
         </Text>
         <Text variant="small" as="span" tone="secondary" tabular>
           {carousel.left} of {carousel.total} left

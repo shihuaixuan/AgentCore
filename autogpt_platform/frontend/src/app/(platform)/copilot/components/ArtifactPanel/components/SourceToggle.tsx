@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -8,6 +10,7 @@ interface Props {
 }
 
 export function SourceToggle({ isSourceView, onToggle }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center rounded-md border border-border-base bg-surface-muted p-0.5 text-caption font-medium">
       <button
@@ -21,7 +24,7 @@ export function SourceToggle({ isSourceView, onToggle }: Props) {
         )}
         onClick={() => onToggle(false)}
       >
-        Preview
+        {t("Preview", "预览")}
       </button>
       <button
         type="button"
@@ -34,7 +37,7 @@ export function SourceToggle({ isSourceView, onToggle }: Props) {
         )}
         onClick={() => onToggle(true)}
       >
-        Source
+        {t("Source", "源代码")}
       </button>
     </div>
   );

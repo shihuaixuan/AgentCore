@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
 import { ComputerIcon, LicenseDraftIcon } from "@hugeicons/core-free-icons";
@@ -23,10 +25,11 @@ const OPTIONS: {
 /** Two faces of one side panel: the document being worked on, or the
  *  machine doing the work. */
 export function PanelModeSwitch({ mode, hasArtifact, onChange }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       role="group"
-      aria-label="Panel view"
+      aria-label={t("Panel view", "面板视图")}
       className="flex shrink-0 items-center rounded-md bg-surface-hover p-0.5"
     >
       {OPTIONS.map((option) => {
@@ -49,7 +52,7 @@ export function PanelModeSwitch({ mode, hasArtifact, onChange }: Props) {
             )}
           >
             <Icon icon={option.icon} size={14} />
-            {option.label}
+            {t(option.label, option.value === "computer" ? "计算机" : "成果")}
           </button>
         );
       })}

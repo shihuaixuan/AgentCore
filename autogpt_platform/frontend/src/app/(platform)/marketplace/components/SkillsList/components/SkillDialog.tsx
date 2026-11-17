@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { SkillFileViewer } from "@/components/contextual/SkillPackage/SkillFileViewer";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function SkillDialog({ slug, onClose }: Props) {
+  const { t } = useTranslation();
   const {
     skill,
     isLoggedIn,
@@ -53,13 +55,18 @@ export function SkillDialog({ slug, onClose }: Props) {
               </div>
             ) : isError || !skill ? (
               <div className="flex items-center gap-2 text-body text-foreground-secondary">
-                <span>Couldn&apos;t load this skill right now.</span>
+                <span>
+                  {t(
+                    "Couldn't load this skill right now.",
+                    "暂时无法加载此技能。",
+                  )}
+                </span>
                 <button
                   type="button"
                   onClick={() => refetch()}
                   className="font-medium text-brand underline-offset-2 transition-colors hover:underline"
                 >
-                  Retry
+                  {t("Retry", "重试")}
                 </button>
               </div>
             ) : (
@@ -88,7 +95,10 @@ export function SkillDialog({ slug, onClose }: Props) {
                   />
                 ) : (
                   <p className="text-body text-foreground-tertiary">
-                    This skill has no instructions yet.
+                    {t(
+                      "This skill has no instructions yet.",
+                      "此技能尚无说明。",
+                    )}
                   </p>
                 )}
               </>

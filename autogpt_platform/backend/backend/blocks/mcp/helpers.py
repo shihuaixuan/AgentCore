@@ -194,6 +194,7 @@ async def auto_lookup_mcp_credential(
         for cred in mcp_creds:
             if (
                 isinstance(cred, OAuth2Credentials)
+                and not (cred.metadata or {}).get("mcp_isolated")
                 and (cred.metadata or {}).get("mcp_server_url") == server_url
                 and (allowed_ids is None or cred.id in allowed_ids)
             ):

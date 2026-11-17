@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { LockIcon, SecurityCheckIcon } from "@hugeicons/core-free-icons";
 import { ExpertSection } from "./ExpertSection";
@@ -11,12 +14,16 @@ interface Props {
  *  instruction the model receives can never drift apart. Each one gets its
  *  own tile: a shield, the rule, and a quiet "Locked" note. */
 export function ExpertProtectedRules({ rules }: Props) {
+  const { t } = useTranslation();
   if (rules.length === 0) return null;
 
   return (
     <ExpertSection
-      title="Rules this expert cannot break"
-      description="Part of every expert's soul, and not editable by anyone."
+      title={t("Rules this expert cannot break", "这位专家必须遵守的规则")}
+      description={t(
+        "Part of every expert's soul, and not editable by anyone.",
+        "这些是每位专家的核心设定，任何人都无法编辑。",
+      )}
     >
       <ul className="grid gap-3 sm:grid-cols-2">
         {rules.map((rule) => (

@@ -12,6 +12,7 @@ import { MaintenanceControls } from "./MaintenanceControls";
 import { useMemoryScope } from "./useMemoryScope";
 import type { DreamResult } from "./helpers";
 import type { AnyJobStatus } from "./memoryJobStatus";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function MemoryVisualizer() {
   const {
@@ -42,6 +43,7 @@ interface MemoryScopeViewProps {
 }
 
 function MemoryScopeView({ expertID }: MemoryScopeViewProps) {
+  const { t } = useTranslation();
   const {
     overview,
     overviewData,
@@ -169,15 +171,15 @@ function MemoryScopeView({ expertID }: MemoryScopeViewProps) {
         <div className="col-span-12 rounded-md border bg-surface md:col-span-7">
           {graph.isLoading ? (
             <div className="flex h-[70vh] items-center justify-center text-body text-foreground-tertiary">
-              Loading graph…
+              {t("Loading graph…", "正在加载图谱…")}
             </div>
           ) : graph.error || scopeMismatchError ? (
             <div className="p-6 text-body text-error-foreground">
-              Failed to load graph: {String(graph.error ?? scopeMismatchError)}
+              {t("Failed to load graph:", "无法加载图谱：")} {String(graph.error ?? scopeMismatchError)}
             </div>
           ) : nodes.length === 0 ? (
             <div className="flex h-[70vh] flex-col items-center justify-center text-body text-foreground-tertiary">
-              No memory yet. Start a chat session to populate it.
+              {t("No memory yet. Start a chat session to populate it.", "暂无记忆。开始一次对话以填充记忆。")}
             </div>
           ) : (
             <GraphCanvas
@@ -219,17 +221,18 @@ interface OverviewStripProps {
 }
 
 function OverviewStrip({ loading, error, data }: OverviewStripProps) {
+  const { t } = useTranslation();
   if (loading) {
     return (
       <div className="rounded-md border bg-surface p-3 text-body text-foreground-tertiary">
-        Loading overview…
+        {t("Loading overview…", "正在加载概览…")}
       </div>
     );
   }
   if (error) {
     return (
       <div className="rounded-md border border-error/20 bg-error-surface p-3 text-body text-error-foreground">
-        Failed to load overview: {String(error)}
+        {t("Failed to load overview:", "无法加载概览：")} {String(error)}
       </div>
     );
   }
@@ -237,11 +240,11 @@ function OverviewStrip({ loading, error, data }: OverviewStripProps) {
   return (
     <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
       {[
-        { label: "Entities", value: data.entities },
-        { label: "Episodes", value: data.episodes },
-        { label: "Facts", value: data.relates_to_edges },
-        { label: "Mentions", value: data.mentions_edges },
-        { label: "Communities", value: data.communities },
+        { label: t("Entities", "实体"), value: data.entities },
+        { label: t("Episodes", "事件"), value: data.episodes },
+        { label: t("Facts", "事实"), value: data.relates_to_edges },
+        { label: t("Mentions", "提及"), value: data.mentions_edges },
+        { label: t("Communities", "社区"), value: data.communities },
       ].map((stat) => (
         <div
           key={stat.label}
@@ -304,6 +307,7 @@ function ControlBar({
   nodeCount,
   edgeCount,
 }: ControlBarProps) {
+  const { t } = useTranslation();
   const rebuildActive = !!rebuildActiveJobId;
   const dreamActive = !!dreamActiveJobId;
   const nightlyActive = !!nightlyActiveJobId;
@@ -311,7 +315,7 @@ function ControlBar({
     <div className="flex flex-wrap items-center gap-3 rounded-md border bg-surface p-3 text-body">
       {readOnly ? (
         <span className="rounded bg-surface-hover px-2 py-1 text-caption text-foreground-secondary">
-          Read-only
+          {t("Read-only", "只读")}
         </span>
       ) : (
         <MaintenanceControls
@@ -336,7 +340,7 @@ function ControlBar({
           checked={includeCommunities}
           onChange={(e) => setIncludeCommunities(e.target.checked)}
         />
-        Communities
+        {t("Communities", "社区")}
       </label>
       <label className="flex items-center gap-2 text-foreground-body">
         <input
@@ -344,13 +348,13 @@ function ControlBar({
           checked={includeEpisodes}
           onChange={(e) => setIncludeEpisodes(e.target.checked)}
         />
-        Episodes (noisy)
+        {t("Episodes (noisy)", "事件（含噪声）")}
       </label>
       <span className="ml-auto text-caption text-foreground-tertiary">
         {nodeCount} nodes · {edgeCount} edges
         {truncated && (
           <span className="ml-2 rounded bg-warning-surface px-2 py-0.5 text-warning-foreground">
-            truncated
+            {t("truncated", "已截断")}
           </span>
         )}
         {!readOnly && rebuildActive && rebuildStatus && (
@@ -400,6 +404,7 @@ function Sidebar({
   hiddenEdgeTypes,
   setHiddenEdgeTypes,
 }: SidebarProps) {
+  const { t } = useTranslation();
   function togglePill(set: Set<string>, key: string): Set<string> {
     const next = new Set(set);
     if (next.has(key)) next.delete(key);
@@ -410,7 +415,7 @@ function Sidebar({
     <div className="col-span-12 space-y-3 md:col-span-3">
       <div className="rounded-md border bg-surface p-3">
         <h3 className="mb-2 text-caption font-semibold text-foreground-tertiary uppercase">
-          Labels
+          {t("Labels", "标签")}
         </h3>
         <div className="flex flex-wrap gap-1.5">
           {[...nodeTypeCounts.entries()]
@@ -438,7 +443,7 @@ function Sidebar({
       </div>
       <div className="rounded-md border bg-surface p-3">
         <h3 className="mb-2 text-caption font-semibold text-foreground-tertiary uppercase">
-          Relationships
+          {t("Relationships", "关系")}
         </h3>
         <div className="flex flex-wrap gap-1.5">
           {[...edgeTypeCounts.entries()]
@@ -496,17 +501,18 @@ interface DreamResultPanelProps {
 }
 
 function DreamResultPanel({ result, onDismiss }: DreamResultPanelProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-2" data-testid="dream-result-panel">
       <div className="flex items-center justify-between gap-2">
         <Text variant="small-medium" as="span" tone="body">
-          Last dream pass{" "}
+          {t("Last dream pass", "最近一次记忆整理")} {" "}
           <span className="font-mono text-foreground-tertiary">
             {result.passID}
           </span>
         </Text>
         <Button variant="ghost" size="small" onClick={onDismiss}>
-          Dismiss
+          {t("Dismiss", "关闭")}
         </Button>
       </div>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -518,12 +524,13 @@ function DreamResultPanel({ result, onDismiss }: DreamResultPanelProps) {
 }
 
 function DetailPanel({ node, neighbors, onClear }: DetailPanelProps) {
+  const { t } = useTranslation();
   return (
     <div className="col-span-12 md:col-span-2">
       <div className="rounded-md border bg-surface p-3 text-body">
         {!node ? (
           <div className="text-foreground-tertiary">
-            Click a node to inspect.
+            {t("Click a node to inspect.", "点击节点查看详情。")}
           </div>
         ) : (
           <>
@@ -540,7 +547,7 @@ function DetailPanel({ node, neighbors, onClear }: DetailPanelProps) {
                 type="button"
                 onClick={onClear}
                 className="text-caption text-foreground-subtle hover:text-foreground-secondary"
-                aria-label="Clear selection"
+                aria-label={t("Clear selection", "清除选择")}
               >
                 ✕
               </button>
@@ -554,7 +561,7 @@ function DetailPanel({ node, neighbors, onClear }: DetailPanelProps) {
               </div>
             )}
             <h4 className="mt-4 text-caption font-semibold text-foreground-tertiary uppercase">
-              {neighbors.length} edges
+              {neighbors.length} {t("edges", "条关系")}
             </h4>
             <ul className="mt-1 max-h-72 space-y-1 overflow-y-auto text-caption">
               {neighbors.map(({ edge, otherUuid }) => (

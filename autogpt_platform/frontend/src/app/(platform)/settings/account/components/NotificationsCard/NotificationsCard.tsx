@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Select } from "@/components/atoms/Select/Select";
@@ -28,6 +29,7 @@ export function NotificationsCard({
   onStoreVerdictsChange,
   index = 0,
 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   return (
@@ -44,7 +46,7 @@ export function NotificationsCard({
       <div className="flex h-fit flex-col gap-4 rounded-large border border-border-base bg-surface px-4 py-3 shadow-message-table">
         <div className="flex flex-col gap-1">
           <Text variant="body-medium" as="span">
-            Email
+            {t("Email", "电子邮箱")}
           </Text>
           <Text variant="small" as="span" tone="muted">
             Billing and account messages are always sent — they are about your
@@ -55,7 +57,7 @@ export function NotificationsCard({
         <div className="flex flex-col gap-2">
           <Select
             id="briefing-frequency"
-            label="Briefing"
+            label={t("Briefing", "简报")}
             value={values.briefingFrequency}
             options={BRIEFING_OPTIONS.map((option) => ({
               value: option.value,
@@ -84,14 +86,14 @@ export function NotificationsCard({
           <Switch
             checked={values.alertsEnabled}
             onCheckedChange={onAlertsChange}
-            aria-label="Alerts"
+            aria-label={t("Alerts", "提醒")}
           />
         </div>
 
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col">
             <Text variant="body-medium" as="span">
-              Marketplace reviews
+              {t("Marketplace reviews", "市场评价")}
             </Text>
             <Text variant="small" as="span" tone="muted">
               When a workflow you submitted is approved or needs changes.
@@ -100,7 +102,7 @@ export function NotificationsCard({
           <Switch
             checked={values.storeVerdictsEnabled}
             onCheckedChange={onStoreVerdictsChange}
-            aria-label="Marketplace reviews"
+            aria-label={t("Marketplace reviews", "市场评价")}
           />
         </div>
       </div>

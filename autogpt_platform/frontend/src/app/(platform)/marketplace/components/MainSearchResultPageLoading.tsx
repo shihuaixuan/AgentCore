@@ -1,12 +1,16 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 
 export function MainSearchResultPageLoading() {
+  const { t } = useTranslation();
   return (
     <div
       className="w-full"
       role="status"
       aria-busy="true"
-      aria-label="Loading search results"
+      aria-label={t("Loading search results", "正在加载搜索结果")}
     >
       <div className="mx-auto min-h-screen w-full max-w-[1440px] px-6 md:px-10">
         {/* Go back button */}

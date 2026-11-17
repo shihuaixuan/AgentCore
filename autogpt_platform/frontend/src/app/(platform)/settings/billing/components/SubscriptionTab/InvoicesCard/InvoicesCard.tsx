@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Badge } from "@/components/atoms/Badge/Badge";
@@ -29,6 +30,7 @@ const STATUS_VARIANT: Record<string, "success" | "info" | "error"> = {
 };
 
 export function InvoicesCard({ index = 0 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const { invoices, isLoading, isError, refetch } = useInvoicesCard();
   const sectionMotion = getSectionMotionProps(index, Boolean(reduceMotion));
@@ -55,7 +57,7 @@ export function InvoicesCard({ index = 0 }: Props) {
     <motion.section {...sectionMotion} className="flex w-full flex-col gap-2">
       <div className="px-1">
         <Text variant="body-medium" as="span">
-          Invoices
+          {t("Invoices", "发票")}
         </Text>
       </div>
 
@@ -63,7 +65,7 @@ export function InvoicesCard({ index = 0 }: Props) {
         {invoices.length === 0 ? (
           <div className="px-4 py-6">
             <Text variant="small" as="span" tone="muted">
-              No invoices yet.
+              {t("No invoices yet.", "暂无发票。")}
             </Text>
           </div>
         ) : (
@@ -71,13 +73,15 @@ export function InvoicesCard({ index = 0 }: Props) {
             <table className="w-full border-collapse text-left">
               <thead className="bg-surface-muted">
                 <tr className="border-b border-border-base">
-                  <Th>Invoice</Th>
-                  <Th className="hidden sm:table-cell">Date</Th>
-                  <Th className="hidden md:table-cell">Description</Th>
-                  <Th align="right">Amount</Th>
-                  <Th>Status</Th>
+                  <Th>{t("Invoice", "发票")}</Th>
+                  <Th className="hidden sm:table-cell">{t("Date", "日期")}</Th>
+                  <Th className="hidden md:table-cell">
+                    {t("Description", "描述")}
+                  </Th>
+                  <Th align="right">{t("Amount", "金额")}</Th>
+                  <Th>{t("Status", "状态")}</Th>
                   <th scope="col" className="w-12 px-2 py-3 sm:px-4">
-                    <span className="sr-only">Download</span>
+                    <span className="sr-only">{t("Download", "下载")}</span>
                   </th>
                 </tr>
               </thead>
@@ -130,7 +134,10 @@ export function InvoicesCard({ index = 0 }: Props) {
                         size="icon-xs"
                         shape="pill"
                         withTooltip={false}
-                        aria-label={`Download invoice ${invoice.number}`}
+                        aria-label={t(
+                          `Download invoice ${invoice.number}`,
+                          `下载发票 ${invoice.number}`,
+                        )}
                         disabled={!invoice.pdfUrl}
                         onClick={() => {
                           if (invoice.pdfUrl) {

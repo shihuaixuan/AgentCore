@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   Tooltip,
   TooltipContent,
@@ -89,6 +91,7 @@ export function ArtifactPanelHeader({
   showModeSwitch = false,
   onModeChange,
 }: Props) {
+  const { t } = useTranslation();
   const isComputer = mode === "computer" || artifact == null;
   const isFile = !isComputer && !artifact?.expert;
   const hasViewControls =
@@ -98,7 +101,7 @@ export function ArtifactPanelHeader({
     <header className="shrink-0 border-b border-border-base bg-surface">
       <div className="flex h-12 items-center gap-2 px-3 sm:px-4">
         {!isComputer && canGoBack && (
-          <HeaderButton onClick={onBack} title="Back">
+          <HeaderButton onClick={onBack} title={t("Back", "返回")}>
             <Icon icon={ArrowLeft02Icon} size={18} />
           </HeaderButton>
         )}
@@ -106,7 +109,7 @@ export function ArtifactPanelHeader({
           {isComputer ? (
             <>
               <Icon icon={ComputerIcon} size={18} className="shrink-0" />
-              <span className="truncate">Computer</span>
+              <span className="truncate">{t("Computer", "计算机")}</span>
             </>
           ) : (
             <>
@@ -121,16 +124,19 @@ export function ArtifactPanelHeader({
         </div>
         <div className="flex shrink-0 items-center gap-0.5">
           {!isComputer && canCopy && (
-            <HeaderButton onClick={onCopy} title="Copy">
+            <HeaderButton onClick={onCopy} title={t("Copy", "复制")}>
               <Icon icon={Copy01Icon} size={18} />
             </HeaderButton>
           )}
           {isFile && (
             <>
-              <HeaderButton onClick={onOpenFiles} title="All files">
+              <HeaderButton
+                onClick={onOpenFiles}
+                title={t("All files", "所有文件")}
+              >
                 <Icon icon={Folder01Icon} size={18} />
               </HeaderButton>
-              <HeaderButton onClick={onDownload} title="Download">
+              <HeaderButton onClick={onDownload} title={t("Download", "下载")}>
                 <Icon icon={Download01Icon} size={18} />
               </HeaderButton>
             </>
@@ -138,7 +144,11 @@ export function ArtifactPanelHeader({
           {onToggleFullscreen && (
             <HeaderButton
               onClick={onToggleFullscreen}
-              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+              title={
+                isFullscreen
+                  ? t("Exit fullscreen", "退出全屏")
+                  : t("Enter fullscreen", "进入全屏")
+              }
             >
               <Icon
                 icon={
@@ -148,7 +158,7 @@ export function ArtifactPanelHeader({
               />
             </HeaderButton>
           )}
-          <HeaderButton onClick={onClose} title="Close">
+          <HeaderButton onClick={onClose} title={t("Close", "关闭")}>
             <Icon icon={Cancel01Icon} size={18} />
           </HeaderButton>
         </div>

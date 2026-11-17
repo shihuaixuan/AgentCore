@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { usePostV1CreateNewGraph } from "@/app/api/__generated__/endpoints/graphs/graphs";
 import { Graph } from "@/app/api/__generated__/models/graph";
 import { GraphModel } from "@/app/api/__generated__/models/graphModel";
@@ -12,6 +13,7 @@ import { uploadAgentFormSchema } from "./LibraryUploadAgentDialog";
 export function useLibraryUploadAgentDialog(options?: {
   onSuccess?: () => void;
 }) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
   const [agentObject, setAgentObject] = useState<Graph | null>(null);
@@ -23,8 +25,8 @@ export function useLibraryUploadAgentDialog(options?: {
           setIsOpen(false);
           options?.onSuccess?.();
           toast({
-            title: "Success",
-            description: "Workflow uploaded successfully",
+            title: t("Success", "成功"),
+            description: t("Workflow uploaded successfully", "工作流上传成功"),
             variant: "default",
           });
           const qID = "flowID";
@@ -32,8 +34,8 @@ export function useLibraryUploadAgentDialog(options?: {
         },
         onError: () => {
           toast({
-            title: "Error",
-            description: "Error Uploading workflow",
+            title: t("Error", "错误"),
+            description: t("Error Uploading workflow", "上传工作流出错"),
             variant: "destructive",
           });
         },
@@ -105,7 +107,7 @@ export function useLibraryUploadAgentDialog(options?: {
       console.error("Error loading agent file:", error);
 
       toast({
-        title: "Invalid Workflow File",
+        title: t("Invalid Workflow File", "无效的工作流文件"),
         description:
           "Please upload a valid agent.json file that has been previously exported from the AutoGPT platform. The file must contain the required fields: name, description, nodes, and links.",
         duration: 5000,

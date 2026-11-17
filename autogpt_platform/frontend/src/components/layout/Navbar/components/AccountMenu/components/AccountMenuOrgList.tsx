@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 
 import Avatar, {
@@ -15,6 +16,7 @@ import {
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export function AccountMenuOrgList() {
+  const { t } = useTranslation();
   const { orgs, teams, activeOrg, activeTeam, switchOrg, switchTeam } =
     useOrgTeamSwitcher();
 
@@ -37,7 +39,9 @@ export function AccountMenuOrgList() {
       <span className="flex h-5 w-5 items-center justify-center">
         <Icon icon={PlusSignIcon} size={14} />
       </span>
-      <span className="flex-1 truncate text-left">Create organization</span>
+      <span className="flex-1 truncate text-left">
+        {t("Create organization", "创建组织")}
+      </span>
     </button>
   );
 
@@ -45,7 +49,7 @@ export function AccountMenuOrgList() {
     return (
       <div className="flex flex-col gap-2 p-2">
         <div className="px-2 py-1 text-body text-foreground-tertiary">
-          No organizations yet
+          {t("No organizations yet", "暂无组织")}
         </div>
         {createOrgButton}
       </div>
@@ -56,7 +60,7 @@ export function AccountMenuOrgList() {
     <div className="flex flex-col gap-2 p-2">
       <div className="flex flex-col gap-0.5">
         <span className="px-2 py-1 text-caption font-medium text-foreground-subtle uppercase">
-          Organizations
+          {t("Organizations", "组织")}
         </span>
         {orgs.map((org) => (
           <button
@@ -74,7 +78,7 @@ export function AccountMenuOrgList() {
             <span className="flex-1 truncate text-left">{org.name}</span>
             {org.isPersonal && (
               <Text variant="small-tight" as="span" tone="subtle">
-                Personal
+                {t("Personal", "个人")}
               </Text>
             )}
             {org.id === activeOrg?.id && (
@@ -90,7 +94,7 @@ export function AccountMenuOrgList() {
           <div className="border-t border-separator" />
           <div className="flex flex-col gap-0.5">
             <span className="px-2 py-1 text-caption font-medium text-foreground-subtle uppercase">
-              Teams
+              {t("Teams", "团队")}
             </span>
             {teams.map((team) => (
               <button
@@ -102,7 +106,7 @@ export function AccountMenuOrgList() {
                 <span className="flex-1 truncate text-left">{team.name}</span>
                 {team.joinPolicy === "PRIVATE" && (
                   <Text variant="small-tight" as="span" tone="subtle">
-                    Private
+                    {t("Private", "私有")}
                   </Text>
                 )}
                 {team.id === activeTeam?.id && (
@@ -115,7 +119,7 @@ export function AccountMenuOrgList() {
               className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-body text-foreground-tertiary hover:bg-surface-hover"
             >
               <Icon icon={Settings02Icon} size={14} />
-              <span>Manage teams</span>
+              <span>{t("Manage teams", "管理团队")}</span>
             </Link>
           </div>
         </>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useGetWorkspaceStorageUsage } from "@/app/api/__generated__/endpoints/workspace/workspace";
 import { Progress } from "@/components/atoms/Progress/Progress";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -8,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { formatFileSize } from "../ArtifactsList/helpers";
 
 export function StorageUsage() {
+  const { t } = useTranslation();
   const { data, isLoading, isError } = useGetWorkspaceStorageUsage({
     query: {
       select: (res) => (res.status === 200 ? res.data : null),
@@ -39,7 +41,7 @@ export function StorageUsage() {
       data-testid="storage-usage"
     >
       <Text variant="small" as="span" tone="secondary">
-        Storage
+        {t("Storage", "存储空间")}
       </Text>
       <Progress
         value={percent}

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useMemo, useState } from "react";
 import { PendingHumanReviewModel } from "@/app/api/__generated__/models/pendingHumanReviewModel";
 import type { ReviewItem } from "@/app/api/__generated__/models/reviewItem";
@@ -34,6 +37,7 @@ export function PendingReviewsList({
   onReviewComplete,
   emptyMessage = "No pending reviews",
 }: PendingReviewsListProps) {
+  const { t } = useTranslation();
   const [reviewDataMap, setReviewDataMap] = useState<Record<string, string>>(
     () => {
       const initialData: Record<string, string> = {};
@@ -123,8 +127,11 @@ export function PendingReviewsList({
 
     if (groupReviews.length === 0) {
       toast({
-        title: "No reviews to process",
-        description: "No reviews found to process.",
+        title: t("No reviews to process", "没有待处理的审核项"),
+        description: t(
+          "No reviews found to process.",
+          "没有找到可处理的审核项。",
+        ),
         variant: "destructive",
       });
       return;
@@ -150,8 +157,8 @@ export function PendingReviewsList({
             // draft only has to block an approval.
             if (approved) {
               toast({
-                title: "Invalid JSON",
-                description: `Please fix the JSON format in review for node ${review.node_exec_id}: ${error instanceof Error ? error.message : "Invalid syntax"}`,
+                title: t("Invalid JSON", "JSON 格式无效"),
+                description: `Please fix the JSON format in review for node ${review.node_exec_id}: ${error instanceof Error ? error.message : t("Invalid syntax", "语法无效")}`,
                 variant: "destructive",
               });
               setPendingAction(null);
@@ -207,19 +214,19 @@ export function PendingReviewsList({
       const succeeded = result.approved_count + result.rejected_count;
       if (failures.length > 0 && succeeded === 0) {
         toast({
-          title: "Failed to process reviews",
+          title: t("Failed to process reviews", "处理审核项失败"),
           description: [...new Set(failures)].join(" "),
           variant: "destructive",
         });
       } else if (failures.length > 0 || result.failed_count > 0) {
         toast({
-          title: "Reviews partially processed",
-          description: `${succeeded} succeeded, ${result.failed_count + failedReviews} failed. ${[...result.errors, ...new Set(failures)].join(" ") || "Some reviews could not be processed."}`,
+          title: t("Reviews partially processed", "部分审核项已处理"),
+          description: `${succeeded} succeeded, ${result.failed_count + failedReviews} failed. ${[...result.errors, ...new Set(failures)].join(" ") || t("Some reviews could not be processed.", "部分审核项未能处理。")}`,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Reviews processed successfully",
+          title: t("Reviews processed successfully", "审核项已成功处理"),
           description: `${result.approved_count} approved, ${result.rejected_count} rejected`,
           variant: "default",
         });
@@ -241,8 +248,10 @@ export function PendingReviewsList({
           {emptyMessage}
         </Text>
         <Text variant="body" tone="muted" className="mt-2 max-w-md">
-          When workflows have human-in-the-loop blocks, they will appear here
-          for your review and approval.
+          {t(
+            "When workflows have human-in-the-loop blocks, they will appear here for your review and approval.",
+            "工作流包含人工审核模块时，会在此处显示，供你审核和批准。",
+          )}
         </Text>
       </div>
     );
@@ -288,7 +297,7 @@ export function PendingReviewsList({
                 variant="large-semibold"
                 className="overflow-hidden text-ellipsis text-foreground-base"
               >
-                Your review is needed
+                {t("Your review is needed", "需要你审核")}
               </Text>
             </AttentionCard.Row>
             <Text variant="large" tone="body">
@@ -305,7 +314,9 @@ export function PendingReviewsList({
 
               const firstReview = nodeReviews[0];
               const reviewTitle =
-                firstReview?.action ?? firstReview?.instructions ?? "Review";
+                firstReview?.action ??
+                firstReview?.instructions ??
+                t("Review", "审核");
               const workflowName = firstReview?.agent_name;
 
               const getShortenedNodeId = (id: string) => {
@@ -388,7 +399,10 @@ export function PendingReviewsList({
                             }
                           />
                           <Text variant="small" tone="body">
-                            Auto-approve future executions of this node
+                            {t(
+                              "Auto-approve future executions of this node",
+                              "自动批准此节点以后的执行",
+                            )}
                           </Text>
                         </div>
                       )}
@@ -405,7 +419,7 @@ export function PendingReviewsList({
                           loading={groupAction === "approve"}
                         >
                           {reviewCount === 1
-                            ? "Approve"
+                            ? t("Approve", "批准")
                             : `Approve ${reviewCount} reviews`}
                         </Button>
                         <Button
@@ -416,7 +430,7 @@ export function PendingReviewsList({
                           loading={groupAction === "reject"}
                         >
                           {reviewCount === 1
-                            ? "Reject"
+                            ? t("Reject", "拒绝")
                             : `Reject ${reviewCount} reviews`}
                         </Button>
                       </AttentionCard.Actions>
@@ -428,8 +442,10 @@ export function PendingReviewsList({
           </div>
 
           <Text variant="small" tone="body">
-            Each decision applies only to the reviews shown above it. You can
-            turn auto-approval on or off using the toggle for each node.
+            {t(
+              "Each decision applies only to the reviews shown above it. You can turn auto-approval on or off using the toggle for each node.",
+              "每项决定仅适用于其上方显示的审核项。你可以使用各节点的开关启用或关闭自动批准。",
+            )}
           </Text>
         </AttentionCard.Root>
       )}

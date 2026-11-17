@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   getFieldDomId,
   useFieldAccessibilityContext,
@@ -24,6 +26,7 @@ import { LongNumberHint } from "@/components/contextual/LongNumberHint/LongNumbe
 import { hasLongWholeNumber } from "@/lib/json-text";
 
 export const JsonTextField = (props: FieldProps) => {
+  const { t } = useTranslation();
   const {
     formData,
     onChange,
@@ -69,7 +72,7 @@ export const JsonTextField = (props: FieldProps) => {
   });
 
   const placeholder = getPlaceholder(schema);
-  const title = schema.title || name || "JSON Value";
+  const title = schema.title || name || t("JSON Value", "JSON 值");
   const domId = getFieldDomId(fieldId, registry.formContext);
   const fieldAccessibility = useFieldAccessibilityContext(fieldId);
   const labelId = getFieldDomId(titleId(fieldId), registry.formContext);
@@ -124,12 +127,12 @@ export const JsonTextField = (props: FieldProps) => {
               onClick={handleModalOpen}
               type="button"
               withTooltip={false}
-              aria-label="Expand JSON input"
+              aria-label={t("Expand JSON input", "展开 JSON 输入框")}
             >
               <Icon icon={ArrowExpandIcon} className="size-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Expand input</TooltipContent>
+          <TooltipContent>{t("Expand input", "展开输入框")}</TooltipContent>
         </Tooltip>
       </div>
       <LongNumberHint text={textValue} id={longNumberHintId} />
@@ -153,8 +156,10 @@ export const JsonTextField = (props: FieldProps) => {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         onSave={handleModalSave}
-        title={`Edit ${title}`}
-        description={schema.description || "Enter valid JSON"}
+        title={t(`Edit ${title}`, `编辑 ${title}`)}
+        description={
+          schema.description || t("Enter valid JSON", "输入有效的 JSON")
+        }
         defaultValue={textValue}
         placeholder={placeholder}
         inputType="json"

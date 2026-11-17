@@ -1,5 +1,7 @@
 "use client";
 
+import { sectionLabel } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import Link, { useLinkStatus } from "next/link";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -48,6 +50,7 @@ function NavItemContent({
 }
 
 export function SectionNavItem({ item, isActive }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   const variants: Variants = reduceMotion
@@ -78,7 +81,7 @@ export function SectionNavItem({ item, isActive }: Props) {
         )}
       >
         <NavItemContent
-          label={item.label}
+          label={t(item.label, sectionLabel(item.label))}
           Icon={item.Icon}
           isActive={isActive}
         />

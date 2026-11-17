@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useAuth } from "@/lib/auth/hooks/useAuth";
 import { useState } from "react";
 import { AdminSection } from "../../../components/AdminSection";
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export function RelatedAccountsSection({ user }: Props) {
+  const { t } = useTranslation();
   const { report, isLoading, isForbidden, refetch } = useIPReport(user.id);
   const { user: signedInUser } = useAuth();
   const ownIP = useOwnSessionIP();
@@ -27,14 +29,14 @@ export function RelatedAccountsSection({ user }: Props) {
 
   return (
     <AdminSection
-      title="Related accounts"
-      description="Other accounts that signed in from the same addresses or use the same email domain."
+      title={t("Related accounts", "关联账户")}
+      description={t("Other accounts that signed in from the same addresses or use the same email domain.", "曾从相同地址登录或使用相同邮箱域名的其他账户。")}
     >
       {isLoading ? (
         <ReportLoading />
       ) : !report ? (
         <ReportError
-          message="Couldn't load related accounts."
+          message={t("Couldn't load related accounts.", "无法加载关联账户。")}
           isForbidden={isForbidden}
           onRetry={() => void refetch()}
         />
@@ -43,7 +45,7 @@ export function RelatedAccountsSection({ user }: Props) {
           <DomainLine report={report} signedInUserId={signedInUser?.id} />
           {report.related.length === 0 ? (
             <Text variant="small" tone="muted">
-              {getNoRelatedMessage(report)}
+              {t(...(getNoRelatedMessage(report).split("|") as [string, string]))}
             </Text>
           ) : (
             <>
@@ -62,7 +64,7 @@ export function RelatedAccountsSection({ user }: Props) {
                     size="small"
                     onClick={() => setShowAll(true)}
                   >
-                    Show {report.related.length - SHOWN_AT_FIRST} more
+                    {t("Show", "再显示")} {report.related.length - SHOWN_AT_FIRST} {t("more", "个")}
                   </Button>
                 </div>
               ) : null}

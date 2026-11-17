@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { GraphExecution } from "@/app/api/__generated__/models/graphExecution";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { Text } from "@/components/atoms/Text/Text";
@@ -18,6 +21,7 @@ type Props = {
 };
 
 export function RunDetailHeader({ agent, run, scheduleRecurrence }: Props) {
+  const { t } = useTranslation();
   const isBillingEnabled = useIsBillingEnabled();
   return (
     <div className={AGENT_LIBRARY_SECTION_PADDING_X}>
@@ -44,7 +48,7 @@ export function RunDetailHeader({ agent, run, scheduleRecurrence }: Props) {
                 <div className="inline-flex items-center gap-1 rounded-md bg-warning-surface p-1 text-yellow-foreground">
                   <Icon icon={TimeScheduleIcon} size={16} />
                   <Text variant="small-medium" tone="inherit">
-                    Scheduled
+                    {t("Scheduled", "已计划")}
                   </Text>
                 </div>
               ) : null}

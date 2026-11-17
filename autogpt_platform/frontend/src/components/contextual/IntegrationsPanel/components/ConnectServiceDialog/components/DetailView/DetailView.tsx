@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { motion, useReducedMotion } from "framer-motion";
 import { useState } from "react";
 
@@ -59,6 +61,8 @@ export function DetailView({
   onSuccess,
   preferMcp = false,
 }: Props) {
+  const { t } = useTranslation();
+
   const description = provider.description;
   const reduceMotion = useReducedMotion();
   const tabs = TAB_PRIORITY.filter((method) =>
@@ -79,7 +83,7 @@ export function DetailView({
           variant="icon"
           size="icon"
           onClick={onBack}
-          aria-label="Back to services"
+          aria-label={t("Back to services", "返回服务列表")}
           className="size-9"
           withTooltip={false}
         >
@@ -139,7 +143,7 @@ export function DetailView({
               <TabsLineList>
                 {tabs.map((method) => (
                   <TabsLineTrigger key={method} value={method}>
-                    {getAuthMethodLabel(provider, method)}
+                    {getAuthMethodLabel(provider, method, t)}
                   </TabsLineTrigger>
                 ))}
               </TabsLineList>

@@ -15,6 +15,7 @@ import {
 } from "@/components/atoms/Select/components/SelectPrimitives";
 import { SubmissionStatus } from "@/app/api/__generated__/models/submissionStatus";
 import { isKey } from "@/lib/keyboard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function SearchAndFilterAdminMarketplace({
   initialSearch,
@@ -22,6 +23,7 @@ export function SearchAndFilterAdminMarketplace({
   initialStatus?: SubmissionStatus;
   initialSearch?: string;
 }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -63,7 +65,7 @@ export function SearchAndFilterAdminMarketplace({
     <div className="flex items-center justify-between">
       <div className="flex w-full items-center gap-2">
         <BaseInput
-          placeholder="Search agents by Name, Creator, or Description..."
+          placeholder={t("Search agents by Name, Creator, or Description...", "按名称、创建者或描述搜索工作流...")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={(e) => isKey(e, "Enter") && handleSearch()}
@@ -71,7 +73,7 @@ export function SearchAndFilterAdminMarketplace({
         <Button
           variant="compact-outline"
           size="compact"
-          aria-label="Search"
+          aria-label={t("Search", "搜索")}
           onClick={handleSearch}
         >
           <Icon aria-hidden icon={Search01Icon} className="h-4 w-4" />
@@ -93,13 +95,13 @@ export function SearchAndFilterAdminMarketplace({
         }}
       >
         <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select Status" />
+          <SelectValue placeholder={t("Select Status", "选择状态")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="ALL">All</SelectItem>
-          <SelectItem value={SubmissionStatus.PENDING}>Pending</SelectItem>
-          <SelectItem value={SubmissionStatus.APPROVED}>Approved</SelectItem>
-          <SelectItem value={SubmissionStatus.REJECTED}>Rejected</SelectItem>
+          <SelectItem value="ALL">{t("All", "全部")}</SelectItem>
+          <SelectItem value={SubmissionStatus.PENDING}>{t("Pending", "待处理")}</SelectItem>
+          <SelectItem value={SubmissionStatus.APPROVED}>{t("Approved", "已通过")}</SelectItem>
+          <SelectItem value={SubmissionStatus.REJECTED}>{t("Rejected", "已拒绝")}</SelectItem>
         </SelectContent>
       </Select>
     </div>

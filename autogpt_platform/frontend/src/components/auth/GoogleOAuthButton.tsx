@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import Image from "next/image";
 import { Button } from "../atoms/Button/Button";
 
@@ -12,6 +15,7 @@ export function GoogleOAuthButton({
   isLoading,
   disabled,
 }: GoogleOAuthButtonProps) {
+  const { t } = useTranslation();
   return (
     <Button
       type="button"
@@ -22,7 +26,9 @@ export function GoogleOAuthButton({
       loading={isLoading}
     >
       <Image src="/google-logo.svg" alt="" width={20} height={20} />
-      {isLoading ? "Connecting…" : "Continue with Google"}
+      {isLoading
+        ? t("Connecting…", "正在连接…")
+        : t("Continue with Google", "使用 Google 继续")}
     </Button>
   );
 }

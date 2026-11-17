@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
 import { Select } from "@/components/atoms/Select/Select";
@@ -44,6 +45,25 @@ export const libraryFolderCreationFormSchema = z.object({
 });
 
 export default function LibraryFolderCreationDialog() {
+  const { t } = useTranslation();
+  const localizedSchema = z.object({
+    folderName: z
+      .string()
+      .min(1, t("Folder name is required", "请输入文件夹名称"))
+      .max(
+        100,
+        t(
+          "Folder name must be 100 characters or less",
+          "文件夹名称不能超过 100 个字符",
+        ),
+      ),
+    folderColor: z
+      .string()
+      .min(1, t("Folder color is required", "请选择文件夹颜色")),
+    folderIcon: z
+      .string()
+      .min(1, t("Folder icon is required", "请选择文件夹图标")),
+  });
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -57,14 +77,20 @@ export default function LibraryFolderCreationDialog() {
         setIsOpen(false);
         form.reset();
         toast({
-          title: "Folder created",
-          description: "Your folder has been created successfully.",
+          title: t("Folder created", "文件夹已创建"),
+          description: t(
+            "Your folder has been created successfully.",
+            "文件夹已成功创建。",
+          ),
         });
       },
       onError: () => {
         toast({
-          title: "Error",
-          description: "Failed to create folder. Please try again.",
+          title: t("Error", "错误"),
+          description: t(
+            "Failed to create folder. Please try again.",
+            "创建文件夹失败，请重试。",
+          ),
           variant: "destructive",
         });
       },
@@ -72,7 +98,7 @@ export default function LibraryFolderCreationDialog() {
   });
 
   const form = useForm<z.infer<typeof libraryFolderCreationFormSchema>>({
-    resolver: zodResolver(libraryFolderCreationFormSchema),
+    resolver: zodResolver(localizedSchema),
     defaultValues: {
       folderName: "",
       folderColor: "",
@@ -92,7 +118,7 @@ export default function LibraryFolderCreationDialog() {
 
   return (
     <Dialog
-      title="Create Folder"
+      title={t("Create Folder", "创建文件夹")}
       styling={{ maxWidth: "30rem" }}
       controlled={{
         isOpen,
@@ -110,7 +136,7 @@ export default function LibraryFolderCreationDialog() {
           size="small"
         >
           <Icon icon={Folder01Icon} width={18} height={18} />
-          <span>Create folder</span>
+          <span>{t("Create folder", "创建文件夹")}</span>
         </Button>
       </Dialog.Trigger>
       <Dialog.Content>
@@ -129,8 +155,8 @@ export default function LibraryFolderCreationDialog() {
                   <Input
                     {...field}
                     id={field.name}
-                    label="Folder name"
-                    placeholder="Enter folder name"
+                    label={t("Folder name", "文件夹名称")}
+                    placeholder={t("Enter folder name", "输入文件夹名称")}
                     className="!mb-0 w-full"
                     wrapperClassName="!mb-0"
                   />
@@ -148,13 +174,24 @@ export default function LibraryFolderCreationDialog() {
                 <FormControl>
                   <Select
                     id="folderColor"
-                    label="Folder color"
-                    placeholder="Select a color"
+                    label={t("Folder color", "文件夹颜色")}
+                    placeholder={t("Select a color", "选择颜色")}
                     value={field.value}
                     onValueChange={field.onChange}
                     options={FOLDER_COLORS.map((color) => ({
                       value: color.value,
-                      label: color.label,
+                      label: t(
+                        color.label,
+                        (
+                          {
+                            Blue: "蓝色",
+                            Purple: "紫色",
+                            Green: "绿色",
+                            Orange: "橙色",
+                            Pink: "粉色",
+                          } as Record<string, string>
+                        )[color.label] ?? color.label,
+                      ),
                       icon: (
                         <div
                           className="h-4 w-4 rounded-full"
@@ -184,12 +221,12 @@ export default function LibraryFolderCreationDialog() {
               <FormItem>
                 <div className="flex flex-col gap-2">
                   <Text variant="large-medium" as="span">
-                    Folder icon
+                    {t("Folder icon", "文件夹图标")}
                   </Text>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-3">
                       <Text variant="small" tone="muted">
-                        Selected:
+                        {t("Selected:", "已选择：")}
                       </Text>
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border-base bg-surface-muted text-heading-md">
                         {form.watch("folderIcon") || (
@@ -220,7 +257,7 @@ export default function LibraryFolderCreationDialog() {
             disabled={!form.formState.isValid || isPending}
             loading={isPending}
           >
-            Create
+            {t("Create", "创建")}
           </Button>
         </Form>
       </Dialog.Content>

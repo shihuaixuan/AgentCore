@@ -1,4 +1,8 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 export function WebhookTriggerBanner() {
+  const { t } = useTranslation();
   return (
     <div className="mb-4 rounded-lg border border-info/30 bg-info-surface p-4">
       <div className="flex items-start">
@@ -17,12 +21,14 @@ export function WebhookTriggerBanner() {
         </div>
         <div className="ml-3">
           <h3 className="text-body font-medium text-info-foreground">
-            Webhook Trigger
+            {t("Webhook Trigger", "Webhook 触发器")}
           </h3>
           <div className="mt-2 text-body text-info-foreground">
             <p>
-              This will create a webhook endpoint that automatically runs your
-              workflow when triggered by external events.
+              {t(
+                "This will create a webhook endpoint that automatically runs your workflow when triggered by external events.",
+                "这将创建一个 Webhook 端点，在外部事件触发时自动运行你的工作流。",
+              )}
             </p>
           </div>
         </div>

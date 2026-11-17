@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { GraphExecution } from "@/app/api/__generated__/models/graphExecution";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function CreateTemplateModal({ isOpen, onClose, onCreate }: Props) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -41,7 +43,7 @@ export function CreateTemplateModal({ isOpen, onClose, onCreate }: Props) {
 
   return (
     <Dialog
-      title="Create Template"
+      title={t("Create Template", "创建模板")}
       controlled={{ isOpen, set: () => onClose() }}
       styling={{ maxWidth: "500px" }}
     >
@@ -49,16 +51,18 @@ export function CreateTemplateModal({ isOpen, onClose, onCreate }: Props) {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <Text variant="body" tone="secondary">
-              Save this task as a template to reuse later with the same inputs
-              and credentials.
+              {t(
+                "Save this task as a template to reuse later with the same inputs and credentials.",
+                "将此任务保存为模板，以后可复用相同的输入和凭据。",
+              )}
             </Text>
           </div>
 
           <div className="flex w-[96%] flex-col gap-4 pl-1">
             <Input
               id="template-name"
-              label="Name"
-              placeholder="Enter template name"
+              label={t("Name", "名称")}
+              placeholder={t("Enter template name", "输入模板名称")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
@@ -66,8 +70,8 @@ export function CreateTemplateModal({ isOpen, onClose, onCreate }: Props) {
             <Input
               type="textarea"
               id="template-description"
-              label="Description"
-              placeholder="Optional description"
+              label={t("Description", "描述")}
+              placeholder={t("Optional description", "可选描述")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -78,7 +82,7 @@ export function CreateTemplateModal({ isOpen, onClose, onCreate }: Props) {
         <Dialog.Footer className="mt-6">
           <div className="flex justify-end gap-3">
             <Button variant="secondary" onClick={handleCancel}>
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               variant="primary"
@@ -86,7 +90,7 @@ export function CreateTemplateModal({ isOpen, onClose, onCreate }: Props) {
               disabled={!name.trim() || isCreating}
               loading={isCreating}
             >
-              Create Template
+              {t("Create Template", "创建模板")}
             </Button>
           </div>
         </Dialog.Footer>

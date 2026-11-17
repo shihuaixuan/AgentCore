@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   useGetV2GetLibraryAgent,
   useGetV2ListTriggerAgents,
@@ -36,6 +37,7 @@ function parseTab(
 }
 
 export function useNewAgentLibraryView() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const agentId = id as string;
 
@@ -126,9 +128,9 @@ export function useNewAgentLibraryView() {
 
   useEffect(() => {
     if (agent) {
-      document.title = `${agent.name} - Library - AutoGPT Platform`;
+      document.title = `${agent.name} - ${t("Library", "工作流库")} - AutoGPT Platform`;
     }
-  }, [agent]);
+  }, [agent, t]);
 
   // Leave the Triggers tab when it becomes empty — but never while an item
   // is still selected: a stale selection must keep its detail pane (showing

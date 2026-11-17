@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import Link from "next/link";
 import { useState } from "react";
 import type { PendingHumanReviewModel } from "@/app/api/__generated__/models/pendingHumanReviewModel";
@@ -21,6 +24,7 @@ export function NeedsAttentionRow({
   onApprove,
   onDecline,
 }: Props) {
+  const { t } = useTranslation();
   // Decline rejects the agent's action outright, with no undo, in a flow
   // built for fast tapping — so it takes a second, deliberate tap.
   const [isConfirmingDecline, setIsConfirmingDecline] = useState(false);
@@ -77,7 +81,7 @@ export function NeedsAttentionRow({
             aria-label={`Approve: ${title}`}
             onClick={() => onApprove(review)}
           >
-            Approve
+            {t("Approve", "批准")}
           </Button>
           <Button
             // The armed state carries the destructive colour as well as the
@@ -94,7 +98,7 @@ export function NeedsAttentionRow({
             onClick={handleDecline}
             onBlur={() => setIsConfirmingDecline(false)}
           >
-            {isConfirmingDecline ? "Confirm" : "Decline"}
+            {isConfirmingDecline ? t("Confirm", "确认") : t("Decline", "拒绝")}
           </Button>
         </AttentionCard.Actions>
         <span

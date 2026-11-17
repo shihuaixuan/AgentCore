@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -32,6 +33,7 @@ export function ExpertSkillsSection({
   initialSkill = null,
   initialVersionId = null,
 }: Props) {
+  const { t } = useTranslation();
   const {
     query,
     setQuery,
@@ -59,7 +61,7 @@ export function ExpertSkillsSection({
     <section>
       <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
         <Text variant="large-medium" tone="primary">
-          {expert.name}&apos;s Skills
+          {t(`${expert.name}'s Skills`, `${expert.name} 的技能`)}
         </Text>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <Button
@@ -69,12 +71,12 @@ export function ExpertSkillsSection({
             leadingIcon={PlusSignIcon}
             onClick={openAdd}
           >
-            Add skill
+            {t("Add skill", "添加技能")}
           </Button>
           <ToolbarSearch
             textSize="body-md"
             id="expert-skills-search"
-            label="Search skills"
+            label={t("Search skills", "搜索技能")}
             value={query}
             onChange={setQuery}
           />
@@ -88,7 +90,10 @@ export function ExpertSkillsSection({
           <Text variant="small" tone="secondary">
             {learning.recentChange
               ? `${learning.recentChange.summary} · ${learning.recentChange.origin_label ?? ""} · ${learning.recentChange.state_label}`
-              : "No overnight changes yet. Verified procedures from chats are reviewed nightly."}
+              : t(
+                  "No overnight changes yet. Verified procedures from chats are reviewed nightly.",
+                  "暂无夜间更新。系统每晚会审核聊天中已验证的操作流程。",
+                )}
           </Text>
           <label className="flex shrink-0 items-center gap-2 whitespace-nowrap">
             <Text variant="small" tone="primary">
@@ -118,7 +123,7 @@ export function ExpertSkillsSection({
               <Icon icon={SparklesIcon} size={22} />
             </span>,
           ]}
-          title="No skills yet"
+          title={t("No skills yet", "暂无技能")}
           description={`Add skills from your library so ${expert.name} knows how you like things done.`}
         >
           <Button
@@ -128,17 +133,17 @@ export function ExpertSkillsSection({
             leadingIcon={PlusSignIcon}
             onClick={openAdd}
           >
-            Add skill
+            {t("Add skill", "添加技能")}
           </Button>
         </SectionEmptyState>
       ) : visible.length === 0 ? (
         <Text variant="body-md" tone="muted" className="mt-4">
-          No skills match.
+          {t("No skills match.", "没有匹配的技能。")}
         </Text>
       ) : (
         <ul
           className="grid grid-cols-1 gap-3 pt-4 md:grid-cols-2"
-          aria-label="Expert skills"
+          aria-label={t("Expert skills", "专家技能")}
         >
           {visible.map((entry) => (
             <li key={entry.name}>

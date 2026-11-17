@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 import React from "react";
 import { BaseInput } from "@/components/atoms/Input/BaseInput";
@@ -19,6 +20,7 @@ export const GraphMenuSearchBar: React.FC<GraphMenuSearchBarProps> = ({
   onSearchChange,
   onKeyDown,
 }) => {
+  const { t } = useTranslation();
   const { inputRef, handleClear } = useGraphMenuSearchBarComponent({
     onSearchChange,
   });
@@ -44,7 +46,10 @@ export const GraphMenuSearchBar: React.FC<GraphMenuSearchBarProps> = ({
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
         onKeyDown={onKeyDown}
-        placeholder={"Search this workflow for blocks, inputs, outputs..."}
+        placeholder={t(
+          "Search this workflow for blocks, inputs, outputs...",
+          "搜索此工作流中的模块、输入和输出…",
+        )}
         className={cn(
           "m-0 border-none p-0 font-sans text-body-lg leading-6 font-normal text-foreground-emphasis shadow-none outline-none",
           "placeholder:text-foreground-subtle focus:shadow-none focus:ring-0 focus:outline-none",
@@ -55,7 +60,7 @@ export const GraphMenuSearchBar: React.FC<GraphMenuSearchBarProps> = ({
         <Button
           variant="ghost"
           size="icon-xs"
-          aria-label="Clear search"
+          aria-label={t("Clear search", "清除搜索")}
           withTooltip={false}
           onClick={handleClear}
         >

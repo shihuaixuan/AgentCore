@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { TrialCardContent } from "@/components/organisms/TrialCard/TrialCard";
@@ -69,6 +71,7 @@ function PaywallPlanStep() {
 }
 
 function PlanOnlyStep() {
+  const { t } = useTranslation();
   const { plan, progress, isPending } = usePlan();
   const nextStep = useOnboardingWizardStore((s) => s.nextStep);
   return (
@@ -87,7 +90,7 @@ function PlanOnlyStep() {
             textSize="body-md"
             className="mt-1 h-12 w-full"
           >
-            Continue
+            {t("Continue", "继续")}
           </Button>
         }
       />

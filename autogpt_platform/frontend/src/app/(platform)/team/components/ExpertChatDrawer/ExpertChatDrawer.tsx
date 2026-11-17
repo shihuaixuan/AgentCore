@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getExpertRoleLabel } from "@/services/experts/expert-role-label";
 
 import { ChatInput } from "@/app/(platform)/copilot/components/ChatInput/ChatInput";
@@ -34,6 +35,7 @@ export function ExpertChatDrawer({
   threadKey = 0,
   seedPrompt = null,
 }: Props) {
+  const { t } = useTranslation();
   const chat = useExpertChatDrawer({
     target,
     isOpen: target !== null,
@@ -59,7 +61,9 @@ export function ExpertChatDrawer({
     <ExpertSidePanel
       identity={identity}
       title={target?.name ?? ""}
-      ariaLabel={target ? `Chat with ${target.name}` : ""}
+      ariaLabel={
+        target ? t(`Chat with ${target.name}`, `与 ${target.name} 聊天`) : ""
+      }
       panelId="chat"
       closeLabel="Close chat panel"
       showIdentity={!!chat.sessionId}
@@ -70,7 +74,7 @@ export function ExpertChatDrawer({
             variant="ghost"
             size="icon-xs"
             leadingIcon={NoteEditIcon}
-            aria-label="New task"
+            aria-label={t("New task", "新建任务")}
             disabled={!chat.sessionId}
             onClick={chat.startNewThread}
           />
@@ -80,7 +84,7 @@ export function ExpertChatDrawer({
             variant="ghost"
             size="icon-xs"
             leadingIcon={ArrowExpandIcon}
-            aria-label="Open in Chat"
+            aria-label={t("Open in Chat", "在聊天中打开")}
           />
         </>
       }
@@ -106,6 +110,7 @@ interface BodyProps {
 }
 
 function ChatPanelBody({ target, identity, chat }: BodyProps) {
+  const { t } = useTranslation();
   const {
     sessionId,
     messages,
@@ -128,7 +133,7 @@ function ChatPanelBody({ target, identity, chat }: BodyProps) {
         {isResolvingSession ? (
           <div className="flex flex-1 items-center justify-center px-4 py-6">
             <Text variant="small" tone="muted">
-              Opening chat…
+              {t("Opening chat…", "正在打开聊天…")}
             </Text>
           </div>
         ) : sessionId || pendingSend ? (
@@ -155,7 +160,7 @@ function ChatPanelBody({ target, identity, chat }: BodyProps) {
             />
             <div className="space-y-0.5">
               <Text variant="body-medium" tone="primary">
-                What can I do for you?
+                {t("What can I do for you?", "有什么可以帮你？")}
               </Text>
               <Text variant="small" tone="muted">
                 {target.name} · {getExpertRoleLabel(target.role)}
@@ -175,7 +180,10 @@ function ChatPanelBody({ target, identity, chat }: BodyProps) {
             onStop={stop}
             onEnqueue={onSend}
             canAttachWhileStreaming
-            placeholder={`Message ${target.name}…`}
+            placeholder={t(
+              `Message ${target.name}…`,
+              `给 ${target.name} 发消息…`,
+            )}
             hasSession={!!sessionId}
             expertId={target.expertId}
             expertName={target.name}

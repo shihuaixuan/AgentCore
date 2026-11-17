@@ -6,6 +6,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Search01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { isKey } from "@/lib/keyboard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export interface AdminUserSearchProps {
   /** Current search query value (controlled). Falls back to internal state if omitted. */
@@ -32,7 +33,10 @@ export function AdminUserSearch({
   placeholder = "Search users by Name or Email...",
   isLoading = false,
 }: AdminUserSearchProps) {
+  const { t } = useTranslation();
   const [internalValue, setInternalValue] = useState("");
+  const inputPlaceholder =
+    placeholder ?? t("Search users by Name or Email...", "按姓名或邮箱搜索用户...");
 
   const isControlled = controlledValue !== undefined;
   const currentValue = isControlled ? controlledValue : internalValue;
@@ -52,8 +56,8 @@ export function AdminUserSearch({
   return (
     <div className="flex w-full items-center gap-2">
       <BaseInput
-        placeholder={placeholder}
-        aria-label={placeholder}
+        placeholder={inputPlaceholder}
+        aria-label={inputPlaceholder}
         value={currentValue}
         onChange={(e) => handleChange(e.target.value)}
         onKeyDown={(e) => isKey(e, "Enter") && handleSearch()}
@@ -66,7 +70,7 @@ export function AdminUserSearch({
         disabled={isLoading || !currentValue.trim()}
         loading={isLoading}
       >
-        {isLoading ? "Searching..." : <Icon icon={Search01Icon} size={16} />}
+        {isLoading ? t("Searching...", "搜索中...") : <Icon icon={Search01Icon} size={16} />}
       </Button>
     </div>
   );

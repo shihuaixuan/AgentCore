@@ -2,11 +2,14 @@ import type { CopilotTurnJobInfo } from "@/app/api/__generated__/models/copilotT
 
 const MESSAGE_PREVIEW_MAX_LEN = 140;
 
-export function describeFollowup(followup: CopilotTurnJobInfo) {
+export function describeFollowup(
+  followup: CopilotTurnJobInfo,
+  t: (english: string, chinese: string) => string = (english) => english,
+) {
   const message = (followup.message ?? "").trim();
   const messagePreview =
     message.length === 0
-      ? "(no message)"
+      ? t("(no message)", "（无消息）")
       : message.length > MESSAGE_PREVIEW_MAX_LEN
         ? `${message.slice(0, MESSAGE_PREVIEW_MAX_LEN).trimEnd()}…`
         : message;
@@ -25,6 +28,7 @@ export function describeFollowup(followup: CopilotTurnJobInfo) {
 export function formatNextRunTitle(
   nextRunIso: string | null | undefined,
   scheduleTimezone: string | null | undefined,
+  t: (english: string, chinese: string) => string = (english) => english,
 ): string | undefined {
   if (!nextRunIso) return undefined;
   const date = new Date(nextRunIso);
@@ -46,8 +50,14 @@ export function formatNextRunTitle(
       minute: "2-digit",
       timeZoneName: "short",
     }).format(date);
-    return `Next run: ${formatted} (${tz})`;
+    return t(
+      `Next run: ${formatted} (${tz})`,
+      `下次运行：${formatted}（${tz}）`,
+    );
   } catch {
-    return `Next run: ${date.toISOString()} (UTC)`;
+    return t(
+      `Next run: ${date.toISOString()} (UTC)`,
+      `下次运行：${date.toISOString()}（UTC）`,
+    );
   }
 }

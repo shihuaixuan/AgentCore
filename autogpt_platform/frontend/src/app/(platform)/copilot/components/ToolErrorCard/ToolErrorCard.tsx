@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { AlertDiamondIcon } from "@hugeicons/core-free-icons";
@@ -24,6 +26,7 @@ export function ToolErrorCard({
   details,
   actions,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-3 rounded-lg bg-error-surface p-4">
       <div className="flex items-start gap-2">
@@ -40,7 +43,7 @@ export function ToolErrorCard({
           {(error || details) && (
             <details className="text-caption text-error-foreground">
               <summary className="cursor-pointer font-medium">
-                Technical details
+                {t("Technical details", "技术详情")}
               </summary>
               {error && (
                 <pre className="mt-2 max-h-40 overflow-auto rounded bg-error-surface p-2 break-words whitespace-pre-wrap">

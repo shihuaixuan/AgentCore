@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { CredentialsMetaInput } from "@/app/api/__generated__/models/credentialsMetaInput";
 import { CredentialsType } from "@/lib/autogpt-server-api/types";
 import {
@@ -36,6 +39,8 @@ export function CredentialsSelect({
   allowNone = true,
   variant = "default",
 }: Props) {
+  const { t } = useTranslation();
+
   function handleValueChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const value = e.target.value;
     if (value === "__none__") {
@@ -60,13 +65,13 @@ export function CredentialsSelect({
     : allowNone
       ? {
           id: "__none__",
-          title: "None (skip this credential)",
+          title: t("None (skip this credential)", "无（跳过此凭据）"),
           type: "none",
           provider: provider,
         }
       : {
           id: "__placeholder__",
-          title: "Select credential",
+          title: t("Select credential", "选择凭据"),
           type: "placeholder",
           provider: provider,
         };
@@ -82,16 +87,18 @@ export function CredentialsSelect({
           aria-label={`Select ${displayName} credential`}
         >
           {allowNone ? (
-            <option value="__none__">None (skip this credential)</option>
+            <option value="__none__">
+              {t("None (skip this credential)", "无（跳过此凭据）")}
+            </option>
           ) : (
             <option value="__none__" disabled hidden>
-              Select a credential
+              {t("Select a credential", "选择凭据")}
             </option>
           )}
           {credentials.map((credential) => (
             <option key={credential.id} value={credential.id}>
-              {getCredentialDisplayName(credential, displayName)} (
-              {getCredentialTypeLabel(credential.type as CredentialsType)})
+              {getCredentialDisplayName(credential, displayName, t)} (
+              {getCredentialTypeLabel(credential.type as CredentialsType, t)})
             </option>
           ))}
         </select>

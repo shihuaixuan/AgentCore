@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { InformationTooltip } from "@/components/molecules/InformationTooltip/InformationTooltip";
@@ -106,6 +109,8 @@ export function CredentialsFlatView({
   onAddCredential,
   onDeleteCredential,
 }: Props) {
+  const { t } = useTranslation();
+
   const hasCredentials = credentials.length > 0;
   // Ayrshare has no user-settable credential — provisioning runs on the
   // server after the user clicks the Connect Social Media Accounts
@@ -121,16 +126,16 @@ export function CredentialsFlatView({
         <div className="mb-2 flex items-center gap-2">
           <Text variant="small" className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 text-foreground-secondary">
-              {displayName} credentials
+              {displayName} {t("credentials", "凭据")}
               {isOptional && (
                 <span className="font-normal text-foreground-tertiary">
-                  (optional)
+                  {t("(optional)", "（可选）")}
                 </span>
               )}
               {!isOptional && !selectedCredential && (
                 <span className="inline-flex items-center gap-1 text-error-foreground">
                   <Icon aria-hidden icon={Alert02Icon} className="size-3.5" />
-                  <span className="font-normal">required</span>
+                  <span className="font-normal">{t("required", "必填")}</span>
                 </span>
               )}
             </span>

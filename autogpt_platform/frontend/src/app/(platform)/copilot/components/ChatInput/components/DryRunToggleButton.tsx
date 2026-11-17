@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import {
   Tooltip,
   TooltipContent,
@@ -20,10 +22,19 @@ interface Props {
 }
 
 export function DryRunToggleButton({ isDryRun, onToggle }: Props) {
+  const { t } = useTranslation();
   const tooltip = isDryRun
-    ? "Test mode on — new sessions run without performing real actions (click to turn off)."
-    : "Turn on test mode to try prompts without performing real actions.";
-  const ariaLabel = isDryRun ? "Test mode active" : "Enable Test mode";
+    ? t(
+        "Test mode on — new sessions run without performing real actions (click to turn off).",
+        "测试模式已开启：新对话不会执行实际操作（点击关闭）。",
+      )
+    : t(
+        "Turn on test mode to try prompts without performing real actions.",
+        "开启测试模式，尝试提示词而不执行实际操作。",
+      );
+  const ariaLabel = isDryRun
+    ? t("Test mode active", "测试模式已开启")
+    : t("Enable Test mode", "开启测试模式");
 
   return (
     <Tooltip inheritDelay>

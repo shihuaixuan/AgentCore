@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Text } from "@/components/atoms/Text/Text";
@@ -23,6 +24,7 @@ export function TrialCardContent({
   returnTo = "billing",
   controller,
 }: Props & { controller: ReturnType<typeof useTrialCard> }) {
+  const { t } = useTranslation();
   const {
     userID,
     trial,
@@ -53,7 +55,9 @@ export function TrialCardContent({
       />
     );
   if (queryError)
-    return <ErrorCard context="trial information" onRetry={retry} />;
+    return (
+      <ErrorCard context={t("trial information", "试用信息")} onRetry={retry} />
+    );
   if (
     !trial?.offer ||
     trial.converted ||
@@ -101,13 +105,15 @@ export function TrialCardContent({
   if (isBilling)
     return (
       <section
-        aria-label="AutoGPT trial"
+        aria-label={t("AutoGPT trial", "AutoGPT 试用")}
         data-slot="trial-card-content"
         className="flex w-full flex-col gap-2 py-4"
       >
         <div data-slot="trial-card-content-heading" className="sr-only">
           <Text variant="body-medium" as="span">
-            {trial.eligible ? "Free trial" : "Your plan"}
+            {trial.eligible
+              ? t("Free trial", "免费试用")
+              : t("Your plan", "你的套餐")}
           </Text>
         </div>
         <div data-slot="trial-card-content-body" className="w-full">
@@ -122,7 +128,10 @@ export function TrialCardContent({
       density="roomy"
       className="w-full"
     >
-      <section aria-label="AutoGPT trial" data-slot="trial-card-content">
+      <section
+        aria-label={t("AutoGPT trial", "AutoGPT 试用")}
+        data-slot="trial-card-content"
+      >
         {body}
       </section>
     </AttentionCard.Root>

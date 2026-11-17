@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -51,6 +52,7 @@ export function SidebarRunsList({
   onTabChange,
   onCountsChange,
 }: Props) {
+  const { t } = useTranslation();
   // Stable, so the memoised run rows and the auto-select effects in
   // useSidebarRunsList do not re-run on every parent render.
   const selectRun = useStableCallback(onSelectRun);
@@ -125,20 +127,21 @@ export function SidebarRunsList({
             className="min-w-max px-4"
           >
             <TabsLineTrigger value="runs">
-              Tasks <span className="ml-3 inline-block">{runsCount}</span>
+              {t("Tasks", "任务")}{" "}
+              <span className="ml-3 inline-block">{runsCount}</span>
             </TabsLineTrigger>
             <TabsLineTrigger value="scheduled">
-              Scheduled{" "}
+              {t("Scheduled", "已计划")}{" "}
               <span className="ml-3 inline-block">{schedulesCount}</span>
             </TabsLineTrigger>
             {triggersCount > 0 && (
               <TabsLineTrigger value="triggers">
-                Triggers{" "}
+                {t("Triggers", "触发器")}{" "}
                 <span className="ml-3 inline-block">{triggersCount}</span>
               </TabsLineTrigger>
             )}
             <TabsLineTrigger value="templates">
-              Templates{" "}
+              {t("Templates", "模板")}{" "}
               <span className="ml-3 inline-block">{templatesCount}</span>
             </TabsLineTrigger>
           </TabsLineList>
@@ -190,7 +193,7 @@ export function SidebarRunsList({
             ) : (
               <div className="flex min-h-[50vh] flex-col items-center justify-center">
                 <Text variant="large" tone="body">
-                  No scheduled workflows
+                  {t("No scheduled workflows", "暂无计划运行的工作流")}
                 </Text>
               </div>
             )}
@@ -205,7 +208,7 @@ export function SidebarRunsList({
               {triggers.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <Text variant="body-medium" tone="muted" className="mx-1">
-                    Webhook Triggers
+                    {t("Webhook Triggers", "Webhook 触发器")}
                   </Text>
                   <div className="flex flex-nowrap items-center justify-start gap-4 lg:flex-col lg:gap-3">
                     {triggers.map((trigger) => (
@@ -229,7 +232,7 @@ export function SidebarRunsList({
               {triggerAgents.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <Text variant="body-medium" tone="muted" className="mx-1">
-                    Trigger Workflows
+                    {t("Trigger Workflows", "触发工作流")}
                   </Text>
                   <div className="flex flex-nowrap items-center justify-start gap-4 lg:flex-col lg:gap-3">
                     {triggerAgents.map((triggerAgent) => (
@@ -259,7 +262,7 @@ export function SidebarRunsList({
               {triggers.length === 0 && triggerAgents.length === 0 && (
                 <div className="flex min-h-[50vh] flex-col items-center justify-center gap-2 px-6 text-center">
                   <Text variant="large" tone="body">
-                    No triggers set up
+                    {t("No triggers set up", "尚未设置触发器")}
                   </Text>
                   <Text variant="body" tone="muted">
                     Ask an expert to set up a trigger for this workflow (e.g.
@@ -289,7 +292,7 @@ export function SidebarRunsList({
             ) : (
               <div className="flex min-h-[50vh] flex-col items-center justify-center">
                 <Text variant="large" tone="body">
-                  No templates saved
+                  {t("No templates saved", "尚未保存模板")}
                 </Text>
               </div>
             )}

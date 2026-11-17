@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { getGetHomeDashboardQueryKey } from "@/app/api/__generated__/endpoints/home/home";
@@ -7,6 +8,7 @@ import { useProcessReviews } from "@/hooks/useProcessReviews";
 import { trackFunnel } from "@/services/experts/experts-analytics";
 
 export function useAttentionDecisions() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { processReviews } = useProcessReviews();
   const { toast } = useToast();
@@ -43,7 +45,7 @@ export function useAttentionDecisions() {
         kind: item.kind,
         action: approved ? "approve" : "decline",
       });
-      toast({ title: approved ? "Approved" : "Declined" });
+      toast({ title: approved ? t("Approved", "已批准") : "Declined" });
       await queryClient.invalidateQueries({
         queryKey: getGetHomeDashboardQueryKey(),
       });

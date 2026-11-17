@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AttentionRowActions } from "@/app/(platform)/home/components/NeedsYou/components/AttentionRowActions";
 import { HeldPassageQuote } from "@/app/(platform)/home/components/NeedsYou/components/HeldPassageQuote";
 import { attentionReason } from "@/app/(platform)/copilot/components/ApprovalQueue/helpers";
@@ -34,6 +35,7 @@ const ICONS: Record<HomeAttentionItem["kind"], IconSvgElement> = {
 /** Compact card version of the home page's AttentionRow, styled like the
  *  chat sidebar's mini cards. */
 export function ExpertAttentionCard({ item, isProcessing, onDecision }: Props) {
+  const { t } = useTranslation();
   const [confirmDecline, setConfirmDecline] = useState(false);
   const reason = attentionReason(item.review);
 
@@ -74,7 +76,7 @@ export function ExpertAttentionCard({ item, isProcessing, onDecision }: Props) {
             </Text>
             {item.priority === "high" ? (
               <span className="rounded bg-warning-surface px-1.5 py-px font-sans text-caption font-medium text-warning-foreground ring-1 ring-warning-foreground/10 ring-inset">
-                Waiting
+                {t("Waiting", "等待中")}
               </span>
             ) : null}
           </div>

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import {
   expertPastel,
@@ -68,6 +71,7 @@ export function ExpertHeroBand({ expert }: BandProps) {
 /** The portrait breaking out of the band, the name with its glowing title,
  *  the tagline and what comes with the hire, on the page's left edge. */
 export function ExpertHeroIdentity({ expert, stats }: IdentityProps) {
+  const { t } = useTranslation();
   const area = expert.categories?.[0];
   const topic = getTopic(expert);
 
@@ -104,7 +108,7 @@ export function ExpertHeroIdentity({ expert, stats }: IdentityProps) {
         {stats.length > 0 ? (
           <ul
             className="mt-5 flex flex-wrap gap-2"
-            aria-label="What comes with this expert"
+            aria-label={t("What comes with this expert", "这位专家提供的能力")}
           >
             {stats.map((stat) => (
               <li key={stat} className={GLOSSY_STAT}>

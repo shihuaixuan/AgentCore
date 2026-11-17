@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetMyBusinessUnderstandingQueryKey,
   useForgetMyBusinessUnderstanding,
@@ -9,6 +10,7 @@ import { useState } from "react";
 import { getUnderstandingRows } from "./helpers";
 
 export function useUnderstandingCard() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
@@ -24,12 +26,12 @@ export function useUnderstandingCard() {
         queryClient.invalidateQueries({
           queryKey: getGetMyBusinessUnderstandingQueryKey(),
         });
-        toast({ title: "Forgotten" });
+        toast({ title: t("Forgotten", "已忘记") });
       },
       onError() {
         toast({
-          title: "Could not forget this",
-          description: "Please try again.",
+          title: t("Could not forget this", "无法忘记此项"),
+          description: t("Please try again.", "请重试。"),
           variant: "destructive",
         });
       },

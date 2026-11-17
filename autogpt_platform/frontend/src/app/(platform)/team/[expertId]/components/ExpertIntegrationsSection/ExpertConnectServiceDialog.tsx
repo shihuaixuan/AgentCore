@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { ConnectProviderRow } from "@/app/(platform)/copilot/components/ConnectToolsDialog/ConnectProviderRow";
 import { Button } from "@/components/atoms/Button/Button";
@@ -55,6 +56,7 @@ export function ExpertConnectServiceDialog({
   onClose,
   onConnected,
 }: Props) {
+  const { t } = useTranslation();
   const {
     query,
     setQuery,
@@ -148,8 +150,8 @@ export function ExpertConnectServiceDialog({
                         Connect a service for {expertName}
                       </Text>
                       <Text variant="small" tone="muted">
-                        Pick a service to connect. {expertName} will be able to
-                        use it on your behalf.
+                        {t("Pick a service to connect.", "选择要连接的服务。")}{" "}
+                        {expertName} will be able to use it on your behalf.
                       </Text>
                     </div>
                     {isLoading ? (
@@ -173,12 +175,12 @@ export function ExpertConnectServiceDialog({
                           size="small"
                           value={query}
                           onChange={setQuery}
-                          placeholder="Search services..."
-                          aria-label="Search services"
+                          placeholder={t("Search services...", "搜索服务…")}
+                          aria-label={t("Search services", "搜索服务")}
                         />
                         <div
                           role="group"
-                          aria-label="Filter services"
+                          aria-label={t("Filter services", "筛选服务")}
                           className="flex items-center gap-1"
                         >
                           {SERVICE_FILTERS.map((option) => (
@@ -203,8 +205,14 @@ export function ExpertConnectServiceDialog({
                               {query.trim()
                                 ? `No services match "${query.trim()}"`
                                 : filter === "connected"
-                                  ? "No services connected yet."
-                                  : "No services available."}
+                                  ? t(
+                                      "No services connected yet.",
+                                      "尚未连接任何服务。",
+                                    )
+                                  : t(
+                                      "No services available.",
+                                      "暂无可用服务。",
+                                    )}
                             </Text>
                           </div>
                         ) : (
@@ -212,7 +220,7 @@ export function ExpertConnectServiceDialog({
                             <ul
                               ref={attachList}
                               className="grid grid-cols-2 gap-2 overflow-y-auto pr-1"
-                              aria-label="Services"
+                              aria-label={t("Services", "服务")}
                             >
                               {providers.map((provider) => (
                                 <li key={provider.id}>
@@ -255,7 +263,7 @@ export function ExpertConnectServiceDialog({
                     size="small"
                     onClick={handleBackToList}
                   >
-                    Back
+                    {t("Back", "返回")}
                   </Button>
                   {showContinue ? (
                     <Button
@@ -271,7 +279,7 @@ export function ExpertConnectServiceDialog({
                 </>
               ) : (
                 <Button variant="secondary" size="small" onClick={onClose}>
-                  Cancel
+                  {t("Cancel", "取消")}
                 </Button>
               )}
             </div>

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { MarketplaceSkill } from "@/app/api/__generated__/models/marketplaceSkill";
 import {
   Avatar,
@@ -24,6 +27,7 @@ interface Props {
 }
 
 export function SkillCard({ skill, isInstalled }: Props) {
+  const { t } = useTranslation();
   const { accent, icon } = getCategoryAccent(skill.categories[0]);
   const title = skill.title;
   const providers = skill.required_providers;
@@ -93,7 +97,8 @@ export function SkillCard({ skill, isInstalled }: Props) {
             {providers.length > 0 ? (
               <span className="inline-flex items-center gap-1.5">
                 <span aria-hidden>·</span>
-                Works with
+
+                {t("Works with", "适用服务")}
                 <IntegrationLogo provider={providers[0]} size={14} alt="" />
                 {formatProviderList(providers)}
               </span>
@@ -115,17 +120,18 @@ export function SkillCard({ skill, isInstalled }: Props) {
             />
             {/* Nobody having installed it yet makes a listing new, not failing. */}
             {skill.install_count === 0
-              ? "New"
+              ? t("New", "新建")
               : `${skill.install_count.toLocaleString()} installed`}
           </span>
           {isInstalled ? (
             <span className="flex items-center gap-1.5 text-body-lg font-medium text-success">
               <Icon icon={CheckmarkCircle02Icon} size={18} aria-hidden />
-              Added
+
+              {t("Added", "已添加")}
             </span>
           ) : (
             <span className="flex items-center gap-1.5 text-body-lg font-medium text-foreground-tertiary transition-colors duration-200 group-hover:text-foreground-strong">
-              View
+              {t("View", "查看")}
               <Icon
                 icon={ArrowRight02Icon}
                 size={16}

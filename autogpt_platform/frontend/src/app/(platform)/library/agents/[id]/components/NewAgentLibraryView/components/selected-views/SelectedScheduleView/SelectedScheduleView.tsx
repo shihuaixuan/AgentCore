@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
 import { Text } from "@/components/atoms/Text/Text";
@@ -31,6 +32,7 @@ export function SelectedScheduleView({
   onSelectRun,
   banner,
 }: Props) {
+  const { t } = useTranslation();
   const { schedule, isLoading, error } = useSelectedScheduleView(
     agent.graph_id,
     scheduleId,
@@ -101,7 +103,7 @@ export function SelectedScheduleView({
 
             {/* Schedule Section */}
             <div id="schedule" className="scroll-mt-4">
-              <RunDetailCard title="Schedule">
+              <RunDetailCard title={t("Schedule", "计划")}>
                 {isLoading || !schedule ? (
                   <div className="text-foreground-tertiary">
                     <LoadingSpinner />
@@ -109,11 +111,13 @@ export function SelectedScheduleView({
                 ) : (
                   <div className="relative flex flex-col gap-8">
                     <div className="flex flex-col gap-1.5">
-                      <Text variant="large-medium">Name</Text>
+                      <Text variant="large-medium">{t("Name", "名称")}</Text>
                       <Text variant="body">{schedule.name}</Text>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <Text variant="large-medium">Recurrence</Text>
+                      <Text variant="large-medium">
+                        {t("Recurrence", "重复周期")}
+                      </Text>
                       <div className="flex items-center gap-3">
                         <Text variant="body" as="span">
                           {humanizeCronExpression(schedule.cron)}
@@ -129,7 +133,9 @@ export function SelectedScheduleView({
                       </div>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <Text variant="large-medium">Next run</Text>
+                      <Text variant="large-medium">
+                        {t("Next run", "下次运行")}
+                      </Text>
                       <div className="flex items-center gap-3">
                         <Text variant="body" as="span">
                           {formatInTimezone(
@@ -162,7 +168,7 @@ export function SelectedScheduleView({
 
             {/* Input Section */}
             <div id="input" className="scroll-mt-4">
-              <RunDetailCard title="Your input">
+              <RunDetailCard title={t("Your input", "你的输入")}>
                 <div className="relative">
                   <AgentInputsReadOnly
                     agent={agent}

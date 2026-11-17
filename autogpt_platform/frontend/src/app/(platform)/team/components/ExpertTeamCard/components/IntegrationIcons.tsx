@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import {
   Tooltip,
@@ -22,13 +23,17 @@ interface Props {
  *  names the rest. It all sits inside the card link, so nothing is focusable
  *  itself and the hidden names are also given to screen readers inline. */
 export function IntegrationIcons({ expertName, providers }: Props) {
+  const { t } = useTranslation();
   if (providers.length === 0) return null;
   const shown = providers.slice(0, VISIBLE_LOGOS);
   const hidden = providers.slice(VISIBLE_LOGOS);
   const hiddenNames = hidden.map(serviceLabelFromIcon).join(", ");
 
   return (
-    <ul aria-label="Integrations" className="flex shrink-0 items-center gap-1">
+    <ul
+      aria-label={t("Integrations", "集成")}
+      className="flex shrink-0 items-center gap-1"
+    >
       {shown.map((provider) => (
         <li key={provider} className="flex">
           <Tooltip>

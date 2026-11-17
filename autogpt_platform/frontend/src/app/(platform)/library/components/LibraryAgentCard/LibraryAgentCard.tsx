@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import Image from "next/image";
 import { isLocalStoreMediaUrl } from "@/lib/store-media";
@@ -45,6 +46,7 @@ export function LibraryAgentCard({
   statusInfo,
   draggable = true,
 }: Props) {
+  const { t } = useTranslation();
   const { id, name, image_url } = agent;
   const { showImage, handleImageError } = useImageFallback(image_url);
   const router = useRouter();
@@ -137,7 +139,8 @@ export function LibraryAgentCard({
               className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-body-sm leading-inherit font-medium whitespace-nowrap text-foreground-secondary transition-colors hover:bg-surface-muted hover:text-foreground-emphasis"
             >
               <Icon icon={EyeIcon} size={14} className="shrink-0" />
-              See tasks
+
+              {t("See tasks", "查看任务")}
             </button>
             <ContextualActionButton
               status={statusInfo.status}
@@ -155,7 +158,8 @@ export function LibraryAgentCard({
               className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-body-sm leading-inherit font-medium whitespace-nowrap text-foreground-secondary transition-colors hover:bg-surface-muted hover:text-foreground-emphasis"
             >
               <Icon icon={Chatting01Icon} size={14} className="shrink-0" />
-              Chat
+
+              {t("Chat", "聊天")}
             </button>
           </div>
         </div>

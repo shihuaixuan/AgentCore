@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getPaginationNextPageNumber, unpaginate } from "@/app/api/helpers";
 import { useGetV2ListLibraryAgentsInfinite } from "@/app/api/__generated__/endpoints/library/library";
 import { useState } from "react";
@@ -6,6 +7,7 @@ import { useAddAgentToBuilder } from "../hooks/useAddAgentToBuilder";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 
 export const useMyAgentsContent = () => {
+  const { t } = useTranslation();
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [isGettingAgentDetails, setIsGettingAgentDetails] = useState(false);
   const { addLibraryAgentToBuilder } = useAddAgentToBuilder();
@@ -44,9 +46,13 @@ export const useMyAgentsContent = () => {
       await addLibraryAgentToBuilder(agent);
     } catch (error) {
       toast({
-        title: "Failed to add workflow to builder",
+        title: t(
+          "Failed to add workflow to builder",
+          "无法将工作流添加到编辑器",
+        ),
         description:
-          ((error as any).message as string) || "An unexpected error occurred.",
+          ((error as any).message as string) ||
+          t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     } finally {

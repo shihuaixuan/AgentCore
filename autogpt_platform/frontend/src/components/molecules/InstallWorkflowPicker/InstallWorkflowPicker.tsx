@@ -12,6 +12,7 @@ import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { WorkflowTile } from "./components/WorkflowTile";
 import { INSTALL_WORKFLOW_SOURCES, workflowSubtitle } from "./helpers";
 import { useInstallWorkflowPicker } from "./useInstallWorkflowPicker";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   mode: "pick-expert" | "pick-workflow";
@@ -28,6 +29,7 @@ export function InstallWorkflowPicker({
   open,
   onClose,
 }: Props) {
+  const { t } = useTranslation();
   const {
     title,
     hiredExperts,
@@ -78,7 +80,7 @@ export function InstallWorkflowPicker({
               data-slot="install-workflow-picker-empty"
               tone="muted"
             >
-              No hired experts yet.
+              {t("No hired experts yet.", "尚未聘用专家。")}
             </Text>
           ) : (
             <div
@@ -132,7 +134,7 @@ export function InstallWorkflowPicker({
                     loading={pendingKey === expert.id}
                     onClick={() => installOnExpert(expert)}
                   >
-                    Install
+                    {t("Install", "安装")}
                   </Button>
                 </div>
               ))}
@@ -147,7 +149,7 @@ export function InstallWorkflowPicker({
               data-slot="install-workflow-picker-sources"
               className="flex gap-2"
               role="group"
-              aria-label="Workflow source"
+              aria-label={t("Workflow source", "工作流来源")}
             >
               {INSTALL_WORKFLOW_SOURCES.map((option) => (
                 <Button
@@ -159,19 +161,22 @@ export function InstallWorkflowPicker({
                   aria-pressed={source === option.id}
                   onClick={() => setSource(option.id)}
                 >
-                  {option.label}
+                  {t(
+                    option.label,
+                    option.id === "library" ? "你的工作流" : "市场",
+                  )}
                 </Button>
               ))}
             </div>
             <Input
               id="install-workflow-search"
               size="small"
-              label="Search workflows"
+              label={t("Search workflows", "搜索工作流")}
               hideLabel
               placeholder={
                 source === "library"
-                  ? "Search your workflows"
-                  : "Search the marketplace"
+                  ? t("Search your workflows", "搜索你的工作流")
+                  : t("Search the marketplace", "搜索市场")
               }
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
@@ -186,7 +191,7 @@ export function InstallWorkflowPicker({
                   tone="muted"
                   align="center"
                 >
-                  Searching…
+                  {t("Searching…", "正在搜索……")}
                 </Text>
               </div>
             ) : isEmpty ? (
@@ -198,8 +203,11 @@ export function InstallWorkflowPicker({
                   align="center"
                 >
                   {source === "library"
-                    ? "No workflows in your library."
-                    : "No workflows found."}
+                    ? t(
+                        "No workflows in your library.",
+                        "你的工作流库中还没有工作流。",
+                      )
+                    : t("No workflows found.", "未找到工作流。")}
                 </Text>
               </div>
             ) : (
@@ -233,7 +241,9 @@ export function InstallWorkflowPicker({
                             tone="muted"
                             className="truncate"
                           >
-                            {workflowSubtitle(agent.description)}
+                            {agent.description?.trim()
+                              ? workflowSubtitle(agent.description)
+                              : t("From your library", "来自你的工作流库")}
                           </Text>
                         </div>
                         <Button
@@ -243,7 +253,7 @@ export function InstallWorkflowPicker({
                           loading={pendingKey === agent.id}
                           onClick={() => installLibraryAgent(agent)}
                         >
-                          Install
+                          {t("Install", "安装")}
                         </Button>
                       </div>
                     ))
@@ -271,7 +281,7 @@ export function InstallWorkflowPicker({
                             data-slot="install-workflow-picker-option-subtitle"
                             tone="muted"
                           >
-                            by {agent.creator}
+                            {t(`by ${agent.creator}`, `作者：${agent.creator}`)}
                           </Text>
                         </div>
                         <Button
@@ -281,7 +291,7 @@ export function InstallWorkflowPicker({
                           loading={pendingKey === agent.agent_graph_id}
                           onClick={() => installFromListing(agent)}
                         >
-                          Install
+                          {t("Install", "安装")}
                         </Button>
                       </div>
                     ))}
@@ -295,7 +305,7 @@ export function InstallWorkflowPicker({
                 data-slot="install-workflow-picker-load-more"
                 onClick={() => loadMoreLibraryResults()}
               >
-                Load more workflows
+                {t("Load more workflows", "加载更多工作流")}
               </Button>
             ) : null}
           </div>

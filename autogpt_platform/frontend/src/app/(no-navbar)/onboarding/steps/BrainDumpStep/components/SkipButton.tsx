@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +14,7 @@ interface Props {
 // Pinned to the page's top right corner, so it is rendered outside the
 // step's own positioned wrapper.
 export function SkipButton({ isHidden, isProcessing, onSkip }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       className={cn(
@@ -24,7 +27,7 @@ export function SkipButton({ isHidden, isProcessing, onSkip }: Props) {
           the last step on a blank screen. */}
       {!isProcessing && (
         <Button type="button" variant="toggle" size="xs" onClick={onSkip}>
-          Skip for now
+          {t("Skip for now", "暂时跳过")}
         </Button>
       )}
     </div>

@@ -1,5 +1,6 @@
 import { toast } from "@/components/molecules/Toast/use-toast";
 import { getPostHogReplayUrl } from "@/services/analytics/posthog-request-context";
+import type { Locale } from "@/lib/i18n/locale";
 
 const TALLY_EMBED_URL = "https://tally.so/widgets/embed.js";
 export const FEEDBACK_TALLY_FORM_ID = "3yx2L0";
@@ -73,12 +74,15 @@ export function getFeedbackHiddenFields(context: FeedbackContext) {
   };
 }
 
-export function showFeedbackLoadError() {
+export function showFeedbackLoadError(locale: Locale = "en") {
+  const chinese = locale === "zh-CN";
   toast({
-    title: "Couldn't open the feedback form",
+    title: chinese ? "无法打开反馈表单" : "Couldn't open the feedback form",
     description: (
       <>
-        It may be blocked by your browser.{" "}
+        {chinese
+          ? "表单可能被浏览器拦截。"
+          : "It may be blocked by your browser."}{" "}
         <a
           href={FEEDBACK_FORM_URL}
           target="_blank"
@@ -86,7 +90,7 @@ export function showFeedbackLoadError() {
           data-slot="feedback-form-link"
           className="underline"
         >
-          Open the form in a new tab
+          {chinese ? "在新标签页中打开表单" : "Open the form in a new tab"}
         </a>
       </>
     ),

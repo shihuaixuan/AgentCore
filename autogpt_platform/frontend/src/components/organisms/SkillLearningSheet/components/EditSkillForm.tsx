@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { SkillVersionSummary } from "@/app/api/__generated__/models/skillVersionSummary";
 import { Button } from "@/components/atoms/Button/Button";
@@ -27,6 +28,7 @@ export function EditSkillForm({
   onSave,
   onCancel,
 }: Props) {
+  const { t } = useTranslation();
   const hasNewerVersion = draft.baseVersionId !== (currentVersion?.id ?? null);
   return (
     <form
@@ -36,21 +38,25 @@ export function EditSkillForm({
         event.preventDefault();
         if (!hasNewerVersion && !isBusy) onSave();
       }}
-      aria-label="Edit skill"
+      aria-label={t("Edit skill", "编辑技能")}
     >
       <Text variant="small" tone="muted">
-        Your edit takes effect immediately and becomes a new version. The same
-        content checks apply.
+        {t(
+          "Your edit takes effect immediately and becomes a new version. The same content checks apply.",
+          "你的修改会立即生效并成为新版本，仍需通过相同的内容检查。",
+        )}
       </Text>
       {hasNewerVersion && currentVersion ? (
         <section
-          aria-label="Newer version available"
+          aria-label={t("Newer version available", "有新版本可用")}
           data-slot="edit-skill-form-conflict"
           className="rounded-lg border border-warning-border bg-warning-surface p-3"
         >
           <Text variant="small" tone="primary">
-            v{currentVersion.version} was saved while you were editing. Your
-            draft is kept. Compare it with the current version before saving.
+            {t(
+              `v${currentVersion.version} was saved while you were editing. Your draft is kept. Compare it with the current version before saving.`,
+              `你编辑期间已保存版本 v${currentVersion.version}。草稿已保留，请在保存前与当前版本比较。`,
+            )}
           </Text>
           <details
             data-slot="edit-skill-form-conflict-details"
@@ -60,11 +66,17 @@ export function EditSkillForm({
               data-slot="edit-skill-form-conflict-summary"
               className="cursor-pointer text-body font-medium"
             >
-              Review changes against v{currentVersion.version}
+              {t(
+                `Review changes against v${currentVersion.version}`,
+                `查看与 v${currentVersion.version} 的差异`,
+              )}
             </summary>
             {draft.description !== currentVersion.description ? (
               <Text variant="small" tone="secondary" className="mt-2">
-                Current description: {currentVersion.description}
+                {t(
+                  `Current description: ${currentVersion.description}`,
+                  `当前描述：${currentVersion.description}`,
+                )}
               </Text>
             ) : null}
             <pre
@@ -72,7 +84,10 @@ export function EditSkillForm({
               className="my-3 overflow-x-auto rounded-lg bg-action-hover p-3 text-caption text-action-foreground"
             >
               {lineDiff(currentVersion.body ?? "", draft.body) ||
-                "Your procedure matches the current version."}
+                t(
+                  "Your procedure matches the current version.",
+                  "你的操作步骤与当前版本一致。",
+                )}
             </pre>
             <Button
               type="button"
@@ -81,14 +96,17 @@ export function EditSkillForm({
               disabled={isBusy}
               onClick={onReviewCurrent}
             >
-              Continue editing from v{currentVersion.version}
+              {t(
+                `Continue editing from v${currentVersion.version}`,
+                `基于 v${currentVersion.version} 继续编辑`,
+              )}
             </Button>
           </details>
         </section>
       ) : null}
       <Input
         id="skill-edit-description"
-        label="Description"
+        label={t("Description", "描述")}
         labelVariant="small-medium"
         value={draft.description}
         maxLength={1024}
@@ -98,7 +116,7 @@ export function EditSkillForm({
       />
       <Input
         id="skill-edit-body"
-        label="Procedure (Markdown)"
+        label={t("Procedure (Markdown)", "操作步骤（Markdown）")}
         labelVariant="small-medium"
         type="textarea"
         rows={12}
@@ -116,17 +134,19 @@ export function EditSkillForm({
           className="flex flex-col"
         >
           <Text variant="small" tone="primary">
-            Keep automatic improvements on
+            {t("Keep automatic improvements on", "保持自动改进开启")}
           </Text>
           <Text variant="small" tone="muted">
-            Off by default after an edit: later automated changes become
-            proposals for you to decide.
+            {t(
+              "Off by default after an edit: later automated changes become proposals for you to decide.",
+              "手动编辑后默认关闭：后续自动变更将作为提议，由你决定是否应用。",
+            )}
           </Text>
         </span>
         <Switch
           checked={draft.keepAutoImprove}
           disabled={isBusy}
-          aria-label="Keep automatic improvements on"
+          aria-label={t("Keep automatic improvements on", "保持自动改进开启")}
           onCheckedChange={(checked) =>
             onDraftChange({ keepAutoImprove: checked })
           }
@@ -143,7 +163,7 @@ export function EditSkillForm({
           disabled={isBusy}
           onClick={onCancel}
         >
-          Cancel
+          {t("Cancel", "取消")}
         </Button>
         <Button
           type="submit"
@@ -152,7 +172,7 @@ export function EditSkillForm({
           loading={isBusy}
           disabled={hasNewerVersion}
         >
-          Save edit
+          {t("Save edit", "保存修改")}
         </Button>
       </div>
     </form>

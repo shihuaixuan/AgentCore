@@ -45,6 +45,7 @@ import {
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface ScheduleDetail {
   schedule_id: string;
@@ -92,6 +93,7 @@ export function SchedulesTable({
   onRefresh,
   diagnosticsData,
 }: SchedulesTableProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"all" | "orphaned">("all");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -175,7 +177,7 @@ export function SchedulesTable({
       });
 
       toast({
-        title: "Success",
+        title: t("Success", "成功"),
         description:
           (result.data as CleanupResponseData)?.message ||
           `Deleted ${(result.data as CleanupResponseData)?.deleted_count || 0} schedule(s)`,
@@ -187,9 +189,9 @@ export function SchedulesTable({
     } catch (err: unknown) {
       console.error("Error deleting schedules:", err);
       toast({
-        title: "Error",
+        title: t("Error", "错误"),
         description:
-          err instanceof Error ? err.message : "Failed to delete schedules",
+          err instanceof Error ? err.message : t("Failed to delete schedules", "删除计划任务失败"),
         variant: "destructive",
       });
     }
@@ -206,7 +208,7 @@ export function SchedulesTable({
         >
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Schedules</CardTitle>
+              <CardTitle>{t("Schedules", "计划任务")}</CardTitle>
               <div className="flex gap-2">
                 {activeTab === "orphaned" && schedules.length > 0 && (
                   <Button
@@ -216,7 +218,7 @@ export function SchedulesTable({
                     disabled={isDeleting}
                   >
                     <Icon icon={Delete02Icon} className="mr-2 h-4 w-4" />
-                    Delete All Orphaned ({total})
+                    {t("Delete All Orphaned", "删除全部孤立计划任务")} ({total})
                   </Button>
                 )}
                 {selectedIds.size > 0 && (
@@ -227,7 +229,7 @@ export function SchedulesTable({
                     disabled={isDeleting}
                   >
                     <Icon icon={Delete02Icon} className="mr-2 h-4 w-4" />
-                    Delete Selected ({selectedIds.size})
+                    {t("Delete Selected", "删除所选")} ({selectedIds.size})
                   </Button>
                 )}
                 <Button
@@ -251,7 +253,7 @@ export function SchedulesTable({
             {/* oxlint-disable-next-line design-system/no-restyle -- TabsLineList has no inset variant; a padded wrapper would shorten its underline (src/components is P9's) */}
             <TabsLineList className="px-6">
               <TabsLineTrigger value="all">
-                All Schedules
+                {t("All Schedules", "全部计划任务")}
                 {diagnosticsData && ` (${diagnosticsData.user_schedules})`}
               </TabsLineTrigger>
               <TabsLineTrigger value="orphaned">
@@ -271,7 +273,7 @@ export function SchedulesTable({
                 </div>
               ) : schedules.length === 0 ? (
                 <div className="py-8 text-center text-foreground-tertiary">
-                  No schedules found
+                  {t("No schedules found", "没有找到计划任务")}
                 </div>
               ) : (
                 <Table>
@@ -286,13 +288,13 @@ export function SchedulesTable({
                           onCheckedChange={handleSelectAll}
                         />
                       </TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Graph</TableHead>
-                      <TableHead>User</TableHead>
-                      <TableHead>Cron</TableHead>
-                      <TableHead>Next Run</TableHead>
+                      <TableHead>{t("Name", "名称")}</TableHead>
+                      <TableHead>{t("Graph", "工作流")}</TableHead>
+                      <TableHead>{t("User", "用户")}</TableHead>
+                      <TableHead>{t("Cron", "Cron")}</TableHead>
+                      <TableHead>{t("Next Run", "下次运行")}</TableHead>
                       {activeTab === "orphaned" && (
-                        <TableHead>Orphan Reason</TableHead>
+                        <TableHead>{t("Orphan Reason", "孤立原因")}</TableHead>
                       )}
                     </TableRow>
                   </TableHeader>
@@ -319,7 +321,7 @@ export function SchedulesTable({
                             </TableCell>
                             <TableCell>{schedule.schedule_name}</TableCell>
                             <TableCell>
-                              <div>{schedule.graph_name || "Unknown"}</div>
+                              <div>{schedule.graph_name || t("Unknown", "未知")}</div>
                               <Text
                                 variant="small-mono-tight"
                                 as="div"
@@ -343,11 +345,11 @@ export function SchedulesTable({
                                     schedule.user_id,
                                   );
                                   toast({
-                                    title: "Copied",
-                                    description: "User ID copied to clipboard",
+                                    title: t("Copied", "已复制"),
+                                    description: t("User ID copied to clipboard", "用户 ID 已复制到剪贴板"),
                                   });
                                 }}
-                                title="Click to copy user ID"
+                                title={t("Click to copy user ID", "点击复制用户 ID")}
                               >
                                 <Text
                                   variant="small-mono-tight"
@@ -377,7 +379,7 @@ export function SchedulesTable({
                                 </>
                               ) : (
                                 <span className="text-foreground-subtle">
-                                  N/A
+                                  t("N/A", "不适用")
                                 </span>
                               )}
                             </TableCell>
@@ -386,7 +388,7 @@ export function SchedulesTable({
                                 ? new Date(
                                     schedule.next_run_time,
                                   ).toLocaleString()
-                                : "Not scheduled"}
+                                : t("Not scheduled", "未安排")}
                             </TableCell>
                             {activeTab === "orphaned" && (
                               <TableCell>
@@ -444,7 +446,7 @@ export function SchedulesTable({
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Delete Schedules</DialogTitle>
+            <DialogTitle>{t("Confirm Delete Schedules", "确认删除计划任务")}</DialogTitle>
             <DialogDescription>
               {activeTab === "orphaned" && selectedIds.size === 0 ? (
                 <>

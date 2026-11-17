@@ -1,5 +1,10 @@
 "use client";
 
+import { usePromptTranslation } from "../usePromptTranslation";
+import { useOnboardingTranslation } from "../../../useOnboardingTranslation";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Text } from "@/components/atoms/Text/Text";
 import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { cn } from "@/lib/utils";
@@ -42,6 +47,9 @@ export function InsufficientState({
   onWrite,
   onSkip,
 }: Props) {
+  const { translatePrompt } = usePromptTranslation();
+  const { translateCopy } = useOnboardingTranslation();
+  const { t } = useTranslation();
   const isNarrow = useIsNarrowScreen();
   const ottoSize = isNarrow ? 96 : 120;
   const heard = heardTextOf(heardText);
@@ -63,12 +71,14 @@ export function InsufficientState({
         <AutopilotAvatar transparent size={ottoSize} className="relative" />
       </div>
       <div className="mt-4 w-full md:mt-5">
-        <OttoReply firstLine={ottoFirstLine(mode, heard, replyKind)} />
+        <OttoReply
+          firstLine={translateCopy(ottoFirstLine(mode, heard, replyKind))}
+        />
       </div>
       <Text variant="body" tone="muted" className="mt-3 w-full text-left">
-        Like:{" "}
+        {t("Like:", "例如：")}{" "}
         <Text variant="body" tone="secondary" italic as="span">
-          “{offYourPlateExampleForRole(role)}”
+          “{translatePrompt(offYourPlateExampleForRole(role))}”
         </Text>
       </Text>
       <div className="mt-5 w-full md:mt-6">

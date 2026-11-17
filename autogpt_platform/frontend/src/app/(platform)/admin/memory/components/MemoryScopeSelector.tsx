@@ -3,6 +3,7 @@
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import { Select } from "@/components/atoms/Select/Select";
 import { AUTOPILOT_MEMORY_SCOPE } from "./useMemoryScope";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   value: string;
@@ -19,18 +20,19 @@ export function MemoryScopeSelector({
   loading,
   error,
 }: Props) {
+  const { t } = useTranslation();
   const labelCounts = experts.reduce<Record<string, number>>(
     (counts, expert) => {
-      const label = `${expert.name} — ${expert.role.trim() || "Expert"}`;
+      const label = `${expert.name} — ${expert.role.trim() || t("Expert", "专家")}`;
       counts[label] = (counts[label] ?? 0) + 1;
       return counts;
     },
     {},
   );
   const options = [
-    { value: AUTOPILOT_MEMORY_SCOPE, label: "Otto (account memory)" },
+    { value: AUTOPILOT_MEMORY_SCOPE, label: t("Otto (account memory)", "Otto（账户记忆）") },
     ...experts.map((expert) => {
-      const label = `${expert.name} — ${expert.role.trim() || "Expert"}`;
+      const label = `${expert.name} — ${expert.role.trim() || t("Expert", "专家")}`;
       return {
         value: expert.id,
         label:
@@ -44,7 +46,7 @@ export function MemoryScopeSelector({
       <div className="w-full sm:max-w-sm">
         <Select
           id="memory-scope"
-          label="Memory scope"
+          label={t("Memory scope", "记忆范围")}
           value={value}
           onValueChange={onValueChange}
           options={options}
@@ -54,19 +56,19 @@ export function MemoryScopeSelector({
       </div>
       <div aria-live="polite" className="flex flex-col gap-1 text-caption">
         {loading ? (
-          <p className="text-foreground-tertiary">Loading experts…</p>
+          <p className="text-foreground-tertiary">{t("Loading experts…", "正在加载专家…")}</p>
         ) : null}
         {value !== AUTOPILOT_MEMORY_SCOPE ? (
           <p className="text-foreground-tertiary">
-            Expert memory is read-only.
+            {t("Expert memory is read-only.", "专家记忆为只读。")}
           </p>
         ) : null}
         {error ? (
-          <p className="text-error-foreground">Failed to load experts.</p>
+          <p className="text-error-foreground">{t("Failed to load experts.", "无法加载专家。")}</p>
         ) : null}
         {!loading && !error && experts.length === 0 ? (
           <p className="text-foreground-tertiary">
-            No experts for this account.
+            {t("No experts for this account.", "此账户没有专家。")}
           </p>
         ) : null}
       </div>

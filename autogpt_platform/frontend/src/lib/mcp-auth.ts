@@ -35,6 +35,7 @@ export function detectMCPAuthScheme(value: string): MCPAuthScheme | null {
 export function validateMCPAuthCredential(
   value: string,
   scheme: MCPAuthScheme,
+  t: (english: string, chinese: string) => string = (english) => english,
 ): string | null {
   if (scheme !== "basic") return null;
 
@@ -44,10 +45,16 @@ export function validateMCPAuthCredential(
     .trim();
   const credential = matchSchemePrefix(candidate)?.credential ?? candidate;
   if (credential.includes(":")) {
-    return "This looks like an unencoded user:password. Basic authentication sends the Base64 of that pair — encode it first, or paste the complete Authorization header.";
+    return t(
+      "This looks like an unencoded user:password. Basic authentication sends the Base64 of that pair — encode it first, or paste the complete Authorization header.",
+      "此内容看起来是未编码的 user:password。基本身份验证会发送这组用户名和密码的 Base64 编码，请先编码，或粘贴完整的 Authorization 请求头。",
+    );
   }
   if (/\s/.test(credential)) {
-    return "A Basic credential is the Base64 of user:password and cannot contain spaces.";
+    return t(
+      "A Basic credential is the Base64 of user:password and cannot contain spaces.",
+      "基本身份验证凭据是 user:password 的 Base64 编码，不能包含空白字符。",
+    );
   }
   return null;
 }

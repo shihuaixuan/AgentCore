@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { ExpertActivity } from "@/app/api/__generated__/models/expertActivity";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -26,6 +29,7 @@ export function ExpertSummaryCard({
   isActivityLoading,
   isActivityError,
 }: Props) {
+  const { t } = useTranslation();
   const activityDays = activity ? getYearActivityDays(activity.days) : null;
   const visibleActivityDays = activityDays
     ? getThreeMonthActivityDays(activityDays)
@@ -46,7 +50,7 @@ export function ExpertSummaryCard({
       >
         <div className="flex items-center justify-between gap-2">
           <Text variant="body-md-medium" tone="primary">
-            Activity
+            {t("Activity", "活动")}
           </Text>
           {summary ? <ActivityStatus isActive={summary.isActive} /> : null}
         </div>
@@ -54,7 +58,7 @@ export function ExpertSummaryCard({
           <Skeleton className="h-[5.25rem] w-full rounded-lg" />
         ) : isActivityError ? (
           <Text variant="small" tone="muted">
-            Activity unavailable
+            {t("Activity unavailable", "活动不可用")}
           </Text>
         ) : visibleActivityDays && summary ? (
           <>

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
@@ -29,6 +30,7 @@ export function MoveToFolderDialog({
   setIsOpen,
   onMoved,
 }: Props) {
+  const { t } = useTranslation();
   const { folders } = useArtifactsFolders();
   const offerRoot = canMoveToRoot ?? defaultCanMoveToRoot(move, folders);
   const {
@@ -52,12 +54,12 @@ export function MoveToFolderDialog({
     <Dialog
       controlled={{ isOpen, set: setIsOpen }}
       styling={{ maxWidth: "28rem" }}
-      title="Move to folder"
+      title={t("Move to folder", "移动到文件夹")}
     >
       <Dialog.Content>
         <div className="flex flex-col gap-1">
           <Text variant="small" tone="muted" className="mb-1">
-            Move {subject} to:
+            {t("Move", "移动")} {subject} to:
           </Text>
           {rows.length === 0 ? (
             <div className="flex h-20 items-center justify-center">
@@ -81,7 +83,7 @@ export function MoveToFolderDialog({
             size="small"
             onClick={() => setIsOpen(false)}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button
             type="button"
@@ -92,7 +94,7 @@ export function MoveToFolderDialog({
             onClick={confirm}
             data-testid="confirm-move-to-folder"
           >
-            Move
+            {t("Move", "移动")}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

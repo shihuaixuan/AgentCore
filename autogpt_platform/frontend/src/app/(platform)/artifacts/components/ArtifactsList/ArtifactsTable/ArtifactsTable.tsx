@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { WorkspaceFileItem } from "@/app/api/__generated__/models/workspaceFileItem";
 import { Text } from "@/components/atoms/Text/Text";
 import { TooltipProvider } from "@/components/atoms/Tooltip/BaseTooltip";
@@ -45,6 +46,7 @@ export function ArtifactsTable({
   onSelectFolder,
   onOpen,
 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const selection = useFileSelection(files);
 
@@ -60,7 +62,7 @@ export function ArtifactsTable({
       ) : (
         <div className={cn(ROW_GRID_CLASS, "px-2 pb-2")}>
           <Text variant="body" as="span" tone="muted">
-            Name
+            {t("Name", "名称")}
           </Text>
           <Text
             variant="body"
@@ -68,7 +70,7 @@ export function ArtifactsTable({
             tone="muted"
             className="hidden truncate sm:block"
           >
-            Modified
+            {t("Modified", "修改时间")}
           </Text>
           <Text
             variant="body"
@@ -76,7 +78,7 @@ export function ArtifactsTable({
             tone="muted"
             className="hidden md:block"
           >
-            Size
+            {t("Size", "大小")}
           </Text>
           <span aria-hidden />
         </div>

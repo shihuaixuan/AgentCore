@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 import { type ReactNode, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -85,6 +86,7 @@ const ACTIONS: ReadonlyArray<MarkdownAction> = [
 ];
 
 export function ProfileForm({ formState, errors, onChange }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isPreview, setIsPreview] = useState(false);
@@ -160,7 +162,7 @@ export function ProfileForm({ formState, errors, onChange }: Props) {
     >
       <div className="flex items-center justify-between px-4">
         <Text variant="body-medium" as="span">
-          Bio
+          {t("Bio", "简介")}
         </Text>
         <Text
           variant="small"
@@ -206,7 +208,7 @@ export function ProfileForm({ formState, errors, onChange }: Props) {
           ) : (
             <Icon icon={EyeIcon} size={14} />
           )}
-          {isPreview ? "Edit" : "Preview"}
+          {isPreview ? t("Edit", "编辑") : "Preview"}
         </button>
       </div>
       {isPreview ? (
@@ -242,7 +244,7 @@ export function ProfileForm({ formState, errors, onChange }: Props) {
             </div>
           ) : (
             <Text variant="body" as="span" tone="subtle">
-              Nothing to preview yet.
+              {t("Nothing to preview yet.", "暂无可预览内容。")}
             </Text>
           )}
         </div>
@@ -250,11 +252,14 @@ export function ProfileForm({ formState, errors, onChange }: Props) {
         <Input
           ref={textareaRef}
           id="profile-bio"
-          label="Bio"
+          label={t("Bio", "简介")}
           hideLabel
           type="textarea"
           rows={5}
-          placeholder="Tell people what you build, the workflows you ship, and what you care about."
+          placeholder={t(
+            "Tell people what you build, the workflows you ship, and what you care about.",
+            "介绍你构建的内容、发布的工作流，以及你关注的领域。",
+          )}
           value={formState.description}
           error={errors.description}
           onChange={(e) => onChange("description", e.target.value)}

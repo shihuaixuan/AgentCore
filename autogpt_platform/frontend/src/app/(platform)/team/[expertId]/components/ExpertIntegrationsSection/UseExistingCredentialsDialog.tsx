@@ -1,6 +1,7 @@
 "use client";
 
-import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { connectionSearchText, type ExistingConnection } from "./helpers";
 import { ConnectProviderRow } from "@/app/(platform)/copilot/components/ConnectToolsDialog/ConnectProviderRow";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -24,7 +25,7 @@ import { useFitListToDialog } from "../useFitListToDialog";
 interface Props {
   open: boolean;
   expertName: string;
-  credentials: CredentialsMetaResponse[];
+  credentials: ExistingConnection[];
   isGranting: boolean;
   onUse: (credentialId: string) => void;
   onClose: () => void;
@@ -32,13 +33,11 @@ interface Props {
 
 interface ProviderGroup {
   provider: ConnectableProvider;
-  credentials: CredentialsMetaResponse[];
+  credentials: ExistingConnection[];
 }
 
-function groupByProvider(
-  credentials: CredentialsMetaResponse[],
-): ProviderGroup[] {
-  const groups = new Map<string, CredentialsMetaResponse[]>();
+function groupByProvider(credentials: ExistingConnection[]): ProviderGroup[] {
+  const groups = new Map<string, ExistingConnection[]>();
   for (const credential of credentials) {
     const id = serviceKey(credential);
     groups.set(id, [...(groups.get(id) ?? []), credential]);
@@ -71,6 +70,7 @@ export function UseExistingCredentialsDialog({
   onUse,
   onClose,
 }: Props) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
   const { attachList, list } = useFitListToDialog<HTMLUListElement>();
@@ -89,7 +89,7 @@ export function UseExistingCredentialsDialog({
       !needle ||
       group.provider.name.toLowerCase().includes(needle) ||
       group.credentials.some((credential) =>
-        (credential.title ?? "").toLowerCase().includes(needle),
+        connectionSearchText(credential).includes(needle),
       ),
   );
   const selected = groups.find(
@@ -110,7 +110,7 @@ export function UseExistingCredentialsDialog({
     <Dialog
       variant="compact"
       styling={{ maxWidth: "40rem", maxHeight: "60vh" }}
-      title="Use an existing connection"
+      title={t("Use an existing connection", "使用现有连接")}
       controlled={{
         isOpen: open,
         set: (next) => {
@@ -128,7 +128,8 @@ export function UseExistingCredentialsDialog({
                 className="flex w-fit items-center gap-1 text-body text-foreground-tertiary hover:text-foreground-emphasis"
               >
                 <Icon icon={ArrowLeft02Icon} size={14} />
-                All connections
+
+                {t("All connections", "全部连接")}
               </button>
               <Text variant="body-tight" tone="muted">
                 You have {selected.credentials.length} {selected.provider.name}{" "}
@@ -177,29 +178,42 @@ export function UseExistingCredentialsDialog({
           ) : (
             <>
               <Text variant="body-tight" tone="muted">
-                These connections are already set up on your account but{" "}
-                {expertName} can&apos;t use them yet. Choose one to give{" "}
-                {expertName} access. Nothing is re-authorised, and you can
-                remove the access from this tab at any time.
+                {t(
+                  `These connections are already set up on your account but ${expertName} can't use them yet. Choose one to give ${expertName} access. Nothing is re-authorised, and you can remove the access from this tab at any time.`,
+                  `这些连接已在你的账户中设置，但 ${expertName} 尚无使用权限。选择一个连接以授予 ${expertName} 访问权限。无需重新授权，你可以随时在此标签页中移除访问权限。`,
+                )}
               </Text>
               <SearchInput
                 size="small"
                 value={query}
                 onChange={setQuery}
-                placeholder="Search connections"
+                placeholder={t("Search connections", "搜索连接")}
               />
+              {credentials.some(
+                (credential) => (credential.customConnections?.length ?? 0) > 1,
+              ) && (
+                <Text variant="small" tone="muted">
+                  {t(
+                    "Connections listed together share a credential. Adding or removing access applies to all of them.",
+                    "合并列出的连接共用一份凭据，添加或移除权限将同时影响这些连接。",
+                  )}
+                </Text>
+              )}
               {groups.length === 0 ? (
                 <Text variant="small" tone="muted">
                   {credentials.length === 0
-                    ? `${expertName} can already use everything in your account.`
-                    : "No connections match."}
+                    ? t(
+                        "No available connections to add.",
+                        "没有可添加的可用连接。",
+                      )
+                    : t("No connections match.", "没有匹配的连接。")}
                 </Text>
               ) : (
                 <div className="relative">
                   <ul
                     ref={attachList}
                     className="grid grid-cols-2 gap-2 overflow-y-auto pr-1"
-                    aria-label="Existing connections"
+                    aria-label={t("Existing connections", "现有连接")}
                   >
                     {groups.map((group) => (
                       <li key={group.provider.id}>
@@ -207,13 +221,15 @@ export function UseExistingCredentialsDialog({
                           provider={group.provider}
                           onSelect={handleSelect}
                           description={
-                            group.credentials.length === 1
-                              ? formatCredentialName(
-                                  group.credentials[0].title ??
-                                    group.provider.name,
-                                  group.credentials[0].provider,
-                                )
-                              : `${group.credentials.length} connections · choose one`
+                            group.credentials[0].customConnections
+                              ? t("Custom MCP", "自定义 MCP")
+                              : group.credentials.length === 1
+                                ? formatCredentialName(
+                                    group.credentials[0].title ??
+                                      group.provider.name,
+                                    group.credentials[0].provider,
+                                  )
+                                : `${group.credentials.length} connections · choose one`
                           }
                         />
                       </li>
@@ -234,7 +250,7 @@ export function UseExistingCredentialsDialog({
           )}
           <div className="flex justify-end pt-1">
             <Button variant="secondary" size="small" onClick={onClose}>
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
           </div>
         </div>

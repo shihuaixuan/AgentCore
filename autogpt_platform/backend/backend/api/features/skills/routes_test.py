@@ -1,6 +1,8 @@
 """Tests for the copilot-skills routes."""
 
 import asyncio
+import io
+import zipfile
 from unittest.mock import AsyncMock
 
 import fastapi
@@ -652,6 +654,30 @@ def test_skill_package_round_trips_through_upload_and_download() -> None:
     assert sorted(
         (f.relative_path, f.content, f.is_executable) for f in restored.files
     ) == sorted((f.relative_path, f.content, f.is_executable) for f in _PACKAGE_FILES)
+
+
+def test_wrapped_package_with_metadata_round_trips_through_the_api() -> None:
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("sample/SKILL.md", _CANONICAL_SKILL_MD)
+        archive.writestr("sample/.skill-metadata.yaml", "metadata: value")
+        archive.writestr("other/readme.txt", "preserved")
+        archive.writestr("__MACOSX/sample/._SKILL.md", b"metadata")
+
+    with _patch_skills_path(_FakeWorkspaceManager()):
+        created = client.post(
+            "/skills/package",
+            files={"file": ("pkg.zip", buffer.getvalue(), "application/zip")},
+        )
+        assert created.status_code == 201, created.text
+        downloaded = client.get("/skills/oauth_flow/package")
+
+    assert downloaded.status_code == 200
+    restored = package_from_zip(downloaded.content)
+    assert {f.relative_path: f.content for f in restored.files} == {
+        ".skill-metadata.yaml": b"metadata: value",
+        "other/readme.txt": b"preserved",
+    }
 
 
 def test_upload_package_over_the_files_cap_is_413_and_writes_nothing() -> None:

@@ -4,8 +4,10 @@ import { buildEstimatesJson, downloadJson } from "../helpers";
 import { useBlockCostEstimates } from "./useBlockCostEstimates";
 import { Download04Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function BlockCostEstimatesContent() {
+  const { t } = useTranslation();
   const {
     start,
     end,
@@ -37,7 +39,7 @@ export function BlockCostEstimatesContent() {
       <div className="flex flex-wrap items-end gap-3 rounded border p-4">
         <div className="flex flex-col gap-1">
           <label htmlFor="bce-start" className="text-body">
-            Start date (UTC)
+            {t("Start date (UTC)", "开始日期（UTC）")}
           </label>
           <input
             id="bce-start"
@@ -49,7 +51,7 @@ export function BlockCostEstimatesContent() {
         </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="bce-end" className="text-body">
-            End date (UTC)
+            {t("End date (UTC)", "结束日期（UTC）")}
           </label>
           <input
             id="bce-end"
@@ -61,7 +63,7 @@ export function BlockCostEstimatesContent() {
         </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="bce-min-samples" className="text-body">
-            Min samples
+            {t("Min samples", "最小样本数")}
           </label>
           <input
             id="bce-min-samples"
@@ -80,7 +82,7 @@ export function BlockCostEstimatesContent() {
           onClick={fetchEstimates}
           loading={loading}
         >
-          Aggregate
+          {t("Aggregate", "汇总")}
         </Button>
         <Button
           variant="secondary"
@@ -89,7 +91,7 @@ export function BlockCostEstimatesContent() {
           disabled={!data || data.total_rows === 0}
           leftIcon={<Icon icon={Download04Icon} />}
         >
-          Download JSON
+          {t("Download JSON", "下载 JSON")}
         </Button>
       </div>
 
@@ -107,11 +109,11 @@ export function BlockCostEstimatesContent() {
             <table className="w-full text-body">
               <thead className="bg-surface-hover/50">
                 <tr>
-                  <th className="p-2 text-left">Block ID</th>
-                  <th className="p-2 text-left">Block name</th>
-                  <th className="p-2 text-left">Cost type</th>
-                  <th className="p-2 text-right">Samples</th>
-                  <th className="p-2 text-right">Mean (credits)</th>
+                  <th className="p-2 text-left">{t("Block ID", "模块 ID")}</th>
+                  <th className="p-2 text-left">{t("Block name", "模块名称")}</th>
+                  <th className="p-2 text-left">{t("Cost type", "成本类型")}</th>
+                  <th className="p-2 text-right">{t("Samples", "样本数")}</th>
+                  <th className="p-2 text-right">{t("Mean (credits)", "平均值（额度）")}</th>
                   <th className="p-2 text-right">P50</th>
                   <th className="p-2 text-right">P95</th>
                 </tr>
@@ -136,8 +138,7 @@ export function BlockCostEstimatesContent() {
         </div>
       ) : (
         <p className="text-body text-foreground-tertiary">
-          Pick a window and click Aggregate to compute per-block average
-          credits-per-execution.
+          {t("Pick a window and click Aggregate to compute per-block average credits-per-execution.", "选择时间范围并点击“汇总”，计算每个模块的平均每次执行额度。")}
         </p>
       )}
     </div>

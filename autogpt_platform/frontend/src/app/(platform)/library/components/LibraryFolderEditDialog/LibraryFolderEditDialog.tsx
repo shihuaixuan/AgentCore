@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
 import { Select } from "@/components/atoms/Select/Select";
@@ -36,15 +37,6 @@ const LazyEmojiPicker = dynamic(
   { ssr: false },
 );
 
-const editFolderSchema = z.object({
-  folderName: z
-    .string()
-    .min(1, "Folder name is required")
-    .max(100, "Folder name must be 100 characters or less"),
-  folderColor: z.string().min(1, "Folder color is required"),
-  folderIcon: z.string().min(1, "Folder icon is required"),
-});
-
 interface Props {
   folder: LibraryFolder;
   isOpen: boolean;
@@ -52,6 +44,25 @@ interface Props {
 }
 
 export function LibraryFolderEditDialog({ folder, isOpen, setIsOpen }: Props) {
+  const { t } = useTranslation();
+  const editFolderSchema = z.object({
+    folderName: z
+      .string()
+      .min(1, t("Folder name is required", "请输入文件夹名称"))
+      .max(
+        100,
+        t(
+          "Folder name must be 100 characters or less",
+          "文件夹名称不能超过 100 个字符",
+        ),
+      ),
+    folderColor: z
+      .string()
+      .min(1, t("Folder color is required", "请选择文件夹颜色")),
+    folderIcon: z
+      .string()
+      .min(1, t("Folder icon is required", "请选择文件夹图标")),
+  });
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -124,22 +135,31 @@ export function LibraryFolderEditDialog({ folder, isOpen, setIsOpen }: Props) {
             detail.toLowerCase().includes("already exists")
           ) {
             form.setError("folderName", {
-              message: "A folder with this name already exists",
+              message: t(
+                "A folder with this name already exists",
+                "已存在同名文件夹",
+              ),
             });
             return;
           }
         }
         toast({
-          title: "Error",
-          description: "Failed to update folder. Please try again.",
+          title: t("Error", "错误"),
+          description: t(
+            "Failed to update folder. Please try again.",
+            "更新文件夹失败，请重试。",
+          ),
           variant: "destructive",
         });
       },
       onSuccess: () => {
         setIsOpen(false);
         toast({
-          title: "Folder updated",
-          description: "Your folder has been updated successfully.",
+          title: t("Folder updated", "文件夹已更新"),
+          description: t(
+            "Your folder has been updated successfully.",
+            "文件夹已成功更新。",
+          ),
         });
       },
       onSettled: () => {
@@ -163,7 +183,7 @@ export function LibraryFolderEditDialog({ folder, isOpen, setIsOpen }: Props) {
 
   return (
     <Dialog
-      title="Edit Folder"
+      title={t("Edit Folder", "编辑文件夹")}
       styling={{ maxWidth: "30rem" }}
       controlled={{
         isOpen,
@@ -186,8 +206,8 @@ export function LibraryFolderEditDialog({ folder, isOpen, setIsOpen }: Props) {
                   <Input
                     {...field}
                     id={field.name}
-                    label="Folder name"
-                    placeholder="Enter folder name"
+                    label={t("Folder name", "文件夹名称")}
+                    placeholder={t("Enter folder name", "输入文件夹名称")}
                     className="w-full"
                     wrapperClassName="!mb-0"
                   />
@@ -205,14 +225,25 @@ export function LibraryFolderEditDialog({ folder, isOpen, setIsOpen }: Props) {
                 <FormControl>
                   <Select
                     id="folderColor"
-                    label="Folder color"
-                    placeholder="Select a color"
+                    label={t("Folder color", "文件夹颜色")}
+                    placeholder={t("Select a color", "选择颜色")}
                     value={field.value}
                     onValueChange={field.onChange}
                     wrapperClassName="!mb-0"
                     options={FOLDER_COLORS.map((color) => ({
                       value: color.value,
-                      label: color.label,
+                      label: t(
+                        color.label,
+                        (
+                          {
+                            Blue: "蓝色",
+                            Purple: "紫色",
+                            Green: "绿色",
+                            Orange: "橙色",
+                            Pink: "粉色",
+                          } as Record<string, string>
+                        )[color.label] ?? color.label,
+                      ),
                       icon: (
                         <div
                           className="h-4 w-4 rounded-full"
@@ -241,12 +272,12 @@ export function LibraryFolderEditDialog({ folder, isOpen, setIsOpen }: Props) {
               <FormItem>
                 <div className="flex flex-col gap-2">
                   <Text variant="large-medium" as="span">
-                    Folder icon
+                    {t("Folder icon", "文件夹图标")}
                   </Text>
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-3">
                       <Text variant="small" tone="muted">
-                        Selected:
+                        {t("Selected:", "已选择：")}
                       </Text>
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border-base bg-surface-muted text-heading-md">
                         {form.watch("folderIcon") || (
@@ -277,7 +308,7 @@ export function LibraryFolderEditDialog({ folder, isOpen, setIsOpen }: Props) {
             disabled={!form.formState.isValid || isPending}
             loading={isPending}
           >
-            Save Changes
+            {t("Save Changes", "保存更改")}
           </Button>
         </Form>
       </Dialog.Content>

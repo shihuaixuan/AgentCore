@@ -3,54 +3,51 @@ import { withRoleAccess } from "@/lib/withRoleAccess";
 import { GenerateTestDataButton } from "./components/GenerateTestDataButton";
 import { Text } from "@/components/atoms/Text/Text";
 import { isTestDataSurfaceEnabled } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 function TestDataDashboard() {
+  const { t } = useTranslation();
   return (
     <div className="mx-auto p-6">
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div>
             <Text variant="h2" as="h1">
-              Test Data Generation
+              {t("Test Data Generation", "测试数据生成")}
             </Text>
             <Text variant="body" tone="muted">
-              Generate sample data for testing and development
+              {t("Generate sample data for testing and development", "生成用于测试和开发的示例数据")}
             </Text>
           </div>
         </div>
 
         <div className="rounded-lg border bg-surface p-6 shadow-sm">
           <Text variant="h4" as="h2" className="mb-4">
-            Generate Test Data
+            {t("Generate Test Data", "生成测试数据")}
           </Text>
           <Text variant="body" className="mb-6" tone="secondary">
-            Use this tool to populate the database with sample test data. This
-            is useful for development and testing purposes.
+            {t("Use this tool to populate the database with sample test data. This is useful for development and testing purposes.", "使用此工具向数据库填充示例测试数据，便于开发和测试。")}
           </Text>
 
           <div className="mb-6">
             <Text variant="body-medium" className="mb-2">
-              Available Script Types:
+              {t("Available Script Types:", "可用脚本类型：")}
             </Text>
             <ul className="list-inside list-disc space-y-2 text-foreground-secondary">
               <li>
                 <Text variant="body" as="span">
                   <Text variant="body-medium" as="span">
-                    E2E Test Data:
+                    {t("E2E Test Data:", "E2E 测试数据：")}
                   </Text>{" "}
-                  Creates up to 15 test users with graphs, library agents,
-                  presets, store submissions, and API keys. Uses API functions
-                  for better compatibility.
+                    {t("Creates up to 15 test users with graphs, library agents, presets, store submissions, and API 密钥。 Uses API functions for better compatibility.", "创建最多 15 个测试用户及其工作流、库中工作流、预设、市场提交和 API 密钥。使用 API 函数以获得更好的兼容性。")}
                 </Text>
               </li>
               <li>
                 <Text variant="body" as="span">
                   <Text variant="body-medium" as="span">
-                    Full Test Data:
+                    {t("Full Test Data:", "完整测试数据：")}
                   </Text>{" "}
-                  Creates 100+ users with comprehensive test data including
-                  agent blocks, nodes, executions, analytics, and more. Takes
-                  longer to complete.
+                    {t("Creates 100+ users with comprehensive test data including agent blocks, nodes, executions, analytics, and more. Takes longer to complete.", "创建 100 多个用户及完整测试数据，包括模块、节点、执行记录、分析数据等，耗时较长。")}
                 </Text>
               </li>
             </ul>
@@ -61,35 +58,35 @@ function TestDataDashboard() {
 
         <div className="rounded-lg border bg-surface-muted p-6">
           <Text variant="body-medium" className="mb-2" tone="body">
-            What data is created?
+            {t("What data is created?", "会创建哪些数据？")}
           </Text>
           <div className="grid gap-4 text-body text-foreground-secondary md:grid-cols-2">
             <div>
-              <Text variant="body-medium">E2E Script:</Text>
+              <Text variant="body-medium">{t("E2E Script:", "E2E 脚本：")}</Text>
               <ul className="mt-1 list-inside list-disc">
                 <li>
                   <Text variant="small" as="span">
-                    Up to 15 test users
+                    {t("Up to 15 test users", "最多 15 个测试用户")}
                   </Text>
                 </li>
                 <li>
                   <Text variant="small" as="span">
-                    15 graphs per user
+                    {t("15 graphs per user", "每个用户 15 个工作流")}
                   </Text>
                 </li>
                 <li>
                   <Text variant="small" as="span">
-                    Library agents
+                    {t("Library agents", "库中工作流")}
                   </Text>
                 </li>
                 <li>
                   <Text variant="small" as="span">
-                    Agent presets
+                    {t("Agent presets", "工作流预设")}
                   </Text>
                 </li>
                 <li>
                   <Text variant="small" as="span">
-                    Store submissions
+                    {t("Store submissions", "市场提交")}
                   </Text>
                 </li>
                 <li>
@@ -99,52 +96,52 @@ function TestDataDashboard() {
                 </li>
                 <li>
                   <Text variant="small" as="span">
-                    Creator profiles
+                    {t("Creator profiles", "创建者资料")}
                   </Text>
                 </li>
               </ul>
             </div>
             <div>
-              <Text variant="body-medium">Full Script:</Text>
+              <Text variant="body-medium">{t("Full Script:", "完整脚本：")}</Text>
               <ul className="mt-1 list-inside list-disc">
                 <li>
                   <Text variant="small" as="span">
-                    100 users
+                    {t("100 users", "100 个用户")}
                   </Text>
                 </li>
                 <li>
                   <Text variant="small" as="span">
-                    100 agent blocks
+                    {t("100 agent blocks", "100 个工作流模块")}
                   </Text>
                 </li>
                 <li>
                   <Text variant="small" as="span">
-                    Multiple graphs per user
+                    {t("Multiple graphs per user", "每个用户多个工作流")}
                   </Text>
                 </li>
                 <li>
                   <Text variant="small" as="span">
-                    Agent nodes and links
+                    {t("Agent nodes and links", "工作流节点和连接")}
                   </Text>
                 </li>
                 <li>
                   <Text variant="small" as="span">
-                    Graph executions
+                    {t("Graph executions", "工作流执行记录")}
                   </Text>
                 </li>
                 <li>
                   <Text variant="small" as="span">
-                    Store listings and reviews
+                    {t("Store listings and reviews", "市场列表和评价")}
                   </Text>
                 </li>
                 <li>
                   <Text variant="small" as="span">
-                    Analytics data
+                    {t("Analytics data", "分析数据")}
                   </Text>
                 </li>
                 <li>
                   <Text variant="small" as="span">
-                    Credit transactions
+                    {t("Credit transactions", "积分交易记录")}
                   </Text>
                 </li>
               </ul>

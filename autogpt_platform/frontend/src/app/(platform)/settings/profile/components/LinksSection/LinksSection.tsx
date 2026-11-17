@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -22,6 +23,7 @@ interface Props {
 const EASE_OUT = [0.16, 1, 0.3, 1] as const;
 
 export function LinksSection({ links, onChange, onAdd, onRemove }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const canAdd = links.length < MAX_LINKS;
 
@@ -34,7 +36,7 @@ export function LinksSection({ links, onChange, onAdd, onRemove }: Props) {
     >
       <div className="flex flex-col gap-1 px-4">
         <Text variant="body-medium" as="span">
-          Your links
+          {t("Your links", "你的链接")}
         </Text>
         <Text variant="small" tone="muted">
           Add up to {MAX_LINKS} links. Site, GitHub, X, anything you want
@@ -86,7 +88,7 @@ export function LinksSection({ links, onChange, onAdd, onRemove }: Props) {
 
         {links.length === 0 ? (
           <Text variant="small" tone="subtle" className="mx-4">
-            No links yet.
+            {t("No links yet.", "暂无链接。")}
           </Text>
         ) : null}
 

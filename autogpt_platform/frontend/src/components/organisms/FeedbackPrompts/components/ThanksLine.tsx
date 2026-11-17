@@ -1,3 +1,7 @@
+"use client";
+import { DISPLAY_LABELS } from "../display-labels";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
@@ -13,6 +17,7 @@ export function ThanksLine({
   children = "Thanks, we read every one.",
   withChangelog = true,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-start gap-2">
       <Icon
@@ -22,13 +27,13 @@ export function ThanksLine({
         className="mt-[3px] shrink-0"
       />
       <Text variant="body" tone="emphasis">
-        {children}{" "}
+        {t(children, DISPLAY_LABELS[children] ?? children)}{" "}
         {withChangelog ? (
           <Link
             href={CHANGELOG_BASE_URL}
             className="text-foreground-tertiary underline underline-offset-2"
           >
-            See what we&apos;ve changed lately
+            {t("See what we've changed lately", "看看我们最近的更新")}
           </Link>
         ) : null}
       </Text>

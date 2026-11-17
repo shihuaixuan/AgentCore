@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -11,6 +14,7 @@ interface Props {
 /** Offered after the install has already succeeded, so it reads as the next
  *  thing worth doing rather than something that went wrong. */
 export function ConnectStep({ names, onConnect }: Props) {
+  const { t } = useTranslation();
   const providers = new Intl.ListFormat("en", {
     style: "long",
     type: "conjunction",
@@ -31,7 +35,7 @@ export function ConnectStep({ names, onConnect }: Props) {
         onClick={onConnect}
         className="ml-auto"
       >
-        Connect
+        {t("Connect", "连接")}
       </Button>
     </div>
   );

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { AutoGPTLogo } from "@/components/atoms/AutoGPTLogo/AutoGPTLogo";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -16,21 +17,6 @@ interface Props {
   purpose?: "grant" | "choose" | "update";
 }
 
-const TITLES = {
-  grant: (name: string) => `Give this expert access to ${name}`,
-  choose: (name: string) => `Choose a ${name} account`,
-  update: (name: string) => `Update a ${name} account`,
-};
-
-const DESCRIPTIONS = {
-  grant:
-    "Your account is already connected, but this expert can't use it yet. Pick an account to share, or add a new one.",
-  choose:
-    "You have more than one account connected. Pick the one this chat should use, or add a new one.",
-  update:
-    "None of your connected accounts has the access this needs. Pick the one to sign in to again, or add a new one.",
-};
-
 // The step before the connect methods when the account already has a
 // credential the expert lacks: pick which one to hand over. Mirrors the
 // method radio cards so switching to Add new feels like the same dialog.
@@ -42,6 +28,31 @@ export function ExistingCredentialsView({
   onSelect,
   purpose = "grant",
 }: Props) {
+  const { t } = useTranslation();
+  const TITLES = {
+    grant: (name: string) =>
+      t(`Give this expert access to ${name}`, `允许此专家访问 ${name}`),
+    choose: (name: string) =>
+      t(`Choose a ${name} account`, `选择 ${name} 账户`),
+    update: (name: string) =>
+      t(`Update a ${name} account`, `更新 ${name} 账户`),
+  };
+
+  const DESCRIPTIONS = {
+    grant: t(
+      "Your account is already connected, but this expert can't use it yet. Pick an account to share, or add a new one.",
+      "账户已连接，但此专家尚无使用权限。请选择要共享的账户，或添加新账户。",
+    ),
+    choose: t(
+      "You have more than one account connected. Pick the one this chat should use, or add a new one.",
+      "您已连接多个账户。请选择此聊天使用的账户，或添加新账户。",
+    ),
+    update: t(
+      "None of your connected accounts has the access this needs. Pick the one to sign in to again, or add a new one.",
+      "已连接的账户均缺少所需权限。请选择一个账户重新登录，或添加新账户。",
+    ),
+  };
+
   return (
     <div className="flex flex-col gap-5 pt-2">
       <div className="flex items-center justify-center gap-6">
@@ -75,7 +86,7 @@ export function ExistingCredentialsView({
 
       <div
         role="radiogroup"
-        aria-label="Account"
+        aria-label={t("Account", "账户")}
         className="flex flex-col gap-1 rounded-2xl bg-surface-hover p-1.5"
       >
         {credentials.map((credential) => {
@@ -112,7 +123,9 @@ export function ExistingCredentialsView({
                   {credential.title}
                 </Text>
                 <Text variant="small-tight" as="span" tone="muted">
-                  {credential.type === "oauth2" ? "OAuth" : "API key"}
+                  {credential.type === "oauth2"
+                    ? "OAuth"
+                    : t("API key", "API 密钥")}
                 </Text>
               </span>
               <span

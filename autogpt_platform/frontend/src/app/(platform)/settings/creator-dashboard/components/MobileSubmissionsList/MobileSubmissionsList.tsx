@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { motion, useReducedMotion } from "framer-motion";
 
 import type { Pagination as PaginationModel } from "@/app/api/__generated__/models/pagination";
@@ -63,6 +64,7 @@ export function MobileSubmissionsList({
   creatorUsername,
   index = 0,
 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   function setStatuses(statuses: SubmissionStatus[]) {
@@ -88,7 +90,7 @@ export function MobileSubmissionsList({
       <div className="flex items-center justify-between gap-3 px-1">
         <div className="flex items-center gap-2">
           <Text variant="body-medium" as="span">
-            Submissions
+            {t("Submissions", "提交记录")}
           </Text>
         </div>
         <Text variant="small" tone="muted">
@@ -100,8 +102,11 @@ export function MobileSubmissionsList({
         <SearchInput
           value={searchInput}
           onChange={onSearchChange}
-          placeholder="Search by workflow or listing name"
-          aria-label="Search submissions"
+          placeholder={t(
+            "Search by workflow or listing name",
+            "按工作流或上架名称搜索",
+          )}
+          aria-label={t("Search submissions", "搜索提交记录")}
           maxLength={100}
           loading={isFetching}
           size="small"
@@ -109,13 +114,13 @@ export function MobileSubmissionsList({
       </div>
 
       <div className="flex flex-wrap items-center gap-2 px-1">
-        <FilterChip label="Status">
+        <FilterChip label={t("Status", "状态")}>
           <StatusColumnFilter
             value={filterState.statuses}
             onChange={setStatuses}
           />
         </FilterChip>
-        <FilterChip label="Date">
+        <FilterChip label={t("Date", "日期")}>
           <SortColumnFilter
             sortKey="submitted"
             activeKey={filterState.sortKey}
@@ -125,7 +130,7 @@ export function MobileSubmissionsList({
             descLabel="Newest first"
           />
         </FilterChip>
-        <FilterChip label="Runs">
+        <FilterChip label={t("Runs", "运行记录")}>
           <SortColumnFilter
             sortKey="runs"
             activeKey={filterState.sortKey}
@@ -163,11 +168,11 @@ export function MobileSubmissionsList({
                 size="small"
                 onClick={() => onSearchChange("")}
               >
-                Clear search
+                {t("Clear search", "清除搜索")}
               </Button>
             ) : (
               <Button variant="secondary" size="small" onClick={onResetFilters}>
-                Clear filters
+                {t("Clear filters", "清除筛选")}
               </Button>
             )}
           </div>

@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -46,6 +50,7 @@ const READ_TAGS: Partial<Record<HeldState, string>> = {
 };
 
 export function HeldTag({ state, read }: { state: HeldState; read?: boolean }) {
+  const { t } = useTranslation();
   const tag = TAGS[state];
   const text = (read && READ_TAGS[state]) || tag.text;
   return (
@@ -56,7 +61,26 @@ export function HeldTag({ state, read }: { state: HeldState; read?: boolean }) {
       )}
     >
       {state === "approved" && <Icon icon={Tick02Icon} size={11} aria-hidden />}
-      {text}
+      {t(
+        text,
+        read && state === "waiting"
+          ? "已暂缓"
+          : read && state === "approved"
+            ? "已放行"
+            : read && state === "rejected"
+              ? "已屏蔽"
+              : (
+                  {
+                    waiting: "等待你处理",
+                    approved: "已批准",
+                    rejected: "已拒绝",
+                    expired: "已过期",
+                    closed: "未执行",
+                    unknown: "状态不明",
+                    "not-run": "未执行",
+                  } as Record<HeldState, string>
+                )[state],
+      )}
     </span>
   );
 }
@@ -82,6 +106,7 @@ interface HeldCallDetailProps {
 }
 
 export function HeldCallDetail({ held, showArgs = true }: HeldCallDetailProps) {
+  const { t } = useTranslation();
   const card = showArgs ? held.card : undefined;
   if (held.state === "approved" && !card) return null;
   const reviewId = held.reviewId;
@@ -94,7 +119,25 @@ export function HeldCallDetail({ held, showArgs = true }: HeldCallDetailProps) {
   return (
     <div className="flex flex-col items-start gap-1 rounded-lg border border-border-base px-3 py-2 text-body text-foreground-secondary">
       {held.state !== "approved" && (
-        <p>{(held.read && READ_DETAIL[held.state]) || DETAIL[held.state]}</p>
+        <p>
+          {t(
+            (held.read && READ_DETAIL[held.state]) || DETAIL[held.state],
+            held.read && held.state === "waiting"
+              ? `其中的内容尚未传给 ${AUTOPILOT_NAME}。${AUTOPILOT_NAME} 已继续处理其他工作。`
+              : held.read && held.state === "rejected"
+                ? `你已屏蔽此内容，因此 ${AUTOPILOT_NAME} 从未看到它。`
+                : held.read && held.state === "unknown"
+                  ? `无法确定此内容是否已传给 ${AUTOPILOT_NAME}，请先核实再使用。`
+                  : {
+                      waiting: `尚未执行任何操作。${AUTOPILOT_NAME} 已继续处理其他工作。`,
+                      rejected: `你已拒绝，因此未执行。已通知 ${AUTOPILOT_NAME}。`,
+                      expired: `虽已批准，但一小时内未执行，批准已失效。请让 ${AUTOPILOT_NAME} 重试。`,
+                      unknown: "可能已执行，但结果丢失。请先核实再使用。",
+                      closed: `无法完成，因此未执行。如仍需要，请让 ${AUTOPILOT_NAME} 重试。`,
+                      "not-run": `${AUTOPILOT_NAME} 无法发起审批，因此未执行。`,
+                    }[held.state],
+          )}
+        </p>
       )}
       {card && (
         <div className="w-full py-1">
@@ -108,7 +151,7 @@ export function HeldCallDetail({ held, showArgs = true }: HeldCallDetailProps) {
       )}
       {held.state === "waiting" && reviewId && (
         <Button variant="link" size="inline" onClick={goToApproval}>
-          Go to the approval
+          {t("Go to the approval", "前往审批")}
         </Button>
       )}
     </div>

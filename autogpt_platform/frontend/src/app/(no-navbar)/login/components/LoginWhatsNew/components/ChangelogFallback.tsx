@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { CHANGELOG_BASE_URL } from "@/components/molecules/ChangelogPopup/changelog-constants";
@@ -5,6 +8,7 @@ import { ArrowUpRight01Icon, NewsIcon } from "@hugeicons/core-free-icons";
 
 // Shown when the changelog can't be read: the section still leads somewhere.
 export function ChangelogFallback() {
+  const { t } = useTranslation();
   return (
     <a
       href={CHANGELOG_BASE_URL}
@@ -20,11 +24,16 @@ export function ChangelogFallback() {
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <Text as="span" variant="body-medium" tone="primary">
-          See what we&apos;ve shipped lately
+          {t("See what we've shipped lately", "查看近期更新")}
         </Text>
         <Text as="span" variant="body" tone="secondary">
-          Release notes for Otto, your Experts and the AutoGPT Platform
-          <span className="sr-only"> (opens in a new tab)</span>
+          {t(
+            "Release notes for Otto, your Experts and the AutoGPT Platform",
+            "Otto、专家团队和 AutoGPT 平台的更新说明",
+          )}
+          <span className="sr-only">
+            {t("(opens in a new tab)", "（在新标签页中打开）")}
+          </span>
         </Text>
       </span>
       <span

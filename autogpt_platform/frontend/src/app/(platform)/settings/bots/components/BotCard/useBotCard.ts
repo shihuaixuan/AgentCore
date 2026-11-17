@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -9,6 +10,7 @@ import {
 import { useToast } from "@/components/molecules/Toast/use-toast";
 
 export function useBotCard() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   // Track every in-flight link ID independently. A single string would
@@ -38,10 +40,10 @@ export function useBotCard() {
   const invalidatePlatforms = () =>
     queryClient.invalidateQueries({ queryKey: getListBotPlatformsQueryKey() });
 
-  function showError(action: string) {
+  function showError(action: string, chinese: string) {
     toast({
-      title: `Couldn't ${action}`,
-      description: "Please try again in a moment.",
+      title: t(`Couldn't ${action}`, chinese),
+      description: t("Please try again in a moment.", "请稍后重试。"),
       variant: "destructive",
     });
   }
@@ -49,14 +51,14 @@ export function useBotCard() {
   const unlinkServer = useDeletePlatformLinkingUnlinkAPlatformServer({
     mutation: {
       onSuccess: () => invalidatePlatforms(),
-      onError: () => showError("unlink the server"),
+      onError: () => showError("unlink the server", "无法解除服务器绑定"),
     },
   });
 
   const unlinkDm = useDeletePlatformLinkingUnlinkADmUserLink({
     mutation: {
       onSuccess: () => invalidatePlatforms(),
-      onError: () => showError("unlink the DM"),
+      onError: () => showError("unlink the DM", "无法解除私信绑定"),
     },
   });
 

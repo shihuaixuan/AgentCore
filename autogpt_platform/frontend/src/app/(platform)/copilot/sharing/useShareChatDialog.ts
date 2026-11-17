@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -15,6 +19,7 @@ type Props = {
 };
 
 export function useShareChatDialog({ sessionId, open }: Props) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -62,8 +67,8 @@ export function useShareChatDialog({ sessionId, open }: Props) {
       onSuccess: (res) => {
         if (res.status !== 200) {
           toast({
-            title: "Failed to enable sharing",
-            description: "Please try again.",
+            title: t("Failed to enable sharing", "开启共享失败"),
+            description: t("Please try again.", "请重试。"),
             variant: "destructive",
           });
           return;
@@ -72,15 +77,17 @@ export function useShareChatDialog({ sessionId, open }: Props) {
         setShareToken(res.data.share_token);
         invalidateState();
         toast({
-          title: "Chat sharing enabled",
-          description:
+          title: t("Chat sharing enabled", "已开启对话共享"),
+          description: t(
             "Anyone with the link can now view this conversation. Revoke any time.",
+            "任何持有链接的人现在都能查看此对话，你可以随时撤销共享。",
+          ),
         });
       },
       onError: () => {
         toast({
-          title: "Failed to enable sharing",
-          description: "Please try again.",
+          title: t("Failed to enable sharing", "开启共享失败"),
+          description: t("Please try again.", "请重试。"),
           variant: "destructive",
         });
       },
@@ -96,14 +103,17 @@ export function useShareChatDialog({ sessionId, open }: Props) {
           setConfirmingStop(false);
           invalidateState();
           toast({
-            title: "Chat sharing disabled",
-            description: "The share link is no longer accessible.",
+            title: t("Chat sharing disabled", "已停止共享对话"),
+            description: t(
+              "The share link is no longer accessible.",
+              "分享链接已无法访问。",
+            ),
           });
         },
         onError: () => {
           toast({
-            title: "Failed to disable sharing",
-            description: "Please try again.",
+            title: t("Failed to disable sharing", "停止共享失败"),
+            description: t("Please try again.", "请重试。"),
             variant: "destructive",
           });
         },
@@ -120,7 +130,7 @@ export function useShareChatDialog({ sessionId, open }: Props) {
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast({
-        title: "Failed to copy link",
+        title: t("Failed to copy link", "复制链接失败"),
         variant: "destructive",
       });
     }

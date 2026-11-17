@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React, { Fragment } from "react";
 import { Block } from "../Block";
 import { beautifyString, cn } from "@/lib/utils";
@@ -9,6 +10,7 @@ import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { blockMenuButtonBase, blockMenuContainerStyle } from "../style";
 
 export const AllBlocksContent = () => {
+  const { t } = useTranslation();
   const {
     data,
     isLoading,
@@ -37,8 +39,9 @@ export const AllBlocksContent = () => {
           responseError={error || undefined}
           httpError={{
             status: data?.status,
-            statusText: "Request failed",
-            message: (error?.detail as string) || "An error occurred",
+            statusText: t("Request failed", "请求失败"),
+            message:
+              (error?.detail as string) || t("An error occurred", "发生错误"),
           }}
           context="block menu"
           onRetry={() => window.location.reload()}
@@ -98,7 +101,9 @@ export const AllBlocksContent = () => {
               {!isErrorOnLoadingMore && (
                 <ErrorCard
                   isSuccess={false}
-                  responseError={{ message: "Error loading blocks" }}
+                  responseError={{
+                    message: t("Error loading blocks", "加载模块失败"),
+                  }}
                   context="blocks"
                   onRetry={() => handleRefetchBlocks(category.name)}
                 />
@@ -120,7 +125,7 @@ export const AllBlocksContent = () => {
                     tone="inherit"
                     decoration="underline"
                   >
-                    see all
+                    {t("see all", "查看全部")}
                   </Text>
                 </button>
               )}

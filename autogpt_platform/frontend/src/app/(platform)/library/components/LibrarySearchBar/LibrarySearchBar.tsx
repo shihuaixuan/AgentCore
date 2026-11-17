@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Input } from "@/components/atoms/Input/Input";
 import { useLibrarySearchbar } from "./useLibrarySearchbar";
 import { Search01Icon } from "@hugeicons/core-free-icons";
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function LibrarySearchBar({ setSearchTerm }: Props) {
+  const { t } = useTranslation();
   const { handleSearchInput } = useLibrarySearchbar({ setSearchTerm });
 
   return (
@@ -27,7 +29,7 @@ export function LibrarySearchBar({ setSearchTerm }: Props) {
       </span>
 
       <Input
-        label="Search workflows"
+        label={t("Search workflows", "搜索工作流")}
         id="library-search-bar"
         hideLabel
         onChange={handleSearchInput}
@@ -35,7 +37,7 @@ export function LibrarySearchBar({ setSearchTerm }: Props) {
         className="min-w-[18rem] pl-12 lg:min-w-[30rem]"
         type="text"
         data-testid="library-textbox"
-        placeholder="Search workflows"
+        placeholder={t("Search workflows", "搜索工作流")}
       />
     </div>
   );

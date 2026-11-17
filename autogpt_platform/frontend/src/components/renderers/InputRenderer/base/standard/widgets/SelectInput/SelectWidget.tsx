@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useFieldAccessibility } from "../../../../field-accessibility";
 import {
   enumOptionsIndexForValue,
@@ -41,6 +42,7 @@ function getFieldSchema(props: WidgetProps) {
 }
 
 export function SelectWidget(props: WidgetProps) {
+  const { t } = useTranslation();
   const {
     options,
     value,
@@ -142,7 +144,7 @@ export function SelectWidget(props: WidgetProps) {
           <MultiSelectorTrigger>
             <MultiSelectorInput
               aria-describedby={accessibility["aria-describedby"]}
-              placeholder="Select options..."
+              placeholder={t("Select options...", "选择选项…")}
             />
           </MultiSelectorTrigger>
           <MultiSelectorContent>
@@ -166,7 +168,11 @@ export function SelectWidget(props: WidgetProps) {
     return (
       <Select
         label={resolvedLabel}
-        placeholder={placeholder || schemaPlaceholder || "Select an option"}
+        placeholder={
+          placeholder ||
+          schemaPlaceholder ||
+          t("Select an option", "选择一个选项")
+        }
         {...accessibility}
         hideLabel={true}
         disabled={disabled || readonly}

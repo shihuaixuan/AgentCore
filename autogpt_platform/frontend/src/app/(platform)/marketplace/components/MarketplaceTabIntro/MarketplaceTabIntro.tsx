@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { TabIntroCard } from "@/app/(platform)/components/TabIntroCard/TabIntroCard";
 import { useTabIntroCard } from "@/app/(platform)/components/TabIntroCard/useTabIntroCard";
 import { Store01Icon } from "@hugeicons/core-free-icons";
@@ -14,6 +15,7 @@ interface Props {
 // full listing on the days nothing is featured — the card promises movement,
 // so it has to produce some.
 export function MarketplaceTabIntro({ canShow = true }: Props) {
+  const { t } = useTranslation();
   const { isOpen, dismiss, takeAction } = useTabIntroCard(
     "marketplace",
     canShow,
@@ -31,9 +33,12 @@ export function MarketplaceTabIntro({ canShow = true }: Props) {
     <TabIntroCard
       isOpen={isOpen}
       icon={Store01Icon}
-      title="Workflows ready to work."
+      title={t("Workflows ready to work.", "工作流已准备就绪。")}
       body="Hundreds built by the community. Install one in a single click and run it today."
-      cta={{ label: "Browse featured workflows", onClick: browseFeatured }}
+      cta={{
+        label: t("Browse featured workflows", "浏览精选工作流"),
+        onClick: browseFeatured,
+      }}
       onDismiss={dismiss}
     />
   );

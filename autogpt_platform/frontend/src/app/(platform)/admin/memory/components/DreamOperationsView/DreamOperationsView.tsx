@@ -19,19 +19,21 @@ import {
   FilePlusIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   operations: DreamOperationsSnapshot | null | undefined;
 }
 
 export function DreamOperationsView({ operations }: Props) {
+  const { t } = useTranslation();
   if (!operations) {
     return (
       <div
         className="rounded-md border border-dashed bg-surface p-4 text-center text-body text-foreground-tertiary"
         data-testid="dream-operations-empty"
       >
-        No per-edge operations were returned for this dream pass.
+        {t("No per-edge operations were returned for this dream pass.", "此次记忆整理没有返回逐边操作。")}
       </div>
     );
   }
@@ -48,7 +50,7 @@ export function DreamOperationsView({ operations }: Props) {
       data-testid="dream-operations-view"
     >
       <Text variant="eyebrow" as="p" className="mb-2">
-        Operations
+        {t("Operations", "操作")}
       </Text>
       <Accordion
         type="multiple"
@@ -58,13 +60,13 @@ export function DreamOperationsView({ operations }: Props) {
           <AccordionTrigger>
             <SectionLabel
               icon={<Icon icon={FilePlusIcon} size={14} />}
-              label="Writes"
+              label={t("Writes", "写入")}
               count={counts.writes}
             />
           </AccordionTrigger>
           <AccordionContent>
             {writes.length === 0 ? (
-              <EmptyRow text="No writes recorded." />
+              <EmptyRow text={t("No writes recorded.", "没有记录写入。")} />
             ) : (
               <ul className="space-y-1.5">
                 {writes.map((w, i) => (
@@ -82,13 +84,13 @@ export function DreamOperationsView({ operations }: Props) {
           <AccordionTrigger>
             <SectionLabel
               icon={<Icon icon={BulbIcon} size={14} />}
-              label="Proposals"
+              label={t("Proposals", "提议")}
               count={counts.proposals}
             />
           </AccordionTrigger>
           <AccordionContent>
             {proposals.length === 0 ? (
-              <EmptyRow text="No proposals recorded." />
+              <EmptyRow text={t("No proposals recorded.", "没有记录提议。")} />
             ) : (
               <ul className="space-y-1.5">
                 {proposals.map((p, i) => (
@@ -106,13 +108,13 @@ export function DreamOperationsView({ operations }: Props) {
           <AccordionTrigger>
             <SectionLabel
               icon={<Icon icon={Delete02Icon} size={14} />}
-              label="Demotions"
+              label={t("Demotions", "降级")}
               count={counts.demotions}
             />
           </AccordionTrigger>
           <AccordionContent>
             {demotions.length === 0 ? (
-              <EmptyRow text="No demotions recorded." />
+              <EmptyRow text={t("No demotions recorded.", "没有记录降级。")} />
             ) : (
               <ul className="space-y-1.5">
                 {demotions.map((d) => (
@@ -127,13 +129,13 @@ export function DreamOperationsView({ operations }: Props) {
           <AccordionTrigger>
             <SectionLabel
               icon={<Icon icon={Alert01Icon} size={14} />}
-              label="Entity invalidations"
+              label={t("Entity invalidations", "实体失效")}
               count={counts.entities}
             />
           </AccordionTrigger>
           <AccordionContent>
             {entityInvalidations.length === 0 ? (
-              <EmptyRow text="No entity invalidations recorded." />
+              <EmptyRow text={t("No entity invalidations recorded.", "没有记录实体失效。")} />
             ) : (
               <ul className="space-y-1.5">
                 {entityInvalidations.map((e) => (

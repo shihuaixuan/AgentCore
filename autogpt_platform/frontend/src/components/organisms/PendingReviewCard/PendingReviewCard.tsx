@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { PendingHumanReviewModel } from "@/app/api/__generated__/models/pendingHumanReviewModel";
 import { Text } from "@/components/atoms/Text/Text";
 import { Input } from "@/components/atoms/Input/Input";
@@ -29,6 +32,7 @@ export function PendingReviewCard({
   showAutoApprove = true,
   nodeId,
 }: PendingReviewCardProps) {
+  const { t } = useTranslation();
   const isDataEditable = review.editable;
 
   // A block's review names the block in `action`; a human-in-the-loop block's
@@ -76,27 +80,27 @@ export function PendingReviewCard({
       return (
         <Input
           id="data-string"
-          label="Value"
+          label={t("Value", "值")}
           hideLabel
           size="small"
           type="textarea"
           rows={3}
           value={data}
           onChange={(e) => handleDataChange(e.target.value)}
-          placeholder="Enter text"
+          placeholder={t("Enter text", "输入文本")}
         />
       );
     } else if (typeof data === "number") {
       return (
         <Input
           id="data-number"
-          label="Value"
+          label={t("Value", "值")}
           hideLabel
           size="small"
           type="number"
           value={data}
           onChange={(e) => handleDataChange(Number(e.target.value))}
-          placeholder="Enter number"
+          placeholder={t("Enter number", "输入数字")}
         />
       );
     } else if (typeof data === "boolean") {
@@ -109,7 +113,7 @@ export function PendingReviewCard({
             data-slot="pending-review-card-toggle-label"
             className="text-body text-foreground-tertiary"
           >
-            {data ? "Enabled" : "Disabled"}
+            {data ? t("Enabled", "已启用") : t("Disabled", "已禁用")}
           </span>
           <Switch
             className="ml-auto"
@@ -141,7 +145,10 @@ export function PendingReviewCard({
     <div data-slot="pending-review-card" className="space-y-4">
       {nodeId && (
         <Text variant="small" tone="muted">
-          Node #{getShortenedNodeId(nodeId)}
+          {t(
+            `Node #${getShortenedNodeId(nodeId)}`,
+            `节点 #${getShortenedNodeId(nodeId)}`,
+          )}
         </Text>
       )}
 
@@ -181,14 +188,19 @@ export function PendingReviewCard({
               }
             />
             <Text variant="small" tone="body">
-              Auto-approve future executions of this block
+              {t(
+                "Auto-approve future executions of this block",
+                "自动批准此模块以后的执行",
+              )}
             </Text>
           </div>
           {autoApproveFuture && (
             <div className="pl-11">
               <Text variant="small" tone="muted">
-                Original data will be used for this and all future reviews from
-                this block.
+                {t(
+                  "Original data will be used for this and all future reviews from this block.",
+                  "本次及此模块以后所有审核都将使用原始数据。",
+                )}
               </Text>
             </div>
           )}

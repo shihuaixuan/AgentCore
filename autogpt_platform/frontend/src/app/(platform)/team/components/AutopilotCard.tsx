@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -36,6 +39,7 @@ export function AutopilotCard({
   workflowCount,
   onChat,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <section
       aria-label={AUTOPILOT_NAME}
@@ -43,7 +47,7 @@ export function AutopilotCard({
     >
       <Link
         href="/team/autopilot"
-        aria-label={`View ${AUTOPILOT_NAME}`}
+        aria-label={t(`View ${AUTOPILOT_NAME}`, `查看 ${AUTOPILOT_NAME}`)}
         className="flex flex-1 flex-col items-start p-2 pb-4"
       >
         <ExpertCover color={AUTOPILOT_COVER_COLOR} status="built-in" />
@@ -73,14 +77,17 @@ export function AutopilotCard({
             style={categoryTagStyle(AUTOPILOT_COVER_COLOR)}
           >
             <Icon icon={SparklesIcon} size={12} className="shrink-0" />
-            <span className="truncate">{AUTOPILOT_ROLE}</span>
+            <span className="truncate">{t(AUTOPILOT_ROLE, "AI 负责人")}</span>
           </span>
           <Text
             variant="body"
             tone="muted"
             className="mt-1 line-clamp-2 min-h-[2lh]"
           >
-            {AUTOPILOT_BLURB}
+            {t(
+              AUTOPILOT_BLURB,
+              "你的内置通才助手，负责回答问题、运行工作流，并将任务分配给你聘用的专家。",
+            )}
           </Text>
         </div>
 
@@ -88,19 +95,19 @@ export function AutopilotCard({
           <CardStats className="mt-3 w-full">
             <CardStat
               icon={Calendar03Icon}
-              label="Schedules"
+              label={t("Schedules", "计划")}
               singular="schedule"
               count={scheduleCount}
             />
             <CardStat
               icon={SparklesIcon}
-              label="Skills"
+              label={t("Skills", "技能")}
               singular="skill"
               count={skillCount}
             />
             <CardStat
               icon={FlashIcon}
-              label="Workflows"
+              label={t("Workflows", "工作流")}
               singular="workflow"
               count={workflowCount}
             />
@@ -116,7 +123,7 @@ export function AutopilotCard({
           leadingIcon={BubbleChatIcon}
           onClick={onChat}
         >
-          Chat
+          {t("Chat", "聊天")}
         </Button>
       </div>
     </section>

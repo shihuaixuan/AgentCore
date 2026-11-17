@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { tourTarget } from "@/lib/tour-targets";
 import { useIsBillingEnabled } from "@/hooks/useIsBillingEnabled";
 import { useGetV2GetUserProfile } from "@/app/api/__generated__/endpoints/store/store";
@@ -21,6 +22,7 @@ import { isLogoutInProgress } from "@/lib/autogpt-server-api/helpers";
 import { useAuth } from "@/lib/auth/hooks/useAuth";
 
 export function SidebarUserActions() {
+  const { t } = useTranslation();
   const { user, isLoggedIn, isUserLoading } = useAuth();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -68,7 +70,7 @@ export function SidebarUserActions() {
             </SidebarTooltipTrigger>
             <TooltipPortal>
               <SidebarTooltipContent side="right">
-                Account
+                {t("Account", "账户")}
               </SidebarTooltipContent>
             </TooltipPortal>
           </SidebarTooltip>

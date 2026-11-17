@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { ReactNode } from "react";
 import { format } from "date-fns";
 
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function APIKeyInfoDialog({ open, apiKey, onOpenChange }: Props) {
+  const { t } = useTranslation();
   return (
     <Dialog
       title={apiKey.name}
@@ -26,24 +28,24 @@ export function APIKeyInfoDialog({ open, apiKey, onOpenChange }: Props) {
     >
       <Dialog.Content>
         <div className="flex flex-col gap-4 px-1">
-          <Section label="Key">
+          <Section label={t("Key", "密钥")}>
             <code className="font-mono text-body text-foreground-emphasis">
               {maskAPIKey(apiKey.head, apiKey.tail)}
             </code>
           </Section>
 
           {apiKey.description && (
-            <Section label="Description">
+            <Section label={t("Description", "描述")}>
               <Text variant="body" tone="body">
                 {apiKey.description}
               </Text>
             </Section>
           )}
 
-          <Section label="Scopes">
+          <Section label={t("Scopes", "权限范围")}>
             {apiKey.scopes.length === 0 ? (
               <Text variant="body" tone="muted">
-                No scopes
+                {t("No scopes", "无权限范围")}
               </Text>
             ) : (
               <ul className="flex flex-wrap gap-1.5">
@@ -65,17 +67,17 @@ export function APIKeyInfoDialog({ open, apiKey, onOpenChange }: Props) {
             )}
           </Section>
 
-          <Section label="Created">
+          <Section label={t("Created", "创建时间")}>
             <Text variant="body" tone="body">
               {format(new Date(apiKey.created_at), "PPP p")}
             </Text>
           </Section>
 
-          <Section label="Last used">
+          <Section label={t("Last used", "上次使用")}>
             <Text variant="body" tone="body">
               {apiKey.last_used_at
                 ? format(new Date(apiKey.last_used_at), "PPP p")
-                : "Never used"}
+                : t("Never used", "从未使用")}
             </Text>
           </Section>
         </div>

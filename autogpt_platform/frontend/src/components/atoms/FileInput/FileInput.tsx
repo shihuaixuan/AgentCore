@@ -1,4 +1,7 @@
+"use client";
+
 import { useRef, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "../Button/Button";
 import { formatFileSize, getFileLabel } from "./helpers";
 import { cn } from "@/lib/utils";
@@ -24,6 +27,7 @@ function PreviewButton({
   title: string;
   contentType?: string;
 }) {
+  const { t } = useTranslation();
   const metadata = contentType ? { mimeType: contentType } : undefined;
   const renderer = globalRegistry.getRenderer(value, metadata);
   if (!renderer) return null;
@@ -39,7 +43,7 @@ function PreviewButton({
           withTooltip={false}
           className="flex-shrink-0 text-foreground-tertiary hover:text-info-foreground"
           type="button"
-          aria-label="Preview file"
+          aria-label={t("Preview file", "预览文件")}
         >
           <Icon data-slot="file-input-preview-icon" icon={EyeIcon} size={14} />
         </Button>
@@ -115,6 +119,7 @@ interface Base64ModeProps extends BaseProps {
 type Props = UploadModeProps | Base64ModeProps;
 
 export function FileInput(props: Props) {
+  const { t } = useTranslation();
   const {
     value,
     onChange,
@@ -141,7 +146,10 @@ export function FileInput(props: Props) {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const storageNote = "Files are stored securely in your workspace.";
+  const storageNote = t(
+    "Files are stored securely in your workspace.",
+    "文件安全地保存在你的工作空间中。",
+  );
 
   function acceptToString(a?: string | string[]) {
     if (!a) return "*/*";
@@ -247,7 +255,7 @@ export function FileInput(props: Props) {
       setIsUploading(false);
     };
     reader.onerror = () => {
-      setUploadError("Failed to read file");
+      setUploadError(t("Failed to read file", "读取文件失败"));
       setIsUploading(false);
     };
     reader.readAsDataURL(file);
@@ -286,7 +294,9 @@ export function FileInput(props: Props) {
       }
     } catch (error) {
       console.error("Upload failed:", error);
-      setUploadError(error instanceof Error ? error.message : "Upload failed");
+      setUploadError(
+        error instanceof Error ? error.message : t("Upload failed", "上传失败"),
+      );
     } finally {
       setIsUploading(false);
     }
@@ -298,13 +308,18 @@ export function FileInput(props: Props) {
     // Validate max size
     if (typeof maxFileSize === "number" && file.size > maxFileSize) {
       setUploadError(
-        `File exceeds maximum size of ${formatFileSize(maxFileSize)} (selected ${formatFileSize(file.size)})`,
+        t(
+          `File exceeds maximum size of ${formatFileSize(maxFileSize)} (selected ${formatFileSize(file.size)})`,
+          `文件超过 ${formatFileSize(maxFileSize)} 的大小限制，所选文件为 ${formatFileSize(file.size)}`,
+        ),
       );
       return;
     }
     // Validate accept types
     if (!isAcceptedType(file, accept)) {
-      setUploadError("Selected file type is not allowed");
+      setUploadError(
+        t("Selected file type is not allowed", "不支持所选文件类型"),
+      );
       return;
     }
     uploadFile(file);
@@ -327,7 +342,7 @@ export function FileInput(props: Props) {
     setFileInfo(null);
   }
 
-  const displayName = placeholder || "File";
+  const displayName = placeholder || t("File", "文件");
 
   if (variant === "compact") {
     return (
@@ -353,7 +368,9 @@ export function FileInput(props: Props) {
                 variant="small"
                 tone="info-strong"
               >
-                {mode === "base64" ? "Processing..." : "Uploading..."}
+                {mode === "base64"
+                  ? t("Processing...", "处理中……")
+                  : t("Uploading...", "上传中……")}
               </Text>
             </div>
           ) : value ? (
@@ -411,7 +428,7 @@ export function FileInput(props: Props) {
                 className="flex-shrink-0 text-foreground-tertiary hover:text-error-hover"
                 onClick={handleClear}
                 type="button"
-                aria-label="Clear file"
+                aria-label={t("Clear file", "清除文件")}
               >
                 <Icon
                   data-slot="file-input-clear-icon"
@@ -439,7 +456,7 @@ export function FileInput(props: Props) {
                   icon={Upload01Icon}
                   className="mr-1.5 h-3.5 w-3.5"
                 />
-                {`Upload ${displayName}`}
+                {t(`Upload ${displayName}`, `上传${displayName}`)}
               </Button>
             </div>
           )}
@@ -487,7 +504,9 @@ export function FileInput(props: Props) {
                 data-slot="file-input-progress-text"
                 className="text-foreground-body"
               >
-                {mode === "base64" ? "Processing..." : "Uploading..."}
+                {mode === "base64"
+                  ? t("Processing...", "处理中……")
+                  : t("Uploading...", "上传中……")}
               </span>
             </div>
           </div>
@@ -552,7 +571,7 @@ export function FileInput(props: Props) {
                   withTooltip={false}
                   type="button"
                   onClick={handleClear}
-                  aria-label="Clear file"
+                  aria-label={t("Clear file", "清除文件")}
                   className="flex-shrink-0 text-foreground-tertiary hover:text-error-hover"
                 >
                   <Icon
@@ -585,7 +604,10 @@ export function FileInput(props: Props) {
               onDragOver={(e) => e.preventDefault()}
               className="agpt-border-input flex min-h-14 w-full items-center justify-center rounded-xl border-dashed bg-surface-muted text-body leading-5 text-foreground-tertiary"
             >
-              Choose a file or drag and drop it here
+              {t(
+                "Choose a file or drag and drop it here",
+                "选择文件或将文件拖到这里",
+              )}
             </div>
 
             <Button
@@ -594,7 +616,7 @@ export function FileInput(props: Props) {
               className="min-w-40"
               type="button"
             >
-              Browse File
+              {t("Browse File", "浏览文件")}
             </Button>
           </div>
 
@@ -603,7 +625,7 @@ export function FileInput(props: Props) {
               data-slot="file-input-error"
               className="text-body leading-5 text-error-hover"
             >
-              Error: {uploadError}
+              {t(`Error: ${uploadError}`, `错误：${uploadError}`)}
             </div>
           )}
 

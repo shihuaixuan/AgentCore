@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import {
@@ -30,13 +33,15 @@ export function BotCardServerList({
   isPending,
   onUnlink,
 }: Props) {
+  const { t } = useTranslation();
   if (serverLinks.length === 0) {
     return (
       <div className="rounded-large border border-dashed border-border-base px-4 py-3">
         <Text variant="small" as="span" tone="muted">
-          No {serverNoun}s linked yet. Use &quot;{addBotLabel}&quot; to invite
-          the bot — already added it? Run <code>/setup</code> there to finish
-          connecting.
+          {t(
+            `No ${serverNoun}s linked yet. Use "${addBotLabel}" to invite the bot — already added it? Run /setup there to finish connecting.`,
+            `尚未连接任何${serverNoun === "workspace" ? "工作区" : serverNoun === "group" ? "群组" : "服务器"}。点击“${addBotLabel}”邀请机器人。如果已添加机器人，请在那里运行 /setup 以完成连接。`,
+          )}
         </Text>
       </div>
     );
@@ -73,6 +78,7 @@ function BotCardServerRow({
   isPending,
   onUnlink,
 }: RowProps) {
+  const { t } = useTranslation();
   const botMissing = !link.server_name;
   const displayLabel = link.server_name ?? link.platform_server_id;
 
@@ -88,17 +94,20 @@ function BotCardServerRow({
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="inline-flex items-center gap-1 text-caption text-warning-foreground">
-                  <Icon icon={AlertCircleIcon} size={14} /> Name unavailable
+                  <Icon icon={AlertCircleIcon} size={14} />{" "}
+                  {t("Name unavailable", "名称不可用")}
                 </span>
               </TooltipTrigger>
               <TooltipContent>
-                {platformName} didn&apos;t give us a name for this {serverNoun}.
-                It stays linked and usable; unlink to remove this row.
+                {t(
+                  `${platformName} didn't give us a name for this ${serverNoun}. It stays linked and usable; unlink to remove this row.`,
+                  `${platformName} 未提供此连接的名称。该连接仍可正常使用；解除绑定即可移除此记录。`,
+                )}
               </TooltipContent>
             </Tooltip>
           ) : (
             <Text variant="small" as="span" tone="muted">
-              Linked by you
+              {t("Linked by you", "由你连接")}
             </Text>
           )}
         </div>
@@ -109,9 +118,9 @@ function BotCardServerRow({
         leftIcon={<Icon icon={Delete02Icon} size={16} />}
         loading={isPending}
         onClick={onUnlink}
-        aria-label={`Unlink ${displayLabel}`}
+        aria-label={t(`Unlink ${displayLabel}`, `解除 ${displayLabel} 的绑定`)}
       >
-        Unlink
+        {t("Unlink", "断开连接")}
       </Button>
     </li>
   );

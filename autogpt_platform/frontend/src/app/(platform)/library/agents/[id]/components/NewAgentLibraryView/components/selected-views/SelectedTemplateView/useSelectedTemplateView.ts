@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getGetV1ListGraphExecutionsQueryKey } from "@/app/api/__generated__/endpoints/graphs/graphs";
 import {
   getGetV2GetASpecificPresetQueryKey,
@@ -31,6 +32,7 @@ export function useSelectedTemplateView({
   graphId,
   onRunCreated,
 }: Args) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -66,7 +68,7 @@ export function useSelectedTemplateView({
       onSuccess: (response) => {
         if (response.status === 200) {
           toast({
-            title: "Template updated",
+            title: t("Template updated", "模板已更新"),
           });
           queryClient.invalidateQueries({
             queryKey: getGetV2GetASpecificPresetQueryKey(templateId),
@@ -78,7 +80,7 @@ export function useSelectedTemplateView({
       },
       onError: (error: any) => {
         toast({
-          title: "Failed to update template",
+          title: t("Failed to update template", "无法更新模板"),
           description: error.message || "An unexpected error occurred.",
           variant: "destructive",
         });
@@ -93,7 +95,7 @@ export function useSelectedTemplateView({
           const execution = okData(response);
           if (execution) {
             toast({
-              title: "Task started",
+              title: t("Task started", "任务已启动"),
             });
             queryClient.invalidateQueries({
               queryKey: getGetV1ListGraphExecutionsQueryKey(graphId),
@@ -104,7 +106,7 @@ export function useSelectedTemplateView({
       },
       onError: (error: any) => {
         toast({
-          title: "Failed to start task",
+          title: t("Failed to start task", "无法启动任务"),
           description: error.message || "An unexpected error occurred.",
           variant: "destructive",
         });

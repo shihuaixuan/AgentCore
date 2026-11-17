@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
 import { Button } from "@/components/atoms/Button/Button";
@@ -57,6 +60,7 @@ export function SearchCommandModal({
   inputAriaLabel = "Search",
   loadingItemId,
 }: Props) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const reactId = useId();
   // Strip the colons React uses in ``useId`` so the result survives a
@@ -124,9 +128,11 @@ export function SearchCommandModal({
           className="fixed top-[18vh] left-1/2 z-[80] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-3xl bg-surface shadow-2xl ring-1 ring-border-base focus:outline-none"
           onKeyDown={handleKeyDown}
         >
-          <RXDialog.Title className="sr-only">Search</RXDialog.Title>
+          <RXDialog.Title className="sr-only">
+            {t("Search", "搜索")}
+          </RXDialog.Title>
           <RXDialog.Description className="sr-only">
-            Search commands and results.
+            {t("Search commands and results.", "搜索命令和结果。")}
           </RXDialog.Description>
           <div
             data-slot="search-command-modal-search-bar"
@@ -156,7 +162,7 @@ export function SearchCommandModal({
             {isLoading && isSearching ? (
               <LoadingSpinner
                 size="small"
-                aria-label="Searching"
+                aria-label={t("Searching", "正在搜索")}
                 className="shrink-0 text-foreground-tertiary"
               />
             ) : null}
@@ -165,7 +171,7 @@ export function SearchCommandModal({
                 type="button"
                 variant="compact-ghost"
                 size="compact-icon-sm"
-                aria-label="Clear search"
+                aria-label={t("Clear search", "清空搜索")}
                 onClick={() => onQueryChange("")}
                 className="shrink-0"
               >
@@ -275,7 +281,7 @@ export function SearchCommandModal({
                   tone="body"
                   data-slot="search-command-modal-hint-label"
                 >
-                  Navigate
+                  {t("Navigate", "移动选择")}
                 </Text>
               </div>
               <div
@@ -302,7 +308,7 @@ export function SearchCommandModal({
                   tone="body"
                   data-slot="search-command-modal-hint-label"
                 >
-                  Select
+                  {t("Select", "选择")}
                 </Text>
               </div>
             </div>
@@ -330,7 +336,7 @@ export function SearchCommandModal({
                 tone="body"
                 data-slot="search-command-modal-hint-label"
               >
-                Close
+                {t("Close", "关闭")}
               </Text>
             </div>
           </div>

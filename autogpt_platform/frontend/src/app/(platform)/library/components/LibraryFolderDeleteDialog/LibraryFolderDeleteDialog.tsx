@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
@@ -25,6 +26,7 @@ export function LibraryFolderDeleteDialog({
   setIsOpen,
   onDeleted,
 }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -38,16 +40,22 @@ export function LibraryFolderDeleteDialog({
           queryKey: getGetV2ListLibraryAgentsQueryKey(),
         });
         toast({
-          title: "Folder deleted",
-          description: `"${folder.name}" has been deleted.`,
+          title: t("Folder deleted", "文件夹已删除"),
+          description: t(
+            `"${folder.name}" has been deleted.`,
+            `“${folder.name}”已删除。`,
+          ),
         });
         setIsOpen(false);
         onDeleted?.();
       },
       onError: () => {
         toast({
-          title: "Error",
-          description: "Failed to delete folder. Please try again.",
+          title: t("Error", "错误"),
+          description: t(
+            "Failed to delete folder. Please try again.",
+            "删除文件夹失败，请重试。",
+          ),
           variant: "destructive",
         });
       },
@@ -65,13 +73,15 @@ export function LibraryFolderDeleteDialog({
         set: setIsOpen,
       }}
       styling={{ maxWidth: "32rem" }}
-      title="Delete folder"
+      title={t("Delete folder", "删除文件夹")}
     >
       <Dialog.Content>
         <div>
           <Text variant="large">
-            Are you sure you want to delete &ldquo;{folder.name}&rdquo;?
-            Workflows inside this folder will be moved back to your library.
+            {t(
+              `Are you sure you want to delete “${folder.name}”? Workflows inside this folder will be moved back to your library.`,
+              `确定要删除“${folder.name}”吗？此文件夹中的工作流将移回你的工作流库。`,
+            )}
           </Text>
           <Dialog.Footer>
             <Button
@@ -79,14 +89,14 @@ export function LibraryFolderDeleteDialog({
               disabled={isPending}
               onClick={() => setIsOpen(false)}
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               variant="destructive"
               onClick={handleDelete}
               loading={isPending}
             >
-              Delete Folder
+              {t("Delete Folder", "删除文件夹")}
             </Button>
           </Dialog.Footer>
         </div>

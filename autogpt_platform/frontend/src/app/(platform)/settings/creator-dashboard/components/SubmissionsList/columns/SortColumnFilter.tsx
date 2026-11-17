@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ export function SortColumnFilter({
   ascLabel,
   descLabel,
 }: Props) {
+  const { t } = useTranslation();
   const isActive = activeKey === sortKey;
 
   function pick(dir: SortDir) {
@@ -36,10 +38,10 @@ export function SortColumnFilter({
   }
 
   return (
-    <ColumnFilter active={isActive} label="Sort" align="start">
+    <ColumnFilter active={isActive} label={t("Sort", "排序")} align="start">
       <div className="flex flex-col gap-2">
         <Text variant="small-medium" as="span" className="mx-2">
-          Sort
+          {t("Sort", "排序")}
         </Text>
         <SortOption
           icon={<Icon icon={ArrowDown02Icon} size={14} />}
@@ -60,7 +62,7 @@ export function SortColumnFilter({
             onClick={clear}
             className="self-end"
           >
-            Clear
+            {t("Clear", "清除")}
           </Button>
         ) : null}
       </div>

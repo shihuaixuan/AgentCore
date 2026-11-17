@@ -43,6 +43,8 @@ def resolve_connected(
     both stay ``None`` until describe/run time.
     """
     connection = entry.connection
+    if entry.custom_mcp:
+        return connection.connected
     if not connection.required or state is None or connection.key is None:
         return None
     if connection.key_type == "provider":

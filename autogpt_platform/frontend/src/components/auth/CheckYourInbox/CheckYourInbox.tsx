@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/Button/Button";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { Mail01Icon } from "@hugeicons/core-free-icons";
@@ -26,6 +27,7 @@ export function CheckYourInbox({
   marketingOptOut,
   onBack,
 }: Props) {
+  const { t } = useTranslation();
   const copy = CHECK_YOUR_INBOX_COPY[reason];
   const { cooldown, isResending, canResend, handleResend } = useCheckYourInbox({
     email,
@@ -46,19 +48,27 @@ export function CheckYourInbox({
         as="h1"
         className="outline-none"
       >
-        {copy.title}
+        {t(copy.title, reason === "signup" ? "请查收邮件" : "验证邮箱后登录")}
       </Text>
 
       <Text variant="body" tone="secondary" className="mt-3">
-        We sent an email to{" "}
+        {t("We sent an email to", "邮件已发送至")}{" "}
         <span className="font-medium break-all text-foreground-base">
           {email}
         </span>
-        . Open the link in it to {copy.action}.
+        {t(
+          `. Open the link in it to ${copy.action}.`,
+          reason === "signup"
+            ? "。请打开邮件中的链接以继续。"
+            : "。请打开邮件中的链接以登录。",
+        )}
       </Text>
 
       <Text variant="small" tone="muted" className="mt-2">
-        Can&apos;t find it? Check your spam folder.
+        {t(
+          "Can't find it? Check your spam folder.",
+          "没有找到邮件？请查看垃圾邮件文件夹。",
+        )}
       </Text>
 
       <Button
@@ -69,15 +79,20 @@ export function CheckYourInbox({
         onClick={handleResend}
         className="mt-8 w-full"
       >
-        {cooldown > 0 ? `Resend email in ${cooldown}s` : "Resend email"}
+        {cooldown > 0
+          ? t(`Resend email in ${cooldown}s`, `${cooldown} 秒后可重新发送`)
+          : t("Resend email", "重新发送邮件")}
       </Button>
 
       <div className="mt-6 inline-flex items-center justify-center gap-1">
         <Text variant="body-medium" tone="muted">
-          {copy.backPrompt}
+          {t(
+            copy.backPrompt,
+            reason === "signup" ? "邮箱填错了？" : "账户选错了？",
+          )}
         </Text>
         <Button type="button" variant="link" size="inline" onClick={onBack}>
-          {copy.backLabel}
+          {t(copy.backLabel, reason === "signup" ? "重新开始" : "返回登录")}
         </Button>
       </div>
     </div>

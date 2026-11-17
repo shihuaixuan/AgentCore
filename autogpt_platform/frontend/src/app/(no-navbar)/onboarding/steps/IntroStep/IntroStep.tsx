@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Button } from "@/components/atoms/Button/Button";
 import { FadeIn } from "@/components/atoms/FadeIn/FadeIn";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -24,8 +26,31 @@ const SCENES: Record<IntroSlideId, () => React.JSX.Element> = {
 // One intro slide as a wizard step of its own, so it has a URL, a dot, a
 // place in the funnel and a Back button like every other step.
 export function IntroStep({ slide }: Props) {
+  const { t } = useTranslation();
+  const translatedSlides = {
+    team: {
+      eyebrow: t("Welcome to AutoGPT", "欢迎使用 AutoGPT"),
+      title: t(
+        "Your new team, ready on day one",
+        "你的新团队，第一天就准备就绪",
+      ),
+      body: t(
+        "Maria drafts your blog posts. Max finds your next customers.",
+        "Maria 为你起草博客文章，Max 帮你寻找下一批客户。",
+      ),
+      cta: t("Meet Otto", "认识 Otto"),
+    },
+    autopilot: {
+      title: t("Meet Otto, your Head of AI.", "认识 Otto，你的 AI 负责人。"),
+      cta: t("Next", "下一步"),
+    },
+  } satisfies typeof INTRO_SLIDES;
   const nextStep = useOnboardingWizardStore((s) => s.nextStep);
-  const { eyebrow, title, body, cta } = INTRO_SLIDES[slide];
+  const { eyebrow, title, body, cta } = {
+    eyebrow: undefined,
+    body: undefined,
+    ...translatedSlides[slide],
+  };
   const Scene = SCENES[slide];
   // The team slide is the first screen of onboarding, so it opens with a
   // welcome and a larger title than the steps after it.

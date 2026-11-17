@@ -19,6 +19,7 @@ interface Args {
   serverURL: string;
   scopes?: string[];
   signal: AbortSignal;
+  isolated?: boolean;
   exchange?: (
     code: string,
     state: string,
@@ -36,6 +37,7 @@ export async function connectMCPOAuth({
   serverURL,
   scopes,
   signal,
+  isolated = false,
   exchange,
 }: Args) {
   signal.throwIfAborted();
@@ -56,6 +58,7 @@ export async function connectMCPOAuth({
       login = await postV2InitiateOauthLoginForAnMcpServer(
         {
           server_url: serverURL,
+          ...(isolated ? { isolated: true } : {}),
           ...(scopes === undefined ? {} : { scopes }),
         },
         { signal },

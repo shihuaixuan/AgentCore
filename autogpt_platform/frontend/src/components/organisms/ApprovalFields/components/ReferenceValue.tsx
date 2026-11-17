@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Fragment } from "react";
 import type { Reference } from "../helpers";
 import { ReferenceLink } from "./ReferenceLink";
@@ -9,6 +12,7 @@ interface Props {
 }
 
 export function ReferenceValue({ refs, total }: Props) {
+  const { t } = useTranslation();
   const more = total - refs.length;
   return (
     <span data-slot="reference-value">
@@ -24,7 +28,8 @@ export function ReferenceValue({ refs, total }: Props) {
           className="text-foreground-tertiary"
         >
           {" "}
-          +{more} more
+          +{more}
+          {t("more", "更多")}
         </span>
       )}
     </span>

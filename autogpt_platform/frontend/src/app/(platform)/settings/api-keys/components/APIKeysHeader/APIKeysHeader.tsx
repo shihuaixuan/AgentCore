@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Link } from "@/components/atoms/Link/Link";
 import { Text } from "@/components/atoms/Text/Text";
@@ -13,17 +14,18 @@ interface Props {
 }
 
 export function APIKeysHeader({ onCreate }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-start gap-4 pb-6 pl-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 flex-col">
         <Text variant="h4" as="h1">
-          AutoGPT API Keys
+          {t("AutoGPT API Keys", "AutoGPT API 密钥")}
         </Text>
         <Text variant="body" tone="body" className="mt-4 max-w-[600px]">
           Manage API keys that let external tools access your AutoGPT account.
           See the{" "}
           <Link href={API_DOCS_URL} isExternal variant="secondary">
-            API docs
+            {t("API docs", "API 文档")}
           </Link>{" "}
           to get started.
         </Text>
@@ -36,7 +38,7 @@ export function APIKeysHeader({ onCreate }: Props) {
         onClick={onCreate}
         className="sm:hidden"
       >
-        Create Key
+        {t("Create Key", "创建密钥")}
       </Button>
       <Button
         variant="primary"
@@ -45,7 +47,7 @@ export function APIKeysHeader({ onCreate }: Props) {
         onClick={onCreate}
         className="hidden sm:inline-flex"
       >
-        Create Key
+        {t("Create Key", "创建密钥")}
       </Button>
     </div>
   );

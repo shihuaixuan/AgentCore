@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { deleteWorkspaceFile } from "@/app/api/__generated__/endpoints/workspace/workspace";
 import type { WorkspaceFileItem } from "@/app/api/__generated__/models/workspaceFileItem";
 import { useToast } from "@/components/molecules/Toast/use-toast";
@@ -9,6 +10,7 @@ export function useSelectionBar(
   selectedFiles: WorkspaceFileItem[],
   onDone: () => void,
 ) {
+  const { t } = useTranslation();
   const [isMoveOpen, setIsMoveOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -33,16 +35,18 @@ export function useSelectionBar(
       toast({
         title:
           fileIds.length === 1
-            ? "File deleted"
+            ? t("File deleted", "文件已删除")
             : `${fileIds.length} files deleted`,
       });
       onDone();
     },
     onError: (error) => {
       toast({
-        title: "Failed to delete files",
+        title: t("Failed to delete files", "无法删除文件"),
         description:
-          error instanceof Error ? error.message : "Please try again.",
+          error instanceof Error
+            ? error.message
+            : t("Please try again.", "请重试。"),
         variant: "destructive",
       });
     },

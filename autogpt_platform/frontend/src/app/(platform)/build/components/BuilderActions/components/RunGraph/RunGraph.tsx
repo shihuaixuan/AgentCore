@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useGraphStore } from "@/app/(platform)/build/stores/graphStore";
 import { Button } from "@/components/atoms/Button/Button";
 import {
@@ -18,6 +19,7 @@ import {
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export const RunGraph = ({ flowID }: { flowID: string | null }) => {
+  const { t } = useTranslation();
   const {
     handleRunGraph,
     handleStopGraph,
@@ -71,7 +73,10 @@ export const RunGraph = ({ flowID }: { flowID: string | null }) => {
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            Simulate workflow (no real execution — LLM-generated outputs)
+            {t(
+              "Simulate workflow (no real execution — LLM-generated outputs)",
+              "模拟工作流（不实际执行，输出由大语言模型生成）",
+            )}
           </TooltipContent>
         </Tooltip>
       )}
@@ -94,10 +99,10 @@ export const RunGraph = ({ flowID }: { flowID: string | null }) => {
         </TooltipTrigger>
         <TooltipContent>
           {isLoading
-            ? "Processing..."
+            ? t("Processing...", "处理中…")
             : isGraphRunning
-              ? "Stop workflow"
-              : "Run workflow"}
+              ? t("Stop workflow", "停止工作流")
+              : t("Run workflow", "运行工作流")}
         </TooltipContent>
       </Tooltip>
       <RunInputDialog

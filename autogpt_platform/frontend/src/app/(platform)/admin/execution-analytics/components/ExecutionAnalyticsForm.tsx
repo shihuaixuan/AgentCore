@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/atoms/Button/Button";
 import { BaseInput } from "@/components/atoms/Input/BaseInput";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Label } from "@/components/atoms/Label/Label";
 import {
   Select,
@@ -49,6 +50,7 @@ import { AnalyticsResultsTable } from "./AnalyticsResultsTable";
 import { okData } from "@/app/api/helpers";
 
 export function ExecutionAnalyticsForm() {
+  const { t } = useTranslation();
   const [results, setResults] = useState<ExecutionAnalyticsResponse | null>(
     null,
   );
@@ -87,9 +89,9 @@ export function ExecutionAnalyticsForm() {
     if (accuracyError) {
       console.error("Failed to fetch trends:", accuracyError);
       toast({
-        title: "Trends Error",
+        title: t("Trends Error", "趋势错误"),
         description:
-          (accuracyError as any)?.message || "Failed to fetch accuracy trends",
+          (accuracyError as any)?.message || t("Failed to fetch accuracy trends", "无法获取准确性趋势"),
         variant: "destructive",
       });
       return;
@@ -102,8 +104,8 @@ export function ExecutionAnalyticsForm() {
       // Check for alerts
       if (data.alert) {
         toast({
-          title: "🚨 Accuracy Alert Detected",
-          description: `${data.alert.drop_percent.toFixed(1)}% accuracy drop detected for this agent`,
+          title: t("🚨 Accuracy Alert Detected", "🚨 检测到准确性告警"),
+          description: `${data.alert.drop_percent.toFixed(1)}% ${t("accuracy drop detected for this agent", "准确性下降（工作流：")} ${formData.graph_id})`,
           variant: "destructive",
         });
       }
@@ -190,7 +192,7 @@ export function ExecutionAnalyticsForm() {
         setResults(result);
 
         toast({
-          title: "Analytics Generated",
+        title: t("Analytics Generated", "分析已生成"),
           description: `Processed ${result.processed_executions} executions. ${result.successful_analytics} successful, ${result.failed_analytics} failed, ${result.skipped_executions} skipped.`,
           variant: "default",
         });
@@ -199,17 +201,17 @@ export function ExecutionAnalyticsForm() {
         console.error("Analytics generation error:", error);
 
         const errorMessage =
-          error?.message || error?.detail || "An unexpected error occurred";
+          error?.message || error?.detail || t("An unexpected error occurred", "发生意外错误");
         const isOpenAIError = errorMessage.includes(
-          "OpenAI API key not configured",
+          t("OpenAI API key not configured", "未配置 OpenAI API 密钥"),
         );
 
         toast({
           title: isOpenAIError
-            ? "Analytics Generation Skipped"
-            : "Analytics Generation Failed",
+            ? t("Analytics Generation Skipped", "已跳过生成分析")
+            : t("Analytics Generation Failed", "分析生成失败"),
           description: isOpenAIError
-            ? "Analytics generation requires OpenAI configuration, but accuracy trends are still available above."
+            ? t("Analytics generation requires OpenAI configuration, but accuracy trends are still available above.", "生成分析需要配置 OpenAI，但上方仍可查看准确性趋势。")
             : errorMessage,
           variant: isOpenAIError ? "default" : "destructive",
         });
@@ -244,8 +246,8 @@ export function ExecutionAnalyticsForm() {
 
     if (!formData.graph_id.trim()) {
       toast({
-        title: "Validation Error",
-        description: "Graph ID is required",
+        title: t("Validation Error", "验证错误"),
+        description: t("Graph ID is required", "工作流 ID 为必填项"),
         variant: "destructive",
       });
       return;
@@ -301,7 +303,7 @@ export function ExecutionAnalyticsForm() {
   if (configLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="text-foreground-tertiary">Loading configuration...</div>
+        <div className="text-foreground-tertiary">{t("Loading configuration...", "正在加载配置...")}</div>
       </div>
     );
   }
@@ -310,7 +312,7 @@ export function ExecutionAnalyticsForm() {
   if (configError || !config) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="text-error">Failed to load configuration</div>
+        <div className="text-error">{t("Failed to load configuration", "无法加载配置")}</div>
       </div>
     );
   }
@@ -327,13 +329,13 @@ export function ExecutionAnalyticsForm() {
               id="graph_id"
               value={formData.graph_id}
               onChange={(e) => handleInputChange("graph_id", e.target.value)}
-              placeholder="Enter graph/agent ID"
+              placeholder={t("Enter graph/agent ID", "输入工作流 ID")}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="graph_version">Graph Version</Label>
+            <Label htmlFor="graph_version">{t("Graph Version", "工作流版本")}</Label>
             <BaseInput
               id="graph_version"
               type="number"
@@ -344,22 +346,22 @@ export function ExecutionAnalyticsForm() {
                   e.target.value ? parseInt(e.target.value) : undefined,
                 )
               }
-              placeholder="Optional - leave empty for all versions"
+              placeholder={t("Optional - leave empty for all versions", "可选，不填表示所有版本")}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="user_id">User ID</Label>
+            <Label htmlFor="user_id">{t("User ID", "用户 ID")}</Label>
             <BaseInput
               id="user_id"
               value={formData.user_id || ""}
               onChange={(e) => handleInputChange("user_id", e.target.value)}
-              placeholder="Optional - leave empty for all users"
+              placeholder={t("Optional - leave empty for all users", "可选，不填表示所有用户")}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="created_after">Created After</Label>
+            <Label htmlFor="created_after">{t("Created After", "创建时间晚于")}</Label>
             <BaseInput
               id="created_after"
               type="datetime-local"
@@ -371,13 +373,13 @@ export function ExecutionAnalyticsForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="model_name">AI Model</Label>
+            <Label htmlFor="model_name">{t("AI Model", "AI 模型")}</Label>
             <Select
               value={formData.model_name}
               onValueChange={(value) => handleInputChange("model_name", value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select AI model" />
+                <SelectValue placeholder={t("Select AI model", "选择 AI 模型")} />
               </SelectTrigger>
               <SelectContent>
                 {config.available_models.map((model) => (
@@ -390,12 +392,12 @@ export function ExecutionAnalyticsForm() {
           </div>
         </div>
 
-        {/* Advanced Options Section - Collapsible */}
+        {/* {t("Advanced Options", "高级选项")} Section - Collapsible */}
         <div className="border-t pt-6">
           <Collapsible
             trigger={
               <Text variant="lead-semibold" as="h3" tone="body">
-                Advanced Options
+                {t("Advanced Options", "高级选项")}
               </Text>
             }
             defaultOpen={false}
@@ -428,7 +430,7 @@ export function ExecutionAnalyticsForm() {
                 />
                 <Label htmlFor="show_accuracy_chart">
                   <Text variant="body-medium-tight" as="span" tone="inherit">
-                    Show accuracy trends chart and historical data visualization
+                    {t("Show accuracy trends chart and historical data visualization", "显示准确性趋势图和历史数据可视化")}
                   </Text>
                 </Label>
               </div>
@@ -436,7 +438,7 @@ export function ExecutionAnalyticsForm() {
               {/* Custom System Prompt */}
               <div className="space-y-2">
                 <Label htmlFor="system_prompt">
-                  Custom System Prompt (Optional)
+                  {t("Custom System Prompt (Optional)", "自定义系统提示词（可选）")}
                 </Label>
                 <Textarea
                   id="system_prompt"
@@ -457,7 +459,7 @@ export function ExecutionAnalyticsForm() {
               {/* Custom User Prompt */}
               <div className="space-y-2">
                 <Label htmlFor="user_prompt">
-                  Custom User Prompt Template (Optional)
+                  {t("Custom User Prompt Template (Optional)", "自定义用户提示词模板（可选）")}
                 </Label>
                 <Textarea
                   id="user_prompt"
@@ -496,7 +498,7 @@ export function ExecutionAnalyticsForm() {
                     );
                   }}
                 >
-                  Reset System Prompt
+                  {t("Reset System Prompt", "重置系统提示词")}
                 </Button>
                 <Button
                   type="button"
@@ -509,7 +511,7 @@ export function ExecutionAnalyticsForm() {
                     );
                   }}
                 >
-                  Reset User Prompt
+                  {t("Reset User Prompt", "重置用户提示词")}
                 </Button>
                 <Button
                   type="button"
@@ -520,7 +522,7 @@ export function ExecutionAnalyticsForm() {
                     handleInputChange("user_prompt", "");
                   }}
                 >
-                  Clear All Prompts
+                  {t("Clear All Prompts", "清空所有提示词")}
                 </Button>
               </div>
             </div>
@@ -535,8 +537,8 @@ export function ExecutionAnalyticsForm() {
             disabled={generateAnalytics.isPending}
           >
             {generateAnalytics.isPending
-              ? "Processing..."
-              : "Generate Analytics"}
+              ? t("Processing...", "处理中...")
+              : t("Generate Analytics", "生成分析")}
           </Button>
         </div>
       </form>
@@ -546,16 +548,16 @@ export function ExecutionAnalyticsForm() {
         <div className="space-y-4">
           <div className="flex items-start justify-between">
             <Text variant="lead-semibold" as="h3" tone="inherit">
-              Execution Accuracy Trends
+              {t("Execution Accuracy Trends", "执行准确性趋势")}
             </Text>
             <div className="rounded-md bg-info-surface px-3 py-2 text-caption leading-4 text-info-foreground">
               <p className="font-medium">
-                Chart Filters (matches monitoring system):
+                {t("Chart Filters (matches monitoring system):", "图表筛选条件（与监控系统一致）：")}
               </p>
               <ul className="mt-1 list-inside list-disc space-y-1">
-                <li>Only days with ≥1 execution with correctness score</li>
-                <li>Last 30 days</li>
-                <li>Averages calculated from scored executions only</li>
+                <li>{t("Only days with ≥1 execution with correctness score", "仅统计至少有 1 次执行且有正确性评分的日期")}</li>
+                <li>{t("Last 30 days", "最近 30 天")}</li>
+                <li>{t("Averages calculated from scored executions only", "平均值仅根据有评分的执行计算")}</li>
               </ul>
             </div>
           </div>
@@ -611,34 +613,34 @@ export function ExecutionAnalyticsForm() {
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div className="rounded-lg border bg-surface p-4 text-center text-info-foreground">
               <Text variant="heading-md-bold" as="div" tone="inherit">
-                {trendsData.latest_data.daily_score?.toFixed(2) || "N/A"}
+                {trendsData.latest_data.daily_score?.toFixed(2) || t("N/A", "不适用")}
               </Text>
               <Text variant="body-tight" as="div" tone="secondary">
-                Daily Score
+                {t("Daily Score", "每日评分")}
               </Text>
             </div>
             <div className="rounded-lg border bg-surface p-4 text-center">
               <Text variant="heading-md-bold" as="div" tone="success">
-                {trendsData.latest_data.three_day_avg?.toFixed(2) || "N/A"}
+                {trendsData.latest_data.three_day_avg?.toFixed(2) || t("N/A", "不适用")}
               </Text>
               <Text variant="body-tight" as="div" tone="secondary">
-                3-Day Avg
+                {t("3-Day Avg", "3 日平均")}
               </Text>
             </div>
             <div className="rounded-lg border bg-surface p-4 text-center text-orange-foreground">
               <Text variant="heading-md-bold" as="div" tone="inherit">
-                {trendsData.latest_data.seven_day_avg?.toFixed(2) || "N/A"}
+                {trendsData.latest_data.seven_day_avg?.toFixed(2) || t("N/A", "不适用")}
               </Text>
               <Text variant="body-tight" as="div" tone="secondary">
-                7-Day Avg
+                {t("7-Day Avg", "7 日平均")}
               </Text>
             </div>
             <div className="rounded-lg border bg-surface p-4 text-center text-brand-hover">
               <Text variant="heading-md-bold" as="div" tone="inherit">
-                {trendsData.latest_data.fourteen_day_avg?.toFixed(2) || "N/A"}
+                {trendsData.latest_data.fourteen_day_avg?.toFixed(2) || t("N/A", "不适用")}
               </Text>
               <Text variant="body-tight" as="div" tone="secondary">
-                14-Day Avg
+                {t("14-Day Avg", "14 日平均")}
               </Text>
             </div>
           </div>
@@ -652,7 +654,7 @@ export function ExecutionAnalyticsForm() {
                 tone="inherit"
                 className="mb-4"
               >
-                Execution Accuracy Trends Chart
+                {t("Execution Accuracy Trends", "执行准确性趋势")} Chart
               </Text>
               <div className="rounded-lg border bg-surface p-6">
                 <AccuracyChart data={trendsData.historical_data} />

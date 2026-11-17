@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   File02Icon,
   Folder01Icon,
@@ -31,6 +32,7 @@ interface Props {
 
 /** Everything in the expert's chats: what it made and what you gave it. */
 export function ExpertFilesSection({ expertId, expertName }: Props) {
+  const { t } = useTranslation();
   const files = useExpertFilesSection(expertId);
 
   return (
@@ -43,13 +45,13 @@ export function ExpertFilesSection({ expertId, expertName }: Props) {
           <ToolbarSearch
             textSize="body-md"
             id="expert-files-search"
-            label="Search files"
+            label={t("Search files", "搜索文件")}
             value={files.query}
             onChange={files.setQuery}
           />
           <PillFilterMenu
             textSize="body-md"
-            label="Filter files"
+            label={t("Filter files", "筛选文件")}
             value={files.filter}
             defaultValue="all"
             options={FILTERS}
@@ -84,12 +86,12 @@ export function ExpertFilesSection({ expertId, expertName }: Props) {
               <Icon icon={File02Icon} size={22} />
             </span>,
           ]}
-          title="No files yet"
+          title={t("No files yet", "暂无文件")}
           description={`Files you share with ${expertName} and documents it creates show up here.`}
         />
       ) : files.visible.length === 0 ? (
         <Text variant="body-md" tone="muted" className="mt-4">
-          No files match.
+          {t("No files match.", "没有匹配的文件。")}
         </Text>
       ) : (
         <div className="mt-4 rounded-2xl bg-surface p-2 smooth-shadow-ring-sm">
@@ -102,7 +104,7 @@ export function ExpertFilesSection({ expertId, expertName }: Props) {
           </ul>
           {files.hasMore ? (
             <Text variant="small" tone="muted" className="mx-2 mt-2 mb-1">
-              Showing the latest 200 files.
+              {t("Showing the latest 200 files.", "显示最近的 200 个文件。")}
             </Text>
           ) : null}
         </div>

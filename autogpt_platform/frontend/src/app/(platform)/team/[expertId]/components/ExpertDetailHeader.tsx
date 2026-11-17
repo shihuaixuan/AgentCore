@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Button } from "@/components/atoms/Button/Button";
 import { getCategoryHex } from "@/components/molecules/ExpertAvatar/colors";
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function ExpertDetailHeader({ expert, onEditSoul, onChat }: Props) {
+  const { t } = useTranslation();
   const cover = getExpertCover(expert);
   const topic = expert.categories?.[0];
 
@@ -62,7 +64,7 @@ export function ExpertDetailHeader({ expert, onEditSoul, onChat }: Props) {
             leadingIcon={PencilEdit02Icon}
             onClick={onEditSoul}
           >
-            Edit Soul
+            {t("Edit Soul", "编辑设定")}
           </Button>
           <Button
             variant="primary"
@@ -70,7 +72,7 @@ export function ExpertDetailHeader({ expert, onEditSoul, onChat }: Props) {
             leadingIcon={BubbleChatIcon}
             onClick={onChat}
           >
-            Chat
+            {t("Chat", "聊天")}
           </Button>
         </div>
       </div>

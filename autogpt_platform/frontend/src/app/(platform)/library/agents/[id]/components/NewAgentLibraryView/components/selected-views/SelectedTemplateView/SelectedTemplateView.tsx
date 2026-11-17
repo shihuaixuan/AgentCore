@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { GraphExecutionMeta } from "@/app/api/__generated__/models/graphExecutionMeta";
 import type { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { Input } from "@/components/atoms/Input/Input";
@@ -36,6 +37,7 @@ export function SelectedTemplateView({
   onSwitchToRunsTab,
   banner,
 }: Props) {
+  const { t } = useTranslation();
   const {
     template,
     isLoading,
@@ -120,30 +122,45 @@ export function SelectedTemplateView({
               />
             )}
 
-            <RunDetailCard title={`${templateOrTrigger} Details`}>
+            <RunDetailCard
+              title={t(
+                `${templateOrTrigger} Details`,
+                agent.trigger_setup_info ? "触发器详情" : "模板详情",
+              )}
+            >
               <div className="flex flex-col gap-2">
                 <Input
                   id="template-name"
-                  label="Name"
+                  label={t("Name", "名称")}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder={`Enter ${templateOrTrigger.toLowerCase()} name`}
+                  placeholder={t(
+                    `Enter ${templateOrTrigger.toLowerCase()} name`,
+                    agent.trigger_setup_info
+                      ? "输入触发器名称"
+                      : "输入模板名称",
+                  )}
                 />
 
                 <Input
                   id="template-description"
-                  label="Description"
+                  label={t("Description", "描述")}
                   type="textarea"
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder={`Enter ${templateOrTrigger.toLowerCase()} description`}
+                  placeholder={t(
+                    `Enter ${templateOrTrigger.toLowerCase()} description`,
+                    agent.trigger_setup_info
+                      ? "输入触发器说明"
+                      : "输入模板说明",
+                  )}
                 />
               </div>
             </RunDetailCard>
 
             {triggerConfigFields.length > 0 && (
-              <RunDetailCard title="Trigger Configuration">
+              <RunDetailCard title={t("Trigger Configuration", "触发器配置")}>
                 <div className="flex flex-col gap-4">
                   {triggerConfigFields.map(([key, inputSubSchema]) => (
                     <RunAgentInputs
@@ -159,7 +176,7 @@ export function SelectedTemplateView({
             )}
 
             {inputFields.length > 0 && (
-              <RunDetailCard title="Your Input">
+              <RunDetailCard title={t("Your Input", "你的输入")}>
                 <div className="flex flex-col gap-4">
                   {inputFields.map(([key, inputSubSchema]) => (
                     <RunAgentInputs
@@ -175,7 +192,7 @@ export function SelectedTemplateView({
             )}
 
             {credentialFields.length > 0 && (
-              <RunDetailCard title="Task Credentials">
+              <RunDetailCard title={t("Task Credentials", "任务凭据")}>
                 <div className="flex flex-col gap-6">
                   {credentialFields.map(([key, inputSubSchema]) => (
                     <CredentialsInput

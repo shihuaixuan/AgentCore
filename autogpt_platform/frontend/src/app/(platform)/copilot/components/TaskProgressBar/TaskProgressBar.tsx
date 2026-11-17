@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Text } from "@/components/atoms/Text/Text";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { memo, useState } from "react";
@@ -57,6 +59,7 @@ export const TaskProgressBar = memo(function TaskProgressBar({
   isStreaming = false,
   defaultExpanded = false,
 }: Props) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(defaultExpanded);
   const reduceMotion = useReducedMotion();
 
@@ -95,7 +98,7 @@ export const TaskProgressBar = memo(function TaskProgressBar({
                 tone="emphasis"
                 className="min-w-0 flex-1 truncate"
               >
-                All tasks complete
+                {t("All tasks complete", "所有任务已完成")}
               </Text>
             </>
           ) : !expanded && current ? (
@@ -132,7 +135,7 @@ export const TaskProgressBar = memo(function TaskProgressBar({
                 tone="emphasis"
                 className="min-w-0 flex-1"
               >
-                Task Progress
+                {t("Task Progress", "任务进度")}
               </Text>
             </>
           )}

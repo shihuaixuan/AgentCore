@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetExpertQueryKey,
   useRemoveExpertWorkflow,
@@ -44,6 +45,7 @@ export function ExpertWorkflowCardMenu({
   variant = "floating",
   size = "icon-xs",
 }: Props) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isRemoveOpen, setIsRemoveOpen] = useState(false);
@@ -80,7 +82,7 @@ export function ExpertWorkflowCardMenu({
             type="button"
             variant={variant}
             size={size}
-            aria-label="More actions"
+            aria-label={t("More actions", "更多操作")}
             leadingIcon={MoreHorizontalIcon}
           />
         </DropdownMenuTrigger>
@@ -94,7 +96,9 @@ export function ExpertWorkflowCardMenu({
                   }
                   size={16}
                 />
-                {workflowNeedsSetup(workflow) ? "Set up" : "Open in library"}
+                {workflowNeedsSetup(workflow)
+                  ? t("Set up", "设置")
+                  : t("Open in library", "在工作流库中打开")}
               </NextLink>
             </DropdownMenuItem>
           ) : null}
@@ -106,7 +110,8 @@ export function ExpertWorkflowCardMenu({
               onSelect={() => setIsRemoveOpen(true)}
             >
               <Icon icon={Delete02Icon} size={16} />
-              Remove from expert
+
+              {t("Remove from expert", "从专家中移除")}
             </DropdownMenuItem>
           ) : null}
         </DropdownMenuContent>
@@ -138,7 +143,7 @@ export function ExpertWorkflowCardMenu({
                 disabled={isRemoving}
                 onClick={() => setIsRemoveOpen(false)}
               >
-                Keep
+                {t("Keep", "保留")}
               </Button>
               <Button
                 type="button"
@@ -147,7 +152,7 @@ export function ExpertWorkflowCardMenu({
                 loading={isRemoving}
                 onClick={handleRemove}
               >
-                Remove
+                {t("Remove", "移除")}
               </Button>
             </div>
           </div>

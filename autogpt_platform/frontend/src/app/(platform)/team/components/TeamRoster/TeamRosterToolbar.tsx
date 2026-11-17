@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { TeamFilter } from "../../helpers";
 import { ToolbarSearch } from "../ToolbarSearch";
 import { TeamFilterMenu } from "./TeamFilterMenu";
@@ -17,11 +20,12 @@ export function TeamRosterToolbar({
   filter,
   onFilterChange,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
       <ToolbarSearch
         id="team-roster-search"
-        label="Search experts"
+        label={t("Search experts", "搜索专家")}
         value={query}
         onChange={onQueryChange}
         className="sm:w-72"

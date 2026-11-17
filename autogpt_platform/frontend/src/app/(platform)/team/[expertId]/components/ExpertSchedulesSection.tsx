@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ExpertWorkflowRef } from "@/app/api/__generated__/models/expertWorkflowRef";
 import { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
 import { EditScheduleModal } from "@/app/(platform)/library/agents/[id]/components/NewAgentLibraryView/components/selected-views/SelectedScheduleView/components/EditScheduleModal/EditScheduleModal";
@@ -44,6 +45,7 @@ export function ExpertSchedulesSection({
   schedules,
   lastRunLabel,
 }: Props) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ScheduleFilter>("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -71,19 +73,19 @@ export function ExpertSchedulesSection({
               leadingIcon={PlusSignIcon}
               onClick={() => setIsCreateOpen(true)}
             >
-              Create schedule
+              {t("Create schedule", "创建计划")}
             </Button>
           ) : null}
           <ToolbarSearch
             textSize="body-md"
             id="expert-schedules-search"
-            label="Search schedules"
+            label={t("Search schedules", "搜索计划")}
             value={query}
             onChange={setQuery}
           />
           <PillFilterMenu
             textSize="body-md"
-            label="Filter schedules"
+            label={t("Filter schedules", "筛选计划")}
             value={filter}
             defaultValue="all"
             options={SCHEDULE_FILTERS}
@@ -104,7 +106,7 @@ export function ExpertSchedulesSection({
               <Icon icon={Calendar03Icon} size={22} />
             </span>,
           ]}
-          title="No schedules yet"
+          title={t("No schedules yet", "暂无计划")}
           description={`Put a workflow on a schedule and ${expertName} runs it for you, on time, every time.`}
         >
           {expertId && workflows ? (
@@ -115,16 +117,19 @@ export function ExpertSchedulesSection({
               leadingIcon={PlusSignIcon}
               onClick={() => setIsCreateOpen(true)}
             >
-              Create schedule
+              {t("Create schedule", "创建计划")}
             </Button>
           ) : null}
         </SectionEmptyState>
       ) : visible.length === 0 ? (
         <Text variant="body-md" tone="muted" className="mt-4">
-          No schedules match.
+          {t("No schedules match.", "没有匹配的计划。")}
         </Text>
       ) : (
-        <ul className="flex flex-col gap-3 pt-4" aria-label="Expert schedules">
+        <ul
+          className="flex flex-col gap-3 pt-4"
+          aria-label={t("Expert schedules", "专家计划")}
+        >
           {visible.map((schedule) => (
             <li key={schedule.id}>
               <GraphScheduleListItem

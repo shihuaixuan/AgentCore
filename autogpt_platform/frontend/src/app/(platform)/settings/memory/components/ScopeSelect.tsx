@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import {
@@ -31,6 +32,7 @@ function ScopeCheck({ selected }: { selected: boolean }) {
 }
 
 export function ScopeSelect({ scopeExpertID, experts, onSelect }: Props) {
+  const { t } = useTranslation();
   const selectedExpert = scopeExpertID
     ? experts.find((expert) => expert.id === scopeExpertID)
     : undefined;
@@ -40,7 +42,7 @@ export function ScopeSelect({ scopeExpertID, experts, onSelect }: Props) {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label="Memory scope"
+          aria-label={t("Memory scope", "记忆范围")}
           className={cn(
             "flex w-full items-center gap-2.5 rounded-medium border border-border-base bg-surface px-3 py-2 text-body font-medium text-foreground-base",
             "transition-colors hover:border-border-strong focus-visible:ring-2 focus-visible:ring-brand/70 focus-visible:outline-none",
@@ -91,7 +93,7 @@ export function ScopeSelect({ scopeExpertID, experts, onSelect }: Props) {
             <DropdownMenuSeparator />
             {/* oxlint-disable-next-line design-system/no-restyle -- the experts group label is an eyebrow, not a menu label */}
             <DropdownMenuLabel className="px-2.5 pt-1.5 pb-0.5 text-tiny leading-inherit font-semibold tracking-caps text-foreground-subtle uppercase">
-              Your experts
+              {t("Your experts", "你的专家")}
             </DropdownMenuLabel>
             {experts.map((expert) => (
               <DropdownMenuItem

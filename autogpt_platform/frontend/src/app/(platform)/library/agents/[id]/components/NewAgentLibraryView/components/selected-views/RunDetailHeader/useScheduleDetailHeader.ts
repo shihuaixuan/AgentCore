@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useDeleteV1DeleteExecutionSchedule } from "@/app/api/__generated__/endpoints/schedules/schedules";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { invalidateAllScheduleQueries } from "@/services/schedules/invalidate-schedules";
@@ -10,13 +11,14 @@ export function useScheduleDetailHeader(
   scheduleId?: string,
   agentGraphVersion?: number | string,
 ) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const deleteMutation = useDeleteV1DeleteExecutionSchedule({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Schedule deleted" });
+        toast({ title: t("Schedule deleted", "计划已删除") });
         invalidateAllScheduleQueries(queryClient, agentGraphId);
       },
       onError: (error: any) =>

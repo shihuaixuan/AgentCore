@@ -18,10 +18,16 @@ export function isSkillPackageFile(file: File): boolean {
 // description) so the user gets an instant, specific message instead of a
 // round-trip. Anything we can't parse confidently (e.g. YAML block scalars)
 // returns `null` and falls through to the server's validation.
-export function getSkillUploadError(content: string): string | null {
+export function getSkillUploadError(
+  content: string,
+  t: (english: string, chinese: string) => string = (english) => english,
+): string | null {
   const match = content.match(FRONTMATTER_RE);
   if (!match) {
-    return "File is not a valid SKILL.md — expected YAML frontmatter (---) with a name and description.";
+    return t(
+      "File is not a valid SKILL.md — expected YAML frontmatter (---) with a name and description.",
+      "文件不是有效的 SKILL.md：开头应包含带有名称和描述的 YAML 元数据（---）。",
+    );
   }
 
   const frontmatter = match[1];
@@ -32,7 +38,10 @@ export function getSkillUploadError(content: string): string | null {
   // assert this when we can see plain scalar lines — a block scalar would
   // read as absent here, so skip rather than false-reject.
   if (name === "" || description === "") {
-    return "File is not a valid SKILL.md — frontmatter must include a non-empty name and description.";
+    return t(
+      "File is not a valid SKILL.md — frontmatter must include a non-empty name and description.",
+      "文件不是有效的 SKILL.md：元数据中的名称和描述不能为空。",
+    );
   }
 
   const descriptionLength = description
@@ -43,7 +52,10 @@ export function getSkillUploadError(content: string): string | null {
     descriptionLength > MAX_SKILL_DESCRIPTION_CHARS
   ) {
     const over = descriptionLength - MAX_SKILL_DESCRIPTION_CHARS;
-    return `Description is ${descriptionLength}/${MAX_SKILL_DESCRIPTION_CHARS} characters — trim at least ${over}. It appears in the copilot's per-turn skills index, so it's kept short.`;
+    return t(
+      `Description is ${descriptionLength}/${MAX_SKILL_DESCRIPTION_CHARS} characters — trim at least ${over}. It appears in the copilot's per-turn skills index, so it's kept short.`,
+      `描述共 ${descriptionLength} 个字符，上限为 ${MAX_SKILL_DESCRIPTION_CHARS} 个，请至少删减 ${over} 个字符。描述会出现在 Otto 每轮使用的技能索引中，因此需要保持简短。`,
+    );
   }
 
   return null;

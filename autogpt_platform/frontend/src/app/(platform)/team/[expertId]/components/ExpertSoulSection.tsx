@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ProfileEntry } from "./ProfileEntry";
 
 interface Props {
@@ -15,11 +16,12 @@ export function ExpertSoulSection({
   voicePreferences,
   boundaries,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <dl className="space-y-4">
-      <ProfileEntry label="Identity" value={identity} />
-      <ProfileEntry label="Voice" value={voicePreferences} />
-      <ProfileEntry label="Boundaries" value={boundaries} />
+      <ProfileEntry label={t("Identity", "身份")} value={identity} />
+      <ProfileEntry label={t("Voice", "语气")} value={voicePreferences} />
+      <ProfileEntry label={t("Boundaries", "边界")} value={boundaries} />
     </dl>
   );
 }

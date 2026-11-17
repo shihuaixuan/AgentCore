@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ExpertTemplate } from "@/app/api/__generated__/models/expertTemplate";
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { Button } from "@/components/atoms/Button/Button";
@@ -27,6 +28,7 @@ interface Props {
  *  hand-off to the expert's first thread — would unmount with it. Here the
  *  flow runs the expert page's own hook and outlives the swap. */
 export function ExpertHireControl({ expert, isHired }: Props) {
+  const { t } = useTranslation();
   const { isLoggedIn } = useAuth();
   const {
     hire,
@@ -59,7 +61,8 @@ export function ExpertHireControl({ expert, isHired }: Props) {
         className="rounded-full px-2.5 py-1 shadow-subtle"
       >
         <Icon icon={CheckmarkCircle02Icon} size={14} aria-hidden />
-        On your team
+
+        {t("On your team", "已加入你的团队")}
       </Badge>
     );
   } else if (!isLoggedIn) {
@@ -72,7 +75,7 @@ export function ExpertHireControl({ expert, isHired }: Props) {
         size="small"
         leftIcon={HIRE_ICON}
       >
-        Hire
+        {t("Hire", "聘用")}
       </Button>
     );
   } else {
@@ -84,7 +87,7 @@ export function ExpertHireControl({ expert, isHired }: Props) {
         leftIcon={HIRE_ICON}
         onClick={handleHire}
       >
-        Hire
+        {t("Hire", "聘用")}
       </Button>
     );
   }

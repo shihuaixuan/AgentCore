@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React from "react";
 import { Text } from "@/components/atoms/Text/Text";
 import { MultiToggle } from "@/components/molecules/MultiToggle/MultiToggle";
@@ -26,6 +27,7 @@ export function YearlyPicker({
   values: number[];
   onChange: (v: number[]) => void;
 }) {
+  const { t } = useTranslation();
   function toggleAll() {
     if (values.length === months.length) onChange([]);
     else onChange(months.map((m) => m.value));
@@ -36,7 +38,7 @@ export function YearlyPicker({
   return (
     <div className="mb-6 space-y-2">
       <Text variant="body-medium" as="span">
-        Months
+        {t("Months", "月")}
       </Text>
       <div className="flex gap-2">
         <button
@@ -44,14 +46,16 @@ export function YearlyPicker({
           className="h-[2.25rem] rounded-full border border-foreground-body px-4 py-2 text-body leading-4 font-medium text-foreground-base hover:bg-surface-hover"
           onClick={toggleAll}
         >
-          {values.length === months.length ? "Deselect All" : "Select All"}
+          {values.length === months.length
+            ? "Deselect All"
+            : t("Select All", "全选")}
         </button>
       </div>
       <MultiToggle
         items={items}
         selectedValues={selected}
         onChange={(sv) => onChange(sv.map((s) => parseInt(s)))}
-        aria-label="Select months"
+        aria-label={t("Select months", "选择月份")}
       />
     </div>
   );

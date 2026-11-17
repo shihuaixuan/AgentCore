@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Input } from "@/components/atoms/Input/Input";
 import { CredentialsGroupedView } from "@/components/contextual/CredentialsInput/components/CredentialsGroupedView/CredentialsGroupedView";
 import { InformationTooltip } from "@/components/molecules/InformationTooltip/InformationTooltip";
@@ -8,6 +11,7 @@ import { ModalSection } from "../ModalSection/ModalSection";
 import { WebhookTriggerBanner } from "../WebhookTriggerBanner/WebhookTriggerBanner";
 
 export function ModalRunSection() {
+  const { t } = useTranslation();
   const {
     agent,
     defaultRunType,
@@ -43,38 +47,51 @@ export function ModalRunSection() {
       {defaultRunType === "automatic-trigger" ||
       defaultRunType === "manual-trigger" ? (
         <ModalSection
-          title="Task Trigger"
-          subtitle="Set up a trigger for the workflow to run this task automatically"
+          title={t("Task Trigger", "任务触发器")}
+          subtitle={t(
+            "Set up a trigger for the workflow to run this task automatically",
+            "设置触发器，让工作流自动执行此任务",
+          )}
         >
           <WebhookTriggerBanner />
           <div className="flex flex-col gap-4">
             <div className="flex flex-col space-y-2">
               <label className="flex items-center gap-1 text-body font-medium">
-                Trigger Name
-                <InformationTooltip description="Name of the trigger you are setting up" />
+                {t("Trigger Name", "触发器名称")}
+                <InformationTooltip
+                  description={t(
+                    "Name of the trigger you are setting up",
+                    "要设置的触发器名称",
+                  )}
+                />
               </label>
               <Input
                 id="trigger_name"
-                label="Trigger Name"
+                label={t("Trigger Name", "触发器名称")}
                 size="small"
                 hideLabel
                 value={presetName}
-                placeholder="Enter trigger name"
+                placeholder={t("Enter trigger name", "输入触发器名称")}
                 onChange={(e) => setPresetName(e.target.value)}
               />
             </div>
             <div className="flex flex-col space-y-2">
               <label className="flex items-center gap-1 text-body font-medium">
-                Trigger Description
-                <InformationTooltip description="Description of the trigger you are setting up" />
+                {t("Trigger Description", "触发器描述")}
+                <InformationTooltip
+                  description={t(
+                    "Description of the trigger you are setting up",
+                    "要设置的触发器描述",
+                  )}
+                />
               </label>
               <Input
                 id="trigger_description"
-                label="Trigger Description"
+                label={t("Trigger Description", "触发器描述")}
                 size="small"
                 hideLabel
                 value={presetDescription}
-                placeholder="Enter trigger description"
+                placeholder={t("Enter trigger description", "输入触发器描述")}
                 onChange={(e) => setPresetDescription(e.target.value)}
               />
             </div>
@@ -84,8 +101,11 @@ export function ModalRunSection() {
 
       {triggerConfigFieldEntries.length > 0 ? (
         <ModalSection
-          title="Trigger Configuration"
-          subtitle="Configure what this trigger listens for"
+          title={t("Trigger Configuration", "触发器配置")}
+          subtitle={t(
+            "Configure what this trigger listens for",
+            "配置此触发器监听的事件",
+          )}
         >
           {triggerConfigFieldEntries.map(([key, inputSubSchema]) => (
             <RunAgentInputs
@@ -102,8 +122,11 @@ export function ModalRunSection() {
 
       {inputFields.length > 0 ? (
         <ModalSection
-          title="Task Inputs"
-          subtitle="Enter the information you want to provide to the workflow for this task"
+          title={t("Task Inputs", "任务输入")}
+          subtitle={t(
+            "Enter the information you want to provide to the workflow for this task",
+            "输入此任务需要提供给工作流的信息",
+          )}
         >
           {inputFields.map(([key, inputSubSchema]) => (
             <RunAgentInputs
@@ -120,8 +143,11 @@ export function ModalRunSection() {
 
       {credentialFields.length > 0 ? (
         <ModalSection
-          title="Task Credentials"
-          subtitle="These are the credentials the workflow will use to perform this task"
+          title={t("Task Credentials", "任务凭据")}
+          subtitle={t(
+            "These are the credentials the workflow will use to perform this task",
+            "这些是工作流执行此任务时使用的凭据",
+          )}
         >
           <CredentialsGroupedView
             credentialFields={credentialFields}

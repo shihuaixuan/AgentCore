@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React from "react";
 import { Select } from "@/components/atoms/Select/Select";
 
@@ -23,28 +24,29 @@ export function FrequencySelect({
   selectedMinute: string;
   onMinuteChange: (v: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <>
       <Select
         id="repeat"
-        label="Repeats"
+        label={t("Repeats", "重复")}
         size="small"
         value={value}
         onValueChange={(v) => onChange(v as CronFrequency)}
         options={[
-          { label: "Every Hour", value: "hourly" },
-          { label: "Daily", value: "daily" },
-          { label: "Weekly", value: "weekly" },
-          { label: "Monthly", value: "monthly" },
-          { label: "Yearly", value: "yearly" },
-          { label: "Custom", value: "custom" },
+          { label: t("Every Hour", "每小时"), value: "hourly" },
+          { label: t("Daily", "每天"), value: "daily" },
+          { label: t("Weekly", "每周"), value: "weekly" },
+          { label: t("Monthly", "每月"), value: "monthly" },
+          { label: t("Yearly", "每年"), value: "yearly" },
+          { label: t("Custom", "自定义"), value: "custom" },
         ]}
         className="max-w-80"
       />
       {value === "hourly" && (
         <Select
           id="at-minute"
-          label="At minute"
+          label={t("At minute", "在第几分钟")}
           size="small"
           value={selectedMinute}
           onValueChange={(v) => onMinuteChange(v)}

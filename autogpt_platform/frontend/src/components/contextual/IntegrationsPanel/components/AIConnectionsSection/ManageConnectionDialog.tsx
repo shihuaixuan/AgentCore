@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useState } from "react";
 import { useGetV1CodexAccount } from "@/app/api/__generated__/endpoints/integrations/integrations";
@@ -60,6 +61,8 @@ function ChatGPTConnectionDialog({
   credential,
   onOpenChange,
 }: Props) {
+  const { t } = useTranslation();
+
   const credentialId = connection?.credential_id ?? null;
   const [forceMessage, setForceMessage] = useState<string | null>(null);
   const account = credential?.username ?? undefined;
@@ -136,28 +139,34 @@ function ChatGPTConnectionDialog({
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <Text variant="small" tone="muted">
-                Connected account
+                {t("Connected account", "已连接账户")}
               </Text>
               <Text variant="body-medium">
                 {snapshot?.email ?? account ?? "Your ChatGPT account"}
               </Text>
               {accountQuery.isLoading ? (
                 <Text variant="small" tone="muted">
-                  Checking with ChatGPT…
+                  {t("Checking with ChatGPT…", "正在向 ChatGPT 核实…")}
                 </Text>
               ) : accountQuery.isError ? (
                 <Text variant="small" tone="muted">
-                  Could not reach ChatGPT to confirm the plan on this account.
+                  {t(
+                    "Could not reach ChatGPT to confirm the plan on this account.",
+                    "无法连接 ChatGPT 以确认此账户的套餐。",
+                  )}
                 </Text>
               ) : requiresReconnect ? (
                 <Text variant="small" tone="warning">
-                  ChatGPT says this connection needs to be reconnected.
+                  {t(
+                    "ChatGPT says this connection needs to be reconnected.",
+                    "ChatGPT 提示此连接需要重新连接。",
+                  )}
                 </Text>
               ) : (
                 snapshot?.plan_type && (
                   <span className="mt-1 flex flex-wrap gap-2">
                     <span className="rounded-lg bg-accent-surface px-2 py-0.5 text-body-sm leading-5 font-medium text-accent-strong">
-                      {snapshot.plan_type} plan
+                      {snapshot.plan_type} {t("plan", "套餐")}
                     </span>
                   </span>
                 )
@@ -165,14 +174,22 @@ function ChatGPTConnectionDialog({
             </div>
 
             <Text variant="small" tone="muted">
-              ChatGPT identifies the workspace behind this connection only by an
-              internal id, so it cannot be named here yet.
+              {t(
+                "ChatGPT identifies the workspace behind this connection only by an internal id, so it cannot be named here yet.",
+                "ChatGPT 仅提供此连接所属工作区的内部 ID，因此暂时无法在此显示名称。",
+              )}
             </Text>
 
             <Text variant="small" tone="body">
               {connection?.is_default
-                ? "New chats start on this connection and run on your ChatGPT plan."
-                : "Chats you route here run on your ChatGPT plan instead of AutoGPT credits."}
+                ? t(
+                    "New chats start on this connection and run on your ChatGPT plan.",
+                    "新聊天默认使用此连接，并通过您的 ChatGPT 套餐运行。",
+                  )
+                : t(
+                    "Chats you route here run on your ChatGPT plan instead of AutoGPT credits.",
+                    "路由到此连接的聊天通过您的 ChatGPT 套餐运行，无需消耗 AutoGPT 积分。",
+                  )}
             </Text>
 
             <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
@@ -183,7 +200,7 @@ function ChatGPTConnectionDialog({
                 loading={isReconnecting}
                 disabled={isDisconnecting}
               >
-                Reconnect
+                {t("Reconnect", "重新连接")}
               </Button>
               <Button
                 variant="destructive"
@@ -192,13 +209,15 @@ function ChatGPTConnectionDialog({
                 loading={isDisconnecting}
                 disabled={isReconnecting}
               >
-                Disconnect
+                {t("Disconnect", "断开连接")}
               </Button>
             </div>
 
             <Text variant="small" tone="muted">
-              Disconnecting stops new chats running on your ChatGPT plan. Your
-              chat history is kept, and your other integrations are unaffected.
+              {t(
+                "Disconnecting stops new chats running on your ChatGPT plan. Your chat history is kept, and your other integrations are unaffected.",
+                "断开连接后，新聊天将无法通过您的 ChatGPT 套餐运行。聊天记录将保留，其他集成不受影响。",
+              )}
             </Text>
           </div>
         </Dialog.Content>
@@ -234,10 +253,12 @@ function Microsoft365CopilotConnectionDialog({
   onRetryCredentials,
   onOpenChange,
 }: MicrosoftProps) {
+  const { t } = useTranslation();
+
   const [forceMessage, setForceMessage] = useState<string | null>(null);
   const { remove, isPending: isDisconnecting } = useDeleteIntegration();
   const credentialId = connection.credential_id;
-  const accessLabels = microsoftAccessLabels(credential?.scopes);
+  const accessLabels = microsoftAccessLabels(credential?.scopes, t);
   const displayName =
     credential?.title && credential.title !== "Microsoft 365 Copilot"
       ? credential.title
@@ -292,7 +313,7 @@ function Microsoft365CopilotConnectionDialog({
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-1">
               <Text variant="small" tone="muted">
-                Connected work account
+                {t("Connected work account", "已连接的工作账户")}
               </Text>
               <Text variant="body-medium">
                 {displayName ??
@@ -306,14 +327,17 @@ function Microsoft365CopilotConnectionDialog({
               )}
               {!credential?.username && (
                 <Text variant="small" tone="muted">
-                  Reconnect once to show the signed-in account here.
+                  {t(
+                    "Reconnect once to show the signed-in account here.",
+                    "重新连接一次，即可在此显示已登录的账户。",
+                  )}
                 </Text>
               )}
             </div>
 
             <div className="flex flex-col gap-2">
               <Text variant="small-medium" tone="body">
-                Access granted
+                {t("Access granted", "已授予的权限")}
               </Text>
               {accessLabels.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
@@ -328,27 +352,32 @@ function Microsoft365CopilotConnectionDialog({
                 </div>
               ) : (
                 <Text variant="small" tone="muted">
-                  Reconnect once to refresh the access shown here.
+                  {t(
+                    "Reconnect once to refresh the access shown here.",
+                    "重新连接一次，即可刷新此处显示的权限。",
+                  )}
                 </Text>
               )}
             </div>
 
             <Text variant="small" tone="body">
-              Microsoft still limits every answer to content this work account
-              can already access in Microsoft 365.
+              {t(
+                "Microsoft still limits every answer to content this work account can already access in Microsoft 365.",
+                "Microsoft 仍会将每次回答限制在此工作账户已可访问的 Microsoft 365 内容范围内。",
+              )}
             </Text>
 
             {!credential && credentialsFailed && (
               <div className="flex items-center justify-between gap-2">
                 <Text variant="small" tone="body">
-                  Couldn&apos;t load this account.
+                  {t("Couldn't load this account.", "无法加载此账户。")}
                 </Text>
                 <Button
                   variant="ghost"
                   size="small"
                   onClick={onRetryCredentials}
                 >
-                  Try again
+                  {t("Try again", "重试")}
                 </Button>
               </div>
             )}
@@ -361,14 +390,20 @@ function Microsoft365CopilotConnectionDialog({
                 onClick={() => void disconnect()}
                 loading={isDisconnecting}
               >
-                Disconnect
+                {t("Disconnect", "断开连接")}
               </Button>
             </div>
 
             <Text variant="small" tone="muted">
               {isFullConnection
-                ? "Disconnecting removes this Microsoft account from AutoGPT, including its mail, calendar and files. Your chat history is kept."
-                : "Disconnecting stops new chats using this Copilot subscription. Your chat history is kept, and your other integrations are unaffected."}
+                ? t(
+                    "Disconnecting removes this Microsoft account from AutoGPT, including its mail, calendar and files. Your chat history is kept.",
+                    "断开连接会从 AutoGPT 中移除此 Microsoft 账户，包括其邮件、日历和文件的连接。聊天记录将保留。",
+                  )
+                : t(
+                    "Disconnecting stops new chats using this Copilot subscription. Your chat history is kept, and your other integrations are unaffected.",
+                    "断开连接后，新聊天将无法使用此 Copilot 订阅。聊天记录将保留，其他集成不受影响。",
+                  )}
             </Text>
           </div>
         </Dialog.Content>

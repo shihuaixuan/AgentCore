@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import type { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { useState } from "react";
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function AgentBriefingPanel({ summary, agents }: Props) {
+  const { t } = useTranslation();
   const [userTab, setUserTab] = useState<AgentStatusFilter | null>(null);
   const activeTab: AgentStatusFilter =
     userTab ?? (summary.running > 0 ? "running" : "all");
@@ -21,7 +23,7 @@ export function AgentBriefingPanel({ summary, agents }: Props) {
     <div
       className={`min-h-[14.75rem] rounded-large bg-gradient-to-br from-info-surface/30 via-surface/90 to-accent-surface/25 px-5 pt-4.5 pb-5 shadow-sm backdrop-blur-md`}
     >
-      <Text variant="h5">Workflow Briefing</Text>
+      <Text variant="h5">{t("Workflow Briefing", "工作流简报")}</Text>
       <div className="mt-4 space-y-5">
         <StatsGrid
           summary={summary}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -37,6 +38,7 @@ export function ExpertSkillListItem({
   learning,
   onRemove,
 }: Props) {
+  const { t } = useTranslation();
   const details = entry.skill ?? entry.library;
   const triggers = details?.triggers ?? [];
   const shown = triggers.slice(0, VISIBLE_TRIGGERS);
@@ -125,7 +127,7 @@ export function ExpertSkillListItem({
             href="/library/skills"
             variant="ghost"
             size="icon-sm"
-            aria-label="Open in library"
+            aria-label={t("Open in library", "在工作流库中打开")}
             leadingIcon={LinkSquare02Icon}
             tone="muted"
           />

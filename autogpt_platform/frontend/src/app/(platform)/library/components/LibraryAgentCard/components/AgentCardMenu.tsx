@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV2ListLibraryAgentsQueryKey,
   useDeleteV2DeleteLibraryAgent,
@@ -34,6 +35,7 @@ interface AgentCardMenuProps {
 }
 
 export function AgentCardMenu({ agent }: AgentCardMenuProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -82,7 +84,7 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     } finally {
@@ -113,7 +115,7 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     } finally {
@@ -142,7 +144,7 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     } finally {
@@ -157,7 +159,7 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
           <button
             className="absolute top-1 right-2 rounded p-1.5 text-foreground-secondary transition-opacity hover:bg-surface-hover"
             onClick={(e) => e.stopPropagation()}
-            aria-label="More actions"
+            aria-label={t("More actions", "更多操作")}
           >
             <Icon icon={MoreHorizontalIcon} className="h-5 w-5" />
           </button>
@@ -173,7 +175,7 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
                   data-testid="library-agent-card-open-in-builder-link"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  Edit workflow
+                  {t("Edit workflow", "编辑工作流")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -186,7 +188,7 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
             }}
             disabled={isDuplicatingAgent}
           >
-            Duplicate workflow
+            {t("Duplicate workflow", "复制工作流")}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -195,7 +197,7 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
               setShowMoveDialog(true);
             }}
           >
-            Move to folder
+            {t("Move to folder", "移动到文件夹")}
           </DropdownMenuItem>
           {agent.folder_id && (
             <>
@@ -207,7 +209,7 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
                 }}
                 disabled={isRemovingFromFolder}
               >
-                Remove from folder
+                {t("Remove from folder", "从文件夹移出")}
               </DropdownMenuItem>
             </>
           )}
@@ -220,7 +222,7 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
             // oxlint-disable-next-line design-system/no-restyle -- DropdownMenuItem has no destructive variant
             className="text-error-foreground focus:bg-error-surface focus:text-error-foreground"
           >
-            Delete workflow
+            {t("Delete workflow", "删除工作流")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -231,13 +233,15 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
           set: setShowDeleteDialog,
         }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete workflow"
+        title={t("Delete workflow", "删除工作流")}
       >
         <Dialog.Content>
           <div>
             <Text variant="large">
-              Are you sure you want to delete this workflow? This action cannot
-              be undone.
+              {t(
+                "Are you sure you want to delete this workflow? This action cannot be undone.",
+                "确定要删除此工作流吗？此操作无法撤销。",
+              )}
             </Text>
             <Dialog.Footer>
               <Button
@@ -245,14 +249,14 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
                 disabled={isDeletingAgent}
                 onClick={() => setShowDeleteDialog(false)}
               >
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDeleteAgent}
                 loading={isDeletingAgent}
               >
-                Delete Workflow
+                {t("Delete Workflow", "删除工作流")}
               </Button>
             </Dialog.Footer>
           </div>

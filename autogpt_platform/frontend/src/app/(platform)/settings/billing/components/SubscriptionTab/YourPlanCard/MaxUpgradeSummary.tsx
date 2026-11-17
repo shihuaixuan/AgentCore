@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { SubscriptionUpgradePreview } from "@/app/api/__generated__/models/subscriptionUpgradePreview";
 import { Text } from "@/components/atoms/Text/Text";
 import { formatAmount } from "@/services/pro-activation/helpers";
@@ -18,6 +21,7 @@ function dateLabel(timestamp: number) {
 }
 
 export function MaxUpgradeSummary({ preview }: Props) {
+  const { t } = useTranslation();
   const amount = (cents: number) =>
     formatUpgradeAmount(cents, preview.currency);
   const unit = preview.billing_cycle === "yearly" ? "year" : "month";
@@ -30,7 +34,10 @@ export function MaxUpgradeSummary({ preview }: Props) {
         <Text variant="body-medium">
           Max{" "}
           <span className="font-normal text-foreground-tertiary">
-            · {preview.billing_cycle === "yearly" ? "Yearly" : "Monthly"}
+            ·{" "}
+            {preview.billing_cycle === "yearly"
+              ? t("Yearly", "每年")
+              : t("Monthly", "每月")}
           </span>
         </Text>
         <Text variant="small" tone="secondary">
@@ -61,13 +68,13 @@ export function MaxUpgradeSummary({ preview }: Props) {
         />
         {preview.adjustment_amount !== 0 && (
           <SummaryRow
-            label="Other invoice adjustments"
+            label={t("Other invoice adjustments", "其他账单调整")}
             value={amount(preview.adjustment_amount)}
           />
         )}
         <div className="border-t border-border-base pt-4">
           <SummaryRow
-            label="Due today"
+            label={t("Due today", "今日应付")}
             value={amount(preview.amount_due)}
             emphasized
           />

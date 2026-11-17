@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
 import { Text } from "@/components/atoms/Text/Text";
@@ -31,6 +32,7 @@ export function MoveToFolderDialog({
   isOpen,
   setIsOpen,
 }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [search, setSearch] = useState("");
@@ -51,14 +53,20 @@ export function MoveToFolderDialog({
         setIsOpen(false);
         setSearch("");
         toast({
-          title: "Workflow moved",
-          description: `"${agentName}" has been moved.`,
+          title: t("Workflow moved", "工作流已移动"),
+          description: t(
+            `"${agentName}" has been moved.`,
+            `“${agentName}”已移动。`,
+          ),
         });
       },
       onError: () => {
         toast({
-          title: "Error",
-          description: "Failed to move workflow. Please try again.",
+          title: t("Error", "错误"),
+          description: t(
+            "Failed to move workflow. Please try again.",
+            "移动工作流失败，请重试。",
+          ),
           variant: "destructive",
         });
       },
@@ -101,7 +109,7 @@ export function MoveToFolderDialog({
     <Dialog
       controlled={{ isOpen, set: setIsOpen }}
       styling={{ maxWidth: "28rem" }}
-      title="Move to folder"
+      title={t("Move to folder", "移动到文件夹")}
       onClose={() => {
         setSearch("");
       }}
@@ -110,8 +118,8 @@ export function MoveToFolderDialog({
         <div className="flex flex-col gap-3">
           <Input
             id="search-folders"
-            label="Search folders"
-            placeholder="Search folders..."
+            label={t("Search folders", "搜索文件夹")}
+            placeholder={t("Search folders...", "搜索文件夹…")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full"
@@ -120,7 +128,7 @@ export function MoveToFolderDialog({
             {folders.length === 0 ? (
               <div className="flex h-20 items-center justify-center">
                 <Text variant="small" tone="subtle">
-                  No folders found
+                  {t("No folders found", "未找到文件夹")}
                 </Text>
               </div>
             ) : (
@@ -134,9 +142,11 @@ export function MoveToFolderDialog({
                   >
                     <span className="text-lead">📂</span>
                     <div className="flex flex-col items-start">
-                      <Text variant="small-medium">My Library (root)</Text>
+                      <Text variant="small-medium">
+                        {t("My Library (root)", "我的工作流库（根目录）")}
+                      </Text>
                       <Text variant="small" tone="subtle">
-                        Remove from folder
+                        {t("Remove from folder", "从文件夹移出")}
                       </Text>
                     </div>
                   </Button>
@@ -158,8 +168,8 @@ export function MoveToFolderDialog({
                       <Text variant="small" tone="subtle">
                         {folder.agent_count ?? 0}{" "}
                         {(folder.agent_count ?? 0) === 1
-                          ? "workflow"
-                          : "workflows"}
+                          ? t("workflow", "个工作流")
+                          : t("workflows", "个工作流")}
                       </Text>
                     </div>
                   </Button>

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { cn } from "@/lib/utils";
@@ -9,6 +12,7 @@ interface Props {
 }
 
 export function LoadingSelectedContent(props: Props) {
+  const { t } = useTranslation();
   return (
     <SelectedViewLayout agent={props.agent}>
       <div
@@ -16,7 +20,7 @@ export function LoadingSelectedContent(props: Props) {
         data-testid="loading-selected-content"
         role="status"
         aria-busy="true"
-        aria-label="Loading content"
+        aria-label={t("Loading content", "正在加载内容")}
       >
         <Skeleton className="h-8 w-full" />
         <Skeleton className="h-12 w-full" />

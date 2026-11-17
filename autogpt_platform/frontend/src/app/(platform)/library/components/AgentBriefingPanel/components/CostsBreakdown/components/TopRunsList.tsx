@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { UserTopRun } from "@/app/api/__generated__/models/userTopRun";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -16,6 +17,7 @@ interface Props {
 const INITIAL_VISIBLE = 5;
 
 export function TopRunsList({ runs, agentLookup }: Props) {
+  const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
   if (runs.length === 0) return null;
 
@@ -25,7 +27,7 @@ export function TopRunsList({ runs, agentLookup }: Props) {
   return (
     <section className="flex flex-col gap-2 lg:mt-4">
       <Text variant="body-medium" tone="emphasis" className="lg:mb-2">
-        Most expensive tasks
+        {t("Most expensive tasks", "费用最高的任务")}
       </Text>
       <ul className="flex flex-col divide-y divide-separator rounded-medium border border-separator bg-surface">
         {visible.map((run) => {

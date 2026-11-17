@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV2ListPresetsQueryKey,
   useDeleteV2DeleteAPreset,
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export function TemplateActionsDropdown({ agent, template, onDeleted }: Props) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -53,11 +55,11 @@ export function TemplateActionsDropdown({ agent, template, onDeleted }: Props) {
       onDeleted?.();
     } catch (error: unknown) {
       toast({
-        title: "Failed to delete template",
+        title: t("Failed to delete template", "无法删除模板"),
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     }
@@ -70,7 +72,7 @@ export function TemplateActionsDropdown({ agent, template, onDeleted }: Props) {
           <button
             className="ml-auto shrink-0 rounded p-1 text-foreground-subtle hover:bg-surface-hover"
             onClick={(e) => e.stopPropagation()}
-            aria-label="More actions"
+            aria-label={t("More actions", "更多操作")}
           >
             <Icon icon={MoreVerticalIcon} className="h-5 w-5" />
           </button>
@@ -82,7 +84,7 @@ export function TemplateActionsDropdown({ agent, template, onDeleted }: Props) {
               setShowDeleteDialog(true);
             }}
           >
-            Delete template
+            {t("Delete template", "删除模板")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -93,13 +95,15 @@ export function TemplateActionsDropdown({ agent, template, onDeleted }: Props) {
           set: setShowDeleteDialog,
         }}
         styling={{ maxWidth: "32rem" }}
-        title="Delete template"
+        title={t("Delete template", "删除模板")}
       >
         <Dialog.Content>
           <div>
             <Text variant="large">
-              Are you sure you want to delete this template? This action cannot
-              be undone.
+              {t(
+                "Are you sure you want to delete this template? This action cannot be undone.",
+                "确定要删除此模板吗？此操作无法撤销。",
+              )}
             </Text>
             <Dialog.Footer>
               <Button
@@ -107,14 +111,14 @@ export function TemplateActionsDropdown({ agent, template, onDeleted }: Props) {
                 disabled={isDeleting}
                 onClick={() => setShowDeleteDialog(false)}
               >
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDelete}
                 loading={isDeleting}
               >
-                Delete Template
+                {t("Delete Template", "删除模板")}
               </Button>
             </Dialog.Footer>
           </div>

@@ -123,8 +123,18 @@ const CREDENTIAL_TYPE_LABELS: Record<CredentialsType, string> = {
   device_code: "Device Auth",
 };
 
-export function getCredentialTypeLabel(type: CredentialsType): string {
-  return CREDENTIAL_TYPE_LABELS[type] ?? type;
+export function getCredentialTypeLabel(
+  type: CredentialsType,
+  t: (english: string, chinese: string) => string = (english) => english,
+): string {
+  const chinese = {
+    oauth2: "OAuth",
+    api_key: "API 密钥",
+    user_password: "密码",
+    host_scoped: "请求头",
+    device_code: "设备授权",
+  };
+  return t(CREDENTIAL_TYPE_LABELS[type] ?? type, chinese[type] ?? type);
 }
 
 type CredentialIcon = React.FC<{ className?: string; size?: string | number }>;
@@ -152,6 +162,7 @@ export function getActionButtonText(
   hasExistingCredentials: boolean,
   provider?: string,
   supportsDeviceCode: boolean = false,
+  t: (english: string, chinese: string) => string = (english) => english,
 ): string {
   const multipleTypes =
     countSupportedTypes(
@@ -163,38 +174,47 @@ export function getActionButtonText(
     ) > 1;
 
   if (multipleTypes) {
-    return hasExistingCredentials ? "Add another credential" : "Add credential";
+    return hasExistingCredentials
+      ? t("Add another credential", "添加其他凭据")
+      : t("Add credential", "添加凭据");
   }
 
   if (provider === "codex" && supportsOAuth2) {
     return hasExistingCredentials
-      ? "Reconnect ChatGPT"
-      : "Sign in with ChatGPT";
+      ? t("Reconnect ChatGPT", "重新连接 ChatGPT")
+      : t("Sign in with ChatGPT", "使用 ChatGPT 登录");
   }
 
   if (hasExistingCredentials) {
-    if (supportsOAuth2) return "Connect another account";
-    if (supportsDeviceCode) return "Connect another account";
-    if (supportsApiKey) return "Use a new API key";
-    if (supportsUserPassword) return "Add a new username and password";
-    if (supportsHostScoped) return "Update headers";
-    return "Add new credentials";
+    if (supportsOAuth2) return t("Connect another account", "连接其他账户");
+    if (supportsDeviceCode) return t("Connect another account", "连接其他账户");
+    if (supportsApiKey) return t("Use a new API key", "使用新的 API 密钥");
+    if (supportsUserPassword)
+      return t("Add a new username and password", "添加新的用户名和密码");
+    if (supportsHostScoped) return t("Update headers", "更新请求头");
+    return t("Add new credentials", "添加新凭据");
   } else {
-    if (supportsOAuth2) return "Add account";
-    if (supportsDeviceCode) return "Add account";
-    if (supportsApiKey) return "Add API key";
-    if (supportsUserPassword) return "Add username and password";
-    if (supportsHostScoped) return "Add headers";
-    return "Add credentials";
+    if (supportsOAuth2) return t("Add account", "添加账户");
+    if (supportsDeviceCode) return t("Add account", "添加账户");
+    if (supportsApiKey) return t("Add API key", "添加 API 密钥");
+    if (supportsUserPassword)
+      return t("Add username and password", "添加用户名和密码");
+    if (supportsHostScoped) return t("Add headers", "添加请求头");
+    return t("Add credentials", "添加凭据");
   }
 }
 
 export function getCredentialDisplayName(
   credential: { title?: string | null; username?: string },
   displayName: string,
+  t: (english: string, chinese: string) => string = (english) => english,
 ): string {
   return (
-    credential.title || credential.username || `Your ${displayName} account`
+    (credential.title === "Manual Entry"
+      ? t("Manual Entry", "手动输入")
+      : credential.title) ||
+    credential.username ||
+    t(`Your ${displayName} account`, `您的 ${displayName} 账户`)
   );
 }
 
@@ -204,16 +224,24 @@ export function getRemovedCredentialMessage(
     | { id: string; title?: string | null; username?: string }
     | undefined,
   providerName: string,
+  t: (english: string, chinese: string) => string = (english) => english,
 ): string {
   if (!selectedCredential?.id) {
-    return `${removedCredentialTitle} was removed. Choose a connection to keep this workflow running.`;
+    return t(
+      `${removedCredentialTitle} was removed. Choose a connection to keep this workflow running.`,
+      `${removedCredentialTitle} 已移除。请选择连接以继续运行此工作流。`,
+    );
   }
 
   const replacement = getCredentialDisplayName(
     selectedCredential,
     providerName,
+    t,
   );
-  return `${removedCredentialTitle} was removed — now using ${replacement}.`;
+  return t(
+    `${removedCredentialTitle} was removed — now using ${replacement}.`,
+    `${removedCredentialTitle} 已移除，现改用 ${replacement}。`,
+  );
 }
 
 export function getMissingScopes(
@@ -224,12 +252,16 @@ export function getMissingScopes(
   return requiredScopes.filter((scope) => !granted.has(scope));
 }
 
-export function getScopeShortfallMessage(missingScopes: string[]): string {
+export function getScopeShortfallMessage(
+  missingScopes: string[],
+  t: (english: string, chinese: string) => string = (english) => english,
+): string {
   const plural = missingScopes.length > 1;
-  return (
+  return t(
     `The account connected, but the ${plural ? "permissions" : "permission"} ` +
-    `${missingScopes.join(", ")} ${plural ? "were" : "was"} not granted. ` +
-    `Reconnect and approve ${plural ? "them" : "it"} to use this account here.`
+      `${missingScopes.join(", ")} ${plural ? "were" : "was"} not granted. ` +
+      `Reconnect and approve ${plural ? "them" : "it"} to use this account here.`,
+    `账户已连接，但尚未授予以下权限：${missingScopes.join("、")}。请重新连接并批准所需权限，以便在此使用该账户。`,
   );
 }
 

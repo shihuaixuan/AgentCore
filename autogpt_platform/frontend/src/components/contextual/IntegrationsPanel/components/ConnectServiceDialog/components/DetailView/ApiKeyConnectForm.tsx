@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
@@ -25,6 +26,8 @@ export function ApiKeyConnectForm({
   providerName,
   onSuccess,
 }: Props) {
+  const { t } = useTranslation();
+
   const { form, handleSubmit, isPending } = useApiKeyConnectForm({
     provider,
     onSuccess,
@@ -42,7 +45,7 @@ export function ApiKeyConnectForm({
                 {...field}
                 id={field.name}
                 autoComplete="off"
-                label="Name"
+                label={t("Name", "名称")}
                 placeholder={`My ${providerName} key`}
                 wrapperClassName="!mb-0"
               />
@@ -64,7 +67,7 @@ export function ApiKeyConnectForm({
                 type="password"
                 autoComplete="new-password"
                 spellCheck={false}
-                label="API key"
+                label={t("API key", "API 密钥")}
                 placeholder="sk-..."
                 wrapperClassName="!mb-0"
               />
@@ -85,7 +88,7 @@ export function ApiKeyConnectForm({
                 value={field.value ?? ""}
                 id={field.name}
                 type="date"
-                label="Expires (optional)"
+                label={t("Expires (optional)", "到期时间（可选）")}
                 hint="Leave blank to keep the key indefinitely"
                 wrapperClassName="!mb-0"
               />
@@ -102,7 +105,7 @@ export function ApiKeyConnectForm({
         disabled={!form.formState.isValid || isPending}
         loading={isPending}
       >
-        Save API key
+        {t("Save API key", "保存 API 密钥")}
       </Button>
     </Form>
   );

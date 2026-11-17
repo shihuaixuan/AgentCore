@@ -1,4 +1,5 @@
 import { useToast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { authClient } from "@/lib/auth/client";
 import { getEmailVerificationCallbackURL } from "@/lib/auth/email-verification";
 import {
@@ -19,6 +20,7 @@ interface Args {
 }
 
 export function useCheckYourInbox({ email, next, marketingOptOut }: Args) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
   const [isResending, setIsResending] = useState(false);
@@ -63,15 +65,21 @@ export function useCheckYourInbox({ email, next, marketingOptOut }: Args) {
     }
 
     setCooldown(RESEND_COOLDOWN_SECONDS);
-    toast({ title: `Email sent to ${email}`, variant: "success" });
+    toast({
+      title: t(`Email sent to ${email}`, `邮件已发送至 ${email}`),
+      variant: "success",
+    });
   }
 
   function showResendFailed(rateLimited: boolean) {
     toast({
-      title: "We couldn't send the email",
+      title: t("We couldn't send the email", "邮件发送失败"),
       description: rateLimited
-        ? "Too many attempts. Please try again in a few minutes."
-        : "Please try again in a moment.",
+        ? t(
+            "Too many attempts. Please try again in a few minutes.",
+            "尝试次数过多，请几分钟后重试。",
+          )
+        : t("Please try again in a moment.", "请稍后重试。"),
       variant: "destructive",
     });
   }

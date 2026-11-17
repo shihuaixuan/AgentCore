@@ -83,8 +83,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 SUB_WORKFLOW_RUNS_ITSELF = (
-    "A workflow can't run itself as a sub-workflow, directly or through other "
-    "workflows"
+    "A workflow can't run itself as a sub-workflow, directly or through other workflows"
 )
 
 
@@ -742,6 +741,11 @@ class GraphModel(Graph, GraphMeta):
                     field_name,
                     field_info,
                 ) in node.block.input_schema.get_credentials_fields_info().items():
+                    if (
+                        node.block.block_type == BlockType.MCP_TOOL
+                        and node.input_default.get("connection_id")
+                    ):
+                        continue
                     discriminator = field_info.discriminator
                     if not discriminator:
                         if (
@@ -1324,9 +1328,9 @@ class GraphModel(Graph, GraphMeta):
                 # Check for missing dependencies when dependent field is present
                 missing_deps = [dep for dep in dependencies if not has_value(node, dep)]
                 if missing_deps and (field_has_value or field_is_required):
-                    node_errors[node.id][
-                        field_name
-                    ] = f"Requires {', '.join(missing_deps)} to be set"
+                    node_errors[node.id][field_name] = (
+                        f"Requires {', '.join(missing_deps)} to be set"
+                    )
 
         return node_errors
 

@@ -1,10 +1,13 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Text } from "@/components/atoms/Text/Text";
 import { formatBytes } from "../usageHelpers";
 import { useWorkspaceStorage } from "./useWorkspaceStorage";
 
 export function StorageBar() {
+  const { t } = useTranslation();
   const { data: storage } = useWorkspaceStorage();
   if (!storage || storage.limit_bytes <= 0) return null;
 
@@ -12,13 +15,15 @@ export function StorageBar() {
   const percent = Math.min(100, Math.round((used_bytes / limit_bytes) * 100));
   const isHigh = percent >= 80;
   const percentLabel =
-    used_bytes > 0 && percent === 0 ? "<1% used" : `${percent}% used`;
+    used_bytes > 0 && percent === 0
+      ? t("<1% used", "已用不足 1%")
+      : t(`${percent}% used`, `已用 ${percent}%`);
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
         <Text tone="body" variant="body-medium">
-          File storage
+          {t("File storage", "文件存储")}
         </Text>
         <Text variant="body" tone="muted" tabular>
           {percentLabel}
@@ -27,7 +32,7 @@ export function StorageBar() {
       <div className="h-2 w-full overflow-hidden rounded-full bg-surface-active">
         <div
           role="progressbar"
-          aria-label="File storage usage"
+          aria-label={t("File storage usage", "文件存储用量")}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={percent}
@@ -38,8 +43,10 @@ export function StorageBar() {
         />
       </div>
       <Text tone="subtle" variant="small">
-        {formatBytes(used_bytes)} of {formatBytes(limit_bytes)} &middot;{" "}
-        {file_count} {file_count === 1 ? "file" : "files"}
+        {t(
+          `${formatBytes(used_bytes)} of ${formatBytes(limit_bytes)} · ${file_count} ${file_count === 1 ? "file" : "files"}`,
+          `${formatBytes(used_bytes)} / ${formatBytes(limit_bytes)} · ${file_count} 个文件`,
+        )}
       </Text>
     </div>
   );

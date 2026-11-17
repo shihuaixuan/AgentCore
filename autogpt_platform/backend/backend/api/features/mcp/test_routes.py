@@ -729,8 +729,9 @@ class TestOAuthLogin:
             )
 
         assert response.status_code == 400
-        assert "does not match where the metadata was published" in (
-            response.json()["detail"]
+        assert (
+            "does not match where the metadata was published"
+            in (response.json()["detail"])
         )
         mock_cm.store.store_state_token.assert_not_awaited()
 
@@ -1057,6 +1058,45 @@ class TestOAuthCallbackIssuer:
 
 
 class TestOAuthCallback:
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_isolated_oauth_does_not_delete_other_accounts(self, client):
+        old = OAuth2Credentials(
+            provider="mcp",
+            access_token=SecretStr("old"),
+            scopes=[],
+            metadata={"mcp_server_url": "https://mcp.example.com/mcp"},
+        )
+        new = OAuth2Credentials(
+            provider="mcp", access_token=SecretStr("new"), scopes=[]
+        )
+        state = AsyncMock()
+        state.state_metadata = {
+            "authorize_url": "https://auth.example.com/authorize",
+            "token_url": "https://auth.example.com/token",
+            "client_id": "client",
+            "server_url": "https://mcp.example.com/mcp",
+            "isolated": True,
+        }
+        state.scopes = []
+        state.code_verifier = "verifier"
+        with (
+            patch("backend.api.features.mcp.routes.creds_manager") as manager,
+            patch("backend.api.features.mcp.routes.settings") as settings,
+            patch("backend.api.features.mcp.routes.MCPOAuthHandler") as handler,
+        ):
+            settings.config.frontend_base_url = "http://localhost:3000"
+            manager.store.verify_state_token = AsyncMock(return_value=state)
+            manager.store.get_creds_by_provider = AsyncMock(return_value=[old])
+            manager.store.delete_creds_by_id = AsyncMock()
+            manager.create = AsyncMock()
+            handler.return_value.exchange_code_for_tokens = AsyncMock(return_value=new)
+            response = await client.post(
+                "/oauth/callback", json={"code": "code", "state_token": "state"}
+            )
+        assert response.status_code == 200
+        assert new.metadata["mcp_isolated"] is True
+        manager.store.delete_creds_by_id.assert_not_awaited()
+
     @pytest.mark.asyncio(loop_scope="session")
     async def test_oauth_callback_success(self, client):
         mock_creds = OAuth2Credentials(

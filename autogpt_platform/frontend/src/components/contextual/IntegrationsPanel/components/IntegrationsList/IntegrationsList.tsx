@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -14,6 +15,9 @@ import { IntegrationsSelectionBar } from "../IntegrationsSelectionBar/Integratio
 import { ProviderGroup } from "../ProviderGroup/ProviderGroup";
 import { IntegrationsListSkeleton } from "./IntegrationsListSkeleton";
 import { useIntegrationsList } from "./useIntegrationsList";
+import type { useCustomMCPConnections } from "../CustomMCPConnections/useCustomMCPConnections";
+import { CustomMCPConnectionRow } from "../CustomMCPConnections/CustomMCPConnectionRow";
+import { Text } from "@/components/atoms/Text/Text";
 
 const LIST_CONTAINER_VARIANTS: Variants = {
   hidden: {},
@@ -41,13 +45,16 @@ interface Props {
   onQueryChange: (query: string) => void;
   /** Background for the sticky rows; it must match the surface below. */
   stickyClassName: string;
+  customConnections?: ReturnType<typeof useCustomMCPConnections>;
 }
 
 export function IntegrationsList({
   query,
   onQueryChange: setQuery,
   stickyClassName,
+  customConnections,
 }: Props) {
+  const { t } = useTranslation();
   const {
     providers,
     isLoading,
@@ -60,7 +67,20 @@ export function IntegrationsList({
     isDeleting,
     isDeletingId,
     buildTargets,
-  } = useIntegrationsList(query);
+  } = useIntegrationsList(
+    query,
+    new Set(
+      customConnections?.connections.flatMap((connection) =>
+        connection.credential_id ? [connection.credential_id] : [],
+      ) ?? [],
+    ),
+  );
+  const customRows = (customConnections?.connections ?? []).filter(
+    (connection) =>
+      `${connection.name} ${connection.description} ${connection.server_url} Custom MCP 自定义 MCP`
+        .toLowerCase()
+        .includes(query.trim().toLowerCase()),
+  );
   const reduceMotion = useReducedMotion();
   const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
   const [pendingForceIds, setPendingForceIds] = useState<string[]>([]);
@@ -94,10 +114,13 @@ export function IntegrationsList({
   // removing a ChatGPT connection does: it stops new ChatGPT-backed chats and
   // leaves everything already said in them alone.
   const pendingNotice = pendingTargets.some((t) => t.provider === "codex")
-    ? "New chats can no longer run on your ChatGPT plan — they fall back to the connection AutoGPT picks. Your chat history is kept, and your other integrations are unaffected."
+    ? t(
+        "New chats can no longer run on your ChatGPT plan — they fall back to the connection AutoGPT picks. Your chat history is kept, and your other integrations are unaffected.",
+        "新聊天将无法再通过您的 ChatGPT 套餐运行，系统会改用 AutoGPT 选择的连接。聊天记录将保留，其他集成不受影响。",
+      )
     : undefined;
 
-  if (isLoading) {
+  if (isLoading || customConnections?.isLoading) {
     return (
       <div className="flex w-full flex-col gap-3">
         <IntegrationsSearch value={query} onChange={setQuery} disabled />
@@ -169,7 +192,12 @@ export function IntegrationsList({
         )}
       </AnimatePresence>
 
-      {isEmpty ? (
+      {customConnections?.listError && (
+        <Text variant="small" role="alert">
+          {t("Could not load custom connections.", "无法加载自定义连接。")}
+        </Text>
+      )}
+      {isEmpty && customRows.length === 0 ? (
         <IntegrationsListEmpty query={query} />
       ) : (
         <motion.div
@@ -178,6 +206,15 @@ export function IntegrationsList({
           animate={reduceMotion ? undefined : "show"}
           variants={reduceMotion ? undefined : LIST_CONTAINER_VARIANTS}
         >
+          {customRows.map((connection) => (
+            <CustomMCPConnectionRow
+              key={connection.id}
+              connection={connection}
+              onEdit={() => customConnections?.edit(connection)}
+              onRemove={() => customConnections?.setPendingRemove(connection)}
+              busy={customConnections?.busy ?? false}
+            />
+          ))}
           {providers.map((provider) => (
             <motion.div
               key={provider.id}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { WorkspaceFileItem } from "@/app/api/__generated__/models/workspaceFileItem";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -25,6 +26,7 @@ export function SelectionBar({
   onSelectAll,
   onClear,
 }: Props) {
+  const { t } = useTranslation();
   const {
     isMoveOpen,
     setIsMoveOpen,
@@ -51,7 +53,7 @@ export function SelectionBar({
             onClick={onSelectAll}
             data-testid="artifacts-select-all"
           >
-            Select all {totalCount}
+            {t("Select all", "全选")} {totalCount}
           </button>
         ) : null}
       </div>
@@ -63,7 +65,8 @@ export function SelectionBar({
           data-testid="artifacts-selection-move"
         >
           <Icon icon={Folder01Icon} size={14} />
-          Move to folder
+
+          {t("Move to folder", "移动到文件夹")}
         </Button>
         <Button
           variant="outline"
@@ -76,11 +79,11 @@ export function SelectionBar({
           data-testid="artifacts-selection-delete"
         >
           <Icon icon={Delete02Icon} size={14} />
-          {isDeleting ? "Deleting…" : "Delete"}
+          {isDeleting ? "Deleting…" : t("Delete", "删除")}
         </Button>
         <button
           type="button"
-          aria-label="Clear selection"
+          aria-label={t("Clear selection", "清除选择")}
           className="inline-flex h-7 w-7 items-center justify-center rounded-full text-foreground-tertiary transition-colors hover:bg-surface-hover hover:text-foreground-strong"
           onClick={onClear}
           data-testid="artifacts-selection-clear"

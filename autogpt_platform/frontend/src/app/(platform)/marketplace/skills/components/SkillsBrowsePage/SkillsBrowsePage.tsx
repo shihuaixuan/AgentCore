@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Text } from "@/components/atoms/Text/Text";
@@ -17,6 +18,7 @@ import { useSkillsBrowsePage } from "./useSkillsBrowsePage";
 const GRID_CLASS = "grid grid-cols-1 gap-5 md:grid-cols-2";
 
 export function SkillsBrowsePage() {
+  const { t } = useTranslation();
   const {
     search,
     category,
@@ -41,21 +43,26 @@ export function SkillsBrowsePage() {
         className="mb-6 inline-flex w-fit items-center gap-1.5 text-body-sm leading-inherit text-foreground-tertiary transition-colors hover:text-foreground-strong"
       >
         <Icon icon={ArrowLeft02Icon} size={14} aria-hidden />
-        Back to marketplace
+
+        {t("Back to marketplace", "返回市场")}
       </Link>
 
       <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="flex items-center gap-2.5 text-heading font-semibold tracking-heading text-foreground-strong">
             <Icon icon={BookOpen01Icon} size={30} aria-hidden />
-            Skills
+
+            {t("Skills", "技能")}
           </h1>
           <p className="mt-2 text-body-lg text-foreground-tertiary">
-            Playbooks your experts follow. Teach them your way of working.
+            {t(
+              "Playbooks your experts follow. Teach them your way of working.",
+              "专家遵循的操作指南。教他们按你的方式工作。",
+            )}
           </p>
         </div>
         <SearchBar
-          placeholder="Search skills"
+          placeholder={t("Search skills", "搜索技能")}
           height="h-[2.75rem]"
           width="w-full md:w-[439px]"
           defaultValue={search}
@@ -75,7 +82,7 @@ export function SkillsBrowsePage() {
         <div
           role="status"
           aria-busy="true"
-          aria-label="Loading skills"
+          aria-label={t("Loading skills", "正在加载技能")}
           className={GRID_CLASS}
         >
           {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
@@ -85,7 +92,9 @@ export function SkillsBrowsePage() {
       ) : isError ? (
         <ErrorCard
           isSuccess={false}
-          responseError={{ message: "Couldn't load skills right now" }}
+          responseError={{
+            message: t("Couldn't load skills right now", "暂时无法加载技能"),
+          }}
           context="marketplace skills"
           onRetry={() => refetch()}
           className="max-w-md"
@@ -132,6 +141,7 @@ function EmptyResult({
   categoryLabel: string | undefined;
   onShowAll: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       className="flex flex-col items-center justify-center gap-3 rounded-large border border-dashed border-border-base px-6 py-16 text-center"
@@ -151,14 +161,14 @@ function EmptyResult({
           onClick={onShowAll}
           className="text-body font-medium text-brand transition-colors hover:text-brand/80"
         >
-          Show all
+          {t("Show all", "显示全部")}
         </button>
       ) : (
         <Link
           href="/library/skills"
           className="text-body font-medium text-brand transition-colors hover:text-brand/80"
         >
-          Go to your skills →
+          {t("Go to your skills →", "前往你的技能 →")}
         </Link>
       )}
     </div>

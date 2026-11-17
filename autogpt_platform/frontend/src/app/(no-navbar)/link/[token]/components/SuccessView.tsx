@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { AuthCard } from "@/components/auth/AuthCard";
@@ -24,6 +27,7 @@ export function SuccessView({
   serverNoun,
   returnUrl,
 }: Props) {
+  const { t } = useTranslation();
   const forUser = isUserLink(linkType);
   const label =
     forUser || !serverName ? `your ${platform} account` : serverName;
@@ -33,7 +37,7 @@ export function SuccessView({
 
   return (
     <AuthCard
-      title="AutoGPT is ready!"
+      title={t("AutoGPT is ready!", "AutoGPT 已准备就绪！")}
       // oxlint-disable-next-line design-system/no-restyle -- AuthCard has no roomy size; keeps today's p-8 padding and gap-6
       className="max-w-[38rem] gap-6 p-8"
     >
@@ -44,14 +48,24 @@ export function SuccessView({
 
         <div className="w-full rounded-xl bg-surface-hover px-6 py-5 text-center">
           <Text variant="body-medium" tone="muted">
-            <strong>{label}</strong> is now connected to your AutoGPT account.
+            {t(
+              `${label} is now connected to your AutoGPT account.`,
+              `${forUser || !serverName ? platform + " 账户" : serverName}现已连接到你的 AutoGPT 账户。`,
+            )}
             <br />
-            {detail}
+            {t(
+              detail,
+              forUser
+                ? `现在可以在 ${platform} 私信中与 Otto 聊天。`
+                : "共享空间中的所有成员现在都可以开始使用 AutoGPT。",
+            )}
           </Text>
           {returnUrl && forUser ? (
             <Text variant="small" tone="muted" className="mt-3 block">
-              Try it now — &ldquo;research a topic&rdquo;, &ldquo;build me a
-              workflow&rdquo;, or &ldquo;draft a doc&rdquo;.
+              {t(
+                "Try it now — “research a topic”, “build me a workflow”, or “draft a doc”.",
+                "立即试试：“研究一个主题”、“帮我创建工作流”或“起草文档”。",
+              )}
             </Text>
           ) : null}
         </div>
@@ -64,7 +78,7 @@ export function SuccessView({
               size="small"
               leftIcon={<Icon icon={ArrowTurnBackwardIcon} size={16} />}
             >
-              Return to {platform}
+              {t(`Return to ${platform}`, `返回 ${platform}`)}
             </Button>
           ) : null}
           <Button
@@ -73,13 +87,16 @@ export function SuccessView({
             variant="outline"
             size="small"
           >
-            Manage bots
+            {t("Manage bots", "管理机器人")}
           </Button>
         </div>
 
         {returnUrl ? null : (
           <Text variant="small" tone="muted" className="text-center">
-            You can close this page and go back to your chat.
+            {t(
+              "You can close this page and go back to your chat.",
+              "你可以关闭此页面并返回聊天。",
+            )}
           </Text>
         )}
       </div>

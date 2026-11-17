@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import type { PlanDef } from "@/components/molecules/PlanCard/plans";
@@ -14,7 +17,12 @@ interface Props extends SubscriptionPlansProps {
 }
 
 export function OfferActions(props: Props) {
-  const { trial, offer, action } = getPlanPresentation(props.plan, props);
+  const { t, locale } = useTranslation();
+  const { trial, offer, action } = getPlanPresentation(
+    props.plan,
+    props,
+    locale,
+  );
   return (
     <div data-slot="offer-actions" className="mt-auto space-y-2">
       {trial ? (
@@ -27,7 +35,7 @@ export function OfferActions(props: Props) {
           disabled={props.isStartingTrial || props.isUpdatingTier}
           onClick={props.onStartTrial}
         >
-          {action}
+          {t(action, `开始 ${trial.duration_days} 天试用`)}
         </Button>
       ) : (
         <PaidPlanAction {...props} />
@@ -40,8 +48,14 @@ export function OfferActions(props: Props) {
         ) : (
           <Text variant="small" tone="muted">
             {isTeamPlan(props.plan.key)
-              ? "Find the right fit for your team."
-              : "Manage your plan and billing anytime."}
+              ? t(
+                  "Find the right fit for your team.",
+                  "为你的团队找到合适的方案。",
+                )
+              : t(
+                  "Manage your plan and billing anytime.",
+                  "随时管理套餐与账单。",
+                )}
           </Text>
         )}
       </div>
@@ -67,6 +81,7 @@ function PaidPlanAction({
   inline = false,
   price,
 }: Props & { inline?: boolean; price?: string | null }) {
+  const { t } = useTranslation();
   function handleSelect() {
     onSelectPlan(plan.key);
   }
@@ -82,17 +97,21 @@ function PaidPlanAction({
       disabled={isUpdatingTier || isStartingTrial}
       onClick={handleSelect}
     >
-      {plan.cta}
+      {t(plan.cta, isTeamPlan(plan.key) ? "联系销售" : `选择 ${plan.name}`)}
       {price && ` · ${price}`}
     </Button>
   );
 }
 
 function TrialActionDetails(props: Props) {
-  const { paidActionPrice } = getPlanPresentation(props.plan, props);
+  const { t, locale } = useTranslation();
+  const { paidActionPrice } = getPlanPresentation(props.plan, props, locale);
   return (
     <Text variant="small" tone="muted">
-      Card required. No subscription charge today.{" "}
+      {t(
+        "Card required. No subscription charge today.",
+        "需要提供银行卡，今天不收取订阅费用。",
+      )}{" "}
       <Button
         type="button"
         variant="link"
@@ -100,7 +119,7 @@ function TrialActionDetails(props: Props) {
         tone="muted"
         onClick={props.onTrialDetails}
       >
-        Trial details
+        {t("Trial details", "试用详情")}
       </Button>
       {" · "}
       <PaidPlanAction {...props} inline price={paidActionPrice} />
@@ -116,6 +135,7 @@ function AlternativeTrial({
 }: Props & {
   offer: NonNullable<SubscriptionPlansProps["trialOffer"]>;
 }) {
+  const { t, locale } = useTranslation();
   function handleSwitchCycle() {
     onBillingChange(offer.billing_cycle);
   }
@@ -130,10 +150,16 @@ function AlternativeTrial({
         disabled={isStartingTrial}
         onClick={handleSwitchCycle}
       >
-        Try {plan.name} for {offer.duration_days} days instead
+        {t(
+          `Try ${plan.name} for ${offer.duration_days} days instead`,
+          `改为试用 ${plan.name} ${offer.duration_days} 天`,
+        )}
       </Button>
       <Text variant="small" tone="muted">
-        Renews at {formatTrialPrice(offer)} + applicable tax.
+        {t(
+          `Renews at ${formatTrialPrice(offer)} + applicable tax.`,
+          `续订价格为 ${formatTrialPrice(offer, locale)}，另加适用税费。`,
+        )}
       </Text>
     </div>
   );

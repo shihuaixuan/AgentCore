@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function NewPodDialog({ open, onClose, onCreate, isCreating }: Props) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const trimmed = name.trim();
 
@@ -30,7 +32,7 @@ export function NewPodDialog({ open, onClose, onCreate, isCreating }: Props) {
   return (
     <Dialog
       variant="compact"
-      title="New pod"
+      title={t("New pod", "新建小组")}
       styling={{ maxWidth: "28rem" }}
       controlled={{
         isOpen: open,
@@ -44,9 +46,9 @@ export function NewPodDialog({ open, onClose, onCreate, isCreating }: Props) {
           <Input
             id="pod-name"
             size="small"
-            label="Pod name"
+            label={t("Pod name", "小组名称")}
             labelVariant="small-medium"
-            placeholder="e.g. Growth"
+            placeholder={t("e.g. Growth", "例如：增长团队")}
             value={name}
             maxLength={POD_NAME_MAX_LENGTH}
             onChange={(event) => setName(event.target.value)}
@@ -59,7 +61,7 @@ export function NewPodDialog({ open, onClose, onCreate, isCreating }: Props) {
               variant="secondary"
               onClick={onClose}
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               size="small"
@@ -68,7 +70,7 @@ export function NewPodDialog({ open, onClose, onCreate, isCreating }: Props) {
               disabled={!trimmed || isCreating}
               loading={isCreating}
             >
-              Create pod
+              {t("Create pod", "创建小组")}
             </Button>
           </div>
         </form>

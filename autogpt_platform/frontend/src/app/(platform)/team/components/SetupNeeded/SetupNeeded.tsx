@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { Alert01Icon } from "@hugeicons/core-free-icons";
@@ -10,6 +11,7 @@ import { useSetupNeeded } from "./useSetupNeeded";
 /** Everything still standing between the team's scheduled workflows and
  *  their schedules, one row per gap with the one action that closes it. */
 export function SetupNeeded() {
+  const { t } = useTranslation();
   const {
     items,
     isConnectable,
@@ -25,7 +27,7 @@ export function SetupNeeded() {
 
   return (
     <section
-      aria-label="Setup needed"
+      aria-label={t("Setup needed", "需要设置")}
       className="flex min-w-0 flex-col"
       data-testid="setup-needed"
     >
@@ -37,7 +39,10 @@ export function SetupNeeded() {
           Setup needed ({items.length})
         </Text>
       </div>
-      <ul className="flex flex-col gap-2" aria-label="Setup items">
+      <ul
+        className="flex flex-col gap-2"
+        aria-label={t("Setup items", "设置项目")}
+      >
         {items.map((item) => (
           <li
             key={`${item.expert_id}-${item.workflow_id}-${item.providers.join("+")}`}
