@@ -5,6 +5,7 @@ import { Input } from "@/components/atoms/Input/Input";
 import { Select } from "@/components/atoms/Select/Select";
 import { Text } from "@/components/atoms/Text/Text";
 import { Alert, AlertDescription } from "@/components/molecules/Alert/Alert";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { UserBlock01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
@@ -30,6 +31,7 @@ const DURATION_OPTIONS = BAN_DURATIONS.map(({ value, label }) => ({
 }));
 
 export function BanDialog({ user }: Props) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [duration, setDuration] = useState<BanDuration>("permanent");
@@ -48,42 +50,44 @@ export function BanDialog({ user }: Props) {
 
   return (
     <Dialog
-      title={`Ban ${getDisplayName(user)}?`}
+      title={`${t("Ban", "封禁")} ${getDisplayName(user)}?`}
       styling={{ maxWidth: "480px" }}
       controlled={{ isOpen, set: handleOpenChange }}
     >
       <Dialog.Trigger>
         <Button variant="secondary" size="small" leadingIcon={UserBlock01Icon}>
-          Ban user…
+          {t("Ban user…", "封禁用户…")}
         </Button>
       </Dialog.Trigger>
       <Dialog.Content>
         <div className="flex flex-col gap-4">
           <Text variant="body" tone="secondary">
             They&apos;re signed out and can&apos;t sign in again until the ban
-            ends, but for up to 5 minutes they can still get a token that works
-            for an hour. Their API keys, schedules and triggers keep running.
+          {t(
+            "ends, but for up to 5 minutes they can still get a token that works for an hour. Their API keys, schedules and triggers keep running.",
+            "结束。但在接下来的 5 分钟内，用户仍可能获得一个可使用 1 小时的令牌。其 API 密钥、计划任务和触发器仍会继续运行。",
+          )}
           </Text>
           {related > 0 ? (
             <Text variant="small" tone="muted">
               Only this account. To include the{" "}
               {related === 1
-                ? "1 related account"
-                : `${related.toLocaleString("en-GB")} related accounts`}
-              , use Ban all in Related accounts.
+                ? t("1 related account", "1 个关联账户")
+                : `${related.toLocaleString("en-GB")} ${t("related accounts", "个关联账户")}`}
+              ，{t("use Ban all in Related accounts.", "请在“关联账户”中使用“全部封禁”。")}
             </Text>
           ) : null}
           {user.role === "admin" ? (
             <Alert variant="warning">
-              <AlertDescription>This account is an admin.</AlertDescription>
+              <AlertDescription>{t("This account is an admin.", "此账户具有管理员权限。")}</AlertDescription>
             </Alert>
           ) : null}
           <Input
             id="ban-reason"
-            label="Reason (required)"
+            label={t("Reason (required)", "原因（必填）")}
             type="textarea"
             rows={3}
-            placeholder="What they did"
+            placeholder={t("What they did", "违规行为说明")}
             value={reason}
             onChange={(event) => setReason(event.target.value)}
             required
@@ -92,7 +96,7 @@ export function BanDialog({ user }: Props) {
           <div className="flex flex-col gap-1">
             <Select
               id="ban-duration"
-              label="Duration"
+              label={t("Duration", "时长")}
               value={duration}
               onValueChange={(value) => setDuration(value as BanDuration)}
               options={DURATION_OPTIONS}
@@ -100,8 +104,8 @@ export function BanDialog({ user }: Props) {
             />
             <Text variant="small" tone="muted">
               {banEnd
-                ? `Ends ${formatDateTime(banEnd)} (${formatTimeUntil(banEnd)})`
-                : "Doesn't end on its own."}
+                ? t("Ends", "结束时间") + ` ${formatDateTime(banEnd)}（${formatTimeUntil(banEnd)}）`
+                : t("Doesn't end on its own.", "不会自动结束。")}
             </Text>
           </div>
         </div>
@@ -111,7 +115,7 @@ export function BanDialog({ user }: Props) {
             size="small"
             onClick={() => setIsOpen(false)}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button
             variant="destructive"
@@ -125,7 +129,7 @@ export function BanDialog({ user }: Props) {
               )
             }
           >
-            Ban user
+            {t("Ban user", "封禁用户")}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

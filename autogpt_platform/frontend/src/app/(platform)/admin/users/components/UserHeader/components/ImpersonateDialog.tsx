@@ -3,6 +3,7 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { UserSwitchIcon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { type AdminUser, getDisplayName } from "../../../helpers";
@@ -20,26 +21,26 @@ export function ImpersonateDialog({
   isStarting,
   onConfirm,
 }: Props) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Dialog
-      title={`Impersonate ${getDisplayName(user)}?`}
+      title={`${t("Impersonate", "模拟登录")} ${getDisplayName(user)}?`}
       styling={{ maxWidth: "480px" }}
       controlled={{ isOpen, set: setIsOpen }}
     >
       <Dialog.Trigger>
         <Button variant="secondary" size="small" leadingIcon={UserSwitchIcon}>
-          Impersonate
+          {t("Impersonate", "模拟登录")}
         </Button>
       </Dialog.Trigger>
       <Dialog.Content>
         <Text variant="body" tone="secondary">
           You&apos;ll see and act as this user across the whole platform until
-          you stop. A notice goes to the audit channel first, then this page
-          reloads.
+          {t("you stop. A notice goes to the audit channel first, then this page reloads.", "停止模拟登录后操作即结束。系统会先向审计频道发送通知，然后重新加载此页面。")}
           {currentImpersonationID
-            ? ` This ends your current impersonation of ${currentImpersonationID}.`
+            ? ` ${t("This ends your current impersonation of", "这会结束当前对该用户的模拟登录：")} ${currentImpersonationID}.`
             : null}
         </Text>
         <Dialog.Footer>
@@ -48,7 +49,7 @@ export function ImpersonateDialog({
             size="small"
             onClick={() => setIsOpen(false)}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button
             variant="primary"
@@ -56,7 +57,7 @@ export function ImpersonateDialog({
             loading={isStarting}
             onClick={() => void onConfirm()}
           >
-            Impersonate
+            {t("Impersonate", "模拟登录")}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

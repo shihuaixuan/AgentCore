@@ -3,6 +3,7 @@ import type { Pagination } from "@/app/api/__generated__/models/pagination";
 import { formatDuration, formatMicrodollars, formatTokens } from "../helpers";
 import { ExecutionPathBadge } from "./ExecutionPathBadge";
 import { TrackingBadge } from "./TrackingBadge";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 function formatLogDate(value: unknown): string {
   if (value instanceof Date) return value.toLocaleString();
@@ -26,12 +27,13 @@ function LogsTable({
   onExport,
   exporting,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <span className="text-body text-foreground-tertiary">
           {pagination
-            ? `${pagination.total_items.toLocaleString()} total rows`
+            ? `${pagination.total_items.toLocaleString()} ${t("total rows", "行")}`
             : ""}
         </span>
         <button
@@ -39,7 +41,7 @@ function LogsTable({
           disabled={exporting}
           className="rounded border px-3 py-1.5 text-body hover:bg-surface-hover disabled:opacity-50"
         >
-          {exporting ? "Exporting…" : "Export CSV"}
+          {exporting ? t("Exporting…", "正在导出…") : t("Export CSV", "导出 CSV")}
         </button>
       </div>
       <div className="overflow-x-auto">
@@ -47,43 +49,43 @@ function LogsTable({
           <thead className="border-b text-caption text-foreground-tertiary uppercase">
             <tr>
               <th scope="col" className="px-3 py-3">
-                Time
+                {t("Time", "时间")}
               </th>
               <th scope="col" className="px-3 py-3">
-                User
+                {t("User", "用户")}
               </th>
               <th scope="col" className="px-3 py-3">
-                Block
+                {t("Block", "模块")}
               </th>
               <th scope="col" className="px-3 py-3">
-                Provider
+                {t("Provider", "服务提供商")}
               </th>
               <th scope="col" className="px-3 py-3">
-                Path
+                {t("Path", "路径")}
               </th>
               <th scope="col" className="px-3 py-3">
-                Source
+                {t("Source", "来源")}
               </th>
               <th scope="col" className="px-3 py-3">
-                Type
+                {t("Type", "类型")}
               </th>
               <th scope="col" className="px-3 py-3">
-                Model
+                {t("Model", "模型")}
               </th>
               <th scope="col" className="px-3 py-3 text-right">
-                Cost
+                {t("Cost", "成本")}
               </th>
               <th scope="col" className="px-3 py-3 text-right">
-                In / Out
+                {t("In / Out", "输入 / 输出")}
               </th>
               <th scope="col" className="px-3 py-3 text-right">
-                Cache (R/W)
+                {t("Cache (R/W)", "缓存（读/写）")}
               </th>
               <th scope="col" className="px-3 py-3 text-right">
-                Duration
+                {t("Duration", "时长")}
               </th>
               <th scope="col" className="px-3 py-3">
-                Execution
+                {t("Execution", "执行")}
               </th>
             </tr>
           </thead>
@@ -140,7 +142,7 @@ function LogsTable({
                   colSpan={13}
                   className="px-4 py-8 text-center text-foreground-tertiary"
                 >
-                  No logs found
+                  {t("No logs found", "没有找到日志")}
                 </td>
               </tr>
             )}
@@ -160,14 +162,14 @@ function LogsTable({
               onClick={() => onPageChange(pagination.current_page - 1)}
               className="rounded border px-3 py-1 text-body disabled:opacity-50"
             >
-              Previous
+            {t("Previous", "上一页")}
             </button>
             <button
               disabled={pagination.current_page >= pagination.total_pages}
               onClick={() => onPageChange(pagination.current_page + 1)}
               className="rounded border px-3 py-1 text-body disabled:opacity-50"
             >
-              Next
+              {t("Next", "下一页")}
             </button>
           </div>
         </div>

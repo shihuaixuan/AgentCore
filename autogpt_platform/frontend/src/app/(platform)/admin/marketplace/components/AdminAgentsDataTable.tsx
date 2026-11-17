@@ -11,6 +11,7 @@ import { PaginationControls } from "@/components/molecules/PaginationControls/Pa
 import { getAdminListingsWithVersions } from "@/app/(platform)/admin/marketplace/actions";
 import { ExpandableRow } from "./ExpandleRow";
 import { SearchAndFilterAdminMarketplace } from "./SearchFilterForm";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 // Helper function to get the latest version by version number
 const getLatestVersionByNumber = (
@@ -35,6 +36,7 @@ export async function AdminAgentsDataTable({
   initialStatus?: SubmissionStatus;
   initialSearch?: string;
 }) {
+  const { t } = useTranslation();
   // Server-side data fetching
   const data = await getAdminListingsWithVersions(
     initialStatus,
@@ -57,19 +59,19 @@ export async function AdminAgentsDataTable({
           <TableHeader>
             <TableRow>
               <TableHead className="w-10"></TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Creator</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Submitted</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t("Name", "名称")}</TableHead>
+              <TableHead>{t("Creator", "创建者")}</TableHead>
+              <TableHead>{t("Description", "描述")}</TableHead>
+              <TableHead>{t("Status", "状态")}</TableHead>
+              <TableHead>{t("Submitted", "提交时间")}</TableHead>
+              <TableHead className="text-right">{t("Actions", "操作")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {listings.length === 0 ? (
               <TableRow>
                 <td colSpan={7} className="px-2 py-10 text-center align-middle">
-                  No submissions found
+                  {t("No submissions found", "没有找到提交内容")}
                 </td>
               </TableRow>
             ) : (

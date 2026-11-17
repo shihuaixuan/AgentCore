@@ -12,6 +12,7 @@ import { getUsersTransactionHistory } from "@/app/(platform)/admin/spending/acti
 import { AdminAddMoneyButton } from "./AddMoneyButton";
 import { RateLimitModal } from "./RateLimitModal";
 import { CreditTransactionType } from "@/lib/autogpt-server-api";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export async function AdminUserGrantHistory({
   initialPage = 1,
@@ -22,6 +23,7 @@ export async function AdminUserGrantHistory({
   initialStatus?: CreditTransactionType;
   initialSearch?: string;
 }) {
+  const { t } = useTranslation();
   // Server-side data fetching
   const { history, pagination } = await getUsersTransactionHistory(
     initialPage,
@@ -88,16 +90,16 @@ export async function AdminUserGrantHistory({
         <Table>
           <thead className="bg-surface-muted [&_tr]:border-b">
             <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Reason</TableHead>
-              <TableHead>Admin</TableHead>
-              <TableHead>Starting Balance</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Ending Balance</TableHead>
+              <TableHead>{t("User", "用户")}</TableHead>
+              <TableHead>{t("Type", "类型")}</TableHead>
+              <TableHead>{t("Date", "日期")}</TableHead>
+              <TableHead>{t("Reason", "原因")}</TableHead>
+              <TableHead>{t("Admin", "管理员")}</TableHead>
+              <TableHead>{t("Starting Balance", "起始余额")}</TableHead>
+              <TableHead>{t("Amount", "金额")}</TableHead>
+              <TableHead>{t("Ending Balance", "结束余额")}</TableHead>
               {/* <TableHead>Current Balance</TableHead> */}
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right">{t("Actions", "操作")}</TableHead>
             </TableRow>
           </thead>
           <TableBody>
@@ -107,7 +109,7 @@ export async function AdminUserGrantHistory({
                   colSpan={9}
                   className="px-2 py-10 text-center align-middle text-foreground-tertiary"
                 >
-                  No transactions found
+                  {t("No transactions found", "没有找到交易记录")}
                 </td>
               </TableRow>
             ) : (

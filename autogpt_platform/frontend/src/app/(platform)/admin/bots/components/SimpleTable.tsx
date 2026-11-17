@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   columns: string[];
@@ -11,10 +12,11 @@ export function SimpleTable({
   rows,
   emptyLabel = "No data yet",
 }: Props) {
+  const { t } = useTranslation();
   if (rows.length === 0) {
     return (
       <p className="py-6 text-center text-body text-foreground-tertiary">
-        {emptyLabel}
+        {t(emptyLabel, "暂无数据")}
       </p>
     );
   }

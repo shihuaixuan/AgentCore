@@ -4,8 +4,10 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { AdminSkillSubmissionFiles } from "./AdminSkillSubmissionFiles";
 import { useAdminSkillSubmissions } from "./useAdminSkillSubmissions";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function AdminSkillSubmissions() {
+  const { t } = useTranslation();
   const {
     submissions,
     isLoading,
@@ -16,13 +18,13 @@ export function AdminSkillSubmissions() {
   } = useAdminSkillSubmissions();
 
   if (isLoading) {
-    return <div className="py-6 text-center">Loading skill submissions…</div>;
+    return <div className="py-6 text-center">{t("Loading skill submissions…", "正在加载技能提交…")}</div>;
   }
 
   if (isUnavailable) {
     return (
       <Text variant="body" tone="muted">
-        Skill submissions are unavailable right now.
+        {t("Skill submissions are unavailable right now.", "技能提交暂时不可用。")}
       </Text>
     );
   }
@@ -30,7 +32,7 @@ export function AdminSkillSubmissions() {
   if (submissions.length === 0) {
     return (
       <Text variant="body" tone="muted">
-        No skill submissions are waiting for review.
+        {t("No skill submissions are waiting for review.", "没有等待审核的技能提交。")}
       </Text>
     );
   }
@@ -67,7 +69,7 @@ export function AdminSkillSubmissions() {
               onClick={() => reject(submission.skill_listing_version_id)}
               data-testid={`reject-${submission.skill_listing_version_id}`}
             >
-              Reject
+              {t("Reject", "拒绝")}
             </Button>
             <Button
               variant="primary"
@@ -76,7 +78,7 @@ export function AdminSkillSubmissions() {
               onClick={() => approve(submission.skill_listing_version_id)}
               data-testid={`approve-${submission.skill_listing_version_id}`}
             >
-              Approve
+              {t("Approve", "通过")}
             </Button>
           </div>
           <AdminSkillSubmissionFiles

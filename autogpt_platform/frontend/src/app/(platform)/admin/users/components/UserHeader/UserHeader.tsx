@@ -8,6 +8,7 @@ import {
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { UserSwitchIcon } from "@hugeicons/core-free-icons";
 import { AdminSection } from "../../../components/AdminSection";
 import { useAdminImpersonation } from "../../../components/useAdminImpersonation";
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function UserHeader({ user, isSelf, canAct }: Props) {
+  const { t } = useTranslation();
   const impersonation = useAdminImpersonation();
   const displayName = getDisplayName(user);
   const isImpersonatingThisUser = impersonation.impersonatedUserId === user.id;
@@ -45,22 +47,22 @@ export function UserHeader({ user, isSelf, canAct }: Props) {
             </Text>
             {isSelf ? (
               <Badge variant="info" size="small">
-                You
+                {t("You", "你")}
               </Badge>
             ) : null}
             {user.role === "admin" ? (
               <Badge variant="info" size="small">
-                Admin
+                {t("Admin", "管理员")}
               </Badge>
             ) : null}
             {user.banned ? (
               <Badge variant="error" size="small">
-                Banned
+                {t("Banned", "已封禁")}
               </Badge>
             ) : null}
             {user.emailVerified ? null : (
               <Badge variant="warning" size="small">
-                Unverified
+                {t("Unverified", "未验证")}
               </Badge>
             )}
           </div>
@@ -84,7 +86,7 @@ export function UserHeader({ user, isSelf, canAct }: Props) {
               leadingIcon={UserSwitchIcon}
               onClick={impersonation.stopImpersonating}
             >
-              Stop impersonating
+              {t("Stop impersonating", "停止模拟登录")}
             </Button>
           ) : (
             <ImpersonateDialog

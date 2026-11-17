@@ -8,6 +8,18 @@ const LABELS: Record<string, string> = {
   Settings: "设置",
   Memory: "记忆",
   Notifications: "通知",
+  "Admin settings": "管理设置",
+  Users: "用户管理",
+  "Marketplace Management": "市场管理",
+  "User Spending": "用户消费",
+  "System Diagnostics": "系统诊断",
+  "Platform Costs": "平台成本",
+  "Execution Analytics": "执行分析",
+  "Bot Analytics": "机器人分析",
+  "Block Cost Estimates": "模块成本估算",
+  "Memory Inspector": "记忆检查器",
+  "Test Data": "测试数据",
+  Admin: "管理后台",
 };
 
 export function sectionLabel(label: string) {

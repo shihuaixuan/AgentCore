@@ -3,6 +3,7 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function ReportLoading() {
   return (
@@ -20,10 +21,11 @@ interface ErrorProps {
 }
 
 export function ReportError({ message, isForbidden, onRetry }: ErrorProps) {
+  const { t } = useTranslation();
   if (isForbidden) {
     return (
       <Text variant="small" tone="muted">
-        You no longer have admin access. Sign in again.
+        {t("You no longer have admin access. Sign in again.", "管理员权限已失效，请重新登录。")}
       </Text>
     );
   }
@@ -33,7 +35,7 @@ export function ReportError({ message, isForbidden, onRetry }: ErrorProps) {
         {message}
       </Text>
       <Button variant="secondary" size="small" onClick={onRetry}>
-        Retry
+        {t("Retry", "重试")}
       </Button>
     </div>
   );

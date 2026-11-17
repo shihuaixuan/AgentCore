@@ -4,6 +4,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { SearchInput } from "@/components/molecules/SearchInput/SearchInput";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   initialValue: string;
@@ -18,6 +19,7 @@ export function UserLookupBar({
   showHint,
   onSearch,
 }: Props) {
+  const { t } = useTranslation();
   const [value, setValue] = useState(initialValue);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -44,11 +46,11 @@ export function UserLookupBar({
           ref={inputRef}
           value={value}
           onChange={setValue}
-          placeholder="User ID or email…"
+          placeholder={t("User ID or email…", "用户 ID 或邮箱…")}
           name="user"
           autoComplete="off"
           spellCheck={false}
-          aria-label="User ID or email"
+          aria-label={t("User ID or email", "用户 ID 或邮箱")}
           disabled={isLoading}
           size="small"
         />
@@ -60,12 +62,12 @@ export function UserLookupBar({
           disabled={!value.trim()}
           className="shrink-0"
         >
-          Look up
+          {t("Look up", "查找")}
         </Button>
       </div>
       {showHint ? (
         <Text variant="small" tone="muted">
-          Exact match only: a full user ID or the complete email address.
+          {t("Exact match only: a full user ID or the complete email address.", "仅支持精确匹配：完整用户 ID 或完整邮箱地址。")}
         </Text>
       ) : null}
     </form>

@@ -9,6 +9,7 @@ import { UserTable } from "./UserTable";
 import { LogsTable } from "./LogsTable";
 import { usePlatformCostContent } from "./usePlatformCostContent";
 import type { CostBucket } from "@/app/api/__generated__/models/costBucket";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   searchParams: {
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export function PlatformCostContent({ searchParams }: Props) {
+  const { t } = useTranslation();
   const {
     dashboard,
     logs,
@@ -66,68 +68,68 @@ export function PlatformCostContent({ searchParams }: Props) {
     dashboard
       ? [
           {
-            label: "Known Cost",
+            label: t("Known Cost", "已知成本"),
             value: formatMicrodollars(dashboard.total_cost_microdollars),
-            subtitle: "From providers that report USD cost",
+            subtitle: t("From providers that report USD cost", "来自报告美元成本的服务提供商"),
           },
           {
-            label: "Estimated Total",
+            label: t("Estimated Total", "估算总额"),
             value: formatMicrodollars(totalEstimatedCost),
-            subtitle: "Including per-run cost estimates",
+            subtitle: t("Including per-run cost estimates", "包括每次运行的成本估算"),
           },
           {
-            label: "Total Requests",
+            label: t("Total Requests", "请求总数"),
             value: dashboard.total_requests.toLocaleString(),
           },
           {
-            label: "Active Users",
+            label: t("Active Users", "活跃用户"),
             value: dashboard.total_users.toLocaleString(),
           },
           {
-            label: "Avg Cost / Request",
+            label: t("Avg Cost / Request", "平均请求成本"),
             value: formatMicrodollars(
               dashboard.avg_cost_microdollars_per_request ?? 0,
             ),
-            subtitle: "Known cost divided by cost-bearing requests",
+            subtitle: t("Known cost divided by cost-bearing requests", "已知成本除以产生成本的请求数"),
           },
           {
-            label: "Avg Input Tokens",
+            label: t("Avg Input Tokens", "平均输入令牌"),
             value: Math.round(
               dashboard.avg_input_tokens_per_request ?? 0,
             ).toLocaleString(),
-            subtitle: "Prompt tokens per request (context size)",
+            subtitle: t("Prompt tokens per request (context size)", "每次请求的提示令牌（上下文大小）"),
           },
           {
-            label: "Avg Output Tokens",
+            label: t("Avg Output Tokens", "平均输出令牌"),
             value: Math.round(
               dashboard.avg_output_tokens_per_request ?? 0,
             ).toLocaleString(),
-            subtitle: "Completion tokens per request (response length)",
+            subtitle: t("Completion tokens per request (response length)", "每次请求的完成令牌（响应长度）"),
           },
           {
-            label: "Total Tokens",
+            label: t("Total Tokens", "令牌总数"),
             value: `${formatTokens(dashboard.total_input_tokens ?? 0)} in / ${formatTokens(dashboard.total_output_tokens ?? 0)} out`,
-            subtitle: "Prompt vs completion token split",
+            subtitle: t("Prompt vs completion token split", "提示令牌与完成令牌的拆分"),
           },
           {
-            label: "Typical Cost (P50)",
+            label: t("Typical Cost (P50)", "典型成本（P50）"),
             value: formatMicrodollars(dashboard.cost_p50_microdollars ?? 0),
-            subtitle: "Median cost per request",
+            subtitle: t("Median cost per request", "每次请求的中位成本"),
           },
           {
-            label: "Upper Cost (P75)",
+            label: t("Upper Cost (P75)", "较高成本（P75）"),
             value: formatMicrodollars(dashboard.cost_p75_microdollars ?? 0),
-            subtitle: "75th percentile cost",
+            subtitle: t("75th percentile cost", "第 75 百分位成本"),
           },
           {
-            label: "High Cost (P95)",
+            label: t("High Cost (P95)", "高成本（P95）"),
             value: formatMicrodollars(dashboard.cost_p95_microdollars ?? 0),
-            subtitle: "95th percentile cost",
+            subtitle: t("95th percentile cost", "第 95 百分位成本"),
           },
           {
-            label: "Peak Cost (P99)",
+            label: t("Peak Cost (P99)", "峰值成本（P99）"),
             value: formatMicrodollars(dashboard.cost_p99_microdollars ?? 0),
-            subtitle: "99th percentile cost",
+            subtitle: t("99th percentile cost", "第 99 百分位成本"),
           },
         ]
       : [];
@@ -140,9 +142,9 @@ export function PlatformCostContent({ searchParams }: Props) {
             htmlFor="start-date"
             className="text-body text-foreground-tertiary"
           >
-            Start Date{" "}
+            {t("Start Date", "开始日期")}{" "}
             <span className="text-caption">
-              (local time — defaults to last 30 days)
+              {t("(local time — defaults to last 30 days)", "（本地时间 — 默认为最近 30 天）")}
             </span>
           </label>
           <input
@@ -158,7 +160,7 @@ export function PlatformCostContent({ searchParams }: Props) {
             htmlFor="end-date"
             className="text-body text-foreground-tertiary"
           >
-            End Date <span className="text-caption">(local time)</span>
+            {t("End Date", "结束日期")} <span className="text-caption">{t("(local time)", "（本地时间）")}</span>
           </label>
           <input
             id="end-date"
@@ -173,7 +175,7 @@ export function PlatformCostContent({ searchParams }: Props) {
             htmlFor="provider-filter"
             className="text-body text-foreground-tertiary"
           >
-            Provider
+            {t("Provider", "服务提供商")}
           </label>
           <input
             id="provider-filter"
@@ -189,7 +191,7 @@ export function PlatformCostContent({ searchParams }: Props) {
             htmlFor="user-id-filter"
             className="text-body text-foreground-tertiary"
           >
-            User ID
+            {t("User ID", "用户 ID")}
           </label>
           <input
             id="user-id-filter"
@@ -205,7 +207,7 @@ export function PlatformCostContent({ searchParams }: Props) {
             htmlFor="model-filter"
             className="text-body text-foreground-tertiary"
           >
-            Model
+            {t("Model", "模型")}
           </label>
           <input
             id="model-filter"
@@ -221,7 +223,7 @@ export function PlatformCostContent({ searchParams }: Props) {
             htmlFor="block-filter"
             className="text-body text-foreground-tertiary"
           >
-            Block
+            {t("Block", "模块")}
           </label>
           <input
             id="block-filter"
@@ -237,7 +239,7 @@ export function PlatformCostContent({ searchParams }: Props) {
             htmlFor="type-filter"
             className="text-body text-foreground-tertiary"
           >
-            Type
+            {t("Type", "类型")}
           </label>
           <input
             id="type-filter"
@@ -253,7 +255,7 @@ export function PlatformCostContent({ searchParams }: Props) {
             htmlFor="execution-id-filter"
             className="text-body text-foreground-tertiary"
           >
-            Execution ID
+            {t("Execution ID", "执行 ID")}
           </label>
           <input
             id="execution-id-filter"
@@ -269,7 +271,7 @@ export function PlatformCostContent({ searchParams }: Props) {
             htmlFor="execution-path-filter"
             className="text-body text-foreground-tertiary"
           >
-            Path
+            {t("Path", "路径")}
           </label>
           <select
             id="execution-path-filter"
@@ -277,7 +279,7 @@ export function PlatformCostContent({ searchParams }: Props) {
             value={executionPathInput}
             onChange={(e) => setExecutionPathInput(e.target.value)}
           >
-            <option value="">All</option>
+            <option value="">{t("All", "全部")}</option>
             <option value="sync">sync</option>
             <option value="anthropic_batch">anthropic_batch</option>
             <option value="openai_batch">openai_batch</option>
@@ -290,7 +292,7 @@ export function PlatformCostContent({ searchParams }: Props) {
             htmlFor="source-filter"
             className="text-body text-foreground-tertiary"
           >
-            Source
+            {t("Source", "来源")}
           </label>
           <select
             id="source-filter"
@@ -298,7 +300,7 @@ export function PlatformCostContent({ searchParams }: Props) {
             value={sourceInput}
             onChange={(e) => setSourceInput(e.target.value)}
           >
-            <option value="">All</option>
+            <option value="">{t("All", "全部")}</option>
             <option value="copilot">copilot</option>
             <option value="dream_pass">dream_pass</option>
           </select>
@@ -307,7 +309,7 @@ export function PlatformCostContent({ searchParams }: Props) {
           onClick={handleFilter}
           className="rounded bg-action px-4 py-1.5 text-body text-action-foreground hover:bg-action/90"
         >
-          Apply
+          {t("Apply", "应用")}
         </button>
         <button
           onClick={() => {
@@ -337,7 +339,7 @@ export function PlatformCostContent({ searchParams }: Props) {
           }}
           className="rounded border px-4 py-1.5 text-body hover:bg-surface-hover"
         >
-          Clear
+          {t("Clear", "清除")}
         </button>
       </div>
 
@@ -404,21 +406,21 @@ export function PlatformCostContent({ searchParams }: Props) {
             aria-label="Cost view tabs"
             className="flex gap-2 border-b"
           >
-            {["overview", "by-user", "logs"].map((t) => (
+            {["overview", "by-user", "logs"].map((tabKey) => (
               <button
-                key={t}
-                id={`tab-${t}`}
+                key={tabKey}
+                id={`tab-${tabKey}`}
                 role="tab"
-                aria-selected={tab === t}
-                aria-controls={`tabpanel-${t}`}
-                onClick={() => updateUrl({ tab: t, page: "1" })}
-                className={`px-4 py-2 text-body font-medium ${tab === t ? "border-b-2 border-action text-action" : "text-foreground-tertiary hover:text-foreground-base"}`}
+                aria-selected={tab === tabKey}
+                aria-controls={`tabpanel-${tabKey}`}
+                onClick={() => updateUrl({ tab: tabKey, page: "1" })}
+                className={`px-4 py-2 text-body font-medium ${tab === tabKey ? "border-b-2 border-action text-action" : "text-foreground-tertiary hover:text-foreground-base"}`}
               >
-                {t === "overview"
-                  ? "By Provider"
-                  : t === "by-user"
-                    ? "By User"
-                    : "Raw Logs"}
+                {tabKey === "overview"
+                    ? t("By Provider", "按服务提供商")
+                  : tabKey === "by-user"
+                    ? t("By User", "按用户")
+                    : t("Raw Logs", "原始日志")}
               </button>
             ))}
           </div>

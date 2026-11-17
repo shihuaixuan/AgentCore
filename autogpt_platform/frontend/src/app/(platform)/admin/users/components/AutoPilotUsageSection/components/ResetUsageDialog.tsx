@@ -5,6 +5,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { useState } from "react";
 import type { ResetScope } from "../helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   scope: ResetScope;
@@ -19,25 +20,26 @@ export function ResetUsageDialog({
   isResetting,
   onConfirm,
 }: Props) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const both = scope === "both";
 
   return (
     <Dialog
-      title={both ? "Reset daily and weekly usage?" : "Reset daily usage?"}
+      title={both ? t("Reset daily and weekly usage?", "重置每日和每周使用量？") : t("Reset daily usage?", "重置每日使用量？")}
       styling={{ maxWidth: "480px" }}
       controlled={{ isOpen, set: setIsOpen }}
     >
       <Dialog.Trigger>
         <Button variant="secondary" size="small" disabled={nothingToReset}>
-          Reset…
+          {t("Reset…", "重置…")}
         </Button>
       </Dialog.Trigger>
       <Dialog.Content>
         <Text variant="body" tone="secondary">
           {both
-            ? "Sets this user's AutoPilot spend for today and this week back to $0.00. Their limits don't change."
-            : "Sets this user's AutoPilot spend for today back to $0.00. Their limits don't change."}
+            ? t("Sets this user's AutoPilot spend for today and this week back to $0.00. Their limits don't change.", "将该用户今天和本周的 AutoPilot 消费重置为 $0.00，限额不变。")
+            : t("Sets this user's AutoPilot spend for today back to $0.00. Their limits don't change.", "将该用户今天的 AutoPilot 消费重置为 $0.00，限额不变。")}
         </Text>
         <Dialog.Footer>
           <Button
@@ -45,7 +47,7 @@ export function ResetUsageDialog({
             size="small"
             onClick={() => setIsOpen(false)}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button
             variant="primary"
@@ -53,7 +55,7 @@ export function ResetUsageDialog({
             loading={isResetting}
             onClick={() => onConfirm(scope, () => setIsOpen(false))}
           >
-            Reset
+            {t("Reset", "重置")}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

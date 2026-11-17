@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/atoms/Button/Button";
 import type { UserRateLimitResponse } from "@/app/api/__generated__/models/userRateLimitResponse";
 import { UsageBar } from "../../components/UsageBar";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const TIERS = [
   "NO_TIER",
@@ -24,10 +25,6 @@ const TIER_COLORS: Record<Tier, string> = {
   ENTERPRISE: "bg-warning-surface text-warning-foreground",
 };
 
-function tierLabel(tier: Tier): string {
-  return tier === "NO_TIER" ? "no access (paywalled)" : "tier limits";
-}
-
 interface Props {
   data: UserRateLimitResponse;
   onReset: (resetWeekly: boolean) => Promise<void>;
@@ -36,6 +33,12 @@ interface Props {
 }
 
 export function RateLimitDisplay({ data, onReset, className }: Props) {
+  const { t } = useTranslation();
+  function tierLabel(tier: Tier) {
+    return tier === "NO_TIER"
+      ? t("no access (paywalled)", "无权限（需付费）")
+      : t("tier limits", "套餐限额");
+  }
   const [isResetting, setIsResetting] = useState(false);
   const [resetWeekly, setResetWeekly] = useState(false);
 
@@ -67,11 +70,11 @@ export function RateLimitDisplay({ data, onReset, className }: Props) {
       <div className="mb-4 flex items-start justify-between">
         <div>
           <h2 className="mb-1 text-lead font-semibold">
-            Rate Limits for {data.user_email ?? data.user_id}
+            {t("Rate Limits for", "限额：")} {data.user_email ?? data.user_id}
           </h2>
           {data.user_email && (
             <p className="text-caption text-foreground-tertiary">
-              User ID: {data.user_id}
+              {t("User ID", "用户 ID")}：{data.user_id}
             </p>
           )}
         </div>
@@ -84,10 +87,10 @@ export function RateLimitDisplay({ data, onReset, className }: Props) {
 
       <div className="mb-4 flex items-center gap-3">
         <label className="text-body font-medium text-foreground-body">
-          Subscription Tier
+          {t("Subscription Tier", "订阅套餐")}
         </label>
         <select
-          aria-label="Subscription tier"
+          aria-label={t("Subscription tier", "订阅套餐")}
           value={currentTier}
           className="rounded-md border bg-surface px-3 py-1.5 text-body"
           disabled
@@ -103,7 +106,7 @@ export function RateLimitDisplay({ data, onReset, className }: Props) {
       <div className="grid grid-cols-2 gap-6">
         <div className="space-y-2">
           <h3 className="text-body font-medium text-foreground-body">
-            Daily Spend
+            {t("Daily Spend", "每日消费")}
           </h3>
           <UsageBar
             used={data.daily_cost_used_microdollars}
@@ -112,7 +115,7 @@ export function RateLimitDisplay({ data, onReset, className }: Props) {
         </div>
         <div className="space-y-2">
           <h3 className="text-body font-medium text-foreground-body">
-            Weekly Spend
+            {t("Weekly Spend", "每周消费")}
           </h3>
           <UsageBar
             used={data.weekly_cost_used_microdollars}
@@ -123,21 +126,21 @@ export function RateLimitDisplay({ data, onReset, className }: Props) {
 
       <div className="mt-6 flex items-center gap-3 border-t pt-4">
         <select
-          aria-label="Reset scope"
+          aria-label={t("Reset scope", "重置范围")}
           value={resetWeekly ? "both" : "daily"}
           onChange={(e) => setResetWeekly(e.target.value === "both")}
           className="rounded-md border bg-surface px-3 py-1.5 text-body"
           disabled={isResetting}
         >
-          <option value="daily">Reset daily only</option>
-          <option value="both">Reset daily + weekly</option>
+          <option value="daily">{t("Reset daily only", "仅重置每日")}</option>
+          <option value="both">{t("Reset daily + weekly", "重置每日和每周")}</option>
         </select>
         <Button
           variant="outline"
           onClick={handleReset}
           disabled={isResetting || nothingToReset}
         >
-          {isResetting ? "Resetting..." : "Reset Usage"}
+          {isResetting ? t("Resetting...", "正在重置...") : t("Reset Usage", "重置使用量")}
         </Button>
       </div>
     </div>

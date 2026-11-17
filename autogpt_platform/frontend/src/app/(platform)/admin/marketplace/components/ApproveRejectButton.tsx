@@ -23,12 +23,14 @@ import {
   approveAgent,
   rejectAgent,
 } from "@/app/(platform)/admin/marketplace/actions";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function ApproveRejectButtons({
   version,
 }: {
   version: StoreSubmissionAdminView;
 }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
@@ -72,7 +74,7 @@ export function ApproveRejectButtons({
               icon={CheckmarkCircle02Icon}
               className="h-4 w-4"
             />
-            Approve
+            {t("Approve", "通过")}
           </span>
         </Button>
       )}
@@ -86,7 +88,7 @@ export function ApproveRejectButtons({
       >
         <span className="flex items-center gap-1.5 text-error-hover">
           <Icon aria-hidden icon={CancelCircleIcon} className="h-4 w-4" />
-          {isApproved ? "Revoke" : "Reject"}
+          {isApproved ? t("Revoke", "撤销通过") : t("Reject", "拒绝")}
         </span>
       </Button>
 
@@ -94,10 +96,9 @@ export function ApproveRejectButtons({
       <Dialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Approve Agent</DialogTitle>
+            <DialogTitle>{t("Approve Agent", "通过工作流")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to approve this agent? This will make it
-              available in the marketplace.
+              {t("Are you sure you want to approve this agent? This will make it available in the marketplace.", "确定要通过此工作流吗？通过后它将出现在市场中。")}
             </DialogDescription>
           </DialogHeader>
 
@@ -110,11 +111,11 @@ export function ApproveRejectButtons({
 
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="comments">Comments (Optional)</Label>
+                <Label htmlFor="comments">{t("Comments (Optional)", "评论（可选）")}</Label>
                 <Textarea
                   id="comments"
                   name="comments"
-                  placeholder="Add any comments for the agent creator"
+                  placeholder={t("Add any comments for the agent creator", "添加给工作流创建者的评论")}
                   defaultValue="Meets all requirements"
                 />
               </div>
@@ -127,10 +128,10 @@ export function ApproveRejectButtons({
                 size="compact"
                 onClick={() => setIsApproveDialogOpen(false)}
               >
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
               <Button variant="compact-primary" size="compact" type="submit">
-                Approve
+                {t("Approve", "通过")}
               </Button>
             </DialogFooter>
           </form>
@@ -142,12 +143,12 @@ export function ApproveRejectButtons({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {isApproved ? "Revoke Approved Agent" : "Reject Agent"}
+              {isApproved ? t("Revoke Approved Agent", "撤销已通过的工作流") : t("Reject Agent", "拒绝工作流")}
             </DialogTitle>
             <DialogDescription>
               {isApproved
-                ? "Are you sure you want to revoke approval for this agent? This will remove it from the marketplace."
-                : "Please provide feedback on why this agent is being rejected."}
+                ? t("Are you sure you want to revoke approval for this agent? This will remove it from the marketplace.", "确定要撤销此工作流的通过状态吗？它将从市场中移除。")
+                : t("Please provide feedback on why this agent is being rejected.", "请说明拒绝此工作流的原因。")}
             </DialogDescription>
           </DialogHeader>
 
@@ -160,21 +161,21 @@ export function ApproveRejectButtons({
 
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="comments">Comments for Creator</Label>
+                <Label htmlFor="comments">{t("Comments for Creator", "给创建者的评论")}</Label>
                 <Textarea
                   id="comments"
                   name="comments"
-                  placeholder="Provide feedback for the agent creator"
+                  placeholder={t("Provide feedback for the agent creator", "向工作流创建者提供反馈")}
                   required
                 />
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="internal_comments">Internal Comments</Label>
+                <Label htmlFor="internal_comments">{t("Internal Comments", "内部评论")}</Label>
                 <Textarea
                   id="internal_comments"
                   name="internal_comments"
-                  placeholder="Add any internal notes (not visible to creator)"
+                  placeholder={t("Add any internal notes (not visible to creator)", "添加内部备注（创建者不可见）")}
                 />
               </div>
             </div>
@@ -186,14 +187,14 @@ export function ApproveRejectButtons({
                 size="compact"
                 onClick={() => setIsRejectDialogOpen(false)}
               >
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
               <Button
                 type="submit"
                 variant="compact-destructive"
                 size="compact"
               >
-                {isApproved ? "Revoke" : "Reject"}
+                {isApproved ? t("Revoke", "撤销通过") : t("Reject", "拒绝")}
               </Button>
             </DialogFooter>
           </form>

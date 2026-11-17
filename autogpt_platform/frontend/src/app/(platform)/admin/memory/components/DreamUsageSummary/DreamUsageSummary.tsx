@@ -6,19 +6,21 @@ import { Badge } from "@/components/atoms/Badge/Badge";
 import { formatCost, formatTokens } from "./helpers";
 import { Coins01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   usage: DreamPassUsage | null | undefined;
 }
 
 export function DreamUsageSummary({ usage }: Props) {
+  const { t } = useTranslation();
   if (!usage) {
     return (
       <div
         className="rounded-md border border-dashed bg-surface p-4 text-center text-body text-foreground-tertiary"
         data-testid="dream-usage-empty"
       >
-        No token usage was recorded for this dream pass.
+        {t("No token usage was recorded for this dream pass.", "此次记忆整理没有记录令牌使用量。")}
       </div>
     );
   }
@@ -33,7 +35,7 @@ export function DreamUsageSummary({ usage }: Props) {
     >
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <Text variant="eyebrow" as="p">
-          Token usage
+          {t("Token usage", "令牌使用量")}
         </Text>
         <div className="inline-flex items-center gap-2">
           <span className="flex text-foreground-tertiary">
@@ -44,7 +46,7 @@ export function DreamUsageSummary({ usage }: Props) {
           </Text>
           {discount > 0 ? (
             <Badge variant="success" size="small">
-              discount {(discount * 100).toFixed(0)}%
+              {t("discount", "折扣")} {(discount * 100).toFixed(0)}%
             </Badge>
           ) : null}
         </div>
@@ -54,8 +56,8 @@ export function DreamUsageSummary({ usage }: Props) {
         <table className="w-full text-left text-caption">
           <thead className="text-foreground-tertiary">
             <tr>
-              <th className="px-2 py-1 font-medium">Phase</th>
-              <th className="px-2 py-1 font-medium">Model</th>
+              <th className="px-2 py-1 font-medium">{t("Phase", "阶段")}</th>
+              <th className="px-2 py-1 font-medium">{t("Model", "模型")}</th>
               <th className="px-2 py-1 text-right font-medium">In</th>
               <th className="px-2 py-1 text-right font-medium">Out</th>
               <th className="px-2 py-1 text-right font-medium">Cache R</th>
@@ -70,7 +72,7 @@ export function DreamUsageSummary({ usage }: Props) {
                   colSpan={7}
                   className="px-2 py-2 text-center text-foreground-tertiary italic"
                 >
-                  No per-phase data recorded.
+                  {t("No per-phase data recorded.", "没有记录分阶段数据。")}
                 </td>
               </tr>
             ) : (
@@ -105,7 +107,7 @@ export function DreamUsageSummary({ usage }: Props) {
             )}
             <tr className="border-t-2 border-border-base bg-surface-muted font-medium">
               <td className="px-2 py-1" colSpan={2}>
-                Totals
+                {t("Totals", "合计")}
               </td>
               <td className="px-2 py-1 text-right tabular-nums">
                 {formatTokens(usage.total_input_tokens)}

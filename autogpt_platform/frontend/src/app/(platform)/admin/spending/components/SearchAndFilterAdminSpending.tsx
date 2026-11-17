@@ -11,12 +11,14 @@ import {
   SelectValue,
 } from "@/components/atoms/Select/components/SelectPrimitives";
 import { AdminUserSearch } from "../../components/AdminUserSearch";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function SearchAndFilterAdminSpending({
   initialSearch,
 }: {
   initialSearch?: string;
 }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -77,16 +79,16 @@ export function SearchAndFilterAdminSpending({
         }}
       >
         <SelectTrigger className="w-1/4">
-          <SelectValue placeholder="Select Status" />
+          <SelectValue placeholder={t("Select Status", "选择状态")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="ALL">All</SelectItem>
-          <SelectItem value={CreditTransactionType.TOP_UP}>Top Up</SelectItem>
-          <SelectItem value={CreditTransactionType.USAGE}>Usage</SelectItem>
-          <SelectItem value={CreditTransactionType.REFUND}>Refund</SelectItem>
-          <SelectItem value={CreditTransactionType.GRANT}>Grant</SelectItem>
+          <SelectItem value="ALL">{t("All", "全部")}</SelectItem>
+          <SelectItem value={CreditTransactionType.TOP_UP}>{t("Top Up", "充值")}</SelectItem>
+          <SelectItem value={CreditTransactionType.USAGE}>{t("Usage", "使用")}</SelectItem>
+          <SelectItem value={CreditTransactionType.REFUND}>{t("Refund", "退款")}</SelectItem>
+          <SelectItem value={CreditTransactionType.GRANT}>{t("Grant", "赠送")}</SelectItem>
           <SelectItem value={CreditTransactionType.CARD_CHECK}>
-            Card Check
+            {t("Card Check", "银行卡验证")}
           </SelectItem>
         </SelectContent>
       </Select>

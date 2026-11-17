@@ -3,6 +3,7 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useState } from "react";
 import { AdminSection } from "../../../components/AdminSection";
 import { UsageBar } from "../../../components/UsageBar";
@@ -17,14 +18,15 @@ interface Props {
 }
 
 export function AutoPilotUsageSection({ userId }: Props) {
+  const { t } = useTranslation();
   const usage = useAutoPilotUsage(userId);
   const [pendingTier, setPendingTier] = useState<string | null>(null);
   const data = usage.rateLimit;
 
   return (
     <AdminSection
-      title="AutoPilot usage"
-      description="Daily and weekly spend against this user's plan limits."
+      title={t("AutoPilot usage", "AutoPilot 使用情况")}
+      description={t("Daily and weekly spend against this user's plan limits.", "该用户每日和每周的消费及套餐限额。")}
     >
       {usage.isLoading ? (
         <div className="flex flex-col gap-4" aria-busy="true">
@@ -35,14 +37,14 @@ export function AutoPilotUsageSection({ userId }: Props) {
       ) : !data ? (
         <div className="flex items-center justify-between gap-4">
           <Text variant="small" tone="muted">
-            Couldn&apos;t load this user&apos;s usage.
+            {t("Couldn't load this user's usage.", "无法加载该用户的使用情况。")}
           </Text>
           <Button
             variant="secondary"
             size="small"
             onClick={() => void usage.refetch()}
           >
-            Retry
+            {t("Retry", "重试")}
           </Button>
         </div>
       ) : (
@@ -54,12 +56,12 @@ export function AutoPilotUsageSection({ userId }: Props) {
             onPick={setPendingTier}
           />
           <UsageRow
-            label="Daily"
+            label={t("Daily", "每日")}
             used={data.daily_cost_used_microdollars}
             limit={data.daily_cost_limit_microdollars}
           />
           <UsageRow
-            label="Weekly"
+            label={t("Weekly", "每周")}
             used={data.weekly_cost_used_microdollars}
             limit={data.weekly_cost_limit_microdollars}
           />

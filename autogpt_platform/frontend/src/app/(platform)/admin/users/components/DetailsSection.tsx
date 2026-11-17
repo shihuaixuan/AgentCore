@@ -7,6 +7,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { useToast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Copy01Icon } from "@hugeicons/core-free-icons";
 import { ReactNode } from "react";
 import { AdminSection } from "../../components/AdminSection";
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function DetailsSection({ user }: Props) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { data: rateLimit, isError: planFailed } = useGetV2GetUserRateLimit(
     { user_id: user.id },
@@ -26,20 +28,20 @@ export function DetailsSection({ user }: Props) {
   async function copyUserID() {
     try {
       await navigator.clipboard.writeText(user.id);
-      toast({ title: "User ID copied" });
+      toast({ title: t("User ID copied", "用户 ID 已复制") });
     } catch {
       toast({
-        title: "Couldn't copy the user ID",
-        description: "Select it and copy it by hand.",
+        title: t("Couldn't copy the user ID", "无法复制用户 ID"),
+        description: t("Select it and copy it by hand.", "请选中后手动复制。"),
         variant: "destructive",
       });
     }
   }
 
   return (
-    <AdminSection title="Details">
+    <AdminSection title={t("Details", "账户详情")}>
       <dl className="flex flex-col gap-3">
-        <Row label="User ID">
+        <Row label={t("User ID", "用户 ID")}>
           <span className="flex items-start gap-1">
             <span
               className="min-w-0 font-mono text-body-sm leading-inherit break-all"
@@ -50,47 +52,47 @@ export function DetailsSection({ user }: Props) {
             <Button
               variant="icon"
               size="icon-xs"
-              aria-label="Copy user ID"
+              aria-label={t("Copy user ID", "复制用户 ID")}
               onClick={() => void copyUserID()}
             >
               <Icon icon={Copy01Icon} size={14} aria-hidden />
             </Button>
           </span>
         </Row>
-        <Row label="Email">
+        <Row label={t("Email", "邮箱")}>
           <span className="flex flex-wrap items-center gap-1.5">
             <span className="break-all" translate="no">
               {user.email}
             </span>
             {user.emailVerified ? (
               <Badge variant="success" size="small">
-                Verified
+                {t("Verified", "已验证")}
               </Badge>
             ) : (
               <Badge variant="warning" size="small">
-                Unverified
+                {t("Unverified", "未验证")}
               </Badge>
             )}
           </span>
         </Row>
-        <Row label="Role">{user.role === "admin" ? "Admin" : "User"}</Row>
-        <Row label="Plan">
+        <Row label={t("Role", "角色")}>{user.role === "admin" ? t("Admin", "管理员") : t("User", "用户")}</Row>
+        <Row label={t("Plan", "套餐")}>
           {rateLimit
             ? getPlanName(rateLimit.tier)
             : planFailed
-              ? "Couldn't load"
+              ? t("Couldn't load", "加载失败")
               : "—"}
         </Row>
-        <Row label="Joined">{formatDate(user.createdAt)}</Row>
-        <Row label="Status">
+        <Row label={t("Joined", "注册时间")}>{formatDate(user.createdAt)}</Row>
+        <Row label={t("Status", "状态")}>
           {user.banned ? (
             <span className="text-error-foreground">
               {user.banExpires
-                ? `Banned until ${formatDate(user.banExpires)}`
-                : "Banned permanently"}
+                ? t("Banned until", "封禁至") + ` ${formatDate(user.banExpires)}`
+                : t("Banned permanently", "永久封禁")}
             </span>
           ) : (
-            "Active"
+            t("Active", "正常")
           )}
         </Row>
       </dl>

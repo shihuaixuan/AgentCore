@@ -16,6 +16,7 @@ import { BaseInput } from "@/components/atoms/Input/BaseInput";
 import { useRouter } from "next/navigation";
 import { addDollars } from "@/app/(platform)/admin/spending/actions";
 import { useToast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function AdminAddMoneyButton({
   userId,
@@ -30,6 +31,7 @@ export function AdminAddMoneyButton({
   defaultAmount?: number;
   defaultComments?: string;
 }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const { toast } = useToast();
   const [isAddMoneyDialogOpen, setIsAddMoneyDialogOpen] = useState(false);
@@ -44,15 +46,15 @@ export function AdminAddMoneyButton({
       await addDollars(formData);
       setIsAddMoneyDialogOpen(false);
       toast({
-        title: "Success",
-        description: `Added $${dollarAmount} to ${userEmail}'s balance`,
+        title: t("Success", "成功"),
+        description: `${t("Added", "已添加")} $${dollarAmount} ${t("to", "到")} ${userEmail} ${t("balance", "的余额")}`,
       });
       router.refresh(); // Refresh the current route
     } catch (error) {
       console.error("Error adding dollars:", error);
       toast({
-        title: "Error",
-        description: "Failed to add dollars. Please try again.",
+        title: t("Error", "错误"),
+        description: t("Failed to add dollars. Please try again.", "添加金额失败，请重试。"),
         variant: "destructive",
       });
     } finally {
@@ -70,7 +72,7 @@ export function AdminAddMoneyButton({
           setIsAddMoneyDialogOpen(true);
         }}
       >
-        Add Dollars
+        {t("Add Dollars", "添加金额")}
       </Button>
 
       {/* Add $$$ Dialog */}
@@ -80,13 +82,13 @@ export function AdminAddMoneyButton({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Dollars</DialogTitle>
+            <DialogTitle>{t("Add Dollars", "添加金额")}</DialogTitle>
             <DialogDescription className="mt-2">
               <div className="mb-2">
-                <span className="font-medium">User:</span> {userEmail}
+                <span className="font-medium">{t("User", "用户")}：</span> {userEmail}
               </div>
               <div>
-                <span className="font-medium">Current balance:</span> $
+                <span className="font-medium">{t("Current balance", "当前余额")}：</span> $
                 {(currentBalance / 100).toFixed(2)}
               </div>
             </DialogDescription>
@@ -102,7 +104,7 @@ export function AdminAddMoneyButton({
 
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="dollarAmount">Amount (in dollars)</Label>
+                <Label htmlFor="dollarAmount">{t("Amount (in dollars)", "金额（美元）")}</Label>
                 <div className="flex">
                   <div className="flex items-center justify-center rounded-l-md border border-r-0 bg-surface-muted px-3 text-foreground-tertiary">
                     $
@@ -123,11 +125,11 @@ export function AdminAddMoneyButton({
 
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="comments">Comments (Optional)</Label>
+                <Label htmlFor="comments">{t("Comments (Optional)", "备注（可选）")}</Label>
                 <Textarea
                   id="comments"
                   name="comments"
-                  placeholder="Why are you adding dollars?"
+                  placeholder={t("Why are you adding dollars?", "为什么要添加金额？")}
                   defaultValue={defaultComments || "We love you!"}
                 />
               </div>
@@ -141,7 +143,7 @@ export function AdminAddMoneyButton({
                 onClick={() => setIsAddMoneyDialogOpen(false)}
                 disabled={isSubmitting}
               >
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
               <Button
                 variant="compact-primary"
@@ -149,7 +151,7 @@ export function AdminAddMoneyButton({
                 type="submit"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Adding..." : "Add Dollars"}
+                {isSubmitting ? t("Adding...", "正在添加...") : t("Add Dollars", "添加金额")}
               </Button>
             </DialogFooter>
           </form>

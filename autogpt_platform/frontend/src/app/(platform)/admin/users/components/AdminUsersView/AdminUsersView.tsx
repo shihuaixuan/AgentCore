@@ -14,6 +14,7 @@ import {
   UserSearch01Icon,
 } from "@hugeicons/core-free-icons";
 import { useQueryState } from "nuqs";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { BLOCKS_TAB, TAB_QUERY_PARAM } from "../../helpers";
 import { useAdminUserLookup } from "../../useAdminUserLookup";
 import { BlocksTab } from "../BlocksTab/BlocksTab";
@@ -25,6 +26,7 @@ import { UserView } from "../UserView/UserView";
 const LOOKUP_TAB = "lookup";
 
 export function AdminUsersView() {
+  const { t } = useTranslation();
   const [tab, setTab] = useQueryState(TAB_QUERY_PARAM);
   const activeTab = tab === BLOCKS_TAB ? BLOCKS_TAB : LOOKUP_TAB;
   const blockCount = useActiveBlockCount();
@@ -32,7 +34,7 @@ export function AdminUsersView() {
   return (
     <div className="flex w-full max-w-[1120px] flex-col gap-6">
       <Text variant="h4" as="h1">
-        Users
+        {t("Users", "用户管理")}
       </Text>
       <TabsLine
         value={activeTab}
@@ -43,11 +45,11 @@ export function AdminUsersView() {
         {/* oxlint-disable-next-line design-system/no-restyle -- TabsLine has no neutral-indicator variant at the default size (src/components is P9's) */}
         <TabsLineList flush indicatorClassName="bg-action">
           <TabsLineTrigger value={LOOKUP_TAB} icon={UserSearch01Icon}>
-            Lookup
+            {t("Lookup", "查找用户")}
           </TabsLineTrigger>
           <TabsLineTrigger value={BLOCKS_TAB} icon={SecurityBlockIcon}>
             <span className="flex items-center gap-1.5">
-              Blocks
+              {t("Blocks", "拦截规则")}
               {blockCount ? (
                 <Badge variant="info" size="small">
                   {blockCount.toLocaleString("en-GB")}
@@ -62,8 +64,10 @@ export function AdminUsersView() {
         <TabsLineContent value={BLOCKS_TAB} className="mt-4">
           <div className="flex flex-col gap-6">
             <Text variant="body" className="max-w-[600px]" tone="body">
-              IP addresses refused at sign-up and sign-in, and email domains
-              refused at sign-up.
+              {t(
+                "IP addresses refused at sign-up and sign-in, and email domains refused at sign-up.",
+                "被拒绝注册和登录的 IP 地址，以及被拒绝注册的邮箱域名。",
+              )}
             </Text>
             <BlocksTab />
           </div>
@@ -74,6 +78,7 @@ export function AdminUsersView() {
 }
 
 function LookupTab() {
+  const { t } = useTranslation();
   const {
     rawQuery,
     query,
@@ -88,8 +93,10 @@ function LookupTab() {
   return (
     <div className="flex flex-col gap-6">
       <Text variant="body" className="max-w-[600px]" tone="body">
-        Look up an account by ID or email to inspect it, limit it, or act as the
-        user.
+        {t(
+          "Look up an account by ID or email to inspect it, limit it, or act as the user.",
+          "通过用户 ID 或邮箱查找账户，以查看详情、限制账户或代为操作。",
+        )}
       </Text>
 
       <UserLookupBar

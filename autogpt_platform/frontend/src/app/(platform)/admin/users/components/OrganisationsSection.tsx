@@ -6,6 +6,7 @@ import { Badge } from "@/components/atoms/Badge/Badge";
 import { Button } from "@/components/atoms/Button/Button";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AdminSection } from "../../components/AdminSection";
 import { formatMonth } from "../helpers";
 
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function OrganisationsSection({ userId }: Props) {
+  const { t } = useTranslation();
   const {
     data: organisations,
     isLoading,
@@ -22,8 +24,8 @@ export function OrganisationsSection({ userId }: Props) {
 
   return (
     <AdminSection
-      title="Organisations"
-      description="Every account has a personal organisation."
+      title={t("Organisations", "组织")}
+      description={t("Every account has a personal organisation.", "每个账户都有一个个人组织。")}
     >
       {isLoading ? (
         <div className="flex flex-col gap-2" aria-busy="true">
@@ -33,19 +35,19 @@ export function OrganisationsSection({ userId }: Props) {
       ) : !organisations ? (
         <div className="flex items-center justify-between gap-4">
           <Text variant="small" tone="muted">
-            Couldn&apos;t load organisations.
+            {t("Couldn't load organisations.", "无法加载组织。")}
           </Text>
           <Button
             variant="secondary"
             size="small"
             onClick={() => void refetch()}
           >
-            Retry
+            {t("Retry", "重试")}
           </Button>
         </div>
       ) : organisations.length === 0 ? (
         <Text variant="small" tone="muted">
-          No organisations.
+          {t("No organisations.", "暂无组织。")}
         </Text>
       ) : (
         <ul className="divide-y divide-border-base">
@@ -68,7 +70,7 @@ export function OrganisationsSection({ userId }: Props) {
                 </Text>
                 {organisation.is_personal ? (
                   <Badge variant="info" size="small">
-                    Personal
+                    {t("Personal", "个人")}
                   </Badge>
                 ) : null}
               </div>

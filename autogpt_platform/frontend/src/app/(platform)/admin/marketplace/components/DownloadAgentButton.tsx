@@ -6,12 +6,14 @@ import { agentGraphExportFilename, exportAsJSONFile } from "@/lib/utils";
 import { LinkSquare01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function DownloadAgentAdminButton({
   storeListingVersionId,
 }: {
   storeListingVersionId: string;
 }) {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDownload = async () => {
@@ -36,7 +38,7 @@ export function DownloadAgentAdminButton({
       disabled={isLoading}
     >
       <Icon aria-hidden icon={LinkSquare01Icon} className="h-4 w-4" />
-      {isLoading ? "Downloading..." : "Download"}
+      {isLoading ? t("Downloading...", "正在下载...") : t("Download", "下载")}
     </Button>
   );
 }

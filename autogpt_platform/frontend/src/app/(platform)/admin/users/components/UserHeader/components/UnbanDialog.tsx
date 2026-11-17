@@ -3,6 +3,7 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { UserUnlock01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { type AdminUser, getDisplayName } from "../../../helpers";
@@ -13,23 +14,24 @@ interface Props {
 }
 
 export function UnbanDialog({ user }: Props) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const { unbanUser, isUnbanning } = useUserBan(user);
 
   return (
     <Dialog
-      title={`Unban ${getDisplayName(user)}?`}
+      title={`${t("Unban", "解除封禁")} ${getDisplayName(user)}?`}
       styling={{ maxWidth: "480px" }}
       controlled={{ isOpen, set: setIsOpen }}
     >
       <Dialog.Trigger>
         <Button variant="secondary" size="small" leadingIcon={UserUnlock01Icon}>
-          Unban
+          {t("Unban", "解除封禁")}
         </Button>
       </Dialog.Trigger>
       <Dialog.Content>
         <Text variant="body" tone="secondary">
-          They can sign in again right away.
+          {t("They can sign in again right away.", "该用户现在可以重新登录。")}
         </Text>
         <Dialog.Footer>
           <Button
@@ -37,7 +39,7 @@ export function UnbanDialog({ user }: Props) {
             size="small"
             onClick={() => setIsOpen(false)}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button
             variant="primary"
@@ -47,7 +49,7 @@ export function UnbanDialog({ user }: Props) {
               unbanUser(undefined, { onSuccess: () => setIsOpen(false) })
             }
           >
-            Unban
+            {t("Unban", "解除封禁")}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

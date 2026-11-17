@@ -7,53 +7,57 @@ import {
   UserSearch01Icon,
 } from "@hugeicons/core-free-icons";
 import { getSpendingSearchHref } from "../helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function EmptyState() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center gap-2 py-16 text-center">
       <span className="flex text-foreground-subtle">
         <Icon icon={UserSearch01Icon} size={32} aria-hidden />
       </span>
       <Text variant="large-medium" as="h2">
-        Look up a user
+        {t("Look up a user", "查找用户")}
       </Text>
       <Text variant="body" tone="secondary">
-        Paste a user ID or the complete email address.
+        {t("Paste a user ID or the complete email address.", "粘贴用户 ID 或完整邮箱地址。")}
       </Text>
     </div>
   );
 }
 
 export function NotFoundState({ query }: { query: string }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center gap-2 py-16 text-center">
       <span className="flex text-foreground-subtle">
         <Icon icon={UserQuestion01Icon} size={32} aria-hidden />
       </span>
       <Text variant="large-medium" as="h2" className="break-all">
-        No user matches <span className="font-medium">{query}</span>
+        {t("No user matches", "没有找到匹配的用户")} <span className="font-medium">{query}</span>
       </Text>
       <Text variant="body" tone="secondary">
-        Lookup is exact: a full user ID or the complete email address.
+        {t("Lookup is exact: a full user ID or the complete email address.", "请使用完整用户 ID 或完整邮箱地址进行精确查找。")}
       </Text>
       <Link
         variant="secondary"
         href={getSpendingSearchHref(query)}
         className="mt-2"
       >
-        Search spending history for &ldquo;{query}&rdquo; instead
+        {t("Search spending history for", "改为搜索消费记录：")}&ldquo;{query}&rdquo;
       </Link>
     </div>
   );
 }
 
 export function LookupSkeleton() {
+  const { t } = useTranslation();
   return (
     <div
       className="flex flex-col gap-6"
       aria-busy="true"
       aria-live="polite"
-      aria-label="Loading user"
+      aria-label={t("Loading user", "正在加载用户")}
     >
       <Skeleton className="h-[88px] w-full rounded-2xl" />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
