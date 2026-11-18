@@ -76,8 +76,6 @@ describe("getIntroLine", () => {
   });
 
   test("falls back to the Otto line without an expert", () => {
-    expect(getIntroLine(null)).toBe(
-      "Tell me about your work — I'll find what to automate.",
-    );
+    expect(getIntroLine(null)).toBe("Describe a task to get started.");
   });
 });

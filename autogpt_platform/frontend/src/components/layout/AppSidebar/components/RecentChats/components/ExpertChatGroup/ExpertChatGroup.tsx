@@ -5,13 +5,6 @@ import type { SessionSummaryResponse } from "@/app/api/__generated__/models/sess
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
-import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipPortal,
-  TooltipTrigger,
-} from "@/components/atoms/Tooltip/BaseTooltip";
 import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { ExpertIdentityDetails } from "@/components/molecules/ExpertIdentityDetails/ExpertIdentityDetails";
 import {
@@ -20,21 +13,10 @@ import {
   CollapsibleTrigger,
 } from "@/components/molecules/Collapsible/Collapsible";
 import { SidebarMenu } from "@/components/molecules/Sidebar/Sidebar";
-import { cn } from "@/lib/utils";
-import { ArrowDown01Icon, PlusSignIcon } from "@hugeicons/core-free-icons";
-import Link, { useLinkStatus } from "next/link";
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { ReactNode, useState } from "react";
 import { EXPERT_CHAT_PAGE_SIZE } from "@/services/experts/expert-chat-pagination";
 
-// The chevron, the slot the header reserves next to it, and the new-chat link
-// that floats over that slot are all one size. On touch widths the slot and
-// the link grow to a finger-sized target; the chevron keeps its size.
-const CHEVRON_SIZE_CLASS = "size-5";
-const NEW_CHAT_SLOT_SIZE_CLASS = "size-5 max-md:size-9";
-// Where that slot starts, measured in from the header's right edge: the
-// trigger's `px-2` (0.5rem) + the chevron's `size-5` (1.25rem) + the `gap-2`
-// between them (0.5rem) = 2.25rem. Change any of the three and this moves.
-const NEW_CHAT_LINK_OFFSET_CLASS = "right-9";
 // Otto opens with a short preview and a single "Load all"; every other
 // expert starts collapsed and pages in when opened.
 const OTTO_PREVIEW_COUNT = 1;
@@ -43,7 +25,6 @@ interface Props {
   label: string;
   role?: string | null;
   avatarUrl: string | null;
-  newChatHref: string | null;
   color?: string | null;
   isAutopilot?: boolean;
   sessions: SessionSummaryResponse[];
@@ -54,7 +35,6 @@ export function ExpertChatGroup({
   label,
   role,
   avatarUrl,
-  newChatHref,
   color,
   isAutopilot,
   sessions,
@@ -75,9 +55,6 @@ export function ExpertChatGroup({
       onOpenChange={setIsOpen}
       className="group/expert-group"
     >
-      {/* The trigger is itself a button, so the new-chat link sits beside it
-          and floats over a slot the trigger reserves before the chevron —
-          long labels then truncate against the link rather than under it. */}
       <div className="group/expert-header relative mb-1 flex items-center rounded-md hover:bg-surface-hover">
         <CollapsibleTrigger
           aria-label={t(`${label} chats`, `${label}的对话`)}
@@ -94,27 +71,12 @@ export function ExpertChatGroup({
             isAutopilot={isAutopilot}
             nameAccessory={<SessionCount count={sessions.length} />}
           />
-          {newChatHref && (
-            <span
-              aria-hidden
-              className={cn("ml-auto shrink-0", NEW_CHAT_SLOT_SIZE_CLASS)}
-            />
-          )}
-          {/* Hidden at rest on desktop like the new-chat link, and revealed
-              by the same header hover / focus-within so keyboard users see
-              it the moment the trigger takes focus. Opacity keeps its slot,
-              so nothing shifts. On touch widths it stays visible. */}
           <Icon
             icon={ArrowDown01Icon}
             tone="subtle"
-            className={cn(
-              "shrink-0 transition-[opacity,transform] duration-200 group-focus-within/expert-header:opacity-100 group-hover/expert-header:opacity-100 group-data-[state=open]/expert-group:rotate-180 motion-reduce:transition-none md:opacity-0",
-              CHEVRON_SIZE_CLASS,
-              !newChatHref && "ml-auto",
-            )}
+            className="ml-auto size-5 shrink-0 transition-[opacity,transform] duration-200 group-focus-within/expert-header:opacity-100 group-hover/expert-header:opacity-100 group-data-[state=open]/expert-group:rotate-180 motion-reduce:transition-none md:opacity-0"
           />
         </CollapsibleTrigger>
-        {newChatHref && <NewChatLink href={newChatHref} label={label} />}
       </div>
 
       {!isOpen && runningSessions.length > 0 && (
@@ -215,47 +177,6 @@ function SessionCount({ count }: { count: number }) {
       {count}
     </span>
   );
-}
-
-function NewChatLink({ href, label }: { href: string; label: string }) {
-  const { t } = useTranslation();
-  const name = t(`New chat with ${label}`, `与${label}开始新对话`);
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Link
-          href={href}
-          aria-label={name}
-          className={cn(
-            "absolute top-1/2 flex -translate-y-1/2 items-center justify-center rounded-md text-foreground-tertiary transition-opacity group-focus-within/expert-header:opacity-100 group-hover/expert-header:opacity-100 hover:bg-surface-active hover:text-foreground-strong focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-foreground-subtle focus-visible:outline-none md:opacity-0",
-            NEW_CHAT_SLOT_SIZE_CLASS,
-            NEW_CHAT_LINK_OFFSET_CLASS,
-          )}
-        >
-          <NewChatIcon />
-        </Link>
-      </TooltipTrigger>
-      <TooltipPortal>
-        <TooltipContent side="top">{name}</TooltipContent>
-      </TooltipPortal>
-    </Tooltip>
-  );
-}
-
-function NewChatIcon() {
-  const { pending } = useLinkStatus();
-
-  if (pending) {
-    return (
-      <LoadingSpinner
-        size="small"
-        className="!size-4 text-foreground-tertiary"
-      />
-    );
-  }
-
-  return <Icon icon={PlusSignIcon} className="size-4 max-md:size-5" />;
 }
 
 export function GroupBody({ children }: { children: ReactNode }) {

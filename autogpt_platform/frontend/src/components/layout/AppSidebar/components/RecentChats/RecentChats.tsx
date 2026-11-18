@@ -15,7 +15,7 @@ import { useState } from "react";
 import { ExpertChatGroup } from "./components/ExpertChatGroup/ExpertChatGroup";
 import { NewExpertGroup } from "./components/NewExpertGroup/NewExpertGroup";
 import { RecentChatItem } from "./components/RecentChatItem/RecentChatItem";
-import { getNewChatHref, getNewExpertsWithoutChats } from "./helpers";
+import { getNewExpertsWithoutChats } from "./helpers";
 import { useRecentChats } from "./useRecentChats";
 
 export function RecentChats() {
@@ -23,7 +23,7 @@ export function RecentChats() {
   const chatPinningEnabled = useGetFlag(Flag.CHAT_PINNING);
 
   const isLearningEnabled = useGetFlag(Flag.DREAM_SKILL_LEARNING_ENABLED);
-  const { expertsById, activeExperts, activeExpertIds } = useExpertMap();
+  const { expertsById, activeExperts } = useExpertMap();
   // The week a new expert keeps their entry is measured from when the list
   // mounted: an expert who joins later counts as new, and one only ages out
   // on a later visit.
@@ -132,7 +132,6 @@ export function RecentChats() {
         }
         avatarUrl={expert?.avatarUrl ?? null}
         color={expert?.color ?? null}
-        newChatHref={getNewChatHref(group.expertId, activeExpertIds)}
         isAutopilot={!group.expertId}
         sessions={group.sessions}
         renderItem={renderItem}

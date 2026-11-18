@@ -32,8 +32,8 @@ afterEach(() => {
   server.resetHandlers();
 });
 
-describe("RecentChats — new chat link while navigating", () => {
-  it("swaps the + for a spinner while the new chat opens", async () => {
+describe("RecentChats — navigation in progress", () => {
+  it("shows a spinner on the history row being opened", async () => {
     server.use(
       getGetV2ListSessionsMockHandler200({
         sessions: [
@@ -57,7 +57,7 @@ describe("RecentChats — new chat link while navigating", () => {
     );
 
     const link = await screen.findByRole("link", {
-      name: "New chat with Otto",
+      name: "Otto chat",
     });
     expect(link.querySelector("svg.animate-spin")).not.toBeNull();
   });

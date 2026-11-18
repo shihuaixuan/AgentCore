@@ -2,6 +2,12 @@ import type { GetV2ListSessionsParams } from "@/app/api/__generated__/models/get
 
 const LATEST_EXPERT_SESSION_LIMIT = 1;
 
+export function newRecipientChatHref(expertId: string | null) {
+  return expertId === null
+    ? "/home"
+    : `/home?expertId=${encodeURIComponent(expertId)}&new=1`;
+}
+
 export function latestExpertSessionParams(
   expertId: string | null,
 ): GetV2ListSessionsParams {
