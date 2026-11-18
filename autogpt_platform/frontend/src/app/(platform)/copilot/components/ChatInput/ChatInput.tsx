@@ -52,7 +52,11 @@ import { NoAIConnectionNotice } from "./components/NoAIConnectionNotice/NoAIConn
 import { RecordingButton } from "./components/RecordingButton";
 import { RecordingIndicator } from "./components/RecordingIndicator";
 import { RecipientChip, ThreadRecipientChip } from "./components/RecipientChip";
-import type { RecipientPickerConfig } from "./components/recipientOptions";
+import {
+  newTaskDraftKey,
+  type RecipientPickerConfig,
+} from "./components/recipientOptions";
+import { useChatDraftAccess } from "./useChatDraft";
 import type { ExpertIdentity } from "../../useExpertMap";
 import { SecretPasteNotice } from "./components/SecretPasteNotice";
 import { StopButton } from "./components/StopButton";
@@ -426,6 +430,17 @@ export const ChatInput = memo(function ChatInput({
           "请先移除工作区附件和连接引用，再更改专家选择。",
         )
       : undefined;
+  const taskDraft = useChatDraftAccess(recipientPicker ? draftKey : undefined);
+  const selectRecipient = recipientPicker?.onSelect;
+
+  function handleRecipientSelect(id: string | null) {
+    if (!selectRecipient || recipientSelectionBlocked) return;
+    // Only an explicit, unblocked switch carries the text. Link navigation
+    // restores the destination's own draft, including only its own mentions.
+    taskDraft.moveTo(newTaskDraftKey(id), value);
+    selectRecipient(id);
+  }
+
   // Voice mode, model tier and the dev token readout sit behind the +
   // instead of as icons in the tray; the last two open in a dialog.
   const [plusPanel, setPlusPanel] = useState<"model" | "devtool" | null>(null);
@@ -599,6 +614,7 @@ export const ChatInput = memo(function ChatInput({
             {recipientPicker && (
               <RecipientChip
                 {...recipientPicker}
+                onSelect={selectRecipient ? handleRecipientSelect : undefined}
                 anchorRef={plusButtonRef}
                 disabled={isRecipientPickerDisabled}
                 open={isRecipientPickerOpen}

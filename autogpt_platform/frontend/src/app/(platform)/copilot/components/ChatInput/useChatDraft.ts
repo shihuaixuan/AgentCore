@@ -15,6 +15,8 @@ const written = new Map<string, string>();
 
 function readDraft(key: string | null) {
   if (!key || typeof window === "undefined") return "";
+  const inMemory = written.get(key);
+  if (inMemory !== undefined) return inMemory;
   try {
     return sessionStorage.getItem(key) ?? "";
   } catch {
@@ -35,15 +37,15 @@ function writeDraft(key: string | null, value: string) {
   subscribers.get(key)?.forEach((receive) => receive(value));
 }
 
-function useDraftKey(draftKey?: string) {
-  const userID = useAuthStore((state) => state.user?.id);
+function storageKey(userID?: string, draftKey?: string) {
   return draftKey && userID
     ? `autogpt:chat-draft:${encodeURIComponent(userID)}:${encodeURIComponent(draftKey)}`
     : null;
 }
 
 export function useChatDraft(draftKey?: string) {
-  const key = useDraftKey(draftKey);
+  const userID = useAuthStore((state) => state.user?.id);
+  const key = storageKey(userID, draftKey);
   const [snapshot, setSnapshot] = useState(() => ({
     key,
     value: readDraft(key),
@@ -97,12 +99,23 @@ export function useChatDraft(draftKey?: string) {
 /** The draft for a hook that acts on it without showing it. It is read when
  *  asked rather than followed, so typing doesn't re-render the hook's host. */
 export function useChatDraftAccess(draftKey?: string) {
-  const key = useDraftKey(draftKey);
+  const userID = useAuthStore((state) => state.user?.id);
+  const key = storageKey(userID, draftKey);
   function read() {
-    return (key && written.get(key)) ?? readDraft(key);
+    return readDraft(key);
   }
   function write(update: SetStateAction<string>) {
     writeDraft(key, typeof update === "function" ? update(read()) : update);
   }
-  return { read, write };
+  function moveTo(destination: string, value: string) {
+    const target = storageKey(userID, destination);
+    if (!key || !target || key === target || !value.trim()) return;
+    const existing = readDraft(target);
+    writeDraft(
+      target,
+      existing.trim() && existing !== value ? `${value}\n\n${existing}` : value,
+    );
+    writeDraft(key, "");
+  }
+  return { read, write, moveTo };
 }

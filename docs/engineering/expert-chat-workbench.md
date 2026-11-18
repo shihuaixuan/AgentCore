@@ -7,7 +7,7 @@
 | 路径                                                                                 | 职责                                                                                                                           |
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
 | `autogpt_platform/frontend/src/app/(platform)/copilot/components/ChatInput/`         | 「＋ → 专家」入口、专家标签、搜索、清除选择、另开对话确认与附件限制。                                                          |
-| `autogpt_platform/frontend/src/app/(platform)/copilot/components/EmptySession/`      | 首页选择专家、更新首条消息的接收者；同一新任务草稿与接收者解耦。                                                               |
+| `autogpt_platform/frontend/src/app/(platform)/copilot/components/EmptySession/`      | 首页选择专家、更新首条消息的接收者；普通任务和各专家分别保存草稿。                                                             |
 | `autogpt_platform/frontend/src/app/(platform)/copilot/components/ChatContainer/`     | 已有对话向输入框传递会话专家，并接入新任务导航。                                                                               |
 | `autogpt_platform/frontend/src/components/layout/AppSidebar/components/RecentChats/` | 展示历史及入职引导；新任务统一从首页输入框发起。                                                                               |
 | `autogpt_platform/frontend/src/app/(platform)/copilot/useChatSession.ts`             | 复用原有接口，仅为专家任务提交 `expert_id`。新任务 URL 的 `new=1` 避免自动进入目标专家的最近会话。                             |

@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import type { ComponentProps, ReactNode } from "react";
 import type { WorkspaceAttachment } from "../../helpers/workspaceAttachments";
 import { ConnectionPicker } from "../ChatInput/components/ConnectionPicker/ConnectionPicker";
+import { newTaskDraftKey } from "../ChatInput/components/recipientOptions";
 import { OnboardingIntroCard } from "../OnboardingIntroCard/OnboardingIntroCard";
 import { useOnboardingIntroCard } from "../OnboardingIntroCard/useOnboardingIntroCard";
 import { SEND_AT_RESET_PLACEHOLDER } from "../SendAtReset/helpers";
@@ -185,7 +186,7 @@ export function EmptySession({
                 )}
                 <ChatInput
                   inputId="chat-input-empty"
-                  draftKey="new:default"
+                  draftKey={newTaskDraftKey(recipient?.id ?? expertId)}
                   stacked
                   voiceMode={voiceMode}
                   modeSelector={modeSelector}

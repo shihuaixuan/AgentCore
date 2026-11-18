@@ -28,3 +28,7 @@ export function expertRecipient(expert: ExpertIdentity): RecipientOption {
 export function recipientOptions(experts: ExpertIdentity[]) {
   return experts.map(expertRecipient);
 }
+
+export function newTaskDraftKey(expertId: string | null) {
+  return `new:${expertId ?? "default"}`;
+}
