@@ -9,11 +9,13 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Annotated
+from uuid import UUID
 
 from autogpt_libs import auth
 from fastapi import APIRouter, Depends, HTTPException, Response, Security
 from pydantic import BaseModel, Field, model_validator
 
+from backend.api.features.chat.managed_models import require_chat_model
 from backend.api.features.chat.routes import (
     _validate_and_get_session,
     _validate_and_get_writable_session,
@@ -45,6 +47,7 @@ _RESUME_DESCRIPTION = as_model_prompt(RESUMED_AT_RESET_NOTE)
 class AtResetRequest(BaseModel):
     """A turn to run when the budget resets."""
 
+    managed_model_id: UUID | None = None
     kind: AtResetKind = Field(
         description='"resume" picks the paused task back up; "send" sends '
         "``message`` as the user's.",
@@ -108,6 +111,12 @@ async def schedule_at_reset(
     lost. Sending a message in the chat cancels a pending resume.
     """
     session = await _validate_and_get_writable_session(session_id, user_id)
+    managed_model_id = (
+        await require_chat_model(request.managed_model_id)
+        if session.metadata.managed_models_only
+        or "managed_model_id" in request.model_fields_set
+        else None
+    )
     run_at = await _run_at(user_id, session, request.kind)
     job_id = at_reset_schedule_id(request.kind, session_id)
     async with _holding(job_id):
@@ -129,6 +138,7 @@ async def schedule_at_reset(
             expert_id=session.expert_id,
             purpose=request.kind,
             schedule_id=job_id,
+            **({"managed_model_id": managed_model_id} if managed_model_id else {}),
         )
     return AtResetTurn(kind=request.kind, run_at=run_at, message=message)
 

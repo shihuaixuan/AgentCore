@@ -319,6 +319,7 @@ def _mock_stream_internals(
         expert_id=None,
     )
     mock_session.metadata.llm_auth_provider = llm_auth_provider
+    mock_session.metadata.managed_models_only = False
     mock_session.metadata.llm_credential_id = (
         "cred-codex" if llm_auth_provider == "codex" else None
     )
@@ -730,6 +731,42 @@ def test_stream_chat_skips_enqueue_for_duplicate_message(
     # None, so no further dispatch happened (verified by the helper's own
     # contract — see schedule_chat_turn tests).
     mocks.enqueue.assert_called_once()
+
+
+def test_managed_stream_queues_the_selected_model_only(mocker):
+    mocks = _mock_stream_internals(mocker)
+    model_id = "01234567-89ab-4def-8123-456789abcdef"
+    select = mocker.patch(
+        "backend.api.features.chat.managed_models.managed_models.list_chat_models",
+        new_callable=AsyncMock,
+        return_value=[SimpleNamespace(id=model_id)],
+    )
+    mocks.enqueue.return_value = None
+
+    response = client.post(
+        "/sessions/sess-1/stream",
+        json={"message": "hello", "managed_model_id": model_id},
+    )
+
+    assert response.status_code == 200
+    select.assert_awaited_once()
+    assert mocks.enqueue.call_args.kwargs["managed_model_id"] == model_id
+    assert mocks.enqueue.call_args.kwargs["model"] is None
+
+
+def test_managed_stream_without_available_models_does_not_fall_back(mocker):
+    mocks = _mock_stream_internals(mocker)
+    mocks.session.metadata.managed_models_only = True
+    mocker.patch(
+        "backend.api.features.chat.managed_models.managed_models.list_chat_models",
+        new_callable=AsyncMock,
+        return_value=[],
+    )
+
+    response = client.post("/sessions/sess-1/stream", json={"message": "hello"})
+
+    assert response.status_code == 409
+    mocks.enqueue.assert_not_called()
 
 
 @pytest.mark.parametrize(
@@ -3073,6 +3110,7 @@ def _mock_stream_queue_internals(
         mock_session = mocker.MagicMock()
         mock_session.id = "sess-1"
         mock_session.expert_id = None
+        mock_session.metadata.managed_models_only = False
         mocker.patch(
             "backend.api.features.chat.routes._validate_and_get_session",
             new_callable=AsyncMock,

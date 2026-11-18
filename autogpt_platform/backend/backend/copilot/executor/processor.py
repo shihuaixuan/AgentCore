@@ -63,6 +63,8 @@ from backend.copilot.llm_attribution import (
     set_turn_trace_id,
 )
 from backend.copilot.load_test import LoadTestEngine, load_test_engine
+from backend.copilot.managed_model_client import managed_model_client
+from backend.copilot.managed_models import ModelUnavailable, resolve_model
 from backend.copilot.model import maybe_append_user_message
 from backend.copilot.rate_limit import RateLimitUnavailable
 from backend.copilot.response_model import (
@@ -814,7 +816,7 @@ class CoPilotProcessor:
             # one read of the trial and one of the usage state; closed at the
             # model's first output, so tools running after it read afresh.
             trial_reads = cost_context_stack.enter_context(trial_reads_shared())
-            if entry.llm_auth_provider == "platform":
+            if entry.managed_model_id or entry.llm_auth_provider == "platform":
                 # Every platform-billed turn passes the allowance here, from
                 # whichever path queued it (see backend.copilot.budget_gate).
                 # An AutoPilot block turn the allowance can't cover may run on
@@ -825,19 +827,25 @@ class CoPilotProcessor:
                         # Billed to the tenancy the turn runs under (as
                         # streamed below), decided when the turn starts.
                         is_expert_session = session.expert_id is not None
-                        credit_turn = await bill_to_credits(
-                            user_id=entry.user_id,
-                            session_id=entry.session_id,
-                            tool_name=entry.tool_name,
-                            refusal=pause,
-                            organization_id=(
-                                session.organization_id
-                                if is_expert_session
-                                else entry.organization_id
-                            ),
-                            team_id=(
-                                session.team_id if is_expert_session else entry.team_id
-                            ),
+                        credit_turn = (
+                            None
+                            if entry.managed_model_id
+                            else await bill_to_credits(
+                                user_id=entry.user_id,
+                                session_id=entry.session_id,
+                                tool_name=entry.tool_name,
+                                refusal=pause,
+                                organization_id=(
+                                    session.organization_id
+                                    if is_expert_session
+                                    else entry.organization_id
+                                ),
+                                team_id=(
+                                    session.team_id
+                                    if is_expert_session
+                                    else entry.team_id
+                                ),
+                            )
                         )
                 except RateLimitUnavailable:
                     error_msg = RATE_LIMIT_UNAVAILABLE_MESSAGE
@@ -868,7 +876,23 @@ class CoPilotProcessor:
                     credit_billing(credit_turn)
                 )
 
-            if entry.llm_auth_provider == "codex":
+            if entry.managed_model_id and not (config.test_mode or load_test):
+                try:
+                    route = await resolve_model(entry.managed_model_id)
+                    client = await cost_context_stack.enter_async_context(
+                        managed_model_client(route)
+                    )
+                except ModelUnavailable:
+                    error_msg = "The selected model is no longer available. Choose another model."
+                    error_code = "managed_model_unavailable"
+                    return
+                stream_fn = functools.partial(
+                    stream_chat_completion_baseline,
+                    managed_model=route.model,
+                    managed_client=client,
+                )
+                engine = "baseline"
+            elif entry.llm_auth_provider == "codex":
                 from backend.integrations.codex.access import enforce_codex_access
                 from backend.integrations.codex.credential_codec import (
                     bundle_from_credentials,

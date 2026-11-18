@@ -13,7 +13,10 @@ import { createShadowFetch } from "./stream/turnShadow";
 import { isVoiceTurn } from "./voice/pendingVoiceStart";
 import { isTokenDevtoolEnabled } from "./tokenDevtool/gate";
 import { createUsageCapturingFetch } from "./tokenDevtool/usageTap";
-import type { CopilotLlmModel } from "./store";
+import {
+  managedModelRequest,
+  type ChatModelChoice,
+} from "./managedModelSelection";
 
 export interface MutableValue<T> {
   current: T;
@@ -25,7 +28,7 @@ interface CreateTransportArgs {
    * Ref to the current model tier, rather than a captured value, so a
    * mid-session change is picked up on the next send.
    */
-  copilotModelRef: MutableValue<CopilotLlmModel | undefined>;
+  copilotModelRef: MutableValue<ChatModelChoice | undefined>;
 }
 
 /**
@@ -127,7 +130,7 @@ function keepPaywallStatus(inner: typeof fetch): typeof fetch {
 export function streamRequestBody(
   sessionId: string,
   last: UIMessage,
-  model: CopilotLlmModel | undefined,
+  model: ChatModelChoice | undefined,
 ) {
   const kickoffExpertId = getKickoffExpertIdFromMetadata(last.metadata);
   // Extract file_ids from FileUIPart entries on the message
@@ -165,7 +168,7 @@ export function streamRequestBody(
     context: null,
     file_ids: fileIds && fileIds.length > 0 ? fileIds : null,
     folder_ids: folderIds && folderIds.length > 0 ? folderIds : null,
-    model: model ?? null,
+    ...managedModelRequest(model),
     // Supplying options forces uuid's
     // getRandomValues path. Unlike crypto.randomUUID,
     // getRandomValues is available on plain-HTTP LAN origins used

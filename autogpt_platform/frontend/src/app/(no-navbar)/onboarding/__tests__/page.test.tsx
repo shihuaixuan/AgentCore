@@ -445,7 +445,7 @@ describe("onboarding before payment", () => {
     },
   );
 
-  it("keeps self-host connection after the plan", async () => {
+  it("resumes a saved self-host connection step without asking for an AI subscription", async () => {
     flags.payment = false;
     local = true;
     serverDraft = makeProgress({
@@ -453,10 +453,11 @@ describe("onboarding before payment", () => {
       completedSteps: ["role", "painPoints", "subscription"],
     });
     render(<OnboardingPage />);
-    expect(await screen.findByTestId("step-connect")).toBeDefined();
+    expect(await screen.findByTestId("step-preparing")).toBeDefined();
+    expect(screen.queryByTestId("step-connect")).toBeNull();
   });
 
-  it("shows a self-hosted user the plan before the connection", async () => {
+  it("still shows the plan before finishing self-hosted onboarding", async () => {
     flags.payment = false;
     local = true;
     serverDraft = makeProgress({
@@ -467,7 +468,7 @@ describe("onboarding before payment", () => {
     const plan = await screen.findByTestId("step-subscription");
     expect(plan.dataset.paywall).toBe("false");
     fireEvent.click(plan);
-    expect(await screen.findByTestId("step-connect")).toBeDefined();
+    expect(await screen.findByTestId("step-preparing")).toBeDefined();
   });
 
   it("holds onboarding while authentication is loading", () => {

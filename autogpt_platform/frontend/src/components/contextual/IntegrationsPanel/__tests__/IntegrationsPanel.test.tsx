@@ -94,7 +94,7 @@ describe("IntegrationsPanel", () => {
     expect(screen.getByLabelText("Name").getAttribute("value")).toBe("Weather");
   });
 
-  it("separates the subscriptions that pay for a chat from the tools a chat uses", async () => {
+  it("shows tool connections without exposing the old AI subscription entry", async () => {
     server.use(
       getGetV2ListChatConnectionsMockHandler200({ offers: [] }),
       getGetV1ListCredentialsMockHandler200([]),
@@ -105,7 +105,6 @@ describe("IntegrationsPanel", () => {
 
     const headings = await screen.findAllByRole("heading", { level: 2 });
     expect(headings.map((heading) => heading.textContent)).toEqual([
-      "AI subscriptions",
       "Tools your experts and workflows use",
       "Available integrations",
     ]);

@@ -1,10 +1,6 @@
 import { act, renderHook, waitFor } from "@/tests/integrations/test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// A follow-up sent while this tab is still drawing the previous answer, but
-// after the backend's turn has ended: `/messages/pending` answers 409, and
-// before this guard the fallback started a second `useChat` request on top
-// of the live stream, which froze the answer mid-sentence (SECRT-2772).
 // The session-id mock is static on purpose: the chat host is keyed by
 // session id, so a chat switch unmounts this hook rather than re-rendering
 // it with a new id.
@@ -64,6 +60,10 @@ vi.mock("../useExpertMap", async (importOriginal) => {
     }),
   };
 });
+
+vi.mock("../useManagedChatModels", () => ({
+  useManagedChatModels: () => ({ modelID: "company-model" }),
+}));
 
 vi.mock("../useChatSession", () => ({
   useChatSession: () => ({
@@ -150,13 +150,6 @@ vi.mock("../helpers/queueFollowUpMessage", () => ({ queueFollowUpMessage }));
 
 import { useCopilotUIStore } from "../store";
 import { useCopilotPage } from "../useCopilotPage";
-import * as copilotHelpers from "../helpers";
-
-function noActiveTurn() {
-  const error = new Error("Session has no active turn to queue against.");
-  error.name = "QueueFollowUpNotActiveError";
-  return error;
-}
 
 async function flush() {
   await act(async () => {
@@ -171,7 +164,6 @@ beforeEach(() => {
   streamState.isUserStopping = false;
   sessionState.sessionId = "session-1";
   sendNewMessage.mockResolvedValue(undefined);
-  queueFollowUpMessage.mockRejectedValue(noActiveTurn());
   useCopilotUIStore.getState().setInitialPrompt(null);
 });
 
@@ -181,7 +173,7 @@ afterEach(() => {
   window.sessionStorage.clear();
 });
 
-describe("useCopilotPage — follow-up refused by the backend mid-stream", () => {
+describe("useCopilotPage — independent follow-up turns", () => {
   it.each(["ready", "error"] as const)(
     "starts a new turn directly after the stream settles with status %s",
     async (status) => {
@@ -201,50 +193,6 @@ describe("useCopilotPage — follow-up refused by the backend mid-stream", () =>
     },
   );
 
-  it.each(["ready", "error"] as const)(
-    "starts a new turn after a real pending-message 409 and local status %s",
-    async (status) => {
-      const actualQueue = await vi.importActual<
-        typeof import("../helpers/queueFollowUpMessage")
-      >("../helpers/queueFollowUpMessage");
-      queueFollowUpMessage.mockImplementation(actualQueue.queueFollowUpMessage);
-      vi.spyOn(copilotHelpers, "getCopilotAuthHeaders").mockResolvedValue({});
-      const fetchMock = vi.spyOn(global, "fetch").mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            detail:
-              "Session has no active turn. Start a new turn with POST /stream.",
-          }),
-          { status: 409 },
-        ),
-      );
-      const { result, rerender } = renderHook(() => useCopilotPage());
-
-      const send = result.current.onSend("Retry the failed request");
-      await flush();
-      expect(fetchMock).toHaveBeenCalledWith(
-        expect.stringContaining(
-          "/api/chat/sessions/session-1/messages/pending",
-        ),
-        expect.objectContaining({ method: "POST" }),
-      );
-      expect(sendNewMessage).not.toHaveBeenCalled();
-
-      streamState.status = status;
-      rerender();
-      await send;
-
-      expect(sendNewMessage).toHaveBeenCalledWith(
-        "Retry the failed request",
-        undefined,
-        undefined,
-        undefined,
-      );
-      expect(queueMessage).not.toHaveBeenCalled();
-      expect(toast).not.toHaveBeenCalled();
-    },
-  );
-
   it("holds the follow-up until this tab's stream has settled", async () => {
     const { result, rerender } = renderHook(() => useCopilotPage());
 
@@ -253,10 +201,7 @@ describe("useCopilotPage — follow-up refused by the backend mid-stream", () =>
     void send.then(() => (settled = true));
     await flush();
 
-    expect(queueFollowUpMessage).toHaveBeenCalledWith(
-      "session-1",
-      "After the essay, say PINEAPPLE",
-    );
+    expect(queueFollowUpMessage).not.toHaveBeenCalled();
     expect(sendNewMessage).not.toHaveBeenCalled();
     expect(settled).toBe(false);
 
@@ -310,21 +255,15 @@ describe("useCopilotPage — follow-up refused by the backend mid-stream", () =>
   });
 
   it("queues a second held follow-up behind the first instead of starting two turns", async () => {
+    const activeReply = Promise.withResolvers<void>();
+    sendNewMessage.mockReturnValueOnce(activeReply.promise);
     const { result, rerender } = renderHook(() => useCopilotPage());
     const first = result.current.onSend("first");
     const second = result.current.onSend("second");
     await flush();
-    expect(queueFollowUpMessage).toHaveBeenCalledTimes(2);
-
-    // Once the first has dispatched, the backend has a turn to queue against.
-    queueFollowUpMessage.mockResolvedValue({
-      buffer_length: 1,
-      max_buffer_length: 10,
-      turn_in_flight: true,
-    });
     streamState.status = "ready";
     rerender();
-    await Promise.all([first, second]);
+    await first;
 
     expect(sendNewMessage).toHaveBeenCalledTimes(1);
     expect(sendNewMessage).toHaveBeenCalledWith(
@@ -333,24 +272,19 @@ describe("useCopilotPage — follow-up refused by the backend mid-stream", () =>
       undefined,
       undefined,
     );
-    expect(queueMessage).toHaveBeenCalledWith("second");
-    // Both held copies are released: one went out, one is now the
-    // backend's chip.
+    await waitFor(() =>
+      expect(result.current.queuedMessages).toEqual(["second"]),
+    );
+    streamState.status = "streaming";
+    rerender();
+    streamState.status = "ready";
+    rerender();
+    activeReply.resolve();
+    await second;
+    expect(sendNewMessage).toHaveBeenCalledTimes(2);
+    expect(queueFollowUpMessage).not.toHaveBeenCalled();
     await waitFor(() => expect(result.current.queuedMessages).toEqual([]));
     expect(window.sessionStorage.length).toBe(0);
-  });
-
-  it("still queues normally when the backend accepts the follow-up", async () => {
-    queueFollowUpMessage.mockResolvedValue({
-      buffer_length: 1,
-      max_buffer_length: 10,
-      turn_in_flight: true,
-    });
-    const { result } = renderHook(() => useCopilotPage());
-    await result.current.onSend("and then?");
-
-    expect(queueMessage).toHaveBeenCalledWith("and then?");
-    expect(sendNewMessage).not.toHaveBeenCalled();
   });
 
   it("shows the held follow-up as a queued chip until it goes out", async () => {
@@ -380,18 +314,6 @@ describe("useCopilotPage — follow-up refused by the backend mid-stream", () =>
     expect(
       window.sessionStorage.getItem("copilot-held-follow-ups:session-1"),
     ).toBe(JSON.stringify(["and then?"]));
-  });
-
-  it("lets a queue failure reach the composer once, without a toast of its own", async () => {
-    queueFollowUpMessage.mockRejectedValue(new Error("Expected 200; got 500"));
-    const { result } = renderHook(() => useCopilotPage());
-
-    await expect(result.current.onSend("and then?")).rejects.toThrow(
-      "Expected 200; got 500",
-    );
-    expect(toast).not.toHaveBeenCalled();
-    expect(sendNewMessage).not.toHaveBeenCalled();
-    expect(result.current.queuedMessages).toEqual([]);
   });
 
   it("puts a follow-up left behind by a reload back in the composer", async () => {

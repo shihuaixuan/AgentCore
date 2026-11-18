@@ -8,7 +8,7 @@ const NAV_LABELS: Record<string, string> = {
   Account: "账户",
   Memory: "记忆",
   Billing: "账单",
-  "AI connections": "AI 连接",
+  "Chat models": "聊天模型",
   Bots: "机器人",
   "AutoGPT API Keys": "AutoGPT API 密钥",
   "Creator Dashboard": "创作者面板",

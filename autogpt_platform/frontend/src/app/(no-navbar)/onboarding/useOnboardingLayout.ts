@@ -50,13 +50,11 @@ export function useOnboardingLayout({
   );
   const userHasActivePlan = trialConfirmation.active || paidConfirmation.active;
   const isPaymentEnabled = !!hasPayment && !userHasActivePlan;
-  const isSelfHostConnectEnabled = !isPaymentEnabled && environment.isLocal();
   const steps = buildStepLayout({
     hasPaywall: isPaymentEnabled,
     // With no paywall configured the plan stands alone. A plan that is
     // already paid for was seen on the way to Stripe, so it is not repeated.
     hasPlan: !hasPayment,
-    hasConnect: isSelfHostConnectEnabled,
     hasAccess: !!placement?.hasAccess,
     order,
   });
@@ -73,6 +71,5 @@ export function useOnboardingLayout({
       paidConfirmation.ready,
     paidConfirmation,
     isPaymentEnabled,
-    isSelfHostConnectEnabled,
   };
 }

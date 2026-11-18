@@ -1331,6 +1331,9 @@ async def _dispatch_at_reset_turn(
         # limits, as a message sent there now would be (a builder chat's).
         permissions=resolve_session_permissions(session),
         scheduled=ScheduledTurnOrigin(schedule_id=args.schedule_id, purpose=kind),
+        **(
+            {"managed_model_id": args.managed_model_id} if args.managed_model_id else {}
+        ),
     )
     logger.info(
         f"Dispatched {kind}-at-reset turn for session {session.session_id[:12]}"
@@ -1404,6 +1407,11 @@ async def _put_back_at_reset_turn(
             purpose=args.purpose,
             schedule_id=args.schedule_id,
             created_at=args.created_at,
+            **(
+                {"managed_model_id": args.managed_model_id}
+                if args.managed_model_id
+                else {}
+            ),
         )
     except Exception:
         logger.warning(
@@ -2682,6 +2690,7 @@ class GraphExecutionJobArgs(BaseModel):
 
 
 class CopilotTurnJobArgs(BaseModel):
+    managed_model_id: str | None = None
     kind: Literal["copilot_turn"] = "copilot_turn"
     schedule_id: str | None = None
     user_id: str
@@ -3691,6 +3700,7 @@ class Scheduler(AppService):
         schedule_id: str | None = None,
         created_at: datetime | None = None,
         replaces_schedule_ids: list[str] | None = None,
+        managed_model_id: str | None = None,
     ) -> CopilotTurnJobInfo:
         """Schedule a copilot turn at a future time.
 
@@ -3729,6 +3739,7 @@ class Scheduler(AppService):
                 return newer
             if newer is not None:
                 message, created_at = _put_back_onto(newer, message)
+                managed_model_id = newer.managed_model_id
 
         user_timezone = _resolve_timezone(user_timezone, user_id)
         trigger = _build_trigger(cron=cron, run_at=run_at, user_timezone=user_timezone)
@@ -3737,6 +3748,7 @@ class Scheduler(AppService):
             user_id=user_id,
             session_id=session_id,
             message=message,
+            managed_model_id=managed_model_id,
             cron=cron,
             run_at=run_at,
             cap_retry_count=cap_retry_count,

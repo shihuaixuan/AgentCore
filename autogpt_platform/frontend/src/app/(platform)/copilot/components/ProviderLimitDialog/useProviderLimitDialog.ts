@@ -2,6 +2,7 @@
 
 import { useReadEveryRender } from "@/hooks/useReadEveryRender";
 import { useQueryClient } from "@tanstack/react-query";
+import { createContext, useContext } from "react";
 
 import {
   getGetV2GetSessionQueryKey,
@@ -14,6 +15,8 @@ import { toast } from "@/components/molecules/Toast/use-toast";
 
 import type { ProviderFailure } from "../../providerFailure";
 import { alternativeConnection, formatResetHint } from "./helpers";
+
+export const ManagedModelChatContext = createContext(false);
 
 interface Args {
   failure: ProviderFailure | null;
@@ -30,9 +33,10 @@ export function useProviderLimitDialog({
   eligible,
 }: Args) {
   const queryClient = useQueryClient();
+  const managedChat = useContext(ManagedModelChatContext);
 
   const connectionsQuery = useGetV2ListChatConnections({
-    query: { enabled: Boolean(failure) },
+    query: { enabled: Boolean(failure) && !managedChat },
   });
   const offers =
     connectionsQuery.data?.status === 200
@@ -48,10 +52,12 @@ export function useProviderLimitDialog({
     connectionsQuery.isError ||
     (connectionsQuery.data !== undefined &&
       connectionsQuery.data.status !== 200);
-  const alternative = alternativeConnection(
-    eligible ? offers?.filter(eligible) : offers,
-    failure,
-  );
+  const alternative = managedChat
+    ? null
+    : alternativeConnection(
+        eligible ? offers?.filter(eligible) : offers,
+        failure,
+      );
 
   const { mutateAsync: changeConnection, isPending: isSwitching } =
     usePutV2ChangeTheConnectionAnExistingChatRunsOn({

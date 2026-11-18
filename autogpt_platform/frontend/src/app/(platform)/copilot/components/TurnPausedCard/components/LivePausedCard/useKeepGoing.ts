@@ -8,6 +8,7 @@ import {
 } from "@/app/api/__generated__/endpoints/chat/chat";
 import { toast } from "@/components/molecules/Toast/use-toast";
 
+import { useManagedChatModels } from "../../../../useManagedChatModels";
 import { useCopilotUIStore } from "../../../../store";
 import { continueOutcome } from "./helpers";
 
@@ -22,12 +23,16 @@ interface Args {
 export function useKeepGoing({ sessionId, onFollow, onOutOfBudget }: Args) {
   const queryClient = useQueryClient();
   // The composer's model choice, as a message sent now would carry it.
-  const model = useCopilotUIStore((state) => state.copilotLlmModel);
+  const { modelID } = useManagedChatModels();
+  const legacyTier = useCopilotUIStore((state) => state.copilotLlmModel);
   const { mutateAsync, isPending } = usePostV2ContinueSession();
 
   async function keepGoing() {
     try {
-      await mutateAsync({ sessionId, data: { model } });
+      await mutateAsync({
+        sessionId,
+        data: modelID ? { managed_model_id: modelID } : { model: legacyTier },
+      });
       onFollow();
     } catch (error) {
       const outcome = continueOutcome(error);

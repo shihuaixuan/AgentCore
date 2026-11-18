@@ -170,6 +170,7 @@ async def try_enqueue_turn(
     context: Mapping[str, str] | None = None,
     file_ids: list[str] | None = None,
     model: str | None = None,
+    managed_model_id: str | None = None,
     llm_auth_provider: CopilotLlmAuthProvider = "platform",
     llm_credential_id: str | None = None,
     permissions: Mapping[str, Any] | None = None,
@@ -198,6 +199,7 @@ async def try_enqueue_turn(
         context=context,
         file_ids=file_ids,
         model=model,
+        **({"managed_model_id": managed_model_id} if managed_model_id else {}),
         llm_auth_provider=llm_auth_provider,
         llm_credential_id=llm_credential_id,
         permissions=permissions,
@@ -218,6 +220,7 @@ async def enqueue_turn(
     context: Mapping[str, str] | None = None,
     file_ids: list[str] | None = None,
     model: str | None = None,
+    managed_model_id: str | None = None,
     llm_auth_provider: CopilotLlmAuthProvider = "platform",
     llm_credential_id: str | None = None,
     permissions: Mapping[str, Any] | None = None,
@@ -254,6 +257,8 @@ async def enqueue_turn(
         metadata["file_ids"] = list(file_ids)
     if model is not None:
         metadata["model"] = model
+    if managed_model_id is not None:
+        metadata["managed_model_id"] = managed_model_id
     metadata["llm_auth_provider"] = llm_auth_provider
     if llm_credential_id is not None:
         metadata["llm_credential_id"] = llm_credential_id
@@ -578,6 +583,11 @@ async def _promote_head(user_id: str) -> bool | None:
                 organization_id=head.organization_id,
                 team_id=head.team_id,
                 model=metadata.get("model"),
+                **(
+                    {"managed_model_id": metadata["managed_model_id"]}
+                    if "managed_model_id" in metadata
+                    else {}
+                ),
                 llm_auth_provider=head.metadata.llm_auth_provider,
                 llm_credential_id=head.metadata.llm_credential_id,
                 permissions=_promotion_permissions(head, metadata, spawned=spawned),

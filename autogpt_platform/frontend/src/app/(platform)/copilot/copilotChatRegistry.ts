@@ -8,11 +8,11 @@ import {
   type MutableValue,
 } from "./copilotStreamTransport";
 import { countAnswerTowardStarToast } from "./helpers/githubStarToast";
-import type { CopilotLlmModel } from "./store";
+import type { ChatModelChoice } from "./managedModelSelection";
 
 interface CopilotChatRuntime {
   chat: Chat<UIMessage>;
-  copilotModelRef: MutableValue<CopilotLlmModel | undefined>;
+  copilotModelRef: MutableValue<ChatModelChoice | undefined>;
   onFinish?: (args: {
     isDisconnect?: boolean;
     isAbort?: boolean;
@@ -73,7 +73,7 @@ export function getOrCreateCopilotChatRuntime(sessionId: string) {
   const existing = copilotChatRuntimes.get(sessionId);
   if (existing) return existing;
 
-  const copilotModelRef: MutableValue<CopilotLlmModel | undefined> = {
+  const copilotModelRef: MutableValue<ChatModelChoice | undefined> = {
     current: undefined,
   };
   const callbacks: Pick<CopilotChatRuntime, "onFinish" | "onError" | "onData"> =
@@ -134,7 +134,7 @@ type CopilotChatRuntimeCallbacks = Required<
 
 export function setCopilotChatRuntimeModel(
   runtime: CopilotChatRuntime,
-  model: CopilotLlmModel | undefined,
+  model: ChatModelChoice | undefined,
 ) {
   runtime.copilotModelRef.current = model;
 }

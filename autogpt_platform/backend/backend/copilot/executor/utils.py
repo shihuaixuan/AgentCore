@@ -324,6 +324,8 @@ class CoPilotExecutionEntry(BaseModel):
     model: CopilotLLMModel | None = None
     """Per-request model tier: 'standard' or 'advanced'. None = server default."""
 
+    managed_model_id: str | None = None
+
     llm_auth_provider: CopilotLlmAuthProvider = "platform"
     """Session-selected model authentication and execution route."""
 
@@ -425,6 +427,7 @@ async def enqueue_copilot_turn(
     message_metadata: dict[str, Any] | None = None,
     *,
     envelope: TurnEnvelope,
+    managed_model_id: str | None = None,
     unattended: bool = False,
     impersonated: bool = False,
     credential_pins: CredentialPins | None = None,
@@ -470,6 +473,7 @@ async def enqueue_copilot_turn(
         organization_id=organization_id,
         team_id=team_id,
         model=model,
+        managed_model_id=managed_model_id,
         llm_auth_provider=llm_auth_provider,
         llm_credential_id=llm_credential_id,
         permissions=permissions,
@@ -517,6 +521,7 @@ async def schedule_turn(
     organization_id: str | None = None,
     team_id: str | None = None,
     model: CopilotLLMModel | None = None,
+    managed_model_id: str | None = None,
     llm_auth_provider: CopilotLlmAuthProvider = "platform",
     llm_credential_id: str | None = None,
     permissions: CopilotPermissions | None = None,
@@ -599,6 +604,7 @@ async def schedule_turn(
             organization_id=organization_id,
             team_id=team_id,
             model=model,
+            **({"managed_model_id": managed_model_id} if managed_model_id else {}),
             llm_auth_provider=llm_auth_provider,
             llm_credential_id=llm_credential_id,
             permissions=permissions,
@@ -627,6 +633,7 @@ async def dispatch_turn(
     organization_id: str | None = None,
     team_id: str | None = None,
     model: CopilotLLMModel | None = None,
+    managed_model_id: str | None = None,
     llm_auth_provider: CopilotLlmAuthProvider = "platform",
     llm_credential_id: str | None = None,
     permissions: CopilotPermissions | None = None,
@@ -731,6 +738,7 @@ async def dispatch_turn(
             organization_id=organization_id,
             team_id=team_id,
             model=model,
+            **({"managed_model_id": managed_model_id} if managed_model_id else {}),
             llm_auth_provider=llm_auth_provider,
             llm_credential_id=llm_credential_id,
             permissions=permissions,
@@ -923,6 +931,7 @@ async def schedule_chat_turn(
     organization_id: str | None = None,
     team_id: str | None = None,
     model: CopilotLLMModel | None = None,
+    managed_model_id: str | None = None,
     llm_auth_provider: CopilotLlmAuthProvider = "platform",
     llm_credential_id: str | None = None,
     permissions: CopilotPermissions | None = None,
@@ -1032,6 +1041,7 @@ async def schedule_chat_turn(
             organization_id=organization_id,
             team_id=team_id,
             model=model,
+            **({"managed_model_id": managed_model_id} if managed_model_id else {}),
             llm_auth_provider=llm_auth_provider,
             llm_credential_id=llm_credential_id,
             permissions=permissions,

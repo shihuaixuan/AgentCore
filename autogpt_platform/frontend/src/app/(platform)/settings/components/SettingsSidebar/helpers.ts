@@ -30,7 +30,7 @@ export const settingsNavItems: SettingsNavItem[] = [
   },
   { label: "Billing", href: "/settings/billing", Icon: CreditCardIcon },
   {
-    label: "AI connections",
+    label: "Chat models",
     href: "/settings/ai-connections",
     Icon: PlugSocketIcon,
   },

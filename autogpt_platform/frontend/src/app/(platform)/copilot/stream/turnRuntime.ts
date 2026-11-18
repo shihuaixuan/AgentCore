@@ -11,7 +11,7 @@ import {
   getCopilotAuthHeaders,
   isEngineSwitchPart,
 } from "../helpers";
-import type { CopilotLlmModel } from "../store";
+import type { ChatModelChoice } from "../managedModelSelection";
 import { isTokenDevtoolEnabled } from "../tokenDevtool/gate";
 import { createUsageCapturingFetch } from "../tokenDevtool/usageTap";
 import { fetchSse, type SseFrame } from "./sseClient";
@@ -279,7 +279,7 @@ export class TurnRuntime {
   // ── The five named operations ─────────────────────────────────────────
 
   /** POST a new turn: the prompt shows at once, and the turn follows it. */
-  async send(input: SendInput, model: CopilotLlmModel | undefined) {
+  async send(input: SendInput, model: ChatModelChoice | undefined) {
     if (this.isPostPending()) return;
     this.stopped = false;
     this.suppressAttach = false;

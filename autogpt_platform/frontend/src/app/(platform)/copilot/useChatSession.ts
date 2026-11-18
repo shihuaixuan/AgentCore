@@ -1,14 +1,18 @@
 import {
   getGetV2GetSessionQueryKey,
   type postV2CreateSessionResponse,
-  useGetV2ListChatTransports,
   useGetV2GetSession,
+  useGetV2ListChatTransports,
   useGetV2ListSessions,
   usePostV2CreateSession,
 } from "@/app/api/__generated__/endpoints/chat/chat";
 import type { CreateSessionRequest } from "@/app/api/__generated__/models/createSessionRequest";
 import { SESSION_LIST_QUERY_KEY } from "./useSessionList";
-import { type CopilotLlmAuthSelection, useCopilotUIStore } from "./store";
+import { useCopilotUIStore } from "./store";
+import {
+  getAvailableLLMTransports,
+  resolveCopilotLLMAuthSelection,
+} from "./helpers/copilotLlmAuth";
 import { toast } from "@/components/molecules/Toast/use-toast";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import {
@@ -33,10 +37,6 @@ import {
 import { isPaywallError } from "@/components/contextual/PaywallToast/helpers";
 import { getSessionSentFrom } from "./sentFrom";
 import {
-  getAvailableLLMTransports,
-  resolveCopilotLLMAuthSelection,
-} from "./helpers/copilotLlmAuth";
-import {
   getAutopilotModeChoice,
   useAutopilotModeStore,
 } from "./autopilotModeStore";
@@ -50,6 +50,7 @@ import { ReportedSendError } from "./helpers/reportedSendError";
 import { backgroundRefreshInterval } from "./helpers/backgroundSubtasks";
 
 interface UseChatSessionOptions {
+  managedModelID?: string | null;
   dryRun?: boolean;
   expertId?: string | null;
   /** Off = keep the fresh new-task state addressed to the expert instead of
@@ -58,8 +59,7 @@ interface UseChatSessionOptions {
 }
 
 interface CreateSessionBodyArgs {
-  copilotLlmAuth: CopilotLlmAuthSelection | null;
-  resolvedLLMAuth: CopilotLlmAuthSelection;
+  route: CreateSessionRequest;
   dryRun: boolean;
   expertId: string | null;
   options?: { expertKickoff?: boolean };
@@ -72,27 +72,9 @@ interface PendingCreate {
 
 function createSessionData(
   pendingCreate: { current: PendingCreate | null },
-  {
-    copilotLlmAuth,
-    resolvedLLMAuth,
-    dryRun,
-    expertId,
-    options,
-  }: CreateSessionBodyArgs,
+  { route, dryRun, expertId, options }: CreateSessionBodyArgs,
 ) {
-  const sessionData: CreateSessionRequest = {};
-  // Only an explicit choice travels. Naming the route unconditionally
-  // makes every new chat an override, which is how a connection picked
-  // once quietly became the account's default and how a default changed
-  // in Settings stopped taking effect: the server skips its own default
-  // whenever the client names one. `copilotLlmAuth` is null until the
-  // user actually picks, and null means "use whatever the server says".
-  if (copilotLlmAuth !== null) {
-    sessionData.llm_auth_provider = resolvedLLMAuth.authProvider;
-    if (resolvedLLMAuth.authProvider !== "platform") {
-      sessionData.llm_credential_id = resolvedLLMAuth.credentialId;
-    }
-  }
+  const sessionData: CreateSessionRequest = { ...route };
   if (dryRun) sessionData.dry_run = true;
   if (expertId) sessionData.expert_id = expertId;
   // Same rule as the route: only a mode the user picked travels, so a new
@@ -126,6 +108,7 @@ function createdSessionId(response: postV2CreateSessionResponse) {
 }
 
 export function useChatSession({
+  managedModelID,
   dryRun = false,
   expertId = null,
   adoptLatestExpertThread = true,
@@ -133,6 +116,17 @@ export function useChatSession({
   const [sessionId, setSessionId] = useQueryState("sessionId", parseAsString);
   const queryClient = useQueryClient();
   const copilotLlmAuth = useCopilotUIStore((state) => state.copilotLlmAuth);
+  const transportQuery = useGetV2ListChatTransports({
+    query: {
+      enabled: managedModelID === undefined && !sessionId,
+      staleTime: 0,
+      refetchOnWindowFocus: true,
+    },
+  });
+  const transports =
+    transportQuery.data?.status === 200
+      ? transportQuery.data.data.transports
+      : undefined;
   const clearNewChatChoice = useAutopilotModeStore(
     (state) => state.clearNewChatChoice,
   );
@@ -144,18 +138,6 @@ export function useChatSession({
   useEffect(() => {
     if (!sessionId) clearNewChatChoice();
   }, [sessionId, expertId, clearNewChatChoice]);
-
-  const transportQuery = useGetV2ListChatTransports({
-    query: {
-      enabled: !sessionId,
-      refetchOnWindowFocus: true,
-      staleTime: 0,
-    },
-  });
-  const chatTransports =
-    transportQuery.data?.status === 200
-      ? transportQuery.data.data.transports
-      : undefined;
 
   const sessionQuery = useGetV2GetSession(sessionId ?? "", undefined, {
     query: {
@@ -354,59 +336,19 @@ export function useChatSession({
     // never the right recovery.
     sendStartedRef.current = true;
     setHasSendStarted(true);
-    const transports =
-      chatTransports ??
-      (transportQuery.isError ? undefined : await loadChatTransports());
-    const resolvedLLMAuth = resolveCopilotLLMAuthSelection(
-      transports,
-      copilotLlmAuth,
-    );
-    const availableTransports = getAvailableLLMTransports(transports);
-    if (transports === undefined) {
-      toast({
-        variant: "destructive",
-        title: "Could not check AI connections",
-        description: "Refresh the page and try again.",
-      });
-      throw new ReportedSendError("Could not load AI connections");
+    if (managedModelID === null) {
+      toast({ variant: "destructive", title: "暂无开放的聊天模型" });
+      throw new ReportedSendError("No managed chat model is available");
     }
-    if (availableTransports.length === 0) {
-      // NoAIConnectionNotice above the composer says how to fix this and
-      // stays put; the toast only marks that this send went nowhere.
-      toast({
-        variant: "destructive",
-        title: "No AI connection is set up",
-        description:
-          "Your message is back in the composer. See the notice above it for how to connect a model.",
-      });
-      throw new ReportedSendError("No AI connection is set up");
-    }
-    if (!resolvedLLMAuth) {
-      toast({
-        variant: "destructive",
-        title: "Choose an AI connection",
-        description:
-          "Select the connection your expert should use before starting a new task.",
-      });
-      throw new ReportedSendError("AI connection selection required");
-    }
-    if (
-      copilotLlmAuth !== null &&
-      copilotLlmAuth.authProvider !== "platform" &&
-      resolvedLLMAuth.authProvider === "platform"
-    ) {
-      toast({
-        title: "AI connections changed",
-        description:
-          "The next task will use the available connection when it starts.",
-      });
-    }
+    const route =
+      managedModelID === undefined
+        ? await legacyRoute()
+        : { managed_model_id: managedModelID };
 
     try {
       const response = await createSessionMutation({
         data: createSessionData(pendingCreateRef, {
-          copilotLlmAuth,
-          resolvedLLMAuth,
+          route,
           dryRun,
           expertId,
           options,
@@ -443,11 +385,41 @@ export function useChatSession({
     }
   }
 
-  // A send typed before the connection list arrives waits for it instead of
-  // being refused; `cancelRefetch: false` joins the request already in flight.
-  async function loadChatTransports() {
-    const { data } = await transportQuery.refetch({ cancelRefetch: false });
-    return data?.status === 200 ? data.data.transports : undefined;
+  async function legacyRoute(): Promise<CreateSessionRequest> {
+    const response =
+      transports === undefined && !transportQuery.isError
+        ? (await transportQuery.refetch({ cancelRefetch: false })).data
+        : undefined;
+    const available =
+      transports ??
+      (response?.status === 200 ? response.data.transports : undefined);
+    const resolved = resolveCopilotLLMAuthSelection(available, copilotLlmAuth);
+    const title =
+      available === undefined
+        ? "Could not check AI connections"
+        : getAvailableLLMTransports(available).length === 0
+          ? "No AI connection is set up"
+          : !resolved
+            ? "Choose an AI connection"
+            : null;
+    if (title || !resolved) {
+      const message = title ?? "Choose an AI connection";
+      toast({ variant: "destructive", title: message });
+      throw new ReportedSendError(message);
+    }
+    if (!copilotLlmAuth) return {};
+    if (
+      copilotLlmAuth.authProvider !== "platform" &&
+      resolved.authProvider === "platform"
+    ) {
+      toast({ title: "AI connections changed" });
+    }
+    return resolved.authProvider === "platform"
+      ? { llm_auth_provider: "platform" }
+      : {
+          llm_auth_provider: resolved.authProvider,
+          llm_credential_id: resolved.credentialId,
+        };
   }
 
   // Raw messages from the initial page — exposed for cross-page
@@ -492,10 +464,13 @@ export function useChatSession({
       : null;
   // What the AutoPilot budget follows: the session's own connection, or for a
   // new chat the one it will start on (null until that is known).
-  const chatLlmAuthProvider = sessionId
-    ? sessionLlmAuthProvider
-    : (resolveCopilotLLMAuthSelection(chatTransports, copilotLlmAuth)
-        ?.authProvider ?? null);
+  const chatLlmAuthProvider =
+    managedModelID !== undefined
+      ? "platform"
+      : sessionId
+        ? sessionLlmAuthProvider
+        : (resolveCopilotLLMAuthSelection(transports, copilotLlmAuth)
+            ?.authProvider ?? null);
 
   // The expert this session actually belongs to, straight off the session
   // response rather than the URL — the ?expertId= param only describes what
