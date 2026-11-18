@@ -18,10 +18,8 @@ import {
 } from "@/services/consent/cookiebot";
 import { environment } from "@/services/environment";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
-import { LOCALE_COOKIE_NAME, parseLocale } from "@/lib/i18n/locale";
-import { LanguageSwitcher } from "@/components/molecules/LanguageSwitcher/LanguageSwitcher";
 import Script from "next/script";
 import { getSiteUrl } from "@/lib/metadata";
 
@@ -73,14 +71,13 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const headersList = await headers();
-  const locale = parseLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
   const host = headersList.get("host") || "";
   const cookiebotCBID = environment.getCookiebotCBID();
   const cookiebotGeoRegions = environment.getCookiebotGeoRegions();
 
   return (
     <html
-      lang={locale}
+      lang="zh-CN"
       className={`${fonts.poppins.variable} ${fonts.sans.variable} ${fonts.mono.variable}`}
       suppressHydrationWarning
     >
@@ -120,7 +117,7 @@ export default async function RootLayout({
             />
           </>
         ) : null}
-        <LanguageProvider initialLocale={locale}>
+        <LanguageProvider initialLocale="zh-CN">
           <ErrorBoundary context="application">
             <Providers
               attribute="class"
@@ -146,7 +143,6 @@ export default async function RootLayout({
                 )}
               </div>
               <Toaster />
-              <LanguageSwitcher />
               <TrackerCookieCleanup />
               <ConsentWithdrawalReload />
             </Providers>

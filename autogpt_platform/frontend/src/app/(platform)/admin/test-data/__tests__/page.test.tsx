@@ -77,11 +77,11 @@ describe("TestDataDashboardPage", () => {
   it("renders the dashboard heading and script descriptions", async () => {
     await renderDashboard();
 
-    expect(screen.getByText("Test Data Generation")).toBeDefined();
-    expect(screen.getByText("Available Script Types:")).toBeDefined();
-    expect(screen.getByText(/E2E Test Data:/i)).toBeDefined();
-    expect(screen.getByText(/Full Test Data:/i)).toBeDefined();
-    expect(screen.getByText("What data is created?")).toBeDefined();
+    expect(screen.getByText("测试数据生成")).toBeDefined();
+    expect(screen.getByText("可用脚本类型：")).toBeDefined();
+    expect(screen.getByText(/E2E 测试数据：/)).toBeDefined();
+    expect(screen.getByText(/完整测试数据：/)).toBeDefined();
+    expect(screen.getByText("会创建哪些数据？")).toBeDefined();
   });
 
   it("renders the generate action", async () => {

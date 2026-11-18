@@ -203,34 +203,31 @@ async function renderDashboard(load: () => Promise<ReactElement>) {
   render(await Component(dashboard.props));
 }
 
-it("keeps each request's translator isolated when the locale changes", async () => {
+it("uses Chinese for server translations regardless of the saved locale", async () => {
   locale = "en";
   const english = await getServerTranslation();
   locale = "zh-CN";
   const chinese = await getServerTranslation();
-  expect(english.t("Name", "名称")).toBe("Name");
+  expect(english.t("Name", "名称")).toBe("名称");
   expect(chinese.t("Name", "名称")).toBe("名称");
 });
 
-describe.each(pages)("$name server translations", ({ load, en, zh }) => {
+describe.each(pages)("$name server translations", ({ load, zh }) => {
   it.each([
     { cookie: undefined, language: "zh" },
     { cookie: "invalid", language: "zh" },
     { cookie: "zh-CN", language: "zh" },
-    { cookie: "en", language: "en" },
-  ])(
-    "renders $language for locale cookie $cookie",
-    async ({ cookie, language }) => {
-      locale = cookie;
-      await renderDashboard(load);
-      expect(
-        screen.getByRole("heading", {
-          name: language === "en" ? en : zh,
-          level: 1,
-        }),
-      ).toBeDefined();
-    },
-  );
+    { cookie: "en", language: "zh" },
+  ])("renders $language for locale cookie $cookie", async ({ cookie }) => {
+    locale = cookie;
+    await renderDashboard(load);
+    expect(
+      screen.getByRole("heading", {
+        name: zh,
+        level: 1,
+      }),
+    ).toBeDefined();
+  });
 
   it.each(["user", null])("rejects role %s before rendering", async (role) => {
     vi.mocked(getServerUser).mockResolvedValue({
@@ -271,16 +268,16 @@ describe.each([
     headerEn: "Starting Balance",
     headerZh: "起始余额",
   },
-])("$name server translations", ({ load, en, zh, headerEn, headerZh }) => {
+])("$name server translations", ({ load, zh, headerZh }) => {
   it.each([undefined, "en"])(
     "translates headers and empty state for %s",
     async (cookie) => {
       locale = cookie;
       render(await load());
-      expect(screen.getByText(cookie === "en" ? en : zh)).toBeDefined();
+      expect(screen.getByText(zh)).toBeDefined();
       expect(
         screen.getByRole("columnheader", {
-          name: cookie === "en" ? headerEn : headerZh,
+          name: headerZh,
         }),
       ).toBeDefined();
     },

@@ -1,5 +1,7 @@
 import Script from "next/script";
+import { cookies } from "next/headers";
 import { isValidElement, type ReactElement, type ReactNode } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import RootLayout from "../layout";
 
@@ -54,6 +56,29 @@ function findScripts(node: ReactNode): ScriptProps[] {
 async function renderedScripts() {
   return findScripts(await RootLayout({ children: null }));
 }
+
+describe("RootLayout language", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("renders Chinese without a switcher despite a saved English preference", async () => {
+    const store = await cookies();
+    vi.spyOn(store, "get").mockReturnValue({
+      name: "autogpt-locale",
+      value: "en",
+    });
+    vi.mocked(cookies).mockResolvedValue(store);
+
+    const markup = renderToStaticMarkup(await RootLayout({ children: null }));
+    const document = new DOMParser().parseFromString(markup, "text/html");
+
+    expect(document.documentElement.lang).toBe("zh-CN");
+    expect(
+      document.querySelector('[data-slot="language-switcher"]'),
+    ).toBeNull();
+  });
+});
 
 describe("RootLayout consent scripts", () => {
   afterEach(() => {

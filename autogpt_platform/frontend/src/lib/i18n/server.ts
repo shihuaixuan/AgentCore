@@ -1,11 +1,8 @@
-import { cookies } from "next/headers";
-import { LOCALE_COOKIE_NAME, parseLocale } from "./locale";
-
 export async function getServerTranslation() {
-  const locale = parseLocale((await cookies()).get(LOCALE_COOKIE_NAME)?.value);
+  const locale = "zh-CN" as const;
 
-  function t(english: string, chinese: string) {
-    return locale === "en" ? english : chinese;
+  function t(_english: string, chinese: string) {
+    return chinese;
   }
 
   return { locale, t };

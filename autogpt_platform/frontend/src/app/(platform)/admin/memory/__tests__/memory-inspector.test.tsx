@@ -84,14 +84,8 @@ describe.each(["CLOUD", "LOCAL"])(
       vi.stubEnv("NEXT_PUBLIC_GRAPH_MEMORY", "disabled");
       await renderDashboard();
 
-      expect(
-        screen.getByRole("heading", { name: "Memory Inspector" }),
-      ).toBeDefined();
-      expect(
-        screen.getByText(
-          "Long-term memory is unavailable on this installation.",
-        ),
-      ).toBeDefined();
+      expect(screen.getByRole("heading", { name: "记忆检查器" })).toBeDefined();
+      expect(screen.getByText("此安装环境不支持长期记忆。")).toBeDefined();
       expect(renderVisualizer).not.toHaveBeenCalled();
       expect(graphRequest).not.toHaveBeenCalled();
       expect(overviewRequest).not.toHaveBeenCalled();
@@ -105,7 +99,7 @@ describe.each(["CLOUD", "LOCAL"])(
         await renderDashboard();
 
         expect(
-          screen.getByRole("heading", { name: "Memory Inspector" }),
+          screen.getByRole("heading", { name: "记忆检查器" }),
         ).toBeDefined();
         await waitFor(() => {
           expect(graphRequest).toHaveBeenCalled();
@@ -113,11 +107,7 @@ describe.each(["CLOUD", "LOCAL"])(
         });
         expect(renderVisualizer).toHaveBeenCalled();
         expect(withRoleAccess).toHaveBeenCalledWith(["admin"]);
-        expect(
-          screen.queryByText(
-            "Long-term memory is unavailable on this installation.",
-          ),
-        ).toBeNull();
+        expect(screen.queryByText("此安装环境不支持长期记忆。")).toBeNull();
       },
     );
 
