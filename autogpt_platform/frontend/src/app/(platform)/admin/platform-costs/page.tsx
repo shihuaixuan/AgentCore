@@ -1,7 +1,7 @@
 import { withRoleAccess } from "@/lib/withRoleAccess";
 import { Suspense } from "react";
 import { PlatformCostContent } from "./components/PlatformCostContent";
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getServerTranslation } from "@/lib/i18n/server";
 
 type SearchParams = {
   start?: string;
@@ -16,12 +16,12 @@ type SearchParams = {
   tab?: string;
 };
 
-function PlatformCostDashboard({
+async function PlatformCostDashboard({
   searchParams,
 }: {
   searchParams: SearchParams;
 }) {
-  const { t } = useTranslation();
+  const { t } = await getServerTranslation();
   return (
     <div className="mx-auto p-6">
       <div className="flex flex-col gap-4">

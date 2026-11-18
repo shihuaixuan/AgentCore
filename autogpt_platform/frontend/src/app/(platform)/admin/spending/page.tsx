@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { AdminUserGrantHistory } from "./components/AdminUserGrantHistory";
 import { ExportCopilotUsageButton } from "./components/ExportCopilotUsageButton";
 import { ExportCreditTransactionsButton } from "./components/ExportCreditTransactionsButton";
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getServerTranslation } from "@/lib/i18n/server";
 
 type SpendingDashboardPageSearchParams = {
   page?: string;
@@ -12,12 +12,12 @@ type SpendingDashboardPageSearchParams = {
   search?: string;
 };
 
-function SpendingDashboard({
+async function SpendingDashboard({
   searchParams,
 }: {
   searchParams: SpendingDashboardPageSearchParams;
 }) {
-  const { t } = useTranslation();
+  const { t } = await getServerTranslation();
   const page = searchParams.page ? Number.parseInt(searchParams.page) : 1;
   const search = searchParams.search;
   const status = searchParams.status as CreditTransactionType | undefined;

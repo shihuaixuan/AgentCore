@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import type { SubmissionStatus } from "@/app/api/__generated__/models/submissionStatus";
 import { AdminAgentsDataTable } from "./components/AdminAgentsDataTable";
 import { AdminSkillSubmissions } from "./components/AdminSkillSubmissions";
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getServerTranslation } from "@/lib/i18n/server";
 
 type MarketplaceAdminPageSearchParams = {
   page?: string;
@@ -16,7 +16,7 @@ async function AdminMarketplaceDashboard({
 }: {
   searchParams: MarketplaceAdminPageSearchParams;
 }) {
-  const { t } = useTranslation();
+  const { t } = await getServerTranslation();
   const page = searchParams.page ? Number.parseInt(searchParams.page) : 1;
   const status = searchParams.status;
   const search = searchParams.search;

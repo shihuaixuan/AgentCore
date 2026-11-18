@@ -1,9 +1,9 @@
 import { environment } from "@/services/environment";
 import { MemoryVisualizer } from "./MemoryVisualizer";
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getServerTranslation } from "@/lib/i18n/server";
 
-export function MemoryInspector() {
-  const { t } = useTranslation();
+export async function MemoryInspector() {
+  const { t } = await getServerTranslation();
   const isAvailable = environment.isGraphMemoryAvailable();
 
   return (

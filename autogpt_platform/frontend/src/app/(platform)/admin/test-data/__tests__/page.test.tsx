@@ -1,5 +1,7 @@
 import { render, screen } from "@/tests/integrations/test-utils";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cookies } from "next/headers";
+import { LOCALE_COOKIE_NAME } from "@/lib/i18n/locale";
 import * as testDataHelpers from "../helpers";
 
 // The shared next/navigation mock has no notFound(); re-declare it here with
@@ -41,7 +43,23 @@ vi.mock("../components/GenerateTestDataButton", () => ({
 
 import TestDataDashboardPage from "../page";
 
+async function renderDashboard() {
+  const dashboard = await TestDataDashboardPage();
+  const Component = dashboard.type as () => Promise<React.ReactElement>;
+  render(await Component());
+}
+
 describe("TestDataDashboardPage", () => {
+  beforeEach(async () => {
+    const store = await cookies();
+    vi.spyOn(store, "get").mockReturnValue({
+      name: LOCALE_COOKIE_NAME,
+      value: "en",
+    });
+    vi.mocked(cookies).mockResolvedValue(store);
+    vi.spyOn(testDataHelpers, "isTestDataSurfaceEnabled").mockReturnValue(true);
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
     notFoundMock.mockClear();
@@ -57,7 +75,7 @@ describe("TestDataDashboardPage", () => {
   });
 
   it("renders the dashboard heading and script descriptions", async () => {
-    render(await TestDataDashboardPage());
+    await renderDashboard();
 
     expect(screen.getByText("Test Data Generation")).toBeDefined();
     expect(screen.getByText("Available Script Types:")).toBeDefined();
@@ -67,7 +85,7 @@ describe("TestDataDashboardPage", () => {
   });
 
   it("renders the generate action", async () => {
-    render(await TestDataDashboardPage());
+    await renderDashboard();
 
     expect(
       screen.getByRole("button", { name: "Generate Test Data" }),

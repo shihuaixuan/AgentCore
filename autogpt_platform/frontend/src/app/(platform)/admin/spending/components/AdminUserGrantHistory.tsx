@@ -12,7 +12,7 @@ import { getUsersTransactionHistory } from "@/app/(platform)/admin/spending/acti
 import { AdminAddMoneyButton } from "./AddMoneyButton";
 import { RateLimitModal } from "./RateLimitModal";
 import { CreditTransactionType } from "@/lib/autogpt-server-api";
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getServerTranslation } from "@/lib/i18n/server";
 
 export async function AdminUserGrantHistory({
   initialPage = 1,
@@ -23,7 +23,7 @@ export async function AdminUserGrantHistory({
   initialStatus?: CreditTransactionType;
   initialSearch?: string;
 }) {
-  const { t } = useTranslation();
+  const { t } = await getServerTranslation();
   // Server-side data fetching
   const { history, pagination } = await getUsersTransactionHistory(
     initialPage,

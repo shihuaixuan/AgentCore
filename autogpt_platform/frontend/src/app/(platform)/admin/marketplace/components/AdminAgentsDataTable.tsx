@@ -11,7 +11,7 @@ import { PaginationControls } from "@/components/molecules/PaginationControls/Pa
 import { getAdminListingsWithVersions } from "@/app/(platform)/admin/marketplace/actions";
 import { ExpandableRow } from "./ExpandleRow";
 import { SearchAndFilterAdminMarketplace } from "./SearchFilterForm";
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getServerTranslation } from "@/lib/i18n/server";
 
 // Helper function to get the latest version by version number
 const getLatestVersionByNumber = (
@@ -36,7 +36,7 @@ export async function AdminAgentsDataTable({
   initialStatus?: SubmissionStatus;
   initialSearch?: string;
 }) {
-  const { t } = useTranslation();
+  const { t } = await getServerTranslation();
   // Server-side data fetching
   const data = await getAdminListingsWithVersions(
     initialStatus,

@@ -1,9 +1,9 @@
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getServerTranslation } from "@/lib/i18n/server";
 import { withRoleAccess } from "@/lib/withRoleAccess";
 import React from "react";
 
-function AdminDashboard() {
-  const { t } = useTranslation();
+async function AdminDashboard() {
+  const { t } = await getServerTranslation();
   return (
     <div>
       <h1>{t("Admin Dashboard", "管理后台")}</h1>

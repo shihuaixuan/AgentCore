@@ -9,6 +9,8 @@ import {
 import { getListExpertsMockHandler200 } from "@/app/api/__generated__/endpoints/experts/experts.msw";
 import { server } from "@/mocks/mock-server";
 import MemoryDashboardPage from "../page";
+import { cookies } from "next/headers";
+import { LOCALE_COOKIE_NAME } from "@/lib/i18n/locale";
 
 const { renderVisualizer, authorize, withRoleAccess } = vi.hoisted(() => {
   const authorize = vi.fn(async (component: unknown) => component);
@@ -35,8 +37,14 @@ vi.mock("../components/MemoryVisualizer", async (importActual) => {
 const graphRequest = vi.fn();
 const overviewRequest = vi.fn();
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.clearAllMocks();
+  const store = await cookies();
+  vi.spyOn(store, "get").mockReturnValue({
+    name: LOCALE_COOKIE_NAME,
+    value: "en",
+  });
+  vi.mocked(cookies).mockResolvedValue(store);
   server.use(
     getListExpertsMockHandler200([]),
     getGetV2GetGraphMockHandler200(() => {
@@ -57,8 +65,15 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.restoreAllMocks();
   vi.unstubAllEnvs();
 });
+
+async function renderDashboard() {
+  const dashboard = await MemoryDashboardPage();
+  const Component = dashboard.type as () => Promise<React.ReactElement>;
+  render(await Component());
+}
 
 describe.each(["CLOUD", "LOCAL"])(
   "Memory Inspector availability in %s",
@@ -67,7 +82,7 @@ describe.each(["CLOUD", "LOCAL"])(
 
     it("does not mount or query memory data when explicitly disabled", async () => {
       vi.stubEnv("NEXT_PUBLIC_GRAPH_MEMORY", "disabled");
-      render(await MemoryDashboardPage());
+      await renderDashboard();
 
       expect(
         screen.getByRole("heading", { name: "Memory Inspector" }),
@@ -87,7 +102,7 @@ describe.each(["CLOUD", "LOCAL"])(
       "preserves the inspector and queries with override %s",
       async (override) => {
         vi.stubEnv("NEXT_PUBLIC_GRAPH_MEMORY", override);
-        render(await MemoryDashboardPage());
+        await renderDashboard();
 
         expect(
           screen.getByRole("heading", { name: "Memory Inspector" }),

@@ -1,9 +1,9 @@
 import { withRoleAccess } from "@/lib/withRoleAccess";
 import { BlockCostEstimatesContent } from "./components/BlockCostEstimatesContent";
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getServerTranslation } from "@/lib/i18n/server";
 
-function BlockCostEstimatesDashboard() {
-  const { t } = useTranslation();
+async function BlockCostEstimatesDashboard() {
+  const { t } = await getServerTranslation();
   return (
     <div className="mx-auto p-6">
       <div className="flex flex-col gap-4">

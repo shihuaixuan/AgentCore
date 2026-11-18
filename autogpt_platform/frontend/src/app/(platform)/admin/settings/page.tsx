@@ -1,9 +1,9 @@
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getServerTranslation } from "@/lib/i18n/server";
 import { withRoleAccess } from "@/lib/withRoleAccess";
 import React from "react";
 
-function AdminSettings() {
-  const { t } = useTranslation();
+async function AdminSettings() {
+  const { t } = await getServerTranslation();
 
   return (
     <div>
