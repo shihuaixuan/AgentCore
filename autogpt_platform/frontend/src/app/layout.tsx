@@ -135,7 +135,7 @@ export default async function RootLayout({
                 <VercelSpeedInsights />
 
                 {/* React Query DevTools is only available in development */}
-                {process.env.NEXT_PUBLIC_REACT_QUERY_DEVTOOL && (
+                {process.env.NEXT_PUBLIC_REACT_QUERY_DEVTOOL === "true" && (
                   <ReactQueryDevtools
                     initialIsOpen={false}
                     buttonPosition={"bottom-left"}

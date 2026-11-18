@@ -44,6 +44,7 @@ import {
   type ComposerMenuItem,
 } from "./components/ComposerPlusMenu";
 import { DryRunToggleButton } from "./components/DryRunToggleButton";
+import { ExpertMenuEntries } from "./components/ExpertMenuEntries";
 import { FileChips } from "./components/FileChips";
 import { MentionConnectDialog } from "./components/MentionConnectDialog";
 import { MentionDropdown } from "./components/MentionDropdown";
@@ -64,6 +65,7 @@ import { TranscriptionErrorBar } from "./components/TranscriptionErrorBar";
 import { WorkspaceFilePicker } from "./components/WorkspaceFilePicker/WorkspaceFilePicker";
 import { useCopilotUIStore } from "../../store";
 import { isTokenDevtoolEnabled } from "../../tokenDevtool/gate";
+import { useIsMobile } from "../../useIsMobile";
 import { TokenDevtoolDialog } from "../TokenDevtoolBadge/TokenDevtoolDialog";
 import {
   sendAtResetFailureTitle,
@@ -414,6 +416,7 @@ export const ChatInput = memo(function ChatInput({
   }
 
   const isCompact = variant === "compact";
+  const isMobile = useIsMobile();
   const plusButtonRef = useRef<HTMLButtonElement>(null);
   const [isRecipientPickerOpen, setIsRecipientPickerOpen] = useState(false);
   const isRecipientPickerDisabled =
@@ -459,6 +462,21 @@ export const ChatInput = memo(function ChatInput({
             disabled: isRecipientPickerDisabled || recipientPicker?.isLoading,
             opensPopover: true,
             onSelect: () => setIsRecipientPickerOpen(true),
+            submenu:
+              recipientPicker && selectRecipient && !isMobile
+                ? {
+                    entries: (
+                      <ExpertMenuEntries
+                        {...recipientPicker}
+                        selectionBlocked={recipientSelectionBlocked}
+                        onSelect={handleRecipientSelect}
+                      />
+                    ),
+                    pickerLabel: recipientPicker.options.length
+                      ? t("Search experts", "搜索专家")
+                      : undefined,
+                  }
+                : undefined,
           },
         ]
       : []),

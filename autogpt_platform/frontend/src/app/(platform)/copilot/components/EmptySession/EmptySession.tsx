@@ -220,6 +220,8 @@ export function EmptySession({
                     recipient,
                     options,
                     isLoading: isLoadingRecipient,
+                    isRosterPending: !isRosterLoaded,
+                    hasRosterFailed,
                     onSelect: selectRecipient,
                   }}
                 />

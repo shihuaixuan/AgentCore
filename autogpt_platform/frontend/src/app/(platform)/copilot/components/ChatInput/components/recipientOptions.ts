@@ -13,6 +13,8 @@ export interface RecipientPickerConfig {
   options: RecipientOption[];
   onSelect?: (id: string | null) => void;
   isLoading?: boolean;
+  isRosterPending?: boolean;
+  hasRosterFailed?: boolean;
 }
 
 export function expertRecipient(expert: ExpertIdentity): RecipientOption {

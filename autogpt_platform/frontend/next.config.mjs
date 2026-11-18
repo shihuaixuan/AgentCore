@@ -19,6 +19,7 @@ export const reactCompilerSources = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  devIndicators: false,
   // VERCEL_ENV and VERCEL_TARGET_ENV are server-only. Mirror them into the
   // browser bundle so Sentry and PostHog can tag branch previews as previews
   // rather than as production, and custom environments (the dev deployment's

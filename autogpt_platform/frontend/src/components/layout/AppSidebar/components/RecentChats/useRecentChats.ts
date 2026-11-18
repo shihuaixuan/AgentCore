@@ -22,7 +22,7 @@ import { useState } from "react";
 export function useRecentChats() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { sessions, isLoading, hasMore, isLoadingMore, loadMore } =
+  const { sessions, isLoading, error, refetch, hasMore, isLoadingMore, loadMore } =
     useSessionList();
 
   const pathname = usePathname();
@@ -171,6 +171,8 @@ export function useRecentChats() {
   return {
     sessions,
     isLoading,
+    error,
+    refetch,
     hasMore,
     isLoadingMore,
     loadMore,

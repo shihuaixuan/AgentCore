@@ -209,7 +209,10 @@ it("switches recipients from the composer without losing the draft", async () =>
   expect(screen.queryByRole("button", { name: /change recipient/ })).toBeNull();
   await user.type(prompt, "Help with my launch");
   await user.click(screen.getByRole("button", { name: "Add files and more" }));
-  await user.click(await screen.findByRole("menuitem", { name: "Experts" }));
+  await user.hover(await screen.findByRole("menuitem", { name: "Experts" }));
+  await user.click(
+    await screen.findByRole("menuitem", { name: "Search experts" }),
+  );
   await user.type(
     await screen.findByRole("searchbox", { name: "Search experts" }),
     "strategist",
@@ -350,7 +353,7 @@ it("opens a fresh Home visit without a preselected expert", async () => {
   const firstVisit = renderEmptySession("");
   await user.click(screen.getByRole("button", { name: "Add files and more" }));
   await user.click(await screen.findByRole("menuitem", { name: "Experts" }));
-  await user.click(await screen.findByRole("button", { name: /Maria/ }));
+  await user.click(await screen.findByRole("menuitem", { name: /Maria/ }));
   await screen.findByPlaceholderText("What should Maria work on?");
   firstVisit.unmount();
 

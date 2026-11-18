@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/atoms/Tooltip/BaseTooltip";
 import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { UIDataTypes, UIMessage, UITools } from "ai";
 import { LayoutGroup } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -196,6 +197,7 @@ export const ChatContainer = ({
   onBackendTurn,
   floatingControls,
 }: ChatContainerProps) => {
+  const { t } = useTranslation();
   const isTaskBarEnabled = useGetFlag(Flag.TASK_PROGRESS_BAR);
   useAutoOpenArtifacts({
     sessionId,
@@ -612,8 +614,15 @@ export const ChatContainer = ({
                           onStop={handleStop}
                           onEnqueue={onEnqueue ? handleEnqueue : undefined}
                           placeholder={
-                            (atReset && composer.placeholder) ||
-                            "What else can I help with?"
+                            atReset && composer.placeholder
+                              ? t(
+                                  composer.placeholder,
+                                  "现在撰写，额度重置后自动发送……",
+                                )
+                              : t(
+                                  "What else can I help with?",
+                                  "还需要我帮你做什么？",
+                                )
                           }
                           droppedFiles={droppedFiles}
                           onDroppedFilesConsumed={
