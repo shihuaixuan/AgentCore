@@ -1,9 +1,10 @@
 import { useGetV2ListStoreCategories } from "@/app/api/__generated__/endpoints/store/store";
 import { StoreCategoryInfo } from "@/app/api/__generated__/models/storeCategoryInfo";
 
-export function useStoreCategories() {
+export function useStoreCategories({ enabled = true } = {}) {
   const { data, isLoading, isError } = useGetV2ListStoreCategories({
     query: {
+      enabled,
       // The canonical set only changes with a deploy.
       staleTime: Infinity,
       select: (x) => x.data as StoreCategoryInfo[],

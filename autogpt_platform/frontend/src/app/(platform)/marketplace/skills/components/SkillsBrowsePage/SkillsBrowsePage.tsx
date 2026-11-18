@@ -88,6 +88,11 @@ export function SkillsBrowsePage() {
                 <SkillCard
                   skill={skill}
                   isInstalled={browse.installedSlugs.has(skill.slug)}
+                  categoryLabel={
+                    categories.find(
+                      ({ value }) => value === skill.categories[0],
+                    )?.label
+                  }
                 />
               </li>
             ))}

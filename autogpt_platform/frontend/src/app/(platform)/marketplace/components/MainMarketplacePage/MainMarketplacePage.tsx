@@ -14,7 +14,6 @@ import { BrowseMessage, BrowseSkeleton } from "../Browse/BrowseResults";
 import { useBrowseParams } from "../Browse/useBrowseParams";
 import { useExpertsSection } from "../ExpertsSection/useExpertsSection";
 import { CompactExpertCard } from "./CompactExpertCard";
-import { ExpertRecommendations } from "./ExpertRecommendations";
 
 export function MainMarkeplacePage() {
   const { t } = useTranslation();
@@ -47,13 +46,6 @@ export function MainMarkeplacePage() {
           )
         }
       />
-      {!search && !category && !experts.isError && (
-        <ExpertRecommendations
-          categories={categories}
-          experts={experts.templates}
-          onSelect={(value) => update({ category: value })}
-        />
-      )}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <BrowseFilters
           label={t("Browse experts by category", "按分类浏览专家")}

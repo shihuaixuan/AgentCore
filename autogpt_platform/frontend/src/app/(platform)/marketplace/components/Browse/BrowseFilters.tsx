@@ -3,6 +3,7 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { useStoreCategories } from "@/hooks/useStoreCategories";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { formatCategoryLabel } from "../SkillsSection/helpers";
 
 export type BrowseCategory = { value: string; label: string };
 
@@ -50,17 +51,36 @@ const browseOrder = {
   ],
 };
 
+const skillTopicLabels: ReadonlyMap<string, string> = new Map([
+  ["pdf-documents", "PDF 文档"],
+  ["cli-utilities", "命令行工具"],
+  ["web-frontend-development", "Web 前端开发"],
+  ["coding-agents-ides", "编程助手与 IDE"],
+  ["search-research", "搜索与调研"],
+  ["security-passwords", "安全与密码"],
+]);
+
 export function useBrowseCategories(type: keyof typeof browseOrder) {
   const { t } = useTranslation();
-  const { categories } = useStoreCategories();
+  const { categories } = useStoreCategories({ enabled: type === "skills" });
   const index = type === "experts" ? 0 : type === "skills" ? 1 : 2;
-  const rank = new Map(
-    browseOrder[type].map((value, position) => [value, position]),
-  );
-  return categories
+  const order = browseOrder[type];
+  const rank = new Map(order.map((value, position) => [value, position]));
+  // The store endpoint lists skill topics, not expert or workflow categories.
+  // Keep the built-in skill filters usable while the catalogue is unavailable.
+  const options =
+    type === "skills" && categories.length > 0
+      ? categories
+      : order.map((value) => ({ value, label: formatCategoryLabel(value) }));
+  return options
     .map(({ value, label }) => ({
       value,
-      label: t(label, labels[value]?.[index] ?? label),
+      label: t(
+        label,
+        labels[value]?.[index] ??
+          (type === "skills" ? skillTopicLabels.get(value) : undefined) ??
+          label,
+      ),
     }))
     .sort(
       (left, right) =>

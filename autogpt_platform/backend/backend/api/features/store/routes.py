@@ -219,7 +219,8 @@ async def get_categories() -> list[store_model.StoreCategoryInfo]:
         'SELECT DISTINCT unnest(v."categories") AS category '
         'FROM {schema_prefix}"SkillListingVersion" v '
         'JOIN {schema_prefix}"SkillListing" l ON l."activeVersionId" = v."id" '
-        'WHERE v."submissionStatus" = $1 AND v."isAvailable" = true '
+        'WHERE v."submissionStatus" = $1::{schema_prefix}"SubmissionStatus" '
+        'AND v."isAvailable" = true '
         'AND v."isDeleted" = false AND l."isDeleted" = false '
         'AND l."hasApprovedVersion" = true',
         prisma.enums.SubmissionStatus.APPROVED,

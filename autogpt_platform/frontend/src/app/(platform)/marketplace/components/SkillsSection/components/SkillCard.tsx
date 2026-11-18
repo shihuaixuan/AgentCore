@@ -24,10 +24,11 @@ import { formatCategoryLabel } from "../helpers";
 interface Props {
   skill: MarketplaceSkill;
   isInstalled: boolean;
+  categoryLabel?: string;
 }
 
-export function SkillCard({ skill, isInstalled }: Props) {
-  const { t } = useTranslation();
+export function SkillCard({ skill, isInstalled, categoryLabel }: Props) {
+  const { t, locale } = useTranslation();
   const { accent, icon } = getCategoryAccent(skill.categories[0]);
   const title = skill.title;
   const providers = skill.required_providers;
@@ -55,15 +56,16 @@ export function SkillCard({ skill, isInstalled }: Props) {
           >
             <Icon icon={BookOpen01Icon} size={24} aria-hidden />
           </span>
-          {icon && skill.categories[0] ? (
+          {skill.categories[0] ? (
             <span
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-body font-medium",
                 accent.pill,
               )}
             >
-              <Icon icon={icon} size={14} aria-hidden />
-              {formatCategoryLabel(skill.categories[0])}
+              {icon && <Icon icon={icon} size={14} aria-hidden />}
+              {categoryLabel ??
+                formatCategoryLabel(skill.categories[0], locale)}
             </span>
           ) : null}
         </div>
