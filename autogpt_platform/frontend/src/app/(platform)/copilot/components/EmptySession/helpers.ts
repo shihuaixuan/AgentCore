@@ -1,8 +1,7 @@
 import type { User } from "@/lib/auth/types";
 import { getExpertRoleLabel as getExpertDisplayRoleLabel } from "@/services/experts/expert-role-label";
 
-export const AUTOPILOT_INTRO =
-  "Tell me about your work — I'll find what to automate.";
+const DEFAULT_TASK_INTRO = "Describe a task to get started.";
 
 // A role is free text, and the hire flow's own presets come in both shapes:
 // some name a person ("Marketer", "Analyst"), others just a domain ("Sales",
@@ -40,7 +39,7 @@ export function getExpertRoleLabel(role: string) {
 export function getIntroLine(
   expert: { name: string; role: string | null } | null,
 ) {
-  if (!expert) return AUTOPILOT_INTRO;
+  if (!expert) return DEFAULT_TASK_INTRO;
   return `I'm ${expert.name}${getExpertIntroSuffix(expert.role)}`;
 }
 

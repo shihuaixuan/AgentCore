@@ -1,5 +1,6 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { CredentialMentionEditor } from "../CredentialMention/CredentialMentionEditor";
+import { parseCredentialMentions } from "../CredentialMention/helpers";
 import type { MentionInput } from "./useChatMentions";
 import {
   PromptInputButton,
@@ -20,6 +21,7 @@ import {
   ReactNode,
   memo,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import type { WorkspaceFileItem } from "@/app/api/__generated__/models/workspaceFileItem";
@@ -49,6 +51,9 @@ import { ConnectionPickerDialog } from "./components/ConnectionPicker/Connection
 import { NoAIConnectionNotice } from "./components/NoAIConnectionNotice/NoAIConnectionNotice";
 import { RecordingButton } from "./components/RecordingButton";
 import { RecordingIndicator } from "./components/RecordingIndicator";
+import { RecipientChip, ThreadRecipientChip } from "./components/RecipientChip";
+import type { RecipientPickerConfig } from "./components/recipientOptions";
+import type { ExpertIdentity } from "../../useExpertMap";
 import { SecretPasteNotice } from "./components/SecretPasteNotice";
 import { StopButton } from "./components/StopButton";
 import { TranscriptionErrorBar } from "./components/TranscriptionErrorBar";
@@ -77,6 +82,7 @@ import {
   ArrowUp02Icon,
   DashboardSpeed02Icon,
   FlashIcon,
+  UserCircleIcon,
   VoiceIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -113,8 +119,8 @@ interface Props {
   sessionId?: string | null;
   /** When true, the submit button is hidden until there is something to send. */
   hideSubmitWhenEmpty?: boolean;
-  /** Recipient picker chip rendered before the mode chips (new-task state). */
-  recipientPicker?: ReactNode;
+  recipientPicker?: RecipientPickerConfig;
+  threadRecipient?: ExpertIdentity | null;
   /** Card composer: the text always keeps its own row above the controls,
    *  instead of sharing a single pill row until it wraps. Empty state only. */
   stacked?: boolean;
@@ -171,6 +177,7 @@ export const ChatInput = memo(function ChatInput({
   sessionId = null,
   hideSubmitWhenEmpty = false,
   recipientPicker,
+  threadRecipient,
   stacked = false,
   voiceMode,
   modeSelector,
@@ -279,20 +286,26 @@ export const ChatInput = memo(function ChatInput({
     }
   }
 
-  const { value, setValue, handleSubmit, handleEnqueue, isEnqueueing } =
-    useChatInput({
-      onSend: atReset?.onSchedule ?? sendWithAttachments,
-      onEnqueue,
-      isStreaming,
-      hasAttachments,
-      // A scheduled send carries text only, so attachments hold it back.
-      disabled: isTextareaDisabled || (atReset ? hasAttachments : sendDisabled),
-      canSendEmpty: hasAttachments && !atReset,
-      inputId,
-      draftKey,
-      autoFocus,
-      failureTitle: atReset ? sendAtResetFailureTitle : undefined,
-    });
+  const {
+    value,
+    setValue,
+    handleSubmit,
+    handleEnqueue,
+    isEnqueueing,
+    isSending,
+  } = useChatInput({
+    onSend: atReset?.onSchedule ?? sendWithAttachments,
+    onEnqueue,
+    isStreaming,
+    hasAttachments,
+    // A scheduled send carries text only, so attachments hold it back.
+    disabled: isTextareaDisabled || (atReset ? hasAttachments : sendDisabled),
+    canSendEmpty: hasAttachments && !atReset,
+    inputId,
+    draftKey,
+    autoFocus,
+    failureTitle: atReset ? sendAtResetFailureTitle : undefined,
+  });
 
   const integrations = useConnectedIntegrations(expertId);
 
@@ -397,6 +410,22 @@ export const ChatInput = memo(function ChatInput({
   }
 
   const isCompact = variant === "compact";
+  const plusButtonRef = useRef<HTMLButtonElement>(null);
+  const [isRecipientPickerOpen, setIsRecipientPickerOpen] = useState(false);
+  const isRecipientPickerDisabled =
+    isBusy || isSending || isStreaming || isRecording || isTranscribing;
+  if (isRecipientPickerOpen && isRecipientPickerDisabled) {
+    setIsRecipientPickerOpen(false);
+  }
+  const recipientSelectionBlocked =
+    !hasSession &&
+    (attachments.some((attachment) => attachment.kind !== "local") ||
+      parseCredentialMentions(value).some((part) => typeof part !== "string"))
+      ? t(
+          "Remove workspace attachments and connection mentions before changing the expert selection.",
+          "请先移除工作区附件和连接引用，再更改专家选择。",
+        )
+      : undefined;
   // Voice mode, model tier and the dev token readout sit behind the +
   // instead of as icons in the tray; the last two open in a dialog.
   const [plusPanel, setPlusPanel] = useState<"model" | "devtool" | null>(null);
@@ -406,6 +435,18 @@ export const ChatInput = memo(function ChatInput({
     setPlusPanel(null);
   }
   const plusMenuItems: ComposerMenuItem[] = [
+    ...(recipientPicker || threadRecipient !== undefined
+      ? [
+          {
+            key: "experts",
+            label: t("Experts", "专家"),
+            icon: UserCircleIcon,
+            disabled: isRecipientPickerDisabled || recipientPicker?.isLoading,
+            opensPopover: true,
+            onSelect: () => setIsRecipientPickerOpen(true),
+          },
+        ]
+      : []),
     ...(voiceMode
       ? [
           {
@@ -539,6 +580,7 @@ export const ChatInput = memo(function ChatInput({
             )}
           >
             <ComposerPlusMenu
+              triggerRef={plusButtonRef}
               onFilesSelected={handleFilesSelected}
               onUseWorkspaceFile={() => setIsPickerOpen(true)}
               onClearGuidedPrompt={handleClearGuidedPrompt}
@@ -554,7 +596,25 @@ export const ChatInput = memo(function ChatInput({
                   : iconButtonClass
               }
             />
-            {recipientPicker}
+            {recipientPicker && (
+              <RecipientChip
+                {...recipientPicker}
+                anchorRef={plusButtonRef}
+                disabled={isRecipientPickerDisabled}
+                open={isRecipientPickerOpen}
+                onOpenChange={setIsRecipientPickerOpen}
+                selectionBlocked={recipientSelectionBlocked}
+              />
+            )}
+            {threadRecipient !== undefined && (
+              <ThreadRecipientChip
+                expert={threadRecipient}
+                anchorRef={plusButtonRef}
+                disabled={isRecipientPickerDisabled}
+                open={isRecipientPickerOpen}
+                onOpenChange={setIsRecipientPickerOpen}
+              />
+            )}
           </InputGroupAddon>
           {/* Must be a real flex item: `order`/`w-full` are ignored on a
               `display: contents` box, which is what PromptInputBody was. */}

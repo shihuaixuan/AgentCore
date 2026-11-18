@@ -183,9 +183,6 @@
   "src/app/(platform)/copilot/components/ChatInput/components/MentionDropdown.stories.tsx": {
     "require-static-classes": 1
   },
-  "src/app/(platform)/copilot/components/ChatInput/components/RecipientChip.tsx": {
-    "no-restyle": 2
-  },
   "src/app/(platform)/copilot/components/ChatInput/components/RecordingButton.tsx": {
     "no-restyle": 11
   },
@@ -495,7 +492,7 @@
     "no-restyle": 2
   },
   "src/components/layout/AppSidebar/components/RecentChats/components/ExpertChatGroup/ExpertChatGroup.tsx": {
-    "no-restyle": 27
+    "no-restyle": 26
   },
   "src/components/layout/AppSidebar/components/RecentChats/components/RecentChatItem/RecentChatItem.tsx": {
     "no-restyle": 12

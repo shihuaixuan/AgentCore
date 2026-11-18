@@ -282,7 +282,7 @@ describe("RecentChats — expert groups", () => {
     expect(screen.getByText("expert-maria chat 1")).toBeDefined();
   });
 
-  it("links each group header to a new chat, except for fired experts", async () => {
+  it("keeps history groups without per-expert new-chat links", async () => {
     const maxExpert: Expert = {
       ...mariaExpert,
       id: "expert-max",
@@ -300,26 +300,13 @@ describe("RecentChats — expert groups", () => {
     );
     renderRecentChats();
 
-    const mariaLink = await screen.findByRole("link", {
-      name: "New chat with Maria",
-    });
-    // `new=1` is what stops the page adopting Maria's latest thread, which
-    // is exactly the chat the + is meant to step out of.
-    expect(mariaLink.getAttribute("href")).toBe(
-      "/home?expertId=expert-maria&new=1",
-    );
-    expect(
-      screen
-        .getByRole("link", { name: "New chat with Otto" })
-        .getAttribute("href"),
-    ).toBe("/home");
+    await screen.findByRole("button", { name: "Maria chats" });
+    expect(groupHeader("Otto")).toBeDefined();
     expect(groupHeader("Max")).toBeDefined();
-    expect(
-      screen.queryByRole("link", { name: "New chat with Max" }),
-    ).toBeNull();
+    expect(screen.queryByRole("link", { name: /New chat with/ })).toBeNull();
   });
 
-  it("keeps the + link fresh even when the expert's latest chat is running", async () => {
+  it("links to the running chat even when its group is closed", async () => {
     const sessions = [
       makeSession({
         id: "maria-running",
@@ -336,13 +323,11 @@ describe("RecentChats — expert groups", () => {
     renderRecentChats();
 
     const mariaLink = await screen.findByRole("link", {
-      name: "New chat with Maria",
+      name: "maria running chat",
     });
-    const href = new URL(mariaLink.getAttribute("href") ?? "", "http://x");
-    expect(href.pathname).toBe("/home");
-    expect(href.searchParams.get("expertId")).toBe(mariaExpert.id);
-    expect(href.searchParams.get("new")).toBe("1");
-    expect(href.searchParams.has("sessionId")).toBe(false);
+    expect(mariaLink.getAttribute("href")).toBe(
+      "/home?sessionId=maria-running",
+    );
   });
 
   it("hides the group chevron at rest on desktop and reveals it on hover or focus", async () => {

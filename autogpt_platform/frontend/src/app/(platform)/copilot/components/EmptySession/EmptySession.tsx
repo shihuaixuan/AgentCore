@@ -11,7 +11,6 @@ import { motion } from "framer-motion";
 import type { ComponentProps, ReactNode } from "react";
 import type { WorkspaceAttachment } from "../../helpers/workspaceAttachments";
 import { ConnectionPicker } from "../ChatInput/components/ConnectionPicker/ConnectionPicker";
-import { RecipientChip } from "../ChatInput/components/RecipientChip";
 import { OnboardingIntroCard } from "../OnboardingIntroCard/OnboardingIntroCard";
 import { useOnboardingIntroCard } from "../OnboardingIntroCard/useOnboardingIntroCard";
 import { SEND_AT_RESET_PLACEHOLDER } from "../SendAtReset/helpers";
@@ -106,7 +105,7 @@ export function EmptySession({
     expertsById,
     isRosterLoaded,
     hasRosterFailed,
-    recipientID: recipient.id,
+    recipientID: recipient?.id ?? null,
     selectRecipient,
     // A task starts its own chat only through onStartTask, which the page
     // withholds while it resolves the recipient or the turn is locked.
@@ -120,20 +119,9 @@ export function EmptySession({
         getIntroLine(selectedExpert),
         selectedExpert
           ? `我是 ${selectedExpert.name}，你希望我处理什么？`
-          : "说说你的工作，我来帮你找到适合自动化的事情。",
+          : "描述一项任务，即可开始。",
       );
-  const recipientPicker = (
-    <RecipientChip
-      recipient={recipient}
-      options={options}
-      isLoading={isLoadingRecipient}
-      onSelect={selectRecipient}
-    />
-  );
-
   const { inputPlaceholder } = useHomeComposer({
-    enabled:
-      !intro.isVisible && !intro.isAwaitingGreeting && !isKickoffStarting,
     greetingPath: intro.isVisible ? intro.path : null,
   });
 
@@ -171,13 +159,7 @@ export function EmptySession({
             // moves it there rather than replacing it.
             <GreetingLoader />
           ) : (
-            <EmptyHero
-              name={greetingName}
-              intro={introLine}
-              recipientPicker={recipientPicker}
-              isExpert={Boolean(selectedExpert)}
-              expertRole={selectedExpert?.role}
-            />
+            <EmptyHero name={greetingName} intro={introLine} />
           )}
 
           {/* Held back while the greeting is on its way — it enters with
@@ -203,7 +185,7 @@ export function EmptySession({
                 )}
                 <ChatInput
                   inputId="chat-input-empty"
-                  draftKey={`new:${selectedExpert?.id ?? expertId ?? "default"}`}
+                  draftKey="new:default"
                   stacked
                   voiceMode={voiceMode}
                   modeSelector={modeSelector}
@@ -233,9 +215,12 @@ export function EmptySession({
                   expertId={expertId}
                   expertName={expertName}
                   assistantName={selectedExpert?.name ?? expertName ?? null}
-                  recipientPicker={
-                    intro.isVisible ? recipientPicker : undefined
-                  }
+                  recipientPicker={{
+                    recipient,
+                    options,
+                    isLoading: isLoadingRecipient,
+                    onSelect: selectRecipient,
+                  }}
                 />
                 {lowHint}
               </div>

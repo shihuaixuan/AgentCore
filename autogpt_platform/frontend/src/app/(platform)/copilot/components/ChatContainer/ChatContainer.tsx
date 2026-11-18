@@ -627,6 +627,7 @@ export const ChatContainer = ({
                           modeSelector={modeSelector}
                           expertName={expertIdentity?.name ?? null}
                           assistantName={expertIdentity?.name ?? null}
+                          threadRecipient={expertIdentity ?? null}
                           voiceMode={voiceMode}
                           voiceBar={voiceBar}
                         />

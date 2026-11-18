@@ -64,7 +64,7 @@ describe("recipient colors", () => {
       ),
     );
     await userEvent.click(chip);
-    const menu = await screen.findByRole("menu");
+    const menu = await screen.findByRole("dialog", { name: "Experts" });
     expect(
       within(menu).getByRole("img", { name: "Maria" }).getAttribute("src"),
     ).toContain("marketing.png");
