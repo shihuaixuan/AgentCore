@@ -1,5 +1,8 @@
+"use client";
+
 import { formatProviderName } from "@/components/contextual/IntegrationsPanel/helpers";
 import { IntegrationLogo } from "@/components/molecules/IntegrationLogo/IntegrationLogo";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ExpertSection } from "./ExpertSection";
 
 interface Props {
@@ -8,12 +11,16 @@ interface Props {
 }
 
 export function ExpertAccess({ name, providers }: Props) {
+  const { t } = useTranslation();
   if (providers.length === 0) return null;
 
   return (
     <ExpertSection
-      title={`Services ${name} can work with`}
-      description={`${name} will ask you to connect these the first time they are needed — nothing is shared until you do.`}
+      title={t(`Services ${name} can work with`, `${name} 可使用的服务`)}
+      description={t(
+        `${name} will ask you to connect these the first time they are needed — nothing is shared until you do.`,
+        `${name} 首次需要使用这些服务时，会请你连接账户；连接前不会共享任何数据。`,
+      )}
     >
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {providers.map((provider) => (

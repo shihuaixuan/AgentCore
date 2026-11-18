@@ -46,6 +46,7 @@ function BackToMarketplaceLink() {
 }
 
 export function ExpertPage() {
+  const { t } = useTranslation();
   const { expertId } = useParams<{ expertId: string }>();
   useTrackExpertProfileOpened(expertId);
   const {
@@ -96,8 +97,8 @@ export function ExpertPage() {
       <main className={MAIN_CLASS}>
         <BackToMarketplaceLink />
         <ErrorCard
-          context="this expert"
-          hint="We could not load this expert."
+          context={t("this expert", "这位专家")}
+          hint={t("We could not load this expert.", "无法加载这位专家。")}
           onRetry={() => refetch()}
         />
       </main>
@@ -114,7 +115,7 @@ export function ExpertPage() {
     expert.workflows,
     systemProviders,
   );
-  const stats = getExpertStats(expert, accessProviders.length);
+  const stats = getExpertStats(expert, accessProviders.length, t);
 
   let actions: ReactNode = <Skeleton className="h-9 w-full rounded-full" />;
   if (isActionReady) {
@@ -202,13 +203,21 @@ function plural(count: number, word: string) {
 function getExpertStats(
   expert: { bundled_skills?: unknown[] | null; workflows: unknown[] },
   serviceCount: number,
+  t: (english: string, chinese: string) => string,
 ) {
   const skillCount = expert.bundled_skills?.length ?? 0;
   return [
-    skillCount > 0 ? plural(skillCount, "skill") : null,
-    expert.workflows.length > 0
-      ? plural(expert.workflows.length, "workflow")
+    skillCount > 0
+      ? t(plural(skillCount, "skill"), `${skillCount} 项技能`)
       : null,
-    serviceCount > 0 ? plural(serviceCount, "service") : null,
+    expert.workflows.length > 0
+      ? t(
+          plural(expert.workflows.length, "workflow"),
+          `${expert.workflows.length} 个工作流`,
+        )
+      : null,
+    serviceCount > 0
+      ? t(plural(serviceCount, "service"), `${serviceCount} 项服务`)
+      : null,
   ].filter((stat): stat is string => stat !== null);
 }

@@ -62,7 +62,7 @@ export function ExpertHireActions({
           variant="secondary"
           size="small"
         >
-          {`Chat with ${expert.name}`}
+          {t(`Chat with ${expert.name}`, `与 ${expert.name} 对话`)}
         </Button>
       </div>
     );
@@ -84,7 +84,7 @@ export function ExpertHireActions({
       loading={isHiring}
       className="w-full sm:w-auto"
     >
-      {`Hire ${expert.name}`}
+      {t(`Hire ${expert.name}`, `聘用 ${expert.name}`)}
     </Button>
   );
 }

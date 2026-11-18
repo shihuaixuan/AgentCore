@@ -19,6 +19,8 @@ import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { ExpertPage as MarketplaceExpertPage } from "../[expertId]/components/ExpertPage";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 
 const { capture } = vi.hoisted(() => ({ capture: vi.fn() }));
 vi.mock("posthog-js", () => ({ default: { capture } }));
@@ -140,12 +142,12 @@ const mariaDayOne = [
   },
 ] satisfies ExpertDayOneItem[];
 
-function renderPage() {
+function renderPage(locale: Locale = "en") {
   return render(
-    <>
+    <LanguageProvider initialLocale={locale}>
       <MarketplaceExpertPage />
       <Toaster />
-    </>,
+    </LanguageProvider>,
   );
 }
 
@@ -163,6 +165,121 @@ describe("Marketplace expert page", () => {
         "webshare_proxy",
       ]),
     );
+  });
+
+  test.each(["凯西", "Casey"])(
+    "localizes a hired expert's dynamic copy without changing the name %s",
+    async (name) => {
+      const template = {
+        ...mariaTemplate,
+        name,
+        categories: ["development"],
+        day_one: mariaDayOne,
+        workflows: [
+          { ...mariaTemplate.workflows[0], schedule_cron: "40 7 * * *" },
+          { ...mariaTemplate.workflows[1], name: null },
+        ],
+        bundled_skills: [
+          {
+            id: "listing-1",
+            slug: "brand-voice-guide",
+            title: "API review playbook",
+            description: "Creator-authored description",
+          },
+        ],
+      };
+      server.use(
+        getListExpertTemplatesMockHandler([template]),
+        getListExpertsMockHandler([{ ...hiredMaria, name }]),
+      );
+
+      renderPage("zh-CN");
+
+      expect(
+        (
+          await screen.findByRole("link", { name: `与 ${name} 对话` })
+        ).getAttribute("href"),
+      ).toBe("/copilot?expertId=expert-maria");
+      expect(screen.getByText("技术工程")).toBeDefined();
+      const stats = screen.getByRole("list", { name: "这位专家提供的能力" });
+      expect(within(stats).getByText("1 项技能")).toBeDefined();
+      expect(within(stats).getByText("2 个工作流")).toBeDefined();
+      expect(within(stats).getByText("1 项服务")).toBeDefined();
+      expect(screen.getByText("2 个工作流已安装，可立即运行")).toBeDefined();
+      expect(screen.getByText("每天 07:40 运行")).toBeDefined();
+      expect(screen.getByText("未命名工作流")).toBeDefined();
+      expect(
+        screen.getByText(
+          `聘用 ${name} 无需额外费用。其工作将使用你的现有余额，每周支出上限为 $5；加入团队后，你可以调整此上限。`,
+        ),
+      ).toBeDefined();
+      expect(
+        screen.getByRole("region", { name: `${name} 的首日安排` }),
+      ).toBeDefined();
+      expect(
+        screen.getByRole("region", { name: `${name} 可使用的服务` }),
+      ).toBeDefined();
+      expect(
+        screen.getByText(
+          `${name} 首次需要使用这些服务时，会请你连接账户；连接前不会共享任何数据。`,
+        ),
+      ).toBeDefined();
+      expect(
+        screen.getByText(`${name} 加入团队后，这些工作流即可立即运行。`),
+      ).toBeDefined();
+      expect(screen.getAllByText("已锁定")).toHaveLength(2);
+      expect(
+        screen
+          .getByRole("link", { name: /API review playbook/ })
+          .getAttribute("href"),
+      ).toBe("/marketplace/skills/brand-voice-guide");
+      expect(screen.getByText(mariaDayOne[0].title)).toBeDefined();
+      expect(
+        screen.queryByText(
+          /Chat with|Hiring|sets up on day one|installed and ready/,
+        ),
+      ).toBeNull();
+    },
+  );
+
+  test.each([null, 0])(
+    "does not invent a weekly cap for budget %s",
+    async (weeklyBudget) => {
+      server.use(
+        getListExpertTemplatesMockHandler([
+          { ...mariaTemplate, weekly_budget: weeklyBudget },
+        ]),
+        getListExpertsMockHandler([]),
+      );
+
+      renderPage("zh-CN");
+
+      expect(
+        await screen.findByRole("button", { name: "聘用 Maria" }),
+      ).toBeDefined();
+      expect(
+        screen.getByText("聘用 Maria 无需额外费用。其工作将使用你的现有余额。"),
+      ).toBeDefined();
+      expect(screen.queryByText(/每周支出上限/)).toBeNull();
+    },
+  );
+
+  test("localizes expand and collapse controls without translating the author's bio", async () => {
+    server.use(
+      getListExpertTemplatesMockHandler([
+        { ...mariaTemplate, bio: "Original API notes. ".repeat(40) },
+      ]),
+      getListExpertsMockHandler([]),
+    );
+
+    renderPage("zh-CN");
+
+    const expand = await screen.findByRole("button", { name: "阅读更多" });
+    await userEvent.click(expand);
+    expect(screen.getByRole("button", { name: "收起" })).toBeDefined();
+    expect(screen.getByText(/Original API notes\./)).toBeDefined();
+    await userEvent.click(screen.getByRole("button", { name: "收起" }));
+    expect(screen.getByRole("button", { name: "阅读更多" })).toBeDefined();
   });
 
   test("shows the profile and hires from the page", async () => {

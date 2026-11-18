@@ -9,13 +9,19 @@ interface Props {
   rules: string[];
 }
 
-/** The rules baked into every expert's soul, quoted verbatim — the same
- *  strings the backend injects, so the promise on the profile and the
- *  instruction the model receives can never drift apart. Each one gets its
- *  own tile: a shield, the rule, and a quiet "Locked" note. */
 export function ExpertProtectedRules({ rules }: Props) {
   const { t } = useTranslation();
   if (rules.length === 0) return null;
+
+  function getRuleLabel(rule: string) {
+    if (rule === "The expert discloses that it is AI when acting externally.") {
+      return t(rule, "对外执行操作时，专家会表明自己是 AI。");
+    }
+    if (rule === "The expert asks for approval before acting externally.") {
+      return t(rule, "对外执行操作前，专家会先征求你的同意。");
+    }
+    return rule;
+  }
 
   return (
     <ExpertSection
@@ -39,11 +45,11 @@ export function ExpertProtectedRules({ rules }: Props) {
             </span>
             <div className="min-w-0">
               <p className="text-body-md leading-6 text-foreground-emphasis">
-                {rule}
+                {getRuleLabel(rule)}
               </p>
               <span className="mt-1 inline-flex items-center gap-1 text-caption text-foreground-tertiary">
                 <Icon icon={LockIcon} size={12} aria-hidden="true" />
-                Locked
+                {t("Locked", "已锁定")}
               </span>
             </div>
           </li>

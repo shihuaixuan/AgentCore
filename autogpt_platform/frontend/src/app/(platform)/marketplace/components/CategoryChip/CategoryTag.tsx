@@ -1,4 +1,7 @@
+"use client";
+
 import type { CSSProperties } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getCategoryHex } from "@/components/molecules/ExpertAvatar/colors";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
@@ -31,6 +34,7 @@ interface Props {
 /** A category worn as a label rather than a filter: same chip, no click,
  *  tinted with the category's colour (see categoryTagStyle). */
 export function CategoryTag({ category, size = "small", className }: Props) {
+  const { locale } = useTranslation();
   const color = getCategoryHex(category);
   const { accent, icon } = getCategoryAccent(category);
 
@@ -56,7 +60,7 @@ export function CategoryTag({ category, size = "small", className }: Props) {
           aria-hidden
         />
       ) : null}
-      <span className="truncate">{formatCategoryLabel(category)}</span>
+      <span className="truncate">{formatCategoryLabel(category, locale)}</span>
     </span>
   );
 }

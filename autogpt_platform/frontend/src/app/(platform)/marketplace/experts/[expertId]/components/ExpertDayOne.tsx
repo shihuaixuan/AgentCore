@@ -1,4 +1,7 @@
+"use client";
+
 import { ExpertDayOneItem } from "@/app/api/__generated__/models/expertDayOneItem";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 import type { ExpertAccent } from "../../../components/ExpertsSection/helpers";
 import { ExpertSection } from "./ExpertSection";
@@ -12,10 +15,13 @@ interface Props {
 /** Day one as a timeline: numbered steps joined by a line, each with its
  *  timing on the right. */
 export function ExpertDayOne({ name, items, accent }: Props) {
+  const { t } = useTranslation();
   if (items.length === 0) return null;
 
   return (
-    <ExpertSection title={`What ${name} sets up on day one`}>
+    <ExpertSection
+      title={t(`What ${name} sets up on day one`, `${name} 的首日安排`)}
+    >
       <ol className="rounded-2xl bg-surface p-5 smooth-shadow-ring-sm">
         {items.map((item, index) => (
           <li

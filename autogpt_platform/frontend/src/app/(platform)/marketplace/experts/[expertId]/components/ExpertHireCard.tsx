@@ -34,7 +34,10 @@ export function ExpertHireCard({ expert, firstName, actions }: Props) {
         </Perk>
         {workflowCount > 0 ? (
           <Perk icon={CheckmarkCircle02Icon}>
-            {`${workflowCount} ${workflowCount === 1 ? "workflow" : "workflows"} installed and ready to run`}
+            {t(
+              `${workflowCount} ${workflowCount === 1 ? "workflow" : "workflows"} installed and ready to run`,
+              `${workflowCount} 个工作流已安装，可立即运行`,
+            )}
           </Perk>
         ) : null}
         <Perk icon={CheckmarkCircle02Icon}>
@@ -49,10 +52,15 @@ export function ExpertHireCard({ expert, firstName, actions }: Props) {
           {t("Included with your plan", "套餐内包含")}
         </h2>
         <p className="mt-1.5 text-body leading-6 text-foreground-secondary">
-          {`Hiring ${firstName} costs nothing extra. Their work draws on your existing balance`}
           {weeklyBudget
-            ? `, capped at ${creditsToUsdLabel(weeklyBudget)} a week — a limit you can change once they are on your team.`
-            : "."}
+            ? t(
+                `Hiring ${firstName} costs nothing extra. Their work draws on your existing balance, capped at ${creditsToUsdLabel(weeklyBudget)} a week — a limit you can change once they are on your team.`,
+                `聘用 ${firstName} 无需额外费用。其工作将使用你的现有余额，每周支出上限为 ${creditsToUsdLabel(weeklyBudget)}；加入团队后，你可以调整此上限。`,
+              )
+            : t(
+                `Hiring ${firstName} costs nothing extra. Their work draws on your existing balance.`,
+                `聘用 ${firstName} 无需额外费用。其工作将使用你的现有余额。`,
+              )}
         </p>
       </div>
     </aside>

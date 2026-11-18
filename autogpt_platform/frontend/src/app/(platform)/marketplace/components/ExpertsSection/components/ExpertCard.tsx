@@ -95,7 +95,7 @@ export function ExpertCard({ expert, isHired, category }: Props) {
         {skills.length > 0 ? (
           <div>
             <div className="mb-1 text-body text-foreground-tertiary">
-              Skills:
+              {t("Skills:", "技能：")}
             </div>
             <div className="flex flex-col items-start">
               {named.map((skill) => (
@@ -129,7 +129,10 @@ export function ExpertCard({ expert, isHired, category }: Props) {
                         "h-6 cursor-default border-transparent px-0 text-foreground-tertiary outline-none focus-visible:ring-2 focus-visible:ring-brand",
                       )}
                     >
-                      +{restSkills.length} skills
+                      {t(
+                        `+${restSkills.length} skills`,
+                        `+${restSkills.length} 项技能`,
+                      )}
                     </span>
                   </TooltipTrigger>
                   <TooltipPortal>

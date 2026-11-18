@@ -35,7 +35,7 @@ export function ExpertAbout({ text }: Props) {
           onClick={() => setIsExpanded((value) => !value)}
           className="mt-2 inline-flex items-center gap-1 text-body font-medium text-foreground-tertiary transition-colors hover:text-foreground-strong"
         >
-          {isExpanded ? "Show less" : "Read more"}
+          {isExpanded ? t("Show less", "收起") : t("Read more", "阅读更多")}
           <Icon
             icon={ArrowDown01Icon}
             size={14}
