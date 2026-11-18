@@ -9,11 +9,13 @@ one turn per chat at a time.
 """
 
 import logging
+from uuid import UUID
 
 from autogpt_libs import auth
 from fastapi import APIRouter, HTTPException, Security
 from pydantic import BaseModel, Field
 
+from backend.api.features.chat.managed_models import require_chat_model
 from backend.api.features.chat.routes import (
     _validate_and_get_writable_session,
     enforce_model_entitlement,
@@ -42,6 +44,7 @@ router = APIRouter()
 
 
 class ContinueSessionRequest(BaseModel):
+    managed_model_id: UUID | None = None
     model: CopilotLLMModel | None = Field(
         default=None,
         description="Model tier the continuation runs on, as for a message.",
@@ -76,8 +79,18 @@ async def continue_session(
     """Continue the chat's task from the checkpoint it paused at."""
     session = await _validate_and_get_writable_session(session_id, user_id)
     model = request.model if request is not None else None
-    await enforce_model_entitlement(model, session, user_id)
-    await _admit(session, user_id)
+    managed_model_id = (
+        await require_chat_model(request.managed_model_id if request else None)
+        if session.metadata.managed_models_only
+        or (request is not None and "managed_model_id" in request.model_fields_set)
+        else None
+    )
+    if managed_model_id is not None:
+        await enforce_payment_paywall(user_id)
+        await enforce_platform_allowance(user_id)
+    else:
+        await enforce_model_entitlement(model, session, user_id)
+        await _admit(session, user_id)
     await _refuse_if_busy(session_id)
     try:
         # Every note is the same text, so the trailing-text dedupe would refuse
@@ -95,7 +108,8 @@ async def continue_session(
             session_source_platform=session.metadata.source_platform,
             organization_id=session.organization_id or ctx.org_id,
             team_id=session.team_id if session.organization_id else ctx.team_id,
-            model=model,
+            model=None if managed_model_id else model,
+            **({"managed_model_id": managed_model_id} if managed_model_id else {}),
             llm_auth_provider=session.metadata.llm_auth_provider,
             llm_credential_id=session.metadata.llm_credential_id,
             permissions=resolve_session_permissions(session),

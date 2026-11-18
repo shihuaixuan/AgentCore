@@ -52,6 +52,7 @@ vi.mock("@/components/molecules/Sidebar/Sidebar", () => ({
 // Mock hooks that hit the network. Exercise the `select` callback so its
 // line counts as covered alongside the rest of the options.
 vi.mock("@/app/api/__generated__/endpoints/chat/chat", () => ({
+  useGetV2ListManagedChatModels: () => ({ data: undefined }),
   useGetV2ListChatTransports: () => ({ data: undefined }),
   useGetV2GetCopilotUsage: (opts: {
     query?: { select?: (r: { data: unknown }) => unknown };

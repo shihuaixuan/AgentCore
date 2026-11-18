@@ -622,6 +622,7 @@ export const ChatContainer = ({
                               : undefined
                           }
                           hasSession={!!sessionId}
+                          managedModels
                           sessionId={sessionId}
                           expertId={expertIdentity?.id ?? null}
                           modeSelector={modeSelector}

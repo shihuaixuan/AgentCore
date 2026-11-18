@@ -46,6 +46,7 @@ import { FileChips } from "./components/FileChips";
 import { MentionConnectDialog } from "./components/MentionConnectDialog";
 import { MentionDropdown } from "./components/MentionDropdown";
 import { ConnectionPickerDialog } from "./components/ConnectionPicker/ConnectionPickerDialog";
+import { ManagedModelPicker } from "./components/ManagedModelPicker";
 import { NoAIConnectionNotice } from "./components/NoAIConnectionNotice/NoAIConnectionNotice";
 import { RecordingButton } from "./components/RecordingButton";
 import { RecordingIndicator } from "./components/RecordingIndicator";
@@ -109,6 +110,7 @@ interface Props {
   onDroppedFilesConsumed?: () => void;
   /** When true, the dry-run toggle is disabled (session is active and immutable). */
   hasSession?: boolean;
+  managedModels?: boolean;
   /** Session id for the dev-only token badge in the composer footer. */
   sessionId?: string | null;
   /** When true, the submit button is hidden until there is something to send. */
@@ -168,6 +170,7 @@ export const ChatInput = memo(function ChatInput({
   droppedFiles,
   onDroppedFilesConsumed,
   hasSession = false,
+  managedModels = false,
   sessionId = null,
   hideSubmitWhenEmpty = false,
   recipientPicker,
@@ -401,7 +404,7 @@ export const ChatInput = memo(function ChatInput({
   // instead of as icons in the tray; the last two open in a dialog.
   const [plusPanel, setPlusPanel] = useState<"model" | "devtool" | null>(null);
   const showModelControl =
-    !stacked && !isCompact && (!hasSession || !isStreaming);
+    !managedModels && !stacked && !isCompact && (!hasSession || !isStreaming);
   if (!showModelControl && plusPanel === "model") {
     setPlusPanel(null);
   }
@@ -470,7 +473,7 @@ export const ChatInput = memo(function ChatInput({
           onHighlight={mentions.setHighlightedIndex}
         />
       )}
-      <NoAIConnectionNotice enabled={!hasSession} />
+      {!managedModels && <NoAIConnectionNotice enabled={!hasSession} />}
       {/* GPT-style composer: a single pill row — plus on the left, textarea
           in the middle, quiet toggles + mic + send on the right. items-end
           keeps the controls pinned to the bottom edge as the textarea grows. */}
@@ -555,6 +558,9 @@ export const ChatInput = memo(function ChatInput({
               }
             />
             {recipientPicker}
+            {managedModels && (
+              <ManagedModelPicker disabled={isBusy || isStreaming} />
+            )}
           </InputGroupAddon>
           {/* Must be a real flex item: `order`/`w-full` are ignored on a
               `display: contents` box, which is what PromptInputBody was. */}

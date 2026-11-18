@@ -9318,7 +9318,7 @@
             "required": false,
             "schema": {
               "type": "number",
-              "default": 10.0,
+              "default": 10,
               "title": "Drop Threshold"
             }
           },
@@ -24983,6 +24983,172 @@
           }
         }
       }
+    },
+    "/api/chat/managed-models": {
+      "get": {
+        "tags": ["v2", "chat"],
+        "summary": "List Managed Chat Models",
+        "operationId": "getV2ListManagedChatModels",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ChatModel"
+                  },
+                  "type": "array",
+                  "title": "Response Getv2Listmanagedchatmodels"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401NotAuthenticatedError"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearerJWT": []
+          }
+        ]
+      }
+    },
+    "/api/chat/managed-models/admin": {
+      "get": {
+        "tags": ["v2", "chat"],
+        "summary": "List Managed Model Settings",
+        "operationId": "getV2ListManagedModelSettings",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ModelDetails"
+                  },
+                  "type": "array",
+                  "title": "Response Getv2Listmanagedmodelsettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401NotAuthenticatedError"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearerJWT": []
+          }
+        ]
+      },
+      "post": {
+        "tags": ["v2", "chat"],
+        "summary": "Create Managed Chat Model",
+        "operationId": "postV2CreateManagedChatModel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401NotAuthenticatedError"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearerJWT": []
+          }
+        ]
+      }
+    },
+    "/api/chat/managed-models/admin/{model_id}": {
+      "patch": {
+        "tags": ["v2", "chat"],
+        "summary": "Update Managed Chat Model",
+        "operationId": "patchV2UpdateManagedChatModel",
+        "security": [
+          {
+            "HTTPBearerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "model_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Model Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401NotAuthenticatedError"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -25920,7 +26086,7 @@
           },
           "amount_due": {
             "type": "integer",
-            "minimum": 0.0,
+            "minimum": 0,
             "title": "Amount Due"
           },
           "currency": {
@@ -25939,7 +26105,7 @@
           },
           "renewal_unit_amount": {
             "type": "integer",
-            "minimum": 0.0,
+            "minimum": 0,
             "title": "Renewal Unit Amount"
           },
           "renewal_discounts": {
@@ -26819,6 +26985,18 @@
             ],
             "title": "Message",
             "description": "What to send. Required for send, ignored for resume."
+          },
+          "managed_model_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Managed Model Id"
           }
         },
         "type": "object",
@@ -28105,7 +28283,7 @@
           },
           "part_index": {
             "type": "integer",
-            "minimum": 0.0,
+            "minimum": 0,
             "title": "Part Index"
           },
           "resent": {
@@ -28455,19 +28633,19 @@
           },
           "decision_total": {
             "type": "integer",
-            "minimum": 0.0,
+            "minimum": 0,
             "title": "Decision Total",
             "default": 0
           },
           "completed_total": {
             "type": "integer",
-            "minimum": 0.0,
+            "minimum": 0,
             "title": "Completed Total",
             "default": 0
           },
           "failed_total": {
             "type": "integer",
-            "minimum": 0.0,
+            "minimum": 0,
             "title": "Failed Total",
             "default": 0
           },
@@ -29006,6 +29184,11 @@
           "dry_run": {
             "type": "boolean",
             "title": "Dry Run",
+            "default": false
+          },
+          "managed_models_only": {
+            "type": "boolean",
+            "title": "Managed Models Only",
             "default": false
           },
           "llm_auth_provider": {
@@ -30131,8 +30314,8 @@
           },
           "confidence": {
             "type": "number",
-            "maximum": 1.0,
-            "minimum": 0.0,
+            "maximum": 1,
+            "minimum": 0,
             "title": "Confidence",
             "description": "Phase 1 model's confidence in the consolidated statement."
           },
@@ -30198,6 +30381,18 @@
             ],
             "title": "Model",
             "description": "Model tier the continuation runs on, as for a message."
+          },
+          "managed_model_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Managed Model Id"
           }
         },
         "type": "object",
@@ -31163,8 +31358,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1000000.0,
-                "minimum": 0.0
+                "maximum": 1000000,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -31262,6 +31457,18 @@
               }
             ],
             "title": "Autopilot Mode"
+          },
+          "managed_model_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Managed Model Id"
           }
         },
         "additionalProperties": false,
@@ -33459,7 +33666,7 @@
           "discount_applied": {
             "type": "number",
             "title": "Discount Applied",
-            "default": 0.0
+            "default": 0
           }
         },
         "type": "object",
@@ -33988,8 +34195,8 @@
           },
           "batch_size": {
             "type": "integer",
-            "maximum": 25.0,
-            "minimum": 1.0,
+            "maximum": 25,
+            "minimum": 1,
             "title": "Batch Size",
             "description": "Batch size for concurrent processing",
             "default": 10
@@ -34987,8 +35194,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1000000.0,
-                "minimum": 0.0
+                "maximum": 1000000,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -36622,8 +36829,8 @@
             "anyOf": [
               {
                 "type": "number",
-                "maximum": 14400.0,
-                "minimum": 0.0
+                "maximum": 14400,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -45081,37 +45288,37 @@
           "avg_input_tokens_per_request": {
             "type": "number",
             "title": "Avg Input Tokens Per Request",
-            "default": 0.0
+            "default": 0
           },
           "avg_output_tokens_per_request": {
             "type": "number",
             "title": "Avg Output Tokens Per Request",
-            "default": 0.0
+            "default": 0
           },
           "avg_cost_microdollars_per_request": {
             "type": "number",
             "title": "Avg Cost Microdollars Per Request",
-            "default": 0.0
+            "default": 0
           },
           "cost_p50_microdollars": {
             "type": "number",
             "title": "Cost P50 Microdollars",
-            "default": 0.0
+            "default": 0
           },
           "cost_p75_microdollars": {
             "type": "number",
             "title": "Cost P75 Microdollars",
-            "default": 0.0
+            "default": 0
           },
           "cost_p95_microdollars": {
             "type": "number",
             "title": "Cost P95 Microdollars",
-            "default": 0.0
+            "default": 0
           },
           "cost_p99_microdollars": {
             "type": "number",
             "title": "Cost P99 Microdollars",
-            "default": 0.0
+            "default": 0
           },
           "cost_buckets": {
             "items": {
@@ -46153,8 +46360,8 @@
           },
           "confidence": {
             "type": "number",
-            "maximum": 1.0,
-            "minimum": 0.0,
+            "maximum": 1,
+            "minimum": 0,
             "title": "Confidence",
             "description": "Phase 2 model's self-rated confidence."
           },
@@ -46280,12 +46487,12 @@
           "total_duration_seconds": {
             "type": "number",
             "title": "Total Duration Seconds",
-            "default": 0.0
+            "default": 0
           },
           "total_tracking_amount": {
             "type": "number",
             "title": "Total Tracking Amount",
-            "default": 0.0
+            "default": 0
           },
           "request_count": {
             "type": "integer",
@@ -50988,8 +51195,8 @@
           },
           "score": {
             "type": "integer",
-            "maximum": 5.0,
-            "minimum": 1.0,
+            "maximum": 5,
+            "minimum": 1,
             "title": "Score",
             "description": "Star rating, 1 to 5"
           },
@@ -51172,7 +51379,7 @@
           "review_avg_rating": {
             "type": "number",
             "title": "Review Avg Rating",
-            "default": 0.0
+            "default": 0
           }
         },
         "type": "object",
@@ -51360,7 +51567,7 @@
           "review_avg_rating": {
             "type": "number",
             "title": "Review Avg Rating",
-            "default": 0.0
+            "default": 0
           },
           "internal_comments": {
             "anyOf": [
@@ -51513,7 +51720,7 @@
           },
           "graph_version": {
             "type": "integer",
-            "exclusiveMinimum": 0.0,
+            "exclusiveMinimum": 0,
             "title": "Graph Version",
             "description": "Graph version must be greater than 0"
           },
@@ -51765,6 +51972,18 @@
             ],
             "title": "Autopilot Mode",
             "description": "The chat's approval mode from this turn on; None keeps the mode it already has."
+          },
+          "managed_model_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Managed Model Id"
           }
         },
         "type": "object",
@@ -52012,7 +52231,7 @@
             "anyOf": [
               {
                 "type": "integer",
-                "exclusiveMinimum": 0.0
+                "exclusiveMinimum": 0
               },
               {
                 "type": "null"
@@ -53392,19 +53611,19 @@
         "properties": {
           "input_usd_per_1m": {
             "type": "number",
-            "minimum": 0.0,
+            "minimum": 0,
             "title": "Input Usd Per 1M"
           },
           "output_usd_per_1m": {
             "type": "number",
-            "minimum": 0.0,
+            "minimum": 0,
             "title": "Output Usd Per 1M"
           },
           "cache_read_usd_per_1m": {
             "anyOf": [
               {
                 "type": "number",
-                "minimum": 0.0
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -53416,7 +53635,7 @@
             "anyOf": [
               {
                 "type": "number",
-                "minimum": 0.0
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -54156,8 +54375,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
-                "minimum": 0.0
+                "maximum": 10,
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -55075,8 +55294,8 @@
         "properties": {
           "percent_used": {
             "type": "number",
-            "maximum": 100.0,
-            "minimum": 0.0,
+            "maximum": 100,
+            "minimum": 0,
             "title": "Percent Used",
             "description": "Percentage of the window's allowance used (0-100). Clamped at 100 when over the cap."
           },
@@ -55940,7 +56159,7 @@
             "anyOf": [
               {
                 "type": "integer",
-                "minimum": 0.0
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -56857,6 +57076,150 @@
         "required": ["content"],
         "title": "WriteSummary",
         "description": "One line per envelope written by apply.py.\n\nCarries the durable Graphiti edge uuid so the eval / admin UI / the\nfuture inline chat-stream `dream.operations` event (P9 daydreaming)\ncan render or audit individual operations. ``edge_uuid`` is None\nwhen the underlying ``enqueue_episode`` call did not return one\n(FalkorDB unreachable, etc.) — we still record the attempted write."
+      },
+      "ChatModel": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": ["id", "name"],
+        "title": "ChatModel"
+      },
+      "ModelCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Model"
+          },
+          "base_url": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Base Url"
+          },
+          "api_key": {
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1,
+            "format": "password",
+            "title": "Api Key",
+            "writeOnly": true
+          }
+        },
+        "type": "object",
+        "required": ["name", "model", "base_url", "api_key"],
+        "title": "ModelCreate"
+      },
+      "ModelDetails": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "base_url": {
+            "type": "string",
+            "title": "Base Url"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          }
+        },
+        "type": "object",
+        "required": ["id", "name", "model", "base_url", "enabled"],
+        "title": "ModelDetails"
+      },
+      "ModelUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 240,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "base_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Url"
+          },
+          "api_key": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4096,
+                "minLength": 1,
+                "format": "password",
+                "writeOnly": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key"
+          },
+          "enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled"
+          }
+        },
+        "type": "object",
+        "title": "ModelUpdate"
       }
     },
     "securitySchemes": {

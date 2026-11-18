@@ -21,7 +21,7 @@ from functools import partial
 from typing import TYPE_CHECKING, Any, cast
 
 import orjson
-from openai import APIConnectionError
+from openai import APIConnectionError, AsyncOpenAI
 from openai import omit as openai_omit
 from openai.types import CompletionUsage
 from openai.types.chat import ChatCompletionMessageParam, ChatCompletionToolParam
@@ -513,6 +513,7 @@ class _BaselineStreamState:
     """
 
     model: str = ""
+    managed_client: AsyncOpenAI | None = None
     # Which routing layer picked ``model`` — stamped onto persisted assistant
     # messages for product-intelligence segmentation. The baseline path only
     # ever produces "ld" | "catalog" | "env" ("fallback" is SDK-only, marking
@@ -929,8 +930,10 @@ async def _baseline_llm_caller(
     round_text = ""
     try:
         prune_image_context(messages)
-        client = _get_main_client()
-        supports_cache = _supports_prompt_cache_markers(state.model)
+        client = state.managed_client or _get_main_client()
+        supports_cache = (
+            state.managed_client is None and _supports_prompt_cache_markers(state.model)
+        )
         if supports_cache:
             # Build cached system message once; splice on each round to avoid O(n) list copy.
             if (
@@ -969,7 +972,9 @@ async def _baseline_llm_caller(
         # to an OpenRouter endpoint in subscription mode with OR creds present,
         # where ``transport.name`` is ``"subscription"`` but the baseline client
         # still routes to OpenRouter.
-        baseline_provider = config.baseline_provider
+        baseline_provider = (
+            "local" if state.managed_client is not None else config.baseline_provider
+        )
         is_openrouter_transport = baseline_provider == "openrouter"
         extra_body: dict[str, Any] = {}
         if baseline_provider == "local":
@@ -1486,6 +1491,7 @@ def _begin_baseline_tool_round(
 async def _compress_session_messages(
     messages: list[ChatMessage],
     model: str,
+    managed_client: AsyncOpenAI | None = None,
 ) -> list[ChatMessage]:
     """Compress session messages if they exceed the model's token limit.
 
@@ -1509,7 +1515,11 @@ async def _compress_session_messages(
     # ~120k and never fire before the (much smaller) local window overflows.
     # Probe the backend for its real window and target compaction at it.
     target_tokens: int | None = None
-    if config.effective_transport == "local" and config.base_url:
+    if (
+        managed_client is None
+        and config.effective_transport == "local"
+        and config.base_url
+    ):
         window = await probe_local_context_window(config.base_url, model)
         target_tokens = compaction_target_for_window(window)
 
@@ -1518,10 +1528,10 @@ async def _compress_session_messages(
             messages=messages_dict,
             target_tokens=target_tokens,
             model=model,
-            client=_get_main_client(),
+            client=None if managed_client is not None else _get_main_client(),
         )
     except Exception as e:
-        logger.warning("[Baseline] Context compression with LLM failed: %s", e)
+        logger.warning("[Baseline] Context compression failed: %s", type(e).__name__)
         result = await compress_context(
             messages=messages_dict,
             target_tokens=target_tokens,
@@ -1853,6 +1863,8 @@ async def stream_chat_completion_baseline(
     organization_id: str | None = None,
     team_id: str | None = None,
     message_metadata: dict[str, Any] | None = None,
+    managed_model: str | None = None,
+    managed_client: AsyncOpenAI | None = None,
     **_kwargs: Any,
 ) -> AsyncGenerator[StreamBaseResponse, None]:
     """Baseline LLM with tool calling via OpenAI-compatible API.
@@ -1961,39 +1973,33 @@ async def stream_chat_completion_baseline(
     # would be rejected by the direct client.  Pass the baseline-side
     # ``config`` so monkeypatch fixtures targeting this module's
     # ``config`` symbol drive the decision.
-    resolved_route = await _resolve_baseline_model(model, user_id)
-    resolved_model = resolved_route.model
-    routing_source = resolved_route.source
-    try:
-        active_model = normalize_model_for_transport(resolved_model, config)
-    except ValueError as exc:
-        # Mirror SDK's LD-reject soft-fallback (see ``copilot.sdk.service``):
-        # a per-user LD ``copilot-model-routing`` cell can pin a non-Anthropic
-        # slug (e.g. ``moonshotai/kimi-*``) on a direct-Anthropic deployment
-        # where the baseline transport rejects it.  Fall back to the
-        # TIER-SPECIFIC config default so the request still streams instead
-        # of erroring at the user.  Re-raises the original error if the
-        # config default is also invalid (deployment-level misconfig caught
-        # by the ``model_validator`` at startup).
-        tier_default = (
-            config.fast_advanced_model
-            if model == "advanced"
-            else config.fast_standard_model
-        )
+    if managed_model is not None:
+        active_model, routing_source = managed_model, "managed"
+    else:
+        resolved_route = await _resolve_baseline_model(model, user_id)
+        resolved_model = resolved_route.model
+        routing_source = resolved_route.source
         try:
-            active_model = normalize_model_for_transport(tier_default, config)
-        except ValueError:
-            raise exc
-        routing_source = "env"
-        logger.warning(
-            "[Baseline] [%s] LD model %r rejected for tier=%s (%s); falling "
-            "back to tier default %s",
-            session_id[:12] if session_id else "?",
-            resolved_model,
-            "advanced" if model == "advanced" else "standard",
-            exc,
-            active_model,
-        )
+            active_model = normalize_model_for_transport(resolved_model, config)
+        except ValueError as exc:
+            tier_default = (
+                config.fast_advanced_model
+                if model == "advanced"
+                else config.fast_standard_model
+            )
+            try:
+                active_model = normalize_model_for_transport(tier_default, config)
+            except ValueError:
+                raise exc
+            routing_source = "env"
+            logger.warning(
+                "[Baseline] [%s] LD model %r rejected for tier=%s (%s); falling back to tier default %s",
+                session_id[:12] if session_id else "?",
+                resolved_model,
+                "advanced" if model == "advanced" else "standard",
+                exc,
+                active_model,
+            )
 
     # --- E2B sandbox setup (feature parity with SDK path) ---
     e2b_sandbox = None
@@ -2179,6 +2185,7 @@ async def stream_chat_completion_baseline(
     messages_for_context = await _compress_session_messages(
         prior_context + without_stored_first_turn_memory(session.messages[-1:]),
         model=active_model,
+        **({"managed_client": managed_client} if managed_client is not None else {}),
     )
 
     # Build OpenAI message list from session history.
@@ -2579,7 +2586,7 @@ async def stream_chat_completion_baseline(
     # Applies to Anthropic AND Moonshot routes — OpenAI/Grok/Gemini 400
     # on the unknown ``cache_control`` field inside tool definitions, so
     # the gate stays narrow (see :func:`_supports_prompt_cache_markers`).
-    if _supports_prompt_cache_markers(active_model):
+    if managed_client is None and _supports_prompt_cache_markers(active_model):
         tools = cast(
             list[ChatCompletionToolParam], _mark_tools_with_cache_control(tools)
         )
@@ -2632,6 +2639,7 @@ async def stream_chat_completion_baseline(
     _stream_error = False  # Track whether an error occurred during streaming
     state = _BaselineStreamState(
         model=active_model,
+        managed_client=managed_client,
         routing_source=routing_source,
         llm_auth_provider=(
             session.metadata.llm_auth_provider if session is not None else None
@@ -2939,15 +2947,21 @@ async def stream_chat_completion_baseline(
             state.assistant_text += fallback_text
     except Exception as e:
         _stream_error = True
-        out_of_credits = _is_platform_out_of_credits(
+        out_of_credits = managed_client is None and _is_platform_out_of_credits(
             e, session.metadata.llm_auth_provider if session else None
         )
         error_msg = (
             PROVIDER_UNAVAILABLE_MESSAGE
             if out_of_credits
-            else _humanize_baseline_error(e)
+            else (
+                _humanize_baseline_error(e)
+                if managed_client is None
+                else "The selected model could not complete the request. Try again or select another model."
+            )
         )
-        logger.error("[Baseline] Streaming error: %s", error_msg, exc_info=True)
+        logger.error(
+            "[Baseline] Streaming error: %s", error_msg, exc_info=managed_client is None
+        )
         if out_of_credits:
             report_provider_out_of_credits(
                 provider=config.effective_transport,
@@ -3080,7 +3094,9 @@ async def stream_chat_completion_baseline(
         # ``persist_and_record_usage`` no-ops the cost-credit charge when
         # ``cost_usd`` is None. Skip the rate-card call explicitly under
         # local transport so the intent is clear.
-        baseline_provider = config.baseline_provider
+        baseline_provider = (
+            "managed" if managed_client is not None else config.baseline_provider
+        )
         if state.cost_usd is None and baseline_provider == "anthropic":
             recovered = compute_anthropic_cost_usd(
                 model=active_model,
@@ -3111,9 +3127,13 @@ async def stream_chat_completion_baseline(
             cost_usd=state.cost_usd,
             model=active_model,
             provider=(
-                "open_router"
-                if baseline_provider == "openrouter"
-                else config.transport.cost_log_provider
+                "managed_chat"
+                if managed_client is not None
+                else (
+                    "open_router"
+                    if baseline_provider == "openrouter"
+                    else config.transport.cost_log_provider
+                )
             ),
         )
 

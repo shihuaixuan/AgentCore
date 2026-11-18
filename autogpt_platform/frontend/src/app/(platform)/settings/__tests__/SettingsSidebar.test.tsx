@@ -64,7 +64,7 @@ const expectedItems = [
   { label: "Profile", href: "/settings/profile" },
   { label: "Account", href: "/settings/account" },
   { label: "Billing", href: "/settings/billing" },
-  { label: "AI connections", href: "/settings/ai-connections" },
+  { label: "Chat models", href: "/settings/ai-connections" },
   { label: "AutoGPT API Keys", href: "/settings/api-keys" },
   { label: "Creator Dashboard", href: "/settings/creator-dashboard" },
 ];
@@ -89,7 +89,7 @@ describe("SettingsSidebar", () => {
     render(<SettingsSidebar />);
 
     expect(screen.queryByRole("link", { name: /billing/i })).toBeNull();
-    expect(screen.getByRole("link", { name: /AI connections/i })).toBeDefined();
+    expect(screen.getByRole("link", { name: /Chat models/i })).toBeDefined();
   });
 
   it("renders a Back link to /copilot and all 6 nav items with correct hrefs", () => {
@@ -119,7 +119,7 @@ describe("SettingsSidebar", () => {
     usePathnameMock.mockReturnValue("/settings/ai-connections/example");
     render(<SettingsSidebar />);
 
-    const connections = screen.getByRole("link", { name: /AI connections/i });
-    expect(connections.getAttribute("aria-current")).toBe("page");
+    const models = screen.getByRole("link", { name: /Chat models/i });
+    expect(models.getAttribute("aria-current")).toBe("page");
   });
 });

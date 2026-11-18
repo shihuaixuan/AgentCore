@@ -45,6 +45,7 @@ def _session(route: str = "platform") -> MagicMock:
     session.organization_id = None
     session.team_id = None
     session.metadata.llm_auth_provider = route
+    session.metadata.managed_models_only = False
     session.metadata.llm_credential_id = None
     session.metadata.origin = "interactive"
     session.metadata.source_platform = None

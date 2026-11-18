@@ -27,7 +27,6 @@ export function useOnboardingPage() {
     totalSteps,
     isReady,
     isPaymentEnabled,
-    isSelfHostConnectEnabled,
     paidConfirmation,
   } = useOnboardingLayout({
     userID: user?.id ?? null,
@@ -143,7 +142,6 @@ export function useOnboardingPage() {
       (completionError?.userID === user?.id ? completionError?.message : null),
     handlePreparingComplete,
     isPaymentEnabled,
-    isSelfHostConnectEnabled,
     // The plan's team joins once nothing is left to pay for: the trial or
     // plan is confirmed (which removes the paywall), or none is configured.
     // Local development skips Stripe, so it hires straight away.

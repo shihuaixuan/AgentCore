@@ -13,8 +13,28 @@ This guide makes the AutoPilot chat work **without an Anthropic, OpenAI,
 or OpenRouter key** by routing it through any **OpenAI-compatible HTTP
 endpoint you control**.
 
+## Configure chat models in Settings
+
+For the main web chat, an administrator can instead configure models in
+**Settings → Chat models**. Add a display name, the upstream model ID, a
+public HTTPS API base URL (for example `https://api.example.com/v1`), and an
+API key. The endpoint must support streaming OpenAI Chat Completions and
+tool calls. Keys are encrypted using the deployment's `ENCRYPTION_KEY` and
+are not displayed again. Open the model for chat after saving; only open
+models appear in the chat composer. Closing a model blocks new turns using
+it, including turns that have not begun executing. It does not cancel an
+already-running turn.
+
+Deploy the database migrations before using this page. Managed models are
+not imported from `CHAT_*` environment settings. Configure and open at least
+one model before users start sending messages in the main web chat. The
+deployment settings below still apply to other surfaces and background
+services that do not select a managed model.
+
+## Configure an environment-based endpoint
+
 The transport is called `local` because it's the typical case, but
-``CHAT_BASE_URL`` is just a URL — every deployment shape below works
+`CHAT_BASE_URL` is just a URL — every deployment shape below works
 equally well:
 
 | Scenario | `CHAT_BASE_URL` |

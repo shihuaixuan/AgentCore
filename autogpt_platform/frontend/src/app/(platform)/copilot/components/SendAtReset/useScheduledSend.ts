@@ -32,6 +32,7 @@ import {
   startSendRead,
 } from "./sendChanges";
 import { useAtResetJobs } from "./useAtResetJobs";
+import { useManagedChatModels } from "../../useManagedChatModels";
 
 interface Args {
   sessionId: string | null;
@@ -51,6 +52,7 @@ function findSend(jobs: AtResetTurn[]) {
 }
 
 export function useScheduledSend({ sessionId, onSendNow, inputId }: Args) {
+  const { modelID } = useManagedChatModels();
   const queryClient = useQueryClient();
   const { jobs, writeJobs } = useAtResetJobs(sessionId);
   const draft = useChatDraftAccess(
@@ -107,7 +109,14 @@ export function useScheduledSend({ sessionId, onSendNow, inputId }: Args) {
     // any already waiting and answers with the joined message.
     try {
       const response = await scheduleSend
-        .mutateAsync({ sessionId, data: { kind: "send", message } })
+        .mutateAsync({
+          sessionId,
+          data: {
+            kind: "send",
+            message,
+            ...(modelID ? { managed_model_id: modelID } : {}),
+          },
+        })
         .finally(onAnswered);
       // The client throws on error statuses. Any other answer without the
       // job leaves the message unset, so it fails the same way and the

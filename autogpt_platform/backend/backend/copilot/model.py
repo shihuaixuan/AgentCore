@@ -53,6 +53,7 @@ config = ChatConfig()
 RoutingSource = Literal[
     "ld",
     "catalog",
+    "managed",
     "env",
     "fallback",
     "preferred",
@@ -107,6 +108,7 @@ class ChatSessionMetadata(BaseModel):
     """
 
     dry_run: bool = False
+    managed_models_only: bool = False
     llm_auth_provider: CopilotLlmAuthProvider = "platform"
     llm_credential_id: str | None = None
     llm_provider_session_ids: dict[str, str] = Field(default_factory=dict)
@@ -570,6 +572,7 @@ class ChatSession(ChatSessionInfo):
         delegated_by_session_id: str | None = None,
         handed_off_from_expert_id: str | None = None,
         autopilot_mode: AutopilotMode | None = None,
+        managed_models_only: bool = False,
     ) -> Self:
         return cls(
             session_id=session_id or str(uuid.uuid4()),
@@ -582,6 +585,7 @@ class ChatSession(ChatSessionInfo):
             updated_at=datetime.now(UTC),
             metadata=ChatSessionMetadata(
                 dry_run=dry_run,
+                managed_models_only=managed_models_only,
                 builder_graph_id=builder_graph_id,
                 source_platform=source_platform,
                 origin=origin,
@@ -1432,6 +1436,7 @@ async def create_chat_session(
     handed_off_from_expert_id: str | None = None,
     autopilot_mode: AutopilotMode | None = None,
     inherited_autopilot_mode: AutopilotMode | None = None,
+    managed_models_only: bool = False,
 ) -> ChatSession:
     """Create a new chat session and persist it.
 
@@ -1497,6 +1502,7 @@ async def create_chat_session(
         delegated_by_session_id=delegated_by_session_id,
         handed_off_from_expert_id=handed_off_from_expert_id,
         autopilot_mode=autopilot_mode,
+        managed_models_only=managed_models_only,
     )
 
     # Create in database first - fail fast if this fails
@@ -1578,6 +1584,7 @@ async def get_or_create_expert_kickoff_session(
     llm_auth_provider: CopilotLlmAuthProvider = "platform",
     llm_credential_id: str | None = None,
     autopilot_mode: AutopilotMode | None = None,
+    managed_models_only: bool = False,
 ) -> ChatSession:
     """Atomically create or adopt the canonical expert kickoff session.
 
@@ -1612,6 +1619,7 @@ async def get_or_create_expert_kickoff_session(
             llm_credential_id=llm_credential_id,
             expert_id=expert_id,
             autopilot_mode=autopilot_mode,
+            managed_models_only=managed_models_only,
         )
     except DatabaseError:
         existing = await get_chat_session(session_id, user_id)
@@ -1635,6 +1643,7 @@ async def get_or_create_client_chat_session(
     llm_credential_id: str | None = None,
     expert_id: str | None = None,
     autopilot_mode: AutopilotMode | None = None,
+    managed_models_only: bool = False,
 ) -> ChatSession:
     """Create the session the client named, or adopt it on a retry.
 
@@ -1664,6 +1673,7 @@ async def get_or_create_client_chat_session(
                 llm_credential_id=llm_credential_id,
                 expert_id=expert_id,
                 autopilot_mode=autopilot_mode,
+                managed_models_only=managed_models_only,
             )
         except DatabaseError:
             existing = await get_chat_session(session_id, user_id)

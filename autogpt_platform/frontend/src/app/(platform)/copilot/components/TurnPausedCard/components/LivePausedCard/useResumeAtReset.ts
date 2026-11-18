@@ -11,6 +11,7 @@ import {
 import { toast } from "@/components/molecules/Toast/use-toast";
 
 import { atResetOutcome } from "./helpers";
+import { useManagedChatModels } from "../../../../useManagedChatModels";
 
 interface Args {
   sessionId: string;
@@ -20,6 +21,7 @@ interface Args {
 }
 
 export function useResumeAtReset({ sessionId, enabled, onBudgetBack }: Args) {
+  const { modelID } = useManagedChatModels();
   const queryClient = useQueryClient();
   const jobs = useGetV2ListTurnsAtBudgetReset(sessionId, {
     query: {
@@ -43,7 +45,11 @@ export function useResumeAtReset({ sessionId, enabled, onBudgetBack }: Args) {
     try {
       await schedule.mutateAsync({
         sessionId,
-        data: { kind: "resume", message: null },
+        data: {
+          kind: "resume",
+          message: null,
+          ...(modelID ? { managed_model_id: modelID } : {}),
+        },
       });
     } catch (error) {
       const outcome = atResetOutcome(error);

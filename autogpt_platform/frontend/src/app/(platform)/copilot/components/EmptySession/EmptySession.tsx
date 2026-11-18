@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import type { ComponentProps, ReactNode } from "react";
 import type { WorkspaceAttachment } from "../../helpers/workspaceAttachments";
-import { ConnectionPicker } from "../ChatInput/components/ConnectionPicker/ConnectionPicker";
 import { RecipientChip } from "../ChatInput/components/RecipientChip";
 import { OnboardingIntroCard } from "../OnboardingIntroCard/OnboardingIntroCard";
 import { useOnboardingIntroCard } from "../OnboardingIntroCard/useOnboardingIntroCard";
@@ -143,11 +142,6 @@ export function EmptySession({
 
   return (
     <div className="relative flex h-full flex-1 items-start justify-center overflow-y-auto px-0 py-5 md:px-6 md:py-10">
-      {/* Which connection the new chat runs on, kept out of the composer and
-          in the page corner, level with the inset header's controls. */}
-      <div className="absolute top-3 right-3 z-30 empty:hidden">
-        <ConnectionPicker className="ml-0" />
-      </div>
       <motion.div
         className={cn("relative z-10 w-full text-center", "max-w-[1120px]")}
         initial={{ opacity: 0 }}
@@ -205,6 +199,7 @@ export function EmptySession({
                   inputId="chat-input-empty"
                   draftKey={`new:${selectedExpert?.id ?? expertId ?? "default"}`}
                   stacked
+                  managedModels
                   voiceMode={voiceMode}
                   modeSelector={modeSelector}
                   onSend={onSend}
