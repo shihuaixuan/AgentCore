@@ -61,7 +61,7 @@ const nextConfig = {
       },
       {
         source: "/profile/integrations",
-        destination: "/settings/integrations",
+        destination: "/marketplace/connectors?view=mine",
         permanent: false,
       },
     ];

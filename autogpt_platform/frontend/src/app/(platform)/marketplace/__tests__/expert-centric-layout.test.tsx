@@ -26,7 +26,8 @@ import {
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { MainMarkeplacePage } from "../components/MainMarketplacePage/MainMarketplacePage";
+import { SkillsList } from "../components/SkillsList/SkillsList";
+import { WorkflowsBrowsePage } from "../workflows/components/WorkflowsBrowsePage";
 
 configure({ asyncUtilTimeout: 10000 });
 
@@ -112,7 +113,7 @@ describe("Marketplace", () => {
   });
 
   test("lists skills as tiles that do not link to a skill page", async () => {
-    render(<MainMarkeplacePage />);
+    render(<SkillsList />);
 
     const tile = await screen.findByTestId("skill-tile");
     expect(within(tile).getByText("Outreach playbook")).toBeDefined();
@@ -121,7 +122,7 @@ describe("Marketplace", () => {
   });
 
   test("a skill tile opens the instructions in a dialog", async () => {
-    render(<MainMarkeplacePage />);
+    render(<SkillsList />);
 
     await userEvent.click(await screen.findByTestId("skill-tile"));
 
@@ -131,17 +132,11 @@ describe("Marketplace", () => {
     ).toBeDefined();
   });
 
-  test("shows eight workflow tiles below skills, without the full grid", async () => {
-    render(<MainMarkeplacePage />);
+  test("lists workflow tiles on the dedicated page without a skills shelf", async () => {
+    render(<WorkflowsBrowsePage />);
 
-    const skills = await screen.findByRole("heading", { name: "Skills" });
-    const workflows = await screen.findByRole("heading", {
-      name: "Workflows",
-    });
-    // Node.DOCUMENT_POSITION_FOLLOWING === 4: the workflows heading comes after.
-    expect(skills.compareDocumentPosition(workflows) & 4).toBe(4);
-    expect(screen.getAllByTestId("workflow-tile")).toHaveLength(8);
-    expect(screen.queryByText("All AI Workflows")).toBeNull();
+    expect(await screen.findAllByTestId("workflow-tile")).toHaveLength(10);
+    expect(screen.queryByRole("heading", { name: "Skills" })).toBeNull();
     expect(screen.queryByTestId("store-card")).toBeNull();
   });
 
@@ -172,7 +167,7 @@ describe("Marketplace", () => {
       }),
     );
 
-    render(<MainMarkeplacePage />);
+    render(<SkillsList />);
 
     expect(await screen.findAllByTestId("skill-tile")).toHaveLength(8);
     await userEvent.click(
@@ -212,7 +207,7 @@ describe("Marketplace", () => {
       }),
     );
 
-    render(<MainMarkeplacePage />);
+    render(<SkillsList />);
 
     const chips = await screen.findByRole("group", {
       name: "Filter skills by topic",
@@ -223,18 +218,6 @@ describe("Marketplace", () => {
     await waitFor(() =>
       expect(screen.queryByText("Outreach playbook")).toBeNull(),
     );
-  });
-
-  test("Load all shows the rest as tiles, not cards", async () => {
-    render(<MainMarkeplacePage />);
-
-    await userEvent.click(
-      await screen.findByRole("button", { name: "Load all 10 workflows" }),
-    );
-
-    expect(screen.getAllByTestId("workflow-tile")).toHaveLength(10);
-    expect(screen.queryByTestId("store-card")).toBeNull();
-    expect(screen.getByRole("button", { name: "Show fewer" })).toBeDefined();
   });
 
   test("keeps workflows with the same slug from different creators", async () => {
@@ -266,7 +249,7 @@ describe("Marketplace", () => {
       }),
     );
 
-    render(<MainMarkeplacePage />);
+    render(<WorkflowsBrowsePage />);
 
     expect(await screen.findByText("First workflow")).toBeDefined();
     expect(screen.getByText("Second workflow")).toBeDefined();
@@ -280,10 +263,10 @@ describe("Marketplace", () => {
       }),
     );
 
-    render(<MainMarkeplacePage />);
+    render(<WorkflowsBrowsePage />);
 
     expect(
-      await screen.findByRole("button", { name: "Load 10 workflows" }),
+      await screen.findByRole("button", { name: "Load more" }),
     ).toBeDefined();
     expect(
       screen.queryByRole("button", { name: "Load all 10 workflows" }),
@@ -309,7 +292,7 @@ describe("Marketplace", () => {
       }),
     );
 
-    render(<MainMarkeplacePage />);
+    render(<WorkflowsBrowsePage />);
 
     expect(await screen.findByText("No runs")).toBeDefined();
   });
@@ -327,10 +310,10 @@ describe("Marketplace", () => {
       }),
     );
 
-    render(<MainMarkeplacePage />);
+    render(<WorkflowsBrowsePage />);
 
     expect(
-      await screen.findByRole("button", { name: "Publish your workflows" }),
+      await screen.findByRole("button", { name: "Publish workflow" }),
     ).toBeDefined();
   });
 });

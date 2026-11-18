@@ -10,7 +10,7 @@ import {
 } from "@/tests/integrations/test-utils";
 import { server } from "@/mocks/mock-server";
 import { openOAuthPopup } from "@/lib/oauth-popup";
-import SettingsIntegrationsPage from "../page";
+import { IntegrationsPanel as SettingsIntegrationsPage } from "@/components/contextual/IntegrationsPanel/IntegrationsPanel";
 import { setupAuthFixtures, tokenRequest } from "./mcp-auth-fixtures";
 
 vi.mock("@/lib/oauth-popup", async (importOriginal) => ({

@@ -43,7 +43,7 @@ export const SKIPPED_FEEDBACK: DeletionFeedbackRequest = {
 };
 
 export const PANEL_ROUTES: Partial<Record<PanelActionKind, string>> = {
-  manage_apps: "/settings/integrations",
+  manage_apps: "/marketplace/connectors?view=mine",
   billing: "/settings/billing",
 };
 

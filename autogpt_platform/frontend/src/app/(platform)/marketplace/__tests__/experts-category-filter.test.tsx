@@ -17,18 +17,19 @@ import { MainMarkeplacePage } from "../components/MainMarketplacePage/MainMarket
 configure({ asyncUtilTimeout: 10000 });
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
+const route = vi.hoisted(() => ({ search: "", push: vi.fn() }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     back: vi.fn(),
     forward: vi.fn(),
     prefetch: vi.fn(),
-    push: vi.fn(),
+    push: route.push,
     refresh: vi.fn(),
     replace: vi.fn(),
   }),
   usePathname: () => "/marketplace",
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => new URLSearchParams(route.search),
   useParams: () => ({}),
 }));
 
@@ -69,6 +70,10 @@ const requestedCategories: (string | null)[] = [];
 describe("Marketplace category filter over experts", () => {
   beforeEach(() => {
     requestedCategories.length = 0;
+    route.search = "";
+    route.push.mockReset().mockImplementation((href: string) => {
+      route.search = new URL(href, "https://example.test").search;
+    });
 
     mockUseAuth.mockReturnValue({ user: { id: "user-1" }, isLoggedIn: true });
     server.use(
@@ -108,7 +113,7 @@ describe("Marketplace category filter over experts", () => {
     );
   });
 
-  test("category dots take the palette and a multi-category card keeps its own identity under every filter", async () => {
+  test("a multi-category card keeps its own identity under every filter", async () => {
     const expert = template("Quinn", ["research", "finance"]);
     expert.avatar_url = "/experts/clay/v3/quinn.png";
     server.use(
@@ -120,25 +125,25 @@ describe("Marketplace category filter over experts", () => {
         HttpResponse.json([expert]),
       ),
     );
-    render(<MainMarkeplacePage />);
+    const { rerender } = render(<MainMarkeplacePage />);
     const finance = await findCategoryChip("Finance");
-    expect(
-      finance.querySelector('[aria-hidden="true"]')?.getAttribute("style"),
-    ).toContain("#A5B09A");
-    const card = await screen.findByRole("link", { name: /Quinn/ });
-    const quinn = "/autogpt-characters/v2.1/expert-quinn/neutral/96.webp";
-    expect(card.querySelector("img")?.getAttribute("src")).toBe(quinn);
+    const card = await within(await screen.findByRole("article")).findByRole(
+      "link",
+      { name: /Quinn/ },
+    );
+    const image = card.querySelector("img")?.getAttribute("src");
+    expect(image).toContain("expert-quinn");
     await userEvent.click(finance);
+    rerender(<MainMarkeplacePage />);
     expect(finance.getAttribute("aria-pressed")).toBe("true");
-    await waitFor(() =>
-      expect(within(card).getByText("Finance")).toBeDefined(),
-    );
-    expect(card.querySelector("img")?.getAttribute("src")).toBe(quinn);
+    const filteredCard = await screen.findByRole("article");
+    expect(within(filteredCard).getByText("Finance")).toBeDefined();
+    expect(filteredCard.querySelector("img")?.getAttribute("src")).toBe(image);
     await userEvent.click(await findCategoryChip("All"));
-    await waitFor(() =>
-      expect(within(card).getByText("Research")).toBeDefined(),
-    );
-    expect(card.querySelector("img")?.getAttribute("src")).toBe(quinn);
+    rerender(<MainMarkeplacePage />);
+    const resetCard = await screen.findByRole("article");
+    expect(within(resetCard).getByText("Research")).toBeDefined();
+    expect(resetCard.querySelector("img")?.getAttribute("src")).toBe(image);
   });
 
   test("the chip row sits above the experts shelf it narrows", async () => {
@@ -147,19 +152,20 @@ describe("Marketplace category filter over experts", () => {
     const chips = await screen.findByRole("group", {
       name: "Browse experts by category",
     });
-    const shelf = await screen.findByRole("link", { name: /Maria/ });
+    const shelf = (await screen.findAllByRole("article"))[0];
 
     // Node.DOCUMENT_POSITION_FOLLOWING: the shelf comes after the chips.
     expect(chips.compareDocumentPosition(shelf) & 4).toBeTruthy();
   });
 
   test("picking a category narrows the roster and drops the others", async () => {
-    render(<MainMarkeplacePage />);
+    const { rerender } = render(<MainMarkeplacePage />);
 
-    expect(await screen.findByRole("link", { name: /Maria/ })).toBeDefined();
-    expect(await screen.findByRole("link", { name: /Max/ })).toBeDefined();
+    expect(await screen.findByRole("heading", { name: "Maria" })).toBeDefined();
+    expect(await screen.findByRole("heading", { name: "Max" })).toBeDefined();
 
     await userEvent.click(await findCategoryChip("Marketing"));
+    rerender(<MainMarkeplacePage />);
 
     await waitFor(() => expect(requestedCategories).toContain("marketing"));
     await waitFor(() =>
@@ -169,37 +175,36 @@ describe("Marketplace category filter over experts", () => {
   });
 
   test("clearing the category restores the whole roster", async () => {
-    render(<MainMarkeplacePage />);
-    await screen.findByRole("link", { name: /Maria/ });
+    const { rerender } = render(<MainMarkeplacePage />);
+    await screen.findByRole("heading", { name: "Maria" });
 
     await userEvent.click(await findCategoryChip("Marketing"));
+    rerender(<MainMarkeplacePage />);
     await waitFor(() =>
       expect(screen.queryByRole("link", { name: /Max/ })).toBeNull(),
     );
 
     await userEvent.click(await findCategoryChip("Marketing"));
+    rerender(<MainMarkeplacePage />);
 
-    expect(await screen.findByRole("link", { name: /Max/ })).toBeDefined();
+    expect(await screen.findByRole("heading", { name: "Max" })).toBeDefined();
   });
 
-  test("a category with no experts hides the shelf entirely", async () => {
+  test("a category with no experts offers to clear the filters", async () => {
     server.use(
       http.get("/api/proxy/api/experts/templates", ({ request }) => {
         const category = new URL(request.url).searchParams.get("category");
         return HttpResponse.json(category ? [] : ROSTER);
       }),
     );
-    render(<MainMarkeplacePage />);
-    await screen.findByRole("link", { name: /Maria/ });
+    const { rerender } = render(<MainMarkeplacePage />);
+    await screen.findByRole("heading", { name: "Maria" });
 
     await userEvent.click(await findCategoryChip("Sales"));
-
-    await waitFor(() =>
-      expect(screen.queryByText("Meet the AI Experts")).toBeNull(),
-    );
-    // Not the empty-roster fallback either: a filtered shelf offers no
-    // invitation to raise an expert.
-    expect(screen.queryByRole("link", { name: "Create an Expert" })).toBeNull();
+    rerender(<MainMarkeplacePage />);
+    expect(
+      await screen.findByRole("button", { name: "Clear filters" }),
+    ).toBeDefined();
   });
 
   test("a failed roster request under a category still offers the raise link", async () => {
@@ -212,16 +217,12 @@ describe("Marketplace category filter over experts", () => {
           : HttpResponse.json(ROSTER);
       }),
     );
-    render(<MainMarkeplacePage />);
-    await screen.findByRole("link", { name: /Maria/ });
+    const { rerender } = render(<MainMarkeplacePage />);
+    await screen.findByRole("heading", { name: "Maria" });
 
     await userEvent.click(await findCategoryChip("Sales"));
-
-    // The header carries its own "Create an Expert" link, so wait for it to go:
-    // a failure is not an answer about the category, so the fallback stays.
-    await waitFor(() =>
-      expect(screen.queryByText("Meet the AI Experts")).toBeNull(),
-    );
+    rerender(<MainMarkeplacePage />);
+    await screen.findByRole("button", { name: "Retry" });
     expect(
       screen
         .getByRole("link", { name: "Create an Expert" })

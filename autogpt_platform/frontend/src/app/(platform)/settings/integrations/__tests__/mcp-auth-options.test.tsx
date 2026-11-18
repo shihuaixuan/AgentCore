@@ -9,7 +9,7 @@ import {
   waitFor,
   within,
 } from "@/tests/integrations/test-utils";
-import SettingsIntegrationsPage from "../page";
+import { IntegrationsPanel as SettingsIntegrationsPage } from "@/components/contextual/IntegrationsPanel/IntegrationsPanel";
 import {
   discoveryRequest,
   oauthRequest,

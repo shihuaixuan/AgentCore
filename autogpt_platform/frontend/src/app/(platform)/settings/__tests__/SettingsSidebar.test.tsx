@@ -64,7 +64,7 @@ const expectedItems = [
   { label: "Profile", href: "/settings/profile" },
   { label: "Account", href: "/settings/account" },
   { label: "Billing", href: "/settings/billing" },
-  { label: "Integrations", href: "/settings/integrations" },
+  { label: "AI connections", href: "/settings/ai-connections" },
   { label: "AutoGPT API Keys", href: "/settings/api-keys" },
   { label: "Creator Dashboard", href: "/settings/creator-dashboard" },
 ];
@@ -89,7 +89,7 @@ describe("SettingsSidebar", () => {
     render(<SettingsSidebar />);
 
     expect(screen.queryByRole("link", { name: /billing/i })).toBeNull();
-    expect(screen.getByRole("link", { name: /integrations/i })).toBeDefined();
+    expect(screen.getByRole("link", { name: /AI connections/i })).toBeDefined();
   });
 
   it("renders a Back link to /copilot and all 6 nav items with correct hrefs", () => {
@@ -116,10 +116,10 @@ describe("SettingsSidebar", () => {
   });
 
   it("treats nested paths under a nav item as active", () => {
-    usePathnameMock.mockReturnValue("/settings/integrations/google");
+    usePathnameMock.mockReturnValue("/settings/ai-connections/example");
     render(<SettingsSidebar />);
 
-    const integrations = screen.getByRole("link", { name: /integrations/i });
-    expect(integrations.getAttribute("aria-current")).toBe("page");
+    const connections = screen.getByRole("link", { name: /AI connections/i });
+    expect(connections.getAttribute("aria-current")).toBe("page");
   });
 });

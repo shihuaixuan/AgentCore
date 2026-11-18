@@ -92,10 +92,10 @@ export default function MicrosoftSetupPage() {
             )}
           </Text>
           <Text as="li" variant="body">
-            <Link href="/settings/integrations" variant="secondary">
+            <Link href="/settings/ai-connections" variant="secondary">
               {t(
-                "Open Settings → Integrations and connect Microsoft.",
-                "打开设置 → 集成，并连接 Microsoft。",
+                "Open Settings → AI connections and connect Microsoft.",
+                "打开设置 → AI 连接，并连接 Microsoft。",
               )}
             </Link>
           </Text>
@@ -123,7 +123,7 @@ export default function MicrosoftSetupPage() {
         </Text>
         <WorkIQInstructions />
       </section>
-      <Link href="/settings/integrations" variant="secondary">
+      <Link href="/settings/ai-connections" variant="secondary">
         {t("Return to connections", "返回连接设置")}
       </Link>
     </main>

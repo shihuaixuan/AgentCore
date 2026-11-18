@@ -1,7 +1,5 @@
-"use client";
-
-import { IntegrationsPanel } from "@/components/contextual/IntegrationsPanel/IntegrationsPanel";
+import { redirect } from "next/navigation";
 
 export default function SettingsIntegrationsPage() {
-  return <IntegrationsPanel />;
+  redirect("/marketplace/connectors?view=mine");
 }

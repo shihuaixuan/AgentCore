@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AutoGPT Marketplace is a public library of agents created by the community and by the AutoGPT team. You can discover agents for a wide range of use cases, add them to your library with one click, and even publish your own agents for others to use.
+The AutoGPT Marketplace is a public catalog of experts, skills, workflows, and connectors. Open the tab for the resource you want, then use that tab's search and categories to find a match.
 
 **URL:** [platform.agpt.co/marketplace](https://platform.agpt.co/marketplace)
 
@@ -10,11 +10,12 @@ The AutoGPT Marketplace is a public library of agents created by the community a
 
 ## Browsing the Marketplace
 
-The marketplace allows you to:
+- **Experts:** Browse specialists by field and open a profile to see what an expert can do before hiring.
+- **Skills:** Find reusable instructions and install them for an expert.
+- **Workflows:** Search for automations, browse by category, and add a workflow to your library.
+- **Connectors:** Browse external services by purpose and select a service to see its connection options.
 
-- **Search** for agents by name or keyword
-- **Browse by category** to explore different use cases
-- **View agent details** by clicking on any agent
+To connect your own MCP server, sign in and open **Marketplace → Connectors → Add custom MCP**. Enter the server's HTTPS URL and its authentication details, then select **Test and save**. Open **My connections** to edit, disable, or remove the connection. AI subscriptions for chats are managed under **Settings → AI connections**.
 
 ### Agent Detail Page
 

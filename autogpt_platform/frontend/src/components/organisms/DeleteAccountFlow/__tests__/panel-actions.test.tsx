@@ -94,7 +94,7 @@ const ACTION_CASES: ActionCase[] = [
       reason: "privacy",
       alternative: "manage_apps",
     },
-    route: "/settings/integrations",
+    route: "/marketplace/connectors?view=mine",
   },
   {
     name: "Go to Billing for a Max plan that costs too much",

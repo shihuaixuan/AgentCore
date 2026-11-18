@@ -31,8 +31,8 @@ describe("ChatInput secret warning", () => {
     await user.paste(`use this token ${GITHUB_TOKEN}`);
 
     const warning = await screen.findByText(WARNING);
-    const link = screen.getByRole("link", { name: "Integrations" });
-    expect(link.getAttribute("href")).toBe("/settings/integrations");
+    const link = screen.getByRole("link", { name: "Marketplace → Connectors" });
+    expect(link.getAttribute("href")).toBe("/marketplace/connectors");
     expect(link.getAttribute("target")).toBe("_blank");
     expect(warning.textContent).toContain("Otto");
     expect(composer().value).toBe(`use this token ${GITHUB_TOKEN}`);

@@ -27,11 +27,9 @@ export class MarketplacePage extends BasePage {
   }
 
   async goto(page: Page) {
-    await page.goto("/marketplace");
+    await page.goto("/marketplace/workflows");
     await page
-      .locator(
-        '[data-testid="store-card"], [data-testid="featured-store-card"]',
-      )
+      .locator('[data-testid="workflow-tile"]')
       .first()
       .waitFor({ state: "visible", timeout: 20000 });
   }
@@ -224,10 +222,10 @@ export class MarketplacePage extends BasePage {
     agentTitle: string;
     agentSlug: string;
   }> {
-    await this.page.goto("/marketplace");
+    await this.page.goto("/marketplace/workflows");
     await this.page
       .getByRole("button", {
-        name: "Publish your workflows",
+        name: /^(Publish workflow|发布工作流)$/,
       })
       .click();
 

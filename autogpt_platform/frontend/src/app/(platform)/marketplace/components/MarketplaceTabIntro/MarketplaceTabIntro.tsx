@@ -8,13 +8,17 @@ import { AGENTS_SECTION_ID, FEATURED_SECTION_ID } from "./helpers";
 
 interface Props {
   canShow?: boolean;
+  showFeaturedLabel?: boolean;
 }
 
 // First visit to the Marketplace tab. The CTA lands the user on the
 // hand-picked carousel rather than the top of a long page, falling back to the
 // full listing on the days nothing is featured — the card promises movement,
 // so it has to produce some.
-export function MarketplaceTabIntro({ canShow = true }: Props) {
+export function MarketplaceTabIntro({
+  canShow = true,
+  showFeaturedLabel = true,
+}: Props) {
   const { t } = useTranslation();
   const { isOpen, dismiss, takeAction } = useTabIntroCard(
     "marketplace",
@@ -36,7 +40,9 @@ export function MarketplaceTabIntro({ canShow = true }: Props) {
       title={t("Workflows ready to work.", "工作流已准备就绪。")}
       body="Hundreds built by the community. Install one in a single click and run it today."
       cta={{
-        label: t("Browse featured workflows", "浏览精选工作流"),
+        label: showFeaturedLabel
+          ? t("Browse featured workflows", "浏览精选工作流")
+          : t("Browse workflows", "浏览工作流"),
         onClick: browseFeatured,
       }}
       onDismiss={dismiss}

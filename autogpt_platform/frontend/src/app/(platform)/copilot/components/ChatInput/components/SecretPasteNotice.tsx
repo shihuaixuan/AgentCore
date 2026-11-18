@@ -46,14 +46,14 @@ export function SecretPasteNotice({
                   `这看起来像 API 密钥或其他机密。你在此发送的所有内容都会保存在对话中。若要让 ${assistantName} 使用密钥，请将其添加到`,
                 )}
                 <Link
-                  href="/settings/integrations"
+                  href="/marketplace/connectors"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium underline underline-offset-2"
                 >
-                  {t("Integrations", "集成服务")}
-                </Link>{" "}
-                {t("instead.", "设置中。")}
+                  {t("Marketplace → Connectors", "市场 → 连接器")}
+                </Link>
+                {t(" instead.", "。")}
               </span>
             </AttentionCard.Content>
           </AttentionCard.Row>

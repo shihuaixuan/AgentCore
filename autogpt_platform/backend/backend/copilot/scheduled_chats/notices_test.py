@@ -5,8 +5,8 @@ import pytest
 
 from backend.copilot.hidden_rows import is_hidden_from_model
 from backend.copilot.scheduled_chats.notices import (
+    AI_CONNECTIONS_PATH,
     BILLING_PATH,
-    INTEGRATIONS_PATH,
     NOTICE_METADATA_KIND,
     notice_message_id,
     post_notice,
@@ -207,7 +207,7 @@ def test_a_lost_chatgpt_connection_points_at_settings():
     assert notice is not None
     assert notice.reason == "codex_access"
     assert [(a.label, a.href) for a in notice.actions] == [
-        ("Open settings", INTEGRATIONS_PATH)
+        ("Open settings", AI_CONNECTIONS_PATH)
     ]
 
 

@@ -60,5 +60,6 @@ export function useExpertsSection({
     hiredTemplateIds,
     isLoading: templatesQuery.isLoading,
     isError: templatesQuery.isError,
+    refetch: templatesQuery.refetch,
   };
 }

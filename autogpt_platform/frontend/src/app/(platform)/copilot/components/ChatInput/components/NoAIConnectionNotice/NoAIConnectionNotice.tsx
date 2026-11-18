@@ -47,10 +47,10 @@ export function NoAIConnectionNotice({ enabled, className }: Props) {
             , or you can connect your own ChatGPT or Microsoft 365 Copilot plan
             in{" "}
             <Link
-              href="/settings/integrations"
+              href="/settings/ai-connections"
               className="font-medium underline underline-offset-2"
             >
-              Settings → Integrations
+              Settings → AI connections
             </Link>
             .
           </span>

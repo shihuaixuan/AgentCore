@@ -70,7 +70,7 @@ function DialogBody({ picker, connectionLocked }: BodyProps) {
     return (
       <Text variant="body-tight" tone="secondary">
         {t("No AI connection is set up yet.", "尚未设置 AI 连接。")}{" "}
-        <Link href="/settings/integrations" className="underline">
+        <Link href="/settings/ai-connections" className="underline">
           {t("Set one up", "立即设置")}
         </Link>
       </Text>

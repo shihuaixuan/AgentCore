@@ -330,15 +330,14 @@ export default function IntegrationSetupWizardPage() {
             </Button>
           </div>
 
-          {/* Link to integrations settings */}
           <Text variant="small" tone="secondary" className="text-center">
-            You can view and manage all your integrations in your{" "}
+            Manage your integrations in{" "}
             <Link
-              href="/settings/integrations"
+              href="/marketplace/connectors?view=mine"
               target="_blank"
               className="text-brand-hover underline hover:text-accent-strong"
             >
-              integration settings
+              Marketplace → My connections
             </Link>
             .
           </Text>

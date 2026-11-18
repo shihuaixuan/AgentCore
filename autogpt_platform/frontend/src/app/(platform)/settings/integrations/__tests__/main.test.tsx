@@ -22,7 +22,7 @@ import { getGetV2ListChatConnectionsMockHandler200 } from "@/app/api/__generated
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import type { ProviderMetadata } from "@/app/api/__generated__/models/providerMetadata";
 
-import SettingsIntegrationsPage from "../page";
+import { IntegrationsPanel as SettingsIntegrationsPage } from "@/components/contextual/IntegrationsPanel/IntegrationsPanel";
 
 function makeCred(
   overrides: Partial<CredentialsMetaResponse> = {},

@@ -77,7 +77,7 @@ export function MainAgentPage({ params }: Props) {
   }
 
   const breadcrumbs = [
-    { name: "Marketplace", link: "/marketplace" },
+    { name: "Workflows", link: "/marketplace/workflows" },
     {
       name: agentData.creator ?? "",
       link: `/marketplace/creator/${encodeURIComponent(agentData.creator ?? "")}`,
@@ -93,7 +93,7 @@ export function MainAgentPage({ params }: Props) {
             variant="ghost"
             size="small"
             as="NextLink"
-            href="/marketplace"
+            href="/marketplace/workflows"
             className="relative -left-2 lg:!-left-4"
             leftIcon={<Icon icon={ArrowLeft02Icon} size={16} />}
           >

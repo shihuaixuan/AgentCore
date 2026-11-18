@@ -103,7 +103,7 @@ export function ConnectionPicker({
   if (offers.length === 0) {
     return (
       <Link
-        href="/settings/integrations"
+        href="/settings/ai-connections"
         aria-label={t("Set up an AI connection", "设置 AI 连接")}
         className={cn(
           "inline-flex h-9 items-center gap-1.5 rounded-full border border-border-base bg-surface-hover px-2.5 text-foreground-base transition-colors hover:bg-surface-hover/80",

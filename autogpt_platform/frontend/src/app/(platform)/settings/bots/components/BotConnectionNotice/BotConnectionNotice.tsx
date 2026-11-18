@@ -31,7 +31,7 @@ export function BotConnectionNotice() {
           `通过机器人发起的对话将使用 ${current.label}，这是你在 AI 订阅设置中选择的连接。`,
         )}{" "}
         <Link
-          href="/settings/integrations"
+          href="/settings/ai-connections"
           className="font-medium text-brand underline underline-offset-2"
         >
           {t("AI subscriptions", "AI 订阅")}

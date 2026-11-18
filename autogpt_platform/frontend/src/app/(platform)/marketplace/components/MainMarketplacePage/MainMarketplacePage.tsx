@@ -1,115 +1,104 @@
 "use client";
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import { PublishAgentModal } from "@/components/contextual/PublishAgentModal/PublishAgentModal";
-import type { PublishState } from "@/components/contextual/PublishAgentModal/usePublishAgentModal";
+
+import { Button } from "@/components/atoms/Button/Button";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
-import { useAuth } from "@/lib/auth/hooks/useAuth";
-import { useState } from "react";
-import { BecomeACreator } from "../BecomeACreator/BecomeACreator";
-import { CategoryFilter } from "../CategoryFilter/CategoryFilter";
-import { ExpertsSection } from "../ExpertsSection/ExpertsSection";
-import { HeroSection } from "../HeroSection/HeroSection";
-import { MainMarketplacePageLoading } from "../MainMarketplacePageLoading";
-import { MarketplaceTabIntro } from "../MarketplaceTabIntro/MarketplaceTabIntro";
-import { AGENTS_SECTION_ID } from "../MarketplaceTabIntro/helpers";
-import { SkillsList } from "../SkillsList/SkillsList";
-import { WorkflowsShelf } from "../WorkflowsShelf/WorkflowsShelf";
-import { useMainMarketplacePage } from "./useMainMarketplacePage";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { useTrackFunnelViewOnce } from "@/services/experts/use-track-funnel-view-once";
+import { BrowseFilters, useBrowseCategories } from "../Browse/BrowseFilters";
+import {
+  BROWSE_GRID,
+  BROWSE_LAYOUT,
+  BrowseHeader,
+} from "../Browse/BrowseHeader";
+import { BrowseMessage, BrowseSkeleton } from "../Browse/BrowseResults";
+import { useBrowseParams } from "../Browse/useBrowseParams";
+import { useExpertsSection } from "../ExpertsSection/useExpertsSection";
+import { CompactExpertCard } from "./CompactExpertCard";
+import { ExpertRecommendations } from "./ExpertRecommendations";
 
 export function MainMarkeplacePage() {
   const { t } = useTranslation();
-  const [publishState, setPublishState] = useState<PublishState>({
-    isOpen: false,
-    step: "select",
-    submissionData: null,
-  });
-  function openPublishing() {
-    setPublishState({ isOpen: true, step: "select", submissionData: null });
-  }
-  const {
-    featuredAgents,
-    topAgents,
-    category,
-    setCategory,
-    isLoading,
-    hasError,
-  } = useMainMarketplacePage();
-  const { isUserLoading } = useAuth();
-
-  const showExperts = !isUserLoading;
-  const hasWorkflowShelf = Boolean(
-    topAgents &&
-      (topAgents.agents.length > 0 ||
-        (!category && (featuredAgents?.agents.length ?? 0) > 0)),
+  const { search, category, update } = useBrowseParams();
+  const categories = useBrowseCategories("experts");
+  const experts = useExpertsSection({ category, searchQuery: search });
+  useTrackFunnelViewOnce(
+    "experts_section_viewed",
+    experts.templates.length > 0,
   );
 
-  if (isLoading) {
-    return <MainMarketplacePageLoading />;
-  }
-
-  if (hasError) {
-    return (
-      <div className="mx-auto w-full max-w-[1360px]">
-        <main className="px-4">
-          <div className="flex min-h-[400px] items-center justify-center">
-            <ErrorCard
-              isSuccess={false}
-              responseError={{
-                message: t(
-                  "Failed to load marketplace data",
-                  "无法加载市场数据",
-                ),
-              }}
-              context="marketplace page"
-              onRetry={() => window.location.reload()}
-              className="w-full max-w-md"
-            />
-          </div>
-        </main>
-      </div>
-    );
-  }
-
   return (
-    // FRONTEND-TODO : Need better state location, need to fetch creators and agents in their respective file, Can't do it right now because these files are used in some other pages of marketplace, will fix it when encounter with those pages
-    <div className="mx-auto w-full max-w-[1360px]">
-      <main className="px-6 pb-16 md:px-10 lg:px-14">
-        <HeroSection />
-        {/* Above all three shelves because it narrows all three: a filter
-            below its content changes what the reader has scrolled past. */}
-        <CategoryFilter selected={category} onSelect={setCategory} />
-        {showExperts ? <ExpertsSection category={category} /> : null}
-
-        <SkillsList key={category ?? "all"} category={category} />
-        {topAgents && (
-          <WorkflowsShelf
-            id={AGENTS_SECTION_ID}
-            agents={topAgents.agents}
-            featuredAgents={category ? [] : (featuredAgents?.agents ?? [])}
-            total={topAgents.pagination.total_items}
-            onPublish={openPublishing}
-          />
+    <main className={BROWSE_LAYOUT} id="experts">
+      <BrowseHeader
+        title={t("Experts", "专家")}
+        description={t(
+          "Find a specialist to work with your team.",
+          "为你的团队寻找合适的 AI 专家。",
         )}
-
-        {/* The expert layout invites publishing from under the workflows
-            shelf instead, where it cannot outshout the shelf itself. */}
-        {!hasWorkflowShelf ? (
-          <BecomeACreator
-            description={t(
-              "Join our ever-growing community of hackers and tinkerers",
-              "加入我们不断壮大的开发者和探索者社区",
-            )}
-            buttonText="Publish your workflows"
-            onPublish={openPublishing}
-          />
-        ) : null}
-      </main>
-      <PublishAgentModal
-        showTrigger={false}
-        targetState={publishState}
-        onStateChange={setPublishState}
+        search={{
+          value: search,
+          label: t("Search experts", "搜索专家"),
+          onSubmit: (q) => update({ q }),
+        }}
+        action={
+          experts.isLoggedIn && (
+            <Button as="NextLink" href="/team" variant="secondary" size="small">
+              {t("My experts", "我的专家")}
+            </Button>
+          )
+        }
       />
-      <MarketplaceTabIntro canShow={!publishState.isOpen} />
-    </div>
+      {!search && !category && !experts.isError && (
+        <ExpertRecommendations
+          categories={categories}
+          experts={experts.templates}
+          onSelect={(value) => update({ category: value })}
+        />
+      )}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <BrowseFilters
+          label={t("Browse experts by category", "按分类浏览专家")}
+          categories={categories}
+          selected={category}
+          onSelect={(value) => update({ category: value })}
+        />
+        {experts.isLoggedIn && (
+          <Button as="NextLink" href="/raise" variant="ghost" size="small">
+            {t("Create an Expert", "创建专家")}
+          </Button>
+        )}
+      </div>
+      {experts.isLoading ? (
+        <BrowseSkeleton label={t("Loading experts", "正在加载专家")} />
+      ) : experts.isError ? (
+        <ErrorCard
+          context="marketplace experts"
+          responseError={{
+            message: t("Couldn't load experts", "暂时无法加载专家"),
+          }}
+          onRetry={() => experts.refetch()}
+        />
+      ) : experts.templates.length === 0 ? (
+        <BrowseMessage
+          message={t("No matching experts.", "没有找到匹配的专家。")}
+          onReset={
+            search || category
+              ? () => update({ q: null, category: null })
+              : undefined
+          }
+        />
+      ) : (
+        <ul className={BROWSE_GRID}>
+          {experts.templates.map((expert) => (
+            <li key={expert.id} className="min-w-0">
+              <CompactExpertCard
+                expert={expert}
+                categories={categories}
+                isHired={experts.hiredTemplateIds.has(expert.id)}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </main>
   );
 }

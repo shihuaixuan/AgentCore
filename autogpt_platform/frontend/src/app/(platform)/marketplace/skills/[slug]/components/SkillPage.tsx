@@ -296,7 +296,7 @@ function BackToMarketplaceLink() {
   const { t } = useTranslation();
   return (
     <Link
-      href="/marketplace#skills"
+      href="/marketplace/skills"
       className="mb-6 inline-flex w-fit items-center gap-1.5 text-body-sm leading-inherit text-foreground-tertiary transition-colors hover:text-foreground-strong"
       data-testid="skill-back-to-marketplace"
     >

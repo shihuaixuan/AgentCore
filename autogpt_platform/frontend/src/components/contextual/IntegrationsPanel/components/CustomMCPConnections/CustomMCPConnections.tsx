@@ -141,8 +141,8 @@ export function CustomMCPConnections({ state }: Props) {
             <DialogTitle>{t("Remove connection?", "移除连接？")}</DialogTitle>
             <DialogDescription>
               {t(
-                "Workflows using this connection will stop working. Its saved credential remains in Integrations and can be removed separately.",
-                "使用此连接的工作流将无法运行。保存的凭据仍保留在集成页面，可单独移除。",
+                "Workflows using this connection will stop working. You can remove the saved credential separately in My connections.",
+                "使用此连接的工作流将无法运行。保存的凭据可在「我的连接」中单独移除。",
               )}
             </DialogDescription>
           </DialogHeader>

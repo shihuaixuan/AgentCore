@@ -105,6 +105,7 @@ describe("Marketplace skills browse page", () => {
 
     expect(mockPush).toHaveBeenCalledWith(
       "/marketplace/skills?category=content",
+      { scroll: false },
     );
   });
 
@@ -114,14 +115,13 @@ describe("Marketplace skills browse page", () => {
 
     render(<SkillsBrowsePage />);
 
-    expect(
-      await screen.findByTestId("skills-browse-empty", undefined, {
-        timeout: 10000,
-      }),
-    ).toBeDefined();
-    expect(screen.getByText(/No Finance skills yet/)).toBeDefined();
-    await userEvent.click(screen.getByRole("button", { name: "Show all" }));
-    expect(mockPush).toHaveBeenCalledWith("/marketplace/skills");
+    expect(await screen.findByText("No matching skills.")).toBeDefined();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Clear filters" }),
+    );
+    expect(mockPush).toHaveBeenCalledWith("/marketplace/skills", {
+      scroll: false,
+    });
   });
 
   test("keeps a retry on the page when the catalogue fails", async () => {

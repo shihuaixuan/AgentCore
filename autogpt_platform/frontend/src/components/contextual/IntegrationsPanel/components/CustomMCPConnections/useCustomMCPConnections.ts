@@ -24,9 +24,11 @@ const blank: ConnectionInput = {
   enabled: true,
 };
 
-export function useCustomMCPConnections() {
+export function useCustomMCPConnections({
+  enabled = true,
+}: { enabled?: boolean } = {}) {
   const queryClient = useQueryClient();
-  const query = useGetV2ListConnections();
+  const query = useGetV2ListConnections({ query: { enabled } });
   const { t } = useTranslation();
   const [form, setForm] = useState<ConnectionInput>(blank);
   const [editingID, setEditingID] = useState<string | null>(null);

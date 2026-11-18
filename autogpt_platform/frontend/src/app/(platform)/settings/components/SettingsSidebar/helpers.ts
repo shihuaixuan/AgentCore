@@ -30,8 +30,8 @@ export const settingsNavItems: SettingsNavItem[] = [
   },
   { label: "Billing", href: "/settings/billing", Icon: CreditCardIcon },
   {
-    label: "Integrations",
-    href: "/settings/integrations",
+    label: "AI connections",
+    href: "/settings/ai-connections",
     Icon: PlugSocketIcon,
   },
   { label: "Bots", href: "/settings/bots", Icon: MessageMultiple01Icon },

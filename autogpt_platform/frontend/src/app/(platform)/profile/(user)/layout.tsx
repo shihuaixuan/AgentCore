@@ -6,7 +6,6 @@ import { usePlatformPayment } from "@/hooks/usePlatformPayment";
 import {
   AppWindowIcon,
   Coins01Icon,
-  ElectricPlugsIcon,
   Key01Icon,
   SlidersHorizontalIcon,
   Store01Icon,
@@ -39,11 +38,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           },
         ]
       : []),
-    {
-      text: "Integrations",
-      href: "/profile/integrations",
-      icon: <Icon icon={ElectricPlugsIcon} className="size-5" />,
-    },
     {
       text: "Settings",
       href: "/profile/settings",

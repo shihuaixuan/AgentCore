@@ -13,21 +13,22 @@ import {
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { MainMarkeplacePage } from "../components/MainMarketplacePage/MainMarketplacePage";
+import { WorkflowsBrowsePage } from "../workflows/components/WorkflowsBrowsePage";
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
+const route = vi.hoisted(() => ({ search: "", push: vi.fn() }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     back: vi.fn(),
     forward: vi.fn(),
     prefetch: vi.fn(),
-    push: vi.fn(),
+    push: route.push,
     refresh: vi.fn(),
     replace: vi.fn(),
   }),
-  usePathname: () => "/marketplace",
-  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => "/marketplace/workflows",
+  useSearchParams: () => new URLSearchParams(route.search),
   useParams: () => ({}),
 }));
 
@@ -63,6 +64,10 @@ const BY_CATEGORY: Record<string, string[]> = {
 describe("Marketplace category filter", () => {
   beforeEach(() => {
     requestedCategories.length = 0;
+    route.search = "";
+    route.push.mockReset().mockImplementation((href: string) => {
+      route.search = new URL(href, "https://example.test").search;
+    });
     mockUseAuth.mockReturnValue({ user: { id: "user-1" }, isLoggedIn: true });
     server.use(
       getListExpertTemplatesMockHandler([]),
@@ -100,7 +105,7 @@ describe("Marketplace category filter", () => {
   });
 
   test("filtering by a category asks the API for it and narrows the grid", async () => {
-    render(<MainMarkeplacePage />);
+    const { rerender } = render(<WorkflowsBrowsePage />);
 
     expect((await screen.findAllByText("Lead Finder")).length).toBeGreaterThan(
       0,
@@ -108,6 +113,7 @@ describe("Marketplace category filter", () => {
     expect(requestedCategories).toEqual([null]);
 
     await userEvent.click(await findCategoryChip("Marketing"));
+    rerender(<WorkflowsBrowsePage />);
 
     await waitFor(() =>
       expect(screen.queryAllByText("Lead Finder")).toHaveLength(0),
@@ -117,19 +123,21 @@ describe("Marketplace category filter", () => {
   });
 
   test("clicking the active category again clears the filter", async () => {
-    render(<MainMarkeplacePage />);
+    const { rerender } = render(<WorkflowsBrowsePage />);
     expect((await screen.findAllByText("Lead Finder")).length).toBeGreaterThan(
       0,
     );
 
     const marketing = await findCategoryChip("Marketing");
     await userEvent.click(marketing);
+    rerender(<WorkflowsBrowsePage />);
     await waitFor(() =>
       expect(screen.queryAllByText("Lead Finder")).toHaveLength(0),
     );
     expect(marketing.getAttribute("aria-pressed")).toBe("true");
 
     await userEvent.click(marketing);
+    rerender(<WorkflowsBrowsePage />);
 
     await waitFor(() =>
       expect(screen.queryAllByText("Lead Finder").length).toBeGreaterThan(0),
@@ -138,13 +146,15 @@ describe("Marketplace category filter", () => {
   });
 
   test("only the eight canonical categories the API serves are offered", async () => {
-    render(<MainMarkeplacePage />);
+    render(<WorkflowsBrowsePage />);
 
     expect(await findCategoryChip("Marketing")).toBeDefined();
     expect(await findCategoryChip("Sales")).toBeDefined();
     // The legacy free-text options are gone.
     const chips = within(
-      await screen.findByRole("group", { name: "Browse experts by category" }),
+      await screen.findByRole("group", {
+        name: "Filter workflows by category",
+      }),
     );
     expect(chips.queryByRole("button", { name: "Productivity" })).toBeNull();
     expect(chips.queryByRole("button", { name: /Writing/ })).toBeNull();
@@ -154,7 +164,7 @@ describe("Marketplace category filter", () => {
 /** The hero has its own chip row with overlapping labels, so scope to ours. */
 async function findCategoryChip(name: string) {
   const group = await screen.findByRole("group", {
-    name: "Browse experts by category",
+    name: "Filter workflows by category",
   });
   return within(group).findByRole("button", { name });
 }

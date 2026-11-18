@@ -1,176 +1,111 @@
 "use client";
 
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import { Icon } from "@/components/atoms/Icon/Icon";
-import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
+import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
-import { InfiniteList } from "@/components/molecules/InfiniteList/InfiniteList";
-import { useStoreCategories } from "@/hooks/useStoreCategories";
-import { ArrowLeft02Icon, BookOpen01Icon } from "@hugeicons/core-free-icons";
-import Link from "next/link";
-import { SearchBar } from "../../../components/SearchBar/SearchBar";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import {
+  BrowseFilters,
+  useBrowseCategories,
+} from "../../../components/Browse/BrowseFilters";
+import {
+  BROWSE_GRID,
+  BROWSE_LAYOUT,
+  BrowseHeader,
+} from "../../../components/Browse/BrowseHeader";
+import {
+  BrowseMessage,
+  BrowseSkeleton,
+} from "../../../components/Browse/BrowseResults";
 import { SkillCard } from "../../../components/SkillsSection/components/SkillCard";
-import { SkillTopicChips } from "../../../components/SkillTopicChips/SkillTopicChips";
 import { useSkillsBrowsePage } from "./useSkillsBrowsePage";
-
-// oxlint-disable-next-line design-system/no-restyle -- the skills grid's gutter; InfiniteList has no gap prop
-const GRID_CLASS = "grid grid-cols-1 gap-5 md:grid-cols-2";
 
 export function SkillsBrowsePage() {
   const { t } = useTranslation();
-  const {
-    search,
-    category,
-    skills,
-    total,
-    installedSlugs,
-    isLoading,
-    isError,
-    refetch,
-    hasMore,
-    isFetchingMore,
-    loadMore,
-    setSearch,
-    setCategory,
-  } = useSkillsBrowsePage();
-  const { categories } = useStoreCategories();
+  const browse = useSkillsBrowsePage();
+  const categories = useBrowseCategories("skills");
 
   return (
-    <main className="mx-auto w-full max-w-[1360px] px-6 pt-8 pb-16 md:px-10 lg:px-14">
-      <Link
-        href="/marketplace#skills"
-        className="mb-6 inline-flex w-fit items-center gap-1.5 text-body-sm leading-inherit text-foreground-tertiary transition-colors hover:text-foreground-strong"
-      >
-        <Icon icon={ArrowLeft02Icon} size={14} aria-hidden />
-
-        {t("Back to marketplace", "返回市场")}
-      </Link>
-
-      <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="flex items-center gap-2.5 text-heading font-semibold tracking-heading text-foreground-strong">
-            <Icon icon={BookOpen01Icon} size={30} aria-hidden />
-
-            {t("Skills", "技能")}
-          </h1>
-          <p className="mt-2 text-body-lg text-foreground-tertiary">
-            {t(
-              "Playbooks your experts follow. Teach them your way of working.",
-              "专家遵循的操作指南。教他们按你的方式工作。",
-            )}
-          </p>
-        </div>
-        <SearchBar
-          placeholder={t("Search skills", "搜索技能")}
-          height="h-[2.75rem]"
-          width="w-full md:w-[439px]"
-          defaultValue={search}
-          onSubmit={setSearch}
+    <main className={BROWSE_LAYOUT} id="skills">
+      <BrowseHeader
+        title={t("Skills", "技能")}
+        description={t(
+          "Give your experts reusable playbooks.",
+          "为你的专家安装可复用的操作指南。",
+        )}
+        search={{
+          value: browse.search,
+          label: t("Search skills", "搜索技能"),
+          onSubmit: browse.setSearch,
+        }}
+        action={
+          browse.isLoggedIn && (
+            <Button
+              as="NextLink"
+              href="/library/skills"
+              variant="secondary"
+              size="small"
+            >
+              {t("My skills", "我的技能")}
+            </Button>
+          )
+        }
+      />
+      <div className="mb-4">
+        <BrowseFilters
+          label={t("Filter skills by topic", "按主题筛选技能")}
+          categories={categories}
+          selected={browse.category}
+          onSelect={browse.setCategory}
         />
       </div>
-
-      <div className="mb-8">
-        <SkillTopicChips
-          selected={category}
-          onSelect={setCategory}
-          size="default"
-        />
-      </div>
-
-      {isLoading ? (
-        <div
-          role="status"
-          aria-busy="true"
-          aria-label={t("Loading skills", "正在加载技能")}
-          className={GRID_CLASS}
-        >
-          {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-            <Skeleton key={i} className="h-[18rem] w-full rounded-2xl" />
-          ))}
-        </div>
-      ) : isError ? (
+      {browse.isLoading ? (
+        <BrowseSkeleton label={t("Loading skills", "正在加载技能")} />
+      ) : browse.isError && browse.skills.length === 0 ? (
         <ErrorCard
-          isSuccess={false}
+          context="marketplace skills"
           responseError={{
             message: t("Couldn't load skills right now", "暂时无法加载技能"),
           }}
-          context="marketplace skills"
-          onRetry={() => refetch()}
-          className="max-w-md"
+          onRetry={() => browse.refetch()}
         />
-      ) : skills.length === 0 ? (
-        <EmptyResult
-          category={category}
-          categoryLabel={
-            categories.find((entry) => entry.value === category)?.label
-          }
-          onShowAll={() => setCategory(null)}
+      ) : browse.skills.length === 0 ? (
+        <BrowseMessage
+          message={t("No matching skills.", "没有找到匹配的技能。")}
+          onReset={browse.search || browse.category ? browse.reset : undefined}
         />
       ) : (
         <>
-          <p className="mb-4 text-body text-foreground-tertiary">
-            {total.toLocaleString()} {total === 1 ? "skill" : "skills"}
-          </p>
-          <InfiniteList
-            items={skills}
-            className={GRID_CLASS}
-            hasMore={hasMore}
-            isFetchingMore={isFetchingMore}
-            onEndReached={loadMore}
-            renderItem={(skill) => (
-              <SkillCard
-                key={skill.slug}
-                skill={skill}
-                isInstalled={installedSlugs.has(skill.slug)}
-              />
+          <Text variant="small" tone="muted" className="mb-3">
+            {t(
+              `${browse.total.toLocaleString()} ${browse.total === 1 ? "skill" : "skills"}`,
+              `${browse.total.toLocaleString()} 个技能`,
             )}
-          />
+          </Text>
+          <ul className={BROWSE_GRID}>
+            {browse.skills.map((skill) => (
+              <li key={skill.slug} className="min-w-0">
+                <SkillCard
+                  skill={skill}
+                  isInstalled={browse.installedSlugs.has(skill.slug)}
+                />
+              </li>
+            ))}
+          </ul>
+          {(browse.hasMore || browse.isFetchNextPageError) && (
+            <Button
+              className="mt-4"
+              variant="secondary"
+              loading={browse.isFetchingMore}
+              onClick={() => void browse.loadMore()}
+            >
+              {browse.isFetchNextPageError
+                ? t("Retry loading more", "重试加载更多")
+                : t("Load more", "加载更多")}
+            </Button>
+          )}
         </>
       )}
     </main>
-  );
-}
-
-function EmptyResult({
-  category,
-  categoryLabel,
-  onShowAll,
-}: {
-  category: string | null;
-  categoryLabel: string | undefined;
-  onShowAll: () => void;
-}) {
-  const { t } = useTranslation();
-  return (
-    <div
-      className="flex flex-col items-center justify-center gap-3 rounded-large border border-dashed border-border-base px-6 py-16 text-center"
-      data-testid="skills-browse-empty"
-    >
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-surface text-accent-strong">
-        <Icon icon={BookOpen01Icon} size={24} aria-hidden />
-      </div>
-      <Text variant="h4" tone="primary">
-        {category
-          ? `No ${categoryLabel ?? category} skills yet`
-          : "Nothing published yet"}
-      </Text>
-      {category ? (
-        <button
-          type="button"
-          onClick={onShowAll}
-          className="text-body font-medium text-brand transition-colors hover:text-brand/80"
-        >
-          {t("Show all", "显示全部")}
-        </button>
-      ) : (
-        <Link
-          href="/library/skills"
-          className="text-body font-medium text-brand transition-colors hover:text-brand/80"
-        >
-          {t("Go to your skills →", "前往你的技能 →")}
-        </Link>
-      )}
-    </div>
   );
 }

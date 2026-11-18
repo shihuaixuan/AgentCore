@@ -1,4 +1,5 @@
 import { prefetchGetV2ListMarketplaceSkillsInfiniteQuery } from "@/app/api/__generated__/endpoints/store/store";
+import { getPaginationNextPageNumber } from "@/app/api/helpers";
 import { getQueryClient } from "@/lib/react-query/queryClient";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
@@ -12,15 +13,33 @@ export const metadata: Metadata = {
   description: "Playbooks your experts follow. Teach them your way of working.",
 };
 
-export default async function MarketplaceSkillsPage() {
+export default async function MarketplaceSkillsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    q?: string | string[];
+    category?: string | string[];
+  }>;
+}) {
   const queryClient = getQueryClient();
-
-  // Only the unfiltered first page is worth prefetching: a category or search
-  // arrives in the URL and would miss this key anyway.
-  await prefetchGetV2ListMarketplaceSkillsInfiniteQuery(queryClient, {
-    page: 1,
-    page_size: BROWSE_PAGE_SIZE,
-  });
+  const { q, category } = await searchParams;
+  const search = (Array.isArray(q) ? q[0] : q)?.trim();
+  const selected = Array.isArray(category) ? category[0] : category;
+  await prefetchGetV2ListMarketplaceSkillsInfiniteQuery(
+    queryClient,
+    {
+      page: 1,
+      page_size: BROWSE_PAGE_SIZE,
+      ...(search ? { search_query: search } : {}),
+      ...(selected ? { category: selected } : {}),
+    },
+    {
+      query: {
+        initialPageParam: 1,
+        getNextPageParam: getPaginationNextPageNumber,
+      },
+    },
+  );
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

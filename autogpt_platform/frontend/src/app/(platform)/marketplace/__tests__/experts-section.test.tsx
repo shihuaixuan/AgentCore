@@ -17,7 +17,7 @@ import {
 } from "@/tests/integrations/test-utils";
 import { HttpResponse, http } from "msw";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { MainMarkeplacePage } from "../components/MainMarketplacePage/MainMarketplacePage";
+import { ExpertsSection as MainMarkeplacePage } from "../components/ExpertsSection/ExpertsSection";
 
 const { capture } = vi.hoisted(() => ({ capture: vi.fn() }));
 vi.mock("posthog-js", () => ({ default: { capture } }));

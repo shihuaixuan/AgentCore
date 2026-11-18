@@ -123,7 +123,7 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
       </div>
 
       <div className="mb-3 flex flex-col gap-1">
-        <Link href="/settings/integrations">
+        <Link href="/marketplace/connectors?view=mine">
           {t("Manage custom connectors", "管理自定义连接器")}
         </Link>
         <Text variant="small" tone="muted">

@@ -26,7 +26,8 @@ from backend.data.db_accessors import chat_db
 NOTICE_METADATA_KIND = "scheduled_chat_notice"
 
 BILLING_PATH = "/settings/billing"
-INTEGRATIONS_PATH = "/settings/integrations"
+INTEGRATIONS_PATH = "/marketplace/connectors?view=mine"
+AI_CONNECTIONS_PATH = "/settings/ai-connections"
 
 _MESSAGE_NAMESPACE = uuid.UUID("5d0a3a4e-2f3b-5c8e-9a51-6e7c0b1d2f43")
 _TITLE_MAX = 60
@@ -172,7 +173,7 @@ def skip_notice(
                 f"“{title}” didn't run: it runs on your ChatGPT plan, which "
                 f"Otto can't use right now.{after}"
             ),
-            actions=[NoticeLink(label="Open settings", href=INTEGRATIONS_PATH)],
+            actions=[NoticeLink(label="Open settings", href=AI_CONNECTIONS_PATH)],
             window_key=f"codex_access:{_iso_week(now)}",
         )
     return None

@@ -10,6 +10,7 @@ import type { MarketplaceSkill } from "@/app/api/__generated__/models/marketplac
 import { server } from "@/mocks/mock-server";
 import { HttpResponse, http } from "msw";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import {
   configure,
   render,
@@ -20,13 +21,24 @@ import {
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { SkillsBrowsePage } from "../skills/components/SkillsBrowsePage/SkillsBrowsePage";
-import { MainMarkeplacePage } from "../components/MainMarketplacePage/MainMarketplacePage";
+import { CategoryFilter } from "../components/CategoryFilter/CategoryFilter";
+import { SkillsList } from "../components/SkillsList/SkillsList";
 
 // These pages wait on several queries before anything renders, and CI is
 // slower than a dev machine; the testing-library default is one second.
 configure({ asyncUtilTimeout: 10000 });
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
+
+function SkillsShelfFixture() {
+  const [category, setCategory] = useState<string | null>(null);
+  return (
+    <>
+      <CategoryFilter selected={category} onSelect={setCategory} />
+      <SkillsList key={category ?? "all"} category={category} />
+    </>
+  );
+}
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -115,7 +127,7 @@ describe("Marketplace skills", () => {
   test("shows skills as their own shelf with a browse link", async () => {
     server.use(listing([brandVoice]));
 
-    render(<MainMarkeplacePage />);
+    render(<SkillsShelfFixture />);
 
     expect(
       await screen.findByRole(
@@ -134,23 +146,6 @@ describe("Marketplace skills", () => {
         .getByRole("link", { name: "Browse all skills" })
         .getAttribute("href"),
     ).toBe("/marketplace/skills");
-  });
-
-  test("sits above the workflow catalogue, not below it", async () => {
-    server.use(listing([brandVoice]));
-
-    render(<MainMarkeplacePage />);
-
-    const skills = await screen.findByRole(
-      "heading",
-      { name: "Skills" },
-      {
-        timeout: 10000,
-      },
-    );
-    const workflows = await screen.findByRole("heading", { name: "Workflows" });
-    // Node.DOCUMENT_POSITION_FOLLOWING === 4: the workflows heading comes after.
-    expect(skills.compareDocumentPosition(workflows) & 4).toBe(4);
   });
 
   test("shows the compatibility line only for a skill that needs one", async () => {
@@ -217,7 +212,7 @@ describe("Marketplace skills", () => {
   test("offers Browse all once the catalogue outgrows the shelf", async () => {
     server.use(listing([brandVoice, outreach], 9));
 
-    render(<MainMarkeplacePage />);
+    render(<SkillsShelfFixture />);
 
     expect(
       await screen.findByRole(
@@ -235,7 +230,7 @@ describe("Marketplace skills", () => {
       ),
     );
 
-    render(<MainMarkeplacePage />);
+    render(<SkillsShelfFixture />);
 
     expect(
       await screen.findByRole(
@@ -266,7 +261,7 @@ describe("Marketplace skills", () => {
         });
       }),
     );
-    render(<MainMarkeplacePage />);
+    render(<SkillsShelfFixture />);
     await screen.findByRole("button", { name: /Brand voice guide/ });
 
     await userEvent.click(await findCategoryChip("Sales"));
@@ -296,7 +291,7 @@ describe("Marketplace skills", () => {
         });
       }),
     );
-    render(<MainMarkeplacePage />);
+    render(<SkillsShelfFixture />);
     await screen.findByRole("button", { name: /Brand voice guide/ });
 
     await userEvent.click(await findCategoryChip("Sales"));
@@ -310,14 +305,13 @@ describe("Marketplace skills", () => {
     mockUseAuth.mockReturnValue({ user: null, isLoggedIn: false });
     server.use(listing([]));
 
-    render(<MainMarkeplacePage />);
-
-    expect(
-      await screen.findByRole("heading", { name: "Workflows" }),
-    ).toBeDefined();
-    await waitFor(() =>
-      expect(screen.queryByRole("heading", { name: "Skills" })).toBeNull(),
-    );
+    render(<SkillsShelfFixture />);
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("status", { name: "Loading skills" }),
+      ).toBeNull();
+      expect(screen.queryByRole("heading", { name: "Skills" })).toBeNull();
+    });
   });
 });
 

@@ -12,7 +12,7 @@ import {
 } from "@/tests/integrations/test-utils";
 import { server } from "@/mocks/mock-server";
 import { getGetV1ListProvidersMockHandler } from "@/app/api/__generated__/endpoints/integrations/integrations.msw";
-import SettingsIntegrationsPage from "../page";
+import { IntegrationsPanel as SettingsIntegrationsPage } from "@/components/contextual/IntegrationsPanel/IntegrationsPanel";
 import {
   authProviders,
   discoveryRequest,

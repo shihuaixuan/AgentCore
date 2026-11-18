@@ -240,7 +240,7 @@ describe("managing an expert's integrations", () => {
       within(section)
         .getByRole("link", { name: "Manage custom connectors" })
         .getAttribute("href"),
-    ).toBe("/settings/integrations");
+    ).toBe("/marketplace/connectors?view=mine");
   });
 
   it.each(["Web_Search_Test", "current news", "api.anysearch.com"])(
