@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from aiohttp import web
+from multidict import CIMultiDict
 from pydantic import SecretStr
 
 from backend.blocks.mcp.client import MCPClient
@@ -185,6 +186,115 @@ class TestMCPOAuthHandler:
 class TestMCPClientDiscovery:
     """Tests for MCPClient OAuth metadata discovery."""
 
+    @pytest.mark.parametrize(
+        ("challenge", "use_advertised"),
+        [
+            (
+                (
+                    'Basic realm="MCP", bEaReR error="invalid_token", '
+                    'error_description="Missing credentials, try again", '
+                    'resource_metadata="https://mcp.example.com/mcp/.well-known/resource"'
+                ),
+                True,
+            ),
+            (
+                (
+                    'Bearer realm="MCP", Basic '
+                    'resource_metadata="https://mcp.example.com/mcp/.well-known/resource"'
+                ),
+                False,
+            ),
+            ('Bearer resource_metadata="http://mcp.example.com/resource"', False),
+            ('Bearer resource_metadata="https://user@mcp.example.com/resource"', False),
+        ],
+    )
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_discovers_protected_resource_from_401(
+        self, challenge, use_advertised
+    ):
+        server_url = "https://mcp.example.com/mcp/company/stream"
+        advertised_url = "https://mcp.example.com/mcp/.well-known/resource"
+        metadata = {
+            "resource": server_url,
+            "authorization_servers": ["https://auth.example.com"],
+        }
+        denied = _mock_response({}, status=401)
+        denied.headers = CIMultiDict([("WWW-Authenticate", challenge)])
+
+        with patch("backend.blocks.mcp.client.Requests") as requests:
+            http = requests.return_value
+            http.post = AsyncMock(return_value=denied)
+            http.get = AsyncMock(
+                side_effect=lambda url, **_: (
+                    _mock_response(metadata)
+                    if url == advertised_url
+                    else _mock_response({}, status=404)
+                )
+            )
+
+            result = await MCPClient(server_url, "Bearer stored-token").discover_auth()
+
+        if use_advertised:
+            assert result == metadata
+            assert http.get.await_args_list[0].args == (advertised_url,)
+            assert http.get.await_args_list[0].kwargs["allow_redirects"] is False
+        else:
+            assert result is None
+            assert [call.args[0] for call in http.get.await_args_list] == [
+                "https://mcp.example.com/.well-known/oauth-protected-resource/mcp/company/stream",
+                "https://mcp.example.com/.well-known/oauth-protected-resource",
+            ]
+        http.post.assert_awaited_once()
+        assert http.post.await_args.args == (server_url,)
+        assert http.post.await_args.kwargs["json"]["method"] == "ping"
+        assert "Authorization" not in http.post.await_args.kwargs["headers"]
+
+    @pytest.mark.parametrize(
+        "overrides",
+        [
+            {"authorization_servers": "https://auth.example.com"},
+            {"authorization_servers": []},
+            {"authorization_servers": [{}]},
+            {"authorization_servers": ["not-a-url"]},
+            {"resource": "https://mcp.example.com/other"},
+        ],
+    )
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_invalid_challenged_metadata_falls_back_to_well_known(
+        self, overrides
+    ):
+        server_url = "https://mcp.example.com/mcp"
+        metadata = {
+            "resource": server_url,
+            "authorization_servers": ["https://auth.example.com"],
+        }
+        denied = _mock_response({}, status=401)
+        denied.headers = CIMultiDict(
+            [
+                ("WWW-Authenticate", 'Basic realm="MCP"'),
+                (
+                    "WWW-Authenticate",
+                    'Bearer resource_metadata="https://mcp.example.com/resource"',
+                ),
+            ]
+        )
+        with patch("backend.blocks.mcp.client.Requests") as requests:
+            http = requests.return_value
+            http.post = AsyncMock(return_value=denied)
+            http.get = AsyncMock(
+                side_effect=[
+                    _mock_response(metadata | overrides),
+                    _mock_response(metadata),
+                ]
+            )
+
+            assert await MCPClient(server_url).discover_auth() == metadata
+
+        assert [call.args[0] for call in http.get.await_args_list] == [
+            "https://mcp.example.com/resource",
+            "https://mcp.example.com/.well-known/oauth-protected-resource/mcp",
+        ]
+
     @pytest.mark.asyncio(loop_scope="session")
     async def test_discover_auth_found(self):
         client = MCPClient("https://mcp.example.com/mcp")
@@ -198,6 +308,7 @@ class TestMCPClientDiscovery:
 
         with patch("backend.blocks.mcp.client.Requests") as MockRequests:
             instance = MockRequests.return_value
+            instance.post = AsyncMock(return_value=_mock_response({}, status=405))
             instance.get = AsyncMock(return_value=resp)
 
             result = await client.discover_auth()
@@ -213,6 +324,7 @@ class TestMCPClientDiscovery:
 
         with patch("backend.blocks.mcp.client.Requests") as MockRequests:
             instance = MockRequests.return_value
+            instance.post = AsyncMock(side_effect=TimeoutError)
             instance.get = AsyncMock(return_value=resp)
 
             result = await client.discover_auth()

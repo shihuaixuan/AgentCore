@@ -542,5 +542,67 @@
     "external": [
       "execute"
     ]
+  },
+  "mcp_wps_yundoc": {
+    "source": "https://open.wps.cn/documents/app-integration-dev/mcp-server/tools/mcp_kso-yundoc",
+    "read": [
+      "kso_yundoc_extract_yundoc_comment",
+      "kso_yundoc_extract_yundoc_content",
+      "kso_yundoc_get_file_meta",
+      "kso_yundoc_search_yundoc"
+    ],
+    "external": [
+      "kso_yundoc_open_link",
+      "kso_yundoc_permissions_batch_create",
+      "kso_yundoc_permissions_batch_delete"
+    ]
+  },
+  "mcp_processon": {
+    "source": "https://smart.processon.com/docs/mcp",
+    "external": [
+      "generate_chart",
+      "generate_diagram",
+      "generate_diagram_dsl"
+    ]
+  },
+  "mcp_qcc_company": {
+    "source": "https://agent.qcc.com/guide"
+  },
+  "mcp_gitee": {
+    "source": "https://gitee.com/oschina/mcp-gitee",
+    "read": [
+      "compare_branches_tags",
+      "get_diff_files",
+      "get_file_content",
+      "get_pull_detail",
+      "get_repo_issue_detail",
+      "get_user_info",
+      "list_comments",
+      "list_releases",
+      "list_repo_issues",
+      "list_repo_pulls",
+      "list_user_notifications",
+      "list_user_repos",
+      "search_files_by_content",
+      "search_open_source_repositories",
+      "search_users"
+    ],
+    "external": [
+      "create_comment",
+      "create_issue",
+      "create_pull",
+      "create_release",
+      "create_repo",
+      "fork_repository",
+      "manage_pull_review",
+      "update_issue",
+      "update_pull"
+    ],
+    "irreversible": [
+      "merge_pull"
+    ]
+  },
+  "mcp_iphouse": {
+    "source": "https://mcp.iphouse.cn/mcp/guide"
   }
 }

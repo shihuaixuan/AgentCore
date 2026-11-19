@@ -29,3 +29,52 @@ Both `custom` setups show **Setup required** in the integrations list. AutoPilot
 Check the vendor's current endpoint and authentication contract. Verify initialization and tool listing with the MCP client, then a benign read using the intended permissions. For OAuth, check registration, consent, and refresh with the deployment's callback and an authorized test account.
 
 Update affected catalog, provider, guide, and page integration tests. Cover changes to region selection, custom URLs, token handling, or optional grants. Regenerate API types when the metadata schema changes, and run the relevant backend and frontend checks.
+
+## Local Chinese office service selection
+
+The bundled catalog includes one hosted HTTPS service from each selected vendor.
+All five accept a manually entered Bearer credential. 企查查 and 知产宝 also
+offer browser sign-in on the same card. Catalog entries contain setup
+instructions, not user credentials or active connections.
+
+| Service | Catalog ID | Credential preparation |
+| --- | --- | --- |
+| WPS 云文档 | `mcp_wps_yundoc` | Create a WPS 365 application, request cloud document MCP permissions, obtain a user access token, and disable interface signing. App AK/SK is not the Bearer token. |
+| ProcessOn | `mcp_processon` | Obtain an MCP Token from an enabled account on the vendor's limited-access gray environment. |
+| 企查查 | `mcp_qcc_company` | Sign in via OAuth, or create an API Key on the agent data platform. This entry connects only the company data service. |
+| Gitee | `mcp_gitee` | Create a personal access token with permissions for the intended repositories and operations. |
+| 知产宝 | `mcp_iphouse` | Sign in via OAuth, or obtain an API Key from the vendor. Access follows the account's entitlement. |
+
+Both OAuth endpoints advertise dynamic client registration, PKCE S256, and
+`mcp:tools`. Both accepted `http://localhost:3000/auth/integrations/mcp_callback`
+for registration and served an authorization page. User consent, code exchange,
+and authenticated tool calls were not tested. Use Bearer if sign-in is unavailable;
+for a public 企查查 deployment, register the HTTPS callback with the vendor.
+WPS documents its own user authorization flow for obtaining the Bearer access
+token; the selected MCP endpoint does not advertise a compatible OAuth flow.
+
+On 2026-11-19, unauthenticated `initialize` and `tools/list` succeeded for WPS,
+ProcessOn, and Gitee. This verifies protocol discovery, not access to user data.
+企查查 and 知产宝 returned HTTP 401, so authenticated discovery and business
+operations remain unverified. Their effect maps deliberately contain no tool
+classifications: unknown tools keep the existing approval behavior. ProcessOn
+generation is classified as external because it can create artifacts or consume
+account quota. No business tool was invoked during catalog validation.
+
+When the deployment uses `MCPMarketplaceEntry`, changing the bundled JSON alone
+does not update its database snapshot. Publish only the selected entries with
+`publish_mcp_catalog(entries, source)` against the intended initialized database,
+then restart the backend to load that snapshot. Preserve other marketplace entries
+and user credentials. If the database has no project tables, restore the intended
+local runtime before publishing; do not initialize a different database merely to
+import connector metadata.
+
+## DingTalk marketplace connections
+
+The [DingTalk marketplace flow documented by Alibaba Cloud](https://help.aliyun.com/zh/model-studio/connector/dingtalk)
+requires the user to sign in and enable the specific service in DingTalk, then
+copy its Streamable HTTP URL. Each URL contains a `key` query parameter that is
+the credential. The custom MCP form rejects query parameters, so this flow is
+not available yet. Supporting it requires a dedicated connection type that stores
+the key as a secret and never exposes it in ordinary URLs, logs, or API responses.
+DingTalk OpenAPI user authorization is a separate integration route.

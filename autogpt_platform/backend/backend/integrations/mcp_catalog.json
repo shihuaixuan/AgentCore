@@ -592,6 +592,21 @@
     }
   },
   {
+    "name": "mcp_gitee",
+    "display_name": "Gitee",
+    "description": "查询代码仓库、文件、Issue 和 PR，并执行评论、发布与研发协作操作。",
+    "mcp_server": {
+      "server_url": "https://api.gitee.com/mcp",
+      "documentation_url": "https://gitee.com/oschina/mcp-gitee",
+      "setup_instructions": "在 Gitee 账号设置中创建个人访问令牌，为需要使用的仓库和协作操作选择相应权限。选择 Bearer，填写个人访问令牌。工具以该账号身份运行，仓库访问和写入范围受账号及令牌权限限制；这是 Gitee 官方远程服务，无需本地安装 MCP 程序。",
+      "connection_mode": "hosted",
+      "auth_methods": [
+        "bearer"
+      ],
+      "icon_id": "gitee"
+    }
+  },
+  {
     "name": "mcp_github",
     "display_name": "GitHub",
     "description": "Search repositories, read code, and work with issues and pull requests through GitHub's MCP tools.",
@@ -728,6 +743,25 @@
         "bearer"
       ],
       "icon_id": "intercom"
+    }
+  },
+  {
+    "name": "mcp_iphouse",
+    "display_name": "知产宝",
+    "description": "检索法律案例和知识产权相关资料，辅助法务研究与办公。",
+    "mcp_server": {
+      "server_url": "https://mcp.iphouse.cn/mcp",
+      "documentation_url": "https://mcp.iphouse.cn/mcp/guide",
+      "setup_instructions": "可选择 OAuth，跳转到知产宝 MCP 登录授权。也可选择 Bearer，填写从知产宝个人中心或服务商获取的 API Key。实际可用工具和调用额度以账号权限为准。",
+      "connection_mode": "hosted",
+      "auth_methods": [
+        "oauth",
+        "bearer"
+      ],
+      "oauth_scopes": [
+        "mcp:tools"
+      ],
+      "icon_id": "iphouse"
     }
   },
   {
@@ -969,6 +1003,40 @@
     }
   },
   {
+    "name": "mcp_processon",
+    "display_name": "ProcessOn",
+    "description": "通过自然语言生成流程图、思维导图等工作图表和图表 DSL。",
+    "mcp_server": {
+      "server_url": "https://smart-hd.processon.com/mcp",
+      "documentation_url": "https://smart.processon.com/docs/mcp",
+      "setup_instructions": "登录 ProcessOn AI 绘图灰度站 smart-hd.processon.com，在用户中心申请 MCP Token。选择 Bearer，填写 MCP Token。官方当前推荐此灰度地址，功能处于限量开放阶段，需账号已开通；生成图表可能消耗账号权益，服务地址和能力以官方最新说明为准。",
+      "connection_mode": "hosted",
+      "auth_methods": [
+        "bearer"
+      ],
+      "icon_id": "processon"
+    }
+  },
+  {
+    "name": "mcp_qcc_company",
+    "display_name": "企查查",
+    "description": "查询企业工商登记、股东等企业信息，辅助客户与供应商背景调研。",
+    "mcp_server": {
+      "server_url": "https://agent.qcc.com/mcp/company/stream",
+      "documentation_url": "https://agent.qcc.com/guide",
+      "setup_instructions": "可选择 OAuth，在企查查页面登录并授权。如无法完成回跳，可在企查查智能体数据平台右上角头像的“获取我的 API KEY”中创建 Key，再选择 Bearer 填写。此连接仅接入企业数据服务，查询权限和调用额度以账号权益为准。",
+      "connection_mode": "hosted",
+      "auth_methods": [
+        "oauth",
+        "bearer"
+      ],
+      "oauth_scopes": [
+        "mcp:tools"
+      ],
+      "icon_id": "qcc"
+    }
+  },
+  {
     "name": "mcp_runlayer",
     "display_name": "Runlayer",
     "description": "Discover and access tools through your organization's managed MCP catalog.",
@@ -1182,6 +1250,21 @@
         "oauth"
       ],
       "icon_id": "wonder"
+    }
+  },
+  {
+    "name": "mcp_wps_yundoc",
+    "display_name": "WPS 云文档",
+    "description": "搜索和读取 WPS 云文档、查看评论，并管理文件分享与访问权限。",
+    "mcp_server": {
+      "server_url": "https://openapi.wps.cn/mcp/v2/kso-yundoc/message",
+      "documentation_url": "https://open.wps.cn/documents/app-integration-dev/mcp-server/use-guide",
+      "setup_instructions": "在 WPS 365 开放平台创建企业自建应用，申请云文档 MCP 权限 delegated:kso.mcp_yundoc.readwrite，按官方用户授权流程获取用户 access_token，并关闭接口签名。选择 Bearer，填写用户 access_token，不要填写应用 AK/SK。令牌过期后需更新；文档范围受该用户及应用权限限制。",
+      "connection_mode": "hosted",
+      "auth_methods": [
+        "bearer"
+      ],
+      "icon_id": "wps_yundoc"
     }
   },
   {

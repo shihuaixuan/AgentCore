@@ -21,7 +21,10 @@ References:
 import json
 import logging
 from typing import Any, NoReturn
+from urllib.parse import urlparse, urlsplit
+from urllib.request import parse_http_list
 
+from aiohttp import ClientError
 from pydantic import BaseModel, ConfigDict, Field
 
 from backend.blocks.mcp.protocol import (
@@ -69,6 +72,43 @@ _SUPPORTED_AUTH_SCHEMES = {
     "basic": "Basic",
     "bearer": "Bearer",
 }
+
+
+def _bearer_resource_metadata_url(headers: list[str]) -> str | None:
+    """Find the RFC 9728 metadata URL in a Bearer challenge, not another scheme."""
+    for header in headers:
+        scheme = ""
+        for item in parse_http_list(header):
+            name, separator, value = item.strip().partition("=")
+            parts = name.split()
+            if len(parts) > 1 or not separator:
+                scheme = parts[0].casefold() if parts else ""
+                name = parts[1] if len(parts) == 2 else ""
+            if scheme != "bearer" or name.strip().casefold() != "resource_metadata":
+                continue
+            url = value.strip()
+            if url.startswith('"') and url.endswith('"') and _is_oauth_url(url[1:-1]):
+                return url[1:-1]
+    return None
+
+
+def _is_oauth_url(value: Any) -> bool:
+    if not isinstance(value, str) or any(
+        char.isspace() or ord(char) < 32 or ord(char) == 127 for char in value
+    ):
+        return False
+    try:
+        parsed = urlsplit(value)
+        return (
+            parsed.scheme == "https"
+            and bool(parsed.hostname)
+            and (parsed.port is None or parsed.port > 0)
+            and parsed.username is None
+            and parsed.password is None
+            and not parsed.fragment
+        )
+    except ValueError:
+        return False
 
 
 def normalize_mcp_authorization(value: str) -> str:
@@ -688,6 +728,27 @@ class MCPClient:
             return await self._send_modern(method, params)
         return await self._send_legacy(method, params)
 
+    async def _probe_auth_challenge(self) -> str | None:
+        """Read the 401 challenge without sending credentials or opening a session."""
+        try:
+            response = await Requests(
+                raise_for_status=False, retry_max_attempts=1
+            ).post(
+                self.server_url,
+                json=self._build_jsonrpc_request("ping"),
+                headers={"Accept": "application/json, text/event-stream"},
+                allow_redirects=False,
+                max_body_bytes=4096,
+                timeout=5,
+            )
+        except (ClientError, OSError, ValueError):
+            return None  # A well-known path can still work.
+        if response.status != 401:
+            return None
+        return _bearer_resource_metadata_url(
+            response.headers.getall("WWW-Authenticate", [])
+        )
+
     async def discover_auth(self) -> dict[str, Any] | None:
         """Probe the MCP server's OAuth metadata (RFC 9728 / MCP spec).
 
@@ -700,10 +761,20 @@ class MCPClient:
         The caller can then fetch the authorization server metadata to get
         ``authorization_endpoint``, ``token_endpoint``, etc.
         """
-        from urllib.parse import urlparse
-
         parsed = urlparse(self.server_url)
         base = f"{parsed.scheme}://{parsed.netloc}"
+        requests = Requests(
+            raise_for_status=False,
+            retry_max_attempts=_HTTP_RETRY_ATTEMPTS,
+        )
+
+        # The challenge may name a metadata path that cannot be inferred from
+        # the resource URL. Fetch it through the same SSRF-checked client and
+        # verify that the document names the resource we actually contacted.
+        if (advertised_url := await self._probe_auth_challenge()) and (
+            data := await self._get_challenged_resource(advertised_url)
+        ):
+            return data
 
         # Build candidates for protected-resource metadata (per RFC 9728)
         path = parsed.path.rstrip("/")
@@ -712,10 +783,6 @@ class MCPClient:
             candidates.append(f"{base}/.well-known/oauth-protected-resource{path}")
         candidates.append(f"{base}/.well-known/oauth-protected-resource")
 
-        requests = Requests(
-            raise_for_status=False,
-            retry_max_attempts=_HTTP_RETRY_ATTEMPTS,
-        )
         for url in candidates:
             try:
                 resp = await requests.get(url)
@@ -727,6 +794,27 @@ class MCPClient:
                 continue
 
         return None
+
+    async def _get_challenged_resource(self, url: str) -> dict[str, Any] | None:
+        try:
+            resp = await Requests(raise_for_status=False, retry_max_attempts=1).get(
+                url, allow_redirects=False, max_body_bytes=65536, timeout=5
+            )
+            if resp.status != 200:
+                return None
+            data = resp.json()
+        except (ClientError, OSError, RecursionError, ValueError):
+            return None
+        if not isinstance(data, dict) or data.get("resource") != self.server_url:
+            return None
+        servers = data.get("authorization_servers")
+        if (
+            not isinstance(servers, list)
+            or not servers
+            or not all(_is_oauth_url(server) for server in servers)
+        ):
+            return None
+        return data
 
     async def discover_auth_server_metadata(
         self, auth_server_url: str
@@ -746,8 +834,6 @@ class MCPClient:
         decides the expected issuer, and only the caller comparing against
         that exact value can tell a tenant apart from its own origin.
         """
-        from urllib.parse import urlparse
-
         parsed = urlparse(auth_server_url)
         base = f"{parsed.scheme.lower()}://{parsed.netloc.lower()}"
         path = parsed.path.rstrip("/")
