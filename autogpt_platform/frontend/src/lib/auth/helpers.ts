@@ -9,6 +9,7 @@ export const PROTECTED_PAGES = [
   "/home",
   "/monitor",
   "/build",
+  "/chat-imports",
   "/onboarding",
   "/profile",
   "/library",

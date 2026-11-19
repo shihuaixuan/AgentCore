@@ -225,6 +225,7 @@ model User {
   AnalyticsMetrics     AnalyticsMetrics[]
   UserBalance          UserBalance?
   ChatSessions         ChatSession[]
+  ImportedChatConversations ImportedChatConversation[]
   ChatMessageFeedback  ChatMessageFeedback[]
   UserBriefings        UserBriefing[]
   ActivityEvents       ActivityEvent[]
@@ -926,6 +927,35 @@ model BuilderSearchHistory {
 ////////////////   CHAT SESSION TABLES   ///////////////////
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
+
+model ImportedChatConversation {
+  id           String   @id @default(uuid())
+  userId       String
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source       String
+  fingerprint  String
+  title        String
+  messages     Json
+  messageCount Int
+  createdAt    DateTime?
+  importedAt   DateTime @default(now())
+  Attachments  ImportedChatAttachment[]
+
+  @@unique([userId, source, fingerprint])
+  @@index([userId, importedAt, id])
+}
+
+model ImportedChatAttachment {
+  id             String                   @id @default(uuid())
+  conversationId String
+  Conversation   ImportedChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  name           String
+  size           Int
+  sha256         String
+  content        Bytes
+
+  @@unique([conversationId, name, sha256], map: "ImportedChatAttachment_conversation_name_sha256_key")
+}
 
 model ChatSession {
   id        String   @id @default(uuid())

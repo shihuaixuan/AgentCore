@@ -35,6 +35,26 @@ from backend.util.metrics import (
 from backend.util.settings import AppEnvironment, BehaveAs, Config
 
 
+@pytest.mark.parametrize(
+    "hook", [metrics._before_send, metrics._before_send_transaction]
+)
+@pytest.mark.parametrize("path", ["/api/chat/imports", "/api/chat/imports/example-id"])
+def test_private_archive_never_sends_request_or_traceback_locals(hook, path):
+    event = {
+        "request": {"url": f"https://localhost{path}", "data": "synthetic transcript"},
+        "exception": {
+            "values": [
+                {"stacktrace": {"frames": [{"vars": {"text": "synthetic transcript"}}]}}
+            ]
+        },
+    }
+    assert hook(event, {}) is None
+    assert (
+        hook({"request": {"url": "https://localhost/api/chat/sessions"}}, {})
+        is not None
+    )
+
+
 def _log_event(logger: str, message: str) -> dict:
     return {
         "logger": logger,

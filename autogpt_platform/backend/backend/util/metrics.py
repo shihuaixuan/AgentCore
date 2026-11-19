@@ -5,6 +5,7 @@ from collections import deque
 from enum import Enum
 from types import TracebackType
 from typing import Any
+from urllib.parse import urlsplit
 
 from pydantic import SecretStr
 from sentry_sdk._init_implementation import init as _sentry_init
@@ -237,8 +238,21 @@ def _raised_from_graphiti_falkordb(exc_tb: TracebackType | None) -> bool:
     return False
 
 
+def _is_private_chat_archive_event(event: dict) -> bool:
+    url = (event.get("request") or {}).get("url")
+    if not isinstance(url, str):
+        return False
+    try:
+        path = urlsplit(url).path
+    except ValueError:
+        return False
+    return path == "/api/chat/imports" or path.startswith("/api/chat/imports/")
+
+
 def _before_send(event, hint):
     """Filter out expected/transient errors from Sentry to reduce noise."""
+    if _is_private_chat_archive_event(event):
+        return None
     if "exc_info" in hint:
         exc_type, exc_value, exc_tb = hint["exc_info"]
         exc_msg = str(exc_value).lower() if exc_value else ""
@@ -337,6 +351,8 @@ def _before_send(event, hint):
 def _before_send_transaction(event, hint):
     """Transactions skip ``before_send`` but carry the same request data, and
     every WebSocket connection is one."""
+    if _is_private_chat_archive_event(event):
+        return None
     _strip_user_pii(event)
     _strip_ip_headers(event)
     _redact_request_urls(event)

@@ -96,6 +96,21 @@ describe("PostHogProvider", () => {
     expect(config).not.toHaveProperty("ui_host");
   });
 
+  it("skips autocapture on the chat archive even for events targeted outside its content", async () => {
+    const { PostHogProvider } = await import("../posthog-provider");
+    render(<PostHogProvider>app</PostHogProvider>);
+
+    const [archiveRule] =
+      posthog.init.mock.calls[0][1].autocapture.url_ignorelist;
+    expect(archiveRule.test("https://app.test/chat-imports?from=sidebar")).toBe(
+      true,
+    );
+    expect(archiveRule.test("https://app.test/chat-imports#top")).toBe(true);
+    expect(archiveRule.test("https://app.test/home?next=/chat-imports")).toBe(
+      false,
+    );
+  });
+
   it("registers the base properties once PostHog is initialised", async () => {
     const { PostHogProvider } = await import("../posthog-provider");
 

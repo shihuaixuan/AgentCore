@@ -125,6 +125,74 @@ describe("proxy route — handler pass-through", () => {
     expect(text).toBe("");
   });
 
+  it("forwards the archive multipart boundary and binary file bytes with the session token", async () => {
+    const form = new FormData();
+    const bytes = new Uint8Array([0, 42, 255]);
+    form.set("conversation", '{"source":"workbuddy"}');
+    form.append("files", new File([bytes], "report.bin"));
+    const path = ["api", "chat", "imports", "with-attachments"];
+    const req = new NextRequest(
+      `https://app.test/api/proxy/${path.join("/")}`,
+      {
+        method: "POST",
+        body: form,
+      },
+    );
+    vi.mocked(fetch).mockImplementation(async (url, init) => {
+      expect(url).toBe(`${BACKEND}/${path.join("/")}`);
+      const headers = new Headers(init?.headers);
+      expect(headers.get("authorization")).toBe("Bearer test-token");
+      expect(headers.get("content-type")).toBe(req.headers.get("content-type"));
+      const received = await new Response(init?.body, { headers }).formData();
+      expect(received.get("conversation")).toBe('{"source":"workbuddy"}');
+      const file = received.get("files") as File;
+      expect(file.name).toBe("report.bin");
+      expect(new Uint8Array(await file.arrayBuffer())).toEqual(bytes);
+      return Response.json({ added: 1, duplicates: 0 });
+    });
+    const response = await POST(req, makeParams(path));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ added: 1, duplicates: 0 });
+  });
+
+  it("relays private archive attachments without changing their bytes or download headers", async () => {
+    const bytes = new Uint8Array([0, 42, 255]);
+    const contentDisposition = "attachment; filename*=UTF-8''report.bin";
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(bytes, {
+        headers: {
+          "Content-Type": "application/octet-stream",
+          "Content-Disposition": contentDisposition,
+          "Cache-Control": "private, no-store",
+        },
+      }),
+    );
+    const path = [
+      "api",
+      "chat",
+      "imports",
+      "chat-id",
+      "attachments",
+      "file-id",
+    ];
+    const req = new NextRequest(`https://app.test/api/proxy/${path.join("/")}`);
+    const response = await GET(req, makeParams(path));
+    const [url, init] = vi.mocked(fetch).mock.calls[0];
+    expect(url).toBe(`${BACKEND}/${path.join("/")}`);
+    expect(new Headers(init?.headers).get("authorization")).toBe(
+      "Bearer test-token",
+    );
+    expect(response.headers.get("content-type")).toBe(
+      "application/octet-stream",
+    );
+    expect(response.headers.get("content-disposition")).toBe(
+      contentDisposition,
+    );
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(new Uint8Array(await response.arrayBuffer())).toEqual(bytes);
+  });
+
   it("strips content-length and content-encoding from response headers but preserves others", async () => {
     vi.mocked(fetch).mockResolvedValue(
       new Response(JSON.stringify({ ok: true }), {

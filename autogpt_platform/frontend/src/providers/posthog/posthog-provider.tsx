@@ -45,7 +45,9 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
         defaults: "2025-11-30",
         capture_pageview: false,
         capture_pageleave: true,
-        autocapture: true,
+        autocapture: {
+          url_ignorelist: [/^https?:\/\/[^/?#]+\/chat-imports(?:[/?#]|$)/],
+        },
         capture_exceptions: false,
         ...(anonymousID && {
           bootstrap: { distinctID: anonymousID, isIdentifiedID: false },
