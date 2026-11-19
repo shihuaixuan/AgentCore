@@ -72,21 +72,11 @@ export function SkillCard({ skill, isInstalled, categoryLabel }: Props) {
           >
             {title}
           </h3>
-          {(skill.source_repo || providers.length > 0) && (
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-body-sm leading-inherit text-foreground-tertiary">
-              {skill.source_repo && (
-                <span className="min-w-0 break-words">
-                  {t(`From ${skill.source_repo}`, `来源：${skill.source_repo}`)}
-                </span>
-              )}
-              {providers.length > 0 && (
-                <span className="inline-flex items-center gap-1.5">
-                  {skill.source_repo && <span aria-hidden>·</span>}
-                  {t("Works with", "适用服务")}
-                  <IntegrationLogo provider={providers[0]} size={14} alt="" />
-                  {formatProviderList(providers, locale)}
-                </span>
-              )}
+          {providers.length > 0 && (
+            <div className="mt-1.5 flex items-center gap-1.5 text-body-sm leading-inherit text-foreground-tertiary">
+              {t("Works with", "适用服务")}
+              <IntegrationLogo provider={providers[0]} size={14} alt="" />
+              {formatProviderList(providers, locale)}
             </div>
           )}
           <p className="mt-2 line-clamp-3 text-body leading-relaxed text-foreground-secondary">

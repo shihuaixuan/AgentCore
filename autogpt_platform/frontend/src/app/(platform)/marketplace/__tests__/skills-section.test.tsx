@@ -163,7 +163,7 @@ describe("Marketplace skills", () => {
     expect(brand.textContent).not.toContain("Works with");
   });
 
-  test("credits the repo a vendored skill came from, and nothing for our own", async () => {
+  test("does not show repository attribution on skill cards", async () => {
     const coldEmail: MarketplaceSkill = {
       ...outreach,
       slug: "cold-email",
@@ -180,9 +180,8 @@ describe("Marketplace skills", () => {
 
     await screen.findAllByTestId("skill-card", undefined, { timeout: 10000 });
     const vendored = await screen.findByRole("link", { name: /Cold email/ });
-    expect(vendored.textContent).toContain(
-      "From coreyhaines31/marketingskills",
-    );
+    expect(vendored.textContent).not.toContain("coreyhaines31/marketingskills");
+    expect(vendored.textContent).toContain("Works with");
     const own = await screen.findByRole("link", {
       name: /Brand voice guide/,
     });

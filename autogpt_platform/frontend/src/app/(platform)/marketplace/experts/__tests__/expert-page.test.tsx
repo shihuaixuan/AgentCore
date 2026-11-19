@@ -249,13 +249,7 @@ describe("Marketplace expert page", () => {
       expect(screen.getByText("2 个工作流已安装，可立即运行")).toBeDefined();
       expect(screen.getByText("每天 07:40 运行")).toBeDefined();
       expect(screen.getByText("未命名工作流")).toBeDefined();
-      expect(
-        screen.getByText(
-          new RegExp(
-            `聘用 ${TITLE} 无需额外费用。其工作将使用你的现有余额，每周支出上限为`,
-          ),
-        ),
-      ).toBeDefined();
+      expect(screen.queryByText(/其工作将使用你的现有余额/)).toBeNull();
       expect(
         screen.getByRole("region", { name: `${TITLE} 的首日安排` }),
       ).toBeDefined();
@@ -286,7 +280,7 @@ describe("Marketplace expert page", () => {
   );
 
   test.each([null, 0])(
-    "does not invent a weekly cap for budget %s",
+    "hides plan details for budget %s",
     async (weeklyBudget) => {
       server.use(
         getListExpertTemplatesMockHandler([
@@ -300,12 +294,8 @@ describe("Marketplace expert page", () => {
       expect(
         await screen.findByRole("button", { name: `聘用 ${TITLE}` }),
       ).toBeDefined();
-      expect(
-        screen.getByText(
-          `聘用 ${TITLE} 无需额外费用。其工作将使用你的现有余额。`,
-        ),
-      ).toBeDefined();
-      expect(screen.queryByText(/每周支出上限/)).toBeNull();
+      expect(screen.queryByRole("heading", { name: "套餐内包含" })).toBeNull();
+      expect(screen.queryByText(/其工作将使用你的现有余额/)).toBeNull();
     },
   );
 
@@ -496,7 +486,7 @@ describe("Marketplace expert page", () => {
     expect(screen.queryByText("Content strategy")).toBeNull();
   });
 
-  test("renders the services, plan and disclosure sections", async () => {
+  test("renders the services and disclosure sections without plan details", async () => {
     server.use(
       getListExpertTemplatesMockHandler([mariaTemplate]),
       getListExpertsMockHandler([]),
@@ -514,9 +504,11 @@ describe("Marketplace expert page", () => {
     expect(within(access).queryByText("OpenAI")).toBeNull();
 
     expect(
-      screen.getByRole("heading", { name: "Included with your plan" }),
-    ).toBeDefined();
-    expect(screen.getByText(/capped at \$5 a week/)).toBeDefined();
+      screen.queryByRole("heading", { name: "Included with your plan" }),
+    ).toBeNull();
+    expect(
+      screen.queryByText(/Their work draws on your existing balance/),
+    ).toBeNull();
 
     expect(
       screen.getByText(
@@ -543,8 +535,8 @@ describe("Marketplace expert page", () => {
     ).toBeNull();
     expect(screen.queryByText(/cannot break/)).toBeNull();
     expect(
-      screen.getByRole("heading", { name: "Included with your plan" }),
-    ).toBeDefined();
+      screen.queryByRole("heading", { name: "Included with your plan" }),
+    ).toBeNull();
   });
 
   test("lists the creator's day-one rows above the skills", async () => {

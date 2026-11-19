@@ -27,7 +27,6 @@ describe.each([
     runs: "运行 1,234 次",
     rating: "评分：4.5 / 5 星",
     creator: "创建者：Original Creator",
-    source: "来源：original/repo",
     installs: "已安装 1,234 次",
     workflows: "1 个工作流",
   },
@@ -38,23 +37,12 @@ describe.each([
     runs: "1,234 runs",
     rating: "Rating: 4.5 out of 5 stars",
     creator: "by Original Creator",
-    source: "From original/repo",
     installs: "1,234 installed",
     workflows: "1 workflow",
   },
 ])(
   "$locale marketplace cards",
-  ({
-    locale,
-    card,
-    preview,
-    runs,
-    rating,
-    creator,
-    source,
-    installs,
-    workflows,
-  }) => {
+  ({ locale, card, preview, runs, rating, creator, installs, workflows }) => {
     test("localizes workflow accessible names, runs and rating without altering content or actions", () => {
       const onClick = vi.fn();
       render(
@@ -82,7 +70,7 @@ describe.each([
       expect(screen.getByText("Original English description")).toBeDefined();
     });
 
-    test("localizes the skill source and install count without showing the author", () => {
+    test("localizes the skill install count and hides the author and source", () => {
       render(
         <LanguageProvider initialLocale={locale}>
           <SkillCard skill={skill} isInstalled={false} />
@@ -92,7 +80,7 @@ describe.each([
         "/marketplace/skills/original-skill",
       );
       expect(screen.queryByText(/Original Creator/)).toBeNull();
-      expect(screen.getByText(source)).toBeDefined();
+      expect(screen.queryByText("original/repo", { exact: false })).toBeNull();
       expect(screen.getByText(installs)).toBeDefined();
       expect(screen.getByText(skill.title)).toBeDefined();
       expect(screen.getByText(skill.description)).toBeDefined();

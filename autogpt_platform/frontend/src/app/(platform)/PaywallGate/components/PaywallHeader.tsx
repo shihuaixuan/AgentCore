@@ -1,5 +1,8 @@
+"use client";
+
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { PlayCircleIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 
@@ -30,6 +33,3 @@ export function PaywallHeader() {
     </div>
   );
 }
-("use client");
-
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
