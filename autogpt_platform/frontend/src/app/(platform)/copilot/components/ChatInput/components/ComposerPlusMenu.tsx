@@ -7,10 +7,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/molecules/DropdownMenu/DropdownMenu";
 import type { IconSvgElement } from "@hugeicons/react";
+import { useRef, type ReactNode, type Ref } from "react";
 import { cn } from "@/lib/utils";
 import { MAX_ATTACHMENTS } from "../../../helpers/workspaceAttachments";
 import { useComposerPlusMenu } from "./useComposerPlusMenu";
@@ -26,6 +31,7 @@ import {
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 interface Props {
+  triggerRef?: Ref<HTMLButtonElement>;
   onFilesSelected: (files: File[]) => void;
   onUseWorkspaceFile?: () => void;
   onClearGuidedPrompt?: () => void;
@@ -45,9 +51,12 @@ export interface ComposerMenuItem {
   icon: IconSvgElement;
   onSelect: () => void;
   disabled?: boolean;
+  opensPopover?: boolean;
+  submenu?: { entries: ReactNode; pickerLabel?: string };
 }
 
 export function ComposerPlusMenu({
+  triggerRef,
   onFilesSelected,
   onUseWorkspaceFile,
   onClearGuidedPrompt,
@@ -57,6 +66,7 @@ export function ComposerPlusMenu({
   extraItems = [],
 }: Props) {
   const { t } = useTranslation();
+  const skipFocusRestore = useRef(false);
   const {
     fileInputRef,
     openModal,
@@ -92,7 +102,7 @@ export function ComposerPlusMenu({
         data-testid="composer-camera-input"
       />
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild ref={triggerRef}>
           <Button
             type="button"
             variant="tray"
@@ -105,7 +115,14 @@ export function ComposerPlusMenu({
             <Icon icon={PlusSignIcon} className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="min-w-[14rem]">
+        <DropdownMenuContent
+          align="start"
+          className="min-w-[14rem]"
+          onCloseAutoFocus={(event) => {
+            if (skipFocusRestore.current) event.preventDefault();
+            skipFocusRestore.current = false;
+          }}
+        >
           <DropdownMenuItem
             disabled={isAtCap}
             onSelect={() => {
@@ -161,19 +178,70 @@ export function ComposerPlusMenu({
             {t("Scheduled", "定时任务")}
           </DropdownMenuItem>
           {extraItems.length > 0 && <DropdownMenuSeparator />}
-          {extraItems.map((item) => (
-            <DropdownMenuItem
-              key={item.key}
-              disabled={item.disabled}
-              onSelect={item.onSelect}
-            >
-              <Icon icon={item.icon} className="mr-2 h-4 w-4" />
-              {item.label}
-            </DropdownMenuItem>
-          ))}
+          {extraItems.map((item) => {
+            function openItem() {
+              skipFocusRestore.current = !!item.opensPopover;
+              item.onSelect();
+            }
+
+            return (
+              <ComposerExtraMenuItem
+                key={item.key}
+                item={item}
+                onSelect={openItem}
+              />
+            );
+          })}
         </DropdownMenuContent>
       </DropdownMenu>
     </>
+  );
+}
+
+function ComposerExtraMenuItem({
+  item,
+  onSelect,
+}: {
+  item: ComposerMenuItem;
+  onSelect: () => void;
+}) {
+  const label = (
+    <>
+      <Icon icon={item.icon} className="mr-2 h-4 w-4" />
+      {item.label}
+    </>
+  );
+
+  if (!item.submenu) {
+    return (
+      <DropdownMenuItem disabled={item.disabled} onSelect={onSelect}>
+        {label}
+      </DropdownMenuItem>
+    );
+  }
+
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger
+        disabled={item.disabled}
+        className="data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+      >
+        {label}
+      </DropdownMenuSubTrigger>
+      <DropdownMenuPortal>
+        <DropdownMenuSubContent className="max-h-64 w-56 overflow-y-auto">
+          {item.submenu.entries}
+          {item.submenu.pickerLabel && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={onSelect}>
+                {item.submenu.pickerLabel}
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuSubContent>
+      </DropdownMenuPortal>
+    </DropdownMenuSub>
   );
 }
 

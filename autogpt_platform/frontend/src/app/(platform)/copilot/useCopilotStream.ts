@@ -52,7 +52,7 @@ import {
   type ProviderFailure,
 } from "./providerFailure";
 import { useCopilotUIStore } from "./store";
-import type { CopilotLlmModel } from "./store";
+import type { ChatModelChoice } from "./managedModelSelection";
 import { useCopilotReconnect } from "./useCopilotReconnect";
 import { sdkStopStream, useCopilotStop } from "./useCopilotStop";
 import { useHydrateOnStreamEnd } from "./useHydrateOnStreamEnd";
@@ -110,7 +110,7 @@ interface UseCopilotStreamArgs {
   hasActiveStream: boolean;
   refetchSession: () => Promise<{ data?: unknown }>;
   /** Model tier override. `undefined` = let backend decide. */
-  copilotModel: CopilotLlmModel | undefined;
+  copilotModel: ChatModelChoice | undefined;
 }
 
 export function useCopilotStream({

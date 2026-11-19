@@ -61,6 +61,7 @@ const mariaExpert = makeExpert({
 });
 const maxExpert = makeExpert({ id: "expert-max", name: "Max", role: "" });
 const samExpert = makeExpert({ id: "expert-sam", name: "Sam", role: "Sales" });
+const taskPlaceholder = "What would you like to do today?";
 
 function renderEmptySession(searchParams: string, onSend = vi.fn()) {
   server.use(
@@ -79,7 +80,7 @@ function renderEmptySession(searchParams: string, onSend = vi.fn()) {
 }
 
 describe("EmptySession — recipient-aware intro", () => {
-  it("introduces the selected expert with an inline recipient chip", async () => {
+  it("introduces the selected expert above the composer", async () => {
     const { container } = renderEmptySession("?expertId=expert-maria");
 
     await waitFor(() =>
@@ -115,15 +116,15 @@ describe("EmptySession — recipient-aware intro", () => {
     ).toBeDefined();
   });
 
-  it("keeps the Otto intro without a selected expert", async () => {
+  it("offers a plain task without a selected expert", async () => {
     const { container } = renderEmptySession("");
 
     await waitFor(() =>
       expect(normalizeWhitespace(container)).toContain(
-        "Tell Otto about your work, and it will find what to automate.",
+        "Describe a task to get started.",
       ),
     );
-    expect(screen.getByPlaceholderText(/What's your role/)).toBeDefined();
+    expect(screen.getByPlaceholderText(taskPlaceholder)).toBeDefined();
   });
 });
 
@@ -137,7 +138,7 @@ beforeEach(() => {
 
 it("shows the task prompt above the home recap", async () => {
   renderEmptySession("");
-  const prompt = await screen.findByPlaceholderText(/What's your role/);
+  const prompt = await screen.findByPlaceholderText(taskPlaceholder);
   const recap = await screen.findByRole("heading", { name: "Your recap" });
   expect(
     prompt.compareDocumentPosition(recap) & Node.DOCUMENT_POSITION_FOLLOWING,
@@ -158,7 +159,7 @@ it("keeps the prompt usable when the recap fails to load", async () => {
   renderEmptySession("", onSend);
   await screen.findByText("Your Home briefing could not be loaded");
   await user.type(
-    screen.getByPlaceholderText(/What's your role/),
+    screen.getByPlaceholderText(taskPlaceholder),
     "Plan my day{Enter}",
   );
   await waitFor(() => expect(onSend).toHaveBeenCalled());
@@ -173,9 +174,7 @@ it("keeps new tasks and the recap available without a rollout flag", async () =>
   server.events.on("request:start", record);
   try {
     renderEmptySession("");
-    expect(
-      await screen.findByPlaceholderText(/What's your role/),
-    ).toBeDefined();
+    expect(await screen.findByPlaceholderText(taskPlaceholder)).toBeDefined();
     await waitFor(() =>
       expect(requestedPaths).toContain("/api/proxy/api/home"),
     );
@@ -200,34 +199,35 @@ it("shows a named kickoff status and withholds the empty composer", () => {
   expect(screen.getByRole("status").textContent).toContain(
     "Opening Maria's workspace",
   );
-  expect(screen.queryByPlaceholderText(/What's your role/)).toBeNull();
+  expect(screen.queryByPlaceholderText(taskPlaceholder)).toBeNull();
 });
 
-it("switches recipients from the intro with no duplicate picker in the composer", async () => {
+it("switches recipients from the composer without losing the draft", async () => {
   const user = userEvent.setup();
   renderEmptySession("");
-  const picker = await screen.findByRole("button", {
-    name: "Sending to Otto — change recipient",
-  });
-  const prompt = screen.getByPlaceholderText(/What's your role/);
-  expect(
-    picker.compareDocumentPosition(prompt) & Node.DOCUMENT_POSITION_FOLLOWING,
-  ).toBeTruthy();
-  expect(
-    screen.getAllByRole("button", { name: /change recipient/, hidden: true }),
-  ).toHaveLength(1);
-  await user.click(picker);
-  await user.click(await screen.findByRole("menuitem", { name: /Maria/ }));
+  const prompt = screen.getByPlaceholderText(taskPlaceholder);
+  expect(screen.queryByRole("button", { name: /change recipient/ })).toBeNull();
+  await user.type(prompt, "Help with my launch");
+  await user.click(screen.getByRole("button", { name: "Add files and more" }));
+  await user.hover(await screen.findByRole("menuitem", { name: "Experts" }));
+  await user.click(
+    await screen.findByRole("menuitem", { name: "Search experts" }),
+  );
+  await user.type(
+    await screen.findByRole("searchbox", { name: "Search experts" }),
+    "strategist",
+  );
+  await user.click(await screen.findByRole("button", { name: /Maria/ }));
   expect(
     await screen.findByPlaceholderText("What should Maria work on?"),
   ).toBeDefined();
   expect(
     screen.getByRole("button", { name: "Sending to Maria — change recipient" }),
   ).toBeDefined();
+  expect(
+    screen.getByPlaceholderText("What should Maria work on?"),
+  ).toHaveProperty("value", "Help with my launch");
 });
-
-const teamPlaceholder =
-  "What should the team work on? e.g. 'Follow up with yesterday's leads'";
 
 function mockDashboard(dashboard: HomeDashboardResponse) {
   server.use(
@@ -237,12 +237,12 @@ function mockDashboard(dashboard: HomeDashboardResponse) {
   );
 }
 
-it("keeps the discovery prompt without starter pills or suggestion requests for an empty account", async () => {
+it("keeps the task prompt without starter pills or suggestion requests for an empty account", async () => {
   const fetchSuggestions = vi.fn(() => HttpResponse.json({ themes: [] }));
   server.use(http.get("*/api/chat/suggested-prompts", fetchSuggestions));
   renderEmptySession("");
   await screen.findByRole("heading", { name: "Your recap" });
-  expect(screen.getByPlaceholderText(/What's your role/)).toBeDefined();
+  expect(screen.getByPlaceholderText(taskPlaceholder)).toBeDefined();
   for (const name of ["Learn", "Create", "Automate", "Organize"]) {
     expect(screen.queryByRole("button", { name })).toBeNull();
   }
@@ -297,24 +297,23 @@ it.each([
   ],
   ["recent chat output", { recent_work: { total_count: 1, groups: [] } }],
 ] satisfies [string, Partial<HomeDashboardResponse>][])(
-  "uses the team prompt without starter pills for users with %s",
+  "keeps the plain task prompt without starter pills for users with %s",
   async (_label, activity) => {
     mockDashboard({ ...makeDashboard([]), ...activity });
     renderEmptySession("");
-    expect(await screen.findByPlaceholderText(teamPlaceholder)).toBeDefined();
+    await screen.findByRole("heading", { name: "Your recap" });
+    expect(screen.getByPlaceholderText(taskPlaceholder)).toBeDefined();
     for (const name of ["Learn", "Create", "Automate", "Organize"]) {
       expect(screen.queryByRole("button", { name })).toBeNull();
     }
     expect(
-      screen.getByRole("button", {
-        name: "Sending to Otto — change recipient",
-      }),
-    ).toBeDefined();
+      screen.queryByRole("button", { name: /change recipient/ }),
+    ).toBeNull();
   },
 );
 
 it.each([
-  ["answers the brain dump", "A", /^What should Otto take on first\?$/],
+  ["answers the brain dump", "A", /^What should we tackle first\?$/],
   ["asks for one", "B", /^What's your role/],
 ])(
   "asks a fitting question under the onboarding greeting that %s",
@@ -349,24 +348,18 @@ it("keeps the chosen expert's prompt for an existing account", async () => {
   expect(screen.queryByRole("button", { name: "Learn" })).toBeNull();
 });
 
-it("opens a fresh Home visit on Otto after choosing another recipient", async () => {
+it("opens a fresh Home visit without a preselected expert", async () => {
   const user = userEvent.setup();
   const firstVisit = renderEmptySession("");
-  await user.click(
-    await screen.findByRole("button", {
-      name: "Sending to Otto — change recipient",
-    }),
-  );
+  await user.click(screen.getByRole("button", { name: "Add files and more" }));
+  await user.click(await screen.findByRole("menuitem", { name: "Experts" }));
   await user.click(await screen.findByRole("menuitem", { name: /Maria/ }));
   await screen.findByPlaceholderText("What should Maria work on?");
   firstVisit.unmount();
 
   renderEmptySession("");
-  expect(
-    await screen.findByRole("button", {
-      name: "Sending to Otto — change recipient",
-    }),
-  ).toBeDefined();
+  expect(screen.getByPlaceholderText(taskPlaceholder)).toBeDefined();
+  expect(screen.queryByRole("button", { name: /change recipient/ })).toBeNull();
   expect(
     screen.queryByPlaceholderText("What should Maria work on?"),
   ).toBeNull();

@@ -20,6 +20,7 @@ from fastapi import (
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator
 
+from backend.api.features.chat.managed_models import require_chat_model
 from backend.api.features.experts import experts_db
 from backend.api.features.experts.models import Expert
 from backend.blocks.desktop._api import DesktopStream
@@ -396,6 +397,7 @@ class StreamChatRequest(BaseModel):
     """Request model for streaming chat with optional context."""
 
     message: str = Field(max_length=MAX_CHAT_MESSAGE_LENGTH)
+    managed_model_id: UUID | None = None
     is_user_message: bool = True
     context: ChatContext | None = Field(default=None, max_length=MAX_CONTEXT_ENTRIES)
     voice: bool = Field(
@@ -521,6 +523,7 @@ class CreateSessionRequest(BaseModel):
 
     dry_run: bool = False
     builder_graph_id: str | None = Field(default=None, max_length=128)
+    managed_model_id: UUID | None = None
     llm_auth_provider: CopilotLlmAuthProvider = "platform"
     llm_credential_id: str | None = Field(default=None, max_length=128)
     expert_id: str | None = Field(default=None, max_length=128)
@@ -831,6 +834,12 @@ async def _resolve_new_session_llm_route(
     auth_provider = request.llm_auth_provider if request else "platform"
     credential_id = request.llm_credential_id if request else None
 
+    if request is not None and "managed_model_id" in request.model_fields_set:
+        if request.builder_graph_id or auth_provider != "platform" or credential_id:
+            raise HTTPException(422, "Managed models use the platform chat route.")
+        await require_chat_model(request.managed_model_id)
+        return "platform", None
+
     if auth_provider == "codex":
         await enforce_codex_access_http(user_id)
 
@@ -945,6 +954,9 @@ async def create_session(
     client_session_id = (
         str(request.session_id) if request and request.session_id else None
     )
+    managed_models_only = (
+        request is not None and "managed_model_id" in request.model_fields_set
+    )
 
     if client_session_id and (builder_graph_id or expert_kickoff):
         raise HTTPException(
@@ -1018,6 +1030,7 @@ async def create_session(
             llm_auth_provider=llm_auth_provider,
             llm_credential_id=llm_credential_id,
             autopilot_mode=autopilot_mode,
+            **({"managed_models_only": True} if managed_models_only else {}),
         )
     else:
         try:
@@ -1032,6 +1045,7 @@ async def create_session(
                     llm_credential_id=llm_credential_id,
                     expert_id=expert_id,
                     autopilot_mode=autopilot_mode,
+                    **({"managed_models_only": True} if managed_models_only else {}),
                 )
             else:
                 session = await create_chat_session(
@@ -1043,6 +1057,7 @@ async def create_session(
                     llm_credential_id=llm_credential_id,
                     expert_id=expert_id,
                     autopilot_mode=autopilot_mode,
+                    **({"managed_models_only": True} if managed_models_only else {}),
                 )
         except SessionIdConflictError as e:
             raise HTTPException(
@@ -1976,9 +1991,15 @@ async def stream_chat_post(
             message = normalise_user_message(message)
         except EmptyUserMessage as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
+    managed_model_id = (
+        await require_chat_model(request.managed_model_id)
+        if session.metadata.managed_models_only
+        or "managed_model_id" in request.model_fields_set
+        else None
+    )
     await _apply_autopilot_mode(session, user_id, request.autopilot_mode)
-
-    await enforce_model_entitlement(request.model, session, user_id)
+    if managed_model_id is None:
+        await enforce_model_entitlement(request.model, session, user_id)
 
     # Fire-and-forget; per-user Redis dedup inside the helper provides
     # cross-process / cross-restart idempotency. Same pattern as
@@ -1994,7 +2015,9 @@ async def stream_chat_post(
         name=f"morning-briefing-register-{user_id[:12]}",
     )
 
-    is_platform_route = session.metadata.llm_auth_provider == "platform"
+    is_platform_route = (
+        managed_model_id is not None or session.metadata.llm_auth_provider == "platform"
+    )
     if is_platform_route:
         await enforce_payment_paywall(user_id)
     elif session.metadata.llm_auth_provider == "codex":
@@ -2065,6 +2088,10 @@ async def stream_chat_post(
             raise HTTPException(
                 status_code=409,
                 detail="expert kickoff requires an idle session",
+            )
+        if managed_model_id is not None:
+            raise HTTPException(
+                409, "Wait for the current reply before sending with a selected model."
             )
         try:
             await queue_pending_for_http(
@@ -2188,7 +2215,8 @@ async def stream_chat_post(
                 file_ids=sanitized_file_ids,
                 organization_id=turn_org_id,
                 team_id=turn_team_id,
-                model=request.model,
+                model=None if managed_model_id else request.model,
+                **({"managed_model_id": managed_model_id} if managed_model_id else {}),
                 llm_auth_provider=session.metadata.llm_auth_provider,
                 llm_credential_id=session.metadata.llm_credential_id,
                 permissions=builder_permissions,
@@ -2223,7 +2251,8 @@ async def stream_chat_post(
                 is_user_message=request.is_user_message,
                 context=request.context,
                 file_ids=sanitized_file_ids,
-                model=request.model,
+                model=None if managed_model_id else request.model,
+                **({"managed_model_id": managed_model_id} if managed_model_id else {}),
                 llm_auth_provider=session.metadata.llm_auth_provider,
                 llm_credential_id=session.metadata.llm_credential_id,
                 permissions=(
@@ -2463,6 +2492,8 @@ async def queue_pending_message(
 ):
     """Queue a follow-up message while the session has an active turn."""
     session = await _validate_and_get_writable_session(session_id, user_id)
+    if session.metadata.managed_models_only:
+        raise HTTPException(409, "Send a separate turn to use a managed model.")
     if session.metadata.llm_auth_provider == "platform":
         await enforce_payment_paywall(user_id)
     elif session.metadata.llm_auth_provider == "codex":

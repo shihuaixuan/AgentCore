@@ -13,6 +13,16 @@ generator client {
   partial_type_generator = "backend/data/partial_types.py"
 }
 
+model ManagedChatModel {
+  id        String   @id
+  name      String
+  model     String
+  baseUrl   String
+  apiKey    String
+  enabled   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
 // ============ Auth service (Better Auth) tables ============ //
 // Owned by Prisma migrations, but read/written at runtime by the Better Auth
 // service embedded in the frontend (via its pg adapter). Table and column

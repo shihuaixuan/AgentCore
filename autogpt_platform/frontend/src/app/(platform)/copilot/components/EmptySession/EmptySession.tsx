@@ -10,8 +10,7 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import type { ComponentProps, ReactNode } from "react";
 import type { WorkspaceAttachment } from "../../helpers/workspaceAttachments";
-import { ConnectionPicker } from "../ChatInput/components/ConnectionPicker/ConnectionPicker";
-import { RecipientChip } from "../ChatInput/components/RecipientChip";
+import { newTaskDraftKey } from "../ChatInput/components/recipientOptions";
 import { OnboardingIntroCard } from "../OnboardingIntroCard/OnboardingIntroCard";
 import { useOnboardingIntroCard } from "../OnboardingIntroCard/useOnboardingIntroCard";
 import { SEND_AT_RESET_PLACEHOLDER } from "../SendAtReset/helpers";
@@ -106,7 +105,7 @@ export function EmptySession({
     expertsById,
     isRosterLoaded,
     hasRosterFailed,
-    recipientID: recipient.id,
+    recipientID: recipient?.id ?? null,
     selectRecipient,
     // A task starts its own chat only through onStartTask, which the page
     // withholds while it resolves the recipient or the turn is locked.
@@ -120,20 +119,9 @@ export function EmptySession({
         getIntroLine(selectedExpert),
         selectedExpert
           ? `我是 ${selectedExpert.name}，你希望我处理什么？`
-          : "说说你的工作，我来帮你找到适合自动化的事情。",
+          : "描述一项任务，即可开始。",
       );
-  const recipientPicker = (
-    <RecipientChip
-      recipient={recipient}
-      options={options}
-      isLoading={isLoadingRecipient}
-      onSelect={selectRecipient}
-    />
-  );
-
   const { inputPlaceholder } = useHomeComposer({
-    enabled:
-      !intro.isVisible && !intro.isAwaitingGreeting && !isKickoffStarting,
     greetingPath: intro.isVisible ? intro.path : null,
   });
 
@@ -143,11 +131,6 @@ export function EmptySession({
 
   return (
     <div className="relative flex h-full flex-1 items-start justify-center overflow-y-auto px-0 py-5 md:px-6 md:py-10">
-      {/* Which connection the new chat runs on, kept out of the composer and
-          in the page corner, level with the inset header's controls. */}
-      <div className="absolute top-3 right-3 z-30 empty:hidden">
-        <ConnectionPicker className="ml-0" />
-      </div>
       <motion.div
         className={cn("relative z-10 w-full text-center", "max-w-[1120px]")}
         initial={{ opacity: 0 }}
@@ -171,13 +154,7 @@ export function EmptySession({
             // moves it there rather than replacing it.
             <GreetingLoader />
           ) : (
-            <EmptyHero
-              name={greetingName}
-              intro={introLine}
-              recipientPicker={recipientPicker}
-              isExpert={Boolean(selectedExpert)}
-              expertRole={selectedExpert?.role}
-            />
+            <EmptyHero name={greetingName} intro={introLine} />
           )}
 
           {/* Held back while the greeting is on its way — it enters with
@@ -203,8 +180,9 @@ export function EmptySession({
                 )}
                 <ChatInput
                   inputId="chat-input-empty"
-                  draftKey={`new:${selectedExpert?.id ?? expertId ?? "default"}`}
+                  draftKey={newTaskDraftKey(recipient?.id ?? expertId)}
                   stacked
+                  managedModels
                   voiceMode={voiceMode}
                   modeSelector={modeSelector}
                   onSend={onSend}
@@ -233,9 +211,14 @@ export function EmptySession({
                   expertId={expertId}
                   expertName={expertName}
                   assistantName={selectedExpert?.name ?? expertName ?? null}
-                  recipientPicker={
-                    intro.isVisible ? recipientPicker : undefined
-                  }
+                  recipientPicker={{
+                    recipient,
+                    options,
+                    isLoading: isLoadingRecipient,
+                    isRosterPending: !isRosterLoaded,
+                    hasRosterFailed,
+                    onSelect: selectRecipient,
+                  }}
                 />
                 {lowHint}
               </div>

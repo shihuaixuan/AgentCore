@@ -1,5 +1,6 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { CredentialMentionEditor } from "../CredentialMention/CredentialMentionEditor";
+import { parseCredentialMentions } from "../CredentialMention/helpers";
 import type { MentionInput } from "./useChatMentions";
 import {
   PromptInputButton,
@@ -20,6 +21,7 @@ import {
   ReactNode,
   memo,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import type { WorkspaceFileItem } from "@/app/api/__generated__/models/workspaceFileItem";
@@ -42,19 +44,29 @@ import {
   type ComposerMenuItem,
 } from "./components/ComposerPlusMenu";
 import { DryRunToggleButton } from "./components/DryRunToggleButton";
+import { ExpertMenuEntries } from "./components/ExpertMenuEntries";
 import { FileChips } from "./components/FileChips";
 import { MentionConnectDialog } from "./components/MentionConnectDialog";
 import { MentionDropdown } from "./components/MentionDropdown";
 import { ConnectionPickerDialog } from "./components/ConnectionPicker/ConnectionPickerDialog";
+import { ManagedModelPicker } from "./components/ManagedModelPicker";
 import { NoAIConnectionNotice } from "./components/NoAIConnectionNotice/NoAIConnectionNotice";
 import { RecordingButton } from "./components/RecordingButton";
 import { RecordingIndicator } from "./components/RecordingIndicator";
+import { RecipientChip, ThreadRecipientChip } from "./components/RecipientChip";
+import {
+  newTaskDraftKey,
+  type RecipientPickerConfig,
+} from "./components/recipientOptions";
+import { useChatDraftAccess } from "./useChatDraft";
+import type { ExpertIdentity } from "../../useExpertMap";
 import { SecretPasteNotice } from "./components/SecretPasteNotice";
 import { StopButton } from "./components/StopButton";
 import { TranscriptionErrorBar } from "./components/TranscriptionErrorBar";
 import { WorkspaceFilePicker } from "./components/WorkspaceFilePicker/WorkspaceFilePicker";
 import { useCopilotUIStore } from "../../store";
 import { isTokenDevtoolEnabled } from "../../tokenDevtool/gate";
+import { useIsMobile } from "../../useIsMobile";
 import { TokenDevtoolDialog } from "../TokenDevtoolBadge/TokenDevtoolDialog";
 import {
   sendAtResetFailureTitle,
@@ -77,6 +89,7 @@ import {
   ArrowUp02Icon,
   DashboardSpeed02Icon,
   FlashIcon,
+  UserCircleIcon,
   VoiceIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -109,12 +122,13 @@ interface Props {
   onDroppedFilesConsumed?: () => void;
   /** When true, the dry-run toggle is disabled (session is active and immutable). */
   hasSession?: boolean;
+  managedModels?: boolean;
   /** Session id for the dev-only token badge in the composer footer. */
   sessionId?: string | null;
   /** When true, the submit button is hidden until there is something to send. */
   hideSubmitWhenEmpty?: boolean;
-  /** Recipient picker chip rendered before the mode chips (new-task state). */
-  recipientPicker?: ReactNode;
+  recipientPicker?: RecipientPickerConfig;
+  threadRecipient?: ExpertIdentity | null;
   /** Card composer: the text always keeps its own row above the controls,
    *  instead of sharing a single pill row until it wraps. Empty state only. */
   stacked?: boolean;
@@ -168,9 +182,11 @@ export const ChatInput = memo(function ChatInput({
   droppedFiles,
   onDroppedFilesConsumed,
   hasSession = false,
+  managedModels = false,
   sessionId = null,
   hideSubmitWhenEmpty = false,
   recipientPicker,
+  threadRecipient,
   stacked = false,
   voiceMode,
   modeSelector,
@@ -285,22 +301,28 @@ export const ChatInput = memo(function ChatInput({
     }
   }
 
-  const { value, setValue, handleSubmit, handleEnqueue, isEnqueueing } =
-    useChatInput({
-      onSend: atReset?.onSchedule ?? sendWithAttachments,
-      onEnqueue,
-      isStreaming,
-      hasAttachments,
-      // A scheduled send carries text only, so attachments hold it back.
-      disabled: isTextareaDisabled || (atReset ? hasAttachments : sendDisabled),
-      canSendEmpty: hasAttachments && !atReset,
-      inputId,
-      draftKey,
-      autoFocus,
+  const {
+    value,
+    setValue,
+    handleSubmit,
+    handleEnqueue,
+    isEnqueueing,
+    isSending,
+  } = useChatInput({
+    onSend: atReset?.onSchedule ?? sendWithAttachments,
+    onEnqueue,
+    isStreaming,
+    hasAttachments,
+    // A scheduled send carries text only, so attachments hold it back.
+    disabled: isTextareaDisabled || (atReset ? hasAttachments : sendDisabled),
+    canSendEmpty: hasAttachments && !atReset,
+    inputId,
+    draftKey,
+    autoFocus,
       failureTitle: atReset
         ? (error) => sendAtResetFailureTitle(error, locale)
         : undefined,
-    });
+  });
 
   const integrations = useConnectedIntegrations(expertId);
 
@@ -405,15 +427,70 @@ export const ChatInput = memo(function ChatInput({
   }
 
   const isCompact = variant === "compact";
+  const isMobile = useIsMobile();
+  const plusButtonRef = useRef<HTMLButtonElement>(null);
+  const [isRecipientPickerOpen, setIsRecipientPickerOpen] = useState(false);
+  const isRecipientPickerDisabled =
+    isBusy || isSending || isStreaming || isRecording || isTranscribing;
+  if (isRecipientPickerOpen && isRecipientPickerDisabled) {
+    setIsRecipientPickerOpen(false);
+  }
+  const recipientSelectionBlocked =
+    !hasSession &&
+    (attachments.some((attachment) => attachment.kind !== "local") ||
+      parseCredentialMentions(value).some((part) => typeof part !== "string"))
+      ? t(
+          "Remove workspace attachments and connection mentions before changing the expert selection.",
+          "请先移除工作区附件和连接引用，再更改专家选择。",
+        )
+      : undefined;
+  const taskDraft = useChatDraftAccess(recipientPicker ? draftKey : undefined);
+  const selectRecipient = recipientPicker?.onSelect;
+
+  function handleRecipientSelect(id: string | null) {
+    if (!selectRecipient || recipientSelectionBlocked) return;
+    // Only an explicit, unblocked switch carries the text. Link navigation
+    // restores the destination's own draft, including only its own mentions.
+    taskDraft.moveTo(newTaskDraftKey(id), value);
+    selectRecipient(id);
+  }
+
   // Voice mode, model tier and the dev token readout sit behind the +
   // instead of as icons in the tray; the last two open in a dialog.
   const [plusPanel, setPlusPanel] = useState<"model" | "devtool" | null>(null);
   const showModelControl =
-    !stacked && !isCompact && (!hasSession || !isStreaming);
+    !managedModels && !stacked && !isCompact && (!hasSession || !isStreaming);
   if (!showModelControl && plusPanel === "model") {
     setPlusPanel(null);
   }
   const plusMenuItems: ComposerMenuItem[] = [
+    ...(recipientPicker || threadRecipient !== undefined
+      ? [
+          {
+            key: "experts",
+            label: t("Experts", "专家"),
+            icon: UserCircleIcon,
+            disabled: isRecipientPickerDisabled || recipientPicker?.isLoading,
+            opensPopover: true,
+            onSelect: () => setIsRecipientPickerOpen(true),
+            submenu:
+              recipientPicker && selectRecipient && !isMobile
+                ? {
+                    entries: (
+                      <ExpertMenuEntries
+                        {...recipientPicker}
+                        selectionBlocked={recipientSelectionBlocked}
+                        onSelect={handleRecipientSelect}
+                      />
+                    ),
+                    pickerLabel: recipientPicker.options.length
+                      ? t("Search experts", "搜索专家")
+                      : undefined,
+                  }
+                : undefined,
+          },
+        ]
+      : []),
     ...(voiceMode
       ? [
           {
@@ -478,7 +555,7 @@ export const ChatInput = memo(function ChatInput({
           onHighlight={mentions.setHighlightedIndex}
         />
       )}
-      <NoAIConnectionNotice enabled={!hasSession} />
+      {!managedModels && <NoAIConnectionNotice enabled={!hasSession} />}
       {/* GPT-style composer: a single pill row — plus on the left, textarea
           in the middle, quiet toggles + mic + send on the right. items-end
           keeps the controls pinned to the bottom edge as the textarea grows. */}
@@ -547,6 +624,7 @@ export const ChatInput = memo(function ChatInput({
             )}
           >
             <ComposerPlusMenu
+              triggerRef={plusButtonRef}
               onFilesSelected={handleFilesSelected}
               onUseWorkspaceFile={() => setIsPickerOpen(true)}
               onClearGuidedPrompt={handleClearGuidedPrompt}
@@ -562,7 +640,29 @@ export const ChatInput = memo(function ChatInput({
                   : iconButtonClass
               }
             />
-            {recipientPicker}
+            {recipientPicker && (
+              <RecipientChip
+                {...recipientPicker}
+                onSelect={selectRecipient ? handleRecipientSelect : undefined}
+                anchorRef={plusButtonRef}
+                disabled={isRecipientPickerDisabled}
+                open={isRecipientPickerOpen}
+                onOpenChange={setIsRecipientPickerOpen}
+                selectionBlocked={recipientSelectionBlocked}
+              />
+            )}
+            {threadRecipient !== undefined && (
+              <ThreadRecipientChip
+                expert={threadRecipient}
+                anchorRef={plusButtonRef}
+                disabled={isRecipientPickerDisabled}
+                open={isRecipientPickerOpen}
+                onOpenChange={setIsRecipientPickerOpen}
+              />
+            )}
+            {managedModels && (
+              <ManagedModelPicker disabled={isBusy || isStreaming} />
+            )}
           </InputGroupAddon>
           {/* Must be a real flex item: `order`/`w-full` are ignored on a
               `display: contents` box, which is what PromptInputBody was. */}
@@ -665,10 +765,10 @@ export const ChatInput = memo(function ChatInput({
             ) : atReset ? (
               <PromptInputSubmit
                 disabled={!canSend}
-                aria-label={SEND_AT_RESET_LABEL}
+                aria-label={t(SEND_AT_RESET_LABEL, "额度重置时发送")}
                 className={cn(sendButtonClass, "!w-auto px-4 font-medium")}
               >
-                {SEND_AT_RESET_LABEL}
+                {t(SEND_AT_RESET_LABEL, "额度重置时发送")}
               </PromptInputSubmit>
             ) : hideSubmitWhenEmpty && !canSend ? null : (
               <PromptInputSubmit

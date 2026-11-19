@@ -11,7 +11,6 @@ import { StepIndicator } from "./components/StepIndicator";
 import { orderedSteps } from "./progress";
 import { AccessStep } from "./steps/AccessStep/AccessStep";
 import { BrainDumpStep } from "./steps/BrainDumpStep/BrainDumpStep";
-import { ConnectStep } from "./steps/ConnectStep/ConnectStep";
 import { IntroStep } from "./steps/IntroStep/IntroStep";
 import { PreparingStep } from "./steps/PreparingStep";
 import { RoleStep } from "./steps/RoleStep";
@@ -26,7 +25,6 @@ export default function OnboardingPage() {
     isLoading,
     handlePreparingComplete,
     isPaymentEnabled,
-    isSelfHostConnectEnabled,
     canHireTeam,
     steps,
     preparingStep,
@@ -141,9 +139,6 @@ export default function OnboardingPage() {
         {currentStep === steps.autopilot && <IntroStep slide="autopilot" />}
         {currentStep === steps.role && <RoleStep />}
         {currentStep === steps.painPoints && <BrainDumpStep />}
-        {isSelfHostConnectEnabled && currentStep === steps.connect && (
-          <ConnectStep />
-        )}
         {currentStep === steps.subscription && (
           <PlanTrialStep hasPaywall={isPaymentEnabled} />
         )}

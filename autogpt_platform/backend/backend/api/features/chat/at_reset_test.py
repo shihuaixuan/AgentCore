@@ -73,6 +73,7 @@ def session(mocker: pytest_mock.MockerFixture) -> MagicMock:
         session_id=SESSION, organization_id="org-1", team_id="team-1", expert_id=None
     )
     chat.metadata.llm_auth_provider = "platform"
+    chat.metadata.managed_models_only = False
     for check in ("_validate_and_get_writable_session", "_validate_and_get_session"):
         mocker.patch.object(at_reset_routes, check, AsyncMock(return_value=chat))
     return chat

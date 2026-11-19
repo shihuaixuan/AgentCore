@@ -1,14 +1,8 @@
-import { parseAsString, useQueryState } from "nuqs";
+import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect } from "react";
 import { useAutopilotModeStore } from "../../autopilotModeStore";
 import { useExpertMap } from "../../useExpertMap";
-import type { RecipientOption } from "../ChatInput/components/RecipientChip";
-
-const AUTOPILOT_RECIPIENT: RecipientOption = {
-  id: null,
-  name: "Otto",
-  avatarUrl: null,
-};
+import { recipientOptions } from "../ChatInput/components/recipientOptions";
 
 export function useRecipientPicker() {
   const {
@@ -19,36 +13,27 @@ export function useRecipientPicker() {
     hasExpertsLoaded,
     isExpertsError,
   } = useExpertMap();
-  const [expertIdParam, setExpertIdParam] = useQueryState(
-    "expertId",
-    parseAsString,
-  );
+  const [{ expertId: expertIdParam }, setRecipientParams] = useQueryStates({
+    expertId: parseAsString,
+    new: parseAsString,
+  });
 
   // An ?expertId= pointing at an expert the user can no longer address
-  // (archived, deleted, or simply wrong) would leave the chip reading
-  // "Otto" while `createSession` still sent the id — which the backend
-  // rejects with a 404 on every send. Drop it so both agree on Otto.
+  // (archived, deleted, or simply wrong) must not reach `createSession`.
+  // Clear it so the composer and session creation both use the ordinary task.
   useEffect(
     function clearUnknownExpertParam() {
       if (!hasExpertsSettled || !expertIdParam) return;
       if (activeExpertIds.has(expertIdParam)) return;
-      void setExpertIdParam(null);
+      void setRecipientParams({ expertId: null, new: null });
     },
-    [activeExpertIds, hasExpertsSettled, expertIdParam, setExpertIdParam],
+    [activeExpertIds, hasExpertsSettled, expertIdParam, setRecipientParams],
   );
 
   const selectedExpert =
     activeExperts.find((expert) => expert.id === expertIdParam) ?? null;
 
-  const options: RecipientOption[] = [
-    AUTOPILOT_RECIPIENT,
-    ...activeExperts.map((expert) => ({
-      id: expert.id,
-      name: expert.name,
-      avatarUrl: expert.avatarUrl,
-      color: expert.color,
-    })),
-  ];
+  const options = recipientOptions(activeExperts);
 
   return {
     options,
@@ -58,13 +43,10 @@ export function useRecipientPicker() {
     expertsById,
     isRosterLoaded: hasExpertsLoaded,
     hasRosterFailed: isExpertsError,
-    recipient:
-      options.find((option) => option.id === expertIdParam) ??
-      AUTOPILOT_RECIPIENT,
+    recipient: options.find((option) => option.id === expertIdParam) ?? null,
     selectedExpert,
-    // Only a pending param can be mis-rendered as "Otto"; without one the
-    // fallback is already the right answer. Keyed on "not settled yet" rather
-    // than "fetching": an initial query that is pending but paused (offline)
+    // Don't render a pending expert deep link as an ordinary task. Keyed on
+    // "not settled yet" rather than "fetching": a paused query (offline)
     // reports `isFetching: false` while it still has no roster to resolve
     // against.
     isLoadingRecipient: !hasExpertsSettled && !!expertIdParam,
@@ -75,7 +57,7 @@ export function useRecipientPicker() {
       if (id !== expertIdParam) {
         useAutopilotModeStore.getState().clearNewChatChoice();
       }
-      void setExpertIdParam(id);
+      void setRecipientParams({ expertId: id, new: id ? "1" : null });
     },
   };
 }

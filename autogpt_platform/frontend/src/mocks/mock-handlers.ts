@@ -12,6 +12,7 @@ import {
 import { getBriefingsMock } from "@/app/api/__generated__/endpoints/briefings/briefings.msw";
 import {
   getChatMock,
+  getGetV2ListManagedChatModelsMockHandler200,
   getGetV2ListTurnsAtBudgetResetMockHandler200,
 } from "@/app/api/__generated__/endpoints/chat/chat.msw";
 import { getCreditsMock } from "@/app/api/__generated__/endpoints/credits/credits.msw";
@@ -93,6 +94,7 @@ export const mockHandlers = [
   // Nothing set to send at a budget reset unless a test sets it up; random
   // jobs would put a scheduled-message chip above every chat's composer.
   getGetV2ListTurnsAtBudgetResetMockHandler200({ jobs: [] }),
+  getGetV2ListManagedChatModelsMockHandler200([]),
   ...getChatMock(),
   ...getCreditsMock(),
   ...getDefaultMock(),

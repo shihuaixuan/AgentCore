@@ -6,7 +6,6 @@ import { useState } from "react";
 
 import { Text } from "@/components/atoms/Text/Text";
 
-import { AIConnectionsSection } from "./components/AIConnectionsSection/AIConnectionsSection";
 import { ConnectServiceDialog } from "./components/ConnectServiceDialog/ConnectServiceDialog";
 import { IntegrationsHeader } from "./components/IntegrationsHeader/IntegrationsHeader";
 import { IntegrationsList } from "./components/IntegrationsList/IntegrationsList";
@@ -54,7 +53,6 @@ export function IntegrationsPanel({
         withTitle={withHeading}
         onAddCustom={customConnections.create}
       />
-      <AIConnectionsSection />
       <CustomMCPConnections state={customConnections} />
       <section aria-labelledby="tool-connections-heading">
         <div className="pb-3 pl-4">

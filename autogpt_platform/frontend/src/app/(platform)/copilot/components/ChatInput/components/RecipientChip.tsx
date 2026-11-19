@@ -1,50 +1,74 @@
 "use client";
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/molecules/DropdownMenu/DropdownMenu";
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/molecules/Popover/Popover";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
+import { Text } from "@/components/atoms/Text/Text";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { isKey } from "@/lib/keyboard";
 import { cn } from "@/lib/utils";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
-import { ExpertAvatar } from "../../ChatMessagesContainer/components/ExpertAvatar/ExpertAvatar";
+import { useRef, useState, type RefObject } from "react";
+import { useExpertMap, type ExpertIdentity } from "../../../useExpertMap";
+import { ExpertPickerOptions, RecipientAvatar } from "./ExpertPickerOptions";
+import {
+  expertRecipient,
+  recipientOptions,
+  type RecipientPickerConfig,
+} from "./recipientOptions";
 
-export interface RecipientOption {
-  id: string | null;
-  name: string;
-  avatarUrl: string | null;
-  color?: string | null;
+interface Props extends RecipientPickerConfig {
+  anchorRef?: RefObject<HTMLButtonElement | null>;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  disabled?: boolean;
+  selectionBlocked?: string;
 }
 
-interface Props {
-  recipient: RecipientOption;
-  options: RecipientOption[];
-  onSelect: (id: string | null) => void;
-  /** True while the expert list is still loading behind a `?expertId=` deep
-   * link — showing the Otto fallback there would name the wrong
-   * recipient. */
-  isLoading?: boolean;
+export function ThreadRecipientChip({
+  expert,
+  ...props
+}: Pick<Props, "anchorRef" | "open" | "onOpenChange" | "disabled"> & {
+  expert: ExpertIdentity | null;
+}) {
+  const { activeExperts } = useExpertMap();
+  return (
+    <RecipientChip
+      {...props}
+      recipient={expert ? expertRecipient(expert) : null}
+      options={recipientOptions(activeExperts)}
+    />
+  );
 }
 
 const CHIP_CLASSNAME =
-  "ml-2 inline-flex h-9 items-center gap-1.5 rounded-2xl border border-border-base bg-surface pl-1.5 pr-2 text-body font-medium text-foreground-body shadow-sm";
+  "group inline-flex h-9 min-w-0 max-w-44 items-center gap-1.5 rounded-full border border-border-base bg-surface px-2 text-foreground-body";
 
 export function RecipientChip({
   recipient,
   options,
   onSelect,
   isLoading,
+  anchorRef,
+  open,
+  onOpenChange,
+  disabled,
+  selectionBlocked,
 }: Props) {
   const { t } = useTranslation();
+  const [localOpen, setLocalOpen] = useState(false);
+  const setOpen = onOpenChange ?? setLocalOpen;
+  const interactedOutside = useRef(false);
   if (isLoading) {
     return (
       <div
         role="status"
-        aria-label={t("Loading recipient", "正在加载接收者")}
+        aria-label={t("Loading recipient", "正在加载专家")}
         className={CHIP_CLASSNAME}
       >
         <Skeleton className="h-6 w-6 rounded-full" />
@@ -54,58 +78,69 @@ export function RecipientChip({
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          aria-label={t(
-            `Sending to ${recipient.name} — change recipient`,
-            `发送给 ${recipient.name} — 更换接收者`,
-          )}
-          className={cn(
-            CHIP_CLASSNAME,
-            "group transition-colors hover:bg-canvas",
-          )}
-        >
-          <RecipientAvatar option={recipient} />
-          {recipient.name}
-          <Icon
-            icon={ArrowDown01Icon}
-            tone="secondary"
-            motion="transform"
-            className="size-3.5 group-data-[state=open]:rotate-180"
-          />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        {options.map((option) => (
-          <DropdownMenuItem
-            key={option.id ?? "autopilot"}
-            onClick={() => onSelect(option.id)}
+    <Popover open={!disabled && (open ?? localOpen)} onOpenChange={setOpen}>
+      {recipient ? (
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            disabled={disabled}
+            aria-label={t(
+              `Sending to ${recipient.name} — change recipient`,
+              `发送给 ${recipient.name}，更换接收者`,
+            )}
             className={cn(
-              "gap-2",
-              option.id === recipient.id && "bg-surface-hover",
+              CHIP_CLASSNAME,
+              "transition-colors hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-focus focus-visible:outline-none disabled:opacity-60",
             )}
           >
-            <RecipientAvatar option={option} />
-            {option.name}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-// The same face the expert wears in the thread: Otto's own avatar for
-// the null recipient, the generated one for experts without an upload.
-function RecipientAvatar({ option }: { option: RecipientOption }) {
-  return (
-    <ExpertAvatar
-      name={option.name}
-      avatarUrl={option.avatarUrl}
-      color={option.color}
-      isAutopilot={option.id === null}
-      size="sm"
-    />
+            <RecipientAvatar option={recipient} />
+            <Text as="span" variant="body-tight" className="truncate">
+              {recipient.name}
+            </Text>
+            <Icon
+              icon={ArrowDown01Icon}
+              tone="secondary"
+              motion="transform"
+              className="size-3.5 shrink-0 group-data-[state=open]:rotate-180"
+            />
+          </button>
+        </PopoverTrigger>
+      ) : anchorRef ? (
+        <PopoverAnchor virtualRef={anchorRef} />
+      ) : null}
+      <PopoverContent
+        side="top"
+        align="start"
+        aria-label={t("Experts", "专家")}
+        className="max-w-[calc(100vw-1.5rem)]"
+        onInteractOutside={() => {
+          interactedOutside.current = true;
+        }}
+        onCloseAutoFocus={(event) => {
+          // Without a chip, return focus to + unless the user moved it outside.
+          if (!recipient && !interactedOutside.current && anchorRef?.current) {
+            event.preventDefault();
+            anchorRef.current.focus();
+          }
+          interactedOutside.current = false;
+        }}
+        onKeyDown={(event) => {
+          if (
+            isKey(event, "Enter") &&
+            event.target instanceof HTMLInputElement
+          ) {
+            event.preventDefault();
+          }
+        }}
+      >
+        <ExpertPickerOptions
+          recipient={recipient}
+          options={options}
+          selectionBlocked={selectionBlocked}
+          onSelect={onSelect}
+          onClose={() => setOpen(false)}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }

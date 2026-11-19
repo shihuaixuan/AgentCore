@@ -10,7 +10,6 @@ import {
 } from "@/app/api/__generated__/endpoints/chat/chat";
 import type { AtResetTurn } from "@/app/api/__generated__/models/atResetTurn";
 import { toast } from "@/components/molecules/Toast/use-toast";
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { toastSendFailure } from "../../helpers/sendFailureToast";
 import { describeSendFailure } from "../ChatInput/helpers";
@@ -32,6 +31,7 @@ import {
   startSendRead,
 } from "./sendChanges";
 import { useAtResetJobs } from "./useAtResetJobs";
+import { useManagedChatModels } from "../../useManagedChatModels";
 
 interface Args {
   sessionId: string | null;
@@ -51,6 +51,7 @@ function findSend(jobs: AtResetTurn[]) {
 }
 
 export function useScheduledSend({ sessionId, onSendNow, inputId }: Args) {
+  const { modelID } = useManagedChatModels();
   const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const { jobs, writeJobs } = useAtResetJobs(sessionId);
@@ -113,7 +114,14 @@ export function useScheduledSend({ sessionId, onSendNow, inputId }: Args) {
     // any already waiting and answers with the joined message.
     try {
       const response = await scheduleSend
-        .mutateAsync({ sessionId, data: { kind: "send", message } })
+        .mutateAsync({
+          sessionId,
+          data: {
+            kind: "send",
+            message,
+            ...(modelID ? { managed_model_id: modelID } : {}),
+          },
+        })
         .finally(onAnswered);
       // The client throws on error statuses. Any other answer without the
       // job leaves the message unset, so it fails the same way and the

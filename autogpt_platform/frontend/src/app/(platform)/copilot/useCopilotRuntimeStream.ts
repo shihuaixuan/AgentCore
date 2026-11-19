@@ -33,7 +33,8 @@ import {
   providerFailureFingerprint,
   type ProviderFailure,
 } from "./providerFailure";
-import { useCopilotUIStore, type CopilotLlmModel } from "./store";
+import { useCopilotUIStore } from "./store";
+import type { ChatModelChoice } from "./managedModelSelection";
 import {
   createAssistantRunJoiner,
   createTailRenderer,
@@ -70,7 +71,7 @@ interface Args {
   sessionAuthProvider?: string | null;
   sessionCredentialId?: string | null;
   refetchSession: () => Promise<{ data?: unknown }>;
-  copilotModel: CopilotLlmModel | undefined;
+  copilotModel: ChatModelChoice | undefined;
 }
 
 /**

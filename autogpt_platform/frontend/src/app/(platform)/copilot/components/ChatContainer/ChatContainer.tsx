@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/atoms/Tooltip/BaseTooltip";
 import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { UIDataTypes, UIMessage, UITools } from "ai";
 import { LayoutGroup } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -34,7 +35,6 @@ import { useShareChatExpert } from "../ContextPanel/useShareChatExpert";
 import { ArchivedExpertNotice } from "./components/ArchivedExpertNotice";
 import { SessionNotFound } from "./components/SessionNotFound";
 import { cn } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useIsMobile } from "../../useIsMobile";
 import { ComposerPanelTab } from "./components/ComposerPanelTab";
 import { SharedChatNotice } from "./components/SharedChatNotice";
@@ -619,11 +619,15 @@ export const ChatContainer = ({
                           onStop={handleStop}
                           onEnqueue={onEnqueue ? handleEnqueue : undefined}
                           placeholder={
-                            (atReset && composer.placeholder) ||
-                            t(
-                              "What else can I help with?",
-                              "还有什么我可以帮您的吗？",
-                            )
+                            atReset && composer.placeholder
+                              ? t(
+                                  composer.placeholder,
+                                  "现在撰写，额度重置后自动发送……",
+                                )
+                              : t(
+                                  "What else can I help with?",
+                                  "还需要我帮你做什么？",
+                                )
                           }
                           droppedFiles={droppedFiles}
                           onDroppedFilesConsumed={
@@ -632,11 +636,13 @@ export const ChatContainer = ({
                               : undefined
                           }
                           hasSession={!!sessionId}
+                          managedModels
                           sessionId={sessionId}
                           expertId={expertIdentity?.id ?? null}
                           modeSelector={modeSelector}
                           expertName={expertIdentity?.name ?? null}
                           assistantName={expertIdentity?.name ?? null}
+                          threadRecipient={expertIdentity ?? null}
                           voiceMode={voiceMode}
                           voiceBar={voiceBar}
                         />

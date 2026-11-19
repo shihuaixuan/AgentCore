@@ -7,6 +7,7 @@ import { useEffect, useInsertionEffect, useRef } from "react";
  */
 export function useSettleGate(isSettled: boolean) {
   const isSettledRef = useRef(isSettled);
+  const isDispatchingRef = useRef(false);
   // Every commit, before the effects below resolve any waiter.
   useInsertionEffect(() => {
     isSettledRef.current = isSettled;
@@ -15,8 +16,9 @@ export function useSettleGate(isSettled: boolean) {
   const isMountedRef = useRef(true);
 
   useEffect(() => {
-    if (!isSettled) return;
-    waitersRef.current.splice(0).forEach((resolve) => resolve(true));
+    if (isSettled && !isDispatchingRef.current) {
+      waitersRef.current.splice(0).forEach((resolve) => resolve(true));
+    }
   }, [isSettled]);
   useEffect(() => {
     isMountedRef.current = true;
@@ -30,17 +32,26 @@ export function useSettleGate(isSettled: boolean) {
    *  when nothing is left to resolve it. */
   function waitUntilSettled() {
     if (!isMountedRef.current) return Promise.resolve(false);
-    if (isSettledRef.current) return Promise.resolve(true);
+    if (isSettledRef.current && !isDispatchingRef.current) {
+      return Promise.resolve(true);
+    }
     return new Promise<boolean>((resolve) => {
       waitersRef.current.push(resolve);
     });
   }
 
-  /** A turn was just dispatched: waiters that arrive before the next render
-   *  must queue behind it rather than see the stale settled state. */
-  function markUnsettled() {
-    isSettledRef.current = false;
+  function claimTurn() {
+    if (!isSettledRef.current || isDispatchingRef.current) return false;
+    isDispatchingRef.current = true;
+    return true;
   }
 
-  return { waitUntilSettled, markUnsettled };
+  function releaseTurn() {
+    isDispatchingRef.current = false;
+    if (isMountedRef.current && isSettledRef.current) {
+      waitersRef.current.splice(0).forEach((resolve) => resolve(true));
+    }
+  }
+
+  return { waitUntilSettled, claimTurn, releaseTurn };
 }

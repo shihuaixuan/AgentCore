@@ -5,17 +5,19 @@ import { DeleteChatDialog } from "@/app/(platform)/copilot/components/DeleteChat
 import { ShareChatDialog } from "@/app/(platform)/copilot/sharing/ShareChatDialog";
 import { useExpertMap } from "@/app/(platform)/copilot/useExpertMap";
 import { groupSessionsByExpert } from "@/app/(platform)/copilot/useSessionList";
+import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
 import { SidebarMenu } from "@/components/molecules/Sidebar/Sidebar";
+import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
 import { PinIcon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { ExpertChatGroup } from "./components/ExpertChatGroup/ExpertChatGroup";
 import { NewExpertGroup } from "./components/NewExpertGroup/NewExpertGroup";
 import { RecentChatItem } from "./components/RecentChatItem/RecentChatItem";
-import { getNewChatHref, getNewExpertsWithoutChats } from "./helpers";
+import { getNewExpertsWithoutChats } from "./helpers";
 import { useRecentChats } from "./useRecentChats";
 
 export function RecentChats() {
@@ -23,7 +25,7 @@ export function RecentChats() {
   const chatPinningEnabled = useGetFlag(Flag.CHAT_PINNING);
 
   const isLearningEnabled = useGetFlag(Flag.DREAM_SKILL_LEARNING_ENABLED);
-  const { expertsById, activeExperts, activeExpertIds } = useExpertMap();
+  const { expertsById, activeExperts } = useExpertMap();
   // The week a new expert keeps their entry is measured from when the list
   // mounted: an expert who joins later counts as new, and one only ages out
   // on a later visit.
@@ -31,6 +33,8 @@ export function RecentChats() {
   const {
     sessions,
     isLoading,
+    error,
+    refetch,
     hasMore,
     isLoadingMore,
     loadMore,
@@ -58,6 +62,24 @@ export function RecentChats() {
     return (
       <div className="flex justify-center py-4">
         <LoadingSpinner size="small" className="text-foreground-tertiary" />
+      </div>
+    );
+  }
+
+  if (error && !sessions.length) {
+    const message =
+      error instanceof ApiError && error.status === 401
+        ? t("Could not verify your sign-in", "无法验证登录状态")
+        : t("Could not load recent chats", "无法加载最近对话");
+
+    return (
+      <div className="flex flex-col items-start gap-1 px-2 py-2">
+        <Text variant="body-tight" as="p" tone="muted" role="status">
+          {message}
+        </Text>
+        <Button variant="secondary" size="small" onClick={() => refetch()}>
+          {t("Retry", "重试")}
+        </Button>
       </div>
     );
   }
@@ -132,7 +154,6 @@ export function RecentChats() {
         }
         avatarUrl={expert?.avatarUrl ?? null}
         color={expert?.color ?? null}
-        newChatHref={getNewChatHref(group.expertId, activeExpertIds)}
         isAutopilot={!group.expertId}
         sessions={group.sessions}
         renderItem={renderItem}

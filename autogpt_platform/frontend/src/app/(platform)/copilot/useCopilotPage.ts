@@ -12,13 +12,7 @@ import {
 } from "@/services/onboarding/brain-dump-handoff";
 import type { UIMessage } from "ai";
 import { parseAsString, useQueryState } from "nuqs";
-import {
-  useEffect,
-  useInsertionEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCopilotStreamStore } from "./copilotStreamStore";
 import {
   buildKickoffMessage,
@@ -36,7 +30,6 @@ import {
   rememberHeldFollowUp,
   takeHeldFollowUps,
 } from "./helpers/heldFollowUps";
-import { queueFollowUpMessage } from "./helpers/queueFollowUpMessage";
 import { stripReplayPrefix } from "./helpers/stripReplayPrefix";
 import type { WorkspaceAttachment } from "./helpers/workspaceAttachments";
 import { useCopilotUIStore } from "./store";
@@ -45,6 +38,7 @@ import { useCopilotNotifications } from "./useCopilotNotifications";
 import { useCopilotPendingChips } from "./useCopilotPendingChips";
 import { useCopilotRuntimeStream } from "./useCopilotRuntimeStream";
 import { useCopilotStream } from "./useCopilotStream";
+import { useManagedChatModels } from "./useManagedChatModels";
 import { useExpertKickoff } from "./useExpertKickoff";
 import { resolveExpertIdentity, useExpertMap } from "./useExpertMap";
 import { useLoadMoreMessages } from "./useLoadMoreMessages";
@@ -131,7 +125,7 @@ function useCopilotPageSession() {
     void setKickoffParam(null, { history: "replace" });
   }, [hasExpertsSettled, kickoffExpertId, kickoffParam, setKickoffParam]);
 
-  const copilotLlmModel = useCopilotUIStore((s) => s.copilotLlmModel);
+  const { modelID: managedModelID } = useManagedChatModels();
   const isDryRun = useCopilotUIStore((s) => s.isDryRun);
   const setInitialPrompt = useCopilotUIStore((s) => s.setInitialPrompt);
   const { mutate: completeGreeting } = useCompleteBrainDumpGreeting();
@@ -167,6 +161,7 @@ function useCopilotPageSession() {
     dryRun: isDryRun,
     expertId,
     adoptLatestExpertThread: !newThreadParam,
+    managedModelID,
   });
 
   // An open session owns its identity: the URL param only describes who the
@@ -195,11 +190,7 @@ function useCopilotPageSession() {
     activeTurnStartedAt: activeStreamStartedAt,
     hasActiveStream,
     refetchSession,
-    // Sent whenever the picker can set it. The tier control is not behind
-    // CHAT_MODE_OPTION -- it renders from the server's connection offer --
-    // so gating the value on that flag silently ran the turn on the tier the
-    // user had not chosen. Entitlement is the server's call, not the flag's.
-    copilotModel: copilotLlmModel,
+    copilotModel: { managedModelID },
   };
   return {
     user,
@@ -334,33 +325,22 @@ function useCopilotPageChat(
     : historicalTurnStats;
   const turnStats = mergeTurnStats(pagedTurnStats, currentTurnStats);
 
-  // Ref that mirrors whether a stream turn is currently in-flight.
-  // Updated on every commit, before any effect or handler runs, so it always
-  // reflects the latest status — unlike reading `status` inside onSend (which
-  // captures the closure's render-cycle value and can be stale for a frame).
-  // Setting it to true *before* calling sendMessage prevents rapid
-  // double-presses from both routing to /stream before React can re-render
-  // with status="submitted".
   const isInflight =
     !isUserStopping && (status === "streaming" || status === "submitted");
-  const isInflightRef = useRef(isInflight);
-  useInsertionEffect(() => {
-    isInflightRef.current = isInflight;
-  });
 
   // Whether this tab has finished drawing the previous turn. The server's
-  // turn can end well before the screen does: the smoothing transform paces
-  // text out word by word (copilotStreamSmoothing.ts), and the post-finish
-  // probe may still turn into a reconnect. A follow-up the backend refused
-  // to queue (409, no active turn) waits here before going out as a new
-  // turn — see onSend.
+  // turn can end well before the screen does. A follow-up waits here before
+  // starting a separate turn on the selected model.
   const isLocalStreamSettled =
     !isInflight && !isFinishProbing && !isReconnecting;
   // A held follow-up learns whether the stream settled (send now) or the
   // hook went away first (the chat host unmounts on a chat switch and on
   // reload; the follow-up then stays in sessionStorage, see below).
-  const { waitUntilSettled: waitForLocalSettle, markUnsettled } =
-    useSettleGate(isLocalStreamSettled);
+  const {
+    waitUntilSettled: waitForLocalSettle,
+    claimTurn,
+    releaseTurn,
+  } = useSettleGate(isLocalStreamSettled);
 
   // Follow-ups waiting on the settle above. Shown as "Queued" chips beside
   // the backend-buffered ones, since from the user's side they are the same
@@ -429,7 +409,7 @@ function useCopilotPageChat(
 
   // Chip state machine (peek sync + auto-continue promotion + mid-turn poll)
   // lives in a dedicated hook so this component is just glue.
-  const { queuedMessages, queueMessage } = useCopilotPendingChips({
+  const { queuedMessages } = useCopilotPendingChips({
     sessionId,
     status,
     messages,
@@ -455,10 +435,7 @@ function useCopilotPageChat(
     isUserStoppingRef,
   });
 
-  // Wrap sendNewMessage with queue-in-flight routing: if a session is active
-  // and a turn is already running, POST the follow-up text to the pending
-  // endpoint so the backend buffers it; otherwise fall through to normal send.
-  async function sendOrQueue(
+  async function sendAfterCurrentTurn(
     message: string,
     files?: File[],
     workspaceFiles?: WorkspaceAttachment[],
@@ -486,11 +463,7 @@ function useCopilotPageChat(
     }
 
     let heldForLocalSettle = false;
-    // A loop, not an `if`: a held follow-up re-checks the in-flight ref once
-    // the screen settles, because another held follow-up may have dispatched
-    // a new turn in the same settle (in which case this one queues behind
-    // it) — and never sends while a turn is still being drawn.
-    while (sessionId && isInflightRef.current) {
+    while (sessionId && !claimTurn()) {
       if (hasAttachments) {
         toast({
           title: t("Please wait to attach files", "请稍后再添加文件"),
@@ -503,66 +476,39 @@ function useCopilotPageChat(
         return;
       }
 
-      try {
-        await queueFollowUpMessage(sessionId, trimmed);
-        if (heldForLocalSettle) releaseFollowUp(sessionId, trimmed);
-        queueMessage(trimmed);
-        return;
-      } catch (err) {
-        // Any other failure propagates to the composer, which restores the
-        // draft and shows the one toast for it.
-        if (
-          !(err instanceof Error && err.name === "QueueFollowUpNotActiveError")
-        ) {
-          if (heldForLocalSettle) releaseFollowUp(sessionId, trimmed);
-          throw err;
-        }
-      }
-
-      // The backend's turn is already over, but this tab may still be
-      // drawing it. Starting a second `useChat` request now cuts the live
-      // answer off mid-sentence: AI SDK only streams into the last message
-      // while its id matches, and the new user bubble takes that slot (see
-      // midTurnSplit.ts). Hold the follow-up until the local stream has
-      // settled, then send it as a normal turn below the finished answer.
       if (!heldForLocalSettle) holdFollowUp(sessionId, trimmed);
       heldForLocalSettle = true;
       if (!(await waitForLocalSettle())) return;
     }
 
-    // Mark in-flight synchronously before dispatching so a rapid second
-    // press sees isInflightRef.current=true and routes to the queue path
-    // instead of triggering a duplicate /stream POST.
-    if (sessionId) {
-      isInflightRef.current = true;
-      markUnsettled();
-    }
+    const dispatch = sendNewMessage(message, files, workspaceFiles, metadata);
+    const result = sessionId ? dispatch.finally(releaseTurn) : dispatch;
     if (heldForLocalSettle && sessionId) {
       releaseFollowUp(sessionId, trimmed);
       // Resolve once dispatched, not when the whole answer has streamed:
       // the composer's enqueue path is waiting on this, and holding it for
       // the entire turn would lock Enter and the queue button again.
-      void sendNewMessage(message, files, workspaceFiles, metadata).catch(
-        (err: unknown) => recoverDeferredSend(trimmed, err),
+      void result.catch((err: unknown) =>
+        recoverDeferredSend(trimmed, err),
       );
       return;
     }
-    return await sendNewMessage(message, files, workspaceFiles, metadata);
+    return await result;
   }
-  // One function for the host's lifetime that runs the latest `sendOrQueue`,
+  // One function for the host's lifetime that runs the latest send handler,
   // so the chat actions and the composer keep their props across flushes.
   const onSend = useStableCallback(
-    async (...args: Parameters<typeof sendOrQueue>) => {
-      await sendOrQueue(...args);
+    async (...args: Parameters<typeof sendAfterCurrentTurn>) => {
+      await sendAfterCurrentTurn(...args);
     },
   );
   // A suggested task records which chat its message started.
   const onStartTask = useStableCallback((message: string) =>
-    sendOrQueue(message),
+    sendAfterCurrentTurn(message),
   );
 
   useWorkflowImportAutoSubmit({
-    onSend: sendOrQueue,
+    onSend: sendAfterCurrentTurn,
     setPendingFileParts,
     isSendLocked: isExpertSendLocked,
   });
@@ -619,8 +565,6 @@ function useCopilotPageChat(
     createSession,
     onSend,
     onStartTask,
-    // onEnqueue delegates to onSend, which internally routes to the queue
-    // endpoint when isInflightRef.current is true.
     onEnqueue: onSend,
     queuedMessages:
       heldFollowUps.length > 0

@@ -24,7 +24,7 @@ import { RecipientChip } from "../components/ChatInput/components/RecipientChip"
 import { useRecipientPicker } from "../components/EmptySession/useRecipientPicker";
 import { ChatMessagesContainer } from "../components/ChatMessagesContainer/ChatMessagesContainer";
 import { useChatSession } from "../useChatSession";
-import { getNewChatHref } from "@/components/layout/AppSidebar/components/RecentChats/helpers";
+import { newRecipientChatHref } from "../expertSessionQuery";
 import { useCopilotUIStore } from "../store";
 import { groupSessionsByExpert } from "../useSessionList";
 
@@ -254,17 +254,19 @@ function KeyedSessionHost() {
   return <ExpertSessionHarness key={`chat-host-${sessionId ?? "new"}`} />;
 }
 
-/** Stands in for the sidebar's "New chat with Maria" link: following it
- *  lands on the href `getNewChatHref` builds, which replaces the whole query
+/** Stands in for the composer's "Start new chat" link: following it
+ *  lands on the href `newRecipientChatHref` builds, which replaces the whole query
  *  string, so whatever session was open is dropped along the way. Each key
  *  goes through its own setter, like the real New Chat handler. */
-function SidebarNewChatLink() {
+function RecipientNewChatLink() {
   const [, setExpertId] = useQueryState("expertId", parseAsString);
   const [, setSessionId] = useQueryState("sessionId", parseAsString);
   const [, setNewThread] = useQueryState("new", parseAsString);
   function follow() {
-    const href = getNewChatHref("expert-maria", new Set(["expert-maria"]));
-    const target = new URL(href ?? "/home", "http://localhost");
+    const target = new URL(
+      newRecipientChatHref("expert-maria"),
+      "http://localhost",
+    );
     void setSessionId(target.searchParams.get("sessionId"));
     void setExpertId(target.searchParams.get("expertId"));
     void setNewThread(target.searchParams.get("new"));
@@ -553,7 +555,7 @@ describe("useChatSession — expert sessions", () => {
     render(
       <CredentialsProvidersContext.Provider value={{}}>
         <RunningWrapper>
-          <SidebarNewChatLink />
+          <RecipientNewChatLink />
           <KeyedSessionHost />
         </RunningWrapper>
       </CredentialsProvidersContext.Provider>,
@@ -833,7 +835,7 @@ function RecipientPickerHarness() {
   return (
     <div>
       <div data-testid="picker-expert-id">{expertId ?? "none"}</div>
-      <div data-testid="picker-recipient">{recipient.name}</div>
+      <div data-testid="picker-recipient">{recipient?.name ?? "none"}</div>
     </div>
   );
 }
@@ -891,10 +893,10 @@ describe("recipient picker", () => {
     expect(expertListRequests).toBe(0);
   });
 
-  it("RecipientChip shows a placeholder instead of Otto while experts load", () => {
+  it("RecipientChip shows a placeholder while experts load", () => {
     render(
       <RecipientChip
-        recipient={{ id: null, name: "Otto", avatarUrl: null }}
+        recipient={null}
         options={[]}
         onSelect={vi.fn()}
         isLoading
@@ -902,16 +904,18 @@ describe("recipient picker", () => {
     );
 
     expect(screen.getByRole("status", { name: "Loading recipient" }));
-    expect(screen.queryByText("Otto")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /change recipient/ }),
+    ).toBeNull();
   });
 
   it("RecipientChip lists the team and reports the selection", async () => {
     const onSelect = vi.fn();
     render(
       <RecipientChip
-        recipient={{ id: null, name: "Otto", avatarUrl: null }}
+        recipient={{ id: "expert-max", name: "Max", avatarUrl: null }}
         options={[
-          { id: null, name: "Otto", avatarUrl: null },
+          { id: "expert-max", name: "Max", avatarUrl: null },
           { id: "expert-maria", name: "Maria", avatarUrl: null },
         ]}
         onSelect={onSelect}
@@ -945,7 +949,7 @@ describe("recipient picker", () => {
     await waitFor(() =>
       expect(screen.getByTestId("picker-expert-id").textContent).toBe("none"),
     );
-    expect(screen.getByTestId("picker-recipient").textContent).toBe("Otto");
+    expect(screen.getByTestId("picker-recipient").textContent).toBe("none");
   });
 
   it("clears an archived expert recipient after identities load", async () => {
@@ -974,6 +978,6 @@ describe("recipient picker", () => {
     await waitFor(() =>
       expect(screen.getByTestId("picker-expert-id").textContent).toBe("none"),
     );
-    expect(screen.getByTestId("picker-recipient").textContent).toBe("Otto");
+    expect(screen.getByTestId("picker-recipient").textContent).toBe("none");
   });
 });

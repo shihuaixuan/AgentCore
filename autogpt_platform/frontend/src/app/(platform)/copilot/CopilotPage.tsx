@@ -11,6 +11,7 @@ import { ContextPanelAutoOpen } from "./components/ContextPanel/ContextPanelAuto
 import { CopilotModals } from "./components/CopilotModals/CopilotModals";
 import { FileDropZone } from "./components/FileDropZone/FileDropZone";
 import { NotificationBanner } from "./components/NotificationBanner/NotificationBanner";
+import { ManagedModelChatContext } from "./components/ProviderLimitDialog/useProviderLimitDialog";
 import { ScaleLoader } from "./components/ScaleLoader/ScaleLoader";
 import { useIsMobile } from "./useIsMobile";
 
@@ -64,12 +65,14 @@ export function CopilotPage() {
       // visible when mobile browser chrome is shown.
       className="h-svh min-h-0"
     >
-      <MainArea
-        isMobile={isMobile}
-        sessionId={sessionId}
-        droppedFiles={droppedFiles}
-        setDroppedFiles={setDroppedFiles}
-      />
+      <ManagedModelChatContext.Provider value={true}>
+        <MainArea
+          isMobile={isMobile}
+          sessionId={sessionId}
+          droppedFiles={droppedFiles}
+          setDroppedFiles={setDroppedFiles}
+        />
+      </ManagedModelChatContext.Provider>
       {isMobile && sessionId && <ContextPanel sessionId={sessionId} mobile />}
       {isMobile && <ArtifactPanel mobile />}
 

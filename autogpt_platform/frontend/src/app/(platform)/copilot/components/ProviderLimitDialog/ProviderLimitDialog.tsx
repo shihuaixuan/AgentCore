@@ -3,9 +3,13 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
+import { useContext } from "react";
 
 import type { ProviderFailure } from "../../providerFailure";
-import { useProviderLimitDialog } from "./useProviderLimitDialog";
+import {
+  ManagedModelChatContext,
+  useProviderLimitDialog,
+} from "./useProviderLimitDialog";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
@@ -28,6 +32,7 @@ interface Props {
  * because people plan around it.
  */
 export function ProviderLimitDialog({ failure, sessionId, onDismiss }: Props) {
+  const managedChat = useContext(ManagedModelChatContext);
   const { t } = useTranslation();
   const {
     alternative,
@@ -63,7 +68,13 @@ export function ProviderLimitDialog({ failure, sessionId, onDismiss }: Props) {
           {resetHint ? ` ${resetHint}` : ""}
         </Text>
 
-        {isLoadingOffers ? (
+        {managedChat ? (
+          <Dialog.Footer>
+            <Button variant="primary" onClick={onDismiss}>
+              {t("Close", "关闭")}
+            </Button>
+          </Dialog.Footer>
+        ) : isLoadingOffers ? (
           <Text tone="muted" variant="small" className="mt-3">
             {t(
               "Checking what else this chat can run on…",

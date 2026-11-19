@@ -1,19 +1,6 @@
 import type { ExpertIdentity } from "@/app/(platform)/copilot/useExpertMap";
 import type { SessionSummaryResponse } from "@/app/api/__generated__/models/sessionSummaryResponse";
 
-// Fired experts can't be addressed, so their group gets no new-chat entry:
-// the deep link would only fall back to Otto. `new=1` keeps the page on the
-// fresh new-task state: without it `useChatSession` adopts the expert's
-// latest thread, which is exactly the chat the user is trying to leave.
-export function getNewChatHref(
-  expertId: string | null,
-  activeExpertIds: ReadonlySet<string>,
-) {
-  if (!expertId) return "/home";
-  if (!activeExpertIds.has(expertId)) return null;
-  return `/home?expertId=${encodeURIComponent(expertId)}&new=1`;
-}
-
 // How long a new expert keeps their own sidebar entry while they have no chat.
 export const NEW_EXPERT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
