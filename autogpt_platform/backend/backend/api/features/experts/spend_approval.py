@@ -15,6 +15,7 @@ import prisma.models
 from prisma.enums import ResourceVisibility, ReviewStatus
 from pydantic import BaseModel
 
+from backend.api.features.experts.copy_policy import expert_display_title
 from backend.copilot import db as chat_db
 from backend.copilot.constants import (
     COPILOT_NODE_EXEC_ID_SEPARATOR,
@@ -104,7 +105,11 @@ async def spend_approval_required(
     )
     return SpendApprovalNeeded(
         expert_id=expert_id,
-        expert_name=expert.name if expert else "Your expert",
+        expert_name=(
+            expert_display_title(expert.jobTitle, expert.role)
+            if expert
+            else "Your expert"
+        ),
         spent=spent,
         threshold=threshold,
         window=window,

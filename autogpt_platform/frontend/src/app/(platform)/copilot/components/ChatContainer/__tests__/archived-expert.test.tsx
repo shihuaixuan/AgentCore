@@ -121,7 +121,7 @@ describe("ChatContainer — archived expert", () => {
     );
 
     expect(screen.getByTestId("archived-expert-notice").textContent).toContain(
-      "Maria was fired — this thread is read-only",
+      "Marketing Strategist was fired — this thread is read-only",
     );
     expect(screen.queryByTestId("composer")).toBeNull();
   });
@@ -211,9 +211,10 @@ describe("ChatContainer — archived expert", () => {
 
     fireEvent.click(screen.getByTestId("error-retry"));
 
-    // Non-kickoff retries carry no attachments and no kickoff metadata.
+    // This legacy message has no attachments, kickoff metadata, or saved recipient.
     expect(onSend).toHaveBeenCalledWith(
       "Plan my week",
+      undefined,
       undefined,
       undefined,
       undefined,

@@ -4,18 +4,20 @@ import {
 } from "@/app/api/__generated__/endpoints/experts/experts";
 import { useGetV1ListProviders } from "@/app/api/__generated__/endpoints/integrations/integrations";
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
+import type { Expert } from "@/app/api/__generated__/models/expert";
 import type { ExpertSetupItem } from "@/app/api/__generated__/models/expertSetupItem";
 import { okData } from "@/app/api/helpers";
 import { toConnectableProviders } from "@/components/contextual/IntegrationsPanel/components/ConnectServiceDialog/helpers";
 import { serviceName } from "@/components/contextual/IntegrationsPanel/helpers";
 import { useToast } from "@/components/molecules/Toast/use-toast";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { invalidateExpertGrantQueries } from "@/services/experts/invalidate-experts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
-export function useSetupNeeded() {
-  const { t } = useTranslation();
+export function useSetupNeeded(experts: Expert[]) {
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [connecting, setConnecting] = useState<ExpertSetupItem | null>(null);
@@ -31,6 +33,11 @@ export function useSetupNeeded() {
   const connectable = new Set(
     toConnectableProviders(providersQuery.data ?? []).map((p) => p.id),
   );
+  const expertsById = new Map(experts.map((expert) => [expert.id, expert]));
+
+  function expertTitle(expertId: string) {
+    return getExpertDisplayTitle(expertsById.get(expertId), locale);
+  }
 
   const { mutate: grant, isPending: isGranting } = useGrantExpertCredentials({
     mutation: {
@@ -62,14 +69,15 @@ export function useSetupNeeded() {
           service_name: credential.service_name,
         })
       : t("this service", "此服务");
+    const title = expertTitle(item.expert_id);
     grant(
       { expertId: item.expert_id, data: { credential_ids: [credential.id] } },
       {
         onSuccess: () =>
           toast({
             title: t(
-              `${item.expert_name} can now use ${service}`,
-              `${item.expert_name} 现在可以使用 ${service}`,
+              `${title} can now use ${service}`,
+              `${title} 现在可以使用 ${service}`,
             ),
           }),
       },
@@ -96,6 +104,7 @@ export function useSetupNeeded() {
 
   return {
     items: itemsQuery.data ?? [],
+    expertTitle,
     // While the provider list is still loading nothing is knowably
     // unconnectable, so rows offer Connect rather than flashing "Needs a
     // platform key". Once it has settled, a failed load means no provider

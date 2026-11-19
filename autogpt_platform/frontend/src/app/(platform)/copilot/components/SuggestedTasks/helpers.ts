@@ -1,7 +1,9 @@
 import type { SuggestedTask } from "@/app/api/__generated__/models/suggestedTask";
 import type { SuggestedTaskState } from "@/app/api/__generated__/models/suggestedTaskState";
+import type { Locale } from "@/lib/i18n/locale";
 import { isTouchDevice } from "@/lib/platform";
 import { TOUR_TARGET_ATTRIBUTE } from "@/lib/tour-targets";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { Key, storage } from "@/services/storage/local-storage";
 import type { ExpertIdentity, ExpertIdentityMap } from "../../useExpertMap";
 import {
@@ -155,8 +157,10 @@ export function getTaskOwner(
   return expert ? { kind: "expert", expert } : { kind: "otto" };
 }
 
-export function getOwnerName(owner: TaskOwner) {
-  return owner.kind === "expert" ? owner.expert.name : "Otto";
+export function getOwnerName(owner: TaskOwner, locale: Locale = "en") {
+  return owner.kind === "expert"
+    ? getExpertDisplayTitle(owner.expert, locale)
+    : "Otto";
 }
 
 // Collapsing the list is a per-user UI preference, kept as the list of user

@@ -7,12 +7,14 @@ import { FadeIn } from "@/components/atoms/FadeIn/FadeIn";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
 import { MotionConfig } from "framer-motion";
 import { useOnboardingWizardStore } from "../../store";
 import { AutopilotScene } from "./components/AutopilotScene";
 import { TeamScene } from "./components/TeamScene";
-import { INTRO_SLIDES, type IntroSlideId } from "./helpers";
+import { CONTENT_ROLE, SALES_ROLE } from "./components/teamSceneHelpers";
+import type { IntroSlide, IntroSlideId } from "./helpers";
 
 interface Props {
   slide: IntroSlideId;
@@ -26,7 +28,9 @@ const SCENES: Record<IntroSlideId, () => React.JSX.Element> = {
 // One intro slide as a wizard step of its own, so it has a URL, a dot, a
 // place in the funnel and a Back button like every other step.
 export function IntroStep({ slide }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const contentTitle = getExpertDisplayTitle({ role: CONTENT_ROLE }, locale);
+  const salesTitle = getExpertDisplayTitle({ role: SALES_ROLE }, locale);
   const translatedSlides = {
     team: {
       eyebrow: t("Welcome to AutoGPT", "欢迎使用 AutoGPT"),
@@ -35,8 +39,8 @@ export function IntroStep({ slide }: Props) {
         "你的新团队，第一天就准备就绪",
       ),
       body: t(
-        "Maria drafts your blog posts. Max finds your next customers.",
-        "Maria 为你起草博客文章，Max 帮你寻找下一批客户。",
+        `The ${contentTitle} drafts your blog posts. The ${salesTitle} finds your next customers.`,
+        `${contentTitle}为你起草博客文章，${salesTitle}帮你寻找下一批客户。`,
       ),
       cta: t("Meet Otto", "认识 Otto"),
     },
@@ -44,7 +48,7 @@ export function IntroStep({ slide }: Props) {
       title: t("Meet Otto, your Head of AI.", "认识 Otto，你的 AI 负责人。"),
       cta: t("Next", "下一步"),
     },
-  } satisfies typeof INTRO_SLIDES;
+  } satisfies Record<IntroSlideId, IntroSlide>;
   const nextStep = useOnboardingWizardStore((s) => s.nextStep);
   const { eyebrow, title, body, cta } = {
     eyebrow: undefined,

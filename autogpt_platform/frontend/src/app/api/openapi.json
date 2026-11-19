@@ -29221,6 +29221,17 @@
             ],
             "title": "Expert Role"
           },
+          "expert_job_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expert Job Title"
+          },
           "title": {
             "type": "string",
             "title": "Title",
@@ -40037,6 +40048,17 @@
               }
             ],
             "title": "Avatar Url"
+          },
+          "job_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Title"
           }
         },
         "type": "object",

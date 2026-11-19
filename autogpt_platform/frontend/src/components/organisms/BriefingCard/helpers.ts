@@ -2,7 +2,6 @@ import { format, isToday, parseISO } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import type { Locale } from "@/lib/i18n/locale";
 import type { BriefingResponse } from "@/app/api/__generated__/models/briefingResponse";
-import type { BriefingRunItem } from "@/app/api/__generated__/models/briefingRunItem";
 
 // A briefing can be all decisions and no terminal runs — a run paused on an
 // approval never completes — which leaves the card with nothing but a date.
@@ -73,9 +72,8 @@ export function getSafeLink(link: string | null | undefined): string | null {
 }
 
 // Attribution only earns its space when it sits in front of something else:
-// with a summary the row reads "Ana · Found 3 leads", and without one the
-// expert's name is the whole subtitle rather than a prefix to itself.
-export function getSubtitleParts(item: BriefingRunItem) {
-  if (!item.summary) return { attribution: null, text: item.expert_name };
-  return { attribution: item.expert_name, text: item.summary };
+// without a summary, the expert title is the whole subtitle.
+export function getSubtitleParts(summary: string | null, title: string | null) {
+  if (!summary) return { attribution: null, text: title };
+  return { attribution: title, text: summary };
 }

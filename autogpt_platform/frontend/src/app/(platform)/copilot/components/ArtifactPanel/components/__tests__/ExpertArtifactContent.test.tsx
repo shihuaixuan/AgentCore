@@ -34,8 +34,9 @@ function expert(overrides: Partial<ExpertArtifact> = {}): ExpertArtifact {
   return {
     id: null,
     kind: "raise",
-    name: "Otto",
+    name: "Maria",
     role: "Inbox triage",
+    jobTitle: "Inbox Coordinator",
     color: "violet-300",
     tagline: "Sorts your morning inbox.",
     about: "You group the morning inbox.",
@@ -49,11 +50,12 @@ function expert(overrides: Partial<ExpertArtifact> = {}): ExpertArtifact {
 }
 
 describe("ExpertArtifactContent", () => {
-  it("lays out every detail the proposal carries", () => {
+  it("uses one profession in the header and shows the proposal details", () => {
     render(<ExpertArtifactContent expert={expert()} />);
 
-    expect(screen.getByText("Otto")).toBeDefined();
-    expect(screen.getByText("Inbox triage")).toBeDefined();
+    expect(screen.getByText("Inbox Coordinator")).toBeDefined();
+    expect(screen.queryByText("Maria")).toBeNull();
+    expect(screen.queryByText("Inbox triage")).toBeNull();
     expect(screen.getByText("Sorts your morning inbox.")).toBeDefined();
     expect(screen.getByText(/nothing created yet/i)).toBeDefined();
     expect(screen.getByText("Raised from a charter")).toBeDefined();

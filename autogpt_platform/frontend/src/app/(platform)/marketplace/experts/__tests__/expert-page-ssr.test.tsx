@@ -135,11 +135,10 @@ describe("Marketplace expert page on the server", () => {
 
     const html = renderServerHTML(await renderPage("template-maria"));
 
-    expect(html).toMatch(/<h1[^>]*>[^<]*Maria/);
-    expect(html).toContain("Marketing Strategist");
+    expect(html).toMatch(/<h1[^>]*>Marketing Strategist<\/h1>/);
     expect(html).toContain("Grows your brand while you sleep");
     expect(html).toContain(
-      "Maria is a senior marketing strategist with fifteen years across B2B SaaS.",
+      "Marketing Strategist is a senior marketing strategist with fifteen years across B2B SaaS.",
     );
     expect(html).toContain("Social listening on your brand");
     expect(html).toContain("Brand voice guide");
@@ -157,7 +156,9 @@ describe("Marketplace expert page on the server", () => {
     // rest of the profile must be text, not placeholders.
     const [header, body] = html.split("</header>");
     expect(header).toContain("<h1");
-    expect(body).toContain("Maria is a senior marketing strategist");
+    expect(body).toContain(
+      "Marketing Strategist is a senior marketing strategist",
+    );
     expect(body.match(/animate-pulse/g) ?? []).toHaveLength(1);
   });
 

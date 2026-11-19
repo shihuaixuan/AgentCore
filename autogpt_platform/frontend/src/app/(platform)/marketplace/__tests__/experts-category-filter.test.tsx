@@ -130,7 +130,10 @@ describe("Marketplace category filter over experts", () => {
     const finance = await findCategoryChip("Finance");
     const card = await within(await screen.findByRole("article")).findByRole(
       "link",
-      { name: /Quinn/ },
+      { name: /^Account Executive\b/ },
+    );
+    expect(card.getAttribute("href")).toBe(
+      "/marketplace/experts/template-quinn",
     );
     const image = card.querySelector("img")?.getAttribute("src");
     expect(image).toContain("expert-quinn");
@@ -174,19 +177,25 @@ describe("Marketplace category filter over experts", () => {
 
     await waitFor(() => expect(requestedCategories).toContain("marketing"));
     await waitFor(() =>
-      expect(screen.queryByRole("link", { name: /Max/ })).toBeNull(),
+      expect(
+        screen.queryByRole("heading", { name: "Account Executive" }),
+      ).toBeNull(),
     );
-    expect(screen.getByRole("link", { name: /Maria/ })).toBeDefined();
+    expect(
+      await screen.findByRole("heading", { name: "SEO Content Manager" }),
+    ).toBeDefined();
   });
 
   test("clearing the category restores the whole roster", async () => {
     const { rerender } = render(<MainMarkeplacePage />);
-    await screen.findByRole("heading", { name: "SEO Content Manager" });
+    await screen.findByRole("heading", { name: "Account Executive" });
 
     await userEvent.click(await findCategoryChip("Marketing"));
     rerender(<MainMarkeplacePage />);
     await waitFor(() =>
-      expect(screen.queryByRole("link", { name: /Max/ })).toBeNull(),
+      expect(
+        screen.queryByRole("heading", { name: "Account Executive" }),
+      ).toBeNull(),
     );
 
     await userEvent.click(await findCategoryChip("Marketing"));

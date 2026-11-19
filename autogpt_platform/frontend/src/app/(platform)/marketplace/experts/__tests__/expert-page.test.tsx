@@ -142,6 +142,11 @@ const mariaDayOne = [
   },
 ] satisfies ExpertDayOneItem[];
 
+const TITLE = "Marketing Strategist";
+const HIRE_LABEL = `Hire ${TITLE}`;
+const VOICE_PROMPT = `How should ${TITLE} write?`;
+const HIRED_MESSAGE = `${TITLE} joined your team`;
+
 function renderPage(locale: Locale = "en") {
   return render(
     <LanguageProvider initialLocale={locale}>
@@ -167,12 +172,48 @@ describe("Marketplace expert page", () => {
     );
   });
 
+  test("shows the profession and portrait as the profile identity instead of the legacy name", async () => {
+    server.use(
+      getListExpertTemplatesMockHandler([
+        {
+          ...mariaTemplate,
+          name: "凯西",
+          role: "代码审查与质量保障",
+          job_title: "质量保障工程师",
+          bio: "我是 凯西，你的质量保障工程师。提供代码仓库或拉取请求，我会说明是否适合合并。",
+          avatar_url: "/autogpt-characters/v2.1/expert-casey/neutral/128.webp",
+        },
+      ]),
+      getListExpertsMockHandler([]),
+    );
+    renderPage("zh-CN");
+
+    const heading = await screen.findByRole("heading", {
+      level: 1,
+      name: "质量保障工程师",
+    });
+    const header = heading.closest("header");
+    expect(header?.textContent).not.toContain("凯西");
+    expect(header?.querySelector("img")?.getAttribute("src")).toBe(
+      "/experts/professional/expert-casey.webp",
+    );
+    expect(
+      screen.getByRole("button", { name: "聘用 质量保障工程师" }),
+    ).toBeDefined();
+    expect(
+      screen.getByText(
+        "我是你的质量保障工程师。提供代码仓库或拉取请求，我会说明是否适合合并。",
+      ),
+    ).toBeDefined();
+    expect(screen.queryByText(/凯西/)).toBeNull();
+  });
+
   test.each(["凯西", "Casey"])(
-    "localizes a hired expert's dynamic copy without changing the name %s",
-    async (name) => {
+    "localizes a hired expert's dynamic copy using the profession instead of %s",
+    async (legacyName) => {
       const template = {
         ...mariaTemplate,
-        name,
+        name: legacyName,
         categories: ["development"],
         day_one: mariaDayOne,
         workflows: [
@@ -190,14 +231,14 @@ describe("Marketplace expert page", () => {
       };
       server.use(
         getListExpertTemplatesMockHandler([template]),
-        getListExpertsMockHandler([{ ...hiredMaria, name }]),
+        getListExpertsMockHandler([{ ...hiredMaria, name: legacyName }]),
       );
 
       renderPage("zh-CN");
 
       expect(
         (
-          await screen.findByRole("link", { name: `与 ${name} 对话` })
+          await screen.findByRole("link", { name: `与 ${TITLE} 对话` })
         ).getAttribute("href"),
       ).toBe("/copilot?expertId=expert-maria");
       expect(screen.getByText("技术工程")).toBeDefined();
@@ -210,22 +251,24 @@ describe("Marketplace expert page", () => {
       expect(screen.getByText("未命名工作流")).toBeDefined();
       expect(
         screen.getByText(
-          `聘用 ${name} 无需额外费用。其工作将使用你的现有余额，每周支出上限为 $5；加入团队后，你可以调整此上限。`,
+          new RegExp(
+            `聘用 ${TITLE} 无需额外费用。其工作将使用你的现有余额，每周支出上限为`,
+          ),
         ),
       ).toBeDefined();
       expect(
-        screen.getByRole("region", { name: `${name} 的首日安排` }),
+        screen.getByRole("region", { name: `${TITLE} 的首日安排` }),
       ).toBeDefined();
       expect(
-        screen.getByRole("region", { name: `${name} 可使用的服务` }),
+        screen.getByRole("region", { name: `${TITLE} 可使用的服务` }),
       ).toBeDefined();
       expect(
         screen.getByText(
-          `${name} 首次需要使用这些服务时，会请你连接账户；连接前不会共享任何数据。`,
+          `${TITLE} 首次需要使用这些服务时，会请你连接账户；连接前不会共享任何数据。`,
         ),
       ).toBeDefined();
       expect(
-        screen.getByText(`${name} 加入团队后，这些工作流即可立即运行。`),
+        screen.getByText(`${TITLE} 加入团队后，这些工作流即可立即运行。`),
       ).toBeDefined();
       expect(screen.getAllByText("已锁定")).toHaveLength(2);
       expect(
@@ -255,10 +298,12 @@ describe("Marketplace expert page", () => {
       renderPage("zh-CN");
 
       expect(
-        await screen.findByRole("button", { name: "聘用 Maria" }),
+        await screen.findByRole("button", { name: `聘用 ${TITLE}` }),
       ).toBeDefined();
       expect(
-        screen.getByText("聘用 Maria 无需额外费用。其工作将使用你的现有余额。"),
+        screen.getByText(
+          `聘用 ${TITLE} 无需额外费用。其工作将使用你的现有余额。`,
+        ),
       ).toBeDefined();
       expect(screen.queryByText(/每周支出上限/)).toBeNull();
     },
@@ -292,9 +337,13 @@ describe("Marketplace expert page", () => {
     renderPage();
 
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Maria" }),
+      await screen.findByRole("heading", { level: 1, name: TITLE }),
     ).toBeDefined();
-    expect(screen.getByText(/Marketing Strategist/)).toBeDefined();
+    expect(
+      screen.getByText(
+        "Marketing Strategist is a senior marketing strategist with fifteen years across B2B SaaS.",
+      ),
+    ).toBeDefined();
     expect(screen.getByText("Grows your brand while you sleep")).toBeDefined();
     expect(
       within(screen.getByRole("region", { name: /^Workflows/ })).getByText(
@@ -307,9 +356,11 @@ describe("Marketplace expert page", () => {
         .getAttribute("href"),
     ).toBe("/marketplace#experts");
 
-    await userEvent.click(screen.getByRole("button", { name: "Hire Maria" }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: HIRE_LABEL }),
+    );
 
-    expect(await screen.findByText("Maria joined your team")).toBeDefined();
+    expect(await screen.findByText(HIRED_MESSAGE)).toBeDefined();
     expect(mockRouterPush).toHaveBeenCalledWith(
       `/copilot?expertId=${hiredMaria.id}&kickoff=1`,
     );
@@ -332,7 +383,7 @@ describe("Marketplace expert page", () => {
     );
 
     await userEvent.click(
-      await screen.findByRole("button", { name: "Hire Maria" }),
+      await screen.findByRole("button", { name: HIRE_LABEL }),
     );
 
     await waitFor(() =>
@@ -440,7 +491,7 @@ describe("Marketplace expert page", () => {
 
     renderPage();
 
-    await screen.findByRole("heading", { level: 1, name: "Maria" });
+    await screen.findByRole("heading", { level: 1, name: TITLE });
     expect(screen.queryByRole("heading", { name: "Skills" })).toBeNull();
     expect(screen.queryByText("Content strategy")).toBeNull();
   });
@@ -456,7 +507,7 @@ describe("Marketplace expert page", () => {
     // Only what the viewer connects: Anthropic, OpenAI and Jina are on the
     // platform's own credentials and must not be asked for.
     const access = await screen.findByRole("region", {
-      name: "Services Maria can work with",
+      name: `Services ${TITLE} can work with`,
     });
     expect(within(access).getByText("DataForSEO")).toBeDefined();
     expect(within(access).queryByText("Anthropic")).toBeNull();
@@ -485,13 +536,12 @@ describe("Marketplace expert page", () => {
     renderPage();
 
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Maria" }),
+      await screen.findByRole("heading", { level: 1, name: TITLE }),
     ).toBeDefined();
     expect(
-      screen.queryByRole("region", { name: /Services Maria can work with/ }),
+      screen.queryByRole("region", { name: `Services ${TITLE} can work with` }),
     ).toBeNull();
     expect(screen.queryByText(/cannot break/)).toBeNull();
-    // The plan line has no data to be missing, so it always stands.
     expect(
       screen.getByRole("heading", { name: "Included with your plan" }),
     ).toBeDefined();
@@ -520,7 +570,7 @@ describe("Marketplace expert page", () => {
     renderPage();
 
     const dayOne = await screen.findByRole("region", {
-      name: "What Maria sets up on day one",
+      name: `What ${TITLE} sets up on day one`,
     });
     const rows = within(dayOne).getAllByRole("listitem");
     expect(rows).toHaveLength(3);
@@ -548,7 +598,7 @@ describe("Marketplace expert page", () => {
     renderPage();
 
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Maria" }),
+      await screen.findByRole("heading", { level: 1, name: TITLE }),
     ).toBeDefined();
     expect(
       screen.queryByRole("region", { name: /sets up on day one/ }),
@@ -571,16 +621,16 @@ describe("Marketplace expert page", () => {
     renderPage();
 
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Maria" }),
+      await screen.findByRole("heading", { level: 1, name: TITLE }),
     ).toBeDefined();
     // The roster has not answered, so neither action may be shown yet.
-    expect(screen.queryByRole("button", { name: "Hire Maria" })).toBeNull();
+    expect(screen.queryByRole("button", { name: HIRE_LABEL })).toBeNull();
     expect(screen.queryByText("On your team")).toBeNull();
 
     releaseRoster();
 
     expect(await screen.findByText("On your team")).toBeDefined();
-    expect(screen.queryByRole("button", { name: "Hire Maria" })).toBeNull();
+    expect(screen.queryByRole("button", { name: HIRE_LABEL })).toBeNull();
   });
 
   test("shows the on-your-team state with a way into the chat", async () => {
@@ -594,10 +644,10 @@ describe("Marketplace expert page", () => {
     expect(await screen.findByText("On your team")).toBeDefined();
     expect(
       screen
-        .getByRole("link", { name: "Chat with Maria" })
+        .getByRole("link", { name: `Chat with ${TITLE}` })
         .getAttribute("href"),
     ).toBe("/copilot?expertId=expert-maria");
-    expect(screen.queryByRole("button", { name: "Hire Maria" })).toBeNull();
+    expect(screen.queryByRole("button", { name: HIRE_LABEL })).toBeNull();
   });
 
   test("captures a voice pick as a plain-text soul PATCH after hire", async () => {
@@ -618,16 +668,16 @@ describe("Marketplace expert page", () => {
     renderPage();
 
     await userEvent.click(
-      await screen.findByRole("button", { name: "Hire Maria" }),
+      await screen.findByRole("button", { name: HIRE_LABEL }),
     );
 
-    expect(await screen.findByText("How should Maria write?")).toBeDefined();
+    expect(await screen.findByText(VOICE_PROMPT)).toBeDefined();
     await userEvent.click(await screen.findByText("Punchy and bold"));
     await userEvent.click(
       screen.getByRole("button", { name: "Use this voice" }),
     );
 
-    expect(await screen.findByText("Maria joined your team")).toBeDefined();
+    expect(await screen.findByText(HIRED_MESSAGE)).toBeDefined();
     expect(savedVoice).toContain("Preferred writing style: Punchy and bold.");
     expect(savedVoice.startsWith("{")).toBe(false);
   });
@@ -647,14 +697,14 @@ describe("Marketplace expert page", () => {
     renderPage();
 
     await userEvent.click(
-      await screen.findByRole("button", { name: "Hire Maria" }),
+      await screen.findByRole("button", { name: HIRE_LABEL }),
     );
-    expect(await screen.findByText("How should Maria write?")).toBeDefined();
+    expect(await screen.findByText(VOICE_PROMPT)).toBeDefined();
     await userEvent.click(
       await screen.findByRole("button", { name: "Skip for now" }),
     );
 
-    expect(await screen.findByText("Maria joined your team")).toBeDefined();
+    expect(await screen.findByText(HIRED_MESSAGE)).toBeDefined();
     expect(soulPatched).toBe(false);
   });
 
@@ -675,25 +725,23 @@ describe("Marketplace expert page", () => {
     renderPage();
 
     await userEvent.click(
-      await screen.findByRole("button", { name: "Hire Maria" }),
+      await screen.findByRole("button", { name: HIRE_LABEL }),
     );
-    expect(await screen.findByText("How should Maria write?")).toBeDefined();
+    expect(await screen.findByText(VOICE_PROMPT)).toBeDefined();
     await userEvent.click(await screen.findByText("Punchy and bold"));
     await userEvent.click(
       screen.getByRole("button", { name: "Use this voice" }),
     );
 
     expect(await screen.findByText("Couldn't save the voice")).toBeDefined();
-    expect(screen.getByText("How should Maria write?")).toBeDefined();
+    expect(screen.getByText(VOICE_PROMPT)).toBeDefined();
 
     await userEvent.click(
       screen.getByRole("button", { name: "Use this voice" }),
     );
 
-    expect(await screen.findByText("Maria joined your team")).toBeDefined();
-    await waitFor(() =>
-      expect(screen.queryByText("How should Maria write?")).toBeNull(),
-    );
+    expect(await screen.findByText(HIRED_MESSAGE)).toBeDefined();
+    await waitFor(() => expect(screen.queryByText(VOICE_PROMPT)).toBeNull());
     expect(patchAttempts).toBe(2);
   });
 
@@ -707,17 +755,15 @@ describe("Marketplace expert page", () => {
     renderPage();
 
     await userEvent.click(
-      await screen.findByRole("button", { name: "Hire Maria" }),
+      await screen.findByRole("button", { name: HIRE_LABEL }),
     );
-    expect(await screen.findByText("How should Maria write?")).toBeDefined();
+    expect(await screen.findByText(VOICE_PROMPT)).toBeDefined();
 
     await userEvent.keyboard("{Escape}");
 
-    expect(await screen.findByText("Maria joined your team")).toBeDefined();
-    await waitFor(() =>
-      expect(screen.queryByText("How should Maria write?")).toBeNull(),
-    );
-    expect(screen.getAllByText("Maria joined your team")).toHaveLength(1);
+    expect(await screen.findByText(HIRED_MESSAGE)).toBeDefined();
+    await waitFor(() => expect(screen.queryByText(VOICE_PROMPT)).toBeNull());
+    expect(screen.getAllByText(HIRED_MESSAGE)).toHaveLength(1);
   });
 
   test("shows the profile to signed-out visitors with a way to sign up", async () => {
@@ -734,12 +780,12 @@ describe("Marketplace expert page", () => {
     renderPage();
 
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Maria" }),
+      await screen.findByRole("heading", { level: 1, name: TITLE }),
     ).toBeDefined();
     expect(
       screen.getByRole("link", { name: "Get started" }).getAttribute("href"),
     ).toBe("/signup?next=%2Fmarketplace%2Fexperts%2Ftemplate-maria");
-    expect(screen.queryByRole("button", { name: "Hire Maria" })).toBeNull();
+    expect(screen.queryByRole("button", { name: HIRE_LABEL })).toBeNull();
     expect(screen.queryByText("Coming soon")).toBeNull();
     expect(rosterRequested).toBe(false);
   });

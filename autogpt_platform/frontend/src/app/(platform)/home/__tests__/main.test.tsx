@@ -68,6 +68,7 @@ const maria = {
   id: "maria",
   name: "Maria",
   role: "Planning",
+  job_title: "Learning Program Manager",
   avatar_url: null,
 };
 
@@ -127,8 +128,8 @@ const dashboard: HomeDashboardResponse = {
       id: "attention-1",
       kind: "setup",
       priority: "high",
-      title: "Connect your calendar for Maria",
-      description: "Maria cannot schedule your learning sessions yet.",
+      title: "Finish setting up Maria",
+      description: "1 scheduled workflow needs setup.",
       why_it_matters: "Three planned sessions are waiting for this connection.",
       preview: "3 days · 7 stops · $620 estimated total",
       expert: maria,
@@ -227,7 +228,9 @@ test("renders every Home tile from the aggregate API", async () => {
   expect(await screen.findByText("Your recap")).toBeDefined();
   expect(screen.getByRole("heading", { name: "Needs you" })).toBeDefined();
   expect(screen.getByLabelText("1 item needs your attention")).toBeDefined();
-  expect(screen.getByText("Connect your calendar for Maria")).toBeDefined();
+  expect(
+    screen.getByText("Finish setting up Learning Program Manager"),
+  ).toBeDefined();
   expect(screen.getByRole("heading", { name: "Recent work" })).toBeDefined();
   expect(screen.getByText("Your camera research is ready")).toBeDefined();
   expect(screen.getByText("14 runs")).toBeDefined();
@@ -240,6 +243,36 @@ test("renders every Home tile from the aggregate API", async () => {
     screen.getAllByText("Checking recurring subscriptions").length,
   ).toBeGreaterThan(0);
   expect(screen.getByText("Spanish practice plan")).toBeDefined();
+});
+
+test("uses the job title for expert labels without changing their destinations", async () => {
+  mockDashboard(dashboard);
+
+  render(<HomeRecap />);
+
+  const team = await screen.findByRole("region", { name: "Your team" });
+  expect(within(team).getByText("Learning Program Manager")).toBeDefined();
+  expect(
+    within(team)
+      .getByRole("link", { name: "Chat with Learning Program Manager" })
+      .getAttribute("href"),
+  ).toBe("/copilot?expertId=maria");
+  expect(
+    within(team)
+      .getByRole("link", { name: "Manage Learning Program Manager" })
+      .getAttribute("href"),
+  ).toBe("/team/maria");
+  expect(
+    screen.getByRole("article", { name: "Learning Program Manager" }),
+  ).toBeDefined();
+  const nowNext = screen.getByRole("region", { name: "Now & next" });
+  expect(within(nowNext).getByText("Learning Program Manager")).toBeDefined();
+  expect(
+    within(nowNext).getAllByRole("img", {
+      name: /^Learning Program Manager\b/,
+    }),
+  ).toHaveLength(2);
+  expect(screen.queryByRole("img", { name: /Maria/ })).toBeNull();
 });
 
 test.each([
@@ -490,7 +523,11 @@ test("tracks briefing outcomes and team members with useful dimensions", async (
   await user.click(
     await screen.findByRole("link", { name: /Your camera research is ready/ }),
   );
-  await user.click(await screen.findByRole("link", { name: "Manage Maria" }));
+  await user.click(
+    await screen.findByRole("link", {
+      name: "Manage Learning Program Manager",
+    }),
+  );
 
   await waitFor(() => {
     expect(

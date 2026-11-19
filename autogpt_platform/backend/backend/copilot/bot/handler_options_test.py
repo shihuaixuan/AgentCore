@@ -97,7 +97,7 @@ class TestTypedOptions:
             PendingMessage(username="Bently", user_id="user-1", text="fix it")
         ]
         assert calls[0]["options"] == TurnOptions(
-            expert_name="Bolt", expert_id="e1", model="advanced"
+            expert_name="Builder", expert_id="e1", model="advanced"
         )
         api.list_user_experts.assert_awaited_once_with("discord", "user-1", None)
 
@@ -135,7 +135,8 @@ class TestTypedOptions:
         assert calls == []
         reply = adapter.send_message.await_args.args[1]
         assert 'No expert called "Nova"' in reply
-        assert "Bolt (Builder)" in reply and "Sage (Researcher)" in reply
+        assert "Your experts: Builder, Researcher." in reply
+        assert "Bolt" not in reply and "Sage" not in reply
 
     @pytest.mark.asyncio
     async def test_ambiguous_prefix_lists_the_matches(self):
@@ -147,7 +148,7 @@ class TestTypedOptions:
         assert calls == []
         reply = adapter.send_message.await_args.args[1]
         assert "More than one expert" in reply
-        assert "Boltzmann" in reply and "Sage" not in reply
+        assert "Builder, Physicist" in reply and "Researcher" not in reply
 
     @pytest.mark.asyncio
     async def test_exact_name_beats_prefix(self):
@@ -286,7 +287,7 @@ class TestOptionsOnly:
         assert kwargs["session_id"] == "otto-session"
         set_session.assert_awaited_once_with("discord", "chan-1", "s1")
         adapter.send_message.assert_awaited_once_with(
-            "chan-1", "Your next messages here go to Bolt."
+            "chan-1", "Your next messages here go to Builder."
         )
 
     @pytest.mark.asyncio

@@ -7,6 +7,7 @@ import { getListExpertIdentitiesMockHandler } from "@/app/api/__generated__/endp
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import { server } from "@/mocks/mock-server";
 import {
+  fireEvent,
   normalizeWhitespace,
   render,
   screen,
@@ -85,11 +86,11 @@ describe("EmptySession — recipient-aware intro", () => {
 
     await waitFor(() =>
       expect(normalizeWhitespace(container)).toContain(
-        "I'm Maria, your Marketing Strategist. What should I take on?",
+        "How can I help as your Marketing Strategist?",
       ),
     );
     expect(
-      screen.getByPlaceholderText("What should Maria work on?"),
+      screen.getByPlaceholderText("What should Marketing Strategist work on?"),
     ).toBeDefined();
   });
 
@@ -98,7 +99,7 @@ describe("EmptySession — recipient-aware intro", () => {
 
     await waitFor(() =>
       expect(normalizeWhitespace(container)).toContain(
-        "I'm Sam, your Sales Development Rep. What should I take on?",
+        "How can I help as your Sales Development Rep?",
       ),
     );
   });
@@ -108,11 +109,11 @@ describe("EmptySession — recipient-aware intro", () => {
 
     await waitFor(() =>
       expect(normalizeWhitespace(container)).toContain(
-        "I'm Max. What should I take on?",
+        "How can I help as your AI Expert?",
       ),
     );
     expect(
-      screen.getByPlaceholderText("What should Max work on?"),
+      screen.getByPlaceholderText("What should AI Expert work on?"),
     ).toBeDefined();
   });
 
@@ -205,27 +206,28 @@ it("shows a named kickoff status and withholds the empty composer", () => {
 it("switches recipients from the composer without losing the draft", async () => {
   const user = userEvent.setup();
   renderEmptySession("");
-  const prompt = screen.getByPlaceholderText(taskPlaceholder);
+  const prompt = await screen.findByPlaceholderText(taskPlaceholder);
   expect(screen.queryByRole("button", { name: /change recipient/ })).toBeNull();
   await user.type(prompt, "Help with my launch");
   await user.click(screen.getByRole("button", { name: "Add files and more" }));
   await user.hover(await screen.findByRole("menuitem", { name: "Experts" }));
-  await user.click(
-    await screen.findByRole("menuitem", { name: "Search experts" }),
+  fireEvent.click(
+    await screen.findByRole("menuitem", {
+      name: "Marketing Strategist",
+    }),
   );
-  await user.type(
-    await screen.findByRole("searchbox", { name: "Search experts" }),
-    "strategist",
-  );
-  await user.click(await screen.findByRole("button", { name: /Maria/ }));
   expect(
-    await screen.findByPlaceholderText("What should Maria work on?"),
+    await screen.findByPlaceholderText(
+      "What should Marketing Strategist work on?",
+    ),
   ).toBeDefined();
   expect(
-    screen.getByRole("button", { name: "Sending to Maria — change recipient" }),
+    screen.getByRole("button", {
+      name: "Sending to Marketing Strategist — change recipient",
+    }),
   ).toBeDefined();
   expect(
-    screen.getByPlaceholderText("What should Maria work on?"),
+    screen.getByPlaceholderText("What should Marketing Strategist work on?"),
   ).toHaveProperty("value", "Help with my launch");
 });
 
@@ -343,7 +345,9 @@ it("keeps the chosen expert's prompt for an existing account", async () => {
   renderEmptySession("?expertId=expert-maria");
   await screen.findByRole("heading", { name: "Your recap" });
   expect(
-    await screen.findByPlaceholderText("What should Maria work on?"),
+    await screen.findByPlaceholderText(
+      "What should Marketing Strategist work on?",
+    ),
   ).toBeDefined();
   expect(screen.queryByRole("button", { name: "Learn" })).toBeNull();
 });
@@ -351,16 +355,24 @@ it("keeps the chosen expert's prompt for an existing account", async () => {
 it("opens a fresh Home visit without a preselected expert", async () => {
   const user = userEvent.setup();
   const firstVisit = renderEmptySession("");
-  await user.click(screen.getByRole("button", { name: "Add files and more" }));
-  await user.click(await screen.findByRole("menuitem", { name: "Experts" }));
-  await user.click(await screen.findByRole("menuitem", { name: /Maria/ }));
-  await screen.findByPlaceholderText("What should Maria work on?");
+  await user.click(
+    await screen.findByRole("button", { name: "Add files and more" }),
+  );
+  await user.hover(await screen.findByRole("menuitem", { name: "Experts" }));
+  fireEvent.click(
+    await screen.findByRole("menuitem", {
+      name: "Marketing Strategist",
+    }),
+  );
+  await screen.findByPlaceholderText(
+    "What should Marketing Strategist work on?",
+  );
   firstVisit.unmount();
 
   renderEmptySession("");
-  expect(screen.getByPlaceholderText(taskPlaceholder)).toBeDefined();
+  expect(await screen.findByPlaceholderText(taskPlaceholder)).toBeDefined();
   expect(screen.queryByRole("button", { name: /change recipient/ })).toBeNull();
   expect(
-    screen.queryByPlaceholderText("What should Maria work on?"),
+    screen.queryByPlaceholderText("What should Marketing Strategist work on?"),
   ).toBeNull();
 });

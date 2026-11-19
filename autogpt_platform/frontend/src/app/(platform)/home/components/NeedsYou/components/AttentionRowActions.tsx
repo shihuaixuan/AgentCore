@@ -5,6 +5,7 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   item: HomeAttentionItem;
+  title?: string;
   isProcessing: boolean;
   confirmDecline: boolean;
   onApprove: () => void;
@@ -14,6 +15,7 @@ interface Props {
 
 export function AttentionRowActions({
   item,
+  title = item.title,
   isProcessing,
   confirmDecline,
   onApprove,
@@ -44,7 +46,7 @@ export function AttentionRowActions({
         size="icon-sm"
         leadingIcon={Tick02Icon}
         disabled={isProcessing}
-        aria-label={t(`Approve: ${item.title}`, `批准：${item.title}`)}
+        aria-label={t(`Approve: ${title}`, `批准：${title}`)}
         onClick={onApprove}
       />
       <Button
@@ -53,8 +55,8 @@ export function AttentionRowActions({
         leadingIcon={Cancel01Icon}
         disabled={isProcessing}
         aria-label={t(
-          `${confirmDecline ? "Confirm decline" : "Decline"}: ${item.title}`,
-          `${confirmDecline ? "确认拒绝" : "拒绝"}：${item.title}`,
+          `${confirmDecline ? "Confirm decline" : "Decline"}: ${title}`,
+          `${confirmDecline ? "确认拒绝" : "拒绝"}：${title}`,
         )}
         onClick={onDecline}
         onBlur={onDeclineBlur}

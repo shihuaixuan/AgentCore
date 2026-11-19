@@ -156,7 +156,7 @@ describe("OnboardingIntroCard — content", () => {
 
     expect(
       screen.getByRole("button", {
-        name: "Start with Maria: Chase unpaid invoices",
+        name: "Start with Bookkeeper: Chase unpaid invoices",
       }),
     ).toBeDefined();
     expect(screen.getByText(MARIAS_TASK.why ?? "")).toBeDefined();
@@ -174,7 +174,7 @@ describe("OnboardingIntroCard — content", () => {
     const members = within(team).getAllByRole("listitem");
     expect(members).toHaveLength(2);
     expect(within(members[0]).getByText("Otto")).toBeDefined();
-    expect(within(members[1]).getByText("Maria")).toBeDefined();
+    expect(within(members[1]).queryByText("Maria")).toBeNull();
     expect(within(members[1]).getByText("Bookkeeper")).toBeDefined();
   });
 

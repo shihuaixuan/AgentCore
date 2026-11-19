@@ -150,12 +150,13 @@ def _report(
     retry: bool = False,
 ) -> ExpertChangeAppliedResponse:
     expert = applied.expert
+    title = (expert.job_title or "").strip() or expert.role.strip() or "AI Expert"
     kind = _kind(applied)
     link = _sub_session_link(thread)
     if status == "failed":
-        message = _failed_message(kind, expert.name, task, reason, retry)
+        message = _failed_message(kind, title, task, reason, retry)
     else:
-        message = _sent_message(status, kind, expert.name, task, thread or "", link)
+        message = _sent_message(status, kind, title, task, thread or "", link)
     return applied.model_copy(
         update={
             "message": message,

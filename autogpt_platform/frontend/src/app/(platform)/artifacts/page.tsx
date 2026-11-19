@@ -3,6 +3,7 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useExpertMap } from "@/app/(platform)/copilot/useExpertMap";
 import { Text } from "@/components/atoms/Text/Text";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import type { Transition, Variants } from "framer-motion";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect } from "react";
@@ -42,7 +43,7 @@ const MAIN_CLASS_NAME =
   "mx-auto min-h-screen w-full max-w-7xl space-y-6 px-6 pb-20 pt-2 md:px-8";
 
 export default function ArtifactsPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const reduceMotion = useReducedMotion();
   const {
     folders,
@@ -72,6 +73,9 @@ export default function ArtifactsPage() {
     loadMore,
   } = useArtifactsPage({ folders, isFoldersLoading, isFoldersError });
   const { activeExperts, expertsById } = useExpertMap();
+  const selectedExpert = expertFilter
+    ? expertsById.get(expertFilter)
+    : undefined;
 
   const isSearching = searchTerm.length > 0;
   const isInFolder = selectedFolderId !== null;
@@ -195,7 +199,9 @@ export default function ArtifactsPage() {
               expert: expertFilter
                 ? {
                     id: expertFilter,
-                    name: expertsById.get(expertFilter)?.name ?? null,
+                    title: selectedExpert
+                      ? getExpertDisplayTitle(selectedExpert, locale)
+                      : null,
                   }
                 : null,
             },

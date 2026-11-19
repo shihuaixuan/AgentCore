@@ -7,6 +7,7 @@ import {
 import type { PlanResponse } from "@/app/api/__generated__/models/planResponse";
 import { useStableCallback } from "@/hooks/useStableCallback";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { invalidateExpertRosterQueries } from "@/services/experts/invalidate-experts";
 import * as Sentry from "@sentry/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
@@ -48,7 +49,9 @@ export function usePlanHire({ enabled }: { enabled: boolean }) {
   const [sentAt, setSentAt] = useState<number | null>(null);
   const sent = useRef(false);
   const plan = usePlanToHire({ enabled, since: mountedAt });
-  const names = plan.team.map((expert) => expert.name);
+  const titles = plan.team.map((expert) =>
+    getExpertDisplayTitle(expert, locale),
+  );
 
   const hire = useStableCallback(async () => {
     try {
@@ -61,14 +64,19 @@ export function usePlanHire({ enabled }: { enabled: boolean }) {
       const failed = response.data.failed ?? [];
       if (failed.length > 0)
         toastHireFailed(
-          failed.map((e) => e.name),
+          failed.map(({ template_id }) =>
+            getExpertDisplayTitle(
+              plan.team.find((expert) => expert.template_id === template_id),
+              locale,
+            ),
+          ),
           locale,
         );
     } catch (error) {
       Sentry.captureException(error, { tags: { context: "plan-hire" } });
       // After a refresh the first call may well have hired them: failing to
       // ask says nothing about how it went.
-      if (resumedFor === null) toastHireFailed(names, locale);
+      if (resumedFor === null) toastHireFailed(titles, locale);
     } finally {
       // So Home's recipient picker and task owners see the new team, even
       // when a slow hire lands after Home has read them. Whatever the answer:
@@ -108,8 +116,8 @@ export function usePlanHire({ enabled }: { enabled: boolean }) {
 
   return {
     label:
-      names.length > 0
-        ? t(`Hiring ${joinNames(names)}`, `正在聘用${names.join("、")}`)
+      titles.length > 0
+        ? t(`Hiring ${joinNames(titles)}`, `正在聘用${titles.join("、")}`)
         : null,
     isSettled: !enabled || settled,
     maxWaitMs:

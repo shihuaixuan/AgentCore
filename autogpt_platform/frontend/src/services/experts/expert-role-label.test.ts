@@ -1,5 +1,18 @@
 import { describe, expect, test } from "vitest";
-import { getExpertRoleLabel } from "./expert-role-label";
+import { getExpertDisplayTitle, getExpertRoleLabel } from "./expert-role-label";
+
+test("does not use the legacy name when no profession is known", () => {
+  const legacy = { name: "凯西", jobTitle: "  ", role: null };
+  expect(getExpertDisplayTitle(legacy, "zh-CN")).toBe("AI 专家");
+});
+
+test("localizes the built-in QA role but preserves an explicit custom title", () => {
+  const expert = { name: "Casey", role: "Code Review & QA" };
+  expect(getExpertDisplayTitle(expert, "zh-CN")).toBe("质量保障工程师");
+  expect(
+    getExpertDisplayTitle({ ...expert, jobTitle: "  测试架构师  " }, "zh-CN"),
+  ).toBe("测试架构师");
+});
 
 describe("getExpertRoleLabel", () => {
   test("shortens long roster roles", () => {
@@ -13,6 +26,8 @@ describe("getExpertRoleLabel", () => {
 
   test("keeps other roles unchanged", () => {
     expect(getExpertRoleLabel("My custom role")).toBe("My custom role");
+    expect(getExpertRoleLabel("constructor", "zh-CN")).toBe("constructor");
+    expect(getExpertRoleLabel("__proto__")).toBe("__proto__");
   });
 
   test("localizes built-in roles without translating custom job titles", () => {

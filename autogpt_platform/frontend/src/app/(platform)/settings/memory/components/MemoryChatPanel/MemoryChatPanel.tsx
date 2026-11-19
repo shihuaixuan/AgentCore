@@ -4,12 +4,14 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ChatInput } from "@/app/(platform)/copilot/components/ChatInput/ChatInput";
 import { ChatMessagesContainer } from "@/app/(platform)/copilot/components/ChatMessagesContainer/ChatMessagesContainer";
 import { CopilotChatActionsProvider } from "@/app/(platform)/copilot/components/CopilotChatActionsProvider/CopilotChatActionsProvider";
+import type { ExpertIdentity } from "@/app/(platform)/copilot/useExpertMap";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { BrainIcon, Cancel01Icon } from "@hugeicons/core-free-icons";
 
 interface Props {
   scopeName: string;
+  expertIdentity: ExpertIdentity | null;
   isOpen: boolean;
   isStarting: boolean;
   startError: boolean;
@@ -29,6 +31,7 @@ interface Props {
 
 export function MemoryChatPanel({
   scopeName,
+  expertIdentity,
   isOpen,
   isStarting,
   startError,
@@ -104,6 +107,7 @@ export function MemoryChatPanel({
                     sessionID={sessionId}
                     queuedMessages={queuedMessages}
                     isTurnSettling={isTurnSettling}
+                    expertIdentity={expertIdentity}
                   />
                 </div>
                 <div className="relative shrink-0 border-t border-separator bg-surface px-3 pt-2 pb-2">
@@ -116,6 +120,7 @@ export function MemoryChatPanel({
                     onStop={onStop}
                     onEnqueue={onSend}
                     placeholder={t("Ask or update…", "提问或更新…")}
+                    assistantName={scopeName}
                     hasSession={true}
                   />
                 </div>

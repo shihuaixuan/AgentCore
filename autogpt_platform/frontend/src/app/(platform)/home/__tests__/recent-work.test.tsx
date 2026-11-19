@@ -210,7 +210,7 @@ test("groups the week's runs and deliverables by who did them", async () => {
   expect(screen.getByText("3 completed")).toBeDefined();
   expect(screen.getByText("1 failed")).toBeDefined();
 
-  const mariaGroup = screen.getByRole("article", { name: "Maria" });
+  const mariaGroup = screen.getByRole("article", { name: "Marketing" });
   expect(within(mariaGroup).getByText("Expert")).toBeDefined();
   expect(
     within(mariaGroup).getByText("Your camera research is ready"),
@@ -268,7 +268,7 @@ test("puts the team first and the workflows that ran on their own after them", a
     within(tile)
       .getAllByRole("article")
       .map((article) => article.getAttribute("aria-label")),
-  ).toEqual(["Maria", "Otto", "Release Note Generator"]);
+  ).toEqual(["Marketing", "Otto", "Release Note Generator"]);
   // The kind chip says which half a group belongs to, so the rows run
   // straight on without a caption between them.
   expect(within(tile).queryByText("Workflows")).toBeNull();

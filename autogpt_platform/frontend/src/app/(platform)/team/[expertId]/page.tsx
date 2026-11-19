@@ -14,6 +14,8 @@ import {
   TabsLineTrigger,
 } from "@/components/molecules/TabsLine/TabsLine";
 import { cn } from "@/lib/utils";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
+import { formatExpertIntro } from "@/services/experts/expert-intro";
 import {
   AiBrain01Icon,
   Calendar03Icon,
@@ -146,6 +148,7 @@ export default function ExpertDetailPage() {
   }
 
   const isPaused = Boolean(expert.schedules_paused_at);
+  const expertTitle = getExpertDisplayTitle(expert, locale);
 
   return (
     <div className="flex w-full">
@@ -210,7 +213,11 @@ export default function ExpertDetailPage() {
 
           <TabsLineContent value="soul">
             <ExpertSoulSection
-              identity={expert.identity}
+              identity={formatExpertIntro(
+                expert.identity,
+                expert.name,
+                expertTitle,
+              )}
               voicePreferences={expert.voice_preferences}
               boundaries={expert.boundaries}
             />
@@ -219,13 +226,13 @@ export default function ExpertDetailPage() {
           <TabsLineContent value="schedules">
             <ExpertSchedulesSection
               title={t(
-                `${expert.name}'s Schedules`,
-                `${expert.name} 的计划任务`,
+                `${expertTitle}'s Schedules`,
+                `${expertTitle} 的计划任务`,
               )}
               accentClassName={
                 getRaisedExpertAccent(expert.role, expert.color).pill
               }
-              expertName={expert.name}
+              expertName={expertTitle}
               expertId={expert.id}
               workflows={expert.workflows}
               schedules={schedules}
@@ -235,7 +242,7 @@ export default function ExpertDetailPage() {
 
           <TabsLineContent value="workflows">
             <ExpertWorkflowsSection
-              expertName={expert.name}
+              expertName={expertTitle}
               expertId={expert.id}
               workflows={expert.workflows}
               coverColor={getExpertCover(expert).color}
@@ -245,20 +252,20 @@ export default function ExpertDetailPage() {
           </TabsLineContent>
 
           <TabsLineContent value="files">
-            <ExpertFilesSection expertId={expert.id} expertName={expert.name} />
+            <ExpertFilesSection expertId={expert.id} expertName={expertTitle} />
           </TabsLineContent>
 
           <TabsLineContent value="computer">
             <ExpertComputerSection
               expertId={expert.id}
-              expertName={expert.name}
+              expertName={expertTitle}
             />
           </TabsLineContent>
 
           <TabsLineContent value="integrations">
             <ExpertIntegrationsSection
               expertId={expert.id}
-              expertName={expert.name}
+              expertName={expertTitle}
             />
           </TabsLineContent>
 
@@ -290,7 +297,7 @@ export default function ExpertDetailPage() {
 
         <FireExpertDialog
           expertId={expert.id}
-          expertName={expert.name}
+          expertName={expertTitle}
           open={isFireOpen}
           onClose={closeFire}
           onFired={() => router.push("/team")}

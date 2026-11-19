@@ -1,4 +1,5 @@
 import { useListExperts } from "@/app/api/__generated__/endpoints/experts/experts";
+import type { ExpertIdentity } from "@/app/(platform)/copilot/useExpertMap";
 import { useEffect, useState } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
@@ -20,20 +21,35 @@ export function useMemoryScope() {
   const experts = getActiveExperts(
     expertsQuery.data?.status === 200 ? expertsQuery.data.data : undefined,
   );
+  const scopeExpert = experts.find((expert) => expert.id === scopeExpertID);
+  const scopeName = getScopeName(scopeExpertID, experts, locale);
+  const expertIdentity: ExpertIdentity | null = scopeExpertID
+    ? {
+        id: scopeExpertID,
+        name: scopeName,
+        role: scopeExpert?.role ?? null,
+        jobTitle: scopeExpert?.job_title,
+        avatarUrl: scopeExpert?.avatar_url ?? null,
+        color: scopeExpert?.color,
+        isArchived: false,
+        readOnlyReason: null,
+      }
+    : null;
 
   // A selected expert can disappear (fired in another tab, roster changed) —
   // fall back to Otto instead of driving queries with a dead scope id.
   useEffect(() => {
     if (!scopeExpertID || !expertsSettled) return;
-    if (!experts.some((expert) => expert.id === scopeExpertID)) {
+    if (!scopeExpert) {
       setScopeExpertID(null);
     }
-  }, [scopeExpertID, expertsSettled, experts]);
+  }, [scopeExpertID, expertsSettled, scopeExpert]);
 
   return {
     scopeExpertID,
     selectScope: setScopeExpertID,
     experts,
-    scopeName: getScopeName(scopeExpertID, experts, locale),
+    scopeName,
+    expertIdentity,
   };
 }

@@ -4,6 +4,8 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Text } from "@/components/atoms/Text/Text";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
+import { getReviewExpertID } from "@/components/organisms/PendingReviewsList/expertIdentity";
+import { useCardExpertRoster } from "@/components/organisms/PendingReviewsList/useCardExpertRoster";
 import { NeedsAttentionRow } from "./components/NeedsAttentionRow";
 import { useNeedsAttentionList } from "./useNeedsAttentionList";
 
@@ -19,6 +21,9 @@ export function NeedsAttentionList() {
     approve,
     decline,
   } = useNeedsAttentionList();
+  const roster = useCardExpertRoster(
+    reviews.some((review) => Boolean(getReviewExpertID(review))),
+  );
 
   if (isLoading) {
     return (
@@ -60,6 +65,7 @@ export function NeedsAttentionList() {
           <NeedsAttentionRow
             key={review.node_exec_id}
             review={review}
+            roster={roster}
             // Only the acted row locks up, so morning triage stays
             // parallel instead of serializing on each round-trip.
             isProcessing={pendingNodeExecIds.has(review.node_exec_id)}

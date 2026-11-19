@@ -22,6 +22,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { InstallWorkflowSource, WorkflowInstallData } from "./helpers";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 const SEARCH_DEBOUNCE_MS = 300;
 const RESULTS_PAGE_SIZE = 10;
@@ -41,7 +42,7 @@ export function useInstallWorkflowPicker({
   open,
   onClose,
 }: Args) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const [source, setSource] = useState<InstallWorkflowSource>("library");
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,6 +55,9 @@ export function useInstallWorkflowPicker({
     (expert) => !expert.is_template && !expert.is_archived,
   );
   const targetExpert = hiredExperts.find((expert) => expert.id === expertId);
+  const targetTitle = targetExpert
+    ? getExpertDisplayTitle(targetExpert, locale)
+    : null;
 
   const debouncedSearchQuery = useDebouncedValue(
     searchQuery,
@@ -162,8 +166,8 @@ export function useInstallWorkflowPicker({
     } catch {
       toast({
         title: t(
-          `Couldn't install on ${targetExpert.name}`,
-          `无法为 ${targetExpert.name} 安装工作流`,
+          `Couldn't install on ${targetTitle}`,
+          `无法为 ${targetTitle} 安装工作流`,
         ),
         description: t(
           "Something went wrong. Please try again.",
@@ -177,12 +181,10 @@ export function useInstallWorkflowPicker({
   }
 
   async function install(expert: Expert, data: WorkflowInstallData) {
+    const title = getExpertDisplayTitle(expert, locale);
     if (isAlreadyInstalled(expert, data)) {
       toast({
-        title: t(
-          `Already installed on ${expert.name}`,
-          `已为 ${expert.name} 安装`,
-        ),
+        title: t(`Already installed on ${title}`, `已为 ${title} 安装`),
         variant: "success",
       });
       onClose();
@@ -199,16 +201,13 @@ export function useInstallWorkflowPicker({
         }),
       ]);
       toast({
-        title: t(`Installed on ${expert.name}`, `已为 ${expert.name} 安装`),
+        title: t(`Installed on ${title}`, `已为 ${title} 安装`),
         variant: "success",
       });
       onClose();
     } catch {
       toast({
-        title: t(
-          `Couldn't install on ${expert.name}`,
-          `无法为 ${expert.name} 安装工作流`,
-        ),
+        title: t(`Couldn't install on ${title}`, `无法为 ${title} 安装工作流`),
         description: t(
           "Something went wrong. Please try again.",
           "出现了问题，请重试。",
@@ -222,8 +221,8 @@ export function useInstallWorkflowPicker({
     mode === "pick-expert"
       ? t("Install on an expert", "为专家安装工作流")
       : t(
-          `Install a workflow${targetExpert ? ` on ${targetExpert.name}` : ""}`,
-          targetExpert ? `为 ${targetExpert.name} 安装工作流` : "安装工作流",
+          `Install a workflow${targetTitle ? ` on ${targetTitle}` : ""}`,
+          targetTitle ? `为 ${targetTitle} 安装工作流` : "安装工作流",
         );
 
   const resultsQuery =

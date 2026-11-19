@@ -81,7 +81,7 @@ export default function TeamPage() {
         />
 
         <div className="space-y-6">
-          <SetupNeeded />
+          <SetupNeeded experts={hiredExperts} />
           <TeamRoster
             isLoading={isLoading}
             experts={hiredExperts}

@@ -7,9 +7,10 @@ import {
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
-import { RecipientAvatar } from "./ExpertPickerOptions";
+import { RecipientAvatar, RecipientTitle } from "./ExpertPickerOptions";
 import {
   OTTO_RECIPIENT_OPTION,
+  recipientChoices,
   type RecipientPickerConfig,
 } from "./recipientOptions";
 
@@ -34,7 +35,7 @@ export function ExpertMenuEntries({
   selectionBlocked,
   onSelect,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   if (!options.length && !isThreadPicker) {
     const message = isRosterPending
@@ -66,46 +67,36 @@ export function ExpertMenuEntries({
           {selectionBlocked}
         </Text>
       )}
-      {(isThreadPicker ? [OTTO_RECIPIENT_OPTION, ...options] : options).map(
-        (option) => {
-          const id = option === OTTO_RECIPIENT_OPTION ? null : option.id;
-          const selected = id === (recipient?.id ?? null);
-          return (
-            <DropdownMenuItem
-              key={option.id}
-              textValue={option.name}
-              disabled={!!selectionBlocked && !selected}
-              onSelect={() => {
-                if (!selected) onSelect(id);
-              }}
-            >
-              <RecipientAvatar option={option} />
-              <span className="min-w-0 flex-1">
-                <Text as="span" variant="body-tight" className="block truncate">
-                  {option.name}
-                </Text>
-                {option.role && (
-                  <Text
-                    as="span"
-                    variant="small"
-                    tone="secondary"
-                    className="block truncate"
-                  >
-                    {option.role}
-                  </Text>
-                )}
-              </span>
-              {selected && (
-                <Icon
-                  icon={Tick02Icon}
-                  className="size-4 shrink-0"
-                  aria-hidden
-                />
-              )}
-            </DropdownMenuItem>
-          );
-        },
-      )}
+      {recipientChoices(
+        isThreadPicker ? [OTTO_RECIPIENT_OPTION, ...options] : options,
+        locale,
+      ).map(({ option, title, label }) => {
+        const id = option === OTTO_RECIPIENT_OPTION ? null : option.id;
+        const selected = id === (recipient?.id ?? null);
+        return (
+          <DropdownMenuItem
+            key={option.id}
+            aria-label={label}
+            textValue={label}
+            disabled={!!selectionBlocked && !selected}
+            onSelect={() => {
+              if (!selected) onSelect(id);
+            }}
+          >
+            <span className="flex min-w-0 flex-1 items-center gap-2">
+              <RecipientAvatar option={option} title={title} />
+              <RecipientTitle title={label} />
+            </span>
+            {selected && (
+              <Icon
+                icon={Tick02Icon}
+                className="ml-1 size-4 shrink-0"
+                aria-hidden
+              />
+            )}
+          </DropdownMenuItem>
+        );
+      })}
       {recipient && !isThreadPicker && (
         <>
           <DropdownMenuSeparator />

@@ -2,12 +2,12 @@
 
 import { Text } from "@/components/atoms/Text/Text";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import { getExpertRoleLabel } from "@/services/experts/expert-role-label";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
 interface Props {
-  name: string;
+  name?: string;
   isOtto?: boolean;
   role?: string | null;
   jobTitle?: string | null;
@@ -16,10 +16,6 @@ interface Props {
   /** Badges and icons ride the middle of the name; a second line of type
    *  sits on its baseline. */
   nameAlign?: "center" | "baseline";
-  areaClassName?: string;
-  /** Category colour for the title on the name line: a gradient fill with
-   *  a soft glow in that colour (card and page sizes only). */
-  areaColor?: string;
 }
 
 export function ExpertIdentityDetails({
@@ -30,24 +26,12 @@ export function ExpertIdentityDetails({
   size = "card",
   nameAccessory,
   nameAlign = "center",
-  areaClassName,
-  areaColor,
 }: Props) {
   const { t, locale } = useTranslation();
   const compact = size === "compact";
   const Container = compact ? "span" : "div";
-  const area =
-    jobTitle ||
-    (role
-      ? isOtto && role === "Head of AI"
-        ? t("Head of AI", "AI 负责人")
-        : getExpertRoleLabel(role, locale)
-      : null);
-  // What someone does says more than "AI Expert" does, so on a card or a page
-  // it rides the name line and takes that line's place. Compact sizes have no
-  // room for it and keep it on the line below. The category pill belongs to
-  // the card, not here, so the two never say the same thing twice.
-  const titleOnNameLine = compact ? null : area;
+  const profession = getExpertDisplayTitle({ jobTitle, role }, locale);
+  const title = isOtto ? (name ?? "Otto") : profession;
 
   return (
     <Container
@@ -76,6 +60,7 @@ export function ExpertIdentityDetails({
           }
           tone="primary"
           weight={size === "page" ? "semibold" : undefined}
+          title={title}
           data-slot="expert-identity-name"
           className={cn(
             "min-w-0",
@@ -83,77 +68,23 @@ export function ExpertIdentityDetails({
             compact && "leading-4.5",
           )}
         >
-          {name}
+          {title}
         </Text>
-        {titleOnNameLine ? (
-          <Text
-            as="span"
-            variant={size === "card" ? "body-sm-medium-inherit" : "body"}
-            tone="secondary"
-            weight={size === "card" ? "normal" : undefined}
-            data-slot="expert-identity-title"
-            className={cn(
-              "min-w-0",
-              size === "page" ? "max-w-full break-words" : "truncate",
-              // oxlint-disable-next-line design-system/require-static-classes -- forwards the caller's areaClassName
-              areaClassName,
-            )}
-            title={titleOnNameLine}
-          >
-            {areaColor ? (
-              <>
-                {"• "}
-                <span
-                  data-slot="expert-identity-title-text"
-                  className={cn(
-                    "bg-clip-text font-medium text-transparent",
-                    size === "card" && "text-body-md leading-inherit",
-                    size === "page" && "text-lead",
-                  )}
-                  style={{
-                    // oxlint-disable-next-line design-system/no-inline-styles -- gradient mixes the runtime category colour with the primary role
-                    backgroundImage: `linear-gradient(90deg, color-mix(in srgb, ${areaColor} 60%, rgb(var(--color-action))), color-mix(in srgb, ${areaColor} 85%, rgb(var(--color-action))))`,
-                    // oxlint-disable-next-line design-system/no-inline-styles -- glow in the runtime category colour
-                    filter: `drop-shadow(0 0 6px color-mix(in srgb, ${areaColor} 45%, transparent))`,
-                  }}
-                >
-                  {titleOnNameLine}
-                </span>
-              </>
-            ) : (
-              <>
-                {"•"} {titleOnNameLine}
-              </>
-            )}
-          </Text>
-        ) : null}
         {nameAccessory}
       </Container>
-      {!area ? (
+      {isOtto && (
         <Text
           as="span"
           variant="small"
           tone="muted"
           data-slot="expert-identity-subtitle"
+          title={role || jobTitle ? profession : undefined}
         >
-          {isOtto
-            ? t("Your personal Head of AI", "您的专属 AI 负责人")
-            : t("AI Expert", "AI 专家")}
+          {role || jobTitle
+            ? profession
+            : t("Your personal Head of AI", "您的专属 AI 负责人")}
         </Text>
-      ) : null}
-      {compact && area ? (
-        <Text
-          as="span"
-          variant="small-tight"
-          data-slot="expert-identity-area"
-          tone="secondary"
-          // oxlint-disable-next-line design-system/require-static-classes -- forwards the caller's areaClassName
-          className={cn("truncate", areaClassName)}
-          title={area}
-        >
-          {area}
-        </Text>
-      ) : null}
+      )}
     </Container>
   );
 }

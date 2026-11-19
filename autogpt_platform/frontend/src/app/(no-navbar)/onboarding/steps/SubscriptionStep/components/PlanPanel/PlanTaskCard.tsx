@@ -7,7 +7,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { cn } from "@/lib/utils";
-import { getExpertRoleLabel } from "@/services/experts/expert-role-label";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 const AVATAR_SIZE = 36;
 
@@ -19,7 +19,8 @@ interface Props {
 
 // One task as the plan step shows it: read-only, with who takes it.
 export function PlanTaskCard({ task, owner, isFirst }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = owner ? getExpertDisplayTitle(owner, locale) : null;
   return (
     <li
       className={cn(
@@ -31,7 +32,7 @@ export function PlanTaskCard({ task, owner, isFirst }: Props) {
     >
       {owner ? (
         <ExpertAvatar
-          name={owner.name}
+          name={title}
           avatarUrl={owner.avatar_url ?? null}
           size={AVATAR_SIZE}
         />
@@ -52,15 +53,15 @@ export function PlanTaskCard({ task, owner, isFirst }: Props) {
             {task.why}
           </Text>
         ) : null}
-        <OwnerLine owner={owner} />
+        <OwnerLine title={title} />
       </div>
     </li>
   );
 }
 
-function OwnerLine({ owner }: { owner: RecommendedExpert | null }) {
-  const { t, locale } = useTranslation();
-  if (!owner)
+function OwnerLine({ title }: { title: string | null }) {
+  const { t } = useTranslation();
+  if (!title)
     return (
       // Text has no accent tone, so the role classes go on the span.
       <span className="mt-1.5 font-sans text-caption text-accent-strong">
@@ -69,8 +70,7 @@ function OwnerLine({ owner }: { owner: RecommendedExpert | null }) {
     );
   return (
     <Text variant="small" as="span" tone="secondary" className="mt-1.5">
-      <span className="font-medium text-foreground-strong">{owner.name}</span>,{" "}
-      {getExpertRoleLabel(owner.role, locale)}{" "}
+      <span className="font-medium text-foreground-strong">{title}</span>{" "}
       <span className="text-foreground-subtle">
         {t("· joins your team", "· 加入你的团队")}
       </span>

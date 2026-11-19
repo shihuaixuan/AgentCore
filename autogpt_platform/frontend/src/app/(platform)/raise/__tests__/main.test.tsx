@@ -5,6 +5,7 @@ import type { Expert } from "@/app/api/__generated__/models/expert";
 import type { MarketplaceSkill } from "@/app/api/__generated__/models/marketplaceSkill";
 import type { RaiseResult } from "@/app/api/__generated__/models/raiseResult";
 import { Toaster } from "@/components/molecules/Toast/toaster";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { server } from "@/mocks/mock-server";
 import { render, screen, waitFor } from "@/tests/integrations/test-utils";
 import userEvent from "@testing-library/user-event";
@@ -48,14 +49,14 @@ vi.mock("next/navigation", () => ({
 
 const raisedExpert = {
   id: "raised-1",
-  name: "Otto",
+  name: "Marketing Manager",
   avatar_url: null,
   role: "Marketer",
   tagline: null,
   bio: null,
   skills: [],
   identity:
-    "I'm Otto, an AI Expert created by you. I use your instructions to help with your work.",
+    "I'm Marketing Manager, an AI Expert created by you. I use your instructions to help with your work.",
   voice_preferences: "",
   boundaries: "",
   protected_soul_rules: [],
@@ -107,14 +108,13 @@ function mockReducedMotion() {
   });
 }
 
-function seedAtBudget(name = "Otto") {
+function seedAtBudget() {
   saveDraft({
     step: "budget",
     hasStarted: true,
     category: "marketing",
     color: "rose-300",
     jobTitle: "Marketing Manager",
-    name,
     avatarUrl: "",
     about: "",
     voicePreferences: "",
@@ -125,17 +125,13 @@ function seedAtBudget(name = "Otto") {
   });
 }
 
-function seedAtSkills(
-  name = "Otto",
-  budget: { credits: number | null } = { credits: null },
-) {
+function seedAtSkills(budget: { credits: number | null } = { credits: null }) {
   saveDraft({
     step: "skills",
     hasStarted: true,
     category: "marketing",
     color: "rose-300",
     jobTitle: "Marketing Manager",
-    name,
     avatarUrl: "",
     about: "",
     voicePreferences: "",
@@ -171,7 +167,7 @@ test.each([null, "finance"])(
         return raiseResult();
       }),
     );
-    seedAtSkills("Tally");
+    seedAtSkills();
     window.sessionStorage.setItem(
       "raise-expert-draft",
       JSON.stringify({
@@ -181,7 +177,6 @@ test.each([null, "finance"])(
         jobTitle: "Accounts Receivable Specialist",
       }),
     );
-    saveDraft(loadDraft());
     renderRaise();
 
     await userEvent.click(
@@ -190,7 +185,7 @@ test.each([null, "finance"])(
 
     await waitFor(() =>
       expect(captured).toMatchObject({
-        name: "Tally",
+        name: "Accounts Receivable Specialist",
         role: "Invoice chaser",
         job_title: "Accounts Receivable Specialist",
       }),
@@ -200,7 +195,9 @@ test.each([null, "finance"])(
 
 test("opens expert creation without a rollout flag", async () => {
   renderRaise();
-  expect(await screen.findByText(/name/i)).toBeDefined();
+  expect(
+    await screen.findByRole("button", { name: "Create Expert" }),
+  ).toBeDefined();
   expect(notFoundMock).not.toHaveBeenCalled();
 });
 
@@ -223,7 +220,7 @@ test("skips remaining kit steps, posts null budget and empty attachments, and op
 
   await waitFor(() => expect(captured).not.toBeNull());
   expect(captured).toMatchObject({
-    name: "Otto",
+    name: "Marketing Manager",
     role: "Marketer",
     job_title: "Marketing Manager",
     weekly_budget: null,
@@ -256,7 +253,7 @@ test("refreshes the expert roster before opening the kickoff thread", async () =
   );
 });
 
-test("posts null when the job title was skipped", async () => {
+test("localizes a skipped title's category role without translating the API name", async () => {
   let captured: unknown = null;
   server.use(
     getCreateRaisedExpertMockHandler(async (info) => {
@@ -267,12 +264,25 @@ test("posts null when the job title was skipped", async () => {
 
   seedAtSkills();
   saveDraft({ ...loadDraft(), jobTitle: "" });
-  renderRaise();
+  render(
+    <LanguageProvider initialLocale="zh-CN">
+      <RaisePage />
+    </LanguageProvider>,
+  );
+  expect(
+    await screen.findByRole("heading", { name: "营销专员", level: 2 }),
+  ).toBeDefined();
   await userEvent.click(
-    await screen.findByRole("button", { name: /Bring Otto to life/ }),
+    await screen.findByRole("button", { name: "创建 营销专员" }),
   );
 
-  await waitFor(() => expect(captured).toMatchObject({ job_title: null }));
+  await waitFor(() =>
+    expect(captured).toMatchObject({
+      name: "Marketer",
+      role: "Marketer",
+      job_title: null,
+    }),
+  );
 });
 
 test("posts a chosen weekly budget", async () => {
@@ -284,15 +294,17 @@ test("posts a chosen weekly budget", async () => {
     }),
   );
 
-  seedAtSkills("Otto", { credits: 500 });
+  seedAtSkills({ credits: 500 });
   renderRaise();
   await userEvent.click(
-    await screen.findByRole("button", { name: /Bring Otto to life/ }),
+    await screen.findByRole("button", {
+      name: "Bring Marketing Manager to life",
+    }),
   );
 
   await waitFor(() => expect(captured).not.toBeNull());
   expect(captured).toMatchObject({
-    name: "Otto",
+    name: "Marketing Manager",
     weekly_budget: 500,
     attachments: [],
   });
@@ -336,10 +348,14 @@ test("unlocks finish after a raise POST fails so the user can retry", async () =
   seedAtSkills();
   renderRaise();
   await userEvent.click(await screen.findByRole("button", { name: /life/ }));
-  expect(await screen.findByText("Couldn't create Otto")).toBeDefined();
+  expect(
+    await screen.findByText("Couldn't create Marketing Manager"),
+  ).toBeDefined();
   await waitFor(() => expect(postCount).toBe(1));
 
-  const retry = screen.getByRole("button", { name: /Bring Otto to life/ });
+  const retry = screen.getByRole("button", {
+    name: "Bring Marketing Manager to life",
+  });
   expect((retry as HTMLButtonElement).disabled).toBe(false);
   await userEvent.click(retry);
   await waitFor(() => expect(postCount).toBe(2));
@@ -403,10 +419,16 @@ test("toasts failed attachments and still opens copilot", async () => {
   seedAtSkills();
   renderRaise();
   await userEvent.click(
-    await screen.findByRole("button", { name: /Bring Otto to life/ }),
+    await screen.findByRole("button", {
+      name: "Bring Marketing Manager to life",
+    }),
   );
 
-  expect(await screen.findByText(/some tools didn't attach/)).toBeDefined();
+  expect(
+    await screen.findByText(
+      "Created Marketing Manager, but some tools didn't attach",
+    ),
+  ).toBeDefined();
   await waitFor(() =>
     expect(pushMock).toHaveBeenCalledWith(
       "/copilot?expertId=raised-1&kickoff=1",
@@ -414,37 +436,44 @@ test("toasts failed attachments and still opens copilot", async () => {
   );
 });
 
-test("picking a job title records it and asks for a name", async () => {
-  saveDraft({
-    ...EMPTY_DRAFT,
-    hasStarted: true,
-    category: "marketing",
-    color: "rose-300",
-    step: "jobTitle",
-  });
-  renderRaise();
-  await userEvent.click(
-    await screen.findByRole(
-      "button",
-      { name: "Marketing Manager" },
-      { timeout: 5000 },
-    ),
-  );
-
-  expect(
-    await screen.findByRole(
-      "group",
-      { name: "Suggested names" },
-      { timeout: 5000 },
-    ),
-  ).toBeDefined();
-  expect(loadDraft()).toMatchObject({
+test.each([
+  {
+    answer: "Marketing Manager",
     jobTitle: "Marketing Manager",
-    step: "name",
-  });
-});
+    title: "Marketing Manager",
+  },
+  { answer: "Skip", jobTitle: "", title: "Marketer" },
+])(
+  "goes straight to the avatar as $title after choosing $answer",
+  async ({ answer, jobTitle, title }) => {
+    saveDraft({
+      ...EMPTY_DRAFT,
+      hasStarted: true,
+      category: "marketing",
+      color: "rose-300",
+      step: "jobTitle",
+    });
+    renderRaise();
+    await userEvent.click(await screen.findByRole("button", { name: answer }));
 
-test("typing a job title trims it and asks for a name", async () => {
+    expect(loadDraft()).toMatchObject({ jobTitle, step: "avatar" });
+    expect(
+      await screen.findByRole("button", { name: "Use this avatar" }),
+    ).toBeDefined();
+    expect(
+      screen.getByRole("heading", { name: title, level: 2 }),
+    ).toBeDefined();
+    expect(screen.queryByRole("group", { name: "Suggested names" })).toBeNull();
+    expect(
+      screen.queryByRole("textbox", { name: "Or type your own" }),
+    ).toBeNull();
+    expect(
+      screen.queryByText("Good pick. What do you want to call them?"),
+    ).toBeNull();
+  },
+);
+
+test("typing a job title trims it and continues to the avatar", async () => {
   saveDraft({
     ...EMPTY_DRAFT,
     hasStarted: true,
@@ -459,41 +488,79 @@ test("typing a job title trims it and asks for a name", async () => {
   );
   await userEvent.click(screen.getByRole("button", { name: "Add title" }));
 
-  expect(
-    await screen.findByRole(
-      "group",
-      { name: "Suggested names" },
-      { timeout: 5000 },
-    ),
-  ).toBeDefined();
   expect(loadDraft()).toMatchObject({
     jobTitle: "Chief of Staff",
-    step: "name",
+    step: "avatar",
   });
+  expect(
+    await screen.findByRole("button", { name: "Use this avatar" }),
+  ).toBeDefined();
+  expect(
+    screen.getByRole("heading", { name: "Chief of Staff", level: 2 }),
+  ).toBeDefined();
 });
 
-test("skipping a job title records it and asks for a name", async () => {
-  saveDraft({
-    ...EMPTY_DRAFT,
-    hasStarted: true,
-    category: "marketing",
-    color: "rose-300",
-    step: "jobTitle",
-  });
-  renderRaise();
-  await userEvent.click(
-    await screen.findByRole("button", { name: "Skip" }, { timeout: 5000 }),
+test("resumes a legacy draft at skills and submits the profession without the old name", async () => {
+  const attachment = {
+    kind: "workflow",
+    source: "marketplace",
+    id: "listing-1",
+    name: "SEO Blog Writer",
+  };
+  window.sessionStorage.setItem(
+    "raise-expert-draft",
+    JSON.stringify({
+      ...EMPTY_DRAFT,
+      step: "skills",
+      hasStarted: true,
+      category: "marketing",
+      jobTitle: "  Marketing Manager  ",
+      name: "Retired Nova",
+      color: "rose-300",
+      avatarUrl: "/saved-avatar.png",
+      about: "Audit my landing pages.",
+      voicePreferences: "Be concise.",
+      voiceLabel: "Concise and direct",
+      budget: { credits: 500 },
+      marketplace: [attachment],
+    }),
+  );
+  let captured: unknown;
+  server.use(
+    getCreateRaisedExpertMockHandler(async ({ request }) => {
+      captured = await request.json();
+      return raiseResult();
+    }),
   );
 
-  expect(await screen.findByText("Skipped")).toBeDefined();
+  renderRaise();
+  const finish = await screen.findByRole("button", {
+    name: "Bring Marketing Manager to life",
+  });
   expect(
-    await screen.findByRole(
-      "group",
-      { name: "Suggested names" },
-      { timeout: 5000 },
-    ),
+    screen.getByRole("heading", { name: "Marketing Manager", level: 2 }),
   ).toBeDefined();
-  expect(loadDraft()).toMatchObject({ jobTitle: "", step: "name" });
+  expect(
+    screen.getByRole("img", { name: "Marketing Manager's picture" }),
+  ).toBeDefined();
+  expect(screen.queryByText(/Retired Nova/)).toBeNull();
+  await userEvent.click(finish);
+
+  await waitFor(() =>
+    expect(captured).toMatchObject({
+      name: "Marketing Manager",
+      role: "Marketer",
+      job_title: "Marketing Manager",
+      color: "rose-300",
+      avatar_url: "/saved-avatar.png",
+      about: "Audit my landing pages.",
+      voice_preferences: "Be concise.",
+      weekly_budget: 500,
+      attachments: [
+        { kind: "workflow", source: "marketplace", id: "listing-1" },
+      ],
+    }),
+  );
 });
 
 test("picking a weekly budget advances to marketplace workflows", async () => {
@@ -531,7 +598,7 @@ test("drops the skills beat and raises from the marketplace step when there is n
 
   const finish = await screen.findByRole(
     "button",
-    { name: /Bring Otto to life/ },
+    { name: "Bring Marketing Manager to life" },
     { timeout: 5000 },
   );
   expect(screen.queryByRole("textbox", { name: "Search skills" })).toBeNull();
@@ -572,7 +639,7 @@ test("keeps the skills beat when only the Hub has something to offer", async () 
     await screen.findByRole("button", { name: "That's it" }, { timeout: 5000 }),
   ).toBeDefined();
   expect(
-    screen.queryByRole("button", { name: /Bring Otto to life/ }),
+    screen.queryByRole("button", { name: "Bring Marketing Manager to life" }),
   ).toBeNull();
 });
 
@@ -603,7 +670,7 @@ test("keeps the skills beat when availability settles empty after marketplace su
   await userEvent.click(
     await screen.findByRole(
       "button",
-      { name: /Bring Otto to life/ },
+      { name: "Bring Marketing Manager to life" },
       { timeout: 5000 },
     ),
   );
@@ -629,23 +696,26 @@ test("back returns to the previous step and the draft survives", async () => {
     hasStarted: true,
     category: "marketing",
     jobTitle: "Marketing Manager",
-    name: "Otto",
     color: "rose-300",
   });
 });
 
 test("a refresh resumes the draft from session storage", async () => {
-  seedAtSkills("Nova");
+  seedAtSkills();
   const first = renderRaise();
   expect(
-    await screen.findByRole("button", { name: /Bring Nova to life/ }),
+    await screen.findByRole("button", {
+      name: "Bring Marketing Manager to life",
+    }),
   ).toBeDefined();
 
   first.unmount();
   renderRaise();
 
   expect(
-    await screen.findByRole("button", { name: /Bring Nova to life/ }),
+    await screen.findByRole("button", {
+      name: "Bring Marketing Manager to life",
+    }),
   ).toBeDefined();
 });
 
@@ -667,7 +737,7 @@ test.each([400, 422, 503])(
     const draft = loadDraft();
     renderRaise();
     const finish = await screen.findByRole("button", {
-      name: /Bring Otto to life/,
+      name: "Bring Marketing Manager to life",
     });
     await userEvent.click(finish);
     expect(

@@ -56,6 +56,9 @@ vi.mock("@/services/feature-flags/use-get-flag", async (importOriginal) => {
 
 const URL = "*/api/onboarding/brain-dump/suggested-tasks";
 const COLLAPSED_KEY = "home.suggestedTasks.collapsed";
+const EMAIL_TITLE = "Email Marketing Manager";
+const SALES_TITLE = "Sales Development Rep";
+const OPS_TITLE = "Executive Assistant";
 const SOMETHING_ELSE =
   "Want to do something else? Just write it in the textbox below.";
 
@@ -304,16 +307,16 @@ describe("Suggested first tasks on Home — who takes each task", () => {
     stored[2] = { ...stored[2], expert_id: "expert-gone" };
     renderHome();
 
-    await screen.findByRole("button", { name: startName("Maria", TASKS[0]) });
+    await screen.findByRole("button", {
+      name: startName(EMAIL_TITLE, TASKS[0]),
+    });
     const maria = rowOf(TASKS[0]);
     expect(
       within(maria)
-        .getByRole("img", { name: "Maria, AI Expert" })
+        .getByRole("img", { name: `${EMAIL_TITLE}, AI Expert` })
         .getAttribute("width"),
     ).toBe("28");
-    expect(
-      within(maria).getByText(textIs("Maria, Email Marketing Manager")),
-    ).toBeDefined();
+    expect(within(maria).getByText(textIs(EMAIL_TITLE))).toBeDefined();
 
     for (const task of [TASKS[1], TASKS[2]]) {
       const row = rowOf(task);
@@ -333,22 +336,25 @@ describe("Suggested first tasks on Home — who takes each task", () => {
     let wasAddressedToMaria = false;
     const onStartTask = vi.fn(async () => {
       wasAddressedToMaria =
-        screen.queryByPlaceholderText("What should Maria work on?") !== null;
+        screen.queryByPlaceholderText(`What should ${EMAIL_TITLE} work on?`) !==
+        null;
       return "session-1";
     });
     renderHome({ onStartTask });
 
     await userEvent.click(
       await screen.findByRole("button", {
-        name: startName("Maria", TASKS[0]),
+        name: startName(EMAIL_TITLE, TASKS[0]),
       }),
     );
 
     const started = await screen.findByRole("link", {
-      name: chatName("Maria", TASKS[0]),
+      name: chatName(EMAIL_TITLE, TASKS[0]),
     });
     expect(started.getAttribute("href")).toBe("/copilot?sessionId=session-1");
-    expect(within(started).getByText("In progress with Maria")).toBeDefined();
+    expect(
+      within(started).getByText(`In progress with ${EMAIL_TITLE}`),
+    ).toBeDefined();
     expect(onStartTask).toHaveBeenCalledExactlyOnceWith(TASKS[0].prompt);
     expect(wasAddressedToMaria).toBe(true);
     await waitFor(() =>
@@ -386,7 +392,9 @@ describe("Suggested first tasks on Home — who takes each task", () => {
     );
 
     expect(
-      await screen.findByText("Jo isn't on your team, so Otto has this one."),
+      await screen.findByText(
+        "That expert isn't on your team, so Otto has this one.",
+      ),
     ).toBeDefined();
     const started = await screen.findByRole("link", {
       name: chatName("Otto", TASKS[2]),
@@ -408,12 +416,13 @@ describe("Suggested first tasks on Home — who takes each task", () => {
     let wasAddressedToMaria = true;
     const onStartTask = vi.fn(async () => {
       wasAddressedToMaria =
-        screen.queryByPlaceholderText("What should Maria work on?") !== null;
+        screen.queryByPlaceholderText(`What should ${EMAIL_TITLE} work on?`) !==
+        null;
       return "session-2";
     });
     renderHome({ searchParams: "?expertId=expert-maria", onStartTask });
 
-    await screen.findByPlaceholderText("What should Maria work on?");
+    await screen.findByPlaceholderText(`What should ${EMAIL_TITLE} work on?`);
     const block = await findBlock();
     await userEvent.click(
       await within(block).findByRole("button", {
@@ -440,14 +449,14 @@ describe("Suggested first tasks on Home — who takes each task", () => {
     renderHome();
 
     const link = await screen.findByRole("link", {
-      name: chatName("Jo", TASKS[0]),
+      name: chatName(OPS_TITLE, TASKS[0]),
     });
     expect(link.getAttribute("href")).toContain("session-jo");
     expect(
-      within(rowOf(TASKS[0])).getByText("In progress with Jo"),
+      within(rowOf(TASKS[0])).getByText(`In progress with ${OPS_TITLE}`),
     ).toBeDefined();
     expect(
-      screen.queryByRole("button", { name: startName("Jo", TASKS[0]) }),
+      screen.queryByRole("button", { name: startName(OPS_TITLE, TASKS[0]) }),
     ).toBeNull();
   });
 });
@@ -473,7 +482,7 @@ describe("Suggested first tasks on Home — the approval mode", () => {
 
     await userEvent.click(
       await screen.findByRole("button", {
-        name: startName("Maria", TASKS[0]),
+        name: startName(EMAIL_TITLE, TASKS[0]),
       }),
     );
 
@@ -500,7 +509,9 @@ describe("Suggested first tasks on Home — the approval mode", () => {
 describe("Suggested first tasks on Home — the rows", () => {
   it("marks only the first open row Start here, and moves it to the next open row once that one is started", async () => {
     renderHome();
-    await screen.findByRole("button", { name: startName("Maria", TASKS[0]) });
+    await screen.findByRole("button", {
+      name: startName(EMAIL_TITLE, TASKS[0]),
+    });
 
     expect(startHere()).toEqual({
       pill: [TASKS[0].title],
@@ -508,9 +519,9 @@ describe("Suggested first tasks on Home — the rows", () => {
     });
 
     await userEvent.click(
-      screen.getByRole("button", { name: startName("Maria", TASKS[0]) }),
+      screen.getByRole("button", { name: startName(EMAIL_TITLE, TASKS[0]) }),
     );
-    await screen.findByRole("link", { name: chatName("Maria", TASKS[0]) });
+    await screen.findByRole("link", { name: chatName(EMAIL_TITLE, TASKS[0]) });
 
     await waitFor(() =>
       expect(startHere()).toEqual({
@@ -539,13 +550,15 @@ describe("Suggested first tasks on Home — the rows", () => {
     renderHome();
 
     const started = await screen.findByRole("link", {
-      name: chatName("Maria", TASKS[0]),
+      name: chatName(EMAIL_TITLE, TASKS[0]),
     });
 
     expect(started.getAttribute("href")).toBe(
       "/copilot?sessionId=chat%20%2Fone%3F",
     );
-    expect(within(started).getByText("In progress with Maria")).toBeDefined();
+    expect(
+      within(started).getByText(`In progress with ${EMAIL_TITLE}`),
+    ).toBeDefined();
     const row = rowOf(TASKS[0]);
     expect(within(row).queryByRole("button")).toBeNull();
     expect(
@@ -577,7 +590,9 @@ describe("Suggested first tasks on Home — the rows", () => {
 
   it("shows a task's why under its title, and nothing there when it has none", async () => {
     renderHome();
-    await screen.findByRole("button", { name: startName("Sam", TASKS[2]) });
+    await screen.findByRole("button", {
+      name: startName(SALES_TITLE, TASKS[2]),
+    });
 
     expect(within(rowOf(TASKS[0])).getByText(TASKS[0].why ?? "")).toBeDefined();
     expect(within(rowOf(TASKS[2])).getByText(TASKS[2].why ?? "")).toBeDefined();
@@ -589,11 +604,13 @@ describe("Suggested first tasks on Home — the rows", () => {
     renderHome();
 
     const started = await screen.findByRole("link", {
-      name: chatName("Maria", TASKS[0]),
+      name: chatName(EMAIL_TITLE, TASKS[0]),
     });
     const openButtons = [
       await screen.findByRole("button", { name: startName("Otto", TASKS[1]) }),
-      await screen.findByRole("button", { name: startName("Sam", TASKS[2]) }),
+      await screen.findByRole("button", {
+        name: startName(SALES_TITLE, TASKS[2]),
+      }),
     ];
 
     expect(
@@ -668,7 +685,9 @@ describe("Suggested first tasks on Home — removing a task", () => {
 
     expect(within(block).getAllByTestId("suggested-task")).toHaveLength(2);
     expect(
-      within(block).queryByRole("button", { name: startName("Sam", TASKS[2]) }),
+      within(block).queryByRole("button", {
+        name: startName(SALES_TITLE, TASKS[2]),
+      }),
     ).toBeNull();
   });
 
@@ -899,7 +918,7 @@ describe("Suggested first tasks on Home — when to show them", () => {
   it("shows the list, without the team row, while an expert is the recipient", async () => {
     renderHome({ searchParams: "?expertId=expert-maria" });
 
-    await screen.findByPlaceholderText("What should Maria work on?");
+    await screen.findByPlaceholderText(`What should ${EMAIL_TITLE} work on?`);
     const block = await findBlock();
 
     expect(within(block).getAllByTestId("suggested-task")).toHaveLength(3);
@@ -959,23 +978,23 @@ describe("Suggested first tasks — the greeting page", () => {
         within(team)
           .getAllByRole("listitem")
           .map((chip) => chip.textContent),
-      ).toEqual([
-        "OttoHead of AI",
-        "MariaEmail Marketing Manager",
-        "SamSales Development Rep",
-      ]),
+      ).toEqual(["OttoHead of AI", EMAIL_TITLE, SALES_TITLE]),
     );
 
     const list = within(card).getByRole("list", { name: "Your first tasks" });
     expect(within(list).getAllByRole("listitem")).toHaveLength(3);
     expect(
-      within(list).getByRole("button", { name: startName("Maria", TASKS[0]) }),
+      within(list).getByRole("button", {
+        name: startName(EMAIL_TITLE, TASKS[0]),
+      }),
     ).toBeDefined();
     expect(
       within(list).getByRole("button", { name: startName("Otto", TASKS[1]) }),
     ).toBeDefined();
     expect(
-      within(list).getByRole("button", { name: startName("Sam", TASKS[2]) }),
+      within(list).getByRole("button", {
+        name: startName(SALES_TITLE, TASKS[2]),
+      }),
     ).toBeDefined();
     expect(within(card).getByText(SOMETHING_ELSE)).toBeDefined();
     expect(
@@ -1097,7 +1116,9 @@ describe("Suggested first tasks — the greeting page", () => {
     });
     const onStartTask = vi.fn(() => pending);
     renderHome({ onStartTask });
-    await screen.findByRole("button", { name: startName("Sam", TASKS[2]) });
+    await screen.findByRole("button", {
+      name: startName(SALES_TITLE, TASKS[2]),
+    });
     await userEvent.click(
       screen.getByRole("button", { name: startName("Otto", TASKS[1]) }),
     );
@@ -1110,7 +1131,7 @@ describe("Suggested first tasks — the greeting page", () => {
         }
       }
       await userEvent.click(
-        screen.getByRole("button", { name: startName("Sam", TASKS[2]) }),
+        screen.getByRole("button", { name: startName(SALES_TITLE, TASKS[2]) }),
       );
       await userEvent.click(
         screen.getByRole("button", { name: removeName(TASKS[2]) }),
@@ -1252,7 +1273,7 @@ describe("Suggested first tasks — keyboard and screen readers", () => {
 
     await waitFor(() =>
       expect(document.activeElement).toBe(
-        screen.getByRole("button", { name: startName("Sam", TASKS[2]) }),
+        screen.getByRole("button", { name: startName(SALES_TITLE, TASKS[2]) }),
       ),
     );
 
@@ -1263,7 +1284,7 @@ describe("Suggested first tasks — keyboard and screen readers", () => {
     // The toast hands focus back to where it was before the Undo.
     await waitFor(() =>
       expect(document.activeElement).toBe(
-        screen.getByRole("button", { name: startName("Sam", TASKS[2]) }),
+        screen.getByRole("button", { name: startName(SALES_TITLE, TASKS[2]) }),
       ),
     );
   });
@@ -1373,7 +1394,7 @@ describe("Suggested first tasks — keyboard and screen readers", () => {
     renderHome({ onStartTask: vi.fn(() => pending) });
 
     const first = await screen.findByRole("button", {
-      name: startName("Maria", TASKS[0]),
+      name: startName(EMAIL_TITLE, TASKS[0]),
     });
     expect(description(first)).toBe(
       "Start here Three invoices are more than 30 days late.",
@@ -1385,7 +1406,7 @@ describe("Suggested first tasks — keyboard and screen readers", () => {
     ).toBeNull();
     expect(
       description(
-        screen.getByRole("button", { name: startName("Sam", TASKS[2]) }),
+        screen.getByRole("button", { name: startName(SALES_TITLE, TASKS[2]) }),
       ),
     ).toBe("Two rivals changed their prices last month.");
 

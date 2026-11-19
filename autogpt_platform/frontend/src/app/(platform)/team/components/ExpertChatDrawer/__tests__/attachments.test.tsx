@@ -94,7 +94,6 @@ const backendSocket = ws.link("ws://localhost:8001/ws");
 
 const ZARA = {
   expertId: EXPERT_ID,
-  name: "Zara",
   role: "GTM Strategist",
   avatarUrl: null,
 };
@@ -200,7 +199,9 @@ function photo() {
 // makes happy-dom recompute every element's style, which under load can
 // outlast findBy's default 1 s and starve the reply the test is waiting for.
 function composer() {
-  const form = screen.getByPlaceholderText("Message Zara…").closest("form");
+  const form = screen
+    .getByPlaceholderText("Message GTM Strategist…")
+    .closest("form");
   if (!form) throw new Error("The composer has no form");
   return form;
 }
@@ -289,7 +290,7 @@ function workspaceFileHandlers() {
 
 async function enabledComposer() {
   const input = (await screen.findByPlaceholderText(
-    "Message Zara…",
+    "Message GTM Strategist…",
   )) as HTMLTextAreaElement;
   await waitFor(() => expect(input.disabled).toBe(false));
   return input;
@@ -506,8 +507,11 @@ describe("ExpertChatDrawer attachments", () => {
     await waitFor(() => expect(cancels).toBe(1));
     await waitFor(() =>
       expect(
-        (screen.getByPlaceholderText("Message Zara…") as HTMLTextAreaElement)
-          .value,
+        (
+          screen.getByPlaceholderText(
+            "Message GTM Strategist…",
+          ) as HTMLTextAreaElement
+        ).value,
       ).toBe("and this"),
     );
     expect(screen.queryByTestId("pending-upload-message")).toBeNull();
@@ -541,8 +545,11 @@ describe("ExpertChatDrawer attachments", () => {
 
     await waitFor(() =>
       expect(
-        (screen.getByPlaceholderText("Message Zara…") as HTMLTextAreaElement)
-          .value,
+        (
+          screen.getByPlaceholderText(
+            "Message GTM Strategist…",
+          ) as HTMLTextAreaElement
+        ).value,
       ).toBe("and this"),
     );
     expect(screen.queryByTestId("pending-upload-message")).toBeNull();

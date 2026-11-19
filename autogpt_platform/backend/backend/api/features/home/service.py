@@ -9,7 +9,7 @@ from autogpt_libs.auth.permissions import OrgAction, check_org_permission
 from pydantic import BaseModel, ValidationError
 
 from backend.api.features.experts import experts_db
-from backend.api.features.experts.models import Expert
+from backend.api.features.experts.models import Expert, ExpertIdentity
 from backend.api.features.graph_executions.review.model import PendingHumanReviewModel
 from backend.api.features.library import db as library_db
 from backend.copilot import db as chat_db
@@ -91,6 +91,7 @@ async def build_home_dashboard(
         _persisted_briefing(user_id=user_id, timezone_name=data.timezone_name, now=now),
         _get_session_titles(user_id=user_id, session_ids=work_session_ids),
     )
+    archived_experts = await _get_archived_experts(user_id, data, persisted_briefing)
 
     return compose_home_dashboard(
         now=now,
@@ -107,7 +108,37 @@ async def build_home_dashboard(
         work_events=data.work_events,
         session_titles=session_titles,
         paused_chats=data.paused_chats,
+        archived_experts=archived_experts,
     )
+
+
+async def _get_archived_experts(
+    user_id: str, data: HomeSourceData, briefing: BriefingContent | None
+) -> dict[str, ExpertIdentity]:
+    referenced = {review.expert_id for review in data.reviews if review.expert_id}
+    referenced.update(run.expert_id for run in data.executions if run.expert_id)
+    referenced.update(event.expert_id for event in data.work_events if event.expert_id)
+    if briefing:
+        referenced.update(
+            item.expert_id for item in briefing.run_items if item.expert_id
+        )
+    missing = referenced - {expert.id for expert in data.experts}
+    if not missing:
+        return {}
+    try:
+        identities = await experts_db.list_expert_identities(user_id)
+    except Exception:
+        logger.warning(
+            "Home could not load historical experts for user %s",
+            user_id[:_LOG_ID_CHARS],
+            exc_info=True,
+        )
+        return {}
+    return {
+        expert.id: expert
+        for expert in identities
+        if expert.is_archived and expert.id in missing
+    }
 
 
 async def _persisted_briefing(

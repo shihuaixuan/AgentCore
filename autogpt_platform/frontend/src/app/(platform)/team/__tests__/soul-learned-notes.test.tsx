@@ -188,7 +188,9 @@ describe("Soul drawer — what I've learned", () => {
     // Forget sits inside the Soul form; it must not submit it.
     expect(soulSaves).toEqual([]);
     expect(
-      screen.getByRole("complementary", { name: "Maria's Soul" }),
+      screen.getByRole("complementary", {
+        name: "Marketing Strategist's Soul",
+      }),
     ).toBeDefined();
   });
 

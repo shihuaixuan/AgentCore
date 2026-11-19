@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Expert } from "@/app/api/__generated__/models/expert";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { Alert01Icon } from "@hugeicons/core-free-icons";
@@ -10,10 +11,11 @@ import { useSetupNeeded } from "./useSetupNeeded";
 
 /** Everything still standing between the team's scheduled workflows and
  *  their schedules, one row per gap with the one action that closes it. */
-export function SetupNeeded() {
+export function SetupNeeded({ experts }: { experts: Expert[] }) {
   const { t } = useTranslation();
   const {
     items,
+    expertTitle,
     isConnectable,
     connecting,
     connect,
@@ -21,7 +23,7 @@ export function SetupNeeded() {
     handleConnected,
     allow,
     isGranting,
-  } = useSetupNeeded();
+  } = useSetupNeeded(experts);
 
   if (items.length === 0) return null;
 
@@ -49,6 +51,7 @@ export function SetupNeeded() {
           >
             <SetupNeededRow
               item={item}
+              expertTitle={expertTitle(item.expert_id)}
               isConnectable={isConnectable(item)}
               isGranting={isGranting}
               onConnect={() => connect(item)}
@@ -60,7 +63,7 @@ export function SetupNeeded() {
       {connecting ? (
         <ExpertConnectServiceDialog
           open
-          expertName={connecting.expert_name}
+          expertName={expertTitle(connecting.expert_id)}
           initialProviderId={connecting.providers[0] ?? null}
           onClose={closeConnect}
           onConnected={handleConnected}

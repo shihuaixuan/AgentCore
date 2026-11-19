@@ -4,11 +4,13 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { cn } from "@/lib/utils";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { LayoutGroup, motion, type Transition } from "framer-motion";
 
-export interface ExpertFilterOption {
+interface ExpertFilterOption {
   id: string;
-  name: string;
+  role?: string | null;
+  jobTitle?: string | null;
   avatarUrl: string | null;
 }
 
@@ -26,7 +28,7 @@ const snappySpring: Transition = {
 };
 
 export function ExpertFilter({ experts, value, onChange }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   // Keep the control while a selection exists so a filter on an expert who
   // has since been fired can still be cleared.
   if (experts.length === 0 && value === null) return null;
@@ -52,7 +54,7 @@ export function ExpertFilter({ experts, value, onChange }: Props) {
           {experts.map((expert) => (
             <ExpertTab
               key={expert.id}
-              label={expert.name}
+              label={getExpertDisplayTitle(expert, locale)}
               avatarUrl={expert.avatarUrl}
               active={value === expert.id}
               onClick={() => onChange(expert.id)}
@@ -105,7 +107,7 @@ function ExpertTab({
         />
       ) : null}
       {hasAvatar ? (
-        // Decorative: the label carries the name for assistive tech.
+        // Decorative: the label carries the title for assistive tech.
         <span aria-hidden className="relative z-10 shrink-0">
           <ExpertAvatar name={label} avatarUrl={avatarUrl} size={22} />
         </span>

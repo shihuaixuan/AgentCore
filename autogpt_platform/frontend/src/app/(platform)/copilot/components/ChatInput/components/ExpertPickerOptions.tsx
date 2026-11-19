@@ -9,6 +9,8 @@ import { newRecipientChatHref } from "../../../expertSessionQuery";
 import { ExpertAvatar } from "../../ChatMessagesContainer/components/ExpertAvatar/ExpertAvatar";
 import {
   OTTO_RECIPIENT_OPTION,
+  recipientChoices,
+  recipientTitle,
   type RecipientOption,
   type RecipientPickerConfig,
 } from "./recipientOptions";
@@ -28,17 +30,16 @@ export function ExpertPickerOptions({
   onSelect,
   onClose,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [query, setQuery] = useState("");
   const [nextID, setNextID] = useState<string | null>();
+  const choices = recipientChoices(options, locale);
   const next =
-    nextID === null ? null : options.find((option) => option.id === nextID);
+    nextID === null ? null : choices.find(({ option }) => option.id === nextID);
   const search = query.trim().toLowerCase();
   const matchesOtto = isThreadPicker && "otto".includes(search);
-  const matching = options.filter((option) =>
-    [option.name, option.role].some((text) =>
-      text?.toLowerCase().includes(search),
-    ),
+  const matching = choices.filter(({ option, label }) =>
+    [label, option.role].some((text) => text?.toLowerCase().includes(search)),
   );
 
   function select(id: string | null) {
@@ -70,15 +71,18 @@ export function ExpertPickerOptions({
         {matchesOtto && (
           <ExpertOption
             option={OTTO_RECIPIENT_OPTION}
+            title={recipientTitle(OTTO_RECIPIENT_OPTION, locale)}
             selected={!recipient}
             disabled={!!selectionBlocked && !!recipient}
             onSelect={() => select(null)}
           />
         )}
-        {matching.map((option) => (
+        {matching.map(({ option, title, label }) => (
           <ExpertOption
             key={option.id}
             option={option}
+            title={title}
+            label={label}
             selected={option.id === recipient?.id}
             disabled={!!selectionBlocked && option.id !== recipient?.id}
             onSelect={() => select(option.id)}
@@ -126,11 +130,15 @@ export function ExpertPickerOptions({
 
 function ExpertOption({
   option,
+  title,
+  label = title,
   selected,
   disabled,
   onSelect,
 }: {
   option: RecipientOption;
+  title: string;
+  label?: string;
   selected: boolean;
   disabled: boolean;
   onSelect: () => void;
@@ -140,20 +148,14 @@ function ExpertOption({
       type="button"
       size="row"
       variant="ghost"
+      aria-label={label}
       aria-pressed={selected}
       disabled={disabled}
-      className="w-full justify-start"
+      className="h-auto w-full justify-start"
       onClick={onSelect}
     >
-      <RecipientAvatar option={option} />
-      <Text
-        as="span"
-        variant="body-tight"
-        className="min-w-0 flex-1 truncate text-left"
-      >
-        {option.name}
-        {option.role && ` · ${option.role}`}
-      </Text>
+      <RecipientAvatar option={option} title={title} />
+      <RecipientTitle title={label} />
       {selected && (
         <Icon aria-hidden icon={Tick02Icon} className="size-4 shrink-0" />
       )}
@@ -165,7 +167,7 @@ function NewTaskConfirmation({
   next,
   onCancel,
 }: {
-  next: RecipientOption | null;
+  next: { option: RecipientOption; label: string } | null;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
@@ -174,8 +176,8 @@ function NewTaskConfirmation({
       <Text variant="body-medium">
         {next
           ? t(
-              `Start a new chat with ${next.name}?`,
-              `与 ${next.name} 开始新对话？`,
+              `Start a new chat with ${next.label}?`,
+              `与 ${next.label} 开始新对话？`,
             )
           : t("Start a new task without an expert?", "新建普通任务？")}
       </Text>
@@ -197,7 +199,7 @@ function NewTaskConfirmation({
         </Button>
         <Button
           as="NextLink"
-          href={newRecipientChatHref(next?.id ?? null)}
+          href={newRecipientChatHref(next?.option.id ?? null)}
           size="row"
         >
           {next
@@ -209,14 +211,35 @@ function NewTaskConfirmation({
   );
 }
 
-export function RecipientAvatar({ option }: { option: RecipientOption }) {
+export function RecipientTitle({ title }: { title: string }) {
   return (
-    <ExpertAvatar
-      name={option.name}
-      avatarUrl={option.avatarUrl}
-      color={option.color}
-      isAutopilot={option === OTTO_RECIPIENT_OPTION}
-      size="sm"
-    />
+    <Text
+      as="span"
+      variant="body-medium-lh-snug"
+      className="min-w-0 truncate"
+      title={title}
+    >
+      {title}
+    </Text>
+  );
+}
+
+export function RecipientAvatar({
+  option,
+  title,
+}: {
+  option: RecipientOption;
+  title: string;
+}) {
+  return (
+    <span aria-hidden="true" className="flex shrink-0">
+      <ExpertAvatar
+        name={title}
+        avatarUrl={option.avatarUrl}
+        color={option.color}
+        isAutopilot={option === OTTO_RECIPIENT_OPTION}
+        size="sm"
+      />
+    </span>
   );
 }

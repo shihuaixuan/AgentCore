@@ -57,7 +57,8 @@ test("a held call drawn outside the chain renders its real card once answered", 
   );
 
   expect(screen.getByText("Expert created")).toBeDefined();
-  expect(screen.getByText("Otto")).toBeDefined();
+  expect(screen.getByText("Market research")).toBeDefined();
+  expect(screen.queryByText("Otto")).toBeNull();
 });
 
 // The card and the wake's label read the same result row; each says what the

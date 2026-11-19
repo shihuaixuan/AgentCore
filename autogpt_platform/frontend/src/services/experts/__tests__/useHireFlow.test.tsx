@@ -99,7 +99,7 @@ afterEach(() => {
 });
 
 describe("useHireFlow", () => {
-  test("localizes the hire notification without translating the expert name", async () => {
+  test("uses the profession in the localized hire notification", async () => {
     function ChineseWrapper({ children }: Props) {
       return (
         <LanguageProvider>
@@ -114,7 +114,9 @@ describe("useHireFlow", () => {
     await act(async () => {
       await result.current.hire();
     });
-    expect(await screen.findByText("Maria 已加入你的团队")).toBeDefined();
+    expect(
+      await screen.findByText("Marketing Strategist 已加入你的团队"),
+    ).toBeDefined();
     expect(
       screen.getByRole("link", { name: "查看团队" }).getAttribute("href"),
     ).toBe("/team");
@@ -253,7 +255,9 @@ describe("useHireFlow", () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByText("Couldn't hire Maria")).toBeDefined(),
+      expect(
+        screen.getByText("Couldn't hire Marketing Strategist"),
+      ).toBeDefined(),
     );
     expect(result.current.isVoicePickOpen).toBe(false);
     expect(pushMock).not.toHaveBeenCalled();

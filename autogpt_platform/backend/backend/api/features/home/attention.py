@@ -1,10 +1,11 @@
 import json
+from collections.abc import Mapping
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote
 
 from pydantic import ValidationError
 
-from backend.api.features.experts.models import Expert
+from backend.api.features.experts.models import Expert, ExpertIdentity
 from backend.api.features.experts.spend_approval import is_spend_review
 from backend.api.features.graph_executions.review.model import PendingHumanReviewModel
 from backend.copilot.briefing.outcome import as_utc, run_link
@@ -30,9 +31,14 @@ def compose_attention_items(
     credits_balance: int | None,
     questions: list[ChatSessionInfo] | None = None,
     paused_chats: list[PausedScheduledChat] | None = None,
+    archived_experts: Mapping[str, ExpertIdentity] | None = None,
 ) -> list[HomeAttentionItem]:
     expert_by_id = {expert.id: expert for expert in experts}
-    items = [_review_attention(review, now) for review in reviews]
+    review_experts = {**(archived_experts or {}), **expert_by_id}
+    items = [
+        _review_attention(review, now, _review_expert(review, review_experts))
+        for review in reviews
+    ]
     items.extend(
         _expert_attention(expert) for expert in experts if _needs_attention(expert)
     )
@@ -51,10 +57,10 @@ def compose_attention_items(
 
 
 def _review_attention(
-    review: PendingHumanReviewModel, now: datetime
+    review: PendingHumanReviewModel, now: datetime, expert: HomeExpert | None
 ) -> HomeAttentionItem:
     if gate := _gate_payload(review):
-        return _gate_attention(review, gate, now)
+        return _gate_attention(review, gate, now, expert)
     title = (
         review.action
         or review.instructions
@@ -75,7 +81,7 @@ def _review_attention(
         title=title,
         description=description,
         why_it_matters=why_it_matters,
-        expert=_review_expert(review),
+        expert=expert,
         agent_name=review.agent_name,
         created_at=created_at,
         preview=_payload_preview(review.payload),
@@ -85,7 +91,10 @@ def _review_attention(
 
 
 def _gate_attention(
-    review: PendingHumanReviewModel, gate: GateReviewPayload, now: datetime
+    review: PendingHumanReviewModel,
+    gate: GateReviewPayload,
+    now: datetime,
+    expert: HomeExpert | None,
 ) -> HomeAttentionItem:
     """A held AutoPilot call: the card's own headline and reason, and its inputs
     as the preview, because Home answers it without opening the chat."""
@@ -98,7 +107,7 @@ def _gate_attention(
         headline=HomeHeadline(ask=gate.headline.ask, object=gate.headline.object),
         description=_gate_reason(gate, review),
         why_it_matters="Nothing runs until you approve it.",
-        expert=_review_expert(review),
+        expert=expert,
         created_at=created_at,
         preview=_clip(
             " · ".join(
@@ -305,7 +314,11 @@ def _credits_attention(schedule_count: int) -> HomeAttentionItem:
     )
 
 
-def _review_expert(review: PendingHumanReviewModel) -> HomeExpert | None:
+def _review_expert(
+    review: PendingHumanReviewModel, experts: Mapping[str, Expert | ExpertIdentity]
+) -> HomeExpert | None:
+    if review.expert_id and (expert := experts.get(review.expert_id)):
+        return to_home_expert(expert)
     if not review.expert_id or not review.expert_name:
         return None
     return HomeExpert(

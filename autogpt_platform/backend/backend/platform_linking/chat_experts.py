@@ -28,7 +28,7 @@ async def list_owner_experts(owner_user_id: str) -> list[BotExpert]:
     """The owner's live hires, as the bot shows and matches them."""
     identities = await experts_db().list_expert_identities(owner_user_id)
     return [
-        BotExpert(id=e.id, name=e.name, role=e.role)
+        BotExpert(id=e.id, name=e.name, role=e.role, job_title=e.job_title)
         for e in identities
         if not e.is_archived
     ]

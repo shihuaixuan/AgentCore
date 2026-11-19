@@ -120,7 +120,9 @@ describe("Install on Expert from marketplace detail", () => {
       await screen.findByRole("button", { name: "Install" }),
     );
 
-    expect(await screen.findByText("Installed on Maria")).toBeDefined();
+    expect(
+      await screen.findByText("Installed on Marketing Strategist"),
+    ).toBeDefined();
     expect(installExpertId).toBe("expert-maria");
     expect(installBody).toEqual({ store_listing_version_id: "listing-1" });
   });
@@ -167,7 +169,9 @@ describe("Install on Expert from marketplace detail", () => {
       await screen.findByRole("button", { name: "Install" }),
     );
 
-    expect(await screen.findByText("Already installed on Maria")).toBeDefined();
+    expect(
+      await screen.findByText("Already installed on Marketing Strategist"),
+    ).toBeDefined();
     expect(installCalled).toBe(false);
   });
 

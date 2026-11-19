@@ -8,10 +8,7 @@ import { AboutStep } from "../../AboutStep/AboutStep";
 import { AvatarStep } from "../../AvatarStep/AvatarStep";
 import { BudgetStep } from "../../BudgetStep/BudgetStep";
 import { CategoryStep } from "../../CategoryStep/CategoryStep";
-import {
-  jobTitleSuggestionsFor,
-  nameSuggestionsFor,
-} from "../../CategoryStep/helpers";
+import { jobTitleSuggestionsFor } from "../../CategoryStep/helpers";
 import {
   interactiveCardClassFor,
   selectedCardClassFor,
@@ -19,7 +16,6 @@ import {
 } from "../../ColorStep/helpers";
 import { JobTitleStep } from "../../JobTitleStep/JobTitleStep";
 import { MarketplaceStep } from "../../MarketplaceStep/MarketplaceStep";
-import { NameStep } from "../../NameStep/NameStep";
 import { SkillsStep } from "../../SkillsStep/SkillsStep";
 
 interface Props {
@@ -47,21 +43,12 @@ export function BeatControl({ beat, flow }: Props) {
           onSkip={flow.skipJobTitle}
         />
       );
-    case "name":
-      return (
-        <NameStep
-          selectedName={flow.name || null}
-          suggestions={nameSuggestionsFor(flow.category)}
-          color={flow.color}
-          onSubmit={flow.submitName}
-        />
-      );
     case "avatar":
       // The avatar beat only opens once the area is answered.
       if (!flow.category) return null;
       return (
         <AvatarStep
-          name={flow.name}
+          name={flow.title}
           category={flow.category}
           color={flow.color}
           avatarUrl={flow.avatarUrl || null}
@@ -72,7 +59,7 @@ export function BeatControl({ beat, flow }: Props) {
       return (
         <AboutStep
           submittedAbout={flow.about}
-          name={flow.name}
+          name={flow.title}
           color={flow.color}
           onSubmit={flow.submitAbout}
           onSkip={flow.skipAbout}
@@ -81,7 +68,7 @@ export function BeatControl({ beat, flow }: Props) {
     case "voice":
       return (
         <VoicePicker
-          name={flow.name}
+          name={flow.title}
           samples={VOICE_SAMPLES}
           hideHeader
           // oxlint-disable-next-line design-system/require-static-classes -- the colour helpers return whole, static class strings from COLOR_OPTIONS
@@ -106,7 +93,7 @@ export function BeatControl({ beat, flow }: Props) {
     case "marketplace":
       return (
         <MarketplaceStep
-          name={flow.name}
+          name={flow.title}
           color={flow.color}
           submitted={flow.marketplace}
           isFinal={flow.isMarketplaceFinal}
@@ -118,7 +105,7 @@ export function BeatControl({ beat, flow }: Props) {
     case "skills":
       return (
         <SkillsStep
-          name={flow.name}
+          name={flow.title}
           color={flow.color}
           submitted={flow.skills}
           existingCount={flow.marketplace?.length ?? 0}

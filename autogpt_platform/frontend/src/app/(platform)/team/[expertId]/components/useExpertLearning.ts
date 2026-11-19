@@ -8,6 +8,7 @@ import { Expert } from "@/app/api/__generated__/models/expert";
 import { LearningHistoryItem } from "@/app/api/__generated__/models/learningHistoryItem";
 import { okData } from "@/app/api/helpers";
 import { useToast } from "@/components/molecules/Toast/use-toast";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -25,7 +26,8 @@ export function useExpertLearning(
   initialSkill: string | null,
   initialVersionId: string | null,
 ) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   const enabled = Boolean(useGetFlag(Flag.DREAM_SKILL_LEARNING_ENABLED));
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -65,14 +67,8 @@ export function useExpertLearning(
           });
           toast({
             title: variables.data.learning_paused
-              ? t(
-                  `Learning paused for ${expert.name}`,
-                  `已暂停 ${expert.name} 的学习`,
-                )
-              : t(
-                  `Learning resumed for ${expert.name}`,
-                  `已恢复 ${expert.name} 的学习`,
-                ),
+              ? t(`Learning paused for ${title}`, `已暂停 ${title} 的学习`)
+              : t(`Learning resumed for ${title}`, `已恢复 ${title} 的学习`),
             description: variables.data.learning_paused
               ? t(
                   "Existing skills stay in use; no new automatic changes.",

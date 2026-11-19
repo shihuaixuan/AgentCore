@@ -124,12 +124,14 @@ function FieldOrReference({
   total,
 }: FieldOrReferenceProps) {
   const refs = references.filter((ref) => ref.key === name);
-  if (!refs.some((ref) => ref.name))
-    return (
-      <FieldValue name={name} value={value} format={format} clipped={clipped} />
-    );
+  const fallback = (
+    <FieldValue name={name} value={value} format={format} clipped={clipped} />
+  );
+  if (!refs.length) return fallback;
   const counted = Array.isArray(value)
     ? value.filter((v) => typeof v === "string" && v.trim()).length
     : refs.length;
-  return <ReferenceValue refs={refs} total={total ?? counted} />;
+  return (
+    <ReferenceValue refs={refs} total={total ?? counted} fallback={fallback} />
+  );
 }

@@ -1,9 +1,10 @@
 """Tests for ListTeamTool — the model's live view of the roster."""
 
-from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+
+from backend.api.features.experts.models import Expert
 
 from ._test_data import make_session
 from .list_team import ListTeamTool
@@ -19,12 +20,22 @@ def _expert(
     is_archived: bool = False,
     schedules_paused_at=None,
 ):
-    return SimpleNamespace(
+    return Expert(
         id=expert_id,
         name=name,
         role="Market research",
+        job_title="Market Research Analyst",
         color="violet-300",
         avatar_url=None,
+        tagline=None,
+        bio=None,
+        skills=[],
+        identity="",
+        voice_preferences="",
+        boundaries="",
+        protected_soul_rules=[],
+        is_template=False,
+        source_template_id=None,
         is_archived=is_archived,
         schedules_paused_at=schedules_paused_at,
         workflows=[],
@@ -47,8 +58,10 @@ async def test_lists_active_experts_with_ids(monkeypatch):
     result = await ListTeamTool()._execute(user_id=_USER, session=make_session(_USER))
     assert isinstance(result, TeamRosterResponse)
     assert [e.id for e in result.experts] == ["exp-1", "exp-2"]
-    assert "Vera" in result.message
+    assert "Market Research Analyst (expert_id: exp-1" in result.message
     assert "exp-2" in result.message
+    assert "Vera" not in result.model_dump_json()
+    assert "Max" not in result.model_dump_json()
 
 
 @pytest.mark.asyncio

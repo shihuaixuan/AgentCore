@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/molecules/Toast/toaster";
 import { render, screen } from "@/tests/integrations/test-utils";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { saveDraft } from "../helpers";
+import { EMPTY_DRAFT } from "../helpers";
 import RaisePage from "../page";
 
 vi.mock("@/lib/auth/hooks/useAuth", () => ({
@@ -42,22 +42,19 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-test("renders restored conversation messages instantly after reload", async () => {
-  saveDraft({
-    step: "name",
-    hasStarted: true,
-    category: "marketing",
-    color: "rose-300",
-    jobTitle: "Marketing Manager",
-    name: "",
-    avatarUrl: null,
-    about: null,
-    voicePreferences: "",
-    voiceLabel: null,
-    budget: null,
-    marketplace: null,
-    skills: null,
-  });
+test("instantly restores the conversation at the avatar instead of the old name question", async () => {
+  window.sessionStorage.setItem(
+    "raise-expert-draft",
+    JSON.stringify({
+      ...EMPTY_DRAFT,
+      step: "name",
+      hasStarted: true,
+      category: "marketing",
+      color: "rose-300",
+      jobTitle: "Marketing Manager",
+      name: "Retired Nova",
+    }),
+  );
 
   renderRaise();
 
@@ -84,10 +81,12 @@ test("renders restored conversation messages instantly after reload", async () =
   ).toBe(true);
   expect(
     visible.some((text) =>
-      text.includes("Good pick. What do you want to call them?"),
+      text.includes("Here's an avatar for Marketing Manager."),
     ),
   ).toBe(true);
   expect(
     visible.some((text) => text.includes("And what's their job title?")),
   ).toBe(true);
+  expect(visible.join(" ")).not.toContain("What do you want to call them?");
+  expect(visible.join(" ")).not.toContain("Retired Nova");
 });

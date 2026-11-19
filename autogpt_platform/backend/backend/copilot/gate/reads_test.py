@@ -183,7 +183,11 @@ def _experts(**by_name: str | None):
     names = {expert_id: name for name, expert_id in by_name.items() if expert_id}
 
     async def get_expert(user_id, expert_id, include_workflows=True):
-        return SimpleNamespace(name=names[expert_id]) if expert_id in names else None
+        if expert_id not in names:
+            return None
+        return SimpleNamespace(
+            name=names[expert_id], display_title="Market Research Analyst"
+        )
 
     return lambda: SimpleNamespace(get_expert=get_expert)
 
@@ -550,7 +554,9 @@ async def test_mcp_file_read_is_judged_on_the_text_the_model_receives(rows):
     assert judge.await_args.kwargs["text"] == to_model
 
 
-@pytest.mark.parametrize("expert_id, actor", [(None, "Otto"), ("expert-1", "Nadia")])
+@pytest.mark.parametrize(
+    "expert_id, actor", [(None, "Otto"), ("expert-1", "Market Research Analyst")]
+)
 async def test_a_held_read_is_named_by_its_source_on_the_card_and_the_chain_row(
     rows, expert_id, actor
 ):
@@ -581,7 +587,9 @@ async def test_a_held_read_is_named_by_its_source_on_the_card_and_the_chain_row(
     assert (stub["ask"], stub["object"]) == ("Read", "docs.northwind.io/billing")
 
 
-@pytest.mark.parametrize("expert_id, actor", [(None, "Otto"), ("expert-1", "Nadia")])
+@pytest.mark.parametrize(
+    "expert_id, actor", [(None, "Otto"), ("expert-1", "Market Research Analyst")]
+)
 async def test_a_held_read_with_no_named_source_says_what_returned_it(
     rows, expert_id, actor
 ):

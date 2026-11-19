@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 import { useGetExpert } from "@/app/api/__generated__/endpoints/experts/experts";
 import { okData } from "@/app/api/helpers";
@@ -53,6 +54,7 @@ function useCharterFallback(artifact: ExpertArtifact): ExpertArtifact {
   return {
     ...artifact,
     role: artifact.role ?? record.role,
+    jobTitle: artifact.jobTitle ?? record.job_title,
     tagline: artifact.tagline ?? record.tagline ?? null,
     about: record.identity || null,
     boundaries: record.boundaries || null,
@@ -67,8 +69,9 @@ function useCharterFallback(artifact: ExpertArtifact): ExpertArtifact {
 /** The whole charter of a proposed or newly created expert — the card in
  *  the chat shows one line, this is everything the model wrote for them. */
 export function ExpertArtifactContent({ expert: artifact }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const expert = useCharterFallback(artifact);
+  const title = getExpertDisplayTitle(expert, locale);
   const status = expert.applied
     ? t("On the team", "已加入团队")
     : t("Proposed — nothing created yet", "提案 — 尚未创建");
@@ -77,7 +80,7 @@ export function ExpertArtifactContent({ expert: artifact }: Props) {
     <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-5">
       <div className="flex items-center gap-3">
         <ExpertAvatar
-          name={expert.name}
+          name={title}
           avatarUrl={expert.avatarUrl}
           color={expert.color}
           size={48}
@@ -88,13 +91,8 @@ export function ExpertArtifactContent({ expert: artifact }: Props) {
             tone="primary"
             className="truncate"
           >
-            {expert.name}
+            {title}
           </Text>
-          {expert.role && (
-            <Text variant="body-tight" tone="muted" className="truncate">
-              {expert.role}
-            </Text>
-          )}
         </div>
       </div>
       {expert.tagline && (

@@ -380,9 +380,7 @@ describe("MemoryVisualizer — memory scope", () => {
       expect((selector as HTMLButtonElement).disabled).toBe(false);
     });
     fireEvent.click(selector);
-    fireEvent.click(
-      await screen.findByRole("option", { name: /Ada — Researcher/ }),
-    );
+    fireEvent.click(await screen.findByRole("option", { name: "Researcher" }));
 
     expect(
       await screen.findByText("Expert memory is read-only."),
@@ -435,9 +433,7 @@ describe("MemoryVisualizer — memory scope", () => {
 
     const selector = screen.getByRole("combobox", { name: "Memory scope" });
     fireEvent.click(selector);
-    fireEvent.click(
-      await screen.findByRole("option", { name: /Ada — Researcher/ }),
-    );
+    fireEvent.click(await screen.findByRole("option", { name: "Researcher" }));
     await screen.findByText("Expert memory is read-only.");
 
     fireEvent.click(selector);
@@ -502,9 +498,7 @@ describe("MemoryVisualizer — memory scope", () => {
       expect((selector as HTMLButtonElement).disabled).toBe(false),
     );
     fireEvent.click(selector);
-    fireEvent.click(
-      await screen.findByRole("option", { name: /Ada — Researcher/ }),
-    );
+    fireEvent.click(await screen.findByRole("option", { name: "Researcher" }));
     await screen.findByText("Expert memory is read-only.");
 
     experts = [];
@@ -539,9 +533,7 @@ describe("MemoryVisualizer — memory scope", () => {
       expect((selector as HTMLButtonElement).disabled).toBe(false),
     );
     fireEvent.click(selector);
-    fireEvent.click(
-      await screen.findByRole("option", { name: /Ada — Researcher/ }),
-    );
+    fireEvent.click(await screen.findByRole("option", { name: "Researcher" }));
     await screen.findByText("Expert memory is read-only.");
     toastMock.mockClear();
 
@@ -551,7 +543,7 @@ describe("MemoryVisualizer — memory scope", () => {
     );
 
     await screen.findByText("Failed to load experts.");
-    expect(selector.textContent).toContain("Ada");
+    expect(selector.textContent).toContain("Researcher");
     expect(screen.getByText("Expert memory is read-only.")).toBeDefined();
     expect(toastMock).not.toHaveBeenCalled();
   });
@@ -586,11 +578,14 @@ describe("MemoryVisualizer — memory scope", () => {
     await screen.findByText("No experts for this account.");
   });
 
-  test("only appends IDs when expert name and role labels collide", async () => {
+  test("only appends IDs when professional titles collide", async () => {
     setupBaseHandlers([
       makeExpert("ada-one-1234", "Ada", "Researcher"),
       makeExpert("ada-two-5678", "Ada", "Writer"),
-      makeExpert("ada-three-9012", "Ada", "Researcher"),
+      {
+        ...makeExpert("ada-three-9012", "Casey", "Research"),
+        job_title: "Researcher",
+      },
     ]);
 
     render(<MemoryVisualizer />);
@@ -605,13 +600,13 @@ describe("MemoryVisualizer — memory scope", () => {
 
     expect(
       await screen.findByRole("option", {
-        name: "Ada — Researcher (ada-one-1234)",
+        name: "Researcher (ada-one-1234)",
       }),
     ).toBeDefined();
     expect(
-      screen.getByRole("option", { name: "Ada — Researcher (ada-three-9012)" }),
+      screen.getByRole("option", { name: "Researcher (ada-three-9012)" }),
     ).toBeDefined();
-    expect(screen.getByRole("option", { name: "Ada — Writer" })).toBeDefined();
+    expect(screen.getByRole("option", { name: "Writer" })).toBeDefined();
   });
 
   test("switching scope swaps the rendered graph content, not just the request", async () => {
@@ -663,9 +658,7 @@ describe("MemoryVisualizer — memory scope", () => {
       expect((selector as HTMLButtonElement).disabled).toBe(false),
     );
     fireEvent.click(selector);
-    fireEvent.click(
-      await screen.findByRole("option", { name: /Ada — Researcher/ }),
-    );
+    fireEvent.click(await screen.findByRole("option", { name: "Researcher" }));
 
     // Expert scope renders the expert graph's pill and drops the
     // account one — proves the displayed data actually swapped.
@@ -708,9 +701,7 @@ describe("MemoryVisualizer — memory scope", () => {
 
     const selector = screen.getByRole("combobox", { name: "Memory scope" });
     fireEvent.click(selector);
-    fireEvent.click(
-      await screen.findByRole("option", { name: /Ada — Researcher/ }),
-    );
+    fireEvent.click(await screen.findByRole("option", { name: "Researcher" }));
     await screen.findByText("Expert memory is read-only.");
 
     // The account job keeps polling, but its status must not bleed
@@ -762,9 +753,7 @@ describe("MemoryVisualizer — memory scope", () => {
       expect((selector as HTMLButtonElement).disabled).toBe(false),
     );
     fireEvent.click(selector);
-    fireEvent.click(
-      await screen.findByRole("option", { name: /Ada — Researcher/ }),
-    );
+    fireEvent.click(await screen.findByRole("option", { name: "Researcher" }));
 
     // Expert scope now receives account-scoped payloads → tripwire.
     await waitFor(() => {
@@ -999,9 +988,7 @@ describe("MemoryVisualizer — 202 + polling contract", () => {
       expect((selector as HTMLButtonElement).disabled).toBe(false),
     );
     fireEvent.click(selector);
-    fireEvent.click(
-      await screen.findByRole("option", { name: /Ada — Researcher/ }),
-    );
+    fireEvent.click(await screen.findByRole("option", { name: "Researcher" }));
     await waitFor(() =>
       expect(graphRequests.get("expert-ada:true:true")).toBe(1),
     );

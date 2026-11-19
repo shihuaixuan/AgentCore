@@ -213,7 +213,68 @@ const scheduledMaria: Expert = {
   ],
 };
 
+const hiredCasey: Expert = {
+  ...hiredMaria,
+  id: "hired-casey",
+  name: "Casey",
+  role: "Code Review & QA",
+  job_title: "QA Engineer",
+  avatar_url: "/autogpt-characters/v2.1/expert-casey/neutral/128.webp",
+  source_template_id: "expert-casey",
+  tagline: null,
+  identity: "Review proposed changes and report regressions.",
+  workflows: [],
+};
+
 describe("TeamPage", () => {
+  test("identifies Casey only by profession on the roster and in the chat drawer", async () => {
+    server.use(
+      getListExpertsMockHandler([hiredCasey]),
+      getGetV2ListSessionsMockHandler200({ sessions: [], total: 0 }),
+    );
+    const user = userEvent.setup();
+    render(<TeamPage />);
+
+    const card = await screen.findByRole("link", { name: "View QA Engineer" });
+    expect(card.getAttribute("href")).toBe("/team/hired-casey");
+    expect(within(card).getByText("QA Engineer")).toBeDefined();
+    const portrait = within(card).getByRole("img", {
+      name: "QA Engineer, AI Expert",
+    });
+    expect(portrait.getAttribute("src")).toBe(
+      "/experts/professional/expert-casey.webp",
+    );
+    await user.click(screen.getAllByRole("button", { name: "Chat" })[1]);
+    const chat = await screen.findByRole("complementary", {
+      name: "Chat with QA Engineer",
+    });
+    expect(await within(chat).findByText("QA Engineer")).toBeDefined();
+    expect(
+      within(chat).getByPlaceholderText("Message QA Engineer…"),
+    ).toBeDefined();
+    expect(screen.queryByText(/\bCasey\b/)).toBeNull();
+    expect(screen.queryByAltText(/\bCasey\b/)).toBeNull();
+  });
+
+  test("searches by the displayed profession, not the legacy name", async () => {
+    server.use(getListExpertsMockHandler([hiredCasey]));
+    const user = userEvent.setup();
+    render(<TeamPage />);
+
+    const search = await screen.findByRole("textbox", {
+      name: "Search experts",
+    });
+    await user.type(search, "Casey");
+    expect(
+      await screen.findByText("No experts match that search or filter."),
+    ).toBeDefined();
+    await user.clear(search);
+    await user.type(search, "QA Engineer");
+    expect(
+      await screen.findByRole("link", { name: "View QA Engineer" }),
+    ).toBeDefined();
+  });
+
   test("renders the Otto card first", async () => {
     server.use(getListExpertsMockHandler([hiredMaria]));
 
@@ -222,7 +283,7 @@ describe("TeamPage", () => {
     const autopilot = await screen.findByText("Otto");
     expect(screen.getByText("Head of AI")).toBeDefined();
 
-    const maria = await screen.findByText("Maria");
+    const maria = await screen.findByText("Marketing Strategist");
     expect(
       autopilot.compareDocumentPosition(maria) &
         Node.DOCUMENT_POSITION_FOLLOWING,
@@ -248,10 +309,10 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    expect(await screen.findByText("Maria")).toBeDefined();
-    // The job title now rides the name line, after a bullet.
-    expect(screen.getByText(/Marketing Strategist/)).toBeDefined();
-    const card = screen.getByRole("link", { name: "View Maria" });
+    const card = await screen.findByRole("link", {
+      name: "View Marketing Strategist",
+    });
+    expect(within(card).getByText("Marketing Strategist")).toBeDefined();
     expect(within(card).queryByText("Idle")).toBeNull();
     expect(getStatValue(card, "Workflows")).toBe("2");
     // Empty totals are left off the meta line.
@@ -270,7 +331,9 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    const card = await screen.findByRole("link", { name: "View Maria" });
+    const card = await screen.findByRole("link", {
+      name: "View Marketing Strategist",
+    });
     expect(within(card).getByText("Unsupervised")).toBeDefined();
   });
 
@@ -283,7 +346,9 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    const card = await screen.findByRole("link", { name: "View Maria" });
+    const card = await screen.findByRole("link", {
+      name: "View Marketing Strategist",
+    });
     expect(within(card).queryByText("Unsupervised")).toBeNull();
   });
 
@@ -292,8 +357,9 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Maria");
-    const link = screen.getByRole("link", { name: "View Maria" });
+    const link = await screen.findByRole("link", {
+      name: "View Marketing Strategist",
+    });
     expect(link.getAttribute("href")).toBe("/team/expert-maria");
   });
 
@@ -306,20 +372,20 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Maria");
+    await screen.findByText("Marketing Strategist");
     const [autopilotChat, mariaChat] = screen.getAllByRole("button", {
       name: "Chat",
     });
 
     await user.click(mariaChat);
     const mariaPanel = screen.getByRole("complementary", {
-      name: "Chat with Maria",
+      name: "Chat with Marketing Strategist",
     });
     expect(
       await within(mariaPanel).findByText("What can I do for you?"),
     ).toBeDefined();
     expect(
-      within(mariaPanel).getByPlaceholderText("Message Maria…"),
+      within(mariaPanel).getByPlaceholderText("Message Marketing Strategist…"),
     ).toBeDefined();
 
     await user.click(autopilotChat);
@@ -331,7 +397,9 @@ describe("TeamPage", () => {
     ).toBeDefined();
     await waitFor(() => {
       expect(
-        screen.queryByRole("complementary", { name: "Chat with Maria" }),
+        screen.queryByRole("complementary", {
+          name: "Chat with Marketing Strategist",
+        }),
       ).toBeNull();
     });
 
@@ -365,7 +433,9 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    const card = await screen.findByRole("link", { name: "View Maria" });
+    const card = await screen.findByRole("link", {
+      name: "View Marketing Strategist",
+    });
     const integrations = within(card).getByRole("list", {
       name: "Integrations",
     });
@@ -406,10 +476,12 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    const card = await screen.findByRole("link", { name: "View Maria" });
+    const card = await screen.findByRole("link", {
+      name: "View Marketing Strategist",
+    });
     await user.hover(within(card).getByRole("img", { name: "GitHub" }));
     await screen.findByRole("tooltip", {
-      name: "Maria has access to your GitHub account",
+      name: "Marketing Strategist has access to your GitHub account",
     });
   });
 
@@ -421,6 +493,7 @@ describe("TeamPage", () => {
           ...hiredMaria,
           id: "expert-max",
           name: "Max",
+          role: "Researcher",
           avatar_url: "/experts/max.svg",
         },
       ]),
@@ -428,11 +501,13 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    const max = await screen.findByRole("link", { name: "View Max" });
+    const max = await screen.findByRole("link", { name: "View Researcher" });
     expect(
       max.querySelector('img[src="/experts/covers/max-1.jpg"]'),
     ).toBeNull();
-    const maria = screen.getByRole("link", { name: "View Maria" });
+    const maria = screen.getByRole("link", {
+      name: "View Marketing Strategist",
+    });
     expect(maria.querySelector('img[src^="/experts/covers/"]')).toBeNull();
     const otto = screen.getByRole("link", { name: "View Otto" });
     expect(otto.querySelector('img[src^="/experts/covers/"]')).toBeNull();
@@ -447,7 +522,9 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    const card = await screen.findByRole("link", { name: "View Maria" });
+    const card = await screen.findByRole("link", {
+      name: "View Marketing Strategist",
+    });
     expect(getStatValue(card, "Workflows")).toBe("2");
     expect(
       within(card).queryByRole("list", { name: "Integrations" }),
@@ -466,9 +543,9 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    // Maria renders on both her card and the timeline lane once scheduled.
-    await screen.findAllByText("Maria");
-    const card = await screen.findByRole("link", { name: "View Maria" });
+    const card = await screen.findByRole("link", {
+      name: "View Marketing Strategist",
+    });
     expect(getStatValue(card, "Schedules")).toBe("1");
   });
 
@@ -484,7 +561,7 @@ describe("TeamPage", () => {
     render(<TeamPage />);
 
     expect(
-      await screen.findByRole("link", { name: "View Maria" }),
+      await screen.findByRole("link", { name: "View Marketing Strategist" }),
     ).toBeDefined();
     // The roster loaded, so the page must not claim it could not.
     await waitFor(() =>
@@ -509,7 +586,7 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Maria");
+    await screen.findByText("Marketing Strategist");
     // The Setup needed card above the roster owns that state now.
     expect(screen.queryByText(/needs setup/i)).toBeNull();
     expect(screen.queryByText("Needs you")).toBeNull();
@@ -524,7 +601,9 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    const card = await screen.findByRole("link", { name: "View Maria" });
+    const card = await screen.findByRole("link", {
+      name: "View Marketing Strategist",
+    });
     expect(within(card).getByText("Working")).toBeDefined();
   });
 
@@ -538,7 +617,7 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Maria");
+    await screen.findByText("Marketing Strategist");
     expect(screen.getByText("Budget")).toBeDefined();
     expect(screen.getByText("$12 / $50")).toBeDefined();
   });
@@ -559,7 +638,7 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Maria");
+    await screen.findByText("Marketing Strategist");
     expect(screen.getByText(/Schedules paused/)).toBeDefined();
 
     fireEvent.click(screen.getByRole("button", { name: "Resume schedules" }));
@@ -574,12 +653,10 @@ describe("TeamPage", () => {
 
     await user.click(await screen.findByRole("button", { name: "Edit Soul" }));
 
-    expect(
-      screen.getByRole("complementary", { name: "Maria's Soul" }),
-    ).toBeDefined();
-    expect(
-      (screen.getByRole("textbox", { name: "Name" }) as HTMLInputElement).value,
-    ).toBe("Maria");
+    expect(screen.queryByRole("textbox", { name: "Name" })).toBeNull();
+    const panel = screen.getByRole("complementary", {
+      name: "Marketing Strategist's Soul",
+    });
     expect(
       (
         screen.getByRole("textbox", {
@@ -613,12 +690,7 @@ describe("TeamPage", () => {
         "These rules are part of every expert's soul and cannot be edited.",
       ),
     ).toBeDefined();
-    // The roster's search field is a textbox too; count only the Soul's.
-    expect(
-      screen
-        .getAllByRole("textbox")
-        .filter((box) => box.id !== "team-roster-search"),
-    ).toHaveLength(4);
+    expect(within(panel).getAllByRole("textbox")).toHaveLength(3);
     expect(screen.queryByRole("button", { name: /remove/i })).toBeNull();
   });
 
@@ -630,13 +702,17 @@ describe("TeamPage", () => {
 
     await user.click(await screen.findByRole("button", { name: "Edit Soul" }));
     expect(
-      screen.getByRole("complementary", { name: "Maria's Soul" }),
+      screen.getByRole("complementary", {
+        name: "Marketing Strategist's Soul",
+      }),
     ).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     await waitFor(() => {
       expect(
-        screen.queryByRole("complementary", { name: "Maria's Soul" }),
+        screen.queryByRole("complementary", {
+          name: "Marketing Strategist's Soul",
+        }),
       ).toBeNull();
     });
   });
@@ -652,9 +728,11 @@ describe("TeamPage", () => {
     await user.keyboard("{Enter}");
 
     expect(
-      screen.getByRole("complementary", { name: "Maria's Soul" }),
+      screen.getByRole("complementary", {
+        name: "Marketing Strategist's Soul",
+      }),
     ).toBeDefined();
-    expect(screen.queryByRole("dialog", { name: "Maria" })).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 
   test("keeps nested card actions independent for keyboard users", async () => {
@@ -672,14 +750,18 @@ describe("TeamPage", () => {
     expect(
       screen.getByRole("dialog", { name: /Install a workflow/ }),
     ).toBeDefined();
-    expect(screen.queryByRole("dialog", { name: "Maria" })).toBeNull();
+    expect(
+      screen.queryByRole("complementary", {
+        name: "Marketing Strategist's Soul",
+      }),
+    ).toBeNull();
   });
 
-  test("saves Soul edits and refreshes the experts query", async () => {
+  test("saves Soul edits with the unchanged legacy name and refreshes the roster", async () => {
     const user = userEvent.setup();
     let listRequests = 0;
     let requestBody: unknown;
-    const updatedMaria = { ...hiredMaria, name: "Mara" };
+    const updatedMaria = { ...hiredMaria, voice_preferences: "Calm." };
     server.use(
       getListExpertsMockHandler(() => {
         listRequests += 1;
@@ -694,21 +776,23 @@ describe("TeamPage", () => {
     render(<TeamPage />);
 
     await user.click(await screen.findByRole("button", { name: "Edit Soul" }));
-    const nameInput = screen.getByRole("textbox", { name: "Name" });
-    await user.clear(nameInput);
-    await user.type(nameInput, "Mara");
+    const voiceInput = screen.getByRole("textbox", { name: "Voice" });
+    await user.clear(voiceInput);
+    await user.type(voiceInput, "Calm.");
     await user.click(screen.getByRole("button", { name: "Save Soul" }));
 
-    await waitFor(() => expect(listRequests).toBeGreaterThan(1));
+    await waitFor(() =>
+      expect(toastMock).toHaveBeenCalledWith(
+        expect.objectContaining({ title: "Soul saved", variant: "success" }),
+      ),
+    );
+    expect(listRequests).toBeGreaterThan(1);
     expect(requestBody).toEqual({
-      name: "Mara",
+      name: "Maria",
       identity: hiredMaria.identity,
-      voice_preferences: hiredMaria.voice_preferences,
+      voice_preferences: "Calm.",
       boundaries: hiredMaria.boundaries,
     });
-    expect(toastMock).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Soul saved", variant: "success" }),
-    );
   });
 
   test("round-trips a hire-flow voice pick through the Soul editor without clobbering it", async () => {
@@ -734,15 +818,18 @@ describe("TeamPage", () => {
     }) as HTMLTextAreaElement;
     expect(voiceInput.value).toBe(pickedVoice);
 
-    const nameInput = screen.getByRole("textbox", { name: "Name" });
-    await user.clear(nameInput);
-    await user.type(nameInput, "Mara");
+    const boundaries = screen.getByRole("textbox", { name: "Boundaries" });
+    await user.type(boundaries, " Ask before sending.");
     await user.click(screen.getByRole("button", { name: "Save Soul" }));
 
     // An unrelated Soul edit must carry the chosen voice through untouched.
     await waitFor(() => expect(requestBody).toBeDefined());
     expect(requestBody).toEqual(
-      expect.objectContaining({ name: "Mara", voice_preferences: pickedVoice }),
+      expect.objectContaining({
+        name: "Maria",
+        voice_preferences: pickedVoice,
+        boundaries: `${hiredMaria.boundaries} Ask before sending.`,
+      }),
     );
   });
 
@@ -773,7 +860,9 @@ describe("TeamPage", () => {
       "Calm and conversational.",
     );
     expect(
-      screen.getByRole("complementary", { name: "Maria's Soul" }),
+      screen.getByRole("complementary", {
+        name: "Marketing Strategist's Soul",
+      }),
     ).toBeDefined();
   });
 
@@ -788,15 +877,19 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Maria");
+    await screen.findByText("Marketing Strategist");
     fireEvent.pointerDown(screen.getByTestId("expert-card-actions"), {
       button: 0,
     });
     fireEvent.click(
-      await screen.findByRole("menuitem", { name: /Fire Maria/ }),
+      await screen.findByRole("menuitem", {
+        name: "Fire Marketing Strategist",
+      }),
     );
 
-    const dialog = await screen.findByRole("dialog", { name: "Fire Maria?" });
+    const dialog = await screen.findByRole("dialog", {
+      name: "Fire Marketing Strategist?",
+    });
     expect(
       within(dialog).getByText("Installed workflows stay in your library."),
     ).toBeDefined();
@@ -830,23 +923,28 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Maria");
+    await screen.findByText("Marketing Strategist");
     fireEvent.pointerDown(screen.getByTestId("expert-card-actions"), {
       button: 0,
     });
     fireEvent.click(
-      await screen.findByRole("menuitem", { name: /Fire Maria/ }),
+      await screen.findByRole("menuitem", {
+        name: "Fire Marketing Strategist",
+      }),
     );
     const confirm = await screen.findByTestId("fire-expert-confirm");
     await waitFor(() => expect(confirm.hasAttribute("disabled")).toBe(false));
     fireEvent.click(confirm);
 
     await waitFor(() => expect(archiveSpy).toHaveBeenCalled());
-    await waitFor(() => expect(screen.queryByText("Maria")).toBeNull());
+    await waitFor(() =>
+      expect(screen.queryByText("Marketing Strategist")).toBeNull(),
+    );
     expect(listRequests).toBeGreaterThan(1);
     expect(toastMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        description: "You can re-hire Maria anytime from the marketplace.",
+        description:
+          "You can re-hire Marketing Strategist anytime from the marketplace.",
       }),
     );
   });
@@ -866,25 +964,33 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Maria");
+    await screen.findByText("Marketing Strategist");
     fireEvent.pointerDown(screen.getByTestId("expert-card-actions"), {
       button: 0,
     });
     fireEvent.click(
-      await screen.findByRole("menuitem", { name: /Fire Maria/ }),
+      await screen.findByRole("menuitem", {
+        name: "Fire Marketing Strategist",
+      }),
     );
     const confirm = await screen.findByTestId("fire-expert-confirm");
     await waitFor(() => expect(confirm.hasAttribute("disabled")).toBe(false));
     fireEvent.click(confirm);
 
-    // "Keep Maria" is disabled during the request, so ESC must not be an
+    // "Keep Marketing Strategist" is disabled during the request, so ESC must not be an
     // escape hatch that drops the user out before the outcome is known.
-    const dialog = await screen.findByRole("dialog", { name: "Fire Maria?" });
+    const dialog = await screen.findByRole("dialog", {
+      name: "Fire Marketing Strategist?",
+    });
     fireEvent.keyDown(dialog, { key: "Escape", code: "Escape" });
-    expect(screen.getByRole("dialog", { name: "Fire Maria?" })).toBeDefined();
+    expect(
+      screen.getByRole("dialog", { name: "Fire Marketing Strategist?" }),
+    ).toBeDefined();
 
     await waitFor(() =>
-      expect(screen.queryByRole("dialog", { name: "Fire Maria?" })).toBeNull(),
+      expect(
+        screen.queryByRole("dialog", { name: "Fire Marketing Strategist?" }),
+      ).toBeNull(),
     );
   });
 
@@ -902,15 +1008,19 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Maria");
+    await screen.findByText("Marketing Strategist");
     fireEvent.pointerDown(screen.getByTestId("expert-card-actions"), {
       button: 0,
     });
     fireEvent.click(
-      await screen.findByRole("menuitem", { name: /Fire Maria/ }),
+      await screen.findByRole("menuitem", {
+        name: "Fire Marketing Strategist",
+      }),
     );
 
-    const dialog = await screen.findByRole("dialog", { name: "Fire Maria?" });
+    const dialog = await screen.findByRole("dialog", {
+      name: "Fire Marketing Strategist?",
+    });
     expect(within(dialog).getByText("Checking what will pause…")).toBeDefined();
     expect(
       screen.getByTestId("fire-expert-confirm").hasAttribute("disabled"),
@@ -941,15 +1051,19 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Maria");
+    await screen.findByText("Marketing Strategist");
     fireEvent.pointerDown(screen.getByTestId("expert-card-actions"), {
       button: 0,
     });
     fireEvent.click(
-      await screen.findByRole("menuitem", { name: /Fire Maria/ }),
+      await screen.findByRole("menuitem", {
+        name: "Fire Marketing Strategist",
+      }),
     );
 
-    const dialog = await screen.findByRole("dialog", { name: "Fire Maria?" });
+    const dialog = await screen.findByRole("dialog", {
+      name: "Fire Marketing Strategist?",
+    });
     expect(
       await within(dialog).findByText(
         "We couldn't preview what pauses, but you can still fire them.",
@@ -980,15 +1094,19 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Maria");
+    await screen.findByText("Marketing Strategist");
     fireEvent.pointerDown(screen.getByTestId("expert-card-actions"), {
       button: 0,
     });
     fireEvent.click(
-      await screen.findByRole("menuitem", { name: /Fire Maria/ }),
+      await screen.findByRole("menuitem", {
+        name: "Fire Marketing Strategist",
+      }),
     );
 
-    const dialog = await screen.findByRole("dialog", { name: "Fire Maria?" });
+    const dialog = await screen.findByRole("dialog", {
+      name: "Fire Marketing Strategist?",
+    });
     await within(dialog).findByText(
       "We couldn't preview what pauses, but you can still fire them.",
     );
@@ -1011,12 +1129,14 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Maria");
+    await screen.findByText("Marketing Strategist");
     fireEvent.pointerDown(screen.getByTestId("expert-card-actions"), {
       button: 0,
     });
     fireEvent.click(
-      await screen.findByRole("menuitem", { name: /Fire Maria/ }),
+      await screen.findByRole("menuitem", {
+        name: "Fire Marketing Strategist",
+      }),
     );
     const confirm = await screen.findByTestId("fire-expert-confirm");
     await waitFor(() => expect(confirm.hasAttribute("disabled")).toBe(false));
@@ -1025,13 +1145,14 @@ describe("TeamPage", () => {
     await waitFor(() =>
       expect(toastMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: "Could not fire Maria",
-          description: "Maria is still on your team. Please try again.",
+          title: "Could not fire Marketing Strategist",
+          description:
+            "Marketing Strategist is still on your team. Please try again.",
           variant: "destructive",
         }),
       ),
     );
-    expect(screen.getByText("Maria")).toBeDefined();
+    expect(screen.getByText("Marketing Strategist")).toBeDefined();
   });
 
   test("shows empty state linking to the marketplace when no experts are hired", async () => {
@@ -1061,7 +1182,7 @@ describe("TeamPage", () => {
     server.use(getListExpertsMockHandler([hiredMaria]));
     await userEvent.click(screen.getByRole("button", { name: "Try Again" }));
 
-    expect(await screen.findByText("Maria")).toBeDefined();
+    expect(await screen.findByText("Marketing Strategist")).toBeDefined();
     expect(screen.queryByText("Something went wrong")).toBeNull();
   });
 
@@ -1074,7 +1195,7 @@ describe("TeamPage", () => {
     render(<TeamPage />);
 
     await screen.findByText("Otto");
-    expect(await screen.findByText("Maria")).toBeDefined();
+    expect(await screen.findByText("Marketing Strategist")).toBeDefined();
   });
 
   test("renders the roster without requesting pods", async () => {
@@ -1089,7 +1210,7 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    expect(await screen.findByText("Maria")).toBeDefined();
+    expect(await screen.findByText("Marketing Strategist")).toBeDefined();
     expect(screen.queryByText("Something went wrong")).toBeNull();
     expect(podsRequest).not.toHaveBeenCalled();
   });
@@ -1098,7 +1219,7 @@ describe("TeamPage", () => {
     server.use(getListExpertsMockHandler([hiredMaria]));
     notFoundMock.mockClear();
     render(<TeamPage />);
-    expect(await screen.findByText("Maria")).toBeDefined();
+    expect(await screen.findByText("Marketing Strategist")).toBeDefined();
     expect(notFoundMock).not.toHaveBeenCalled();
   });
 
@@ -1120,7 +1241,9 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    const card = await screen.findByRole("link", { name: "View Maria" });
+    const card = await screen.findByRole("link", {
+      name: "View Marketing Strategist",
+    });
     expect(within(card).queryByText(/needs setup/i)).toBeNull();
   });
 });
@@ -1148,12 +1271,13 @@ describe("TeamPage - setup needed card", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Maria");
+    await screen.findByText("Marketing Strategist");
     expect(screen.queryByTestId("setup-needed")).toBeNull();
   });
 
   test("lists each missing connection with the expert and workflow", async () => {
     server.use(
+      getListExpertsMockHandler([hiredMaria]),
       getListExpertSetupItemsMockHandler([
         makeSetupItem(),
         makeSetupItem({
@@ -1179,7 +1303,9 @@ describe("TeamPage - setup needed card", () => {
 
     const card = await screen.findByTestId("setup-needed");
     expect(within(card).getByText("Setup needed (3)")).toBeDefined();
-    expect(within(card).getByText("Notion for Maria")).toBeDefined();
+    expect(
+      await within(card).findByText("Notion for Marketing Strategist"),
+    ).toBeDefined();
     expect(
       within(card).getByText("SEO Audit needs it to run on schedule."),
     ).toBeDefined();
@@ -1208,7 +1334,7 @@ describe("TeamPage - setup needed card", () => {
 
     const card = await screen.findByTestId("setup-needed");
     expect(
-      within(card).getByText("Schedule Personal Newsletter for Maria"),
+      within(card).getByText("Schedule Personal Newsletter for AI Expert"),
     ).toBeDefined();
     expect(
       within(card).getByText(
@@ -1453,14 +1579,20 @@ describe("TeamPage - setup needed card", () => {
     render(<TeamPage />);
 
     expect(
-      await screen.findByText("Setting up Maria's skills and workflows…"),
+      await screen.findByText(
+        "Setting up Marketing Strategist's skills and workflows…",
+      ),
     ).toBeDefined();
-    const card = screen.getByRole("link", { name: "View Maria" });
+    const card = screen.getByRole("link", {
+      name: "View Marketing Strategist",
+    });
     await waitFor(() => expect(getStatValue(card, "Skills")).toBe("2"), {
       timeout: 5_000,
     });
     expect(
-      screen.queryByText("Setting up Maria's skills and workflows…"),
+      screen.queryByText(
+        "Setting up Marketing Strategist's skills and workflows…",
+      ),
     ).toBeNull();
   });
 

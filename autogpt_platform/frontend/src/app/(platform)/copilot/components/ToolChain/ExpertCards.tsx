@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 import {
   ArrowLeft01Icon,
@@ -138,7 +140,7 @@ function isOpenExpertProposal(part: ToolUIPart) {
 }
 
 /** A hire/raise/Soul preview the user can still say yes or no to. */
-function proposalOf(part: ToolUIPart): Proposal | null {
+function proposalOf(part: ToolUIPart, locale: Locale = "en"): Proposal | null {
   const output = asObject(part.output);
   if (!output || output.applied === true) return null;
   const confirmationId = str(output, "confirmation_id");
@@ -153,7 +155,7 @@ function proposalOf(part: ToolUIPart): Proposal | null {
   }
   const preview = asObject(output.preview);
   if (!confirmationId || !preview) return null;
-  const name = str(preview, "name") ?? "this expert";
+  const name = snapshotTitle(preview, locale);
   const task = handoffTaskOf(output);
   const handoffConfirmationId = str(output, "handoff_confirmation_id");
   return {
@@ -211,12 +213,20 @@ function withoutDecision(
   return rest;
 }
 
+function snapshotTitle(expert: Record<string, unknown>, locale: Locale) {
+  return getExpertDisplayTitle(
+    { jobTitle: str(expert, "job_title"), role: str(expert, "role") },
+    locale,
+  );
+}
+
 function toExpertArtifact(
   expert: Record<string, unknown>,
   output: Record<string, unknown>,
   artifactId: string,
+  locale: Locale,
 ): ArtifactRef {
-  const name = str(expert, "name") ?? "New expert";
+  const name = snapshotTitle(expert, locale);
   return {
     id: `expert:${artifactId}`,
     title: name,
@@ -228,6 +238,7 @@ function toExpertArtifact(
       kind: kindOf(output),
       name,
       role: str(expert, "role") ?? null,
+      jobTitle: str(expert, "job_title") ?? null,
       color: str(expert, "color") ?? null,
       tagline: str(expert, "tagline") ?? null,
       about: str(expert, "about") ?? null,
@@ -262,7 +273,7 @@ export function ExpertChangeCard({
   onSend,
   readOnly = false,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [showCharter, setShowCharter] = useState(false);
   const openArtifact = useCopilotUIStore((s) => s.openArtifact);
   const panelAvailable = !!artifactId;
@@ -271,14 +282,13 @@ export function ExpertChangeCard({
 
   function handleShowMore() {
     if (panelAvailable && expert && artifactId) {
-      openArtifact(toExpertArtifact(expert, output, artifactId));
+      openArtifact(toExpertArtifact(expert, output, artifactId, locale));
       return;
     }
     setShowCharter(!showCharter);
   }
 
-  const name = str(expert, "name") ?? "New expert";
-  const role = str(expert, "role");
+  const name = snapshotTitle(expert, locale);
   const tagline = str(expert, "tagline");
   const about = str(expert, "about");
   const boundaries = str(expert, "boundaries");
@@ -360,7 +370,6 @@ export function ExpertChangeCard({
         <HandoffProposal
           kind={newExpertKindOf(kind)}
           name={name}
-          role={role}
           avatarUrl={str(expert, "avatar_url")}
           color={str(expert, "color")}
           about={summary}
@@ -438,11 +447,6 @@ export function ExpertChangeCard({
             >
               {name}
             </Text>
-            {role && (
-              <Text variant="small-tight" tone="subtle" className="truncate">
-                {role}
-              </Text>
-            )}
           </div>
           {showDetails && !chatExpertId && detailsButton}
         </div>
@@ -810,12 +814,12 @@ export function ExpertChangeGroup({
   const part = visible[current];
   const isLast = current === visible.length - 1;
   const proposals = visible
-    .map(proposalOf)
+    .map((candidate) => proposalOf(candidate, locale))
     .filter((proposal): proposal is Proposal => proposal !== null);
   const allDecided =
     proposals.length > 0 &&
     proposals.every((proposal) => decisions[proposal.toolCallId]);
-  const currentProposal = readOnly ? null : proposalOf(part);
+  const currentProposal = readOnly ? null : proposalOf(part, locale);
   // While the turn is still streaming another proposal part can land in
   // this group, so the send waits for the stream to settle.
   const sendable = !readOnly && !!actions && !isCurrentlyStreaming;

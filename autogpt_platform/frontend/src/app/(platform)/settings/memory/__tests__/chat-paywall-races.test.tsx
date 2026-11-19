@@ -35,7 +35,9 @@ describe("Memory chat request lifetime", () => {
         await screen.findByRole("menuitem", { name: /Growth Marketer/ }),
       );
       await user.click(
-        await screen.findByRole("button", { name: "View Maria's summary" }),
+        await screen.findByRole("button", {
+          name: "View Growth Marketer's summary",
+        }),
       );
       expect(await screen.findByText("Your memory summary.")).toBeDefined();
 
@@ -47,8 +49,13 @@ describe("Memory chat request lifetime", () => {
       const panel = screen.getByRole("complementary", {
         name: "Memory chat panel",
       });
-      expect(within(panel).getByText("Maria's memory")).toBeDefined();
+      expect(within(panel).getByText("Growth Marketer's memory")).toBeDefined();
       expect(within(panel).getByText("Your memory summary.")).toBeDefined();
+      expect(
+        within(
+          within(panel).getByTestId("expert-assistant-identity"),
+        ).getByText("Growth Marketer"),
+      ).toBeDefined();
       expect(screen.queryByText("Could not start the memory chat")).toBeNull();
       expect(
         screen.queryByText("The memory chat needs an active plan"),
@@ -101,7 +108,9 @@ describe("Memory chat request lifetime", () => {
       await screen.findByRole("menuitem", { name: /Growth Marketer/ }),
     );
     await user.click(
-      await screen.findByRole("button", { name: "View Maria's summary" }),
+      await screen.findByRole("button", {
+        name: "View Growth Marketer's summary",
+      }),
     );
     await waitForSessionCreates(2);
 
@@ -111,7 +120,7 @@ describe("Memory chat request lifetime", () => {
       screen.queryByText("The memory chat needs an active plan"),
     ).toBeNull();
     await user.click(
-      screen.getByRole("button", { name: "View Maria's summary" }),
+      screen.getByRole("button", { name: "View Growth Marketer's summary" }),
     );
     await waitForSessionCreates(1);
     expect(bodies).toEqual([null, { expert_id: "expert-maria" }]);

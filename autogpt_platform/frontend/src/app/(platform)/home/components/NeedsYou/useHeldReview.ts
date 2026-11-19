@@ -8,9 +8,9 @@ import type {
   ChatRule,
   RuleScope,
 } from "@/app/(platform)/copilot/components/ApprovalQueue/helpers";
-import { toApprovalItem } from "@/app/(platform)/copilot/components/ApprovalQueue/helpers";
 import { useProcessReviews } from "@/hooks/useProcessReviews";
 import { trackFunnel } from "@/services/experts/experts-analytics";
+import { getHeldCallTitle, toHomeApprovalItem } from "./attentionCopy";
 import { headlineButtonId, isHeldCall, receiptText } from "./helpers";
 
 export interface HeldReceipt {
@@ -37,7 +37,7 @@ interface DecideOptions {
 
 // Held calls decided here stay as receipts in place, so the list never shifts under the pointer.
 export function useHeldReview({ items }: Args) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const { processReviews } = useProcessReviews();
   const [statuses, setStatuses] = useState<Record<string, CardStatus>>({});
@@ -138,20 +138,24 @@ export function useHeldReview({ items }: Args) {
     if (lost.length > 0)
       setFailed((prev) => [...prev, ...lost.map((item) => item.id)]);
     if (done.length > 0) {
-      const next = done.map((item) => ({
-        id: item.id,
-        receipt: {
-          outcome: approved ? "approved" : "rejected",
-          text: receiptText(toApprovalItem(item.review!), approved, t),
-        } satisfies HeldReceipt,
-      }));
+      const next = done.map((item) => {
+        const approval = toHomeApprovalItem(item.review!, item.expert, locale);
+        return {
+          id: item.id,
+          title: getHeldCallTitle(item, approval, locale),
+          receipt: {
+            outcome: approved ? "approved" : "rejected",
+            text: receiptText(approval, approved, t),
+          } satisfies HeldReceipt,
+        };
+      });
       setReceipts((prev) => ({
         ...prev,
         ...Object.fromEntries(next.map((r) => [r.id, r.receipt])),
       }));
       setAnnouncement(
         next.length === 1
-          ? `${done[0].title}: ${next[0].receipt.text}`
+          ? `${next[0].title}: ${next[0].receipt.text}`
           : t(
               `${next.length} answered: ${next[0].receipt.text.split(" · ")[0]}`,
               `已处理 ${next.length} 项：${next[0].receipt.text.split(" · ")[0]}`,

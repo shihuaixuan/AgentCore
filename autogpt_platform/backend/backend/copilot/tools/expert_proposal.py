@@ -406,7 +406,7 @@ async def _apply_hire(
     has_chat = await has_chat_with(user_id, result.expert.id)
     return ExpertChangeAppliedResponse(
         message=applied_message(
-            "hire", result.expert.name, has_chat=has_chat, on_card=on_card
+            "hire", result.expert.display_title, has_chat=has_chat, on_card=on_card
         ),
         session_id=session_id,
         kind="hire",
@@ -439,7 +439,7 @@ async def _apply_raise(
         return _raise_failure_response(e, session_id)
     return ExpertChangeAppliedResponse(
         message=applied_message(
-            "raise", result.expert.name, has_chat=False, on_card=on_card
+            "raise", result.expert.display_title, has_chat=False, on_card=on_card
         ),
         session_id=session_id,
         kind="raise",
@@ -490,7 +490,7 @@ async def _apply_update(
     if updated is None:
         return _stale_expert_error(session_id)
     return ExpertChangeAppliedResponse(
-        message=f"{updated.name} is updated. Tell the user exactly what changed.",
+        message=f"{updated.display_title} is updated. Tell the user exactly what changed.",
         session_id=session_id,
         kind="update",
         expert=_summary(updated),
@@ -598,6 +598,7 @@ def _summary(expert: Expert) -> ExpertSummary:
         id=expert.id,
         name=expert.name,
         role=expert.role,
+        job_title=expert.job_title,
         tagline=expert.tagline,
         about=expert.identity,
         boundaries=expert.boundaries,

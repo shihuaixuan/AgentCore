@@ -114,10 +114,12 @@ describe("Installing a marketplace skill for an expert", () => {
       screen.getByRole("button", { name: "Install for an expert" }),
     );
     await userEvent.click(
-      await screen.findByRole("menuitem", { name: /Maria/ }),
+      await screen.findByRole("menuitem", { name: "Marketing Strategist" }),
     );
 
-    expect(await screen.findByText("Installed on Maria")).toBeDefined();
+    expect(
+      await screen.findByText("Installed on Marketing Strategist"),
+    ).toBeDefined();
     expect(installTarget).toBe("expert-maria");
   });
 

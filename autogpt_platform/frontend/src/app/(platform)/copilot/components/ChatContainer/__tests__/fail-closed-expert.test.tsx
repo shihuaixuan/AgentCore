@@ -108,7 +108,7 @@ function ExpertThreadHarness({ activeExpertId }: { activeExpertId: string }) {
 }
 
 describe("Copilot expert thread — fail-closed identity", () => {
-  it("keeps a fired expert's thread read-only with their real name", async () => {
+  it("keeps a fired expert's thread read-only and shows their profession", async () => {
     let requestedUrl: string | null = null;
     server.use(
       http.get("*/api/experts/identities", ({ request }) => {
@@ -121,7 +121,7 @@ describe("Copilot expert thread — fail-closed identity", () => {
 
     const notice = await screen.findByTestId("archived-expert-notice");
     expect(notice.textContent).toContain(
-      "Maria was fired — this thread is read-only",
+      "Marketing Strategist was fired — this thread is read-only",
     );
     expect(screen.queryByTestId("composer")).toBeNull();
     expect(requestedUrl).toContain("/api/experts/identities");
@@ -232,7 +232,7 @@ describe("Copilot expert thread — fail-closed identity", () => {
 
     const notice = await screen.findByTestId("archived-expert-notice");
     expect(notice.textContent).toContain(
-      "Maria is temporarily unavailable — this thread is read-only",
+      "Marketing Strategist is temporarily unavailable — this thread is read-only",
     );
     expect(screen.queryByTestId("composer")).toBeNull();
   });

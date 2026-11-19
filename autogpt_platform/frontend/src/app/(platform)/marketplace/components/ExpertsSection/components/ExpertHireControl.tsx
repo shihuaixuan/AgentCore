@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { ExpertTemplate } from "@/app/api/__generated__/models/expertTemplate";
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { Button } from "@/components/atoms/Button/Button";
@@ -28,7 +29,7 @@ interface Props {
  *  hand-off to the expert's first thread — would unmount with it. Here the
  *  flow runs the expert page's own hook and outlives the swap. */
 export function ExpertHireControl({ expert, isHired }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { isLoggedIn } = useAuth();
   const {
     hire,
@@ -107,7 +108,7 @@ export function ExpertHireControl({ expert, isHired }: Props) {
         <Dialog.Content>
           {isVoicePickOpen && hireResult ? (
             <VoicePicker
-              name={hireResult.expert.name}
+              name={getExpertDisplayTitle(hireResult.expert, locale)}
               samples={expert.voice_samples ?? []}
               onPick={pickVoice}
               onSkip={skipVoice}

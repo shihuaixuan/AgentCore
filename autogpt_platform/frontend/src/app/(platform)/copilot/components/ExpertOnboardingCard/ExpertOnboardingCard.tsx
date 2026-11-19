@@ -19,6 +19,7 @@ import { parseExpertOnboarding, type ExpertOnboardingOutput } from "./helpers";
 import { PendingOnboardingContext } from "./PendingOnboardingContext";
 import { useExpertOnboardingCard } from "./useExpertOnboardingCard";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 interface Props {
   part: ToolUIPart;
@@ -68,7 +69,7 @@ interface FormProps {
 }
 
 function OnboardingForm({ callId, onboarding, isLive }: FormProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { expertsById } = useExpertMap();
   // What the user's reply in the chat said, as opposed to the form's answers.
   const sentAnswers = useContext(AnsweredQuestionsContext).get(callId);
@@ -100,7 +101,9 @@ function OnboardingForm({ callId, onboarding, isLive }: FormProps) {
   const expert = onboarding.expertId
     ? expertsById.get(onboarding.expertId)
     : undefined;
-  const name = expert?.name ?? t("Your new hire", "你的新专家");
+  const name = expert
+    ? getExpertDisplayTitle(expert, locale)
+    : t("Your new hire", "你的新专家");
   const labelId = `${sectionId}-${currentStep?.keyword ?? "review"}`;
 
   if (isDone) {

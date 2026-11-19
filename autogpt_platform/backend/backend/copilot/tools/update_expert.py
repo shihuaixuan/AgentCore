@@ -71,12 +71,6 @@ class UpdateExpertTool(BaseTool):
                     "description": "The team expert to edit.",
                     "entity": "expert",
                 },
-                "name": {
-                    "type": "string",
-                    "description": (
-                        "New personal first name; omit to keep the current one."
-                    ),
-                },
                 "about": {
                     "type": "string",
                     "description": (
@@ -167,6 +161,7 @@ class UpdateExpertTool(BaseTool):
             kind="update",
             name=merged.name,
             role=expert.role,
+            job_title=expert.job_title or "",
             tagline=expert.tagline or "",
             about=merged.identity,
             boundaries=merged.boundaries,
@@ -194,7 +189,7 @@ class UpdateExpertTool(BaseTool):
         )
         return ExpertChangeProposedResponse(
             message=(
-                f"Nothing changed yet. Show the user exactly how {expert.name} "
+                f"Nothing changed yet. Show the user exactly how {expert.display_title} "
                 "would be rewritten, including anything this replaces. Only "
                 "after they explicitly approve, call tool:confirm_expert_change "
                 f"with this confirmation_id; it expires in "

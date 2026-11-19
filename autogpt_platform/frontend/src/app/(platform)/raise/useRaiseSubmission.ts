@@ -6,7 +6,6 @@ import { invalidateExpertRosterQueries } from "@/services/experts/invalidate-exp
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { roleFor } from "./components/CategoryStep/helpers";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   failedAttachmentMessage,
@@ -18,6 +17,7 @@ import {
   type RaiseDraft,
   type RaiseKit,
 } from "./helpers";
+import { getRaiseProfession } from "./profession";
 
 export function useRaiseSubmission() {
   const { t, locale } = useTranslation();
@@ -35,12 +35,13 @@ export function useRaiseSubmission() {
     if (submitLatch.current) return;
     submitLatch.current = true;
     setIsLocked(true);
+    const { name, title, role, jobTitle } = getRaiseProfession(draft, locale);
     try {
       const response = await createRaisedExpert({
         data: {
-          name: draft.name,
-          role: draft.legacyRole ?? roleFor(draft.category),
-          job_title: draft.jobTitle || null,
+          name,
+          role,
+          job_title: jobTitle,
           color: draft.color,
           avatar_url: draft.avatarUrl || null,
           about: draft.about || null,
@@ -53,8 +54,8 @@ export function useRaiseSubmission() {
       if (result.failed_attachments?.length) {
         toast({
           title: t(
-            `Created ${draft.name || "your expert"}, but some tools didn't attach`,
-            `已创建 ${draft.name || "你的专家"}，但部分工具未能添加`,
+            `Created ${title}, but some tools didn't attach`,
+            `已创建 ${title}，但部分工具未能添加`,
           ),
           description: failedAttachmentMessage(
             result.failed_attachments,
@@ -77,7 +78,7 @@ export function useRaiseSubmission() {
     } catch (error) {
       submitLatch.current = false;
       setIsLocked(false);
-      reportFailure(error, draft.name, t);
+      reportFailure(error, title, t);
     }
   }
 
@@ -86,7 +87,7 @@ export function useRaiseSubmission() {
 
 function reportFailure(
   error: unknown,
-  name: string,
+  title: string,
   translate: (english: string, chinese: string) => string,
 ) {
   if (error instanceof ApiError && error.status === 409) {
@@ -112,10 +113,7 @@ function reportFailure(
     return;
   }
   toast({
-    title: translate(
-      `Couldn't create ${name || "your expert"}`,
-      `无法创建 ${name || "你的专家"}`,
-    ),
+    title: translate(`Couldn't create ${title}`, `无法创建 ${title}`),
     description:
       error instanceof ApiError && [400, 422, 503].includes(error.status)
         ? error.message

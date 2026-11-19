@@ -92,7 +92,7 @@ describe("onboarding localization", () => {
     expect(progress.getByText("正在为每项任务安排负责人")).toBeDefined();
   });
 
-  it("localizes built-in team roles without changing names or image identifiers", () => {
+  it("localizes the team titles without changing Otto", () => {
     render(
       <LanguageProvider>
         <TeamScene />
@@ -103,13 +103,13 @@ describe("onboarding localization", () => {
     ).getAllByRole("listitem");
     expect(members.map((member) => member.textContent)).toEqual([
       "OttoAI 负责人",
-      "Maria市场营销",
-      "Max销售",
-      "Mina财务",
-      "Nadia研究",
-      "Riley客户支持",
-      "Frankie运营",
-      "Devon安全",
+      "SEO 内容经理",
+      "销售开发代表",
+      "记账员",
+      "市场研究分析师",
+      "客户成功经理",
+      "行政助理",
+      "应用安全工程师",
     ]);
     expect(members[0].querySelector("img")?.getAttribute("src")).toBe(
       "/experts/transparent/otto.webp",

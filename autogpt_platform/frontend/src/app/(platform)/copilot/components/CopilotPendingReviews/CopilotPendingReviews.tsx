@@ -89,6 +89,7 @@ export function CopilotPendingReviews(props: Props) {
                 id: expert.id,
                 name: expert.name,
                 role: expert.role ?? "",
+                job_title: expert.jobTitle,
                 avatar_url: expert.avatarUrl,
               }
             : null

@@ -82,6 +82,30 @@ def test_templates_and_archived_experts_are_left_off_the_dashboard() -> None:
     assert [item.id for item in dashboard.attention] == ["setup-hired"]
 
 
+def test_dashboard_projects_the_job_title_without_changing_expert_identity() -> None:
+    expert = _expert("hired").model_copy(update={"job_title": "Executive Assistant"})
+    dashboard = compose_home_dashboard(
+        now=NOW,
+        experts=[expert],
+        executions=[],
+        reviews=[],
+        schedules=[],
+        library_refs=[],
+        cost_summary=_cost_summary(),
+        credits_balance=100,
+        timezone_name="UTC",
+    )
+
+    [agent] = dashboard.model_dump(mode="json")["agents"]
+    assert agent["expert"] == {
+        "id": "hired",
+        "name": "Expert hired",
+        "role": "Assistant",
+        "avatar_url": None,
+        "job_title": "Executive Assistant",
+    }
+
+
 def test_expert_spend_reaches_the_agent_rows_and_the_team_total() -> None:
     dashboard = compose_home_dashboard(
         now=NOW,

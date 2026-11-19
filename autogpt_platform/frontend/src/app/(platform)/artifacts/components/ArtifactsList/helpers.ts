@@ -399,7 +399,7 @@ export function getEmptyMessage(
     /** Child folders are listed above the empty files area. */
     hasFolders: boolean;
     hasExpertFilter?: boolean;
-    expertName?: string | null;
+    expertTitle?: string | null;
   },
   t: Translate = englishText,
 ): string {
@@ -411,8 +411,8 @@ export function getEmptyMessage(
     if (!opts.isInFolder && !opts.hasFolders)
       return t("No files from this expert yet", "此专家暂无文件");
     return t(
-      `No files from ${opts.expertName ?? "this expert"} here`,
-      `此处没有来自 ${opts.expertName ?? "此专家"} 的文件`,
+      `No files from ${opts.expertTitle ?? "this expert"} here`,
+      `此处没有来自 ${opts.expertTitle ?? "此专家"} 的文件`,
     );
   }
   if (opts.isInFolder)
@@ -438,7 +438,7 @@ export function getEmptyState(
     isInFolder: boolean;
     hasFolders: boolean;
     folderId: string | null;
-    expert: { id: string; name: string | null } | null;
+    expert: { id: string; title: string | null } | null;
   },
   t: Translate = englishText,
 ): EmptyStateContent {
@@ -448,7 +448,7 @@ export function getEmptyState(
       isInFolder: opts.isInFolder,
       hasFolders: opts.hasFolders,
       hasExpertFilter: opts.expert !== null,
-      expertName: opts.expert?.name,
+      expertTitle: opts.expert?.title,
     },
     t,
   );
@@ -470,18 +470,18 @@ export function getEmptyState(
     };
   }
   if (opts.expert) {
-    const name = opts.expert.name;
+    const expertTitle = opts.expert.title;
     return {
       ...base,
       description: t(
-        `Files ${name ?? "this expert"} creates while working on a task will show up here.`,
-        `${name ?? "此专家"} 执行任务时创建的文件会显示在这里。`,
+        `Files ${expertTitle ?? "this expert"} creates while working on a task will show up here.`,
+        `${expertTitle ?? "此专家"} 执行任务时创建的文件会显示在这里。`,
       ),
-      chatHref: name
+      chatHref: expertTitle
         ? `/copilot?expertId=${encodeURIComponent(opts.expert.id)}`
         : null,
-      chatLabel: name
-        ? t(`Chat with ${name}`, `与 ${name} 聊天`)
+      chatLabel: expertTitle
+        ? t(`Chat with ${expertTitle}`, `与 ${expertTitle} 聊天`)
         : base.chatLabel,
     };
   }

@@ -158,8 +158,8 @@ export function useSuggestedTasks({
     if (owner.kind === "otto" && task.expert_template_id && !hasRosterFailed) {
       toast({
         title: t(
-          `${task.expert_name ?? "That expert"} isn't on your team, so Otto has this one.`,
-          `${task.expert_name ?? "该专家"}不在你的团队中，因此此任务将由 Otto 负责。`,
+          "That expert isn't on your team, so Otto has this one.",
+          "该专家不在你的团队中，因此此任务将由 Otto 负责。",
         ),
       });
     }

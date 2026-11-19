@@ -13,7 +13,7 @@ const MARIA: RecommendedExpert = {
   template_id: "tpl-maria",
   name: "Maria",
   role: "SEO & Content",
-  avatar_url: null,
+  avatar_url: "/autogpt-characters/v1.1/expert-maria/neutral/128.webp",
 };
 const MAX: RecommendedExpert = {
   template_id: "tpl-max",
@@ -266,13 +266,15 @@ describe("PlanPanel task cards", () => {
 
     const [newsletter] = getTaskCards();
     expect(
-      within(newsletter).getByRole("img", { name: "Maria, AI Expert" }),
-    ).toBeDefined();
+      within(newsletter)
+        .getByRole("img", { name: "SEO Content Manager, AI Expert" })
+        .getAttribute("src"),
+    ).toBe("/experts/professional/expert-maria.webp");
     expect(within(newsletter).getByText(NEWSLETTER.title)).toBeDefined();
     expect(within(newsletter).getByText(NEWSLETTER.why!)).toBeDefined();
     expect(
       within(newsletter).getByText(
-        hasText("Maria, SEO Content Manager · joins your team"),
+        hasText("SEO Content Manager · joins your team"),
       ),
     ).toBeDefined();
   });
@@ -283,7 +285,7 @@ describe("PlanPanel task cards", () => {
     const leads = getTaskCards()[1];
     // Title and owner line only: no third line of text in between.
     expect(leads.textContent).toBe(
-      `${LEADS.title}Max, Sales Development Rep · joins your team`,
+      `${LEADS.title}Sales Development Rep · joins your team`,
     );
   });
 
@@ -292,9 +294,7 @@ describe("PlanPanel task cards", () => {
 
     const [launch] = getTaskCards();
     expect(
-      within(launch).getByText(
-        hasText("Mina, Chief of Staff · joins your team"),
-      ),
+      within(launch).getByText(hasText("Chief of Staff · joins your team")),
     ).toBeDefined();
   });
 
@@ -321,7 +321,9 @@ describe("PlanPanel task cards", () => {
     expect(within(leads).getByText("Otto handles this one")).toBeDefined();
     expect(within(leads).getByRole("img", { name: OTTO_AVATAR })).toBeDefined();
     expect(
-      within(leads).queryByRole("img", { name: "Max, AI Expert" }),
+      within(leads).queryByRole("img", {
+        name: "Sales Development Rep, AI Expert",
+      }),
     ).toBeNull();
   });
 
@@ -342,7 +344,7 @@ describe("PlanPanel consent line", () => {
 
     expect(
       screen.getByText(
-        "Maria, Max and Mina join your team when your trial starts. Nothing runs until you pick a task.",
+        "SEO Content Manager, Sales Development Rep and Chief of Staff join your team when your trial starts. Nothing runs until you pick a task.",
       ),
     ).toBeDefined();
   });
@@ -352,7 +354,7 @@ describe("PlanPanel consent line", () => {
 
     expect(
       screen.getByText(
-        "Maria joins your team when your trial starts. Nothing runs until you pick a task.",
+        "SEO Content Manager joins your team when your trial starts. Nothing runs until you pick a task.",
       ),
     ).toBeDefined();
   });
@@ -378,7 +380,7 @@ describe("PlanPanel consent line", () => {
     );
     expect(
       screen.getByText(
-        "Maria, Max and Mina join your team when you subscribe. Nothing runs until you pick a task.",
+        "SEO Content Manager, Sales Development Rep and Chief of Staff join your team when you subscribe. Nothing runs until you pick a task.",
       ),
     ).toBeDefined();
     unmount();
@@ -386,10 +388,27 @@ describe("PlanPanel consent line", () => {
     render(<PlanPanel plan={makePlan()} moment="continue" />);
     expect(
       screen.getByText(
-        "Maria, Max and Mina join your team when you continue. Nothing runs until you pick a task.",
+        "SEO Content Manager, Sales Development Rep and Chief of Staff join your team when you continue. Nothing runs until you pick a task.",
       ),
     ).toBeDefined();
   });
+});
+
+test("uses an explicit job title in the task and consent labels", () => {
+  const owner = { ...MARIA, job_title: "Editorial Lead" };
+  render(
+    <PlanPanel
+      plan={makePlan({ team: [owner], tasks: [NEWSLETTER] })}
+      moment="trial"
+    />,
+  );
+
+  expect(
+    screen.getByRole("img", { name: "Editorial Lead, AI Expert" }),
+  ).toBeDefined();
+  expect(
+    screen.getByText(/Editorial Lead joins your team when your trial starts/),
+  ).toBeDefined();
 });
 
 describe("PlanPanel while the plan is being written", () => {

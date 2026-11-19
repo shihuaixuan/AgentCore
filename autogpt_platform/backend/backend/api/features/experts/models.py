@@ -14,6 +14,7 @@ from pydantic import (
 )
 
 from backend.api.features.experts.avatar_catalog import resolve_avatar_url
+from backend.api.features.experts.copy_policy import expert_display_title
 from backend.copilot.autopilot_mode import AutopilotMode
 from backend.copilot.credential_selection import CredentialPins
 from backend.data.expert_run_output import OutputType
@@ -342,6 +343,10 @@ class Expert(BaseModel):
     @classmethod
     def resolve_avatar(cls, value: str | None) -> str | None:
         return resolve_avatar_url(value)
+
+    @property
+    def display_title(self) -> str:
+        return expert_display_title(self.job_title, self.role)
 
 
 class ExpertBundledSkill(BaseModel):

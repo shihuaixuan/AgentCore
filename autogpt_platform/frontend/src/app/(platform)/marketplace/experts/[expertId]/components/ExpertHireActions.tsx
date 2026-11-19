@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { Button } from "@/components/atoms/Button/Button";
@@ -29,7 +30,8 @@ export function ExpertHireActions({
   isHiring,
   onHire,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   if (!isLoggedIn) {
     const next = encodeURIComponent(`/marketplace/experts/${expert.id}`);
     return (
@@ -62,7 +64,10 @@ export function ExpertHireActions({
           variant="secondary"
           size="small"
         >
-          {t(`Chat with ${expert.name}`, `与 ${expert.name} 对话`)}
+          {t(
+            `Chat with ${getExpertDisplayTitle(hiredExpert, locale)}`,
+            `与 ${getExpertDisplayTitle(hiredExpert, locale)} 对话`,
+          )}
         </Button>
       </div>
     );
@@ -84,7 +89,7 @@ export function ExpertHireActions({
       loading={isHiring}
       className="w-full sm:w-auto"
     >
-      {t(`Hire ${expert.name}`, `聘用 ${expert.name}`)}
+      {t(`Hire ${title}`, `聘用 ${title}`)}
     </Button>
   );
 }

@@ -4,6 +4,7 @@ import type { Expert } from "@/app/api/__generated__/models/expert";
 import { Select } from "@/components/atoms/Select/Select";
 import { AUTOPILOT_MEMORY_SCOPE } from "./useMemoryScope";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 interface Props {
   value: string;
@@ -20,25 +21,24 @@ export function MemoryScopeSelector({
   loading,
   error,
 }: Props) {
-  const { t } = useTranslation();
-  const labelCounts = experts.reduce<Record<string, number>>(
-    (counts, expert) => {
-      const label = `${expert.name} — ${expert.role.trim() || t("Expert", "专家")}`;
-      counts[label] = (counts[label] ?? 0) + 1;
-      return counts;
-    },
-    {},
-  );
+  const { t, locale } = useTranslation();
+  const expertOptions = experts.map((expert) => ({
+    value: expert.id,
+    label: getExpertDisplayTitle(expert, locale),
+  }));
+  const labelCounts = new Map<string, number>();
+  for (const { label } of expertOptions) {
+    labelCounts.set(label, (labelCounts.get(label) ?? 0) + 1);
+  }
   const options = [
-    { value: AUTOPILOT_MEMORY_SCOPE, label: t("Otto (account memory)", "Otto（账户记忆）") },
-    ...experts.map((expert) => {
-      const label = `${expert.name} — ${expert.role.trim() || t("Expert", "专家")}`;
-      return {
-        value: expert.id,
-        label:
-          (labelCounts[label] ?? 0) > 1 ? `${label} (${expert.id})` : label,
-      };
-    }),
+    {
+      value: AUTOPILOT_MEMORY_SCOPE,
+      label: t("Otto (account memory)", "Otto（账户记忆）"),
+    },
+    ...expertOptions.map(({ value, label }) => ({
+      value,
+      label: (labelCounts.get(label) ?? 0) > 1 ? `${label} (${value})` : label,
+    })),
   ];
 
   return (
@@ -56,7 +56,9 @@ export function MemoryScopeSelector({
       </div>
       <div aria-live="polite" className="flex flex-col gap-1 text-caption">
         {loading ? (
-          <p className="text-foreground-tertiary">{t("Loading experts…", "正在加载专家…")}</p>
+          <p className="text-foreground-tertiary">
+            {t("Loading experts…", "正在加载专家…")}
+          </p>
         ) : null}
         {value !== AUTOPILOT_MEMORY_SCOPE ? (
           <p className="text-foreground-tertiary">
@@ -64,7 +66,9 @@ export function MemoryScopeSelector({
           </p>
         ) : null}
         {error ? (
-          <p className="text-error-foreground">{t("Failed to load experts.", "无法加载专家。")}</p>
+          <p className="text-error-foreground">
+            {t("Failed to load experts.", "无法加载专家。")}
+          </p>
         ) : null}
         {!loading && !error && experts.length === 0 ? (
           <p className="text-foreground-tertiary">

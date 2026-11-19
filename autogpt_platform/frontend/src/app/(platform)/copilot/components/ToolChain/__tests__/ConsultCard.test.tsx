@@ -34,7 +34,7 @@ describe("consult_teammate verdict card", () => {
       />,
     );
 
-    expect(screen.getByText("Ada")).toBeDefined();
+    expect(screen.queryByText("Ada")).toBeNull();
     expect(screen.getByText("Chief of Staff")).toBeDefined();
     expect(screen.getByText("No objection")).toBeDefined();
     expect(

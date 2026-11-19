@@ -7,10 +7,11 @@ that did it, so the two feeds land in the same block instead of describing
 the same day from different angles.
 """
 
+from collections.abc import Mapping
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
-from backend.api.features.experts.models import Expert
+from backend.api.features.experts.models import Expert, ExpertIdentity
 from backend.blocks import get_blocks
 from backend.blocks.llm import LLM_PROVIDER_NAMES
 from backend.copilot.briefing.models import BriefingRunItem
@@ -66,6 +67,7 @@ def compose_recent_work(
     expert_by_id: dict[str, Expert],
     agent_by_graph: dict[str, AgentRef],
     session_titles: dict[str, str | None],
+    archived_experts: Mapping[str, ExpertIdentity] | None = None,
 ) -> HomeRecentWork:
     since = now - _WINDOW
     exec_by_id = {execution.id: execution for execution in executions}
@@ -74,7 +76,9 @@ def compose_recent_work(
     def bucket(key: ActorKey) -> _Bucket:
         found = buckets.get(key)
         if found is None:
-            found = buckets[key] = _Bucket(_actor(key, expert_by_id, agent_by_graph))
+            found = buckets[key] = _Bucket(
+                _actor(key, expert_by_id, agent_by_graph, archived_experts or {})
+            )
         return found
 
     run_items = live_run_items(executions, since, now, expert_by_id, agent_by_graph)
@@ -149,20 +153,22 @@ def _event_key(
 
 
 def _actor(
-    key: ActorKey, expert_by_id: dict[str, Expert], agent_by_graph: dict[str, AgentRef]
+    key: ActorKey,
+    expert_by_id: dict[str, Expert],
+    agent_by_graph: dict[str, AgentRef],
+    archived_experts: Mapping[str, ExpertIdentity],
 ) -> HomeWorkActor:
     kind, ref = key
     if kind == "expert":
-        expert = expert_by_id.get(ref)
+        live = expert_by_id.get(ref)
+        expert = live or archived_experts.get(ref)
         if expert is None:
-            # The expert was archived or removed after the fact; the work
-            # and its attribution kind survive, only the profile is gone.
             return HomeWorkActor(kind="expert", name="Expert")
         return HomeWorkActor(
             kind="expert",
             name=expert.name,
             expert=to_home_expert(expert),
-            link=f"/copilot?expertId={expert.id}",
+            link=f"/copilot?expertId={expert.id}" if live else None,
         )
     if kind == "workflow":
         agent = agent_by_graph.get(ref, UNKNOWN_AGENT)

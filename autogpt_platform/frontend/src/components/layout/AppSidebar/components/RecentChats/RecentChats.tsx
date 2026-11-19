@@ -3,6 +3,7 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { DeleteChatDialog } from "@/app/(platform)/copilot/components/DeleteChatDialog/DeleteChatDialog";
 import { ShareChatDialog } from "@/app/(platform)/copilot/sharing/ShareChatDialog";
+import { useExpertMap } from "@/app/(platform)/copilot/useExpertMap";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -19,6 +20,7 @@ export function RecentChats() {
   const chatPinningEnabled = useGetFlag(Flag.CHAT_PINNING);
 
   const isLearningEnabled = useGetFlag(Flag.DREAM_SKILL_LEARNING_ENABLED);
+  const { expertsById } = useExpertMap();
   const {
     sessions,
     isLoading,
@@ -89,6 +91,9 @@ export function RecentChats() {
       <RecentChatItem
         key={session.id}
         session={session}
+        expert={
+          session.expert_id ? expertsById.get(session.expert_id) : undefined
+        }
         isActive={session.id === activeSessionId}
         isEditing={isEditing}
         editingTitle={isEditing ? editingTitle : ""}

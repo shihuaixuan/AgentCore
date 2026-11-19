@@ -3,7 +3,7 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Button } from "@/components/atoms/Button/Button";
-import { getCategoryHex } from "@/components/molecules/ExpertAvatar/colors";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { ExpertIdentityDetails } from "@/components/molecules/ExpertIdentityDetails/ExpertIdentityDetails";
 import { CategoryTag } from "@/app/(platform)/marketplace/components/CategoryChip/CategoryTag";
 import { BubbleChatIcon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
@@ -20,7 +20,8 @@ interface Props {
 }
 
 export function ExpertDetailHeader({ expert, onEditSoul, onChat }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   const cover = getExpertCover(expert);
   const topic = expert.categories?.[0];
 
@@ -43,16 +44,13 @@ export function ExpertDetailHeader({ expert, onEditSoul, onChat }: Props) {
         </span>
         <div className="min-w-0 flex-1">
           <ExpertIdentityDetails
-            name={expert.name}
             role={expert.role}
             jobTitle={expert.job_title}
             size="page"
-            nameAlign="baseline"
-            areaColor={getCategoryHex(topic)}
           />
           <div className="mt-2 flex items-center gap-2 empty:hidden">
             <IntegrationIcons
-              expertName={expert.name}
+              expertName={title}
               providers={expert.credential_providers ?? []}
             />
           </div>

@@ -2,11 +2,8 @@
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/atoms/Avatar/Avatar";
+import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -98,6 +95,7 @@ export function ExpertInstallMenu({
   onAddToExpert,
   children,
 }: MenuProps) {
+  const { locale } = useTranslation();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
@@ -107,32 +105,30 @@ export function ExpertInstallMenu({
             {MENU_LABEL}
           </Text>
         </DropdownMenuLabel>
-        {experts.map((expert) => (
-          <DropdownMenuItem
-            key={expert.id}
-            disabled={isAdding}
-            onSelect={() => onAddToExpert(expert)}
-            // oxlint-disable-next-line design-system/no-restyle -- a taller row for the expert's avatar and role
-            className="gap-2.5 py-2"
-          >
-            <Avatar className="h-6 w-6">
-              {expert.avatar_url ? (
-                <AvatarImage src={expert.avatar_url} alt="" />
-              ) : null}
-              <AvatarFallback>{expert.name}</AvatarFallback>
-            </Avatar>
-            <span className="min-w-0">
-              <span className="block truncate text-foreground-strong">
-                {expert.name}
+        {experts.map((expert) => {
+          const title = getExpertDisplayTitle(expert, locale);
+          return (
+            <DropdownMenuItem
+              key={expert.id}
+              disabled={isAdding}
+              onSelect={() => onAddToExpert(expert)}
+              textValue={title}
+              // oxlint-disable-next-line design-system/no-restyle -- a taller row for the expert's avatar
+              className="gap-2.5 py-2"
+            >
+              <span aria-hidden="true" className="flex shrink-0">
+                <ExpertAvatar
+                  name={title}
+                  avatarUrl={expert.avatar_url}
+                  size={24}
+                />
               </span>
-              {expert.role ? (
-                <span className="block truncate text-caption text-foreground-tertiary">
-                  {expert.role}
-                </span>
-              ) : null}
-            </span>
-          </DropdownMenuItem>
-        ))}
+              <Text as="span" variant="body" className="min-w-0 truncate">
+                {title}
+              </Text>
+            </DropdownMenuItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -8,6 +8,7 @@ import {
 } from "@/components/atoms/Tooltip/BaseTooltip";
 import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { UIDataTypes, UIMessage, UITools } from "ai";
 import { LayoutGroup } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -145,6 +146,7 @@ export interface ChatContainerProps {
   /** Expert identity for expert-scoped sessions (thread header + assistant
    * avatar/name). Null = default header. */
   expertIdentity?: ExpertIdentity | null;
+  replyExpertsById?: ReadonlyMap<string, ExpertIdentity>;
   /** True while an expert-scoped session's active/archived identity is still
    * unresolved. Keep every send path locked until the roster settles. */
   isResolvingExpertIdentity?: boolean;
@@ -202,6 +204,7 @@ export const ChatContainer = ({
   onDroppedFilesConsumed,
   turnStats,
   expertIdentity,
+  replyExpertsById,
   isUsageRefused = false,
   usageFailure,
   onDismissUsage,
@@ -248,9 +251,15 @@ export const ChatContainer = ({
     ? expertIdentity
     : null;
   const isExpertArchived = archivedExpertIdentity !== null;
+  const expertTitle = expertIdentity
+    ? getExpertDisplayTitle(expertIdentity, locale)
+    : null;
   const chatExpert =
-    !isResolvingExpertIdentity && expertIdentity && !expertIdentity.isArchived
-      ? { id: expertIdentity.id, name: expertIdentity.name }
+    !isResolvingExpertIdentity &&
+    expertIdentity &&
+    !expertIdentity.isArchived &&
+    expertTitle
+      ? { id: expertIdentity.id, name: expertTitle }
       : null;
   useShareChatExpert(chatExpert);
   const isTurnLocked = isExpertArchived || !!isResolvingExpertIdentity;
@@ -531,7 +540,7 @@ export const ChatContainer = ({
       onSend={guardedOnSend}
       onBackendTurn={onBackendTurn}
       sessionId={sessionId}
-      assistantName={expertIdentity?.name ?? "Otto"}
+      assistantName={threadRecipient?.name ?? expertTitle ?? "Otto"}
     >
       <LayoutGroup id="copilot-2-chat-layout">
         <div
@@ -578,6 +587,7 @@ export const ChatContainer = ({
                 pendingSend={pendingSend}
                 bottomContentPadding={usageCardHeight + composerTabInset}
                 expertIdentity={expertIdentity}
+                replyExpertsById={replyExpertsById}
                 isResolvingExpertIdentity={isResolvingExpertIdentity}
                 floatingControls={floatingControls}
               />
@@ -589,7 +599,10 @@ export const ChatContainer = ({
                     </div>
                   )}
                   <ArchivedExpertNotice
-                    expertName={archivedExpertIdentity.name}
+                    expertName={getExpertDisplayTitle(
+                      archivedExpertIdentity,
+                      locale,
+                    )}
                     reason={archivedExpertIdentity.readOnlyReason ?? "fired"}
                   />
                 </>
@@ -686,12 +699,10 @@ export const ChatContainer = ({
                               ? threadRecipient.expertId
                                 ? threadRecipient.name
                                 : null
-                              : (expertIdentity?.name ?? null)
+                              : expertTitle
                           }
                           assistantName={
-                            threadRecipient?.name ??
-                            expertIdentity?.name ??
-                            null
+                            threadRecipient?.name ?? expertTitle ?? null
                           }
                           recipientPicker={threadRecipient?.picker}
                           recipientPickerDisabled={Boolean(
@@ -757,7 +768,7 @@ export const ChatContainer = ({
                 ) : undefined
               }
               isKickoffStarting={isKickoffStarting}
-              expertName={expertIdentity?.name}
+              expertName={expertTitle ?? undefined}
               expertId={expertIdentity?.id ?? null}
             />
           )}

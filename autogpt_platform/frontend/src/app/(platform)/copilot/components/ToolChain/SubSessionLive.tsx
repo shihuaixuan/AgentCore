@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import type { Locale } from "@/lib/i18n/locale";
 
 import {
@@ -291,7 +292,7 @@ export function SubSessionPendingCard({
   input,
   minimal = false,
 }: PendingCardProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { expertsById } = useExpertMap();
   const args = asObject(input) ?? {};
   const inputExpertId = str(args, "expert_id");
@@ -309,12 +310,13 @@ export function SubSessionPendingCard({
   } = useLiveSubSession(liveSessionId ?? "", !!liveSessionId);
   const expertId = inputExpertId ?? liveSession?.expert_id ?? null;
   const expert = expertId ? expertsById.get(expertId) : undefined;
+  const title = getExpertDisplayTitle(expert, locale);
 
   return (
     <div className={cn(CARD, "w-full rounded-2xl p-2.5")}>
       <div className="flex items-center gap-2.5">
         <ExpertAvatar
-          name={expert?.name ?? t("Expert", "专家")}
+          name={title}
           avatarUrl={expert?.avatarUrl ?? null}
           color={expert?.color}
           size={28}
@@ -324,12 +326,7 @@ export function SubSessionPendingCard({
           tone="emphasis"
           className="min-w-0 flex-1 truncate"
         >
-          {expert?.name ?? t("Expert", "专家")}
-          {expert?.role && (
-            <span className="ml-1.5 font-normal text-foreground-subtle">
-              {expert.role}
-            </span>
-          )}
+          {title}
         </Text>
         {/* Once the poll dies the card no longer knows the run is going —
             keeping the spinner up would be a guess dressed as a fact. */}

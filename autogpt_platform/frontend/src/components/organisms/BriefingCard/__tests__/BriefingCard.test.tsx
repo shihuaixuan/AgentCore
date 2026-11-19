@@ -2,6 +2,9 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import type { BriefingResponse } from "@/app/api/__generated__/models/briefingResponse";
 import type { BriefingRunItem } from "@/app/api/__generated__/models/briefingRunItem";
+import { getListExpertIdentitiesMockHandler200 } from "@/app/api/__generated__/endpoints/experts/experts.msw";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
+import { server } from "@/mocks/mock-server";
 import { render, screen } from "@/tests/integrations/test-utils";
 import { BriefingCard } from "../BriefingCard";
 
@@ -54,6 +57,86 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+});
+
+test("shares one roster fetch across archived, unknown and current run owners", async () => {
+  let reads = 0;
+  server.use(
+    getListExpertIdentitiesMockHandler200(() => {
+      reads += 1;
+      return [
+        {
+          id: "exp-0",
+          name: "Maria",
+          avatar_url: "/autogpt-characters/v1.1/expert-maria/neutral/128.webp",
+          role: "SEO & Content",
+          job_title: "Editorial Lead",
+          is_archived: true,
+        },
+        {
+          id: "exp-3",
+          name: "Unrelated name",
+          avatar_url: null,
+          role: "Ops",
+          is_archived: false,
+        },
+      ];
+    }),
+  );
+  render(
+    <LanguageProvider>
+      <BriefingCard
+        briefing={makeBriefing([
+          {
+            ...makeItem(0),
+            expert_name: null,
+            summary: "Maria wrote a draft.",
+          },
+          { ...makeItem(1), summary: null, expert_role: "Sales" },
+          { ...makeItem(2), expert_name: "Unrelated name", summary: null },
+        ])}
+      />
+    </LanguageProvider>,
+  );
+
+  const avatar = await screen.findByRole("img", {
+    name: "Editorial Lead，AI 专家",
+  });
+  expect(avatar.getAttribute("src")).toBe(
+    "/experts/professional/expert-maria.webp",
+  );
+  expect(avatar.closest("a")?.getAttribute("href")).toBe(
+    "/library/agents/lib-0",
+  );
+  expect(screen.getByText("Maria wrote a draft.")).toBeDefined();
+  expect(screen.getByText("销售开发代表")).toBeDefined();
+  expect(screen.getByText("AI 专家")).toBeDefined();
+  expect(screen.queryByText("Unrelated name")).toBeNull();
+  expect(screen.queryByText("行政助理")).toBeNull();
+  expect(reads).toBe(1);
+});
+
+test("keeps Otto's label on a legacy recap, without promoting a named expert to Otto", () => {
+  render(
+    <BriefingCard
+      briefing={makeBriefing([
+        { ...makeItem(0), expert_id: null, expert_name: "Otto", summary: null },
+        {
+          ...makeItem(1),
+          expert_name: "Otto",
+          expert_role: "Sales",
+          summary: null,
+        },
+      ])}
+    />,
+  );
+
+  expect(screen.getByText("Otto").closest("li")?.textContent).toContain(
+    "Agent 0",
+  );
+  expect(
+    screen.getByText("Sales Development Rep").closest("li")?.textContent,
+  ).toContain("Agent 1");
 });
 
 test("keeps clipped rows out of the tab order until the list is expanded", async () => {

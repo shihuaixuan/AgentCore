@@ -8,11 +8,17 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { AttentionCard } from "@/components/organisms/AttentionCard/AttentionCard";
+import { getSpendReviewTitle } from "@/components/organisms/PendingReviewsList/components/SpendApprovalCard/helpers";
+import {
+  getReviewExpert,
+  type ExpertRoster,
+} from "@/components/organisms/PendingReviewsList/expertIdentity";
 import { getReviewLink } from "@/lib/review-links";
 import { getReviewTitle } from "../helpers";
 
 interface Props {
   review: PendingHumanReviewModel;
+  roster?: ExpertRoster;
   isProcessing: boolean;
   onApprove: (review: PendingHumanReviewModel) => void;
   onDecline: (review: PendingHumanReviewModel) => void;
@@ -20,6 +26,7 @@ interface Props {
 
 export function NeedsAttentionRow({
   review,
+  roster,
   isProcessing,
   onApprove,
   onDecline,
@@ -28,8 +35,10 @@ export function NeedsAttentionRow({
   // Decline rejects the agent's action outright, with no undo, in a flow
   // built for fast tapping — so it takes a second, deliberate tap.
   const [isConfirmingDecline, setIsConfirmingDecline] = useState(false);
-  const title = getReviewTitle(review, locale);
-  const subtitle = [review.expert_name, review.agent_name]
+  const expert = getReviewExpert(review, locale, roster);
+  const title =
+    getSpendReviewTitle(review, expert.title) ?? getReviewTitle(review, locale);
+  const subtitle = [expert.title, review.agent_name]
     .filter(Boolean)
     .join(" · ");
 
@@ -50,10 +59,7 @@ export function NeedsAttentionRow({
     >
       <AttentionCard.Row align="center">
         <AttentionCard.Icon>
-          <ExpertAvatar
-            name={review.expert_name ?? null}
-            avatarUrl={review.expert_avatar_url ?? null}
-          />
+          <ExpertAvatar name={expert.title} avatarUrl={expert.avatarURL} />
         </AttentionCard.Icon>
         <AttentionCard.Content asChild>
           <Link

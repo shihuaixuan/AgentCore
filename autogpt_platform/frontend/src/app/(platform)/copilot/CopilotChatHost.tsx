@@ -120,6 +120,7 @@ function ChatHostView({
     sessionAutopilotMode,
     chatLlmAuthProvider,
     expertIdentity,
+    replyExpertsById,
     isResolvingExpertIdentity,
     isAdoptingExpertSession,
     isKickoffStarting,
@@ -189,6 +190,7 @@ function ChatHostView({
           onDroppedFilesConsumed={onDroppedFilesConsumed}
           turnStats={turnStats}
           expertIdentity={expertIdentity}
+          replyExpertsById={replyExpertsById}
           isResolvingExpertIdentity={isResolvingExpertIdentity}
           isAdoptingExpertSession={isAdoptingExpertSession}
           isKickoffStarting={isKickoffStarting}

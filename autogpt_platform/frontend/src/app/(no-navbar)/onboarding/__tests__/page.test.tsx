@@ -603,7 +603,9 @@ describe("hiring the plan's team", () => {
     trial.active = true;
     render(<OnboardingPage />);
 
-    expect(await screen.findByText("Hiring Maria")).toBeDefined();
+    expect(
+      await screen.findByText("Hiring Sales Development Rep"),
+    ).toBeDefined();
     await waitFor(() => expect(hires.count).toBe(1));
   });
 

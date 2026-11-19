@@ -376,7 +376,9 @@ describe("managing an expert's integrations", () => {
     await openIntegrationsTab();
 
     const section = await screen.findByTestId("expert-integrations-section");
-    expect(within(section).getByText("Maria's Integrations")).toBeDefined();
+    expect(
+      within(section).getByText("Marketing Strategist's Integrations"),
+    ).toBeDefined();
     await within(section).findByText("Work LinkedIn");
 
     await userEvent.type(
@@ -400,7 +402,9 @@ describe("managing an expert's integrations", () => {
 
     const section = await screen.findByTestId("expert-integrations-section");
     expect(
-      await within(section).findByText(/Connect a tool and Maria can use it/),
+      await within(section).findByText(
+        /Connect a tool and Marketing Strategist can use it/,
+      ),
     ).toBeDefined();
   });
 
@@ -499,7 +503,7 @@ describe("managing an expert's integrations", () => {
     expect(await screen.findByLabelText("Search services")).toBeDefined();
     expect(
       screen.getByText(
-        "Pick a service to connect. Maria will be able to use it on your behalf.",
+        "Pick a service to connect. Marketing Strategist will be able to use it on your behalf.",
       ),
     ).toBeDefined();
   });
@@ -587,7 +591,7 @@ describe("managing an expert's integrations", () => {
     expect(within(choices).getAllByRole("listitem")).toHaveLength(2);
     await userEvent.click(
       within(choices).getByRole("button", {
-        name: "Let Maria use Personal Notion",
+        name: "Let Marketing Strategist use Personal Notion",
       }),
     );
 
@@ -630,7 +634,9 @@ describe("managing an expert's integrations", () => {
       await within(dialog).findByLabelText("Search services"),
     ).toBeDefined();
     expect(await within(dialog).findByText("Notion")).toBeDefined();
-    expect(within(dialog).queryByText(/Let Maria use/)).toBeNull();
+    expect(
+      within(dialog).queryByText(/Let Marketing Strategist use/),
+    ).toBeNull();
   });
 
   it("filters the connect dialog's services by connection state", async () => {
@@ -1111,7 +1117,9 @@ describe("managing an expert's integrations", () => {
     );
 
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).queryByText(/Let Maria use/)).toBeNull();
+    expect(
+      within(dialog).queryByText(/Let Marketing Strategist use/),
+    ).toBeNull();
     await userEvent.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(

@@ -135,7 +135,7 @@ describe("Expert approval mode", () => {
     const user = await openSettings();
 
     const section = await screen.findByRole("region", {
-      name: "Maria approval mode",
+      name: "Marketing Strategist approval mode",
     });
     expect(section.textContent).toContain("Routines, scheduled runs");
     expect(
@@ -217,17 +217,19 @@ describe("Expert approval mode", () => {
     );
     expect(
       await screen.findByRole("heading", {
-        name: "Run Maria unsupervised by default?",
+        name: "Run Marketing Strategist unsupervised by default?",
       }),
     ).toBeDefined();
     expect(
-      screen.getByText(/^Maria will not ask before anything in new chats\./),
+      screen.getByText(
+        /^Marketing Strategist will not ask before anything in new chats\./,
+      ),
     ).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     await waitFor(() =>
       expect(
         screen.queryByRole("heading", {
-          name: "Run Maria unsupervised by default?",
+          name: "Run Marketing Strategist unsupervised by default?",
         }),
       ).toBeNull(),
     );
@@ -273,10 +275,12 @@ describe("Expert approval mode", () => {
     await openSettings();
 
     expect(
-      await screen.findByRole("region", { name: "Fire Maria" }),
+      await screen.findByRole("region", { name: "Fire Marketing Strategist" }),
     ).toBeDefined();
     expect(
-      screen.queryByRole("region", { name: "Maria approval mode" }),
+      screen.queryByRole("region", {
+        name: "Marketing Strategist approval mode",
+      }),
     ).toBeNull();
   });
 });

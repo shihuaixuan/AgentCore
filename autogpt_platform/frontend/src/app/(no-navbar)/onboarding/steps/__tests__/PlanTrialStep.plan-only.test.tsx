@@ -121,7 +121,7 @@ test("names when the team joins: when the user continues", async () => {
 
   expect(
     await screen.findByText(
-      "Maria joins your team when you continue. Nothing runs until you pick a task.",
+      "Assistant joins your team when you continue. Nothing runs until you pick a task.",
     ),
   ).toBeDefined();
 });

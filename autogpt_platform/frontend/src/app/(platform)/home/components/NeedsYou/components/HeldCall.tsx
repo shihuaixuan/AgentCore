@@ -1,6 +1,7 @@
 import type { HomeAttentionItem } from "@/app/api/__generated__/models/homeAttentionItem";
 import type { CardStatus } from "@/app/(platform)/copilot/components/ApprovalQueue/components/ApprovalCard/ApprovalCard";
-import { toApprovalItem } from "@/app/(platform)/copilot/components/ApprovalQueue/helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { toHomeApprovalItem } from "../attentionCopy";
 import type { HeldReceipt } from "../useHeldReview";
 import { HeldCallRow } from "./HeldCallRow";
 import { HeldReceiptRow } from "./HeldReceiptRow";
@@ -26,7 +27,8 @@ export function HeldCall({
   onOpen,
   onDecide,
 }: Props) {
-  const approval = toApprovalItem(item.review!);
+  const { locale } = useTranslation();
+  const approval = toHomeApprovalItem(item.review!, item.expert, locale);
   if (receipt) return <HeldReceiptRow approval={approval} receipt={receipt} />;
   return (
     <HeldCallRow

@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from backend.api.features.experts.models import Expert
+from backend.api.features.experts.models import Expert, ExpertIdentity
 from backend.api.features.library.model import LibraryAgentRef
 from backend.copilot.briefing.outcome import DEFAULT_AGENT_NAME, as_utc
 from backend.executor.scheduler import GraphExecutionJobInfo
@@ -12,12 +12,13 @@ from backend.executor.scheduler import GraphExecutionJobInfo
 from .models import HomeExpert
 
 
-def to_home_expert(expert: Expert) -> HomeExpert:
+def to_home_expert(expert: Expert | ExpertIdentity) -> HomeExpert:
     return HomeExpert(
         id=expert.id,
         name=expert.name,
         role=expert.role,
         avatar_url=expert.avatar_url,
+        job_title=expert.job_title,
     )
 
 

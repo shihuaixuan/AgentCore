@@ -7,7 +7,6 @@ import {
   PopoverTrigger,
 } from "@/components/molecules/Popover/Popover";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
-import { Text } from "@/components/atoms/Text/Text";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { isKey } from "@/lib/keyboard";
 import { cn } from "@/lib/utils";
@@ -15,11 +14,17 @@ import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { useRef, useState, type RefObject } from "react";
 import { useExpertMap, type ExpertIdentity } from "../../../useExpertMap";
-import { ExpertPickerOptions, RecipientAvatar } from "./ExpertPickerOptions";
+import {
+  ExpertPickerOptions,
+  RecipientAvatar,
+  RecipientTitle,
+} from "./ExpertPickerOptions";
 import {
   expertRecipient,
   OTTO_RECIPIENT_OPTION,
+  recipientChoices,
   recipientOptions,
+  recipientTitle,
   type RecipientPickerConfig,
 } from "./recipientOptions";
 
@@ -48,7 +53,7 @@ export function ThreadRecipientChip({
 }
 
 const CHIP_CLASSNAME =
-  "group inline-flex h-9 min-w-0 max-w-44 items-center gap-1.5 rounded-full border border-border-base bg-surface px-2 text-foreground-body";
+  "group inline-flex h-10 min-w-0 max-w-44 items-center gap-1.5 rounded-full border border-border-base bg-surface px-2 text-foreground-body";
 
 export function RecipientChip({
   recipient,
@@ -64,11 +69,17 @@ export function RecipientChip({
   disabled,
   selectionBlocked,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [localOpen, setLocalOpen] = useState(false);
   const setOpen = onOpenChange ?? setLocalOpen;
   const interactedOutside = useRef(false);
   const chip = recipient ?? (isThreadPicker ? OTTO_RECIPIENT_OPTION : null);
+  const title = chip ? recipientTitle(chip, locale) : "";
+  const label = recipient
+    ? (recipientChoices(options, locale).find(
+        ({ option }) => option.id === recipient.id,
+      )?.label ?? title)
+    : title;
   if (isLoading) {
     return (
       <div
@@ -90,18 +101,16 @@ export function RecipientChip({
             type="button"
             disabled={disabled}
             aria-label={t(
-              `Sending to ${chip.name} — change recipient`,
-              `发送给 ${chip.name}，更换接收者`,
+              `Sending to ${label} — change recipient`,
+              `发送给 ${label}，更换接收者`,
             )}
             className={cn(
               CHIP_CLASSNAME,
               "transition-colors hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-focus focus-visible:outline-none disabled:opacity-60",
             )}
           >
-            <RecipientAvatar option={chip} />
-            <Text as="span" variant="body-tight" className="truncate">
-              {chip.name}
-            </Text>
+            <RecipientAvatar option={chip} title={title} />
+            <RecipientTitle title={label} />
             <Icon
               icon={ArrowDown01Icon}
               tone="secondary"

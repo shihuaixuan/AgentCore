@@ -1,18 +1,15 @@
 "use client";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/atoms/Avatar/Avatar";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
+import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { WorkflowTile } from "./components/WorkflowTile";
 import { INSTALL_WORKFLOW_SOURCES, workflowSubtitle } from "./helpers";
 import { useInstallWorkflowPicker } from "./useInstallWorkflowPicker";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 interface Props {
   mode: "pick-expert" | "pick-workflow";
@@ -29,7 +26,7 @@ export function InstallWorkflowPicker({
   open,
   onClose,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const {
     title,
     hiredExperts,
@@ -87,57 +84,43 @@ export function InstallWorkflowPicker({
               data-slot="install-workflow-picker-list"
               className="divide-y divide-separator overflow-hidden rounded-lg border border-border-base/80"
             >
-              {hiredExperts.map((expert) => (
-                <div
-                  key={expert.id}
-                  data-slot="install-workflow-picker-option"
-                  className="flex items-center gap-3 px-3.5 py-2.5 transition-colors hover:bg-surface-muted"
-                >
-                  <Avatar
-                    data-slot="install-workflow-picker-option-avatar"
-                    className="h-9 w-9"
-                  >
-                    {expert.avatar_url ? (
-                      <AvatarImage
-                        data-slot="install-workflow-picker-option-avatar-image"
-                        src={expert.avatar_url}
-                        alt={expert.name}
-                      />
-                    ) : null}
-                    <AvatarFallback data-slot="install-workflow-picker-option-avatar-fallback">
-                      {expert.name}
-                    </AvatarFallback>
-                  </Avatar>
+              {hiredExperts.map((expert) => {
+                const expertTitle = getExpertDisplayTitle(expert, locale);
+                return (
                   <div
-                    data-slot="install-workflow-picker-option-text"
-                    className="min-w-0 flex-1"
+                    key={expert.id}
+                    data-slot="install-workflow-picker-option"
+                    className="flex items-center gap-3 px-3.5 py-2.5 transition-colors hover:bg-surface-muted"
                   >
-                    <Text
-                      variant="body-medium"
-                      data-slot="install-workflow-picker-option-title"
-                      className="truncate"
+                    <ExpertAvatar
+                      name={expertTitle}
+                      avatarUrl={expert.avatar_url}
+                      size={36}
+                    />
+                    <div
+                      data-slot="install-workflow-picker-option-text"
+                      className="min-w-0 flex-1"
                     >
-                      {expert.name}
-                    </Text>
-                    <Text
-                      variant="small"
-                      data-slot="install-workflow-picker-option-subtitle"
-                      tone="muted"
+                      <Text
+                        variant="body-medium"
+                        data-slot="install-workflow-picker-option-title"
+                        className="truncate"
+                      >
+                        {expertTitle}
+                      </Text>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      data-slot="install-workflow-picker-option-install"
+                      loading={pendingKey === expert.id}
+                      onClick={() => installOnExpert(expert)}
                     >
-                      {expert.role}
-                    </Text>
+                      {t("Install", "安装")}
+                    </Button>
                   </div>
-                  <Button
-                    variant="secondary"
-                    size="small"
-                    data-slot="install-workflow-picker-option-install"
-                    loading={pendingKey === expert.id}
-                    onClick={() => installOnExpert(expert)}
-                  >
-                    {t("Install", "安装")}
-                  </Button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )
         ) : (

@@ -56,16 +56,22 @@ test("localizes recipient accessibility labels while preserving identity", () =>
   render(
     <LanguageProvider initialLocale="zh-CN">
       <RecipientChip
-        recipient={{ id: "raw-id", name: "English Expert", avatarUrl: null }}
+        recipient={{
+          id: "raw-id",
+          name: "Casey",
+          role: "Code Review & QA",
+          avatarUrl: null,
+        }}
         options={[]}
         onSelect={vi.fn()}
       />
     </LanguageProvider>,
   );
   expect(
-    screen.getByRole("button", { name: "发送给 English Expert，更换接收者" }),
+    screen.getByRole("button", { name: "发送给 质量保障工程师，更换接收者" }),
   ).toBeDefined();
-  expect(screen.getByText("English Expert")).toBeDefined();
+  expect(screen.getByText("质量保障工程师")).toBeDefined();
+  expect(screen.queryByText("Casey")).toBeNull();
 });
 
 test("localizes reasoning controls but never model text", () => {
@@ -157,7 +163,12 @@ test("retains English compatibility without a language provider", () => {
       <FilesEmptyState />
       <StoppedTaskCard />
       <RecipientChip
-        recipient={{ id: "raw-id", name: "English Expert", avatarUrl: null }}
+        recipient={{
+          id: "raw-id",
+          name: "Casey",
+          role: "Code Review & QA",
+          avatarUrl: null,
+        }}
         options={[]}
         onSelect={vi.fn()}
       />
@@ -167,7 +178,7 @@ test("retains English compatibility without a language provider", () => {
   expect(screen.getByText("Task stopped")).toBeDefined();
   expect(
     screen.getByRole("button", {
-      name: "Sending to English Expert — change recipient",
+      name: "Sending to QA Engineer — change recipient",
     }),
   ).toBeDefined();
 });

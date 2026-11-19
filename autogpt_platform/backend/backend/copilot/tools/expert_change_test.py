@@ -77,6 +77,7 @@ def _template(template_id: str = "tpl-scout"):
         id=template_id,
         name="Scout",
         role="Market research",
+        job_title="Market Research Analyst",
         tagline="Tracks your competitors and reports what changed.",
         identity="You track competitors.",
         boundaries="You never contact anyone outside the team.",
@@ -91,6 +92,8 @@ def _created(name: str = "Scout", expert_id: str = "exp-1"):
         id=expert_id,
         name=name,
         role="Market research",
+        job_title="Market Research Analyst",
+        display_title="Market Research Analyst",
         tagline="Tracks your competitors and reports what changed.",
         identity="You track competitors.",
         boundaries="You never contact anyone outside the team.",
@@ -107,6 +110,8 @@ def _hired_otto():
         id="exp-2",
         name="Otto",
         role="Inbox triage",
+        job_title="Executive Assistant",
+        display_title="Executive Assistant",
         tagline="Sorts your morning inbox.",
         identity="You group the morning inbox.",
         boundaries="You never send a reply yourself.",
@@ -249,6 +254,19 @@ class TestPreviewNeverWrites:
             resp = await _hire(make_session(_USER), template_id="tpl-scout")
         assert isinstance(resp, ExpertChangeProposedResponse)
         assert resp.preview.tagline == _template().tagline
+        assert resp.preview.job_title == "Market Research Analyst"
+
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_a_job_title_does_not_identify_an_existing_expert(self):
+        with _env() as db:
+            db.list_experts.return_value = [
+                _created(name="Executive Assistant", expert_id="existing")
+            ]
+            resp = await _raise(make_session(_USER), **{**_CHARTER, "name": ""})
+
+        assert isinstance(resp, ExpertChangeProposedResponse)
+        assert resp.preview.name == "Executive Assistant"
+        assert resp.preview.job_title == "Executive Assistant"
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_raise_without_tagline_is_refused(self):

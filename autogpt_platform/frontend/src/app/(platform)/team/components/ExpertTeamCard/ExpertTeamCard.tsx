@@ -4,7 +4,7 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
-import { getCategoryHex } from "@/components/molecules/ExpertAvatar/colors";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { ExpertIdentityDetails } from "@/components/molecules/ExpertIdentityDetails/ExpertIdentityDetails";
 import { CategoryTag } from "@/app/(platform)/marketplace/components/CategoryChip/CategoryTag";
 import { ExpertTagline } from "@/components/molecules/ExpertIdentityDetails/components/ExpertTagline";
@@ -54,7 +54,8 @@ export function ExpertTeamCard({
   onEditSoul,
   onChat,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   const rosterStatus = getExpertRosterStatus(expert);
   const weeklySpend = getWeeklySpend(expert);
   const cover = getExpertCover(expert);
@@ -93,7 +94,7 @@ export function ExpertTeamCard({
           onClick={handleEditSoulClick}
         />
         <FireExpertMenu
-          expertName={expert.name}
+          expertName={title}
           onFire={openFire}
           testId="expert-card-actions"
         />
@@ -101,7 +102,7 @@ export function ExpertTeamCard({
 
       <Link
         href={`/team/${expert.id}`}
-        aria-label={t(`View ${expert.name}`, `查看 ${expert.name}`)}
+        aria-label={t(`View ${title}`, `查看 ${title}`)}
         className="flex flex-1 flex-col items-center p-2 pb-4"
       >
         <ExpertCover
@@ -113,7 +114,7 @@ export function ExpertTeamCard({
         <div className="flex w-full items-start gap-3 px-2">
           <span className="relative z-10 -mt-12 ml-1 block shrink-0">
             <ExpertAvatar
-              name={expert.name}
+              name={title}
               avatarUrl={expert.avatar_url}
               color={expert.color}
               backgroundColor={cover.color}
@@ -144,11 +145,8 @@ export function ExpertTeamCard({
 
         <div className="mt-2 flex w-full flex-col items-start gap-1 px-2 pl-5 text-left">
           <ExpertIdentityDetails
-            name={expert.name}
             role={expert.role}
             jobTitle={expert.job_title}
-            nameAlign="baseline"
-            areaColor={getCategoryHex(topic)}
           />
           <div className="flex items-center gap-2 empty:hidden">
             {topic ? <CategoryTag category={topic} /> : null}
@@ -158,7 +156,7 @@ export function ExpertTeamCard({
               </Badge>
             ) : null}
             <IntegrationIcons
-              expertName={expert.name}
+              expertName={title}
               providers={expert.credential_providers ?? []}
             />
           </div>
@@ -234,7 +232,7 @@ export function ExpertTeamCard({
 
       <FireExpertDialog
         expertId={expert.id}
-        expertName={expert.name}
+        expertName={title}
         open={isFireOpen}
         onClose={closeFire}
       />

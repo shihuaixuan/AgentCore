@@ -23,6 +23,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@/tests/integrations/test-utils";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse, ws } from "msw";
@@ -77,7 +78,6 @@ const backendSocket = ws.link("ws://localhost:8001/ws");
 
 const ZARA = {
   expertId: EXPERT_ID,
-  name: "Zara",
   role: "GTM Strategist",
   avatarUrl: null,
 };
@@ -150,7 +150,7 @@ describe("ExpertChatDrawer", () => {
 
     expect(
       (await screen.findByPlaceholderText(
-        "Message Zara…",
+        "Message GTM Strategist…",
       )) as HTMLTextAreaElement,
     ).toHaveProperty("disabled", true);
     expect(createBodies).toEqual([]);
@@ -158,6 +158,55 @@ describe("ExpertChatDrawer", () => {
     sessionsRequest.resolve();
     await waitFor(() => expect(createBodies.length).toBe(1));
     expect(await screen.findByText("Hi, I'm Zara.")).toBeDefined();
+  });
+
+  test("labels a saved expert reply by profession without rewriting its text", async () => {
+    server.use(
+      getGetV2ListSessionsMockHandler200({
+        sessions: [
+          {
+            id: SESSION_ID,
+            created_at: "2026-09-27T18:00:00Z",
+            updated_at: "2026-09-27T18:01:00Z",
+            is_processing: false,
+            expert_id: EXPERT_ID,
+          },
+        ],
+        total: 1,
+      }),
+      getGetV2GetSessionMockHandler200({
+        id: SESSION_ID,
+        created_at: "2026-09-27T18:00:00Z",
+        updated_at: "2026-09-27T18:01:00Z",
+        user_id: USER_ID,
+        expert_id: EXPERT_ID,
+        active_stream: null,
+        messages: [
+          {
+            id: "saved-reply",
+            role: "assistant",
+            content: "Hi, I'm Zara.",
+            sequence: 1,
+            created_at: "2026-09-27T18:01:00Z",
+            metadata: null,
+          },
+        ],
+      }),
+    );
+
+    render(
+      <ExpertChatDrawer
+        target={{ ...ZARA, jobTitle: "Go-to-Market Strategist" }}
+        onClose={() => {}}
+      />,
+    );
+
+    expect(await screen.findByText("Hi, I'm Zara.")).toBeDefined();
+    expect(
+      within(screen.getByTestId("expert-assistant-identity")).getByText(
+        "Go-to-Market Strategist",
+      ),
+    ).toBeDefined();
   });
 
   test("waits for a fresh session list before starting onboarding", async () => {
@@ -215,7 +264,7 @@ describe("ExpertChatDrawer", () => {
 
     expect(
       (await screen.findByPlaceholderText(
-        "Message Zara…",
+        "Message GTM Strategist…",
       )) as HTMLTextAreaElement,
     ).toHaveProperty("disabled", true);
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -259,7 +308,7 @@ describe("ExpertChatDrawer", () => {
     );
 
     await waitFor(() => expect(createAttempts).toBe(1));
-    const input = await screen.findByPlaceholderText("Message Zara…");
+    const input = await screen.findByPlaceholderText("Message GTM Strategist…");
     await waitFor(() =>
       expect(input as HTMLTextAreaElement).toHaveProperty("disabled", false),
     );
@@ -349,7 +398,7 @@ describe("ExpertChatDrawer", () => {
 
     await waitFor(() => expect(createAttempts).toBe(1));
     const input = (await screen.findByPlaceholderText(
-      "Message Zara…",
+      "Message GTM Strategist…",
     )) as HTMLTextAreaElement;
     await waitFor(() => expect(input).toHaveProperty("disabled", false));
     await user.type(input, "Plan my launch{Enter}");
@@ -380,7 +429,7 @@ describe("ExpertChatDrawer", () => {
     );
 
     expect(await screen.findByText("What can I do for you?")).toBeDefined();
-    const input = await screen.findByPlaceholderText("Message Zara…");
+    const input = await screen.findByPlaceholderText("Message GTM Strategist…");
     await waitFor(() =>
       expect(input as HTMLTextAreaElement).toHaveProperty("disabled", false),
     );

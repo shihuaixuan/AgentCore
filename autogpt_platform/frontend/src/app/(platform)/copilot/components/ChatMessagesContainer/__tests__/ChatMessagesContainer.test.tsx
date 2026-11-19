@@ -834,31 +834,37 @@ describe("ChatMessagesContainer — queue badges on user messages", () => {
     },
   );
 
-  it("renders a Sent from badge linking to the session a delegated message came from", () => {
-    const messages: Message[] = [
-      {
-        id: "user-d1",
-        role: "user" as const,
-        parts: [{ type: "text" as const, text: "draft the ops update" }],
-        metadata: {
-          from_session_id: "3f2c1a9e-7b4d-4e8a-9c1b-2d3e4f5a6b7c",
-          from_expert_id: "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
-          from_expert_name: "Ari",
+  it.each([
+    ["Product Manager", "Product Manager"],
+    [undefined, "AI Expert"],
+  ])(
+    "uses a handoff's profession (%s), never its legacy name",
+    (jobTitle, title) => {
+      const messages: Message[] = [
+        {
+          id: "user-d1",
+          role: "user" as const,
+          parts: [{ type: "text" as const, text: "draft the ops update" }],
+          metadata: {
+            from_session_id: "3f2c1a9e-7b4d-4e8a-9c1b-2d3e4f5a6b7c",
+            from_expert_id: "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
+            from_expert_name: "Ari",
+            from_expert_job_title: jobTitle,
+          },
         },
-      },
-    ];
-    render(<ChatMessagesContainer {...baseProps} messages={messages} />);
-    const card = screen.getByTestId("sent-from-badge");
-    expect(card.textContent).toContain("Sent from Ari");
-    expect(card.getAttribute("href")).toBe(
-      "/copilot?sessionId=3f2c1a9e-7b4d-4e8a-9c1b-2d3e4f5a6b7c",
-    );
-  });
+      ];
+      render(<ChatMessagesContainer {...baseProps} messages={messages} />);
+      const card = screen.getByTestId("sent-from-badge");
+      expect(card.textContent).toBe(`Sent from ${title}`);
+      expect(card.getAttribute("href")).toBe(
+        "/copilot?sessionId=3f2c1a9e-7b4d-4e8a-9c1b-2d3e4f5a6b7c",
+      );
+    },
+  );
 
   const sessionSentFrom = {
     sessionId: "3f2c1a9e-7b4d-4e8a-9c1b-2d3e4f5a6b7c",
     expertId: null,
-    expertName: null,
   };
 
   function userRow(id: string, text: string) {
@@ -1150,7 +1156,6 @@ describe("ChatMessagesContainer — readOnly mode", () => {
         sessionSentFrom={{
           sessionId: "3f2c1a9e-7b4d-4e8a-9c1b-2d3e4f5a6b7c",
           expertId: null,
-          expertName: null,
         }}
       />,
     );

@@ -3,6 +3,7 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { ChatOriginIcon } from "@/app/(platform)/copilot/components/ChatOriginIcon/ChatOriginIcon";
 import { resolvePlatformLogo } from "@/app/(platform)/copilot/components/ChatOriginIcon/platformLogos";
+import type { ExpertIdentity } from "@/app/(platform)/copilot/useExpertMap";
 import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
 import { RelativeTime } from "@/components/atoms/RelativeTime/RelativeTime";
 import { Text } from "@/components/atoms/Text/Text";
@@ -12,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/molecules/DropdownMenu/DropdownMenu";
+import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import {
   SidebarMenuAction,
   SidebarMenuButton,
@@ -32,6 +34,8 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { isKey } from "@/lib/keyboard";
+import { cn } from "@/lib/utils";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 interface Session {
   id: string;
@@ -44,6 +48,7 @@ interface Session {
 
 interface Props {
   session: Session;
+  expert?: Pick<ExpertIdentity, "avatarUrl" | "role" | "jobTitle">;
   isActive: boolean;
   isEditing: boolean;
   editingTitle: string;
@@ -81,6 +86,7 @@ function ChatLinkLoader() {
 // session id), so a list refetch only re-renders rows whose session changed.
 export const RecentChatItem = memo(function RecentChatItem({
   session,
+  expert,
   isActive,
   isEditing,
   editingTitle,
@@ -98,9 +104,10 @@ export const RecentChatItem = memo(function RecentChatItem({
   onExcludeFromLearning,
   onDelete,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const title = session.title || t("Untitled chat", "未命名对话");
   const hasPlatformLogo = !!resolvePlatformLogo(session.source_platform);
+  const expertLabel = expert ? getExpertDisplayTitle(expert, locale) : null;
 
   // Enter and Escape both blur the input, which would otherwise trigger a
   // second (or contradictory) submit via onBlur. This flag lets onBlur skip
@@ -146,11 +153,24 @@ export const RecentChatItem = memo(function RecentChatItem({
       <SidebarMenuButton
         asChild
         isActive={isActive}
+        size={expertLabel ? "lg" : "default"}
         tooltip={title}
         // leading-5 keeps SidebarMenuButton's 20px line-height under max-md:text-body-md.
-        className="font-normal hover:!bg-surface-hover data-[active=true]:!bg-surface-hover data-[active=true]:font-normal max-md:h-11 max-md:!pr-11 max-md:text-body-md max-md:leading-5"
+        className={cn(
+          "font-normal hover:!bg-surface-hover data-[active=true]:!bg-surface-hover data-[active=true]:font-normal max-md:!pr-11 max-md:text-body-md max-md:leading-5",
+          !expertLabel && "max-md:h-11",
+        )}
       >
         <Link href={`/home?sessionId=${session.id}`}>
+          {expert && !hasPlatformLogo && (
+            <span aria-hidden="true" className="flex shrink-0">
+              <ExpertAvatar
+                name={expertLabel}
+                avatarUrl={expert.avatarUrl}
+                size={28}
+              />
+            </span>
+          )}
           {session.is_processing ? (
             <LoadingSpinner
               size="small"
@@ -159,7 +179,20 @@ export const RecentChatItem = memo(function RecentChatItem({
           ) : hasPlatformLogo ? (
             <ChatOriginIcon sourcePlatform={session.source_platform} />
           ) : null}
-          <span className="min-w-0 flex-1 truncate">{title}</span>
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="truncate">{title}</span>
+            {expertLabel && (
+              <Text
+                as="span"
+                variant="small-tight"
+                tone="muted"
+                className="truncate"
+                title={expertLabel}
+              >
+                {expertLabel}
+              </Text>
+            )}
+          </span>
           {Number.isFinite(Date.parse(session.updated_at)) && (
             <Text
               as="span"

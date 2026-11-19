@@ -9,6 +9,7 @@ from urllib.parse import quote, urlencode
 
 from pydantic import BaseModel, field_serializer
 
+from backend.api.features.experts.copy_policy import expert_display_title
 from backend.api.features.experts.models import Expert, ExpertTemplate
 from backend.api.features.library.model import LibraryAgent, LibraryFolder
 from backend.copilot.context import get_workspace_manager
@@ -392,13 +393,14 @@ async def _team_change(confirmation_id: str, call: _Call) -> _Found | None:
     # Confirming a hire's hand-off id also starts a task, so a held confirm
     # names it: otherwise its card reads like the plain hire.
     task = proposal.handoff if proposal.hand_off else None
+    title = expert_display_title(preview.job_title, preview.role)
     return _Found(
         kind=(
             f"{_TEAM_CHANGE_KINDS[preview.kind]} with a first task"
             if task
             else _TEAM_CHANGE_KINDS[preview.kind]
         ),
-        name=f"{preview.name} to take on {task.title}" if task else preview.name,
+        name=f"{title} to take on {task.title}" if task else title,
         href=_team_href(proposal.expert_id) if proposal.expert_id else None,
         description=preview.tagline or preview.about,
         meta=[preview.job_title or preview.role, _area(template) if template else None],
@@ -485,7 +487,7 @@ def _agent(agent: LibraryAgent) -> _Found:
 def _teammate(expert: Expert) -> _Found:
     return _Found(
         kind="Expert",
-        name=expert.name,
+        name=expert.display_title,
         href=_team_href(expert.id),
         description=expert.tagline or expert.bio,
         meta=[

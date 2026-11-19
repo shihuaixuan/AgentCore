@@ -221,7 +221,7 @@ describe("PlanTrialStep with a paywall and no trial", () => {
     // The plan's team joins when the user subscribes, not when a trial starts.
     expect(
       await screen.findByText(
-        "Maria joins your team when you subscribe. Nothing runs until you pick a task.",
+        "Assistant joins your team when you subscribe. Nothing runs until you pick a task.",
       ),
     ).toBeDefined();
     expect(screen.queryByText(/\bMax\b/)).toBeNull();

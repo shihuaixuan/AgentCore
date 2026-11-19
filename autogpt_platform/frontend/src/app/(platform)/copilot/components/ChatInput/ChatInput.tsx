@@ -684,10 +684,7 @@ export const ChatInput = memo(function ChatInput({
               />
             )}
             {!recipientPicker && threadRecipient && (
-              <FixedRecipientLabel
-                expert={threadRecipient}
-                name={expertName ?? threadRecipient.name}
-              />
+              <FixedRecipientLabel expert={threadRecipient} />
             )}
           </InputGroupAddon>
           {/* Must be a real flex item: `order`/`w-full` are ignored on a

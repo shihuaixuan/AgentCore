@@ -217,7 +217,7 @@ async def test_holding_a_call_resolves_its_ids_into_the_stored_card():
 @pytest.mark.parametrize(
     "owner, session_id, expected",
     [
-        ("user-1", "s-mine", "Ada"),
+        ("user-1", "s-mine", "Operations Manager"),
         ("user-2", "s-mine", None),
         ("user-1", "s-other", None),
     ],
@@ -231,7 +231,9 @@ async def test_a_pending_team_change_is_named_only_in_its_own_chat(
     proposal = ExpertChangeProposal(
         user_id=owner,
         session_id=session_id,
-        preview=ExpertChangePreview(kind="hire", name="Ada"),
+        preview=ExpertChangePreview(
+            kind="hire", name="Ada", job_title="Operations Manager"
+        ),
     )
     redis = MagicMock(get=AsyncMock(return_value=proposal.model_dump_json()))
     session = ChatSession.new(user_id="user-1", dry_run=False)
@@ -252,15 +254,15 @@ async def test_a_pending_team_change_is_named_only_in_its_own_chat(
         (
             "hire",
             True,
-            "Ada to take on the Printify order pipeline",
+            "Operations Manager to take on the Printify order pipeline",
             "New hire with a first task",
         ),
-        ("hire", False, "Ada", "New hire"),
+        ("hire", False, "Operations Manager", "New hire"),
         # SECRT-3401: a created expert takes its task the same way.
         (
             "raise",
             True,
-            "Ada to take on the Printify order pipeline",
+            "Operations Manager to take on the Printify order pipeline",
             "New expert with a first task",
         ),
     ],
@@ -278,7 +280,9 @@ async def test_a_held_hire_names_the_task_its_confirm_would_start(
     proposal = ExpertChangeProposal(
         user_id="user-1",
         session_id=session.session_id,
-        preview=ExpertChangePreview(kind=change, name="Ada"),
+        preview=ExpertChangePreview(
+            kind=change, name="Ada", job_title="Operations Manager"
+        ),
         handoff=ExpertHandoffTask(
             title="the Printify order pipeline", brief="Move Etsy orders."
         ),
@@ -305,7 +309,9 @@ async def test_a_held_hire_is_named_however_slow_the_whole_roster_is():
     proposal = ExpertChangeProposal(
         user_id="user-1",
         session_id=session.session_id,
-        preview=ExpertChangePreview(kind="hire", name="Ada", template_id="tpl-ada"),
+        preview=ExpertChangePreview(
+            kind="hire", name="Ada", template_id="tpl-ada", role="Finance Specialist"
+        ),
     )
     redis = MagicMock(get=AsyncMock(return_value=proposal.model_dump_json()))
     template = MagicMock(id="tpl-ada", categories=["Finance"])
@@ -327,7 +333,7 @@ async def test_a_held_hire_is_named_however_slow_the_whole_roster_is():
             "confirm_expert_change", {"confirmation_id": "c-1"}, "user-1", session
         )
 
-    assert ref.name == "Ada"
+    assert ref.name == "Finance Specialist"
     assert ref.skills == ["Payroll"]
 
 

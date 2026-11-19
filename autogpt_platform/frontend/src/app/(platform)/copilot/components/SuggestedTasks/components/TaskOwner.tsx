@@ -1,18 +1,19 @@
 import { Text } from "@/components/atoms/Text/Text";
 import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
-import { getExpertRoleLabel } from "@/services/experts/expert-role-label";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import type { TaskOwner } from "../helpers";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const AVATAR_SIZE = 28;
 
 export function OwnerAvatar({ owner }: { owner: TaskOwner }) {
+  const { locale } = useTranslation();
   if (owner.kind === "otto")
     return <AutopilotAvatar size={AVATAR_SIZE} className="shrink-0" />;
   return (
     <ExpertAvatar
-      name={owner.expert.name}
+      name={getExpertDisplayTitle(owner.expert, locale)}
       avatarUrl={owner.expert.avatarUrl}
       backgroundColor={owner.expert.color ?? undefined}
       size={AVATAR_SIZE}
@@ -21,7 +22,6 @@ export function OwnerAvatar({ owner }: { owner: TaskOwner }) {
   );
 }
 
-// "{Name}, {role}" for an expert's task; "Otto" in the accent for his own.
 export function OwnerLabel({ owner }: { owner: TaskOwner }) {
   const { locale } = useTranslation();
   if (owner.kind === "otto")
@@ -31,20 +31,14 @@ export function OwnerLabel({ owner }: { owner: TaskOwner }) {
         Otto
       </span>
     );
-  const role = owner.expert.role
-    ? getExpertRoleLabel(owner.expert.role, locale)
-    : null;
   return (
     <Text
-      variant="small"
+      variant="small-medium"
       as="span"
-      tone="secondary"
+      tone="primary"
       className="sm:whitespace-nowrap"
     >
-      <Text variant="small-medium" as="span" tone="primary">
-        {owner.expert.name}
-      </Text>
-      {role ? `, ${role}` : null}
+      {getExpertDisplayTitle(owner.expert, locale)}
     </Text>
   );
 }

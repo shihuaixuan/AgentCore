@@ -14,7 +14,6 @@ import {
 export type RaiseStep =
   | "category"
   | "jobTitle"
-  | "name"
   | "avatar"
   | "about"
   | "voice"
@@ -26,7 +25,6 @@ export type RaiseStep =
 export const STEP_ORDER: RaiseStep[] = [
   "category",
   "jobTitle",
-  "name",
   "avatar",
   "about",
   "voice",
@@ -65,19 +63,18 @@ export const RAISE_PROMPTS = {
   categoryQuestion:
     "First — which area should your expert work in? It sets their color.",
   jobTitleQuestion: "And what's their job title?",
-  nameQuestion: "Good pick. What do you want to call them?",
-  avatarQuestion: (name: string) =>
-    `Here's an avatar for ${name || "your expert"}. Use it, generate another, or upload a picture.`,
-  aboutQuestion: (name: string) =>
-    `Anything else I should know about ${name || "your expert"}? How they should work, what matters to you — or skip it.`,
-  voiceQuestion: (name: string) =>
-    `How should ${name || "your expert"} sound when they write? Pick the one that feels right.`,
-  budgetQuestion: (name: string) =>
-    `How much weekly budget should ${name || "your expert"} have? $5 a week is the default — pick an amount, or skip.`,
-  marketplaceQuestion: (name: string) =>
-    `Want ${name || "your expert"} to run workflows? Search the marketplace and your library, then add any you like — or skip.`,
-  skillsQuestion: (name: string) =>
-    `Should ${name || "your expert"} have extra skills? Add one from the marketplace or your own library — or skip.`,
+  avatarQuestion: (title: string) =>
+    `Here's an avatar for ${title}. Use it, generate another, or upload a picture.`,
+  aboutQuestion: (title: string) =>
+    `Anything else I should know about ${title}? How they should work, what matters to you — or skip it.`,
+  voiceQuestion: (title: string) =>
+    `How should ${title} sound when they write? Pick the one that feels right.`,
+  budgetQuestion: (title: string) =>
+    `How much weekly budget should ${title} have? $5 a week is the default — pick an amount, or skip.`,
+  marketplaceQuestion: (title: string) =>
+    `Want ${title} to run workflows? Search the marketplace and your library, then add any you like — or skip.`,
+  skillsQuestion: (title: string) =>
+    `Should ${title} have extra skills? Add one from the marketplace or your own library — or skip.`,
 };
 
 // Beat before each question lands, so the control that triggered it settles
@@ -94,7 +91,6 @@ export interface RaiseDraft {
   legacyRole?: string;
   color: string | null;
   jobTitle: string | null;
-  name: string;
   // "" once the user skips, so the question is not asked again on restore.
   avatarUrl: string | null;
   about: string | null;
@@ -112,7 +108,6 @@ export const EMPTY_DRAFT: RaiseDraft = {
   category: null,
   color: null,
   jobTitle: null,
-  name: "",
   avatarUrl: null,
   about: null,
   voicePreferences: "",
@@ -129,50 +124,36 @@ export function loadDraft(): RaiseDraft {
   try {
     const raw = window.sessionStorage.getItem(DRAFT_STORAGE_KEY);
     if (!raw) return EMPTY_DRAFT;
-    const { role, ...parsed } = JSON.parse(raw) as StoredDraft;
+    const {
+      role,
+      name: _legacyName,
+      ...parsed
+    } = JSON.parse(raw) as StoredDraft;
     if (role && !categoryForRole(role)) parsed.legacyRole = role;
-    if (role && parsed.jobTitle == null) return reopenedAtJobTitle(role);
     const step = migrateStep(parsed.step);
-    const draft = backfillSkippedVoice({
+    const draft = {
       ...EMPTY_DRAFT,
       ...parsed,
       step: isRaiseStep(step) ? step : EMPTY_DRAFT.step,
-    });
-    return role ? backfillCategory(draft, role) : draft;
+    };
+    const restored = role ? backfillCategory(draft, role) : draft;
+    return backfillSkippedVoice(backfillSkippedJobTitle(restored));
   } catch {
     return EMPTY_DRAFT;
   }
 }
 
-// Earlier builds opened on a role question and stored the answer as `role`.
 type StoredDraft = Omit<Partial<RaiseDraft>, "step"> & {
   step?: string;
   role?: string | null;
+  name?: string;
 };
 
-// A draft written before the job title beat existed has a role and no title.
-// Every later beat waits on the title, so the draft resumes there.
-function reopenedAtJobTitle(role: string): RaiseDraft {
-  return backfillCategory(
-    {
-      ...EMPTY_DRAFT,
-      hasStarted: true,
-      step: "jobTitle",
-      ...(!categoryForRole(role) ? { legacyRole: role } : {}),
-    },
-    role,
-  );
-}
-
-// A draft written by an earlier build recorded a skipped voice as a null
-// label. The flow now treats null as "not answered", which would leave a
-// restored session parked on the voice beat with no way forward, so a draft
-// that has already moved past voice gets the sentinel back.
 // Steps that existed in earlier builds map onto the beat that absorbed them,
 // so a restored draft resumes where it left off instead of resetting.
 function migrateStep(step: string | undefined): string | undefined {
   if (step === "kit") return "budget";
-  if (step === "color") return "avatar";
+  if (step === "name" || step === "color") return "avatar";
   if (step === "role") return "category";
   return step;
 }
@@ -185,12 +166,27 @@ function backfillCategory(draft: RaiseDraft, role: string): RaiseDraft {
   const category = categoryForRole(role) ?? legacyCategoryForRole(role);
   return {
     ...draft,
+    hasStarted: true,
     category,
     color: draft.color ?? colorForCategory(category),
     step: draft.step === "category" ? "avatar" : draft.step,
   };
 }
 
+function backfillSkippedJobTitle(draft: RaiseDraft): RaiseDraft {
+  if (draft.jobTitle !== null) {
+    return { ...draft, jobTitle: draft.jobTitle.trim() };
+  }
+  if (STEP_ORDER.indexOf(draft.step) <= STEP_ORDER.indexOf("jobTitle")) {
+    return draft;
+  }
+  return { ...draft, jobTitle: "" };
+}
+
+// A draft written by an earlier build recorded a skipped voice as a null
+// label. The flow now treats null as "not answered", which would leave a
+// restored session parked on the voice beat with no way forward, so a draft
+// that has already moved past voice gets the sentinel back.
 function backfillSkippedVoice(draft: RaiseDraft): RaiseDraft {
   if (draft.voiceLabel !== null) return draft;
   if (STEP_ORDER.indexOf(draft.step) <= STEP_ORDER.indexOf("voice")) {

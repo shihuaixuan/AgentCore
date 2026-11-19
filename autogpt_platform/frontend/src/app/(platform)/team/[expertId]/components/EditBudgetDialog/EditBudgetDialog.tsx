@@ -6,6 +6,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
 import { Text } from "@/components/atoms/Text/Text";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { useEditBudgetDialog } from "./useEditBudgetDialog";
 
 interface Props {
@@ -15,7 +16,8 @@ interface Props {
 }
 
 export function EditBudgetDialog({ expert, open, onClose }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   const { value, setValue, isInvalid, isPending, save } = useEditBudgetDialog({
     expert,
     open,
@@ -57,8 +59,8 @@ export function EditBudgetDialog({ expert, open, onClose }: Props) {
             />
             <Text variant="small" tone="muted">
               {t(
-                `What ${expert.name} may spend each week, in dollars. Leave empty for the default, or enter 0 to remove the cap.`,
-                `${expert.name} 每周可消费的美元金额。留空使用默认值，输入 0 则不设上限。`,
+                `What ${title} may spend each week, in dollars. Leave empty for the default, or enter 0 to remove the cap.`,
+                `${title} 每周可消费的美元金额。留空使用默认值，输入 0 则不设上限。`,
               )}
             </Text>
           </div>

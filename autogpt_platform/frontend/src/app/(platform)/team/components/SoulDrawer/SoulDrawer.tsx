@@ -2,7 +2,6 @@
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
-import { ExpertSoulUpdate } from "@/app/api/__generated__/models/expertSoulUpdate";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Input } from "@/components/atoms/Input/Input";
@@ -11,11 +10,12 @@ import { LockIcon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { environment } from "@/services/environment";
 import { cn } from "@/lib/utils";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { ExpertSidePanel } from "../ExpertSidePanel/ExpertSidePanel";
 import { LearnedNotes } from "./components/LearnedNotes/LearnedNotes";
 import { SoulSectionTitle } from "./SoulSectionTitle";
 import { useBottomScrollShadow } from "./useBottomScrollShadow";
-import { useSoulDrawer } from "./useSoulDrawer";
+import { type EditableSoul, useSoulDrawer } from "./useSoulDrawer";
 
 interface Props {
   expert: Expert | null;
@@ -23,19 +23,20 @@ interface Props {
 }
 
 export function SoulDrawer({ expert, onClose }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   return (
     <ExpertSidePanel
       identity={
         expert
           ? {
-              name: expert.name,
+              name: title,
               avatarUrl: expert.avatar_url,
               color: expert.color,
             }
           : null
       }
-      title={expert ? t(`${expert.name}'s Soul`, `${expert.name} 的设定`) : ""}
+      title={expert ? t(`${title}'s Soul`, `${title} 的设定`) : ""}
       panelId="soul"
       closeLabel={t("Close Soul panel", "关闭设定面板")}
       onClose={onClose}
@@ -107,25 +108,14 @@ function SoulPanelBody({ expert, onClose }: BodyProps) {
 }
 
 interface SoulFieldsProps {
-  soul: ExpertSoulUpdate;
-  updateField: (field: keyof ExpertSoulUpdate, value: string) => void;
+  soul: EditableSoul;
+  updateField: (field: keyof EditableSoul, value: string) => void;
 }
 
 function SoulFields({ soul, updateField }: SoulFieldsProps) {
   const { t } = useTranslation();
   return (
     <div className="space-y-1">
-      <Input
-        id="soul-name"
-        label={t("Name", "名称")}
-        labelVariant="small-medium"
-        // oxlint-disable-next-line design-system/no-restyle -- Input has no label tone prop (src/components is P9's)
-        labelClassName="!text-foreground-body"
-        value={soul.name}
-        maxLength={100}
-        required
-        onChange={(event) => updateField("name", event.target.value)}
-      />
       <Input
         id="soul-identity"
         label={t("Identity and personality", "身份与个性")}

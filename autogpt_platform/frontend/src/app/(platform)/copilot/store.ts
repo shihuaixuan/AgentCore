@@ -27,6 +27,7 @@ export interface ExpertArtifact {
   kind: "hire" | "raise" | "update" | null;
   name: string;
   role: string | null;
+  jobTitle?: string | null;
   color: string | null;
   tagline: string | null;
   about: string | null;

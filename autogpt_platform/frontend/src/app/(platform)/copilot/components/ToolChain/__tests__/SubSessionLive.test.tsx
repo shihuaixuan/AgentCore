@@ -325,7 +325,7 @@ describe("SubSessionLive", () => {
       />,
     );
 
-    expect(screen.getByText("Expert")).toBeDefined();
+    expect(screen.getByText("AI Expert")).toBeDefined();
     expect(screen.getByText("running")).toBeDefined();
     // A teammate's thread is their own workspace: the delegated card is
     // status-only, so the prompt preview stays out of the parent chain.
@@ -354,7 +354,7 @@ describe("SubSessionLive", () => {
       />,
     );
 
-    expect(screen.getByText(/Vera/)).toBeDefined();
+    expect(screen.queryByText(/Vera/)).toBeNull();
     expect(screen.getByText("Research")).toBeDefined();
     expect(screen.getByText("completed")).toBeDefined();
     expect(screen.getByText("1m 15s")).toBeDefined();

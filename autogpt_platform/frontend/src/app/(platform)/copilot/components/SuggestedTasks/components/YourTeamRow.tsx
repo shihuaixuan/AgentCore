@@ -1,7 +1,7 @@
 import { Text } from "@/components/atoms/Text/Text";
 import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
-import { getExpertRoleLabel } from "@/services/experts/expert-role-label";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { useId } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { ExpertIdentity } from "../../../useExpertMap";
@@ -45,20 +45,15 @@ export function YourTeamRow({ experts }: Props) {
           >
             <span aria-hidden className="contents">
               <ExpertAvatar
-                name={expert.name}
+                name={getExpertDisplayTitle(expert, locale)}
                 avatarUrl={expert.avatarUrl}
                 backgroundColor={expert.color ?? undefined}
                 size={AVATAR_SIZE}
               />
             </span>
             <Text variant="small-medium" as="span" tone="primary">
-              {expert.name}
+              {getExpertDisplayTitle(expert, locale)}
             </Text>
-            {expert.role ? (
-              <Text variant="small" as="span" tone="secondary">
-                {getExpertRoleLabel(expert.role, locale)}
-              </Text>
-            ) : null}
           </li>
         ))}
       </ul>

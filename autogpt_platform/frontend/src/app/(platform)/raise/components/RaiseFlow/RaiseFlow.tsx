@@ -34,9 +34,7 @@ export function RaiseFlow() {
   const {
     hasStarted,
     items,
-    name,
-    category,
-    jobTitle,
+    title,
     color,
     avatarUrl,
     about,
@@ -145,9 +143,7 @@ export function RaiseFlow() {
 
           <div className="relative flex h-full items-center justify-center p-4 sm:p-6">
             <SoulPreviewPanel
-              name={name}
-              category={category}
-              jobTitle={jobTitle}
+              title={title}
               avatarUrl={avatarUrl || null}
               color={color}
               about={about}

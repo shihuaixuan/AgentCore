@@ -72,7 +72,7 @@ const MARIA: ExpertIdentity = {
   id: "maria",
   name: "Maria",
   avatarUrl: null,
-  role: null,
+  role: "Marketing Strategist",
   isArchived: false,
   readOnlyReason: null,
 };
@@ -210,7 +210,9 @@ describe("feedback cards in a chat", () => {
         expertIdentity={MARIA}
       />,
     );
-    expect(await screen.findByText("How did Maria do?")).toBeDefined();
+    expect(
+      await screen.findByText("How did Marketing Strategist do?"),
+    ).toBeDefined();
     expect(screen.getByText("Quick check-in on this task")).toBeDefined();
   });
 

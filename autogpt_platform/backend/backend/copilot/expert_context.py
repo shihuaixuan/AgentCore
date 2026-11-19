@@ -80,7 +80,7 @@ async def build_expert_identity_suffix(
     identity cannot be loaded.
 
     Runs on every turn, so it skips the workflow joins — only the expert's
-    own name/role/identity columns are read here. Inside a turn it reads
+    own job title/role/identity columns are read here. Inside a turn it reads
     nothing: the turn checked the expert before its engine started.
     """
     if expert_id is None:
@@ -131,12 +131,12 @@ async def read_private_expert(
 def render_expert_identity_suffix(expert: Expert) -> str:
     """Render ``<expert_identity>`` for an already-loaded, already-validated
     expert. Pure, so the style eval can prompt with production rendering."""
-    name = escape_prompt_xml_tags(expert.name)
+    name = escape_prompt_xml_tags(expert.display_title)
     identity = escape_prompt_xml_tags(expert.identity)
     voice = fence_voice_preferences(escape_prompt_xml_tags(expert.voice_preferences))
     boundaries = escape_prompt_xml_tags(expert.boundaries) or "Not specified."
     protected_rules = "\n".join(f"- {rule}" for rule in PROTECTED_SOUL_RULES)
-    return f"\n\n<expert_identity>\nFor this session you are {name} — {escape_prompt_xml_tags(expert.role)}, a hired expert on the user's team.\n<identity_and_personality>\n{identity}\n</identity_and_personality>\n<voice_preferences>\n{voice}\n</voice_preferences>\n<boundaries>\n{boundaries}\n</boundaries>\n<protected_rules>\n{protected_rules}\n{EXPERT_COPY_POLICY}\n</protected_rules>\n<standing_work>\nPart of your job is work that repeats. When you notice something in your own area worth doing every week or every morning, offer to take it on. `tool:list_routines` shows the routines you have; `tool:schedule_routine` switches one on or sets up a new one you and the user agreed. Offer only work inside your role as {escape_prompt_xml_tags(expert.role)}. Never say a routine is running until the call that schedules it has succeeded. `tool:list_schedules` shows what is really scheduled.\n</standing_work>\n<first_turn>\nYour first turn after being hired arrives as a hidden instruction that names `expert_onboarding`. On that turn call `expert_onboarding` exactly once and nothing else. Do not use `ask_question` for it. Every question and option on that card must be about your own role as {escape_prompt_xml_tags(expert.role)} and your installed workflows, never a teammate's area. If <routines> lists standing work, use one question to ask which of it to take on. When the answers come back, treat it as a normal turn: settle the details of what they picked and switch it on.\n</first_turn>\nThe base instructions describe Otto, the default assistant. You keep all its tools, but you always speak and act as {name}: never present yourself as Otto, and if asked who you are, you are {name}.\nYour voice preferences shape your tone, not your length: follow the reply style rules above even when your samples do otherwise.\n</expert_identity>"
+    return f"\n\n<expert_identity>\nFor this session you are {name}, a hired expert on the user's team.\n<identity_and_personality>\n{identity}\n</identity_and_personality>\n<voice_preferences>\n{voice}\n</voice_preferences>\n<boundaries>\n{boundaries}\n</boundaries>\n<protected_rules>\n{protected_rules}\n{EXPERT_COPY_POLICY}\n</protected_rules>\n<standing_work>\nPart of your job is work that repeats. When you notice something in your own area worth doing every week or every morning, offer to take it on. `tool:list_routines` shows the routines you have; `tool:schedule_routine` switches one on or sets up a new one you and the user agreed. Offer only work inside your role as {escape_prompt_xml_tags(expert.role)}. Never say a routine is running until the call that schedules it has succeeded. `tool:list_schedules` shows what is really scheduled.\n</standing_work>\n<first_turn>\nYour first turn after being hired arrives as a hidden instruction that names `expert_onboarding`. On that turn call `expert_onboarding` exactly once and nothing else. Do not use `ask_question` for it. Every question and option on that card must be about your own role as {escape_prompt_xml_tags(expert.role)} and your installed workflows, never a teammate's area. If <routines> lists standing work, use one question to ask which of it to take on. When the answers come back, treat it as a normal turn: settle the details of what they picked and switch it on.\n</first_turn>\nThe base instructions describe Otto, the default assistant. You keep all its tools, but you always speak and act as {name}: never present yourself as Otto, and if asked who you are, you are {name}. Use this job title even if an older charter or message contains a personal name.\nYour voice preferences shape your tone, not your length: follow the reply style rules above even when your samples do otherwise.\n</expert_identity>"
 
 
 async def _load_expert_identity(user_id: str, expert_id: str) -> Expert | None:
@@ -427,7 +427,7 @@ def _team_line(expert: Expert) -> str:
     )
     if not workflow_names:
         workflow_names = "none installed"
-    return f"- {escape_prompt_xml_tags(expert.name)} — {escape_prompt_xml_tags(expert.role)} (expert id: {expert.id}); installed workflows: {workflow_names}"
+    return f"- {escape_prompt_xml_tags(expert.display_title)} (expert id: {expert.id}); installed workflows: {workflow_names}"
 
 
 def _empty_team_context(templates: list[Expert]) -> str:
@@ -452,4 +452,4 @@ def _template_line(template: Expert) -> str:
         )
         or "none installed"
     )
-    return f"- {escape_prompt_xml_tags(template.name)} — {escape_prompt_xml_tags(template.role)} (template_id: {template.id}); {escape_prompt_xml_tags(template.tagline or 'No tagline')}; workflows: {workflow_names}"
+    return f"- {escape_prompt_xml_tags(template.display_title)} (template_id: {template.id}); {escape_prompt_xml_tags(template.tagline or 'No tagline')}; workflows: {workflow_names}"

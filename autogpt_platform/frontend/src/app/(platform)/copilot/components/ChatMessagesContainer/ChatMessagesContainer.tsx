@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
+import { getMessageReplyRecipient } from "../../helpers/replyRecipient";
 
 import { useCostReplyMoment } from "@/app/(platform)/components/ContextualTips/useTipMoment";
 import { parseSpecialMarkers } from "../../helpers/messageMarkers";
@@ -44,6 +46,10 @@ import {
 import { RESTORE_STALL_TIMEOUT_MS } from "../../restoreConstants";
 import { TURN_PAUSED_PART_TYPE } from "../../turnPause";
 import type { ExpertIdentity } from "../../useExpertMap";
+import {
+  recipientChoices,
+  recipientOptions,
+} from "../ChatInput/components/recipientOptions";
 import { ChatMinimap } from "../ChatMinimap/ChatMinimap";
 import { getWorkRunMetadata } from "../WorkCard/helpers";
 import { TailSpacer } from "./components/TailSpacer";
@@ -119,6 +125,7 @@ interface Props {
   /** The session's original expert, used for replies without an author
    *  snapshot. Null/undefined falls back to Otto. */
   expertIdentity?: ExpertIdentity | null;
+  replyExpertsById?: ReadonlyMap<string, ExpertIdentity>;
   /** The session's original expert is still loading. */
   isResolvingExpertIdentity?: boolean;
   /** Where this thread's opening task came from (session-level delegation
@@ -294,6 +301,7 @@ export function ChatMessagesContainer({
   filePattern,
   fileUrlBuilder,
   expertIdentity,
+  replyExpertsById,
   isResolvingExpertIdentity = false,
   sessionSentFrom = null,
   floatingControls,
@@ -301,8 +309,20 @@ export function ChatMessagesContainer({
   showThreadHeader = true,
   sessionTitle,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const isCompact = variant === "compact";
+  const replyLabelsById =
+    replyExpertsById &&
+    new Map(
+      recipientChoices(
+        recipientOptions(
+          [...replyExpertsById.values()].filter((expert) => !expert.isArchived),
+        ),
+        locale,
+      )
+        .filter(({ label, title }) => label !== title)
+        .map(({ option, label }) => [option.id, label]),
+    );
   const messages = useMemo(
     () => hideKickoffMessages(allMessages),
     [allMessages],
@@ -492,6 +512,8 @@ export function ChatMessagesContainer({
       !isMidTurnSegmentRow(message) &&
       (!nextRow || nextRow.role === "user");
     const showsTurnStats = isLastInTurn && !isCurrentlyStreaming;
+    const replyRecipient = getMessageReplyRecipient(message);
+    const authorID = replyRecipient ? replyRecipient.id : expertIdentity?.id;
 
     return (
       <MessageRow
@@ -523,6 +545,12 @@ export function ChatMessagesContainer({
         fileUrlBuilder={fileUrlBuilder}
         onRetry={isLastAssistant ? onRetry : undefined}
         threadExpert={isAssistant ? expertIdentity : undefined}
+        replyExpert={
+          isAssistant && authorID ? replyExpertsById?.get(authorID) : undefined
+        }
+        replyLabel={
+          isAssistant && authorID ? replyLabelsById?.get(authorID) : undefined
+        }
         isResolvingThreadExpert={isAssistant && isResolvingExpertIdentity}
       />
     );
@@ -645,7 +673,11 @@ export function ChatMessagesContainer({
               chatSessionId={sessionID}
               pollWhileEmpty={reviewTargets.chat || isTurnBusy}
               refetchKey={reviewRefetchKey(messages)}
-              expertName={expertIdentity?.name ?? null}
+              expertName={
+                expertIdentity
+                  ? getExpertDisplayTitle(expertIdentity, locale)
+                  : null
+              }
               expert={expertIdentity ?? null}
             />
           )}

@@ -14,6 +14,7 @@ import {
 import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { cn } from "@/lib/utils";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { ArrowDown01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 
 interface Props {
@@ -32,10 +33,13 @@ function ScopeCheck({ selected }: { selected: boolean }) {
 }
 
 export function ScopeSelect({ scopeExpertID, experts, onSelect }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const selectedExpert = scopeExpertID
     ? experts.find((expert) => expert.id === scopeExpertID)
     : undefined;
+  const selectedTitle = scopeExpertID
+    ? getExpertDisplayTitle(selectedExpert, locale)
+    : "Otto";
 
   return (
     <DropdownMenu>
@@ -49,18 +53,16 @@ export function ScopeSelect({ scopeExpertID, experts, onSelect }: Props) {
             "data-[state=open]:border-brand",
           )}
         >
-          {selectedExpert ? (
+          {scopeExpertID ? (
             <ExpertAvatar
-              name={selectedExpert.name}
-              avatarUrl={selectedExpert.avatar_url}
+              name={selectedTitle}
+              avatarUrl={selectedExpert?.avatar_url ?? null}
               size={24}
             />
           ) : (
             <AutopilotAvatar size={24} />
           )}
-          <span className="min-w-0 truncate">
-            {selectedExpert?.name ?? "Otto"}
-          </span>
+          <span className="min-w-0 truncate">{selectedTitle}</span>
           <span className="ml-auto flex shrink-0 text-foreground-tertiary">
             <Icon icon={ArrowDown01Icon} size={16} />
           </span>
@@ -98,31 +100,29 @@ export function ScopeSelect({ scopeExpertID, experts, onSelect }: Props) {
             <DropdownMenuLabel className="px-2.5 pt-1.5 pb-0.5 text-tiny leading-inherit font-semibold tracking-caps text-foreground-subtle uppercase">
               {t("Your experts", "你的专家")}
             </DropdownMenuLabel>
-            {experts.map((expert) => (
-              <DropdownMenuItem
-                key={expert.id}
-                // oxlint-disable-next-line design-system/no-restyle -- two-line scope row with an avatar
-                className="flex items-start gap-2.5 rounded-small px-2.5 py-2"
-                onSelect={() => onSelect(expert.id)}
-              >
-                <ExpertAvatar
-                  name={expert.name}
-                  avatarUrl={expert.avatar_url}
-                  size={28}
-                />
-                <span className="flex min-w-0 flex-col leading-snug">
-                  <span className="truncate text-body font-medium text-foreground-base">
-                    {expert.name}
+            {experts.map((expert) => {
+              const title = getExpertDisplayTitle(expert, locale);
+              return (
+                <DropdownMenuItem
+                  key={expert.id}
+                  // oxlint-disable-next-line design-system/no-restyle -- scope row with an avatar and selection check
+                  className="flex items-center gap-2.5 rounded-small px-2.5 py-2"
+                  onSelect={() => onSelect(expert.id)}
+                >
+                  <span aria-hidden className="flex shrink-0">
+                    <ExpertAvatar
+                      name={title}
+                      avatarUrl={expert.avatar_url}
+                      size={28}
+                    />
                   </span>
-                  {expert.role && (
-                    <span className="truncate text-caption text-foreground-tertiary">
-                      {expert.role}
-                    </span>
-                  )}
-                </span>
-                <ScopeCheck selected={scopeExpertID === expert.id} />
-              </DropdownMenuItem>
-            ))}
+                  <span className="truncate text-body font-medium text-foreground-base">
+                    {title}
+                  </span>
+                  <ScopeCheck selected={scopeExpertID === expert.id} />
+                </DropdownMenuItem>
+              );
+            })}
           </>
         )}
       </DropdownMenuContent>

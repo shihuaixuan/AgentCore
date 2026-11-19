@@ -5,7 +5,6 @@ import { RAISE_PROMPTS, type RaiseDraft } from "./helpers";
 export const BEAT_KEYS = [
   "category",
   "jobTitle",
-  "name",
   "avatar",
   "about",
   "voice",
@@ -29,11 +28,10 @@ export type RaiseFlowItem =
 // Derived from the draft rather than accumulated, so refresh restores and
 // back transitions always rebuild the same stream.
 export function buildFlowItems(
-  draft: RaiseDraft,
+  title: string,
   progress: RaiseProgress,
   t: (english: string, chinese: string) => string = (english) => english,
 ): RaiseFlowItem[] {
-  const name = draft.name || t("your expert", "你的专家");
   const items: RaiseFlowItem[] = [
     {
       kind: "message",
@@ -53,30 +51,29 @@ export function buildFlowItems(
       "首先，你的专家应在哪个领域工作？这也会决定其颜色。",
     ),
     jobTitle: t(RAISE_PROMPTS.jobTitleQuestion, "专家的职位是什么？"),
-    name: t(RAISE_PROMPTS.nameQuestion, "不错的选择。你想给专家取什么名字？"),
     avatar: t(
-      RAISE_PROMPTS.avatarQuestion(draft.name),
-      `这是 ${name} 的头像。你可以使用它、重新生成或上传图片。`,
+      RAISE_PROMPTS.avatarQuestion(title),
+      `这是 ${title} 的头像。你可以使用它、重新生成或上传图片。`,
     ),
     about: t(
-      RAISE_PROMPTS.aboutQuestion(draft.name),
-      `关于 ${name}，还有什么需要我了解的吗？例如工作方式、你重视的事情，也可以跳过。`,
+      RAISE_PROMPTS.aboutQuestion(title),
+      `关于 ${title}，还有什么需要我了解的吗？例如工作方式、你重视的事情，也可以跳过。`,
     ),
     voice: t(
-      RAISE_PROMPTS.voiceQuestion(draft.name),
-      `${name} 写作时应使用什么语气？选择你觉得合适的风格。`,
+      RAISE_PROMPTS.voiceQuestion(title),
+      `${title} 写作时应使用什么语气？选择你觉得合适的风格。`,
     ),
     budget: t(
-      RAISE_PROMPTS.budgetQuestion(draft.name),
-      `${name} 每周可以使用多少预算？默认为每周 $5，你可以选择金额或跳过。`,
+      RAISE_PROMPTS.budgetQuestion(title),
+      `${title} 每周可以使用多少预算？默认为每周 $5，你可以选择金额或跳过。`,
     ),
     marketplace: t(
-      RAISE_PROMPTS.marketplaceQuestion(draft.name),
-      `想让 ${name} 运行工作流吗？搜索市场和你的库，添加喜欢的工作流，也可以跳过。`,
+      RAISE_PROMPTS.marketplaceQuestion(title),
+      `想让 ${title} 运行工作流吗？搜索市场和你的库，添加喜欢的工作流，也可以跳过。`,
     ),
     skills: t(
-      RAISE_PROMPTS.skillsQuestion(draft.name),
-      `想为 ${name} 添加额外技能吗？从市场或你的库中添加，也可以跳过。`,
+      RAISE_PROMPTS.skillsQuestion(title),
+      `想为 ${title} 添加额外技能吗？从市场或你的库中添加，也可以跳过。`,
     ),
   };
 
@@ -115,8 +112,7 @@ export function beatTriggers(
   return {
     category: draft.hasStarted,
     jobTitle: draft.category !== null,
-    name: draft.jobTitle !== null,
-    avatar: draft.name !== "",
+    avatar: draft.category !== null && draft.jobTitle !== null,
     about: draft.avatarUrl !== null,
     voice: draft.about !== null,
     budget: draft.voiceLabel !== null,
@@ -129,7 +125,6 @@ function beatAnswers(draft: RaiseDraft): Record<BeatKey, boolean> {
   return {
     category: draft.category !== null,
     jobTitle: draft.jobTitle !== null,
-    name: draft.name !== "",
     avatar: draft.avatarUrl !== null,
     about: draft.about !== null,
     voice: draft.voiceLabel !== null,
@@ -153,8 +148,6 @@ export function clearedAnswer(beat: BeatKey): Partial<RaiseDraft> {
       return { category: null, color: null, legacyRole: undefined };
     case "jobTitle":
       return { jobTitle: null };
-    case "name":
-      return { name: "" };
     case "avatar":
       return { avatarUrl: null };
     case "about":

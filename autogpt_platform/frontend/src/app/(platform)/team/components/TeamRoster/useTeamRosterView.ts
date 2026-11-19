@@ -1,5 +1,6 @@
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useState } from "react";
 import { TeamFilter, filterExperts } from "../../helpers";
 
@@ -9,6 +10,7 @@ interface Args {
 }
 
 export function useTeamRosterView({ experts, schedulesForExpert }: Args) {
+  const { locale } = useTranslation();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<TeamFilter>("all");
 
@@ -23,6 +25,7 @@ export function useTeamRosterView({ experts, schedulesForExpert }: Args) {
       query,
       filter,
       schedulesForExpert,
+      locale,
     }),
   };
 }

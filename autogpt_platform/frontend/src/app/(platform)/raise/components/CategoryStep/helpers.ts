@@ -1,13 +1,11 @@
 import { ExpertAvatarRequestCategory } from "@/app/api/__generated__/models/expertAvatarRequestCategory";
 import { EXPERT_PALETTE } from "@/components/molecules/ExpertAvatar/helpers";
+import type { Locale } from "@/lib/i18n/locale";
 
 interface CategoryDetails {
   label: string;
   color: string;
-  // Saved as the expert's role, so the intro reads "I'm Curie, your Researcher".
-  role: string;
-  // Seeds the name step, so suggestions fit the area the expert works in.
-  nameSuggestions: string[];
+  role: Record<Locale, string>;
   jobTitleSuggestions: string[];
 }
 
@@ -15,15 +13,13 @@ const CATEGORY_DETAILS: Record<ExpertAvatarRequestCategory, CategoryDetails> = {
   general: {
     label: "General",
     color: "amber-300",
-    role: "Assistant",
-    nameSuggestions: ["Otto", "Nova", "Juno"],
+    role: { en: "Assistant", "zh-CN": "助理" },
     jobTitleSuggestions: ["Executive Assistant", "Personal Assistant"],
   },
   marketing: {
     color: "orange-300",
     label: "Marketing",
-    role: "Marketer",
-    nameSuggestions: ["Echo", "Reach", "Nova"],
+    role: { en: "Marketer", "zh-CN": "营销专员" },
     jobTitleSuggestions: [
       "Marketing Manager",
       "Growth Marketer",
@@ -33,8 +29,7 @@ const CATEGORY_DETAILS: Record<ExpertAvatarRequestCategory, CategoryDetails> = {
   sales: {
     color: "amber-300",
     label: "Sales",
-    role: "Sales",
-    nameSuggestions: ["Pitch", "Ace", "Rain"],
+    role: { en: "Sales", "zh-CN": "销售" },
     jobTitleSuggestions: [
       "Sales Development Rep",
       "Account Executive",
@@ -44,8 +39,7 @@ const CATEGORY_DETAILS: Record<ExpertAvatarRequestCategory, CategoryDetails> = {
   finance: {
     color: "green-300",
     label: "Finance",
-    role: "Analyst",
-    nameSuggestions: ["Tally", "Vector", "Sigma"],
+    role: { en: "Analyst", "zh-CN": "分析师" },
     jobTitleSuggestions: [
       "Financial Analyst",
       "Data Analyst",
@@ -55,8 +49,7 @@ const CATEGORY_DETAILS: Record<ExpertAvatarRequestCategory, CategoryDetails> = {
   support: {
     color: "rose-300",
     label: "Support",
-    role: "Support",
-    nameSuggestions: ["Remy", "Aide", "Piper"],
+    role: { en: "Support", "zh-CN": "客户支持" },
     jobTitleSuggestions: [
       "Support Specialist",
       "Customer Success Manager",
@@ -66,8 +59,7 @@ const CATEGORY_DETAILS: Record<ExpertAvatarRequestCategory, CategoryDetails> = {
   operations: {
     color: "sky-300",
     label: "Operations",
-    role: "Operations",
-    nameSuggestions: ["Cadence", "Clockwork", "Scout"],
+    role: { en: "Operations", "zh-CN": "运营" },
     jobTitleSuggestions: [
       "Operations Manager",
       "Executive Assistant",
@@ -77,8 +69,7 @@ const CATEGORY_DETAILS: Record<ExpertAvatarRequestCategory, CategoryDetails> = {
   research: {
     color: "lime-300",
     label: "Research",
-    role: "Researcher",
-    nameSuggestions: ["Kepler", "Curie", "Juno"],
+    role: { en: "Researcher", "zh-CN": "研究员" },
     jobTitleSuggestions: [
       "Research Analyst",
       "Market Researcher",
@@ -88,15 +79,13 @@ const CATEGORY_DETAILS: Record<ExpertAvatarRequestCategory, CategoryDetails> = {
   content: {
     color: "amber-300",
     label: "Content",
-    role: "Writer",
-    nameSuggestions: ["Quill", "Hemingway", "Ink"],
+    role: { en: "Writer", "zh-CN": "作家" },
     jobTitleSuggestions: ["Content Writer", "Copywriter", "Technical Writer"],
   },
   development: {
     color: "blue-300",
     label: "Development",
-    role: "Developer",
-    nameSuggestions: ["Ada", "Turing", "Bit"],
+    role: { en: "Developer", "zh-CN": "开发者" },
     jobTitleSuggestions: [
       "Software Engineer",
       "Full-Stack Developer",
@@ -118,8 +107,6 @@ const ROLE_CATEGORIES = new Map<string, ExpertAvatarRequestCategory>([
   ["support", "support"],
   ["operations", "operations"],
 ]);
-
-const FALLBACK_NAMES = ["Otto", "Nova", "Juno"];
 
 export interface CategoryOption {
   id: ExpertAvatarRequestCategory;
@@ -153,14 +140,11 @@ export function categoryForRole(role: string) {
   return ROLE_CATEGORIES.get(role) ?? null;
 }
 
-export function roleFor(category: ExpertAvatarRequestCategory | null) {
-  return category ? CATEGORY_DETAILS[category].role : null;
-}
-
-export function nameSuggestionsFor(
+export function roleFor(
   category: ExpertAvatarRequestCategory | null,
+  locale: Locale = "en",
 ) {
-  return category ? CATEGORY_DETAILS[category].nameSuggestions : FALLBACK_NAMES;
+  return category ? CATEGORY_DETAILS[category].role[locale] : null;
 }
 
 export function jobTitleSuggestionsFor(

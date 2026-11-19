@@ -195,6 +195,7 @@ describe("Settings memory page", () => {
       id: "expert-maria",
       name: "Maria",
       role: "Growth Marketer",
+      job_title: "Marketing Manager",
       avatar_url: null,
       is_archived: false,
     };
@@ -236,19 +237,21 @@ describe("Settings memory page", () => {
     await screen.findByText("Runs a DTC candle brand called Emberline");
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "Memory scope" }));
-    await user.click(
-      await screen.findByRole("menuitem", { name: /Growth Marketer/ }),
-    );
+    const option = await screen.findByRole("menuitem", {
+      name: /\bMarketing Manager\b/,
+    });
+    expect(option.textContent).toBe("Marketing Manager");
+    await user.click(option);
 
     expect(
       await screen.findByText("Q4 campaign brief is due Friday"),
     ).toBeDefined();
     expect(expertFactRequests).toEqual(["expert-maria"]);
     expect(
-      screen.getByRole("button", { name: "View Maria's summary" }),
+      screen.getByRole("button", { name: "View Marketing Manager's summary" }),
     ).toBeDefined();
     expect(screen.getByRole("button", { name: "Erase memory" })).toBeDefined();
-    expect(screen.getByText(/Erase Maria's memory/)).toBeDefined();
+    expect(screen.getByText(/Erase Marketing Manager's memory/)).toBeDefined();
   });
 
   it("opens on an expert's scope when linked with ?expert=", async () => {
@@ -257,6 +260,7 @@ describe("Settings memory page", () => {
       id: "expert-maria",
       name: "Maria",
       role: "Growth Marketer",
+      job_title: null,
       avatar_url: null,
       is_archived: false,
     };
@@ -295,7 +299,7 @@ describe("Settings memory page", () => {
       await screen.findByText("Q4 campaign brief is due Friday"),
     ).toBeDefined();
     expect(expertFactRequests).toEqual(["expert-maria"]);
-    expect(screen.getByText(/Erase Maria's memory/)).toBeDefined();
+    expect(screen.getByText(/Erase Growth Marketer's memory/)).toBeDefined();
   });
 
   it.each([

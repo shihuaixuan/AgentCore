@@ -1,17 +1,16 @@
 // The team picture is laid out on a 600-unit-wide, 396px-tall stage that stretches to the
-// screen's width, while every vertical position is in pixels: names and roles
+// screen's width, while every vertical position is in pixels: the labels
 // are text at a fixed size, so the rows keep the room their labels need on a
 // phone instead of shrinking with the drawing.
 const STAGE_WIDTH = 600;
 
-// A name over a role, from the top of the label to its last line.
+// Leave space for wrapped titles above the branch connectors.
 export const LABEL_GAP = 6;
 export const LABEL_HEIGHT = 40;
 // Space between a connector and the label above it.
 const CONNECTOR_GAP = 8;
 
 export interface TeamMember {
-  name: string;
   role: string;
   asset: string;
   /** Centre, in stage units (0-600). */
@@ -23,14 +22,16 @@ export interface TeamMember {
   parent?: string;
 }
 
+export const CONTENT_ROLE = "SEO & Content";
+export const SALES_ROLE = "Sales";
+
 // Otto leads three heads of department, and each side of the tree is a team
 // whose work belongs together: research and support under marketing,
 // operations and security under finance.
 export const TEAM: TeamMember[] = [
-  { name: "Otto", role: "Head of AI", asset: "otto", x: 300, top: 0, size: 88 },
+  { role: "Head of AI", asset: "otto", x: 300, top: 0, size: 88 },
   {
-    name: "Maria",
-    role: "Marketing",
+    role: CONTENT_ROLE,
     asset: "maria",
     x: 150,
     top: 128,
@@ -38,8 +39,7 @@ export const TEAM: TeamMember[] = [
     parent: "otto",
   },
   {
-    name: "Max",
-    role: "Sales",
+    role: SALES_ROLE,
     asset: "max",
     x: 300,
     top: 128,
@@ -47,8 +47,7 @@ export const TEAM: TeamMember[] = [
     parent: "otto",
   },
   {
-    name: "Mina",
-    role: "Finance",
+    role: "Finance, Invoicing & Bookkeeping",
     asset: "mina",
     x: 450,
     top: 128,
@@ -56,8 +55,7 @@ export const TEAM: TeamMember[] = [
     parent: "otto",
   },
   {
-    name: "Nadia",
-    role: "Research",
+    role: "Market & Competitor Intelligence",
     asset: "nadia",
     x: 75,
     top: 282,
@@ -65,8 +63,7 @@ export const TEAM: TeamMember[] = [
     parent: "maria",
   },
   {
-    name: "Riley",
-    role: "Support",
+    role: "Customer Success & Retention",
     asset: "riley",
     x: 225,
     top: 282,
@@ -74,8 +71,7 @@ export const TEAM: TeamMember[] = [
     parent: "maria",
   },
   {
-    name: "Frankie",
-    role: "Operations",
+    role: "Ops",
     asset: "frankie",
     x: 375,
     top: 282,
@@ -83,8 +79,7 @@ export const TEAM: TeamMember[] = [
     parent: "mina",
   },
   {
-    name: "Devon",
-    role: "Security",
+    role: "Dependency & Security Hygiene",
     asset: "devon",
     x: 525,
     top: 282,

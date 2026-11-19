@@ -9,7 +9,12 @@ import {
   MessageContent,
 } from "@/components/organisms/Message/Message";
 import type { TurnStats } from "../../../../helpers/convertChatSessionToUiMessages";
-import { getMessageReplyRecipient } from "../../../../helpers/replyRecipient";
+import {
+  getMessageReplyRecipient,
+  getReplyProfession,
+} from "../../../../helpers/replyRecipient";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import type { SentFrom } from "../../../../sentFrom";
 import { WorkCheckTool } from "../../../../tools/FeedbackPrompts/WorkCheckTool";
 import {
@@ -81,6 +86,8 @@ interface Props {
   fileUrlBuilder?: (fileId: string) => string;
   onRetry?: () => void;
   threadExpert?: ExpertIdentity | null;
+  replyExpert?: ExpertIdentity;
+  replyLabel?: string;
   isResolvingThreadExpert?: boolean;
 }
 
@@ -108,8 +115,11 @@ export const MessageRow = memo(function MessageRow({
   fileUrlBuilder,
   onRetry,
   threadExpert,
+  replyExpert,
+  replyLabel,
   isResolvingThreadExpert,
 }: Props) {
+  const { locale } = useTranslation();
   const {
     runMetadata,
     runPreview,
@@ -168,7 +178,19 @@ export const MessageRow = memo(function MessageRow({
 
   const isAssistant = message.role === "assistant";
   const recipient = getMessageReplyRecipient(message);
-  const name = recipient?.name ?? threadExpert?.name ?? AUTOPILOT_NAME;
+  const title = recipient
+    ? recipient.id
+      ? getReplyProfession(recipient, replyExpert ?? threadExpert, locale)
+      : AUTOPILOT_NAME
+    : threadExpert
+      ? getExpertDisplayTitle(threadExpert, locale)
+      : AUTOPILOT_NAME;
+  const name =
+    replyLabel &&
+    replyExpert &&
+    getExpertDisplayTitle(replyExpert, locale) === title
+      ? replyLabel
+      : title;
   const avatarUrl = recipient
     ? recipient.avatar_url
     : (threadExpert?.avatarUrl ?? null);
@@ -309,8 +331,8 @@ export const MessageRow = memo(function MessageRow({
         <WorkCheckTool
           part={workCheckPart as ToolUIPart}
           target={feedbackTarget}
-          expert={{
-            name,
+          author={{
+            title: name,
             avatarUrl: isAutopilot
               ? (avatarUrl ?? AUTOPILOT_AVATAR_URL)
               : avatarUrl,

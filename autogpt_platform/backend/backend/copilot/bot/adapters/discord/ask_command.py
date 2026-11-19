@@ -1,7 +1,7 @@
 """``/autogpt`` — ask Otto or one of your experts, with an optional mode.
 
 An interaction carries no message to thread off, so the command posts a
-visible starter message ("**Bently** asked Bolt: ...") and hands that to the
+visible starter message ("**Bently** asked Builder: ...") and hands that to the
 core handler like any other message. Expert picks are DM-only.
 """
 
@@ -14,6 +14,7 @@ from discord import app_commands
 from backend.copilot.bot.bot_backend import BotBackend
 from backend.copilot.bot.expert_choice import (
     SERVER_EXPERTS_REPLY,
+    expert_labels,
     match_experts,
     no_single_match_reply,
 )
@@ -77,7 +78,7 @@ def register(
 async def expert_choices(
     api: BotBackend, interaction: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    """The invoker's experts whose name contains ``current``; none in a
+    """The invoker's experts whose title or alias contains ``current``; none in a
     server, where experts can't be used."""
     if interaction.guild is not None:
         return []
@@ -87,10 +88,11 @@ async def expert_choices(
         logger.warning("Expert autocomplete failed", exc_info=True)
         return []
     wanted = current.casefold()
+    labels = expert_labels(experts, max_length=CHOICE_LABEL_LIMIT)
     return [
-        app_commands.Choice(name=f"{e.name}, {e.role}"[:CHOICE_LABEL_LIMIT], value=e.id)
-        for e in experts
-        if wanted in e.name.casefold()
+        app_commands.Choice(name=labels[expert.id], value=expert.id)
+        for expert in experts
+        if wanted in expert.display_title.casefold() or wanted in expert.name.casefold()
     ][:AUTOCOMPLETE_LIMIT]
 
 
@@ -124,7 +126,7 @@ async def handle_autogpt(
     await _drop_thinking(interaction)
     options = TurnOptions(
         expert_id=chosen.id if chosen else None,
-        expert_name=chosen.name if chosen else None,
+        expert_name=chosen.display_title if chosen else None,
         model=MODE_TIERS.get(mode) if mode else None,
     )
     try:
@@ -137,7 +139,7 @@ async def handle_autogpt(
 async def _pick_expert(
     api: BotBackend, interaction: discord.Interaction, value: str
 ) -> tuple[BotExpert | None, str]:
-    """The expert an autocomplete id, or a typed name, refers to."""
+    """The expert an autocomplete id or typed job title refers to."""
     try:
         experts = await api.list_user_experts("discord", str(interaction.user.id), None)
     except ValueError:
@@ -161,7 +163,8 @@ def starter_text(username: str, prompt: str, expert: BotExpert | None) -> str:
         if len(prompt) <= STARTER_PROMPT_LIMIT
         else (prompt[:STARTER_PROMPT_LIMIT] + "…")
     )
-    return f"**{username}** asked {expert.name if expert else 'Otto'}: {shown}"
+    title = expert.display_title[:CHOICE_LABEL_LIMIT] if expert else "Otto"
+    return f"**{username}** asked {title}: {shown}"
 
 
 async def _post_starter(

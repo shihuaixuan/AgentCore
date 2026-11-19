@@ -1,4 +1,5 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import {
   getGetExpertQueryKey,
   useListExperts,
@@ -28,7 +29,7 @@ import { useState } from "react";
 const MORE_SKILLS_PAGE_SIZE = 3;
 
 export function useSkillPage(slug: string) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const { isLoggedIn, isUserLoading } = useAuth();
   const { toast } = useToast();
@@ -90,7 +91,10 @@ export function useSkillPage(slug: string) {
             queryKey: getGetExpertQueryKey(expert.id),
           });
           toast({
-            title: t(`Installed on ${expert.name}`, `已为 ${expert.name} 安装`),
+            title: t(
+              `Installed on ${getExpertDisplayTitle(expert, locale)}`,
+              `已为 ${getExpertDisplayTitle(expert, locale)} 安装`,
+            ),
             variant: "success",
           });
         },
@@ -100,8 +104,8 @@ export function useSkillPage(slug: string) {
           toast({
             title: expert
               ? t(
-                  `Couldn't add this skill to ${expert.name}`,
-                  `无法为 ${expert.name} 添加此技能`,
+                  `Couldn't add this skill to ${getExpertDisplayTitle(expert, locale)}`,
+                  `无法为 ${getExpertDisplayTitle(expert, locale)} 添加此技能`,
                 )
               : t("Couldn't add this skill", "无法添加此技能"),
             description:

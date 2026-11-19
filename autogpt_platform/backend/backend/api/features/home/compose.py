@@ -1,6 +1,7 @@
+from collections.abc import Mapping
 from datetime import datetime
 
-from backend.api.features.experts.models import Expert
+from backend.api.features.experts.models import Expert, ExpertIdentity
 from backend.api.features.graph_executions.review.model import PendingHumanReviewModel
 from backend.api.features.library.model import LibraryAgentRef
 from backend.copilot.briefing.models import BriefingContent
@@ -41,6 +42,7 @@ def compose_home_dashboard(
     work_events: list[ActivityEvent] | None = None,
     session_titles: dict[str, str | None] | None = None,
     paused_chats: list[PausedScheduledChat] | None = None,
+    archived_experts: Mapping[str, ExpertIdentity] | None = None,
 ) -> HomeDashboardResponse:
     hired = [
         expert
@@ -81,6 +83,7 @@ def compose_home_dashboard(
             credits_balance=credits_balance,
             questions=questions,
             paused_chats=paused_chats,
+            archived_experts=archived_experts,
         ),
         briefing=compose_briefing(
             now=now,
@@ -88,6 +91,7 @@ def compose_home_dashboard(
             expert_by_id=expert_by_id,
             agent_by_graph=agent_by_graph,
             persisted=persisted_briefing,
+            archived_experts=archived_experts,
         ),
         active_tasks=compose_active_tasks(
             executions, expert_by_id, agent_by_graph, experts_by_graph(hired)
@@ -105,5 +109,6 @@ def compose_home_dashboard(
             expert_by_id=expert_by_id,
             agent_by_graph=agent_by_graph,
             session_titles=session_titles or {},
+            archived_experts=archived_experts,
         ),
     )

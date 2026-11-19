@@ -465,7 +465,7 @@ class ListExpertWorkflowsTool(BaseTool):
             expert_id=target,
             workflows=expert.workflows,
             message=(
-                f"{len(expert.workflows)} workflow(s) installed on {expert.name}: "
+                f"{len(expert.workflows)} workflow(s) installed on {expert.display_title}: "
                 f"{lines or 'none'}. Add more with tool:install_expert_workflow."
             ),
             session_id=session_id,

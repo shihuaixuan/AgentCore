@@ -82,7 +82,6 @@ function seedAtAvatar(category: ExpertAvatarRequestCategory) {
     category,
     color: "green-300",
     jobTitle: "Financial Analyst",
-    name: "Maria",
     voiceLabel: VOICE_SKIPPED_LABEL,
   });
 }
@@ -184,7 +183,7 @@ test.each([
         identity.categories.includes(category),
     );
     const preview = screen
-      .getByRole("img", { name: "Maria, AI Expert" })
+      .getByRole("img", { name: "Financial Analyst, AI Expert" })
       .getAttribute("src");
     expect(candidates.some((identity) => preview?.includes(identity.id))).toBe(
       true,
@@ -222,7 +221,9 @@ test("the generated avatar is saved only after confirmation", async () => {
 
   await waitFor(() =>
     expect(
-      screen.getByRole("img", { name: "Maria" }).getAttribute("src"),
+      screen
+        .getByRole("img", { name: "Financial Analyst" })
+        .getAttribute("src"),
     ).toContain("generated.png"),
   );
   expect(loadDraft().avatarUrl).toBeNull();

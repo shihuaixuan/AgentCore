@@ -17,11 +17,11 @@ import {
   ApprovalActions,
   ApprovalCard,
 } from "@/app/(platform)/copilot/components/ApprovalQueue/components/ApprovalCard/ApprovalCard";
-import {
-  modeLine,
-  toApprovalItem,
-} from "@/app/(platform)/copilot/components/ApprovalQueue/helpers";
+import { modeLine } from "@/app/(platform)/copilot/components/ApprovalQueue/helpers";
+import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
 import { isKey } from "@/lib/keyboard";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
+import { toHomeApprovalItem } from "../attentionCopy";
 import { reviewTally, shortAge } from "../helpers";
 import type { useHeldReview } from "../useHeldReview";
 import type { useReviewCarousel } from "../useReviewCarousel";
@@ -40,7 +40,12 @@ interface Props {
 export function HeldReviewDialog({ carousel, held, chatLink = true }: Props) {
   const { t, locale } = useTranslation();
   const { current } = carousel;
-  const approval = current ? toApprovalItem(current.item.review!) : null;
+  const approval = current
+    ? toHomeApprovalItem(current.item.review!, current.item.expert, locale)
+    : null;
+  const expertTitle = current?.item.expert
+    ? getExpertDisplayTitle(current.item.expert, locale)
+    : null;
 
   function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
     // The rule menu portals out of this subtree; its arrows are the menu's.
@@ -111,7 +116,7 @@ export function HeldReviewDialog({ carousel, held, chatLink = true }: Props) {
                     tone="secondary"
                     className="truncate"
                   >
-                    {current.item.expert?.name ?? "Otto"}
+                    {expertTitle ?? AUTOPILOT_NAME}
                     {current.item.created_at
                       ? ` · ${shortAge(current.item.created_at, undefined, locale)}`
                       : ""}
@@ -141,7 +146,7 @@ export function HeldReviewDialog({ carousel, held, chatLink = true }: Props) {
                   item={approval}
                   status={held.statusOf(current.item.id)}
                   failed={held.hasFailed(current.item.id)}
-                  expertName={current.item.expert?.name ?? null}
+                  expertName={expertTitle}
                   note={
                     approval.reasonKind === "mode"
                       ? modeLine(approval.mode)
@@ -167,7 +172,7 @@ export function HeldReviewDialog({ carousel, held, chatLink = true }: Props) {
                   key={current.item.id}
                   item={approval}
                   status={held.statusOf(current.item.id)}
-                  expertName={current.item.expert?.name ?? null}
+                  expertName={expertTitle}
                   onApprove={(rule, scope) =>
                     carousel.decide(current.item, true, rule, scope)
                   }

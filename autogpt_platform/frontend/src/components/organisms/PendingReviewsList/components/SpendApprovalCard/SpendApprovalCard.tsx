@@ -28,16 +28,16 @@ export function SpendApprovalCard({
     >
       <SpendRing spent={summary.spent} threshold={summary.threshold}>
         <ExpertAvatar
-          name={summary.expertName}
-          avatarUrl={summary.avatarUrl}
+          name={summary.expertTitle}
+          avatarUrl={summary.avatarURL}
           size={32}
         />
       </SpendRing>
       <div className="min-w-0 flex-1">
         <Text variant="body-semibold" tone="primary">
           {t(
-            `${summary.expertName} has done ${summary.spent} credits of work ${summary.period}`,
-            `${summary.expertName} ${summary.period === "this week" ? "本周" : "今天"}已完成消耗 ${summary.spent} 积分的工作`,
+            `${summary.expertTitle} has done ${summary.spent} credits of work ${summary.period}`,
+            `${summary.expertTitle} ${summary.period === "this week" ? "本周" : "今天"}已完成消耗 ${summary.spent} 积分的工作`,
           )}
         </Text>
         <Text variant="small" tone="muted">

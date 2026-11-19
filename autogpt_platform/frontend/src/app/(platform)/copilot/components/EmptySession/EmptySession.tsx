@@ -6,6 +6,7 @@ import { tourTarget } from "@/lib/tour-targets";
 import { useFirstRunTourAutoStart } from "@/app/(platform)/components/FirstRunTour/useFirstRunTourAutoStart";
 import { useAuth } from "@/lib/auth/hooks/useAuth";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import type { ComponentProps, ReactNode } from "react";
@@ -20,11 +21,7 @@ import { useSuggestedTasks } from "../SuggestedTasks/useSuggestedTasks";
 import { EmptyHero } from "./components/EmptyHero";
 import { ExpertKickoffLoader } from "./components/ExpertKickoffLoader/ExpertKickoffLoader";
 import { GreetingLoader } from "./components/GreetingLoader";
-import {
-  getExpertInputPlaceholder,
-  getGreetingName,
-  getIntroLine,
-} from "./helpers";
+import { getExpertInputPlaceholder, getGreetingName } from "./helpers";
 import { useHomeComposer } from "./useHomeComposer";
 import { useRecipientPicker } from "./useRecipientPicker";
 
@@ -76,7 +73,7 @@ export function EmptySession({
   usageNotice,
   lowHint,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { user } = useAuth();
   const greetingName = getGreetingName(user);
   const intro = useOnboardingIntroCard();
@@ -113,14 +110,17 @@ export function EmptySession({
     isRecipientResolving: isLoadingRecipient,
   });
   const collapse = useCollapsedSuggestions();
+  const profession = selectedExpert
+    ? getExpertDisplayTitle(selectedExpert, locale)
+    : null;
   const introLine = isLoadingRecipient
     ? null
-    : t(
-        getIntroLine(selectedExpert),
-        selectedExpert
-          ? `我是 ${selectedExpert.name}，你希望我处理什么？`
-          : "描述一项任务，即可开始。",
-      );
+    : profession
+      ? t(
+          `How can I help as your ${profession}?`,
+          `我是你的${profession}，你希望我处理什么？`,
+        )
+      : t("Describe a task to get started.", "描述一项任务，即可开始。");
   const { inputPlaceholder } = useHomeComposer({
     greetingPath: intro.isVisible ? intro.path : null,
   });
@@ -195,10 +195,10 @@ export function EmptySession({
                           SEND_AT_RESET_PLACEHOLDER,
                           "现在撰写，额度重置后自动发送……",
                         )
-                      : selectedExpert
+                      : profession
                         ? t(
-                            getExpertInputPlaceholder(selectedExpert.name),
-                            `你希望 ${selectedExpert.name} 处理什么？`,
+                            getExpertInputPlaceholder(profession),
+                            `你希望 ${profession} 处理什么？`,
                           )
                         : inputPlaceholder
                   }
@@ -210,7 +210,7 @@ export function EmptySession({
                   onDroppedFilesConsumed={onDroppedFilesConsumed}
                   expertId={expertId}
                   expertName={expertName}
-                  assistantName={selectedExpert?.name ?? expertName ?? null}
+                  assistantName={profession ?? expertName ?? null}
                   recipientPicker={{
                     recipient,
                     options,

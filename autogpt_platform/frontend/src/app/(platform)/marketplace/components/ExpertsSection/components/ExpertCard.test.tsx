@@ -57,7 +57,7 @@ describe.each([
     expect(
       within(link).getByRole("heading", { name: "质量保障工程师" }),
     ).toBeDefined();
-    expect(within(link).getByText("凯西")).toBeDefined();
+    expect(within(link).queryByText("凯西")).toBeNull();
     expect(link.querySelector("img")?.getAttribute("src")).toBe(
       "/experts/professional/expert-casey.webp",
     );

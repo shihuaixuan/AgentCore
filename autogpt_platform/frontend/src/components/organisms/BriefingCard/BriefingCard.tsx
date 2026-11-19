@@ -12,6 +12,8 @@ import type { BriefingResponse } from "@/app/api/__generated__/models/briefingRe
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { AttentionCard } from "@/components/organisms/AttentionCard/AttentionCard";
+import { getCardExpert } from "@/components/organisms/PendingReviewsList/expertIdentity";
+import { useCardExpertRoster } from "@/components/organisms/PendingReviewsList/useCardExpertRoster";
 import { cn } from "@/lib/utils";
 import { RunRow } from "./components/RunRow";
 import { COLLAPSED_ROWS, formatBriefingDate, hasRecapContent } from "./helpers";
@@ -29,6 +31,9 @@ interface Props {
 export function BriefingCard({ briefing, className }: Props) {
   const { t, locale } = useTranslation();
   const { run_items } = briefing.content;
+  const roster = useCardExpertRoster(
+    run_items.some((item) => Boolean(item.expert_id)),
+  );
   const {
     listRef,
     height,
@@ -94,6 +99,7 @@ export function BriefingCard({ briefing, className }: Props) {
               <RunRow
                 key={item.execution_id}
                 item={item}
+                expert={getCardExpert(item, locale, roster)}
                 isHidden={!isShowingAll && index >= COLLAPSED_ROWS}
               />
             ))}

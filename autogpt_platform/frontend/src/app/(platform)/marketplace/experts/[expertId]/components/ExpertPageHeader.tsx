@@ -4,12 +4,12 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import {
   expertPastel,
-  getCategoryHex,
   getExpertTopicHex,
 } from "@/components/molecules/ExpertAvatar/colors";
 import { ExpertIdentityDetails } from "@/components/molecules/ExpertIdentityDetails/ExpertIdentityDetails";
 import { CategoryTag } from "../../../components/CategoryChip/CategoryTag";
-import { MarketplaceExpertAvatar } from "../../../components/ExpertsSection/components/MarketplaceExpertAvatar";
+import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 interface BandProps {
   expert: Expert;
@@ -68,18 +68,18 @@ export function ExpertHeroBand({ expert }: BandProps) {
   );
 }
 
-/** The portrait breaking out of the band, the name with its glowing title,
+/** The portrait breaking out of the band, the professional title,
  *  the tagline and what comes with the hire, on the page's left edge. */
 export function ExpertHeroIdentity({ expert, stats }: IdentityProps) {
-  const { t } = useTranslation();
-  const area = expert.categories?.[0];
+  const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   const topic = getTopic(expert);
 
   return (
     <header>
       <div className="relative -mt-16 sm:-mt-20">
-        <MarketplaceExpertAvatar
-          name={expert.name}
+        <ExpertAvatar
+          name={title}
           avatarUrl={expert.avatar_url}
           color={expert.color}
           backgroundColor={topic}
@@ -92,12 +92,9 @@ export function ExpertHeroIdentity({ expert, stats }: IdentityProps) {
         />
         <div className="mt-4 min-w-0">
           <ExpertIdentityDetails
-            name={expert.name}
             role={expert.role}
             jobTitle={expert.job_title}
             size="page"
-            nameAlign="baseline"
-            areaColor={getCategoryHex(area)}
           />
         </div>
         {expert.tagline?.trim() ? (

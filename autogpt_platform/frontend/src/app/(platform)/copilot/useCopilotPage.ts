@@ -690,6 +690,7 @@ function useCopilotPageChat(
     expertIdentity,
     isResolvingExpertIdentity,
     isAdoptingExpertSession,
+    replyExpertsById: session.roster.byId,
     isKickoffStarting: isKickoffResolving || isKickoffStarting,
     followBackendTurn,
   };

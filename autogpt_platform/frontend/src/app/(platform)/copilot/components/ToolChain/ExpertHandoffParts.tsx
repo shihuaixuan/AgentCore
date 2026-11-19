@@ -18,7 +18,6 @@ interface ProposalProps {
   /** A hire off the roster or a new expert: the card says hire or create. */
   kind: NewExpertKind;
   name: string;
-  role: string | null;
   avatarUrl: string | null;
   color: string | null;
   /** One line about the expert, written for the user. */
@@ -44,7 +43,6 @@ interface ProposalProps {
 export function HandoffProposal({
   kind,
   name,
-  role,
   avatarUrl,
   color,
   about,
@@ -74,12 +72,7 @@ export function HandoffProposal({
             )}
           </p>
           <p className="mt-0.5 text-body [overflow-wrap:anywhere] text-foreground-tertiary">
-            {role
-              ? t(
-                  `${role} · works on it in their own chat`,
-                  `${role} · 在自己的对话中处理任务`,
-                )
-              : t("Works on it in their own chat", "在自己的对话中处理任务")}
+            {t("Works on it in their own chat", "在自己的对话中处理任务")}
           </p>
         </div>
         {actions && (

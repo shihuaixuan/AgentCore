@@ -74,7 +74,7 @@ def test_outcome_splits_the_summary_and_carries_stats() -> None:
     )
     assert item.occurred_at == NOW
     assert item.link == "/library/agents/lib-1?activeTab=runs&activeItem=run-1"
-    assert (item.expert_name, item.expert_role) == ("Ana", "Researcher")
+    assert (item.expert_name, item.expert_role) == ("Researcher", "Researcher")
 
 
 def test_outcome_carries_what_fired_the_run() -> None:

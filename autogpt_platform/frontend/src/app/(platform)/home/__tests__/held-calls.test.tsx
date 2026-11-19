@@ -103,7 +103,7 @@ test.each([
   (_, passage, releasable) => {
     const review = heldRead("r1", "docs.northwind.io/billing");
     (review.payload as Record<string, unknown>).passage = passage;
-    const item = homeHeldItem(review);
+    const item = homeHeldItem(review, { expert: null });
     renderTile([item]);
 
     expect(
@@ -191,19 +191,43 @@ test("after an inline decision focus skips a setup row to the next held call", a
   );
 });
 
-test("a held read's receipt names the Expert who reads it", async () => {
+test("a held read names the expert's profession in its decision and receipt", async () => {
   serveAnswers();
-  const review = heldRead("n1", "docs.northwind.io/billing");
-  (review.payload as Record<string, unknown>).reader = "Nadia";
-  const item = homeHeldItem(review);
+  const url = "docs.northwind.io/billing";
+  const review = heldRead("n1", url);
+  const item = homeHeldItem(
+    {
+      ...review,
+      payload: {
+        ...(review.payload as Record<string, unknown>),
+        reader: "Nadia",
+        headline: { ask: "Let Nadia read", object: url, object_key: "url" },
+      },
+    },
+    { expert: { id: "nadia", name: "Nadia", role: "Ops", avatar_url: null } },
+  );
   renderTile([item]);
 
   await userEvent.click(
-    screen.getByRole("button", { name: `Release: ${item.title}` }),
+    screen.getByRole("button", {
+      name: `Release: Let Executive Assistant read “${url}”`,
+    }),
   );
 
   expect(
-    await screen.findByText("· Released · Nadia is reading it"),
+    await screen.findByText("· Released · Executive Assistant is reading it"),
+  ).toBeDefined();
+  expect(screen.queryByText(/Nadia/)).toBeNull();
+});
+
+test("keeps Otto as the recorded reader in an expert-linked chat", () => {
+  const item = homeHeldItem(heldRead("otto-turn", "docs.northwind.io/billing"));
+  renderTile([item]);
+
+  expect(
+    screen.getByRole("button", {
+      name: "Release: Let Otto read “docs.northwind.io/billing”",
+    }),
   ).toBeDefined();
 });
 
@@ -229,7 +253,7 @@ test.each([
   (_, passage, clamped) => {
     const review = heldRead("q1", "docs.northwind.io/billing");
     (review.payload as Record<string, unknown>).passage = passage;
-    const item = homeHeldItem(review);
+    const item = homeHeldItem(review, { expert: null });
     renderTile([item]);
 
     const quote = screen.getByLabelText("What it says");

@@ -39,21 +39,21 @@ _FRAMING_DELIMITERS = str.maketrans("", "", "[]")
 
 
 def sent_from_metadata(
-    session: ChatSession, expert_name: str | None = None
+    session: ChatSession, expert_job_title: str | None = None
 ) -> dict[str, Any]:
     """Provenance stamped on the message a spawn tool sends to another thread.
 
     The receiving thread renders it as a "Sent from <expert>" badge that links
     back to the session the work came from. ``from_expert_id`` is ``None``
-    for a plain Otto session; the name is a display hint only, the frontend
+    for a plain Otto session; the job title is a display hint only, the frontend
     falls back to its expert roster (or "Otto") when it is absent.
     """
     metadata: dict[str, Any] = {
         "from_session_id": session.session_id,
         "from_expert_id": session.expert_id,
     }
-    if expert_name:
-        metadata["from_expert_name"] = expert_name
+    if session.expert_id and expert_job_title:
+        metadata["from_expert_job_title"] = expert_job_title
     return metadata
 
 
@@ -79,8 +79,8 @@ async def is_first_task(user_id: str, expert_id: str) -> bool:
     return not await has_chat_with(user_id, expert_id)
 
 
-def is_card_retry(session: ChatSession, expert_name: str) -> bool:
-    """Whether the turn answers the hire card's Try again for *expert_name*.
+def is_card_retry(session: ChatSession, expert: Expert) -> bool:
+    """Whether the turn answers the hire card's Try again for this expert.
 
     Try again reaches the new expert through Otto and ``delegate_to_expert``,
     so this is how that path tells the card's hand-off from any other
@@ -89,8 +89,17 @@ def is_card_retry(session: ChatSession, expert_name: str) -> bool:
     """
     for message in reversed(session.messages):
         if message.role == "user":
-            pattern = rf"Try handing .+ to {re.escape(expert_name)} again\."
-            return re.fullmatch(pattern, (message.content or "").strip()) is not None
+            content = (message.content or "").strip()
+            if match := re.fullmatch(
+                r"Try handing .+ to .+ again\. \(expert_id: ([^\r\n()]+)\)", content
+            ):
+                return match[1] == expert.id
+            return (
+                re.fullmatch(
+                    rf"Try handing .+ to {re.escape(expert.name)} again\.", content
+                )
+                is not None
+            )
     return False
 
 
@@ -113,7 +122,7 @@ async def has_chat_with(user_id: str, expert_id: str) -> bool:
 
 
 async def resolve_target_expert(user_id: str, reference: str) -> Expert | None:
-    """Resolve a teammate by id, falling back to a unique name match.
+    """Resolve a teammate by id, falling back to a unique title or old name.
 
     The roster block that carries expert ids is injected only into the first
     user message, so a session opened before the team was hired knows its
@@ -135,7 +144,8 @@ async def resolve_target_expert(user_id: str, reference: str) -> Expert | None:
     matches = [
         e
         for e in await experts_db().list_experts(user_id, with_metrics=False)
-        if not e.is_archived and e.name.strip().casefold() == wanted
+        if not e.is_archived
+        and wanted in (e.name.strip().casefold(), e.display_title.casefold())
     ]
     return matches[0] if len(matches) == 1 else None
 
@@ -170,7 +180,7 @@ async def unknown_target_message(
     ]
     if not teammates:
         return fallback
-    roster = "; ".join(f"{e.name} (expert_id: {e.id})" for e in teammates)
+    roster = "; ".join(f"{e.display_title} (expert_id: {e.id})" for e in teammates)
     return (
         f"No active expert matching {reference!r} on this team. "
         f"Use one of these expert_ids: {roster}."
@@ -208,7 +218,7 @@ async def chain_refusal(
             break
         if parent.expert_id == target.id:
             return (
-                f"{target.name} already has this task further up the chain, "
+                f"{target.display_title} already has this task further up the chain, "
                 "so passing it back would loop. Do what you can with it "
                 "yourself instead."
             )

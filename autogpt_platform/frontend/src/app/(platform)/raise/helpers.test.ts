@@ -8,7 +8,6 @@ import {
   kitToolsLabel,
   loadDraft,
   raisedIdentity,
-  type RaiseDraft,
   resolveVoicePreferences,
   saveDraft,
   VOICE_SKIPPED_LABEL,
@@ -160,30 +159,54 @@ describe("restoring a persisted draft", () => {
     expect(draft).not.toHaveProperty("role");
   });
 
-  test("reads a typed role for its area and colors the draft to match", () => {
+  test("moves a draft parked on the old name question to the avatar", () => {
     saveDraftFromEarlierBuild({
       hasStarted: true,
       role: "Invoice chaser",
       jobTitle: "",
+      name: "Old name",
       step: "name",
     });
-
-    expect(loadDraft()).toMatchObject({
-      category: "finance",
-      color: colorForCategory("finance"),
-      step: "name",
-    });
-  });
-
-  test("keeps a custom role when reopening a draft without a job title", () => {
-    saveDraftFromEarlierBuild({ role: "Invoice chaser", step: "avatar" });
 
     const draft = loadDraft();
     expect(draft).toMatchObject({
-      step: "jobTitle",
+      category: "finance",
+      color: colorForCategory("finance"),
+      legacyRole: "Invoice chaser",
+      jobTitle: "",
+      step: "avatar",
+    });
+    expect(draft).not.toHaveProperty("name");
+  });
+
+  test("keeps later answers when an older draft predates the job title question", () => {
+    saveDraftFromEarlierBuild({
+      hasStarted: true,
+      role: "Invoice chaser",
+      step: "skills",
+      name: "Old name",
+      avatarUrl: "/saved-avatar.png",
+      about: "Track overdue invoices.",
+      voicePreferences: "Be direct.",
+      voiceLabel: "Direct",
+      budget: { credits: 500 },
+      marketplace: [],
+    });
+
+    const draft = loadDraft();
+    expect(draft).toMatchObject({
+      step: "skills",
       category: "finance",
       legacyRole: "Invoice chaser",
+      jobTitle: "",
+      avatarUrl: "/saved-avatar.png",
+      about: "Track overdue invoices.",
+      voicePreferences: "Be direct.",
+      voiceLabel: "Direct",
+      budget: { credits: 500 },
+      marketplace: [],
     });
+    expect(draft).not.toHaveProperty("name");
     saveDraft(draft);
     expect(loadDraft()).toEqual(draft);
   });
@@ -215,7 +238,7 @@ describe("restoring a persisted draft", () => {
     expect(loadDraft().step).toBe("budget");
   });
 
-  test("sends a draft from before the job title beat back to that beat", () => {
+  test("treats a title missing from an older draft as skipped past the title step", () => {
     saveDraftFromEarlierBuild({
       hasStarted: true,
       role: "marketer",
@@ -228,7 +251,8 @@ describe("restoring a persisted draft", () => {
       hasStarted: true,
       category: "marketing",
       color: colorForCategory("marketing"),
-      step: "jobTitle",
+      step: "avatar",
+      jobTitle: "",
     });
   });
 
@@ -240,5 +264,8 @@ describe("restoring a persisted draft", () => {
 });
 
 function saveDraftFromEarlierBuild(fields: object) {
-  saveDraft({ ...EMPTY_DRAFT, ...fields } as RaiseDraft);
+  window.sessionStorage.setItem(
+    "raise-expert-draft",
+    JSON.stringify({ ...EMPTY_DRAFT, ...fields }),
+  );
 }

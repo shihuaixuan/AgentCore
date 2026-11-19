@@ -29,6 +29,8 @@ describe("getSetupRowCopy for missing inputs", () => {
       "Needs Email Address, Topic and Send Time before it can run on schedule.",
     ],
   ])("%j", (missing, detail) => {
-    expect(getSetupRowCopy(inputsItem(missing)).detail).toBe(detail);
+    expect(
+      getSetupRowCopy(inputsItem(missing), "Executive Assistant").detail,
+    ).toBe(detail);
   });
 });

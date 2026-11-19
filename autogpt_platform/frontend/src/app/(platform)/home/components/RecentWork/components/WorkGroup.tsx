@@ -6,6 +6,7 @@ import type { HomeRecentWorkGroup } from "@/app/api/__generated__/models/homeRec
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { formatGroupCounts, getActorChip } from "../helpers";
 import { ActorMark } from "./ActorMark";
 import { OutcomeRow } from "./OutcomeRow";
@@ -17,16 +18,20 @@ interface Props {
 }
 
 export function WorkGroup({ group, timezone }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { actor } = group;
+  const title =
+    actor.kind === "expert"
+      ? getExpertDisplayTitle(actor.expert, locale)
+      : actor.name;
   const chip = getActorChip(actor.kind);
   const runs = group.runs ?? [];
   const items = group.items ?? [];
   const header = (
     <div className="flex min-w-0 items-center gap-2">
-      <ActorMark actor={actor} />
+      <ActorMark actor={actor} name={title} />
       <Text variant="body-medium-tight" tone="primary" className="truncate">
-        {actor.name}
+        {title}
       </Text>
       <span
         className={cn(
@@ -75,7 +80,7 @@ export function WorkGroup({ group, timezone }: Props) {
   );
 
   return (
-    <article aria-label={actor.name}>
+    <article aria-label={title}>
       <div className="bg-surface-hover/80 px-4 py-2">
         {actor.link ? (
           <Link

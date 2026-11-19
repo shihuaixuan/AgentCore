@@ -12,6 +12,8 @@ import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Text } from "@/components/atoms/Text/Text";
 import { PanelEmptyState } from "@/app/(platform)/copilot/components/ContextPanel/components/PanelEmptyState/PanelEmptyState";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
+import { formatExpertIntro } from "@/services/experts/expert-intro";
 import { ExpertSummaryCard } from "../ExpertSummaryCard";
 import { ActivityChart } from "./components/ActivityChart";
 import { LatestOutputs } from "./components/LatestOutputs";
@@ -39,13 +41,14 @@ export function ExpertOverview({
   onChat,
 }: Props) {
   const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   const overview = useExpertOverview(expert.id, activity);
 
   return (
     <div className="flex flex-col gap-4">
       {expert.bio ? (
         <Text variant="body-md" tone="secondary">
-          {getBioLead(expert.bio)}
+          {getBioLead(formatExpertIntro(expert.bio, expert.name, title))}
         </Text>
       ) : null}
 
@@ -116,8 +119,8 @@ export function ExpertOverview({
               ]}
               title={t("Nothing to chart yet", "暂无可绘制的数据")}
               description={t(
-                `Once ${expert.name} starts chatting and running workflows, each day shows up here.`,
-                `${expert.name} 开始聊天和运行工作流后，每天的活动会显示在这里。`,
+                `Once ${title} starts chatting and running workflows, each day shows up here.`,
+                `${title} 开始聊天和运行工作流后，每天的活动会显示在这里。`,
               )}
             />
           )}
@@ -132,7 +135,7 @@ export function ExpertOverview({
 
       <div className="grid gap-4 lg:grid-cols-2">
         <RecentConversations
-          expertName={expert.name}
+          expertName={title}
           sessions={overview.sessions}
           isLoading={overview.isSessionsLoading}
           isError={overview.isSessionsError}
@@ -140,7 +143,7 @@ export function ExpertOverview({
           onChat={onChat}
         />
         <LatestOutputs
-          expertName={expert.name}
+          expertName={title}
           outputs={overview.outputs}
           isLoading={overview.isOutputsLoading}
           isError={overview.isOutputsError}

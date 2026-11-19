@@ -11,6 +11,7 @@ import { getSetupRowCopy, isCredentialItem } from "../helpers";
 
 interface Props {
   item: ExpertSetupItem;
+  expertTitle: string;
   isConnectable: boolean;
   isGranting: boolean;
   onConnect: () => void;
@@ -19,6 +20,7 @@ interface Props {
 
 export function SetupNeededRow({
   item,
+  expertTitle,
   isConnectable,
   isGranting,
   onConnect,
@@ -27,7 +29,7 @@ export function SetupNeededRow({
   const { t, locale } = useTranslation();
   const provider = item.providers[0];
   const isCredential = isCredentialItem(item);
-  const { title, detail } = getSetupRowCopy(item, locale);
+  const { title, detail } = getSetupRowCopy(item, expertTitle, locale);
 
   return (
     <article className="flex items-center gap-2.5 rounded-2xl bg-surface px-3.5 py-2.5 smooth-shadow-ring-sm">

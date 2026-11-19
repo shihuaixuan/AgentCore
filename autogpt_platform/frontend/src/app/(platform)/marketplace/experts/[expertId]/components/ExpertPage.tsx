@@ -4,7 +4,6 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getExpertAccent,
   getExpertAccessProviders,
-  getExpertFirstName,
 } from "@/app/(platform)/marketplace/components/ExpertsSection/helpers";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -13,6 +12,8 @@ import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { VoicePicker } from "@/components/organisms/VoicePicker/VoicePicker";
 import { useTrackExpertProfileOpened } from "@/services/experts/use-track-funnel-view-once";
 import { useHireFlow } from "@/services/experts/useHireFlow";
+import { formatExpertIntro } from "@/services/experts/expert-intro";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { ArrowLeft02Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
@@ -46,7 +47,7 @@ function BackToMarketplaceLink() {
 }
 
 export function ExpertPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { expertId } = useParams<{ expertId: string }>();
   useTrackExpertProfileOpened(expertId);
   const {
@@ -110,7 +111,7 @@ export function ExpertPage() {
   }
 
   const accent = getExpertAccent(expert.role);
-  const firstName = getExpertFirstName(expert.name);
+  const title = getExpertDisplayTitle(expert, locale);
   const accessProviders = getExpertAccessProviders(
     expert.workflows,
     systemProviders,
@@ -144,27 +145,30 @@ export function ExpertPage() {
         </div>
         <div className="relative z-10 order-2 mt-8 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:-mt-24">
           <div className="lg:sticky lg:top-6">
-            <ExpertHireCard
-              expert={expert}
-              firstName={firstName}
-              actions={actions}
-            />
+            <ExpertHireCard expert={expert} actions={actions} />
           </div>
         </div>
         <div className="order-3 mt-12 flex min-w-0 flex-col gap-12 lg:col-start-1 lg:row-start-2">
           <ExpertDayOne
-            name={firstName}
+            name={title}
             items={expert.day_one ?? []}
             accent={accent}
           />
-          <ExpertAbout key={expert.id} text={expert.bio || expert.identity} />
+          <ExpertAbout
+            key={expert.id}
+            text={formatExpertIntro(
+              expert.bio || expert.identity,
+              expert.name,
+              title,
+            )}
+          />
           <ExpertSkills
             skills={expert.bundled_skills ?? []}
             category={expert.categories?.[0]}
           />
-          <ExpertAccess name={firstName} providers={accessProviders} />
+          <ExpertAccess name={title} providers={accessProviders} />
           <ExpertProtectedRules rules={expert.protected_soul_rules ?? []} />
-          <ExpertWorkflowList name={expert.name} workflows={expert.workflows} />
+          <ExpertWorkflowList name={title} workflows={expert.workflows} />
         </div>
       </div>
 
@@ -182,7 +186,7 @@ export function ExpertPage() {
         <Dialog.Content>
           {isVoicePickOpen && hireResult ? (
             <VoicePicker
-              name={hireResult.expert.name}
+              name={getExpertDisplayTitle(hireResult.expert, locale)}
               samples={expert.voice_samples ?? []}
               onPick={pickVoice}
               onSkip={skipVoice}

@@ -8,27 +8,29 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { AttentionCard } from "@/components/organisms/AttentionCard/AttentionCard";
+import type { CardExpert } from "@/components/organisms/PendingReviewsList/expertIdentity";
 import { getSafeLink, getSubtitleParts } from "../helpers";
 
 interface Props {
   item: BriefingRunItem;
+  expert: CardExpert;
   isHidden?: boolean;
 }
 
 // One row per run: the summary doubles as the row's subtitle, so the agent
-// name and its finding read as a single line.
-export function RunRow({ item, isHidden = false }: Props) {
+// attribution and its finding read as a single line.
+export function RunRow({ item, expert, isHidden = false }: Props) {
   const { t } = useTranslation();
   const isFailed = item.status !== "COMPLETED";
-  const { attribution, text } = getSubtitleParts(item);
+  const { attribution, text } = getSubtitleParts(item.summary, expert.title);
   const link = getSafeLink(item.link);
 
   const body = (
     <>
       <AttentionCard.Icon>
         <ExpertAvatar
-          name={item.expert_name}
-          avatarUrl={item.expert_avatar_url}
+          name={expert.title}
+          avatarUrl={expert.avatarURL}
           size={28}
         />
       </AttentionCard.Icon>

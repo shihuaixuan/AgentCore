@@ -6,6 +6,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { WorkflowAvatar } from "@/components/molecules/WorkflowAvatar/WorkflowAvatar";
 import { cn } from "@/lib/utils";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { formatRunningFor } from "../helpers";
 
 interface Props {
@@ -16,13 +17,13 @@ interface Props {
 const ROW_CLASS = "relative flex items-center gap-3 py-2 pl-[3.75rem] pr-4";
 
 export function ActiveRow({ item }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const content = (
     <>
       <span className="absolute top-1/2 left-4 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-surface">
         {item.expert ? (
           <ExpertAvatar
-            name={item.expert.name}
+            name={getExpertDisplayTitle(item.expert, locale)}
             avatarUrl={item.expert.avatar_url}
             size={36}
           />

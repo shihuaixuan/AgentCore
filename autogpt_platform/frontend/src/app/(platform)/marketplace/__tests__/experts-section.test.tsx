@@ -117,7 +117,9 @@ describe("Marketplace ExpertsSection", () => {
     ).toBe("/raise");
     // The card is the link: a shared URL lands on the same profile the
     // marketplace opens, with no dialog in between.
-    const card = await screen.findByRole("link", { name: /Maria/ });
+    const card = await screen.findByRole("link", {
+      name: /^Marketing Strategist\b/,
+    });
     expect(card.getAttribute("href")).toBe(
       "/marketplace/experts/template-maria",
     );
@@ -139,7 +141,9 @@ describe("Marketplace ExpertsSection", () => {
     render(<MainMarkeplacePage />);
 
     expect(await screen.findByText("Meet the AI Experts")).toBeDefined();
-    const card = await screen.findByRole("link", { name: /Maria/ });
+    const card = await screen.findByRole("link", {
+      name: /^Marketing Strategist\b/,
+    });
     expect(card.getAttribute("href")).toBe(
       "/marketplace/experts/template-maria",
     );
@@ -171,7 +175,9 @@ describe("Marketplace ExpertsSection", () => {
     expect(
       screen.getByRole("link", { name: "Create an Expert" }),
     ).toBeDefined();
-    expect(await screen.findByRole("link", { name: /Maria/ })).toBeDefined();
+    expect(
+      await screen.findByRole("heading", { name: "Marketing Strategist" }),
+    ).toBeDefined();
     expect(templatesRequested).toBe(true);
     await waitFor(() => expect(expertsRequested).toBe(true));
   });
@@ -235,7 +241,7 @@ describe("Marketplace ExpertsSection", () => {
 
     const card = await screen.findByRole(
       "link",
-      { name: /Maria/ },
+      { name: /^Marketing Strategist\b/ },
       { timeout: 5_000 },
     );
     expect(within(card).getByText("Brand voice guide")).toBeDefined();
@@ -256,7 +262,7 @@ describe("Marketplace ExpertsSection", () => {
 
     const maria = await screen.findByRole(
       "link",
-      { name: /Maria/ },
+      { name: /^SEO Content Manager\b/ },
       { timeout: 5_000 },
     );
     expect(
@@ -264,7 +270,8 @@ describe("Marketplace ExpertsSection", () => {
     ).toBeDefined();
     expect(within(maria).queryByText("Marketing Strategist")).toBeNull();
     expect(within(maria).queryByText("AI Expert")).toBeNull();
-    const max = screen.getByRole("link", { name: /\bMax\b/ });
+    expect(within(maria).queryByText("Maria")).toBeNull();
+    const max = screen.getByRole("link", { name: /^Sales Development Rep\b/ });
     expect(
       within(max).getByRole("heading", { name: "Sales Development Rep" }),
     ).toBeDefined();
@@ -282,7 +289,7 @@ describe("Marketplace ExpertsSection", () => {
 
     const card = await screen.findByRole(
       "link",
-      { name: /Maria/ },
+      { name: /^Marketing Strategist\b/ },
       { timeout: 5_000 },
     );
     expect(within(card).queryByText("Skills")).toBeNull();
@@ -309,7 +316,7 @@ describe("Marketplace ExpertsSection", () => {
 
     render(<MainMarkeplacePage />);
 
-    await screen.findByText("Maria");
+    await screen.findByRole("heading", { name: "Marketing Strategist" });
     await waitFor(() =>
       expect(funnelCalls().map((body) => body.type)).toContain(
         "experts_section_viewed",
@@ -326,7 +333,7 @@ describe("Marketplace ExpertsSection", () => {
     render(<MainMarkeplacePage />);
 
     expect(await screen.findByText("Meet the AI Experts")).toBeDefined();
-    await screen.findByText("Maria");
+    await screen.findByRole("heading", { name: "Marketing Strategist" });
     expect(screen.getByText("View")).toBeDefined();
     expect(screen.queryByText("On your team")).toBeNull();
   });

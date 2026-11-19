@@ -218,7 +218,7 @@ test("shows an unanswered copilot question and links back to the chat", async ()
 
   render(<HomeRecap />);
 
-  expect(await screen.findByText("Maria has a question")).toBeDefined();
+  expect(await screen.findByText("Planning has a question")).toBeDefined();
   expect(screen.getByText("Monday morning or Friday evening?")).toBeDefined();
   expect(
     screen.getByRole("link", { name: "Answer" }).getAttribute("href"),
@@ -230,12 +230,12 @@ test("offers no approve or decline on a question", async () => {
 
   render(<HomeRecap />);
 
-  await screen.findByText("Maria has a question");
+  await screen.findByText("Planning has a question");
   expect(
-    screen.queryByRole("button", { name: /Approve: Maria has a question/ }),
+    screen.queryByRole("button", { name: /Approve: Planning has a question/ }),
   ).toBeNull();
   expect(
-    screen.queryByRole("button", { name: /Decline: Maria has a question/ }),
+    screen.queryByRole("button", { name: /Decline: Planning has a question/ }),
   ).toBeNull();
 });
 
@@ -274,6 +274,7 @@ function heldReadItem(id: string, judged: boolean): HomeAttentionItem {
     title: `Let Otto read https://example.com/${id}`,
     headline: { ask: "Let Otto read", object: `https://example.com/${id}` },
     description: reason,
+    expert: null,
     review: {
       ...review,
       payload: judged
@@ -333,9 +334,8 @@ test.each([
   },
 );
 
-// Home's backend names the expert whose chat raised a block review
-// (attention.py `_waiting_on`); the row shows that line as written.
-test("a block review an expert raised in chat names the expert, not Otto", async () => {
+// The API's legacy prose still carries the stored chat expert's name.
+test("a block review an expert raised in chat names the profession, not Otto", async () => {
   const issa = { id: "issa", name: "Issa", role: "Ops", avatar_url: null };
   const approval = makeApproval(0);
   mockDashboard([
@@ -363,7 +363,10 @@ test("a block review an expert raised in chat names the expert, not Otto", async
   render(<HomeRecap />);
 
   expect(
-    await screen.findByText("Issa is waiting for your approval."),
+    await screen.findByText(
+      "Executive Assistant is waiting for your approval.",
+    ),
   ).toBeDefined();
+  expect(screen.queryByText(/Issa/)).toBeNull();
   expect(screen.queryByText(/Otto is waiting/)).toBeNull();
 });

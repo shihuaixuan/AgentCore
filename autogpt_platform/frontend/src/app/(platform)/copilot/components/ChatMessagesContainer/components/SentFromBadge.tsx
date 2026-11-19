@@ -1,7 +1,7 @@
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { ArrowTurnBackwardIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
-import { getSentFromDisplayName, type SentFrom } from "../../../sentFrom";
+import { getSentFromDisplayTitle, type SentFrom } from "../../../sentFrom";
 import { useExpertMap } from "../../../useExpertMap";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
@@ -10,12 +10,12 @@ interface Props {
 }
 
 export function SentFromBadge({ sentFrom }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { expertsById } = useExpertMap();
-  const resolvedName = sentFrom.expertId
-    ? expertsById.get(sentFrom.expertId)?.name
-    : null;
-  const name = getSentFromDisplayName(sentFrom, resolvedName);
+  const expert = sentFrom.expertId
+    ? expertsById.get(sentFrom.expertId)
+    : undefined;
+  const name = getSentFromDisplayTitle(sentFrom, expert, locale);
 
   return (
     <Link

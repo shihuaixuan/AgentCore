@@ -13,8 +13,19 @@ import { useState } from "react";
 import type { HomeAttentionItem } from "@/app/api/__generated__/models/homeAttentionItem";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
-import { attentionReason } from "@/app/(platform)/copilot/components/ApprovalQueue/helpers";
+import {
+  isGateReview,
+  isHeldRead,
+  reasonLine,
+} from "@/app/(platform)/copilot/components/ApprovalQueue/helpers";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
+import {
+  getAttentionDescription,
+  getAttentionTitle,
+  getHeldCallTitle,
+  toHomeApprovalItem,
+} from "../attentionCopy";
 import { AttentionRowActions } from "./AttentionRowActions";
 import { HeldPassageQuote } from "./HeldPassageQuote";
 
@@ -33,9 +44,22 @@ const ICONS: Record<HomeAttentionItem["kind"], IconSvgElement> = {
 };
 
 export function AttentionRow({ item, isProcessing, onDecision }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [confirmDecline, setConfirmDecline] = useState(false);
-  const reason = attentionReason(item.review);
+  const expertTitle = item.expert
+    ? getExpertDisplayTitle(item.expert, locale)
+    : null;
+  const approval =
+    item.review && isGateReview(item.review)
+      ? toHomeApprovalItem(item.review, item.expert, locale)
+      : null;
+  const read = approval && isHeldRead(approval) ? approval : null;
+  const title = read
+    ? getHeldCallTitle(item, read, locale)
+    : getAttentionTitle(item, expertTitle, t);
+  const description =
+    (approval && reasonLine(approval, locale)) ??
+    getAttentionDescription(item, expertTitle, t);
 
   function handleDecline() {
     if (!confirmDecline) {
@@ -51,7 +75,7 @@ export function AttentionRow({ item, isProcessing, onDecision }: Props) {
       <div className="flex min-w-0 flex-1 items-center gap-3">
         {item.expert ? (
           <ExpertAvatar
-            name={item.expert.name}
+            name={expertTitle}
             avatarUrl={item.expert.avatar_url}
             size={48}
           />
@@ -63,7 +87,7 @@ export function AttentionRow({ item, isProcessing, onDecision }: Props) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <Text variant="body-medium" tone="primary" className="text-pretty">
-              <AttentionTitle item={item} />
+              <AttentionTitle title={title} headline={item.headline} />
             </Text>
             {item.priority === "high" ? (
               <span className="rounded bg-warning-surface px-1.5 py-px ring-1 ring-warning-foreground/10 ring-inset">
@@ -83,17 +107,16 @@ export function AttentionRow({ item, isProcessing, onDecision }: Props) {
             tone="secondary"
             className="text-pretty break-words"
           >
-            {reason?.line ?? item.description}
+            {description}
           </Text>
-          {reason?.passage ? (
-            <HeldPassageQuote passage={reason.passage} />
-          ) : null}
+          {read?.passage ? <HeldPassageQuote passage={read.passage} /> : null}
         </div>
       </div>
 
       <div className="flex shrink-0 items-center gap-1.5 self-end sm:self-center">
         <AttentionRowActions
           item={item}
+          title={title}
           isProcessing={isProcessing}
           confirmDecline={confirmDecline}
           onApprove={() => onDecision(item, true)}
@@ -103,10 +126,7 @@ export function AttentionRow({ item, isProcessing, onDecision }: Props) {
       </div>
       <span className="sr-only" aria-live="polite">
         {confirmDecline
-          ? t(
-              `Press again to decline ${item.title}`,
-              `再次点击以拒绝 ${item.title}`,
-            )
+          ? t(`Press again to decline ${title}`, `再次点击以拒绝 ${title}`)
           : ""}
       </span>
     </article>
@@ -114,9 +134,14 @@ export function AttentionRow({ item, isProcessing, onDecision }: Props) {
 }
 
 // A held call's object is set in semibold, as on its card in the chat.
-function AttentionTitle({ item }: { item: HomeAttentionItem }) {
-  const headline = item.headline;
-  if (!headline?.object) return <>{item.title}</>;
+function AttentionTitle({
+  title,
+  headline,
+}: {
+  title: string;
+  headline: HomeAttentionItem["headline"];
+}) {
+  if (!headline?.object) return <>{title}</>;
   return (
     <>
       {headline.ask}{" "}

@@ -87,6 +87,7 @@ const OTHER_SURFACES: Surface[] = [
       render(
         <MemoryChatPanel
           scopeName="Otto"
+          expertIdentity={null}
           isOpen
           isStarting={false}
           startError={false}
@@ -153,7 +154,6 @@ const OTHER_SURFACES: Surface[] = [
         <ExpertChatDrawer
           target={{
             expertId: null,
-            name: "Otto",
             role: "autopilot",
             avatarUrl: null,
           }}

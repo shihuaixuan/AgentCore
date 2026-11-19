@@ -5,6 +5,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { BubbleChatIcon, Settings01Icon } from "@hugeicons/core-free-icons";
 import { Text } from "@/components/atoms/Text/Text";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { trackFunnel } from "@/services/experts/experts-analytics";
 import { formatWeeklySpend } from "../../../helpers";
 import { formatUntil } from "../../NowNext/helpers";
@@ -18,6 +19,7 @@ interface Props {
  *  anything that needs doing is already spelled out under Needs you. */
 export function AgentRow({ agent }: Props) {
   const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(agent.expert, locale);
   const spend = formatWeeklySpend(agent.spend_cents, t);
   const nextRun = agent.next_run_time
     ? t(
@@ -30,14 +32,14 @@ export function AgentRow({ agent }: Props) {
   return (
     <div className="flex min-w-0 items-center gap-3 px-4 py-2.5">
       <ExpertAvatar
-        name={agent.expert.name}
+        name={title}
         avatarUrl={agent.expert.avatar_url}
         size={32}
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <Text variant="body-medium-tight" tone="primary" className="truncate">
-            {agent.expert.name}
+            {title}
           </Text>
           <StatusBadge status={agent.status} />
         </div>
@@ -68,10 +70,7 @@ export function AgentRow({ agent }: Props) {
           variant="icon"
           size="icon-sm"
           leadingIcon={BubbleChatIcon}
-          aria-label={t(
-            `Chat with ${agent.expert.name}`,
-            `与 ${agent.expert.name} 聊天`,
-          )}
+          aria-label={t(`Chat with ${title}`, `与 ${title} 聊天`)}
         />
         <Button
           as="NextLink"
@@ -79,10 +78,7 @@ export function AgentRow({ agent }: Props) {
           variant="icon"
           size="icon-sm"
           leadingIcon={Settings01Icon}
-          aria-label={t(
-            `Manage ${agent.expert.name}`,
-            `管理 ${agent.expert.name}`,
-          )}
+          aria-label={t(`Manage ${title}`, `管理 ${title}`)}
           onClick={() =>
             trackFunnel("home_team_member_clicked", {
               expert_id: agent.expert.id,

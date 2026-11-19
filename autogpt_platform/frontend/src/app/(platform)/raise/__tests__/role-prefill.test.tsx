@@ -23,7 +23,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 // The conversation types its questions in; reduced motion reveals each
-// beat immediately so the name step is queryable.
+// beat immediately so the job title step is queryable.
 function mockReducedMotion() {
   vi.spyOn(window, "matchMedia").mockImplementation(
     (query) =>
@@ -76,7 +76,6 @@ describe("/raise?role= — the greeting page's raise door", () => {
       category: "marketing" as const,
       color: "orange-300",
       jobTitle: "Marketing Manager",
-      name: "Nova",
       step: "avatar" as const,
     };
     saveDraft(inProgress);

@@ -289,6 +289,12 @@ const PLAN_POLL_MS = 1_000;
 const HIRE_RETRY_MS = 2_000;
 const HIRE_TRY_MS = 7_000;
 const HIRE_STARTED_KEY = "autogpt:onboarding-plan-hire:u1";
+const TEAM_ROLES: Record<string, string> = {
+  Maria: "SEO & Content",
+  Max: "Sales",
+  Mina: "Finance, Invoicing & Bookkeeping",
+  Nadia: "Market & Competitor Intelligence",
+};
 
 function teamPlan(names: string[]): PlanResponse {
   return {
@@ -299,7 +305,7 @@ function teamPlan(names: string[]): PlanResponse {
     team: names.map((name) => ({
       template_id: `tpl-${name.toLowerCase()}`,
       name,
-      role: "Marketing",
+      role: TEAM_ROLES[name],
     })),
     tasks: [],
   };
@@ -377,7 +383,9 @@ describe("usePreparingStep — hiring the plan's team", () => {
     await advance(START_DELAY_MS);
 
     expect(hires.count).toBe(1);
-    expect(result.current.checklist[1]).toBe("Hiring Maria, Max and Mina");
+    expect(result.current.checklist[1]).toBe(
+      "Hiring SEO Content Manager, Sales Development Rep and Bookkeeper",
+    );
   });
 
   it("never hires before the trial is confirmed", async () => {
@@ -412,7 +420,7 @@ describe("usePreparingStep — hiring the plan's team", () => {
     mockHire();
     const { result } = renderPreparing({ canHire: true });
 
-    expect(result.current.checklist[1]).toBe("Hiring Nadia");
+    expect(result.current.checklist[1]).toBe("Hiring Market Research Analyst");
   });
 
   it("names the server's team when the plan step gave up waiting", async () => {
@@ -426,7 +434,9 @@ describe("usePreparingStep — hiring the plan's team", () => {
 
     await advance(START_DELAY_MS);
 
-    expect(result.current.checklist[1]).toBe("Hiring Maria, Max and Mina");
+    expect(result.current.checklist[1]).toBe(
+      "Hiring SEO Content Manager, Sales Development Rep and Bookkeeper",
+    );
   });
 
   it("holds the bar and the hire item until the hire answers", async () => {
@@ -474,7 +484,8 @@ describe("usePreparingStep — hiring the plan's team", () => {
     expect(toast).toHaveBeenCalledTimes(1);
     expect(toast).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: "Couldn't hire Maria, Max and Mina",
+        title:
+          "Couldn't hire SEO Content Manager, Sales Development Rep and Bookkeeper",
         description:
           "Otto takes on their tasks for now. You can hire experts any time.",
         variant: "destructive",
@@ -558,7 +569,7 @@ describe("usePreparingStep — hiring the plan's team", () => {
 
     expect(toast).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: "Couldn't hire Max and Mina",
+        title: "Couldn't hire Sales Development Rep and Bookkeeper",
         variant: "destructive",
       }),
     );
@@ -595,7 +606,9 @@ describe("usePreparingStep — hiring the plan's team", () => {
 
     await advance(PLAN_POLL_MS * 2);
     expect(hires.count).toBe(1);
-    expect(result.current.checklist[1]).toBe("Hiring Maria, Max and Mina");
+    expect(result.current.checklist[1]).toBe(
+      "Hiring SEO Content Manager, Sales Development Rep and Bookkeeper",
+    );
   });
 
   it("hires anyway once the wait for the plan runs out", async () => {
@@ -774,7 +787,7 @@ describe("usePreparingStep — hiring the plan's team", () => {
 
     expect(hires.count).toBe(1);
     expect(toast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Couldn't hire Max" }),
+      expect.objectContaining({ title: "Couldn't hire Sales Development Rep" }),
     );
     expect(invalidate).toHaveBeenCalledWith({
       queryKey: getGetBrainDumpSuggestedTasksQueryKey(),
@@ -796,9 +809,25 @@ describe("usePreparingStep — hiring the plan's team", () => {
 
     expect(hires.count).toBe(1);
     expect(toast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Couldn't hire Maria" }),
+      expect.objectContaining({ title: "Couldn't hire SEO Content Manager" }),
     );
     expect(onComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses a generic title when a failed template is not in the plan", async () => {
+    mockHire(() =>
+      HttpResponse.json({
+        hired: [],
+        failed: [{ template_id: "tpl-stale", name: "Legacy Expert" }],
+      }),
+    );
+    renderPreparing({ canHire: true });
+
+    await advance(START_DELAY_MS + 100);
+
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Couldn't hire AI Expert" }),
+    );
   });
 
   it("stays quiet when asking after a refresh fails, and still refreshes Home", async () => {
@@ -848,7 +877,7 @@ describe("usePreparingStep — hiring the plan's team", () => {
 
     expect(hires.count).toBe(2);
     expect(toast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Couldn't hire Max" }),
+      expect.objectContaining({ title: "Couldn't hire Sales Development Rep" }),
     );
   });
 
@@ -863,7 +892,10 @@ describe("usePreparingStep — hiring the plan's team", () => {
     expect(hires.count).toBeGreaterThan(1);
     expect(toast).toHaveBeenCalledTimes(1);
     expect(toast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Couldn't hire Maria, Max and Mina" }),
+      expect.objectContaining({
+        title:
+          "Couldn't hire SEO Content Manager, Sales Development Rep and Bookkeeper",
+      }),
     );
   });
 

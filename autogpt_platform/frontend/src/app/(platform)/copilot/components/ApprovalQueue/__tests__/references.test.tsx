@@ -113,7 +113,7 @@ test("a hire's card lists its template's skills, as the marketplace card does", 
   renderCard(referenceCard("Confirm team change"));
 
   const view = await card();
-  await userEvent.hover(view.getByText("Grace"));
+  await userEvent.hover(view.getByText("Release manager"));
 
   const tip = within(await screen.findByRole("tooltip"));
   expect(
@@ -137,8 +137,11 @@ test("a held team change names who joins, never its one-time id", async () => {
 
   const view = await card();
   expect(
-    view.getByRole("heading", { name: /Confirm the team change.*Grace/ }),
+    view.getByRole("heading", {
+      name: /Confirm the team change.*Release manager/,
+    }),
   ).toBeDefined();
+  expect(view.queryByText("Grace")).toBeNull();
   expect(view.queryByText("cf-1")).toBeNull();
 });
 
@@ -147,7 +150,7 @@ test("a named thing with no page still shows its card, unlinked", async () => {
 
   const view = await card();
   expect(view.queryAllByRole("link")).toHaveLength(0);
-  await userEvent.hover(view.getByText("Grace"));
+  await userEvent.hover(view.getByText("Release manager"));
 
   const tip = within(await screen.findByRole("tooltip"));
   expect(tip.getByText("New hire")).toBeDefined();
@@ -158,9 +161,9 @@ test("an unlinked name's card opens from the keyboard too", async () => {
   renderCard(referenceCard("Confirm team change"));
 
   const view = await card();
-  const grace = view.getByText("Grace");
-  expect(grace.getAttribute("tabindex")).toBe("0");
-  act(() => grace.focus());
+  const title = view.getByText("Release manager");
+  expect(title.getAttribute("tabindex")).toBe("0");
+  act(() => title.focus());
 
   const tip = within(await screen.findByRole("tooltip"));
   expect(tip.getByText("New hire")).toBeDefined();

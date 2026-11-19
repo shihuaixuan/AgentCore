@@ -1,5 +1,6 @@
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import { SkillLearningSheet } from "@/components/organisms/SkillLearningSheet/SkillLearningSheet";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { learningSheetScope } from "../helpers";
 import { useLearningHistory } from "../useLearningHistory";
 import { OpenDecisionsCard } from "./OpenDecisionsCard";
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function MemoryLearningSection({ learning, experts }: Props) {
+  const { locale } = useTranslation();
   if (!learning.enabled) return null;
   const record = learning.openRecord;
   const canOpen =
@@ -38,6 +40,7 @@ export function MemoryLearningSection({ learning, experts }: Props) {
         scope={learningSheetScope(
           learning.openRecord?.expertId ?? null,
           experts,
+          locale,
         )}
         skillName={canOpen ? (record?.skillName ?? null) : null}
         initialVersionId={learning.openRecord?.versionId ?? null}

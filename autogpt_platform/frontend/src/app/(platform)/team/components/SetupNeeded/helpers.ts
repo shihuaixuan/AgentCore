@@ -6,25 +6,29 @@ export function isCredentialItem(item: ExpertSetupItem) {
   return item.resolution === "connect" || item.resolution === "allow";
 }
 
-export function getSetupRowCopy(item: ExpertSetupItem, locale: Locale = "en") {
+export function getSetupRowCopy(
+  item: ExpertSetupItem,
+  expertTitle: string,
+  locale: Locale = "en",
+) {
   const workflowName =
     item.workflow_name ?? (locale === "zh-CN" ? "工作流" : "a workflow");
   if (isCredentialItem(item)) {
     const provider = item.providers[0];
     if (locale === "zh-CN") {
       return {
-        title: `${item.expert_name} 的${provider ? ` ${formatProviderName(provider)}` : "服务"}`,
+        title: `${expertTitle} 的${provider ? ` ${formatProviderName(provider)}` : "服务"}`,
         detail: `${workflowName} 需要此服务才能按计划运行。`,
       };
     }
     return {
-      title: `${provider ? formatProviderName(provider) : "A service"} for ${item.expert_name}`,
+      title: `${provider ? formatProviderName(provider) : "A service"} for ${expertTitle}`,
       detail: `${workflowName} needs it to run on schedule.`,
     };
   }
   if (locale === "zh-CN") {
     return {
-      title: `为 ${item.expert_name} 设置 ${workflowName} 的计划`,
+      title: `为 ${expertTitle} 设置 ${workflowName} 的计划`,
       detail:
         item.resolution === "inputs"
           ? `需要填写 ${item.missing_inputs?.length ? item.missing_inputs.join("、") : "一些信息"} 才能按计划运行。`
@@ -32,7 +36,7 @@ export function getSetupRowCopy(item: ExpertSetupItem, locale: Locale = "en") {
     };
   }
   return {
-    title: `Schedule ${workflowName} for ${item.expert_name}`,
+    title: `Schedule ${workflowName} for ${expertTitle}`,
     detail:
       item.resolution === "inputs"
         ? `Needs ${formatInputList(item.missing_inputs ?? [])} before it can run on schedule.`

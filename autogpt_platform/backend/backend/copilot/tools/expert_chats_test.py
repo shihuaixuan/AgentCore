@@ -130,6 +130,7 @@ def _experts(*pairs: tuple[str, str]) -> MagicMock:
         expert = MagicMock()
         expert.id = expert_id
         expert.name = name
+        expert.display_title = "Quality Assurance Engineer"
         roster.append(expert)
     client = MagicMock()
     client.list_experts = AsyncMock(return_value=roster)
@@ -229,10 +230,11 @@ class TestListExpertChats:
         assert [c.session_id for c in result.chats] == ["chat-2"]
 
     @pytest.mark.asyncio
-    async def test_rows_carry_the_expert_name_not_just_the_id(self) -> None:
+    async def test_rows_carry_the_professional_title_not_the_old_name(self) -> None:
         result = await _list(_FakeChatDB())
-        assert result.chats[0].expert_name == "Ada"
-        assert "Ada" in result.message
+        assert result.chats[0].expert_name == "Quality Assurance Engineer"
+        assert "Quality Assurance Engineer" in result.message
+        assert "Ada" not in result.message
 
     @pytest.mark.asyncio
     async def test_another_users_chats_are_never_listed(self) -> None:

@@ -1,21 +1,25 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import { LanguageProvider, useTranslation } from "@/lib/i18n/LanguageProvider";
-import { NameStep } from "../components/NameStep/NameStep";
 import { JobTitleStep } from "../components/JobTitleStep/JobTitleStep";
 import { KitBudget } from "../components/KitStep/KitBudget";
 import { CategoryStep } from "../components/CategoryStep/CategoryStep";
 import { BEAT_KEYS, buildFlowItems } from "../flowItems";
 import { EMPTY_DRAFT } from "../helpers";
 import { SoulPreviewPanel } from "../components/SoulPreviewPanel/SoulPreviewPanel";
+import { getRaiseProfession } from "../profession";
 
 function Conversation() {
-  const { t, setLocale } = useTranslation();
+  const { t, locale, setLocale } = useTranslation();
+  const { title } = getRaiseProfession(
+    { ...EMPTY_DRAFT, category: "marketing", jobTitle: "Custom Role" },
+    locale,
+  );
   const progress = Object.fromEntries(
     BEAT_KEYS.map((beat) => [beat, true]),
   ) as Record<(typeof BEAT_KEYS)[number], boolean>;
   const items = buildFlowItems(
-    { ...EMPTY_DRAFT, name: "Original Nova" },
+    title,
     { prompts: progress, steps: progress },
     t,
   );
@@ -29,7 +33,7 @@ function Conversation() {
   );
 }
 
-test("translates creation conversation prompts while preserving interpolated names", () => {
+test("translates creation conversation prompts without translating a custom title", () => {
   render(
     <LanguageProvider>
       <Conversation />
@@ -40,13 +44,13 @@ test("translates creation conversation prompts while preserving interpolated nam
   ).toBeDefined();
   expect(
     screen.getByText(
-      "这是 Original Nova 的头像。你可以使用它、重新生成或上传图片。",
+      "这是 Custom Role 的头像。你可以使用它、重新生成或上传图片。",
     ),
   ).toBeDefined();
   fireEvent.click(screen.getByRole("button", { name: "English" }));
   expect(
     screen.getByText(
-      "Hello, I'm Otto. I'll help you create your own AI Expert.",
+      "Here's an avatar for Custom Role. Use it, generate another, or upload a picture.",
     ),
   ).toBeDefined();
 });
@@ -56,58 +60,34 @@ function SwitchLanguage() {
   return <button onClick={() => setLocale("en")}>English</button>;
 }
 
-test("translates name controls and preserves typed names through language changes", () => {
+test("translates job title controls and preserves titles through language changes", () => {
   const onSubmit = vi.fn();
   render(
     <LanguageProvider>
       <SwitchLanguage />
-      <NameStep
-        selectedName={null}
-        suggestions={["Nova"]}
-        color={null}
-        onSubmit={onSubmit}
-      />
-    </LanguageProvider>,
-  );
-  expect(screen.getByRole("group", { name: "推荐姓名" })).toBeDefined();
-  const input = screen.getByRole("textbox", { name: "或输入自定义姓名" });
-  expect(input.getAttribute("placeholder")).toBe("输入姓名…");
-  fireEvent.change(input, { target: { value: "My 自定义 Name" } });
-  expect(
-    (screen.getByRole("button", { name: "为我命名" }) as HTMLButtonElement)
-      .disabled,
-  ).toBe(false);
-  fireEvent.click(screen.getByRole("button", { name: "English" }));
-  expect(
-    (
-      screen.getByRole("textbox", {
-        name: "Or type your own",
-      }) as HTMLInputElement
-    ).value,
-  ).toBe("My 自定义 Name");
-  fireEvent.click(screen.getByRole("button", { name: "Name me" }));
-  expect(onSubmit).toHaveBeenCalledWith("My 自定义 Name");
-});
-
-test("translates job title controls but does not translate suggested or entered titles", () => {
-  render(
-    <LanguageProvider>
       <JobTitleStep
         selectedTitle={null}
         suggestions={["My Custom Role"]}
         color={null}
-        onSubmit={vi.fn()}
+        onSubmit={onSubmit}
         onSkip={vi.fn()}
       />
     </LanguageProvider>,
   );
   expect(screen.getByRole("group", { name: "推荐职位" })).toBeDefined();
   expect(screen.getByRole("button", { name: "My Custom Role" })).toBeDefined();
-  expect(
-    screen.getByRole("textbox", { name: "职位" }).getAttribute("placeholder"),
-  ).toBe("输入职位…");
+  const input = screen.getByRole("textbox", { name: "职位" });
+  expect(input.getAttribute("placeholder")).toBe("输入职位…");
   expect(screen.getByRole("button", { name: "添加职位" })).toBeDefined();
   expect(screen.getByRole("button", { name: "跳过" })).toBeDefined();
+  fireEvent.change(input, { target: { value: "My 自定义 Role" } });
+  fireEvent.click(screen.getByRole("button", { name: "English" }));
+  expect(screen.getByRole("textbox", { name: "Job title" })).toHaveProperty(
+    "value",
+    "My 自定义 Role",
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Add title" }));
+  expect(onSubmit).toHaveBeenCalledWith("My 自定义 Role");
 });
 
 test("translates category display labels while submitting the original API identifier", () => {
@@ -149,9 +129,7 @@ test("translates the soul preview and switches labels without translating user d
     <LanguageProvider>
       <SwitchLanguage />
       <SoulPreviewPanel
-        name="Original Nova"
-        category="marketing"
-        jobTitle="Custom Role"
+        title="Custom Role"
         avatarUrl="/original-avatar.png"
         color={null}
         about="Original biography"
@@ -170,9 +148,7 @@ test("translates the soul preview and switches labels without translating user d
       />
     </LanguageProvider>,
   );
-  expect(
-    screen.getByRole("img", { name: "Original Nova 的头像" }),
-  ).toBeDefined();
+  expect(screen.getByRole("img", { name: "Custom Role 的头像" })).toBeDefined();
   for (const label of [
     "关于",
     "声音",
@@ -188,27 +164,40 @@ test("translates the soul preview and switches labels without translating user d
   }
   fireEvent.click(screen.getByRole("button", { name: "English" }));
   expect(
-    screen.getByRole("img", { name: "Original Nova's picture" }),
+    screen.getByRole("img", { name: "Custom Role's picture" }),
   ).toBeDefined();
   expect(screen.getByText("No weekly limit")).toBeDefined();
   expect(screen.getByText("Custom Role")).toBeDefined();
 });
 
-test("translates an unnamed preview and built-in category role", () => {
+function CategoryRolePreview() {
+  const { locale } = useTranslation();
+  const { title } = getRaiseProfession(
+    { ...EMPTY_DRAFT, category: "marketing" },
+    locale,
+  );
+  return (
+    <SoulPreviewPanel
+      title={title}
+      avatarUrl="/original-avatar.png"
+      color={null}
+      about={null}
+      voiceLabel={null}
+      kit={null}
+    />
+  );
+}
+
+test("localizes the category role used as the preview's only title", () => {
   render(
     <LanguageProvider>
-      <SoulPreviewPanel
-        name=""
-        category="marketing"
-        avatarUrl="/original-avatar.png"
-        color={null}
-        about={null}
-        voiceLabel={null}
-        kit={null}
-      />
+      <SwitchLanguage />
+      <CategoryRolePreview />
     </LanguageProvider>,
   );
-  expect(screen.getByRole("heading", { name: "尚未命名" })).toBeDefined();
-  expect(screen.getByRole("img", { name: "你的专家的头像" })).toBeDefined();
-  expect(screen.getByText("营销专员")).toBeDefined();
+  expect(screen.getByRole("heading", { name: "营销专员" })).toBeDefined();
+  expect(screen.getByRole("img", { name: "营销专员 的头像" })).toBeDefined();
+  expect(screen.getAllByText("营销专员")).toHaveLength(1);
+  fireEvent.click(screen.getByRole("button", { name: "English" }));
+  expect(screen.getByRole("heading", { name: "Marketer" })).toBeDefined();
 });

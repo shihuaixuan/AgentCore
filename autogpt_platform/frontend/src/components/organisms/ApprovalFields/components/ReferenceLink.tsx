@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
@@ -6,7 +8,13 @@ import {
   TooltipPortal,
   TooltipTrigger,
 } from "@/components/atoms/Tooltip/BaseTooltip";
+import { useCardExpertRoster } from "@/components/organisms/PendingReviewsList/useCardExpertRoster";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { Reference } from "../helpers";
+import {
+  getReferenceIdentity,
+  type ReferenceIdentity,
+} from "../referenceIdentity";
 import { ReferenceCard } from "./ReferenceCard";
 
 interface Props {
@@ -17,6 +25,22 @@ interface Props {
 // With a card the hover carries it and the id; without, the id is the title.
 // A thing with no page of its own is named without a link, card and all.
 export function ReferenceLink({ reference, children }: Props) {
+  const { locale } = useTranslation();
+  const roster = useCardExpertRoster(false);
+  const identity = getReferenceIdentity(reference, locale, roster);
+  const label = children === reference.name ? identity.title : children;
+  return (
+    <ResolvedReferenceLink reference={reference} identity={identity}>
+      {label}
+    </ResolvedReferenceLink>
+  );
+}
+
+export function ResolvedReferenceLink({
+  reference,
+  identity,
+  children,
+}: Props & { identity: ReferenceIdentity }) {
   // A reference stored before cards had kinds carries only its summary line.
   const hasCard = Boolean(reference.kind || reference.summary);
   const link = reference.href ? (
@@ -55,7 +79,7 @@ export function ReferenceLink({ reference, children }: Props) {
           align="start"
           className="w-max max-w-[320px] px-3 py-2.5"
         >
-          <ReferenceCard reference={reference} />
+          <ReferenceCard reference={reference} identity={identity} />
         </TooltipContent>
       </TooltipPortal>
     </Tooltip>

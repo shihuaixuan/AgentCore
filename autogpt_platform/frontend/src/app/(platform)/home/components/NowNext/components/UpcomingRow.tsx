@@ -6,6 +6,7 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { WorkflowAvatar } from "@/components/molecules/WorkflowAvatar/WorkflowAvatar";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { formatUntil } from "../helpers";
 
 interface Props {
@@ -14,13 +15,16 @@ interface Props {
 
 export function UpcomingRow({ item }: Props) {
   const { t, locale } = useTranslation();
+  const expertTitle = item.expert
+    ? getExpertDisplayTitle(item.expert, locale)
+    : null;
   return (
     <div
       // oxlint-disable-next-line design-system/no-arbitrary-values -- the 60px indent lines the row up with the timeline column; the spacing scale has 14 (56px) and 16 (64px)
       className="relative flex items-center gap-3 py-2 pr-4 pl-[3.75rem]"
     >
       <span className="absolute top-1/2 left-4 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-surface">
-        <TaskMarker item={item} />
+        <TaskMarker item={item} expertTitle={expertTitle} />
       </span>
       <div className="min-w-0 flex-1">
         <Text variant="body-medium-tight" tone="primary" className="truncate">
@@ -33,7 +37,7 @@ export function UpcomingRow({ item }: Props) {
           ) : null}
         </Text>
         <Text variant="body" tone="muted" className="truncate">
-          {item.expert?.name ??
+          {expertTitle ??
             (item.kind === "followup"
               ? t("Follow-up", "跟进任务")
               : t("Scheduled task", "计划任务"))}
@@ -49,11 +53,14 @@ export function UpcomingRow({ item }: Props) {
 
 /** The expert who will do the work is the marker; a workflow shows its own
  *  picture, and the glyph only stands in for a follow-up. */
-function TaskMarker({ item }: Props) {
+function TaskMarker({
+  item,
+  expertTitle,
+}: Props & { expertTitle: string | null }) {
   if (item.expert) {
     return (
       <ExpertAvatar
-        name={item.expert.name}
+        name={expertTitle}
         avatarUrl={item.expert.avatar_url}
         size={36}
       />

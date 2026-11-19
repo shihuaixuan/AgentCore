@@ -847,12 +847,12 @@ describe("ArtifactsPage - expert filter", () => {
 
     render(<ArtifactsPage />);
 
-    const novaTab = await screen.findByRole("tab", { name: "Nova" });
+    const analystTab = await screen.findByRole("tab", { name: "Analyst" });
     expect(screen.getByRole("tab", { name: "Everyone" })).toBeDefined();
     // A fired expert is history, not a filter you can pick.
-    expect(screen.queryByRole("tab", { name: "Kai" })).toBeNull();
+    expect(screen.queryByRole("tab", { name: "Writer" })).toBeNull();
 
-    fireEvent.click(novaTab);
+    fireEvent.click(analystTab);
 
     // The expert narrows where you are, so the root listing stays root-only
     // instead of flattening the whole workspace.
@@ -861,7 +861,7 @@ describe("ArtifactsPage - expert filter", () => {
       expect(last.expertId).toBe("expert-a");
       expect(last.rootOnly).toBe("true");
     });
-    expect(novaTab.getAttribute("aria-selected")).toBe("true");
+    expect(analystTab.getAttribute("aria-selected")).toBe("true");
   });
 
   test("labels each file with the expert whose conversation it came from", async () => {
@@ -878,7 +878,7 @@ describe("ArtifactsPage - expert filter", () => {
     expect(await screen.findByText("notes.md")).toBeDefined();
     const badges = await screen.findAllByTestId("artifacts-expert-badge");
     expect(badges).toHaveLength(1);
-    expect(badges[0].textContent).toBe("Nova");
+    expect(badges[0].textContent).toBe("Analyst");
   });
 
   test("hides the expert filter when no expert is hired", async () => {

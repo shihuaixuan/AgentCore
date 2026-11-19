@@ -79,7 +79,7 @@ describe("TeamPage layout", () => {
 
     render(<TeamPage />);
 
-    expect(await screen.findByText("Maria")).toBeDefined();
+    expect(await screen.findByText("Marketing Strategist")).toBeDefined();
     expect(screen.getByRole("heading", { name: "Team" })).toBeDefined();
     expect(screen.queryByRole("tab")).toBeNull();
   });
@@ -97,8 +97,8 @@ describe("TeamPage layout", () => {
 
     render(<TeamPage />);
 
-    expect(await screen.findByText("Maria")).toBeDefined();
-    expect(screen.getByText("Lee")).toBeDefined();
+    expect(await screen.findByText("Marketing Strategist")).toBeDefined();
+    expect(screen.getByText("Researcher")).toBeDefined();
     expect(screen.queryByRole("heading", { name: "Growth" })).toBeNull();
   });
 });
@@ -149,16 +149,15 @@ describe("TeamRoster toolbar", () => {
     server.use(getListExpertsMockHandler([maria, lee]));
 
     render(<TeamPage />);
-    expect(await screen.findByText("Maria")).toBeDefined();
+    expect(await screen.findByText("Marketing Strategist")).toBeDefined();
 
     await user.type(
       screen.getByRole("textbox", { name: "Search experts" }),
       "resear",
     );
 
-    // Matches Lee on role, not name.
-    expect(screen.getByText("Lee")).toBeDefined();
-    expect(screen.queryByText("Maria")).toBeNull();
+    expect(screen.getByText("Researcher")).toBeDefined();
+    expect(screen.queryByText("Marketing Strategist")).toBeNull();
     // Otto is pinned, but steps aside once the roster is narrowed.
     expect(screen.queryByText("Otto")).toBeNull();
   });
@@ -168,7 +167,7 @@ describe("TeamRoster toolbar", () => {
     server.use(getListExpertsMockHandler([maria]));
 
     render(<TeamPage />);
-    expect(await screen.findByText("Maria")).toBeDefined();
+    expect(await screen.findByText("Marketing Strategist")).toBeDefined();
 
     await user.type(
       screen.getByRole("textbox", { name: "Search experts" }),
@@ -184,21 +183,22 @@ describe("TeamRoster toolbar", () => {
     const pausedLee = makeExpert({
       id: "expert-lee",
       name: "Lee",
+      role: "Researcher",
       schedules_paused_at: new Date("2026-08-20T10:00:00Z"),
     });
     server.use(getListExpertsMockHandler([maria, pausedLee]));
 
     const user = userEvent.setup();
     render(<TeamPage />);
-    expect(await screen.findByText("Maria")).toBeDefined();
+    expect(await screen.findByText("Marketing Strategist")).toBeDefined();
 
     await user.click(screen.getByRole("button", { name: /^Filter experts/ }));
     await user.click(
       await screen.findByRole("menuitemradio", { name: "Paused" }),
     );
 
-    expect(screen.getByText("Lee")).toBeDefined();
-    expect(screen.queryByText("Maria")).toBeNull();
+    expect(screen.getByText("Researcher")).toBeDefined();
+    expect(screen.queryByText("Marketing Strategist")).toBeNull();
   });
 });
 
@@ -243,7 +243,7 @@ describe("AutopilotCard", () => {
     );
 
     render(<TeamPage />);
-    expect(await screen.findByText("Lee")).toBeDefined();
+    expect(await screen.findByText("Researcher")).toBeDefined();
 
     const autopilot = screen.getByRole("region", { name: "Otto" });
     expect(getStatValue(autopilot, "Skills")).toBe("3");
@@ -255,7 +255,7 @@ describe("AutopilotCard", () => {
     server.use(getListExpertsMockHandler([maria]));
 
     render(<TeamPage />);
-    expect(await screen.findByText("Maria")).toBeDefined();
+    expect(await screen.findByText("Marketing Strategist")).toBeDefined();
 
     const autopilot = screen.getByRole("region", { name: "Otto" });
     // A zero total is left out of the meta line rather than shown as "0".
@@ -274,7 +274,7 @@ describe("AutopilotCard", () => {
     server.use(getListExpertsMockHandler([maria]));
 
     render(<TeamPage />);
-    expect(await screen.findByText("Maria")).toBeDefined();
+    expect(await screen.findByText("Marketing Strategist")).toBeDefined();
 
     const autopilot = screen.getByRole("region", { name: "Otto" });
     expect(

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 import {
   Alert02Icon,
@@ -51,11 +52,15 @@ const VERDICTS: Record<string, VerdictStyle> = {
  *  so they render as plain text — never markdown, never HTML. The backend
  *  tag-escapes them for the model; the card shows them as written. */
 export function ConsultVerdictCard({ output }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const verdict = str(output, "verdict") ?? "";
   const style = VERDICTS[verdict];
   const reviewer = asObject(output.reviewer);
   if (!style || !reviewer) return null;
+  const title = getExpertDisplayTitle(
+    { jobTitle: str(reviewer, "job_title"), role: str(reviewer, "role") },
+    locale,
+  );
 
   const quotes = Array.isArray(output.quotes)
     ? output.quotes
@@ -69,16 +74,16 @@ export function ConsultVerdictCard({ output }: Props) {
     <div className={cn(CARD, "w-full rounded-3xl p-2.5")}>
       <div className="flex items-center gap-2.5">
         <ExpertAvatar
-          name={str(reviewer, "name") ?? null}
+          name={title}
           avatarUrl={str(reviewer, "avatar_url") ?? null}
           size={28}
         />
         <div className="min-w-0 flex-1">
           <Text tone="emphasis" variant="body-medium" className="truncate">
-            {str(reviewer, "name") ?? t("A teammate", "一位队友")}
+            {title}
           </Text>
           <Text tone="muted" variant="small" className="truncate">
-            {str(reviewer, "role") ?? t("checked this", "已检查此内容")}
+            {t("Checked this", "已检查此内容")}
           </Text>
         </div>
         <span

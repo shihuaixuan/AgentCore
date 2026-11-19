@@ -460,6 +460,7 @@ class DelegatedExpertInfo(BaseModel):
     id: str
     name: str
     role: str
+    job_title: str | None = None
     avatar_url: str | None = None
     color: str = ""
 
@@ -704,6 +705,7 @@ class ExpertSummary(BaseModel):
     id: str
     name: str
     role: str
+    job_title: str | None = None
     tagline: str | None = None
     about: str = ""
     boundaries: str = ""
@@ -790,6 +792,7 @@ class ConsultingExpertInfo(BaseModel):
     id: str
     name: str
     role: str
+    job_title: str | None = None
     avatar_url: str | None = None
     color: str = ""
 

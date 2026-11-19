@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from backend.api.features.experts.copy_policy import expert_display_title
+
 
 class BriefingRunItem(BaseModel):
     expert_id: str | None
@@ -19,6 +21,7 @@ class BriefingRunItem(BaseModel):
     # so a stored row that predates them still validates — the home mapper
     # falls back to the agent-name headline when `title` is empty.
     expert_role: str | None = None
+    expert_job_title: str | None = None
     title: str = ""
     detail: str = ""
     occurred_at: datetime | None = None
@@ -32,6 +35,17 @@ class BriefingRunItem(BaseModel):
     # The execution's own `trigger_source`, set even when a schedule created
     # before its job carried a `schedule_id` fired the run.
     trigger_source: str | None = None
+
+    @property
+    def expert_display_title(self) -> str | None:
+        if (
+            self.expert_id
+            or self.expert_name
+            or self.expert_job_title
+            or self.expert_role
+        ):
+            return expert_display_title(self.expert_job_title, self.expert_role)
+        return None
 
 
 class BriefingDecisionItem(BaseModel):

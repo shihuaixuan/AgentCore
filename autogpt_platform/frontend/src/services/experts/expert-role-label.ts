@@ -10,6 +10,7 @@ const ROLE_LABELS: Record<string, string> = {
   "Research, Data & KPI Analysis": "Data Analyst",
   Sales: "Sales Development Rep",
   "Dependency & Security Hygiene": "Application Security Engineer",
+  "Code Review & QA": "QA Engineer",
   "Customer Success & Retention": "Customer Success Manager",
   "Deal Desk & Proposal Support": "Deal Desk Manager",
   Ops: "Executive Assistant",
@@ -38,14 +39,31 @@ const CHINESE_ROLE_LABELS: Readonly<Record<string, string>> = {
   Recruiter: "招聘专员",
   "Procurement Specialist": "采购专员",
   "Contract Manager": "合同经理",
-  "QA Engineer": "质量保证工程师",
-  "Quality Assurance Engineer": "质量保证工程师",
+  "QA Engineer": "质量保障工程师",
+  "Quality Assurance Engineer": "质量保障工程师",
+};
+
+type Profession = {
+  job_title?: string | null;
+  jobTitle?: string | null;
+  role?: string | null;
 };
 
 export function getExpertRoleLabel(
   role: string,
   locale: Locale = "en",
 ): string {
-  const label = ROLE_LABELS[role] ?? role;
-  return locale === "zh-CN" ? (CHINESE_ROLE_LABELS[label] ?? label) : label;
+  const label = Object.hasOwn(ROLE_LABELS, role) ? ROLE_LABELS[role] : role;
+  return locale === "zh-CN" && Object.hasOwn(CHINESE_ROLE_LABELS, label)
+    ? CHINESE_ROLE_LABELS[label]
+    : label;
+}
+
+export function getExpertDisplayTitle(
+  expert: Profession | null | undefined,
+  locale: Locale,
+): string {
+  const title = expert?.job_title?.trim() || expert?.jobTitle?.trim();
+  if (title) return title;
+  return getExpertRoleLabel(expert?.role?.trim() || "AI Expert", locale);
 }

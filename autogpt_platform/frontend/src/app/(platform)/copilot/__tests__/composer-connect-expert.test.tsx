@@ -154,7 +154,7 @@ describe("connecting a service from the composer", () => {
     await waitFor(() =>
       expect(useCopilotUIStore.getState().contextPanelExpert).toEqual({
         id: "expert-maria",
-        name: "Maria",
+        name: "Marketing Strategist",
       }),
     );
 

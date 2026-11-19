@@ -206,13 +206,15 @@ class HandoffToExpertTool(BaseTool):
                     exc_info=True,
                 )
             return self._error(
-                _refused_transfer_message(target.name, outcome, result.refusal),
+                _refused_transfer_message(
+                    target.display_title, outcome, result.refusal
+                ),
                 session,
             )
         transferred = _transferred_response(
             inner_session_id=inner.session_id,
             parent_session_id=session.session_id,
-            target_name=target.name,
+            target_name=target.display_title,
             waiting_for_slot=outcome == "queued_for_slot",
         )
         transferred.message += await build_spawn_state_note()
@@ -223,6 +225,7 @@ class HandoffToExpertTool(BaseTool):
                 id=target.id,
                 name=target.name,
                 role=target.role,
+                job_title=target.job_title,
                 avatar_url=target.avatar_url,
                 color=target.color,
             ),
@@ -273,7 +276,7 @@ class HandoffToExpertTool(BaseTool):
             )
         if target.schedules_paused_at is not None:
             raise _HandoffRefused(
-                f"{target.name} is paused (budget guardrail or archive) and "
+                f"{target.display_title} is paused (budget guardrail or archive) and "
                 "cannot take the task until the user resumes them."
             )
         return target
@@ -288,7 +291,7 @@ class HandoffToExpertTool(BaseTool):
         except Exception as e:
             logger.warning(f"Handing-off expert lookup failed: {e}")
             return "a teammate"
-        return caller.name if caller else "a teammate"
+        return caller.display_title if caller else "a teammate"
 
 
 def _request_refusal(

@@ -724,3 +724,20 @@ def test_an_experts_held_call_names_the_expert() -> None:
 
     assert item.description == "Issa is waiting for your approval."
     assert item.expert is not None and item.expert.name == "Issa"
+
+
+@pytest.mark.parametrize("gate", [False, True], ids=["workflow", "held-call"])
+def test_review_projects_title_from_the_authorized_roster(gate: bool) -> None:
+    expert = _expert().model_copy(update={"job_title": "Executive Assistant"})
+    review = (_gate_review() if gate else _review(NOW)).model_copy(
+        update={"expert_id": expert.id, "expert_name": "Old name"}
+    )
+
+    [item] = compose_attention_items(
+        now=NOW, experts=[expert], reviews=[review], schedules=[], credits_balance=None
+    )
+
+    assert item.expert is not None
+    assert item.expert.model_dump()["job_title"] == "Executive Assistant"
+    assert item.expert.role == "Assistant"
+    assert item.expert.id == expert.id

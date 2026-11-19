@@ -48,7 +48,7 @@ test("localizes review action names and decline confirmation while preserving th
     screen.getByRole("button", { name: "确认拒绝：Approve original email" }),
   );
   expect(onDecline).toHaveBeenCalledWith(review);
-  expect(screen.getByText("Ana · Original workflow")).toBeDefined();
+  expect(screen.getByText("AI 专家 · Original workflow")).toBeDefined();
 });
 
 test("localizes only the app-owned review title fallback", () => {
@@ -63,4 +63,50 @@ test("localizes only the app-owned review title fallback", () => {
     </LanguageProvider>,
   );
   expect(screen.getByRole("button", { name: "批准：需要审核" })).toBeDefined();
+});
+
+test("renders a legacy spend heading from the charged expert's profession", () => {
+  const spendReview: PendingHumanReviewModel = {
+    ...review,
+    node_exec_id: "expert-spend:exp-1:run-1",
+    payload: {
+      expert: "Ana",
+      spent_credits: 30,
+      threshold_credits: 25,
+      window: "week",
+    },
+    instructions:
+      "Ana has used 30 of 25 credits this week and needs your approval to keep spending",
+    editable: false,
+  };
+  const onApprove = vi.fn();
+  render(
+    <NeedsAttentionRow
+      review={spendReview}
+      isProcessing={false}
+      onApprove={onApprove}
+      onDecline={vi.fn()}
+      roster={
+        new Map([
+          [
+            "exp-1",
+            {
+              id: "exp-1",
+              name: "Ana",
+              role: "Sales",
+              avatar_url: null,
+              is_archived: false,
+            },
+          ],
+        ])
+      }
+    />,
+  );
+
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: "Approve: Sales Development Rep has used 30 of 25 credits this week and needs your approval to keep spending",
+    }),
+  );
+  expect(onApprove).toHaveBeenCalledWith(spendReview);
 });

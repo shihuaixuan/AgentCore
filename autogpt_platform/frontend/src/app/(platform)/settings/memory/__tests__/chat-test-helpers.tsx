@@ -109,6 +109,7 @@ export function setupMemoryChat() {
         id: "expert-maria",
         name: "Maria",
         role: "Growth Marketer",
+        job_title: null,
         avatar_url: null,
         is_archived: false,
       },

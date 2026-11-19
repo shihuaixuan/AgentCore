@@ -119,13 +119,18 @@ def compose_briefing(
         fallback = experts_by_id.get(
             review.expert_id or expert_id_by_exec.get(review.graph_exec_id or "") or ""
         )
+        expert_id = review.expert_id or (fallback.id if fallback else None)
         decision_items.append(
             BriefingDecisionItem(
                 node_exec_id=review.node_exec_id,
                 graph_exec_id=review.graph_exec_id,
                 title=review.instructions or "Review needed",
-                expert_id=review.expert_id or (fallback.id if fallback else None),
-                expert_name=review.expert_name or (fallback.name if fallback else None),
+                expert_id=expert_id,
+                expert_name=(
+                    fallback.display_title
+                    if fallback
+                    else ("AI Expert" if expert_id else None)
+                ),
                 expert_avatar_url=review.expert_avatar_url
                 or (fallback.avatar_url if fallback else None),
                 link=link,

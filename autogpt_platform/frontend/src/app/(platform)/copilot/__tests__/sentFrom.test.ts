@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  getSentFromDisplayName,
+  getSentFromDisplayTitle,
   getSentFromMetadata,
   getSessionSentFrom,
   isSessionOpeningMessage,
@@ -16,11 +16,12 @@ describe("getSentFromMetadata", () => {
         from_session_id: SESSION_ID,
         from_expert_id: EXPERT_ID,
         from_expert_name: "Ari",
+        from_expert_job_title: " QA Engineer ",
       }),
     ).toEqual({
       sessionId: SESSION_ID,
       expertId: EXPERT_ID,
-      expertName: "Ari",
+      expertJobTitle: "QA Engineer",
     });
   });
 
@@ -30,7 +31,7 @@ describe("getSentFromMetadata", () => {
         from_session_id: SESSION_ID,
         from_expert_id: null,
       }),
-    ).toEqual({ sessionId: SESSION_ID, expertId: null, expertName: null });
+    ).toEqual({ sessionId: SESSION_ID, expertId: null });
   });
 
   it("ignores metadata without a valid sending session id", () => {
@@ -47,7 +48,7 @@ describe("getSessionSentFrom", () => {
         delegated_by_session_id: SESSION_ID,
         delegated_by_expert_id: EXPERT_ID,
       }),
-    ).toEqual({ sessionId: SESSION_ID, expertId: EXPERT_ID, expertName: null });
+    ).toEqual({ sessionId: SESSION_ID, expertId: EXPERT_ID });
   });
 
   it("returns null for a thread nobody delegated", () => {
@@ -56,20 +57,30 @@ describe("getSessionSentFrom", () => {
   });
 });
 
-describe("getSentFromDisplayName", () => {
-  it("prefers the name stamped on the message, then the roster, then a default", () => {
-    const stamped = {
-      sessionId: SESSION_ID,
-      expertId: EXPERT_ID,
-      expertName: "Ari",
-    };
-    expect(getSentFromDisplayName(stamped, "Roster Ari")).toBe("Ari");
-    const unnamed = { ...stamped, expertName: null };
-    expect(getSentFromDisplayName(unnamed, "Roster Ari")).toBe("Roster Ari");
-    expect(getSentFromDisplayName(unnamed, null)).toBe("an expert");
-    expect(getSentFromDisplayName({ ...unnamed, expertId: null }, null)).toBe(
-      "Otto",
+describe("getSentFromDisplayTitle", () => {
+  it("prefers the stamped profession, then the roster, then a default", () => {
+    const unstamped = { sessionId: SESSION_ID, expertId: EXPERT_ID };
+    const roster = { role: "Code Review & QA", jobTitle: null };
+    expect(
+      getSentFromDisplayTitle(
+        { ...unstamped, expertJobTitle: "QA Lead" },
+        roster,
+        "en",
+      ),
+    ).toBe("QA Lead");
+    expect(getSentFromDisplayTitle(unstamped, roster, "zh-CN")).toBe(
+      "质量保障工程师",
     );
+    expect(getSentFromDisplayTitle(unstamped, undefined, "zh-CN")).toBe(
+      "AI 专家",
+    );
+    expect(
+      getSentFromDisplayTitle(
+        { ...unstamped, expertId: null },
+        undefined,
+        "en",
+      ),
+    ).toBe("Otto");
   });
 });
 

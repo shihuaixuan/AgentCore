@@ -98,7 +98,7 @@ class RaiseExpertTool(BaseTool):
     def description(self) -> str:
         return (
             EXPERT_CREATION_COPY_POLICY
-            + " Preview if no template fits; never hires. Collect name, role, tagline, color and charter (ownership, success criteria, boundaries). Card shows charter; add at most one short line. Returns one-time confirmation_id; await user approval before tool:confirm_expert_change. For a task already in the chat, pass handoff_title + handoff_task."
+            + " Preview if no template fits; never hires. Collect job title, role, tagline, color and charter (ownership, success criteria, boundaries). Card shows charter; add at most one short line. Returns one-time confirmation_id; await user approval before tool:confirm_expert_change. For a task already in the chat, pass handoff_title + handoff_task."
         )
 
     @property
@@ -106,10 +106,6 @@ class RaiseExpertTool(BaseTool):
         return {
             "type": "object",
             "properties": {
-                "name": {
-                    "type": "string",
-                    "description": ("First name; put job titles in job_title."),
-                },
                 "role": {
                     "type": "string",
                     "description": "Area owned, e.g. 'SEO & Content'.",
@@ -152,7 +148,7 @@ class RaiseExpertTool(BaseTool):
                 },
                 **HANDOFF_PARAMETERS,
             },
-            "required": ["name", "tagline", "about", "boundaries"],
+            "required": ["job_title", "tagline", "about", "boundaries"],
         }
 
     async def _execute(
@@ -197,7 +193,7 @@ class RaiseExpertTool(BaseTool):
                 # ``expert_context`` renders one line per teammate, so an
                 # embedded newline in either field forges extra roster
                 # entries that ``escape_prompt_xml_tags`` cannot neutralise.
-                name=" ".join(name.split()),
+                name=" ".join((name.strip() or job_title).split()),
                 role=" ".join(role.split()),
                 job_title=" ".join(job_title.split()),
                 tagline=" ".join(tagline.split()),
@@ -223,7 +219,11 @@ class RaiseExpertTool(BaseTool):
                 session_id=session_id,
             )
         try:
-            duplicate = await _active_expert_named(user_id, params.name)
+            duplicate = (
+                await _active_expert_named(user_id, params.name)
+                if name.strip()
+                else None
+            )
         except _RosterUnavailable as e:
             # Nothing downstream enforces name uniqueness, so a roster read we
             # could not perform must not pass for "no duplicate".
@@ -235,7 +235,7 @@ class RaiseExpertTool(BaseTool):
         if duplicate:
             return ErrorResponse(
                 message=(
-                    f"An active expert named {duplicate.name} already exists "
+                    f"An active expert for {duplicate.role} already exists "
                     f"(expert_id: {duplicate.id}, role: {duplicate.role}) — "
                     "do not raise them again. Delegate work to them with "
                     "delegate_to_expert, or change their charter with "

@@ -227,17 +227,19 @@ async def test_the_lede_reports_the_team_rather_than_claiming_its_work():
 
     system = mock.await_args.args[1][0]["content"]
     assert "the whole team's work" in system
-    assert "Credit each expert by name for their own work" in system
+    assert "Credit each expert by job title" in system
 
 
 @pytest.mark.asyncio
-async def test_facts_name_the_expert_behind_each_run():
+async def test_facts_credit_the_experts_profession():
     """Otto can only credit an expert it was told about."""
     with patch_llm(return_value=completion("Morning.")) as mock:
-        await compose_narrative(USER, make_content())
+        outcome = make_run_item().model_copy(update={"expert_role": "Researcher"})
+        await compose_narrative(USER, make_content(run_items=[outcome]))
 
     facts = mock.await_args.args[1][1]["content"]
-    assert "Ana / Lead Finder" in facts
+    assert "Researcher / Lead Finder" in facts
+    assert "Ana" not in facts
 
 
 @pytest.mark.asyncio

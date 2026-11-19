@@ -7,6 +7,7 @@ import {
   getPostV2ProcessReviewActionMockHandler200,
 } from "@/app/api/__generated__/endpoints/executions/executions.msw";
 import type { PendingHumanReviewModel } from "@/app/api/__generated__/models/pendingHumanReviewModel";
+import { getListExpertIdentitiesMockHandler200 } from "@/app/api/__generated__/endpoints/experts/experts.msw";
 import { Toaster } from "@/components/molecules/Toast/toaster";
 import { server } from "@/mocks/mock-server";
 import { render, screen, waitFor } from "@/tests/integrations/test-utils";
@@ -40,6 +41,15 @@ test("renders attributed rows and approves in one tap", async () => {
   let actionBody: unknown;
   server.use(
     getGetV2GetPendingReviewsMockHandler200([review]),
+    getListExpertIdentitiesMockHandler200([
+      {
+        id: "exp-1",
+        name: "Ana",
+        role: "Sales",
+        avatar_url: null,
+        is_archived: false,
+      },
+    ]),
     getPostV2ProcessReviewActionMockHandler200(async (info) => {
       actionBody = await info.request.json();
       return { approved_count: 1, rejected_count: 0, failed_count: 0 };
@@ -48,7 +58,13 @@ test("renders attributed rows and approves in one tap", async () => {
 
   render(<NeedsAttentionList />);
   expect(await screen.findByText("Approve outreach email")).toBeDefined();
-  expect(screen.getByText(/Ana/)).toBeDefined();
+  const subtitle = await screen.findByText(
+    "Sales Development Rep · Lead Finder",
+  );
+  expect(subtitle.closest("a")?.getAttribute("href")).toBe(
+    "/library/agents/lib-1?activeTab=runs&activeItem=run-1",
+  );
+  expect(screen.queryByText(/Ana/)).toBeNull();
 
   await userEvent.click(screen.getByRole("button", { name: /^Approve:/ }));
   await waitFor(() =>

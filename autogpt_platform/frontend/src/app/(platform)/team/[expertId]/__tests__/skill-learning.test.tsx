@@ -304,7 +304,9 @@ describe("Expert skills — learning", () => {
     await openSkillsTab();
 
     await userEvent.click(
-      await screen.findByRole("switch", { name: "Nightly learning for Alex" }),
+      await screen.findByRole("switch", {
+        name: "Nightly learning for Data Analyst",
+      }),
     );
     await waitFor(() =>
       expect(policy).toHaveBeenCalledWith({ learning_paused: true }),

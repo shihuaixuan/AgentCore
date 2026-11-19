@@ -50,11 +50,11 @@ export function TaskRow({
   onSend,
   onRemove,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
   const pillID = useId();
   const whyID = useId();
-  const name = getOwnerName(owner);
+  const name = getOwnerName(owner, locale);
   const isSent = getTaskState(task) === "sent" && Boolean(task.session_id);
   const hasWhy = showWhy && Boolean(task.why);
   // What the row's own label leaves out: the pill and the why.

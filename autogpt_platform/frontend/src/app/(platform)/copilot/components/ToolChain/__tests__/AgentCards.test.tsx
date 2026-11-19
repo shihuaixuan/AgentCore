@@ -182,7 +182,7 @@ describe("SubSessionCard", () => {
       />,
     );
 
-    expect(screen.getByAltText("Maria").getAttribute("src")).toBe(
+    expect(screen.getByAltText("Researcher").getAttribute("src")).toBe(
       "https://cdn.example.com/maria.png",
     );
     expect(screen.getByText("Researcher")).toBeDefined();

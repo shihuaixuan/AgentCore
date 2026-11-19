@@ -365,9 +365,7 @@ def test_persisted_briefing_prefers_the_live_expert_record() -> None:
     assert (expert.id, expert.name, expert.role) == ("expert-1", "Ana", "Researcher")
 
 
-def test_persisted_briefing_drops_attribution_without_a_stored_name() -> None:
-    """An id with nothing to render beside it is not an attribution — the card
-    would otherwise show an expert row with a blank name."""
+def test_persisted_briefing_keeps_the_profession_without_a_stored_name() -> None:
     nameless = _stored_item("stored-run").model_copy(update={"expert_name": None})
 
     briefing = compose_briefing(
@@ -378,7 +376,8 @@ def test_persisted_briefing_drops_attribution_without_a_stored_name() -> None:
         persisted=_stored(nameless),
     )
 
-    assert briefing.outcomes[0].expert is None
+    assert briefing.outcomes[0].expert is not None
+    assert briefing.outcomes[0].expert.name == "Researcher"
 
 
 def test_persisted_failures_keep_their_order_ahead_of_later_ones() -> None:
@@ -412,12 +411,20 @@ def test_persisted_briefing_keeps_stored_attribution_for_an_unknown_expert() -> 
         executions=[],
         expert_by_id={},
         agent_by_graph=TRIAGE,
-        persisted=_stored(_stored_item("stored-run")),
+        persisted=_stored(
+            _stored_item("stored-run").model_copy(
+                update={"expert_job_title": "Market Research Analyst"}
+            )
+        ),
     )
 
     expert = briefing.outcomes[0].expert
     assert expert is not None
-    assert (expert.id, expert.name, expert.role) == ("expert-1", "Ana", "Researcher")
+    assert (expert.id, expert.name, expert.job_title) == (
+        "expert-1",
+        "Market Research Analyst",
+        "Market Research Analyst",
+    )
 
 
 def test_a_row_written_before_the_composer_was_unified_falls_back_to_the_agent() -> (

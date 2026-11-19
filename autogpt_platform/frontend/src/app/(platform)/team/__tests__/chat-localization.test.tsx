@@ -34,14 +34,13 @@ function SwitchLanguage() {
   return <button onClick={() => setLocale("en")}>English</button>;
 }
 
-test("switches known chat roles and panel actions while preserving expert names", () => {
+test("switches the profession fallback and panel actions with the locale", () => {
   render(
     <LanguageProvider>
       <SwitchLanguage />
       <ExpertChatDrawer
         target={{
           expertId: "original-expert",
-          name: "Original Nova",
           role: "SEO & Content",
           avatarUrl: null,
         }}
@@ -49,10 +48,10 @@ test("switches known chat roles and panel actions while preserving expert names"
       />
     </LanguageProvider>,
   );
-  expect(screen.getByText("Original Nova · SEO 内容经理")).toBeDefined();
+  expect(screen.getByText("SEO 内容经理")).toBeDefined();
   expect(screen.getByRole("button", { name: "关闭聊天面板" })).toBeDefined();
   fireEvent.click(screen.getByRole("button", { name: "English" }));
-  expect(screen.getByText("Original Nova · SEO Content Manager")).toBeDefined();
+  expect(screen.getByText("SEO Content Manager")).toBeDefined();
   expect(
     screen.getByRole("button", { name: "Close chat panel" }),
   ).toBeDefined();
@@ -64,7 +63,6 @@ test("keeps custom chat roles verbatim in Chinese", () => {
       <ExpertChatDrawer
         target={{
           expertId: "original-expert",
-          name: "Original Nova",
           role: "Custom Role 自定义",
           avatarUrl: null,
         }}
@@ -72,5 +70,5 @@ test("keeps custom chat roles verbatim in Chinese", () => {
       />
     </LanguageProvider>,
   );
-  expect(screen.getByText("Original Nova · Custom Role 自定义")).toBeDefined();
+  expect(screen.getByText("Custom Role 自定义")).toBeDefined();
 });

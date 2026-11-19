@@ -1,5 +1,5 @@
-import { ExpertAvatar as SharedExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
+import { ExpertAvatar as SharedExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -43,7 +43,7 @@ export function ExpertAvatar({
       avatarUrl={avatarUrl}
       color={color}
       size={isSmall ? 24 : 36}
-      className={borderClass}
+      className="rounded-lg border border-border-base"
     />
   );
 }

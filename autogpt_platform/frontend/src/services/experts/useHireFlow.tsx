@@ -17,16 +17,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "./expert-role-label";
 
 function celebrate(
   result: HireResult,
-  t: ReturnType<typeof useTranslation>["t"],
+  { t, locale }: Pick<ReturnType<typeof useTranslation>, "t" | "locale">,
 ) {
+  const title = getExpertDisplayTitle(result.expert, locale);
   toast({
-    title: t(
-      `${result.expert.name} joined your team`,
-      `${result.expert.name} 已加入你的团队`,
-    ),
+    title: t(`${title} joined your team`, `${title} 已加入你的团队`),
     description:
       result.expert.setup_status === "installing"
         ? t(
@@ -53,7 +52,7 @@ function celebrate(
  *  the persona ships writing samples, then celebrate and hand the user to
  *  the expert's first thread. */
 export function useHireFlow(expert: Expert | null) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const router = useRouter();
   const [hireResult, setHireResult] = useState<HireResult | null>(null);
@@ -70,7 +69,7 @@ export function useHireFlow(expert: Expert | null) {
     setHireResult(null);
     setIsVoicePickOpen(false);
     if (completedHire) {
-      celebrate(completedHire, t);
+      celebrate(completedHire, { t, locale });
       // Hiring isn't installing: hand the user straight to the expert's
       // thread with kickoff=1 so it introduces itself and starts its job.
       router.push(`/copilot?expertId=${completedHire.expert.id}&kickoff=1`);
@@ -94,7 +93,10 @@ export function useHireFlow(expert: Expert | null) {
       finish();
     } catch {
       toast({
-        title: t(`Couldn't hire ${expert.name}`, `无法聘用 ${expert.name}`),
+        title: t(
+          `Couldn't hire ${getExpertDisplayTitle(expert, locale)}`,
+          `无法聘用 ${getExpertDisplayTitle(expert, locale)}`,
+        ),
         description: t(
           "Something went wrong. Please try again.",
           "出现了问题，请重试。",

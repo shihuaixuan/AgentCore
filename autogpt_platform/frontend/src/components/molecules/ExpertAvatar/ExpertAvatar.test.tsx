@@ -6,13 +6,13 @@ const MINA = "/autogpt-characters/v1.1/expert-mina/neutral/128.webp";
 const JULES = "/autogpt-characters/v2.1/expert-jules/neutral/128.webp";
 
 describe("ExpertAvatar saved appearance", () => {
-  test("uses the saved clay identity after a rename and color change", () => {
+  test("uses the matching professional portrait after a title and color change", () => {
     const { rerender } = render(
       <ExpertAvatar name="Mina" avatarUrl={MINA} size={32} />,
     );
     const image = screen.getByRole("img");
     expect(image.getAttribute("src")).toBe(
-      "/autogpt-characters/v1.1/expert-mina/neutral/32.webp",
+      "/experts/professional/expert-mina.webp",
     );
     rerender(
       <ExpertAvatar
@@ -27,10 +27,11 @@ describe("ExpertAvatar saved appearance", () => {
     );
   });
 
-  test("serves a 2.1 identity from its own library with 1x and 2x sources", () => {
+  test("falls back to the same 2.1 identity with 1x and 2x sources", () => {
     const { container } = render(
       <ExpertAvatar name="Jules" avatarUrl={JULES} size={88} />,
     );
+    fireEvent.error(screen.getByRole("img"));
     expect(screen.getByRole("img").getAttribute("src")).toBe(
       "/autogpt-characters/v2.1/expert-jules/neutral/96.webp",
     );
@@ -48,12 +49,16 @@ describe("ExpertAvatar saved appearance", () => {
       />,
     );
     expect(screen.getByRole("img").getAttribute("src")).toBe(
-      "/autogpt-characters/v2.1/expert-jules/neutral/40.webp",
+      "/experts/professional/expert-jules.webp",
     );
   });
 
-  test("falls back to PNG then initials without borrowing another identity", () => {
+  test("falls back to managed WebP, PNG then initials without borrowing another identity", () => {
     render(<ExpertAvatar name="My editor" avatarUrl={MINA} size={32} />);
+    fireEvent.error(screen.getByRole("img"));
+    expect(screen.getByRole("img").getAttribute("src")).toBe(
+      "/autogpt-characters/v1.1/expert-mina/neutral/32.webp",
+    );
     fireEvent.error(screen.getByRole("img"));
     expect(screen.getByRole("img").getAttribute("src")).toBe(
       "/autogpt-characters/v1.1/expert-mina/neutral/32.png",
@@ -91,7 +96,7 @@ test("a managed identity keeps its opaque studio tile on a topic background", ()
   );
   const image = screen.getByRole("img");
   expect(image.getAttribute("src")).toBe(
-    "/autogpt-characters/v1.1/expert-mina/neutral/96.webp",
+    "/experts/professional/expert-mina.webp",
   );
   expect(image.getAttribute("alt")).toBe("Mina, AI Expert");
 });

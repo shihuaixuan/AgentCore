@@ -74,6 +74,7 @@ def _template():
         id="tpl-james",
         name="James",
         role="Operations",
+        job_title="Operations Manager",
         tagline="Keeps orders, stock and suppliers moving.",
         identity="You run operations.",
         boundaries="You never pay a supplier yourself.",
@@ -88,6 +89,8 @@ def _hired(*, paused: bool = False):
         id="exp-james",
         name="James",
         role="Operations",
+        job_title="Operations Manager",
+        display_title="Operations Manager",
         tagline="Keeps orders, stock and suppliers moving.",
         identity="You run operations.",
         boundaries="You never pay a supplier yourself.",
@@ -291,9 +294,9 @@ class TestHireAndHandOffInOneApproval:
         assert isinstance(resp, ExpertChangeAppliedResponse)
         env.turn.assert_not_called()
         assert resp.handoff is None
-        assert resp.message.startswith("James is hired and on the team")
-        assert "James has no chat yet" in resp.message
-        assert "Chat with James button" in resp.message
+        assert resp.message.startswith("Operations Manager is hired and on the team")
+        assert "Operations Manager has no chat yet" in resp.message
+        assert "Chat with Operations Manager button" in resp.message
         assert "Never say a thread or chat with them already exists" in resp.message
 
     @pytest.mark.asyncio(loop_scope="session")
@@ -307,8 +310,8 @@ class TestHireAndHandOffInOneApproval:
             resp = await _confirm(_approve(session), preview.confirmation_id)
 
         assert isinstance(resp, ExpertChangeAppliedResponse)
-        assert "James already has a chat with the user" in resp.message
-        assert "the card's Chat with James button opens it" in resp.message
+        assert "Operations Manager already has a chat with the user" in resp.message
+        assert "the card's Chat with Operations Manager button opens it" in resp.message
         assert "no chat yet" not in resp.message
 
     @pytest.mark.asyncio(loop_scope="session")

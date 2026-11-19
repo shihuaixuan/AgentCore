@@ -2,6 +2,7 @@ import type { Expert } from "@/app/api/__generated__/models/expert";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import type { Locale } from "@/lib/i18n/locale";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 export const RECENT_FACTS_LIMIT = 6;
 
@@ -38,20 +39,25 @@ export function getScopeName(
 ) {
   if (!scopeExpertID) return "Otto";
   const expert = experts?.find((e) => e.id === scopeExpertID);
-  return expert?.name ?? (locale === "zh-CN" ? "这位专家" : "this expert");
+  return expert
+    ? getExpertDisplayTitle(expert, locale)
+    : locale === "zh-CN"
+      ? "这位专家"
+      : "this expert";
 }
 
 /** Panel identity for a learning record: the Expert, or the personal scope. */
 export function learningSheetScope(
   expertId: string | null,
   experts: Expert[] | undefined,
+  locale: Locale,
 ) {
   const expert = expertId
     ? experts?.find((candidate) => candidate.id === expertId)
     : undefined;
   return {
     expertId: expert ? expert.id : null,
-    name: expert ? expert.name : "Otto",
+    name: expertId ? getExpertDisplayTitle(expert, locale) : "Otto",
     avatarUrl: expert ? expert.avatar_url : null,
     color: expert ? expert.color : null,
   };

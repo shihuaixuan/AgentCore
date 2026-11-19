@@ -34,7 +34,7 @@ class ListTeamTool(BaseTool):
     @property
     def description(self) -> str:
         return (
-            "List the experts currently on the user's team (name, expert_id, "
+            "List the experts currently on the user's team (job title, expert_id, "
             "role, paused state). The roster in <team_context> is a snapshot "
             "from the start of this chat — call this before hiring, raising, "
             "or delegating whenever the team may have changed since, or when "
@@ -77,7 +77,7 @@ class ListTeamTool(BaseTool):
         # learn how much access its teammates hold.
         show_credentials = session.expert_id is None
         lines = "; ".join(
-            f"{e.name} — {e.role} (expert_id: {e.id}, "
+            f"{e.display_title} (expert_id: {e.id}, "
             f"{len(e.workflows)} workflow(s)"
             + (f", {e.credential_count} credential(s))" if show_credentials else ")")
             + (" [paused]" if e.schedules_paused_at is not None else "")
@@ -95,7 +95,7 @@ class ListTeamTool(BaseTool):
             experts=[
                 TeamExpertInfo(
                     id=e.id,
-                    name=e.name,
+                    name=e.display_title,
                     role=e.role,
                     color=e.color,
                     avatar_url=e.avatar_url,

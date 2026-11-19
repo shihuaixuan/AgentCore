@@ -86,13 +86,13 @@ test("localizes default empty copy but preserves a caller-supplied empty message
   expect(screen.getByText("Raw empty message")).toBeDefined();
 });
 
-test("localizes approval attribution and spend accessibility without translating expert names", () => {
+test("localizes an unknown expert and keeps separate legacy actors distinct", () => {
   expect(
     waitingOnLine(
-      [["copilot-node-gate-1", [{ ...review, expert_name: "Your team" }]]],
+      [["copilot-node-gate-1", [{ ...review, expert_name: "Ana" }]]],
       "zh-CN",
     ),
-  ).toBe("Your team 正在等待你批准下方操作。");
+  ).toBe("AI 专家 正在等待你批准下方操作。");
   expect(
     waitingOnLine(
       [
@@ -107,6 +107,9 @@ test("localizes approval attribution and spend accessibility without translating
       "zh-CN",
     ),
   ).toBe("你的团队正在等待你批准下方操作。");
+});
+
+test("localizes spend accessibility without translating the child", () => {
   render(
     <LanguageProvider>
       <SpendRing spent={30} threshold={100}>

@@ -10,13 +10,15 @@ import { ExpertAvatarPicker } from "@/components/molecules/ExpertAvatarPicker/Ex
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { useExpertAvatarButton } from "./useExpertAvatarButton";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 interface Props {
   expert: Expert;
 }
 
 export function ExpertAvatarButton({ expert }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   const { isOpen, setIsOpen, saveAvatar, isPending } = useExpertAvatarButton(
     expert.id,
   );
@@ -25,14 +27,11 @@ export function ExpertAvatarButton({ expert }: Props) {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        aria-label={t(
-          `Change ${expert.name}'s appearance`,
-          `更改 ${expert.name} 的外观`,
-        )}
+        aria-label={t(`Change ${title}'s appearance`, `更改 ${title} 的外观`)}
         className="size-24 shrink-0 rounded-full focus-visible:ring-2 focus-visible:ring-focus"
       >
         <ExpertAvatar
-          name={expert.name}
+          name={title}
           avatarUrl={expert.avatar_url}
           size={96}
           // oxlint-disable-next-line design-system/no-restyle -- ExpertAvatar has no bordered variant (src/components is P9's)
@@ -45,17 +44,14 @@ export function ExpertAvatarButton({ expert }: Props) {
         />
       </button>
       <Dialog
-        title={t(
-          `Change ${expert.name}'s avatar`,
-          `更改 ${expert.name} 的头像`,
-        )}
+        title={t(`Change ${title}'s avatar`, `更改 ${title} 的头像`)}
         controlled={{ isOpen, set: setIsOpen }}
       >
         <Dialog.Content>
           {isOpen && (
             <fieldset disabled={isPending} className="min-w-0">
               <ExpertAvatarPicker
-                name={expert.name}
+                name={title}
                 category={
                   Object.values(ExpertAvatarRequestCategory).find(
                     (category) =>

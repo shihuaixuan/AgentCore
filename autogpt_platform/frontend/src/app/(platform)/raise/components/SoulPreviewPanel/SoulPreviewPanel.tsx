@@ -1,17 +1,11 @@
 "use client";
 
-import type { ExpertAvatarRequestCategory } from "@/app/api/__generated__/models/expertAvatarRequestCategory";
 import { GlassOrb } from "@/components/molecules/GlassOrb/GlassOrb";
 import { DEFAULT_GLASS_PARAMS } from "@/components/molecules/GlassOrb/GlassSurface";
-import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { kitBudgetLabel, kitToolsLabel, type RaiseKit } from "../../helpers";
-import { roleFor } from "../CategoryStep/helpers";
 import { SoulDetailCard } from "./SoulDetailCard";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
-
-const REVEAL =
-  "duration-700 animate-in fade-in slide-in-from-bottom-2 fill-mode-both motion-reduce:animate-none";
 
 type SoulDetail = {
   label: string;
@@ -19,9 +13,7 @@ type SoulDetail = {
 };
 
 interface Props {
-  name: string;
-  category: ExpertAvatarRequestCategory | null;
-  jobTitle?: string | null;
+  title: string;
   avatarUrl: string | null;
   color: string | null;
   about: string | null;
@@ -32,9 +24,7 @@ interface Props {
 // Starts as just the orb — an expert with nothing to say about itself yet.
 // Answers stack beneath it, which pushes the identity card up as they land.
 export function SoulPreviewPanel({
-  name,
-  category,
-  jobTitle,
+  title,
   avatarUrl,
   color,
   about,
@@ -42,19 +32,6 @@ export function SoulPreviewPanel({
   kit,
 }: Props) {
   const { t } = useTranslation();
-  const roles: Record<ExpertAvatarRequestCategory, string> = {
-    general: "助理",
-    marketing: "营销专员",
-    sales: "销售",
-    finance: "分析师",
-    support: "客户支持",
-    operations: "运营",
-    research: "研究员",
-    content: "作家",
-    development: "开发者",
-  };
-  const roleLabel =
-    jobTitle || (category ? t(roleFor(category) ?? "", roles[category]) : null);
   const details = [
     { label: t("About", "关于"), value: about },
     { label: t("Voice", "声音"), value: voiceLabel },
@@ -70,10 +47,7 @@ export function SoulPreviewPanel({
           {avatarUrl ? (
             <Image
               src={avatarUrl}
-              alt={t(
-                `${name || "Your expert"}'s picture`,
-                name ? `${name} 的头像` : "你的专家的头像",
-              )}
+              alt={t(`${title}'s picture`, `${title} 的头像`)}
               width={112}
               height={112}
               className="size-28 rounded-full object-cover"
@@ -84,25 +58,9 @@ export function SoulPreviewPanel({
           )}
         </div>
 
-        <div className="flex flex-col items-center gap-1.5">
-          <h2
-            className={cn(
-              "text-center text-heading-md font-semibold tracking-heading",
-              name
-                ? `text-foreground-base ${REVEAL}`
-                : "text-foreground-tertiary/50",
-            )}
-          >
-            {name || t("No name yet", "尚未命名")}
-          </h2>
-          {roleLabel ? (
-            <p
-              className={`text-body tracking-caps text-foreground-tertiary uppercase ${REVEAL}`}
-            >
-              {roleLabel}
-            </p>
-          ) : null}
-        </div>
+        <h2 className="max-w-full text-center text-heading-md font-semibold tracking-heading break-words text-foreground-base">
+          {title}
+        </h2>
       </aside>
 
       {details.map((detail) => (

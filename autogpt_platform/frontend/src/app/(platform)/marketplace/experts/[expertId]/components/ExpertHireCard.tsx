@@ -4,20 +4,21 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { creditsToUsdLabel } from "@/lib/credits";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { CheckmarkCircle02Icon, Coins01Icon } from "@hugeicons/core-free-icons";
 import type { ReactNode } from "react";
 
 interface Props {
   expert: Expert;
-  firstName: string;
   actions: ReactNode;
 }
 
 /** The page's call to action, kept in view: sticky beside the content on
  *  wide screens, straight under the hero on phones. It carries the price
  *  terms so the decision and its cost sit together. */
-export function ExpertHireCard({ expert, firstName, actions }: Props) {
-  const { t } = useTranslation();
+export function ExpertHireCard({ expert, actions }: Props) {
+  const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   const weeklyBudget = expert.weekly_budget ?? null;
   const workflowCount = expert.workflows.length;
 
@@ -54,12 +55,12 @@ export function ExpertHireCard({ expert, firstName, actions }: Props) {
         <p className="mt-1.5 text-body leading-6 text-foreground-secondary">
           {weeklyBudget
             ? t(
-                `Hiring ${firstName} costs nothing extra. Their work draws on your existing balance, capped at ${creditsToUsdLabel(weeklyBudget)} a week — a limit you can change once they are on your team.`,
-                `聘用 ${firstName} 无需额外费用。其工作将使用你的现有余额，每周支出上限为 ${creditsToUsdLabel(weeklyBudget)}；加入团队后，你可以调整此上限。`,
+                `Hiring ${title} costs nothing extra. Their work draws on your existing balance, capped at ${creditsToUsdLabel(weeklyBudget)} a week — a limit you can change once they are on your team.`,
+                `聘用 ${title} 无需额外费用。其工作将使用你的现有余额，每周支出上限为 ${creditsToUsdLabel(weeklyBudget)}；加入团队后，你可以调整此上限。`,
               )
             : t(
-                `Hiring ${firstName} costs nothing extra. Their work draws on your existing balance.`,
-                `聘用 ${firstName} 无需额外费用。其工作将使用你的现有余额。`,
+                `Hiring ${title} costs nothing extra. Their work draws on your existing balance.`,
+                `聘用 ${title} 无需额外费用。其工作将使用你的现有余额。`,
               )}
         </p>
       </div>

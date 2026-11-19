@@ -386,7 +386,6 @@ describe.each(["zh-CN", undefined] as const)("%s toast locale", (locale) => {
         useExpertChatDrawer({
           target: {
             expertId: null,
-            name: "Otto",
             role: "Original Role",
             avatarUrl: null,
           },

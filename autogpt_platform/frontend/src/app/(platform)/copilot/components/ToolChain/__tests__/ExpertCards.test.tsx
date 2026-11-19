@@ -71,7 +71,7 @@ describe("expert change cards", () => {
     );
 
     expect(screen.getByText("Create an Expert")).toBeDefined();
-    expect(screen.getByText("Otto")).toBeDefined();
+    expect(screen.queryByText("Otto")).toBeNull();
     expect(screen.getByText("Inbox triage")).toBeDefined();
     expect(screen.getByText("Sorts your morning inbox.")).toBeDefined();
     // The card is an introduction, not a charter — no status, budget or limits.
@@ -110,7 +110,7 @@ describe("expert change cards", () => {
     expect(activeArtifact?.id).toBe("expert:call-raise");
     expect(activeArtifact?.expert).toMatchObject({
       kind: "raise",
-      name: "Otto",
+      name: "Inbox triage",
       role: "Inbox triage",
       about: "You group the morning inbox.",
       boundaries: "You never send a reply yourself.",
@@ -236,13 +236,15 @@ describe("expert change cards", () => {
     );
 
     expect(screen.getByText("Expert created")).toBeDefined();
-    expect(screen.getByText("Otto")).toBeDefined();
+    expect(screen.queryByText("Otto")).toBeNull();
     expect(screen.getByText("Inbox triage")).toBeDefined();
     expect(screen.queryByText("Raised")).toBeNull();
     expect(screen.queryByText(/Couldn't set up/)).toBeNull();
     // The one way on: no chat exists yet, so the card opens the first one.
     expect(
-      screen.getByRole("link", { name: "Chat with Otto" }).getAttribute("href"),
+      screen
+        .getByRole("link", { name: "Chat with Inbox triage" })
+        .getAttribute("href"),
     ).toBe("/copilot?expertId=exp-otto&kickoff=1");
   });
 
@@ -263,7 +265,7 @@ describe("expert change cards", () => {
       />,
     );
 
-    expect(screen.getByText("Bea")).toBeDefined();
+    expect(screen.queryByText("Bea")).toBeNull();
     expect(screen.getByText("Ops lead")).toBeDefined();
     expect(screen.getByLabelText("Open sub-session").getAttribute("href")).toBe(
       "/copilot?sessionId=sub-1",
@@ -286,13 +288,19 @@ function expertPart(
 }
 
 function proposal(name: string, id: string): ToolUIPart {
+  const role =
+    name === "Fiona"
+      ? "Finance Analyst"
+      : name === "Bhaskar"
+        ? "Data Analyst"
+        : "Engineer";
   return expertPart(
     "output-available",
     {
       type: "expert_change_proposed",
       applied: false,
       confirmation_id: `c-${id}`,
-      preview: { kind: "raise", name, role: "Engineer" },
+      preview: { kind: "raise", name, role },
     },
     id,
   );
@@ -307,7 +315,7 @@ describe("ExpertChangePart", () => {
       />,
     );
 
-    expect(screen.getByText("Otto")).toBeDefined();
+    expect(screen.queryByText("Otto")).toBeNull();
     expect(screen.getByText("Engineer")).toBeDefined();
   });
 
@@ -351,7 +359,7 @@ describe("ExpertChangeGroup", () => {
   it("shows a single expert without a pager", () => {
     render(<ExpertChangeGroup parts={[proposal("Fiona", "a")]} />);
 
-    expect(screen.getByText("Fiona")).toBeDefined();
+    expect(screen.getByText("Finance Analyst")).toBeDefined();
     expect(screen.queryByRole("button", { name: "Next expert" })).toBeNull();
   });
 
@@ -367,26 +375,26 @@ describe("ExpertChangeGroup", () => {
       />,
     );
 
-    expect(screen.getByText("Fiona")).toBeDefined();
-    expect(screen.queryByText("Bhaskar")).toBeNull();
+    expect(screen.getByText("Finance Analyst")).toBeDefined();
+    expect(screen.queryByText("Data Analyst")).toBeNull();
     expect(screen.getByText("1 of 3")).toBeDefined();
     expect(
       screen.getByRole("button", { name: "Previous expert" }),
     ).toHaveProperty("disabled", true);
 
     await user.click(screen.getByRole("button", { name: "Next expert" }));
-    expect(screen.getByText("Bhaskar")).toBeDefined();
+    expect(screen.getByText("Data Analyst")).toBeDefined();
     expect(screen.getByText("2 of 3")).toBeDefined();
 
     await user.click(screen.getByRole("button", { name: "Go to expert 3" }));
-    expect(screen.getByText("Otto")).toBeDefined();
+    expect(screen.getByText("Engineer")).toBeDefined();
     expect(screen.getByRole("button", { name: "Next expert" })).toHaveProperty(
       "disabled",
       true,
     );
 
     await user.click(screen.getByRole("button", { name: "Previous expert" }));
-    expect(screen.getByText("Bhaskar")).toBeDefined();
+    expect(screen.getByText("Data Analyst")).toBeDefined();
   });
 
   it("leaves empty rows out of the pager once the stream is over", () => {
@@ -426,7 +434,7 @@ describe("expert approval", () => {
 
     // The line gate/card_approval.py takes as the answer to the confirm.
     expect(onSend).toHaveBeenCalledWith(
-      "Approved: create Otto (confirmation_id: 5f0c2a3e-7b1d-4c9e-8a6f-0d2b4e6c8a10).",
+      "Approved: create Executive Assistant (confirmation_id: 5f0c2a3e-7b1d-4c9e-8a6f-0d2b4e6c8a10).",
     );
   });
 
@@ -434,11 +442,11 @@ describe("expert approval", () => {
     const user = userEvent.setup();
     renderGroup([proposal("Fiona", "a"), proposal("Bhaskar", "b")]);
 
-    expect(screen.getByText("Fiona")).toBeDefined();
+    expect(screen.getByText("Finance Analyst")).toBeDefined();
     expect(screen.queryByRole("button", { name: "Send decisions" })).toBeNull();
 
     await user.click(screen.getByRole("button", { name: "Approve" }));
-    expect(screen.getByText("Bhaskar")).toBeDefined();
+    expect(screen.getByText("Data Analyst")).toBeDefined();
     expect(screen.getByText("2 of 2")).toBeDefined();
     expect(
       screen.getByRole("button", { name: "Go to expert 1" }).className,
@@ -454,8 +462,8 @@ describe("expert approval", () => {
     await user.click(screen.getByRole("button", { name: "Send decisions" }));
     expect(onSend).toHaveBeenCalledTimes(1);
     expect(onSend).toHaveBeenCalledWith(
-      "Approved: create Fiona (confirmation_id: c-a).\n" +
-        "Not approved: do not create Bhaskar, discard that proposal (confirmation_id: c-b).",
+      "Approved: create Finance Analyst (confirmation_id: c-a).\n" +
+        "Not approved: do not create Data Analyst, discard that proposal (confirmation_id: c-b).",
     );
     expect(screen.getByText("Sent")).toBeDefined();
     expect(screen.queryByRole("button", { name: "Undo decline" })).toBeNull();
@@ -489,7 +497,7 @@ describe("expert approval", () => {
 
     await user.click(screen.getByRole("button", { name: "Approve" }));
     expect(onSend).toHaveBeenCalledWith(
-      "Approved: create Otto (confirmation_id: c-a).",
+      "Approved: create Engineer (confirmation_id: c-a).",
     );
   });
 
@@ -509,7 +517,7 @@ describe("expert approval", () => {
     await user.click(screen.getByRole("button", { name: "Approve" }));
     await user.click(screen.getByRole("button", { name: "Previous expert" }));
 
-    expect(screen.getByText("Fiona")).toBeDefined();
+    expect(screen.getByText("Finance Analyst")).toBeDefined();
     expect(screen.queryByRole("button", { name: "Approve" })).toBeNull();
 
     await user.click(screen.getByRole("button", { name: "Unapprove" }));
@@ -528,7 +536,7 @@ describe("expert approval", () => {
     expect(screen.queryByRole("button", { name: "Send decisions" })).toBeNull();
 
     expect(onSend).toHaveBeenCalledWith(
-      "Approved: create Otto (confirmation_id: c-a).",
+      "Approved: create Engineer (confirmation_id: c-a).",
     );
   });
 
@@ -570,7 +578,7 @@ describe("expert approval", () => {
     await user.click(screen.getByRole("button", { name: "Approve" }));
 
     expect(onSend).toHaveBeenCalledWith(
-      "Approved: update Otto (confirmation_id: c-u).",
+      "Approved: update Engineer (confirmation_id: c-u).",
     );
   });
 
@@ -601,7 +609,7 @@ describe("expert approval", () => {
       />,
     );
 
-    const card = screen.getByText("Fiona").closest(".rounded-3xl");
+    const card = screen.getByText("Finance Analyst").closest(".rounded-3xl");
     expect(card).not.toBeNull();
     expect(card?.textContent).toContain("1 of 2");
     expect(card?.textContent).toContain("Approve");

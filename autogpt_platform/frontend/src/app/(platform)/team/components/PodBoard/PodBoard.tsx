@@ -7,6 +7,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Text } from "@/components/atoms/Text/Text";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { ArrowLeft01Icon, Folder02Icon } from "@hugeicons/core-free-icons";
 import { ReactNode, useState } from "react";
 import { TEAM_GRID_CLASS } from "../../helpers";
@@ -124,7 +125,7 @@ interface PodFolderProps {
 }
 
 function PodFolder({ name, experts, onOpen }: PodFolderProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   return (
     <button
       type="button"
@@ -160,7 +161,7 @@ function PodFolder({ name, experts, onOpen }: PodFolderProps) {
               key={expert.id}
               className="max-w-full truncate rounded-md bg-surface-muted px-2 py-0.5 font-sans text-caption text-foreground-secondary ring-1 ring-border-base ring-inset"
             >
-              {expert.name}
+              {getExpertDisplayTitle(expert, locale)}
             </li>
           ))}
         </ul>

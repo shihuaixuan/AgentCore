@@ -6,6 +6,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { cn } from "@/lib/utils";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { TeamHeaderActions } from "../TeamHeaderActions";
 
 interface Props {
@@ -26,7 +27,7 @@ const POSITIONS = [
 /** Otto flanked by the first two hires, over the page title and a line on
  *  what the team is for. */
 export function TeamPageHeader({ experts }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const flank = experts.slice(0, 2);
 
   return (
@@ -42,7 +43,7 @@ export function TeamPageHeader({ experts }: Props) {
               )}
             >
               <ExpertAvatar
-                name={expert.name}
+                name={getExpertDisplayTitle(expert, locale)}
                 avatarUrl={expert.avatar_url}
                 color={expert.color}
                 size={44}

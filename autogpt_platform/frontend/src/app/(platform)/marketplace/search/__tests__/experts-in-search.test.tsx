@@ -87,7 +87,9 @@ describe("Experts in marketplace search", () => {
     expect(
       await screen.findByRole("heading", { name: "Experts" }),
     ).toBeDefined();
-    const card = await screen.findByRole("link", { name: /Maria/ });
+    const card = await screen.findByRole("link", {
+      name: /^Marketing\b/,
+    });
     expect(card.getAttribute("href")).toBe(
       "/marketplace/experts/template-maria",
     );

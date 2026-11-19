@@ -1,4 +1,4 @@
-"""Turn a typed ``expert=<name>`` into the expert the turn runs as.
+"""Turn a typed ``expert=<job title>`` (or a legacy name) into an expert.
 
 Experts are DM-only: a server turn runs as the server-link owner but anyone
 in the server types it, so it stays on Otto. A name that matches nothing, or
@@ -6,6 +6,7 @@ more than one expert, gets one short reply and no turn.
 """
 
 import logging
+from collections import Counter
 
 from backend.platform_linking.models import BotExpert
 
@@ -46,33 +47,68 @@ async def resolve_turn_options(
     matches = match_experts(experts, name)
     if len(matches) == 1:
         return options.model_copy(
-            update={"expert_id": matches[0].id, "expert_name": matches[0].name}
+            update={"expert_id": matches[0].id, "expert_name": matches[0].display_title}
         )
     await reply_in_place(ctx, adapter, no_single_match_reply(name, experts, matches))
     return None
 
 
 def match_experts(experts: list[BotExpert], name: str) -> list[BotExpert]:
-    """Exact (case-insensitive) name matches, else names that start with it."""
-    wanted = name.casefold()
-    exact = [e for e in experts if e.name.casefold() == wanted]
+    """Match exact professions or legacy aliases before trying prefixes."""
+    wanted = name.strip().casefold()
+    if not wanted:
+        return []
+    labels = expert_labels(experts)
+    exact = [
+        expert
+        for expert in experts
+        if wanted
+        in (
+            expert.name.casefold(),
+            expert.display_title.casefold(),
+            labels[expert.id].casefold(),
+        )
+    ]
     if exact:
         return exact
-    return [e for e in experts if e.name.casefold().startswith(wanted)]
+    return [
+        expert
+        for expert in experts
+        if expert.name.casefold().startswith(wanted)
+        or expert.display_title.casefold().startswith(wanted)
+    ]
+
+
+def expert_labels(
+    experts: list[BotExpert], *, max_length: int | None = None
+) -> dict[str, str]:
+    titles = Counter(expert.display_title.casefold() for expert in experts)
+    positions: Counter[str] = Counter()
+    labels: dict[str, str] = {}
+    for expert in sorted(experts, key=lambda expert: expert.id):
+        title = expert.display_title
+        key = title.casefold()
+        positions[key] += 1
+        suffix = f" ({positions[key]})" if titles[key] > 1 else ""
+        if max_length is not None:
+            title = title[: max_length - len(suffix)]
+        labels[expert.id] = title + suffix
+    return labels
 
 
 def no_single_match_reply(
     name: str, experts: list[BotExpert], matches: list[BotExpert]
 ) -> str:
     if matches:
-        return f'More than one expert matches "{name}": {_names(matches)}.'
+        return f"More than one expert matches: {_names(matches, experts)}."
     if not experts:
         return "You haven't hired any experts yet. Hire one in AutoGPT first."
-    return f'No expert called "{name}". Your experts: {_names(experts)}.'
+    return f'No expert called "{name}". Your experts: {_names(experts, experts)}.'
 
 
-def _names(experts: list[BotExpert]) -> str:
-    return ", ".join(f"{e.name} ({e.role})" for e in experts)
+def _names(matches: list[BotExpert], experts: list[BotExpert]) -> str:
+    labels = expert_labels(experts)
+    return ", ".join(labels[expert.id] for expert in matches)
 
 
 async def reply_in_place(

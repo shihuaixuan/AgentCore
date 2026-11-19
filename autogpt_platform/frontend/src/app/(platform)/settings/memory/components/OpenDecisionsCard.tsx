@@ -6,6 +6,7 @@ import type { Expert } from "@/app/api/__generated__/models/expert";
 import type { SkillVersionSummary } from "@/app/api/__generated__/models/skillVersionSummary";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { skillDetailHref } from "@/services/skill-learning/helpers";
 import Link from "next/link";
 
@@ -25,7 +26,7 @@ export function OpenDecisionsCard({
   isDeciding,
   onDecide,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   if (decisions.length === 0) return null;
   return (
     <div
@@ -60,8 +61,14 @@ export function OpenDecisionsCard({
                   {proposal.skill_name}
                 </Link>
                 {" · "}
-                {experts.find((expert) => expert.id === proposal.expert_id)
-                  ?.name ?? "Otto"}
+                {proposal.expert_id
+                  ? getExpertDisplayTitle(
+                      experts.find(
+                        (expert) => expert.id === proposal.expert_id,
+                      ),
+                      locale,
+                    )
+                  : "Otto"}
               </Text>
               <Text variant="small" as="p" tone="secondary">
                 {proposal.summary || proposal.description} —{" "}

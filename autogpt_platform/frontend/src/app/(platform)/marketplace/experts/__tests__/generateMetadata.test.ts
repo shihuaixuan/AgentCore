@@ -42,18 +42,16 @@ describe("generateMetadata", () => {
     metadataLocale.current = "en";
   });
 
-  test("previews the expert's name, role and tagline", async () => {
+  test("previews the expert's profession and tagline", async () => {
     mockListExpertTemplates.mockResolvedValue({ data: [maria] });
 
     const metadata = await generateMetadata({
       params: Promise.resolve({ expertId: "template-maria" }),
     });
 
-    expect(metadata.title).toBe(
-      "Maria, Marketing · AI Expert - AutoGPT Marketplace",
-    );
+    expect(metadata.title).toBe("Marketing · AutoGPT Marketplace");
     expect(metadata.openGraph).toMatchObject({
-      title: "Maria, Marketing · AI Expert - AutoGPT Marketplace",
+      title: "Marketing · AutoGPT Marketplace",
       description: "Turns your product story into campaigns that land.",
       type: "profile",
     });
@@ -101,7 +99,7 @@ describe("generateMetadata", () => {
     const metadata = await generateMetadata({
       params: Promise.resolve({ expertId: maria.id }),
     });
-    expect(metadata.title).toBe("Maria，SEO 内容经理 · AI 专家 - AutoGPT 市场");
+    expect(metadata.title).toBe("SEO 内容经理 · AutoGPT 市场");
     expect(metadata.openGraph).toMatchObject({
       description: maria.tagline,
       type: "profile",
@@ -125,7 +123,7 @@ describe("generateMetadata", () => {
       const metadata = await generateMetadata({
         params: Promise.resolve({ expertId: maria.id }),
       });
-      expect(metadata.title).toBe(`Maria，${title} · AI 专家 - AutoGPT 市场`);
+      expect(metadata.title).toBe(`${title} · AutoGPT 市场`);
     },
   );
 

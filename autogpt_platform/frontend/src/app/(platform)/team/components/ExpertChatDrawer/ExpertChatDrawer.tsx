@@ -1,13 +1,14 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import { getExpertRoleLabel } from "@/services/experts/expert-role-label";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 import { ChatInput } from "@/app/(platform)/copilot/components/ChatInput/ChatInput";
 import { ChatMessagesContainer } from "@/app/(platform)/copilot/components/ChatMessagesContainer/ChatMessagesContainer";
 import { CopilotChatActionsProvider } from "@/app/(platform)/copilot/components/CopilotChatActionsProvider/CopilotChatActionsProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
+import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
 import { ArrowExpandIcon, NoteEditIcon } from "@hugeicons/core-free-icons";
 import { ExpertSidePanel } from "../ExpertSidePanel/ExpertSidePanel";
 import {
@@ -35,7 +36,7 @@ export function ExpertChatDrawer({
   threadKey = 0,
   seedPrompt = null,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const chat = useExpertChatDrawer({
     target,
     isOpen: target !== null,
@@ -50,7 +51,10 @@ export function ExpertChatDrawer({
       : "/copilot";
   const identity = target
     ? {
-        name: target.name,
+        name:
+          target.expertId === null
+            ? AUTOPILOT_NAME
+            : getExpertDisplayTitle(target, locale),
         avatarUrl: target.avatarUrl,
         color: target.color,
         isAutopilot: target.expertId === null,
@@ -60,9 +64,11 @@ export function ExpertChatDrawer({
   return (
     <ExpertSidePanel
       identity={identity}
-      title={target?.name ?? ""}
+      title={identity?.name ?? ""}
       ariaLabel={
-        target ? t(`Chat with ${target.name}`, `与 ${target.name} 聊天`) : ""
+        identity
+          ? t(`Chat with ${identity.name}`, `与 ${identity.name} 聊天`)
+          : ""
       }
       panelId="chat"
       closeLabel={t("Close chat panel", "关闭聊天面板")}
@@ -147,6 +153,20 @@ function ChatPanelBody({ target, identity, chat }: BodyProps) {
               queuedMessages={queuedMessages}
               pendingSend={pendingSend}
               isTurnSettling={chat.isTurnSettling}
+              expertIdentity={
+                target.expertId === null
+                  ? null
+                  : {
+                      id: target.expertId,
+                      name: identity.name,
+                      role: target.role,
+                      jobTitle: target.jobTitle,
+                      avatarUrl: target.avatarUrl,
+                      color: target.color,
+                      isArchived: false,
+                      readOnlyReason: null,
+                    }
+              }
               variant="compact"
               showThreadHeader={false}
             />
@@ -163,7 +183,10 @@ function ChatPanelBody({ target, identity, chat }: BodyProps) {
                 {t("What can I do for you?", "有什么可以帮你？")}
               </Text>
               <Text variant="small" tone="muted">
-                {target.name} · {getExpertRoleLabel(target.role, locale)}
+                {identity.name}
+                {identity.isAutopilot
+                  ? ` · ${getExpertDisplayTitle(target, locale)}`
+                  : null}
               </Text>
             </div>
           </div>
@@ -181,13 +204,13 @@ function ChatPanelBody({ target, identity, chat }: BodyProps) {
             onEnqueue={onSend}
             canAttachWhileStreaming
             placeholder={t(
-              `Message ${target.name}…`,
-              `给 ${target.name} 发消息…`,
+              `Message ${identity.name}…`,
+              `给 ${identity.name} 发消息…`,
             )}
             hasSession={!!sessionId}
             expertId={target.expertId}
-            expertName={target.name}
-            assistantName={target.name}
+            expertName={identity.name}
+            assistantName={identity.name}
           />
         </div>
       </div>

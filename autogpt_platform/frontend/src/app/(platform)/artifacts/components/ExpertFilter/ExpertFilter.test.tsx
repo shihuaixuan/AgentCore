@@ -4,16 +4,22 @@ import { fireEvent, render, screen } from "@/tests/integrations/test-utils";
 import { ExpertFilter } from "./ExpertFilter";
 
 const EXPERTS = [
-  { id: "expert-a", name: "Nova", avatarUrl: "https://cdn.test/nova.png" },
-  { id: "expert-b", name: "Kai", avatarUrl: null },
+  {
+    id: "expert-a",
+    name: "Nova",
+    role: "Editor",
+    jobTitle: "Copy Editor",
+    avatarUrl: "https://cdn.test/nova.png",
+  },
+  { id: "expert-b", name: "Kai", role: "Researcher", avatarUrl: null },
 ];
 
 describe("ExpertFilter", () => {
   test("renders Everyone plus one tab per expert", () => {
     render(<ExpertFilter experts={EXPERTS} value={null} onChange={() => {}} />);
     expect(screen.getByRole("tab", { name: "Everyone" })).toBeDefined();
-    expect(screen.getByRole("tab", { name: "Nova" })).toBeDefined();
-    expect(screen.getByRole("tab", { name: "Kai" })).toBeDefined();
+    expect(screen.getByRole("tab", { name: "Copy Editor" })).toBeDefined();
+    expect(screen.getByRole("tab", { name: "Researcher" })).toBeDefined();
   });
 
   test("marks the selected expert as active", () => {
@@ -21,7 +27,9 @@ describe("ExpertFilter", () => {
       <ExpertFilter experts={EXPERTS} value="expert-b" onChange={() => {}} />,
     );
     expect(
-      screen.getByRole("tab", { name: "Kai" }).getAttribute("aria-selected"),
+      screen
+        .getByRole("tab", { name: "Researcher" })
+        .getAttribute("aria-selected"),
     ).toBe("true");
     expect(
       screen
@@ -33,7 +41,7 @@ describe("ExpertFilter", () => {
   test("forwards the expert id, and null for Everyone", () => {
     const onChange = vi.fn();
     render(<ExpertFilter experts={EXPERTS} value={null} onChange={onChange} />);
-    fireEvent.click(screen.getByRole("tab", { name: "Nova" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Copy Editor" }));
     expect(onChange).toHaveBeenCalledWith("expert-a");
     fireEvent.click(screen.getByRole("tab", { name: "Everyone" }));
     expect(onChange).toHaveBeenCalledWith(null);

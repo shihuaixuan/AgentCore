@@ -101,6 +101,37 @@ describe("RecentChats — conversation list", () => {
     expect(screen.queryByText("Today")).toBeNull();
     expect(screen.queryByText("Yesterday")).toBeNull();
   });
+
+  it("shows the original expert's profession and portrait without replacing the conversation title", async () => {
+    const session = makeSession({
+      id: "marketing-chat",
+      title: "Plan the launch",
+      updated_at: TODAY,
+      expert_id: "expert-maria",
+    });
+    server.use(
+      getGetV2ListSessionsMockHandler200({ sessions: [session], total: 1 }),
+      getListExpertIdentitiesMockHandler([
+        {
+          id: "expert-maria",
+          name: "Maria",
+          role: "Content Strategy",
+          job_title: "Marketing Manager",
+          avatar_url: "/autogpt-characters/v1.1/expert-maria/neutral/128.webp",
+          is_archived: true,
+        },
+      ]),
+    );
+    renderRecentChats();
+
+    const link = await screen.findByRole("link", {
+      name: "Plan the launch Marketing Manager",
+    });
+    expect(link.getAttribute("href")).toBe("/home?sessionId=marketing-chat");
+    expect(link.querySelector("img")?.getAttribute("src")).toBe(
+      "/experts/professional/expert-maria.webp",
+    );
+  });
 });
 
 describe("RecentChats — pinned split", () => {

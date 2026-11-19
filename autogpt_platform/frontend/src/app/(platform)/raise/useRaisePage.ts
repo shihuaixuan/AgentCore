@@ -26,18 +26,20 @@ import {
   type RaiseKit,
 } from "./helpers";
 import { colorForCategory } from "./components/CategoryStep/helpers";
+import { getRaiseProfession } from "./profession";
 import { useFlowProgress } from "./useFlowProgress";
 import { useRaiseSubmission } from "./useRaiseSubmission";
 import { useSkillsAvailability } from "./useSkillsAvailability";
 
 export function useRaisePage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const searchParams = useSearchParams();
   // Seeded in the initialiser rather than an effect: an effect would render
   // the area question first and then snatch it away.
   const [draft, setDraft] = useState<RaiseDraft>(() =>
     draftWithPrefilledRole(loadDraft(), searchParams.get("role")),
   );
+  const { title } = getRaiseProfession(draft, locale);
   const { hasSkillsToOffer } = useSkillsAvailability();
   const hasSkillsBeat = draft.marketplace !== null || hasSkillsToOffer;
   const progress = useFlowProgress(beatTriggers(draft, hasSkillsBeat));
@@ -70,17 +72,11 @@ export function useRaisePage() {
   function submitJobTitle(value: string) {
     const trimmed = value.trim();
     if (!trimmed) return;
-    update({ jobTitle: trimmed, step: "name" });
+    update({ jobTitle: trimmed, step: "avatar" });
   }
 
   function skipJobTitle() {
-    update({ jobTitle: "", step: "name" });
-  }
-
-  function submitName(value: string) {
-    const trimmed = value.trim();
-    if (!trimmed) return;
-    update({ name: trimmed, step: "avatar" });
+    update({ jobTitle: "", step: "avatar" });
   }
 
   function pickAvatar(avatarUrl: string) {
@@ -177,8 +173,8 @@ export function useRaisePage() {
     avatarUrl: draft.avatarUrl,
     about: draft.about,
     voiceLabel: draft.voiceLabel,
-    items: buildFlowItems(draft, progress, t),
-    name: draft.name,
+    items: buildFlowItems(title, progress, t),
+    title,
     budget: draft.budget,
     marketplace: draft.marketplace,
     skills: draft.skills,
@@ -192,7 +188,6 @@ export function useRaisePage() {
     pickCategory,
     submitJobTitle,
     skipJobTitle,
-    submitName,
     pickAvatar,
     submitAbout,
     skipAbout,

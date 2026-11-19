@@ -55,11 +55,21 @@ def _api(experts: list[BotExpert] | None = None) -> MagicMock:
 
 class TestExpertChoices:
     @pytest.mark.asyncio
-    async def test_dm_offers_matching_experts_labelled_with_role(self):
+    @pytest.mark.parametrize("query", ["bo", "bui"])
+    async def test_dm_displays_profession_and_accepts_legacy_search(self, query):
         api = _api([BOLT, SAGE])
-        choices = await expert_choices(api, _interaction(), "bo")
-        assert choices == [app_commands.Choice(name="Bolt, Builder", value="e1")]
+        choices = await expert_choices(api, _interaction(), query)
+        assert choices == [app_commands.Choice(name="Builder", value="e1")]
         api.list_user_experts.assert_awaited_once_with("discord", "456", None)
+
+    @pytest.mark.asyncio
+    async def test_duplicate_professions_offer_distinct_choices(self):
+        other = BOLT.model_copy(update={"id": "e3", "name": "Old nickname"})
+        choices = await expert_choices(_api([other, BOLT]), _interaction(), "Builder")
+        assert choices == [
+            app_commands.Choice(name="Builder (2)", value="e3"),
+            app_commands.Choice(name="Builder (1)", value="e1"),
+        ]
 
     @pytest.mark.asyncio
     async def test_caps_at_discord_limit(self):
@@ -89,12 +99,14 @@ class TestHandleAutogpt:
         interaction.response.defer.assert_awaited_once_with(
             ephemeral=True, thinking=True
         )
-        interaction.channel.send.assert_awaited_once_with("**Bently** asked Bolt: hi")
+        interaction.channel.send.assert_awaited_once_with(
+            "**Bently** asked Builder: hi"
+        )
         interaction.delete_original_response.assert_awaited_once()
         _, starter, prompt, options = dispatch.await_args.args
         assert starter.id == 999 and prompt == "hi"
         assert options == TurnOptions(
-            expert_id="e1", expert_name="Bolt", model="advanced"
+            expert_id="e1", expert_name="Builder", model="advanced"
         )
 
     @pytest.mark.asyncio

@@ -16,6 +16,7 @@ import {
   modeLabel,
   reasonLine,
 } from "@/app/(platform)/copilot/components/ApprovalQueue/helpers";
+import { getHeldCallTitle } from "../attentionCopy";
 import { headlineButtonId, isInformed, shortAge } from "../helpers";
 import { HeldAvatar } from "./HeldAvatar";
 import { HeldPassageQuote } from "./HeldPassageQuote";
@@ -42,7 +43,8 @@ export function HeldCallRow({
   const { t, locale } = useTranslation();
   const [confirmReject, setConfirmReject] = useState(false);
   const read = isHeldRead(approval);
-  const reason = reasonLine(approval);
+  const title = getHeldCallTitle(item, approval, locale);
+  const reason = reasonLine(approval, locale);
   const mode = approval.reasonKind === "mode" ? modeLabel(approval.mode) : null;
   const busy = status !== "idle";
   const approveLabel = read ? t("Release", "放行") : t("Approve", "批准");
@@ -141,7 +143,7 @@ export function HeldCallRow({
             leadingIcon={Tick02Icon}
             loading={status === "approving"}
             disabled={busy}
-            aria-label={`${approveLabel}: ${item.title}`}
+            aria-label={`${approveLabel}: ${title}`}
             onClick={() => onDecide(true)}
           />
         ) : (
@@ -149,7 +151,7 @@ export function HeldCallRow({
             variant="secondary"
             size="row"
             disabled={busy}
-            aria-label={t(`Review: ${item.title}`, `审核：${item.title}`)}
+            aria-label={t(`Review: ${title}`, `审核：${title}`)}
             onClick={onOpen}
           >
             {t("Review", "审核")}
@@ -162,8 +164,8 @@ export function HeldCallRow({
           loading={status === "rejecting"}
           disabled={busy}
           aria-label={t(
-            `${confirmReject ? `Confirm ${read ? "keep it out" : "reject"}` : read ? "Keep it out" : "Reject"}: ${item.title}`,
-            `${confirmReject ? "确认" : ""}${read ? "拦截" : "拒绝"}：${item.title}`,
+            `${confirmReject ? `Confirm ${read ? "keep it out" : "reject"}` : read ? "Keep it out" : "Reject"}: ${title}`,
+            `${confirmReject ? "确认" : ""}${read ? "拦截" : "拒绝"}：${title}`,
           )}
           onClick={handleReject}
           onBlur={() => setConfirmReject(false)}
@@ -172,8 +174,8 @@ export function HeldCallRow({
       <span className="sr-only" aria-live="polite">
         {confirmReject
           ? t(
-              `Press again to ${read ? "keep it out" : "reject"} ${item.title}. ${read ? approval.reader : AUTOPILOT_NAME} will be told it didn't run.`,
-              `再次点击以${read ? "拦截" : "拒绝"} ${item.title}。系统将告知 ${read ? approval.reader : AUTOPILOT_NAME} 此操作未执行。`,
+              `Press again to ${read ? "keep it out" : "reject"} ${title}. ${read ? approval.reader : AUTOPILOT_NAME} will be told it didn't run.`,
+              `再次点击以${read ? "拦截" : "拒绝"} ${title}。系统将告知 ${read ? approval.reader : AUTOPILOT_NAME} 此操作未执行。`,
             )
           : ""}
       </span>

@@ -8,6 +8,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
 import { FireIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { ExpertActivityGraph } from "./ExpertActivityGraph/ExpertActivityGraph";
 import {
   getActivityStreak,
@@ -30,6 +31,7 @@ export function ExpertSummaryCard({
   isActivityError,
 }: Props) {
   const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   const activityDays = activity ? getYearActivityDays(activity.days) : null;
   const visibleActivityDays = activityDays
     ? getThreeMonthActivityDays(activityDays)
@@ -41,11 +43,11 @@ export function ExpertSummaryCard({
 
   return (
     <aside
-      aria-label={t(`${expert.name} at a glance`, `${expert.name} 概览`)}
+      aria-label={t(`${title} at a glance`, `${title} 概览`)}
       className="flex flex-col gap-4 self-start"
     >
       <section
-        aria-label={t(`${expert.name} activity`, `${expert.name} 的活动`)}
+        aria-label={t(`${title} activity`, `${title} 的活动`)}
         className="flex flex-col gap-2 rounded-2xl bg-surface p-4 smooth-shadow-ring-sm"
       >
         <div className="flex items-center justify-between gap-2">
@@ -74,10 +76,7 @@ export function ExpertSummaryCard({
       </section>
 
       <section
-        aria-label={t(
-          `${expert.name} activity streak`,
-          `${expert.name} 的连续活跃天数`,
-        )}
+        aria-label={t(`${title} activity streak`, `${title} 的连续活跃天数`)}
         className="flex flex-col rounded-2xl bg-surface p-4 smooth-shadow-ring-sm"
       >
         {isActivityLoading ? (

@@ -6,6 +6,7 @@ import type { LearningHistoryItem } from "@/app/api/__generated__/models/learnin
 import { Select } from "@/components/atoms/Select/Select";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Text } from "@/components/atoms/Text/Text";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { formatWhen } from "../helpers";
 import { ORIGIN_FILTERS, STATE_FILTERS } from "../useLearningHistory";
 
@@ -48,11 +49,11 @@ export function LearningHistoryCard({
     archived: "已归档",
     invalidated: "已归档（来源不可用）",
   };
-  function expertName(expertId: string | null | undefined) {
+  function expertTitle(expertId: string | null | undefined) {
     if (!expertId) return "Otto";
-    return (
-      experts.find((expert) => expert.id === expertId)?.name ??
-      t("Expert", "专家")
+    return getExpertDisplayTitle(
+      experts.find((expert) => expert.id === expertId),
+      locale,
     );
   }
   return (
@@ -144,7 +145,7 @@ export function LearningHistoryCard({
               </Text>
               <Text variant="small" as="span" tone="muted">
                 {[
-                  expertName(item.expert_id),
+                  expertTitle(item.expert_id),
                   t(
                     item.origin_label ?? "",
                     originLabels[item.origin ?? ""] ?? item.origin_label ?? "",

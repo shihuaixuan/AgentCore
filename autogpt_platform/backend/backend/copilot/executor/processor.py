@@ -344,7 +344,11 @@ def _set_reply_recipient(session: "ChatSession") -> None:
         raise ExpertSessionUnavailableError(EXPERT_SESSION_TEMPORARY_MESSAGE)
     expert = check.expert
     session.reply_recipient = ReplyRecipient(
-        id=expert.id, name=expert.name, avatar_url=expert.avatar_url
+        id=expert.id,
+        name=expert.name,
+        avatar_url=expert.avatar_url,
+        job_title=expert.job_title,
+        role=expert.role,
     )
 
 

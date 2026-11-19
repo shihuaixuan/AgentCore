@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { expect, test, vi } from "vitest";
 import { getPostV2ProcessReviewActionMockHandler200 } from "@/app/api/__generated__/endpoints/executions/executions.msw";
 import type { PendingHumanReviewModel } from "@/app/api/__generated__/models/pendingHumanReviewModel";
+import { getListExpertIdentitiesMockHandler200 } from "@/app/api/__generated__/endpoints/experts/experts.msw";
 import type { ReviewRequest } from "@/app/api/__generated__/models/reviewRequest";
 import { server } from "@/mocks/mock-server";
 import { render, screen, waitFor } from "@/tests/integrations/test-utils";
@@ -215,19 +216,30 @@ const WORKFLOW_LINE =
   "This workflow is paused until you approve the step below. Check what it will do, and edit it if needed.";
 
 test.each([
-  ["the expert whose chat raised it", "Issa", "Issa"],
+  ["the expert whose chat raised it", "exp-issa", "Executive Assistant"],
   ["Otto in a chat without an expert", null, "Otto"],
 ])(
   "a block review raised in a chat names %s, not a workflow",
-  (_, expertName, waitingOn) => {
+  async (_, expertID, waitingOn) => {
+    server.use(
+      getListExpertIdentitiesMockHandler200([
+        {
+          id: "exp-issa",
+          name: "Issa",
+          role: "Ops",
+          avatar_url: null,
+          is_archived: false,
+        },
+      ]),
+    );
     render(
       <PendingReviewsList
-        reviews={[chatBlockReview({ expert_name: expertName })]}
+        reviews={[chatBlockReview({ expert_id: expertID })]}
       />,
     );
 
     expect(
-      screen.getByText(
+      await screen.findByText(
         `${waitingOn} is waiting for your approval before the action below.`,
       ),
     ).toBeDefined();
@@ -237,18 +249,19 @@ test.each([
 );
 
 test.each([
-  ["two experts", "Maria"],
+  ["two experts with the same name", "exp-2"],
   ["an expert and Otto", null],
-])("reviews raised by %s wait on the team, not on Otto", (_, otherExpert) => {
+])("reviews raised by %s wait on the team, not on Otto", (_, otherExpertID) => {
   render(
     <PendingReviewsList
       reviews={[
-        chatBlockReview({ expert_name: "Issa" }),
+        chatBlockReview({ expert_id: "exp-1", expert_name: "Issa" }),
         chatBlockReview({
           node_exec_id: "copilot-node-slack:cd34",
           node_id: "copilot-node-slack",
           action: "Slack Post",
-          expert_name: otherExpert,
+          expert_id: otherExpertID,
+          expert_name: otherExpertID ? "Issa" : null,
         }),
       ]}
     />,
@@ -353,11 +366,39 @@ function spendReview(overrides: Partial<PendingHumanReviewModel> = {}) {
   });
 }
 
-test("an expert's spend approval is one compact card, beside the other reviews", () => {
-  render(<PendingReviewsList reviews={[spendReview(), makeReview()]} />);
+test("a spend card uses the charged expert's title, not the chat owner or payload name", async () => {
+  server.use(
+    getListExpertIdentitiesMockHandler200([
+      {
+        id: "e-1",
+        name: "Maria",
+        job_title: "Editorial Lead",
+        role: "SEO & Content",
+        avatar_url: null,
+        is_archived: false,
+      },
+      {
+        id: "e-2",
+        name: "Max",
+        role: "Sales",
+        avatar_url: null,
+        is_archived: false,
+      },
+    ]),
+  );
+  const chatSpend = spendReview({
+    node_id: "copilot-node-expert-spend:e-1",
+    node_exec_id: "copilot-node-expert-spend:e-1:ab12",
+    session_id: "chat-1",
+    graph_exec_id: null,
+    expert_id: "e-2",
+  });
+  render(<PendingReviewsList reviews={[chatSpend, makeReview()]} />);
 
   expect(
-    screen.getByText("Maria has done 300 credits of work this week"),
+    await screen.findByText(
+      "Editorial Lead has done 300 credits of work this week",
+    ),
   ).toBeDefined();
   expect(
     screen.getByText("That's past your 250 check-in. Keep going?"),

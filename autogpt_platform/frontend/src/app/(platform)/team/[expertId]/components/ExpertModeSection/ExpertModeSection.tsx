@@ -8,6 +8,7 @@ import { UnsupervisedConfirmDialog } from "@/app/(platform)/copilot/components/C
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
 import { useExpertModeSection } from "./useExpertModeSection";
 
@@ -22,7 +23,8 @@ export function ExpertModeSection({ expert }: Props) {
 }
 
 function ExpertModeOptions({ expert }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   const modeLabels = {
     ask_first: "先询问",
     auto: "自动",
@@ -44,23 +46,19 @@ function ExpertModeOptions({ expert }: Props) {
 
   return (
     <section
-      aria-label={t(
-        `${expert.name} approval mode`,
-        `${expert.name} 的审批模式`,
-      )}
+      aria-label={t(`${title} approval mode`, `${title} 的审批模式`)}
       className="rounded-xl border border-border-base bg-surface p-4"
     >
       <Text variant="large-medium">{t("Approvals", "审批")}</Text>
       <Text variant="small" tone="secondary" className="mt-1">
         {t(
-          `How every new web chat with ${expert.name} starts. You can still change it per chat from the composer, and chats already open keep their own setting. Routines, scheduled runs and chats from Slack, Discord, Teams or Telegram are not affected.`,
-          `与 ${expert.name} 新建网页聊天时使用的默认设置。你仍可在输入框中单独调整每个聊天；已打开的聊天保持原有设置。例行任务、计划运行及来自 Slack、Discord、Teams 或 Telegram 的聊天不受影响。`,
+          `How every new web chat with ${title} starts. You can still change it per chat from the composer, and chats already open keep their own setting. Routines, scheduled runs and chats from Slack, Discord, Teams or Telegram are not affected.`,
+          `与 ${title} 新建网页聊天时使用的默认设置。你仍可在输入框中单独调整每个聊天；已打开的聊天保持原有设置。例行任务、计划运行及来自 Slack、Discord、Teams 或 Telegram 的聊天不受影响。`,
         )}
       </Text>
       <fieldset className="mt-4 flex flex-col gap-2" disabled={isPending}>
         <legend className="sr-only">
-          {t("Approval mode for new chats with", "新对话的审批模式：")}{" "}
-          {expert.name}
+          {t("Approval mode for new chats with", "新对话的审批模式：")} {title}
         </legend>
         {AUTOPILOT_MODE_OPTIONS.map((option) => {
           const isSelected = option.value === mode;
@@ -108,12 +106,12 @@ function ExpertModeOptions({ expert }: Props) {
         onConfirm={confirmUnsupervised}
         onCancel={cancelUnsupervised}
         title={t(
-          `Run ${expert.name} unsupervised by default?`,
-          `默认让 ${expert.name} 无人监督运行？`,
+          `Run ${title} unsupervised by default?`,
+          `默认让 ${title} 无人监督运行？`,
         )}
         description={t(
-          `${expert.name} will not ask before anything in new chats. Edits, commands and actions outside the platform, like sending a message or an email, run without your approval unless you switch a chat back from the composer.`,
-          `${expert.name} 在新聊天中执行任何操作前都不会询问。编辑、命令及发送消息或邮件等平台外操作均无需批准，除非你在聊天输入框中切回其他模式。`,
+          `${title} will not ask before anything in new chats. Edits, commands and actions outside the platform, like sending a message or an email, run without your approval unless you switch a chat back from the composer.`,
+          `${title} 在新聊天中执行任何操作前都不会询问。编辑、命令及发送消息或邮件等平台外操作均无需批准，除非你在聊天输入框中切回其他模式。`,
         )}
       />
     </section>

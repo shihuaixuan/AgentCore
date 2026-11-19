@@ -48,3 +48,22 @@ test("keeps the English fallback outside the language provider", () => {
     screen.getByRole("blockquote", { name: "What it says" }).textContent,
   ).toBe("Original quote");
 });
+
+test("uses a localized role for a scheduled expert without a job title", () => {
+  render(
+    <LanguageProvider initialLocale="zh-CN">
+      <UpcomingRow
+        item={{
+          id: "schedule",
+          kind: "agent",
+          title: "Meeting prep",
+          expert: { id: "ada", name: "Ada", role: "Ops", avatar_url: null },
+          next_run_time: new Date("2099-01-01T00:00:00Z"),
+        }}
+      />
+    </LanguageProvider>,
+  );
+
+  expect(screen.getByText("行政助理")).toBeDefined();
+  expect(screen.queryByText(/Ada/)).toBeNull();
+});

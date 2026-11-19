@@ -393,13 +393,13 @@ def _fit_budget(
 
 
 async def _expert_names(user_id: str) -> dict[str, str]:
-    """Expert id → name, so a listing reads as a person rather than a uuid."""
+    """Expert ID → professional title for the chat listing."""
     try:
         experts = await experts_db().list_experts(user_id, with_metrics=False)
     except Exception as e:
         logger.warning(f"expert roster lookup failed: {e}")
         return {}
-    return {expert.id: expert.name for expert in experts}
+    return {expert.id: expert.display_title for expert in experts}
 
 
 async def _expert_name(user_id: str, expert_id: str) -> str:
@@ -410,4 +410,4 @@ async def _expert_name(user_id: str, expert_id: str) -> str:
     except Exception as e:
         logger.warning(f"expert lookup failed for {expert_id}: {e}")
         return expert_id
-    return expert.name if expert else expert_id
+    return expert.display_title if expert else expert_id

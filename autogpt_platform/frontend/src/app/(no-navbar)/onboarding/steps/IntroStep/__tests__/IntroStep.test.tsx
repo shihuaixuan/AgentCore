@@ -7,7 +7,6 @@ import {
 } from "@/tests/integrations/test-utils";
 import { useOnboardingWizardStore } from "../../../store";
 import { IntroStep } from "../IntroStep";
-import { INTRO_SLIDES } from "../helpers";
 import { TEAM } from "../components/teamSceneHelpers";
 
 const motionPreference = vi.hoisted(() => ({ reduced: false }));
@@ -49,25 +48,36 @@ describe("IntroStep", () => {
   it("shows the Otto slide with its own Next button", () => {
     render(<IntroStep slide="autopilot" />);
     expect(
-      screen.getByRole("heading", { name: INTRO_SLIDES.autopilot.title }),
+      screen.getByRole("heading", { name: "Meet Otto, your Head of AI." }),
     ).toBeDefined();
     expect(screen.getByRole("button", { name: "Next" })).toBeDefined();
     expect(screen.queryByText("Welcome to AutoGPT")).toBeNull();
   });
 
-  it("lists every member of the team with their role", () => {
+  it("introduces the team by occupational title, keeping Otto", () => {
     render(<IntroStep slide="team" />);
     const team = screen.getByRole("list", { name: "Your team" });
     const members = within(team).getAllByRole("listitem");
     expect(members).toHaveLength(TEAM.length);
     expect(within(members[0]).getByText("Otto")).toBeDefined();
     expect(within(members[0]).getByText("Head of AI")).toBeDefined();
-    expect(within(team).getByText("Maria")).toBeDefined();
-    expect(within(team).getByText("Max")).toBeDefined();
-    expect(within(team).getByText("Sales")).toBeDefined();
-    expect(within(team).getByText("Marketing")).toBeDefined();
-    expect(within(team).getByText("Devon")).toBeDefined();
-    expect(within(team).getByText("Security")).toBeDefined();
+    expect(members.slice(1).map((member) => member.textContent)).toEqual([
+      "SEO Content Manager",
+      "Sales Development Rep",
+      "Bookkeeper",
+      "Market Research Analyst",
+      "Customer Success Manager",
+      "Executive Assistant",
+      "Application Security Engineer",
+    ]);
+    expect(members[1].querySelector("img")?.getAttribute("src")).toBe(
+      "/experts/professional/expert-maria.webp",
+    );
+    expect(
+      screen.getByText(
+        "The SEO Content Manager drafts your blog posts. The Sales Development Rep finds your next customers.",
+      ),
+    ).toBeDefined();
   });
 
   it("brings the team in with an entrance animation", () => {

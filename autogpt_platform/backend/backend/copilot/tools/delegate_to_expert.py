@@ -234,7 +234,7 @@ def paused_refusal(target: Expert) -> str | None:
     if target.schedules_paused_at is None:
         return None
     return (
-        f"{target.name} is paused (budget guardrail or archive) and "
+        f"{target.display_title} is paused (budget guardrail or archive) and "
         "cannot take delegated work until the user resumes them."
     )
 
@@ -259,7 +259,7 @@ async def start_delegation(
     # Read before the thread opens: once it exists, every expert has a chat.
     first_task = (
         not delegated_session_id
-        and is_card_retry(session, target.name)
+        and is_card_retry(session, target)
         and await is_first_task(user_id, target.id)
     )
     inner_session_id = await _resolve_session(
@@ -343,7 +343,8 @@ async def run_delegated_turn(
             (
                 spawn_limit_message()
                 if outcome == "rejected_concurrent_turn_cap"
-                else result.refusal or f"{target.name} could not start this task."
+                else result.refusal
+                or f"{target.display_title} could not start this task."
             ),
             session,
         )
@@ -359,7 +360,7 @@ async def run_delegated_turn(
         parent_session_id=session.session_id,
         elapsed=elapsed,
         workspace_files=workspace_files,
-        actor=target.name,
+        actor=target.display_title,
     )
     delegated.message += await _spawn_note()
     return apply_delegated_expert(
@@ -368,6 +369,7 @@ async def run_delegated_turn(
             id=target.id,
             name=target.name,
             role=target.role,
+            job_title=target.job_title,
             avatar_url=target.avatar_url,
             color=target.color,
         ),
@@ -423,7 +425,7 @@ async def _resolve_session(
     ):
         return _error(
             f"delegated_session_id {delegated_session_id} is not a "
-            f"delegation you started with {target.name}. Leave it empty "
+            f"delegation you started with {target.display_title}. Leave it empty "
             "to open a fresh one.",
             session,
         )
@@ -432,7 +434,7 @@ async def _resolve_session(
         or prior.metadata.llm_credential_id != session.metadata.llm_credential_id
     ):
         return _error(
-            f"That delegation thread with {target.name} runs on a "
+            f"That delegation thread with {target.display_title} runs on a "
             "different model connection than this chat does, so it "
             "cannot be resumed from here. Leave delegated_session_id "
             "empty to open a fresh one.",
@@ -472,7 +474,7 @@ async def _caller_name(user_id: str, caller_expert_id: str | None) -> str:
     except Exception as e:
         logger.warning(f"Delegating expert lookup failed: {e}")
         return "a teammate"
-    return caller.name if caller else "a teammate"
+    return caller.display_title if caller else "a teammate"
 
 
 # An expert's first task from the hire card is also the user's first look at

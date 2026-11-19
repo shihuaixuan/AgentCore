@@ -17,6 +17,7 @@ import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import type { Locale } from "@/lib/i18n/locale";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 /** Section headings sit outside the cards, so they need the cards' own content
  *  inset (1px border-box padding + p-4, matching AutopilotCard's p-5) to line
@@ -272,19 +273,23 @@ interface FilterExpertsArgs {
   query: string;
   filter: TeamFilter;
   schedulesForExpert: (expert: Expert) => GraphExecutionJobInfo[];
+  locale: Locale;
 }
 
-/** Narrows the roster by free-text (name or role) and by the toolbar's filter.
+/** Narrows the roster by profession and by the toolbar's filter.
  *  Both are applied together, so an empty result can mean either. */
 export function filterExperts({
   experts,
   query,
   filter,
   schedulesForExpert,
+  locale,
 }: FilterExpertsArgs) {
-  const needle = query.trim().toLowerCase();
+  const needle = query.trim().toLocaleLowerCase(locale);
   return experts.filter((expert) => {
-    const haystack = `${expert.name} ${expert.role}`.toLowerCase();
+    const haystack = getExpertDisplayTitle(expert, locale).toLocaleLowerCase(
+      locale,
+    );
     if (needle && !haystack.includes(needle)) return false;
     if (filter === "scheduled") return schedulesForExpert(expert).length > 0;
     if (filter === "needs-setup")

@@ -6,7 +6,7 @@ import {
   getChartDays,
 } from "../[expertId]/components/ExpertOverview/helpers";
 
-test("localizes setup instructions without translating workflow, expert or input names", () => {
+test("localizes setup instructions while preserving the profession, workflow and input names", () => {
   const item: ExpertSetupItem = {
     expert_id: "original-expert",
     expert_name: "Original Nova",
@@ -18,11 +18,11 @@ test("localizes setup instructions without translating workflow, expert or input
     resolution: "inputs",
     missing_inputs: ["Email Address", "Original Topic"],
   };
-  expect(getSetupRowCopy(item, "zh-CN")).toEqual({
-    title: "为 Original Nova 设置 Original Workflow 的计划",
+  expect(getSetupRowCopy(item, "QA Engineer", "zh-CN")).toEqual({
+    title: "为 QA Engineer 设置 Original Workflow 的计划",
     detail: "需要填写 Email Address、Original Topic 才能按计划运行。",
   });
-  expect(getSetupRowCopy(item).detail).toBe(
+  expect(getSetupRowCopy(item, "QA Engineer").detail).toBe(
     "Needs Email Address and Original Topic before it can run on schedule.",
   );
 });

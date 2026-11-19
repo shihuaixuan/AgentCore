@@ -165,7 +165,11 @@ class GetSubSessionResultTool(BaseTool):
 
         started_at = time.monotonic()
         delegate = await _delegated_expert_info(user_id, sub, session)
-        actor = delegate.name if delegate is not None else "Subtask"
+        actor = (
+            (delegate.job_title or "").strip() or delegate.role.strip() or "AI Expert"
+            if delegate is not None
+            else "Subtask"
+        )
         borrowed = _is_borrowed_thread(sub, session)
         queued = sub.chat_status == CHAT_STATUS_QUEUED
 
@@ -445,6 +449,7 @@ async def _delegated_expert_info(
         id=expert.id,
         name=expert.name,
         role=expert.role,
+        job_title=expert.job_title,
         avatar_url=expert.avatar_url,
         color=expert.color,
     )

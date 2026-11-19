@@ -20,7 +20,9 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 import { AttentionCard } from "@/components/organisms/AttentionCard/AttentionCard";
 import { SpendApprovalCard } from "./components/SpendApprovalCard/SpendApprovalCard";
 import { spendSummary } from "./components/SpendApprovalCard/helpers";
+import { getReviewExpertID } from "./expertIdentity";
 import { isGateReview, waitingOnLine } from "./helpers";
+import { useCardExpertRoster } from "./useCardExpertRoster";
 
 interface PendingReviewsListProps {
   reviews: PendingHumanReviewModel[];
@@ -38,6 +40,15 @@ export function PendingReviewsList({
   emptyMessage,
 }: PendingReviewsListProps) {
   const { t, locale } = useTranslation();
+  const roster = useCardExpertRoster(
+    reviews.some(
+      (review) =>
+        getReviewExpertID(review) &&
+        (!review.graph_exec_id ||
+          isGateReview(review.node_id) ||
+          isSpendReview(review.node_id ?? "")),
+    ),
+  );
   const [reviewDataMap, setReviewDataMap] = useState<Record<string, string>>(
     () => {
       const initialData: Record<string, string> = {};
@@ -272,7 +283,9 @@ export function PendingReviewsList({
 
   const groups = Object.entries(groupedReviews);
   const spendCards = groups.flatMap(([nodeId, nodeReviews]) => {
-    const summary = isSpendReview(nodeId) ? spendSummary(nodeReviews) : null;
+    const summary = isSpendReview(nodeId)
+      ? spendSummary(nodeReviews, locale, roster)
+      : null;
     return summary ? [{ nodeId, summary }] : [];
   });
   const reviewGroups = groups.filter(
@@ -314,7 +327,7 @@ export function PendingReviewsList({
               </Text>
             </AttentionCard.Row>
             <Text variant="large" tone="body">
-              {waitingOnLine(reviewGroups, locale)}
+              {waitingOnLine(reviewGroups, locale, roster)}
             </Text>
           </div>
 

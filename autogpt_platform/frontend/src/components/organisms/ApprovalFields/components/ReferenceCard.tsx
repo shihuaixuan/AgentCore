@@ -3,20 +3,22 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { factText, type Reference } from "../helpers";
+import type { ReferenceIdentity } from "../referenceIdentity";
 
 // Named, then a count: the marketplace expert card's skills, in a line.
 const NAMED_SKILLS = 3;
 
 interface Props {
   reference: Reference;
+  identity: ReferenceIdentity;
 }
 
-export function ReferenceCard({ reference }: Props) {
+export function ReferenceCard({ reference, identity }: Props) {
   const { locale, t } = useTranslation();
   const facts = reference.kind
-    ? reference.meta.map((fact) => factText(fact, locale)).join(" · ")
+    ? identity.facts.map((fact) => factText(fact, locale)).join(" · ")
     : reference.summary;
-  const hasAvatar = Boolean(reference.avatarURL || reference.avatarColor);
+  const hasAvatar = Boolean(identity.avatarURL || reference.avatarColor);
   return (
     <div data-slot="reference-card">
       <div
@@ -25,8 +27,8 @@ export function ReferenceCard({ reference }: Props) {
       >
         {hasAvatar && (
           <ExpertAvatar
-            name={reference.name}
-            avatarUrl={reference.avatarURL}
+            name={identity.title}
+            avatarUrl={identity.avatarURL}
             color={reference.avatarColor}
             size={36}
             className="shrink-0 rounded-full"
@@ -46,7 +48,7 @@ export function ReferenceCard({ reference }: Props) {
             data-slot="reference-card-name"
             className="text-body font-semibold text-foreground-strong"
           >
-            {reference.name}
+            {identity.title}
           </p>
         </div>
       </div>

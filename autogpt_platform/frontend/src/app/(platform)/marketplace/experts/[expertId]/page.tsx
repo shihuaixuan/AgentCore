@@ -5,7 +5,8 @@ import {
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { buildPageMetadata } from "@/lib/metadata";
 import { getQueryClient } from "@/lib/react-query/queryClient";
-import { getExpertRoleLabel } from "@/services/experts/expert-role-label";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
+import { formatExpertIntro } from "@/services/experts/expert-intro";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -41,14 +42,15 @@ export async function generateMetadata({
     });
   }
 
-  // avatar_url points at an SVG, which no unfurler renders, so this stays a
-  // text card until experts have a raster image.
+  const title = getExpertDisplayTitle(expert, locale);
   return buildPageMetadata({
-    title: t(
-      `${expert.name}, ${expert.job_title || getExpertRoleLabel(expert.role, locale)} · AI Expert - AutoGPT Marketplace`,
-      `${expert.name}，${expert.job_title || getExpertRoleLabel(expert.role, locale)} · AI 专家 - AutoGPT 市场`,
-    ),
-    description: expert.tagline || expert.bio,
+    title: t(`${title} · AutoGPT Marketplace`, `${title} · AutoGPT 市场`),
+    description:
+      formatExpertIntro(
+        expert.tagline || expert.bio || "",
+        expert.name,
+        title,
+      ) || null,
     path,
     type: "profile",
   });

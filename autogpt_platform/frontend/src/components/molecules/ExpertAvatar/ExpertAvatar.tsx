@@ -27,9 +27,8 @@ interface Props {
   backgroundColor?: string;
 }
 
-/** An Expert's saved appearance. The image never depends on the name, role,
- *  category or the marketplace filter: a managed identity is served from its
- *  versioned library path, anything else is shown exactly as saved. */
+/** An Expert's saved appearance. Managed assets use their matching portrait;
+ * uploads and generated images are shown as saved. */
 export function ExpertAvatar({
   name,
   avatarUrl,
@@ -50,6 +49,11 @@ export function ExpertAvatar({
         pixels={managed.pixels}
         pngMaxPixels={managed.pngMaxPixels}
         size={size}
+        portrait={
+          managed.assetID === "otto" || managed.assetID === "expert-general-01"
+            ? undefined
+            : `/experts/professional/${managed.assetID}.webp`
+        }
         isOtto={managed.assetID === "otto"}
         className={className}
       />
@@ -89,7 +93,7 @@ export function ExpertAvatar({
         />
         <AvatarFallback
           data-slot="expert-avatar-fallback"
-          accessibleLabel={name ? `${name}, AI Expert` : "AI Expert"}
+          accessibleLabel={name ?? t("AI Expert", "AI 专家")}
         >
           <span
             data-slot="expert-avatar-initial"

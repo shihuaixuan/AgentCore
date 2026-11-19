@@ -371,7 +371,7 @@ test("shows the trial timeline beside the plan: today, the reminder, then the fi
   // The plan's team joins when the trial starts, not on a subscription.
   expect(
     await screen.findByText(
-      "Maria joins your team when your trial starts. Nothing runs until you pick a task.",
+      "Assistant joins your team when your trial starts. Nothing runs until you pick a task.",
     ),
   ).toBeDefined();
 });

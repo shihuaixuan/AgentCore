@@ -42,6 +42,8 @@ class ReplyRecipient(BaseModel):
     id: str | None
     name: str
     avatar_url: str | None = None
+    job_title: str | None = None
+    role: str | None = None
 
 
 def recipient_expert_id(recipient: TurnRecipient) -> str | None:

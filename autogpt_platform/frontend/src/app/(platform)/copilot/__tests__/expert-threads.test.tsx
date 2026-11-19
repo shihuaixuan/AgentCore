@@ -4,6 +4,7 @@ import {
   getListExpertIdentitiesMockHandler,
 } from "@/app/api/__generated__/endpoints/experts/experts.msw";
 import type { Expert } from "@/app/api/__generated__/models/expert";
+import type { ComponentProps } from "react";
 import { server } from "@/mocks/mock-server";
 import { CredentialsProvidersContext } from "@/providers/agent-credentials/credentials-provider";
 import {
@@ -23,6 +24,7 @@ import { RecipientChip } from "../components/ChatInput/components/RecipientChip"
 import { useRecipientPicker } from "../components/EmptySession/useRecipientPicker";
 import { ChatMessagesContainer } from "../components/ChatMessagesContainer/ChatMessagesContainer";
 import { useChatSession } from "../useChatSession";
+import { useExpertMap } from "../useExpertMap";
 import { newRecipientChatHref } from "../expertSessionQuery";
 import { useCopilotUIStore } from "../store";
 
@@ -663,6 +665,13 @@ describe("useChatSession — expert sessions", () => {
 });
 
 describe("ChatMessagesContainer — expert identity", () => {
+  function TranscriptWithRoster(
+    props: ComponentProps<typeof ChatMessagesContainer>,
+  ) {
+    const { expertsById } = useExpertMap();
+    return <ChatMessagesContainer {...props} replyExpertsById={expertsById} />;
+  }
+
   const assistantMessage = {
     id: "m1",
     role: "assistant",
@@ -679,9 +688,21 @@ describe("ChatMessagesContainer — expert identity", () => {
     readOnlyReason: null,
   };
 
-  it("shows the conversation title and uses the saved author for each reply", () => {
+  it("shows the original profession and resolves a switched reply's legacy author by ID", async () => {
+    server.use(
+      getListExpertIdentitiesMockHandler([
+        {
+          id: "expert-slides",
+          name: "Casey",
+          role: "Code Review & QA",
+          job_title: "Quality Assurance Lead",
+          avatar_url: "/autogpt-characters/v2.1/expert-casey/neutral/128.webp",
+          is_archived: true,
+        },
+      ]),
+    );
     render(
-      <ChatMessagesContainer
+      <TranscriptWithRoster
         messages={[
           assistantMessage,
           {
@@ -696,8 +717,9 @@ describe("ChatMessagesContainer — expert identity", () => {
             metadata: {
               reply_recipient: {
                 id: "expert-slides",
-                name: "Slide Designer",
-                avatar_url: null,
+                name: "Casey",
+                avatar_url:
+                  "/autogpt-characters/v2.1/expert-casey/neutral/128.webp",
               },
             },
           },
@@ -713,11 +735,18 @@ describe("ChatMessagesContainer — expert identity", () => {
     const header = screen.getByTestId("expert-thread-header");
     expect(within(header).getByText("Campaign planning")).toBeDefined();
     expect(within(header).queryByText("Maria")).toBeNull();
+    const author = await screen.findByText("Quality Assurance Lead");
+    expect(
+      author
+        .closest('[data-testid="expert-assistant-identity"]')
+        ?.querySelector("img")
+        ?.getAttribute("src"),
+    ).toBe("/experts/professional/expert-casey.webp");
     expect(
       screen
         .getAllByTestId("expert-assistant-identity")
         .map((row) => row.textContent),
-    ).toEqual(["Maria", "Slide Designer"]);
+    ).toEqual(["Marketing Manager", "Quality Assurance Lead"]);
   });
 
   it("keeps the chip a passive label with no file counter", async () => {
@@ -743,6 +772,45 @@ describe("ChatMessagesContainer — expert identity", () => {
     const header = await screen.findByTestId("expert-thread-header");
     expect(within(header).queryByRole("button")).toBeNull();
     expect(workspaceFileRequests).toBe(0);
+  });
+
+  it("uses the same position as the picker for replies from matching professions", async () => {
+    const ids = ["casey", "sam"];
+    server.use(
+      getListExpertIdentitiesMockHandler(
+        ids.map((id) => ({
+          id,
+          name: id,
+          role: "Quality Assurance",
+          job_title: "QA Engineer",
+          avatar_url: null,
+          is_archived: false,
+        })),
+      ),
+    );
+    render(
+      <TranscriptWithRoster
+        messages={ids.map((id) => ({
+          id: `message-${id}`,
+          role: "assistant",
+          parts: [{ type: "text", text: "Here are the test results." }],
+          metadata: {
+            reply_recipient: { id, name: id, avatar_url: null },
+          },
+        }))}
+        status="ready"
+        error={undefined}
+        isLoading={false}
+      />,
+    );
+
+    await waitFor(() =>
+      expect(
+        screen
+          .getAllByTestId("expert-assistant-identity")
+          .map((row) => row.textContent),
+      ).toEqual(["QA Engineer (1)", "QA Engineer (2)"]),
+    );
   });
 
   it("falls back to Otto on historical replies in plain sessions", () => {
@@ -847,10 +915,20 @@ describe("recipient picker", () => {
     const onSelect = vi.fn();
     render(
       <RecipientChip
-        recipient={{ id: "expert-max", name: "Max", avatarUrl: null }}
+        recipient={{
+          id: "expert-max",
+          name: "Max",
+          role: "Sales",
+          avatarUrl: null,
+        }}
         options={[
-          { id: "expert-max", name: "Max", avatarUrl: null },
-          { id: "expert-maria", name: "Maria", avatarUrl: null },
+          { id: "expert-max", name: "Max", role: "Sales", avatarUrl: null },
+          {
+            id: "expert-maria",
+            name: "Maria",
+            jobTitle: "Marketing Strategist",
+            avatarUrl: null,
+          },
         ]}
         onSelect={onSelect}
       />,
@@ -859,7 +937,9 @@ describe("recipient picker", () => {
     await userEvent.click(
       screen.getByRole("button", { name: /change recipient/i }),
     );
-    await userEvent.click(await screen.findByText("Maria"));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Marketing Strategist" }),
+    );
     expect(onSelect).toHaveBeenCalledWith("expert-maria");
   });
 

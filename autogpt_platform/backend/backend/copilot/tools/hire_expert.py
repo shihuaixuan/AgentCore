@@ -76,10 +76,6 @@ class HireExpertTool(BaseTool):
                     "type": "string",
                     "description": ("Roster template to hire; never invent an id."),
                 },
-                "name": {
-                    "type": "string",
-                    "description": "Rename the hire; omit to keep the template name.",
-                },
                 **HANDOFF_PARAMETERS,
             },
             "required": ["template_id"],
@@ -158,6 +154,7 @@ def _preview(template: Expert, name: str) -> ExpertChangePreview:
         kind="hire",
         name=name or template.name,
         role=template.role,
+        job_title=template.job_title or "",
         tagline=template.tagline or "",
         about=template.identity,
         boundaries=template.boundaries,

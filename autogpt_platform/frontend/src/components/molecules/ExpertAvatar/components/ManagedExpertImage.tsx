@@ -13,6 +13,7 @@ interface Props {
   pngMaxPixels?: number;
   size: number;
   isOtto: boolean;
+  portrait?: string;
   className?: string;
 }
 
@@ -23,10 +24,13 @@ export function ManagedExpertImage({
   pngMaxPixels = 1024,
   size,
   isOtto,
+  portrait,
   className,
 }: Props) {
   const { t } = useTranslation();
-  const [format, setFormat] = useState<"webp" | "png" | null>("webp");
+  const [format, setFormat] = useState<"portrait" | "webp" | "png" | null>(
+    portrait ? "portrait" : "webp",
+  );
   const label = isOtto
     ? t("Otto, your personal Head of AI", "Otto，你的专属 AI 负责人")
     : t(`${name}, AI Expert`, `${name}，AI 专家`);
@@ -36,6 +40,23 @@ export function ManagedExpertImage({
     "size-(--avatar-size)",
   );
   const sizeStyle = { "--avatar-size": `${size}px` } as CSSProperties;
+
+  if (format === "portrait" && portrait) {
+    return (
+      <picture data-slot="expert-avatar" className={classes} style={sizeStyle}>
+        <Image
+          src={portrait}
+          alt={label}
+          width={size}
+          height={size}
+          unoptimized
+          data-slot="expert-avatar-image"
+          className="h-full w-full object-cover"
+          onError={() => setFormat("webp")}
+        />
+      </picture>
+    );
+  }
 
   if (!format) {
     return (

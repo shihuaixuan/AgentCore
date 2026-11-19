@@ -9,7 +9,11 @@ from backend.data.expert_spend import window_start
 from backend.util.settings import Config
 
 NEEDED = sa.SpendApprovalNeeded(
-    expert_id="e-1", expert_name="Ada", spent=250, threshold=250, window="week"
+    expert_id="e-1",
+    expert_name="Operations Manager",
+    spent=250,
+    threshold=250,
+    window="week",
 )
 
 
@@ -34,6 +38,8 @@ def _arm(
     )
     expert = MagicMock()
     expert.name = "Ada"
+    expert.jobTitle = "Operations Manager"
+    expert.role = "Operations"
     mocker.patch.object(
         prisma.models.Expert,
         "prisma",
@@ -80,7 +86,7 @@ async def test_an_approval_in_the_window_unlocks_it(mocker, window) -> None:
 
 def test_headline_names_the_expert_and_avoids_the_card_discriminator() -> None:
     assert NEEDED.headline == (
-        "Ada has used 250 of 250 credits this week and needs your approval "
+        "Operations Manager has used 250 of 250 credits this week and needs your approval "
         "to keep spending"
     )
     # PendingReviewCard drops any instructions containing "Block".

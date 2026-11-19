@@ -8,22 +8,22 @@ import {
 
 const chinese = (_english: string, translated: string) => translated;
 
-test("translates artifact empty state templates without changing expert names or IDs", () => {
+test("translates artifact empty state templates without changing profession titles or IDs", () => {
   const state = getEmptyState(
     {
       hasSearchTerm: false,
       isInFolder: false,
       hasFolders: false,
       folderId: null,
-      expert: { id: "expert/id", name: "Original Nova" },
+      expert: { id: "expert/id", title: "QA Engineer" },
     },
     chinese,
   );
   expect(state.title).toBe("此专家暂无文件");
   expect(state.description).toBe(
-    "Original Nova 执行任务时创建的文件会显示在这里。",
+    "QA Engineer 执行任务时创建的文件会显示在这里。",
   );
-  expect(state.chatLabel).toBe("与 Original Nova 聊天");
+  expect(state.chatLabel).toBe("与 QA Engineer 聊天");
   expect(state.chatHref).toBe("/copilot?expertId=expert%2Fid");
 });
 

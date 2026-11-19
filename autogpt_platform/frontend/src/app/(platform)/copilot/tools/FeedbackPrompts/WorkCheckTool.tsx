@@ -3,7 +3,6 @@
 import { AUTOPILOT_AVATAR_URL } from "@/components/molecules/AutopilotAvatar/helpers";
 import { WorkCheckCard } from "@/components/organisms/FeedbackPrompts/WorkCheckCard";
 import type { ToolUIPart } from "ai";
-import type { ExpertIdentity } from "../../useExpertMap";
 import {
   type FeedbackCardTarget,
   getWorkCheckNote,
@@ -17,10 +16,10 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 interface Props {
   part: ToolUIPart;
   target: FeedbackCardTarget;
-  expert?: Pick<ExpertIdentity, "name" | "avatarUrl"> | null;
+  author?: { title: string; avatarUrl: string | null };
 }
 
-export function WorkCheckTool({ part, target, expert }: Props) {
+export function WorkCheckTool({ part, target, author }: Props) {
   const output = readFeedbackPrompt(part);
   if (!output) return null;
   return (
@@ -29,7 +28,7 @@ export function WorkCheckTool({ part, target, expert }: Props) {
       promptId={output.promptId}
       isFirst={output.isFirst}
       target={target}
-      expert={expert}
+      author={author}
     />
   );
 }
@@ -39,15 +38,15 @@ interface PromptProps extends Omit<Props, "part"> {
   isFirst: boolean;
 }
 
-function WorkCheckPrompt({ promptId, isFirst, target, expert }: PromptProps) {
+function WorkCheckPrompt({ promptId, isFirst, target, author }: PromptProps) {
   const { t } = useTranslation();
   const card = useFeedbackCard({ kind: "work_check", promptId, target });
   if (card.isLoading || !card.state || card.state.dismissed) return null;
 
   return (
     <WorkCheckCard
-      name={expert?.name ?? "Otto"}
-      avatarUrl={expert ? expert.avatarUrl : AUTOPILOT_AVATAR_URL}
+      name={author?.title ?? "Otto"}
+      avatarUrl={author ? author.avatarUrl : AUTOPILOT_AVATAR_URL}
       note={getWorkCheckNote(isFirst, t)}
       initialRating={ratingFromState(card.state)}
       initialSent={card.state.answered}

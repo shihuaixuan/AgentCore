@@ -53,7 +53,9 @@ export function HandoffRetry({ title, name, expertId, onSend }: Props) {
       size="row"
       onClick={() => {
         markAsked();
-        onSend(`Try handing ${title} to ${name} again.`);
+        onSend(
+          `Try handing ${title} to ${name} again. (expert_id: ${expertId})`,
+        );
       }}
     >
       {t("Try again", "重试")}

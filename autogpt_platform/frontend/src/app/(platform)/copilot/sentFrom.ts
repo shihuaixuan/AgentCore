@@ -1,12 +1,16 @@
 import type { ChatSessionMetadata } from "@/app/api/__generated__/models/chatSessionMetadata";
+import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
+import type { Locale } from "@/lib/i18n/locale";
 import { isValidUUID } from "@/lib/utils";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import type { UIMessage } from "ai";
 import { extractDbSequence } from "./helpers/convertChatSessionToUiMessages";
+import type { ExpertIdentity } from "./useExpertMap";
 
 export interface SentFrom {
   sessionId: string;
   expertId: string | null;
-  expertName: string | null;
+  expertJobTitle?: string;
 }
 
 type SessionDelegation = Pick<
@@ -26,10 +30,11 @@ export function getSentFromMetadata(metadata: unknown): SentFrom | null {
   const value = metadata as Record<string, unknown>;
   const sessionId = readString(value.from_session_id);
   if (!sessionId || !isValidUUID(sessionId)) return null;
+  const expertJobTitle = readString(value.from_expert_job_title)?.trim();
   return {
     sessionId,
     expertId: readString(value.from_expert_id),
-    expertName: readString(value.from_expert_name),
+    ...(expertJobTitle && { expertJobTitle }),
   };
 }
 
@@ -43,7 +48,6 @@ export function getSessionSentFrom(
   return {
     sessionId,
     expertId: metadata?.delegated_by_expert_id ?? null,
-    expertName: null,
   };
 }
 
@@ -55,11 +59,17 @@ export function isSessionOpeningMessage(message: UIMessage): boolean {
   return message.role === "user" && extractDbSequence(message) === 0;
 }
 
-export function getSentFromDisplayName(
+export function getSentFromDisplayTitle(
   sentFrom: SentFrom,
-  resolvedExpertName: string | null | undefined,
+  expert: Pick<ExpertIdentity, "jobTitle" | "role"> | undefined,
+  locale: Locale,
 ): string {
-  if (sentFrom.expertName) return sentFrom.expertName;
-  if (resolvedExpertName) return resolvedExpertName;
-  return sentFrom.expertId ? "an expert" : "Otto";
+  if (!sentFrom.expertId) return AUTOPILOT_NAME;
+  return getExpertDisplayTitle(
+    {
+      jobTitle: sentFrom.expertJobTitle || expert?.jobTitle,
+      role: expert?.role,
+    },
+    locale,
+  );
 }

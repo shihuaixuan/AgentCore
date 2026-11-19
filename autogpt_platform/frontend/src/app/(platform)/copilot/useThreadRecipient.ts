@@ -1,12 +1,16 @@
 import type { UIMessage } from "ai";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import {
   expertRecipient,
   recipientOptions,
 } from "./components/ChatInput/components/recipientOptions";
 import {
   getMessageReplyRecipient,
+  getReplyProfession,
   type ReplyRecipient,
 } from "./helpers/replyRecipient";
 import type { ExpertIdentity } from "./useExpertMap";
@@ -51,6 +55,7 @@ export function useThreadRecipient({
   pinnedExpert,
   roster,
 }: Args) {
+  const { locale } = useTranslation();
   const key = userId && sessionId ? `${userId}:${sessionId}` : null;
   const choice = useThreadRecipientChoices((state) =>
     key ? state.choices[key] : undefined,
@@ -65,7 +70,11 @@ export function useThreadRecipient({
   const recipient = expert
     ? expertRecipient(expert)
     : snapshot?.id && snapshot.id === expertId
-      ? { id: snapshot.id, name: snapshot.name, avatarUrl: snapshot.avatar_url }
+      ? {
+          id: snapshot.id,
+          jobTitle: getReplyProfession(snapshot, null, locale),
+          avatarUrl: snapshot.avatar_url,
+        }
       : pinnedExpert && pinnedExpert.id === expertId
         ? expertRecipient(pinnedExpert)
         : null;
@@ -89,8 +98,7 @@ export function useThreadRecipient({
   return {
     picker: {
       recipient:
-        recipient ??
-        (expertId ? { id: expertId, name: "Expert", avatarUrl: null } : null),
+        recipient ?? (expertId ? { id: expertId, avatarUrl: null } : null),
       options: recipientOptions(roster.active),
       isRosterPending: roster.pending,
       hasRosterFailed: roster.failed,
@@ -98,7 +106,7 @@ export function useThreadRecipient({
       isThreadPicker: true,
     },
     expertId,
-    name: recipient?.name ?? (expertId ? "Expert" : "Otto"),
+    name: expertId ? getExpertDisplayTitle(recipient, locale) : AUTOPILOT_NAME,
     target,
     isSwitched,
     isUnavailable,

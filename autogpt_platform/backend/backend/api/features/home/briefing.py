@@ -6,10 +6,11 @@ reached a terminal state *after* the row was generated are appended live, so a
 run finishing at 10:30am shows up on the next poll rather than tomorrow morning.
 """
 
+from collections.abc import Mapping
 from datetime import datetime, timedelta
 from typing import Literal
 
-from backend.api.features.experts.models import Expert
+from backend.api.features.experts.models import Expert, ExpertIdentity
 from backend.copilot.briefing.models import BriefingContent, BriefingRunItem
 from backend.copilot.briefing.outcome import (
     as_utc,
@@ -38,6 +39,7 @@ def compose_briefing(
     expert_by_id: dict[str, Expert],
     agent_by_graph: dict[str, AgentRef],
     persisted: BriefingContent | None = None,
+    archived_experts: Mapping[str, ExpertIdentity] | None = None,
 ) -> HomeBriefing:
     if persisted is None:
         window_start = now - _BRIEFING_WINDOW
@@ -51,7 +53,8 @@ def compose_briefing(
         )
 
     generated_at = as_utc(persisted.generated_at)
-    anchored = [to_outcome(item, expert_by_id) for item in persisted.run_items]
+    stored_experts = {**(archived_experts or {}), **expert_by_id}
+    anchored = [to_outcome(item, stored_experts) for item in persisted.run_items]
     anchored_ids = {outcome.id for outcome in anchored}
     fresh = [
         outcome
@@ -165,7 +168,7 @@ def _run_item(
 
 
 def to_outcome(
-    item: BriefingRunItem, expert_by_id: dict[str, Expert]
+    item: BriefingRunItem, expert_by_id: Mapping[str, Expert | ExpertIdentity]
 ) -> HomeBriefingOutcome:
     failed = item.status == "FAILED"
     # `error=None` because there is no error left to pass: the shared composer
@@ -199,19 +202,20 @@ def _trigger(item: BriefingRunItem) -> Literal["schedule", "webhook", "manual"]:
 
 
 def _expert(
-    item: BriefingRunItem, expert_by_id: dict[str, Expert]
+    item: BriefingRunItem, expert_by_id: Mapping[str, Expert | ExpertIdentity]
 ) -> HomeExpert | None:
-    """Prefer the live expert record; a stored briefing keeps its own copy of
-    the display fields for an expert that has since been archived or renamed."""
-    live = expert_by_id.get(item.expert_id or "")
-    if live:
-        return to_home_expert(live)
-    if not item.expert_id or not item.expert_name:
+    """Prefer an authorized identity; use the snapshot if the expert is gone."""
+    expert = expert_by_id.get(item.expert_id or "")
+    if expert:
+        return to_home_expert(expert)
+    title = item.expert_display_title
+    if not item.expert_id or not title:
         return None
     return HomeExpert(
         id=item.expert_id,
-        name=item.expert_name,
+        name=title,
         role=item.expert_role or "",
+        job_title=item.expert_job_title,
         avatar_url=item.expert_avatar_url,
     )
 

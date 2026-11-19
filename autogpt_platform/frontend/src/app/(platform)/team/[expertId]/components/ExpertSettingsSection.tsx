@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
   BubbleChatIcon,
@@ -32,7 +33,8 @@ function plural(count: number, word: string) {
 /** Firing, spelled out before anyone reaches for the button: what pauses,
  *  what stays, and that the expert can come back. */
 export function ExpertSettingsSection({ expert, onFire }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   const {
     pauseItems,
     isPreviewLoading,
@@ -47,7 +49,7 @@ export function ExpertSettingsSection({ expert, onFire }: Props) {
 
   return (
     <section
-      aria-label={t(`Fire ${expert.name}`, `解聘 ${expert.name}`)}
+      aria-label={t(`Fire ${title}`, `解聘 ${title}`)}
       className="overflow-hidden rounded-2xl bg-surface smooth-shadow-ring-sm"
     >
       <div className="flex items-start gap-3 border-b border-error/10 bg-error-surface/60 px-5 py-4">
@@ -56,12 +58,12 @@ export function ExpertSettingsSection({ expert, onFire }: Props) {
         </span>
         <div className="min-w-0">
           <Text variant="large-medium" tone="primary">
-            {t(`Fire ${expert.name}`, `解聘 ${expert.name}`)}
+            {t(`Fire ${title}`, `解聘 ${title}`)}
           </Text>
           <Text variant="body-md" tone="secondary" className="mt-0.5">
             {t(
-              `${expert.name} leaves your team and stops working for you. Here is what that means for what you have set up.`,
-              `${expert.name} 将离开团队并停止为你工作。以下是对现有设置的影响。`,
+              `${title} leaves your team and stops working for you. Here is what that means for what you have set up.`,
+              `${title} 将离开团队并停止为你工作。以下是对现有设置的影响。`,
             )}
           </Text>
         </div>
@@ -173,8 +175,8 @@ export function ExpertSettingsSection({ expert, onFire }: Props) {
         <Consequence
           icon={Store01Icon}
           title={t(
-            `You can hire ${expert.name} again anytime from the marketplace`,
-            `你可以随时从市场重新聘请 ${expert.name}`,
+            `You can hire ${title} again anytime from the marketplace`,
+            `你可以随时从市场重新聘请 ${title}`,
           )}
         />
       </ul>
@@ -187,7 +189,7 @@ export function ExpertSettingsSection({ expert, onFire }: Props) {
           onClick={onFire}
           data-testid="expert-fire-button"
         >
-          {t(`Fire ${expert.name}`, `解聘 ${expert.name}`)}
+          {t(`Fire ${title}`, `解聘 ${title}`)}
         </Button>
       </div>
     </section>

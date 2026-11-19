@@ -92,6 +92,46 @@ const baseFile = {
 describe("ArtifactsPage - folder in the URL", () => {
   beforeEach(() => resetNavigation());
 
+  test("uses the profession for the expert filter, attribution, and empty state", async () => {
+    useBaseHandlers([
+      {
+        id: "expert-a",
+        name: "Casey",
+        avatar_url: null,
+        role: "Code Review & QA",
+        job_title: "Quality Assurance Engineer",
+        is_archived: false,
+      },
+    ]);
+    server.use(
+      http.get(`${PROXY}/folders`, () => HttpResponse.json({ folders: [] })),
+      http.get(`${PROXY}/files`, ({ request }) => {
+        const expertId = new URL(request.url).searchParams.get("expert_id");
+        return HttpResponse.json({
+          files:
+            expertId === "expert-a"
+              ? []
+              : [{ ...baseFile, expert_id: "expert-a" }],
+          offset: 0,
+          has_more: false,
+        });
+      }),
+    );
+
+    render(<ArtifactsPage />);
+    const filter = await screen.findByRole("tab", {
+      name: "Quality Assurance Engineer",
+    });
+    const badge = await screen.findByTitle("From Quality Assurance Engineer");
+    expect(badge.textContent).toBe("Quality Assurance Engineer");
+    expect(screen.queryByText("Casey")).toBeNull();
+    fireEvent.click(filter);
+    const chat = await screen.findByRole("link", {
+      name: "Chat with Quality Assurance Engineer",
+    });
+    expect(chat.getAttribute("href")).toBe("/copilot?expertId=expert-a");
+  });
+
   test("opens the folder named by the URL on load", async () => {
     resetNavigation("folder=fld-1");
     useBaseHandlers();

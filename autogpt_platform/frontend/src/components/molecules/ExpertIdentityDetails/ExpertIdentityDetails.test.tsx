@@ -21,7 +21,7 @@ describe("ExpertIdentityDetails", () => {
   );
 
   test.each(["card", "page"] as const)(
-    "puts the job title on the name line in %s size, in place of the kind",
+    "renders the job title as the only name in %s size",
     (size) => {
       render(
         <ExpertIdentityDetails
@@ -32,10 +32,8 @@ describe("ExpertIdentityDetails", () => {
         />,
       );
 
-      const title = screen.getByText(/Social Media Manager/);
-      expect(title.closest("div")?.textContent).toBe(
-        "Jules\u2022 Social Media Manager",
-      );
+      expect(screen.getByText("Social Media Manager")).toBeDefined();
+      expect(screen.queryByText(/Jules/)).toBeNull();
       expect(screen.queryByText("AI Expert")).toBeNull();
       expect(screen.queryByText("Social media")).toBeNull();
     },
@@ -63,9 +61,7 @@ describe("ExpertIdentityDetails", () => {
         size="compact"
       />,
     );
-    expect(
-      screen.getByText("Social Media Manager").classList.contains("leading-4"),
-    ).toBe(true);
+    expect(screen.getByText("Social Media Manager").tagName).toBe("SPAN");
     expect(container.querySelector("svg")).toBeNull();
   });
 });
@@ -98,11 +94,11 @@ test("keeps Otto's disclosure without a role or title", () => {
   expect(screen.queryByText("AI Expert")).toBeNull();
 });
 
-test("shows only name and role for a compact specialist", () => {
+test("shows only the profession for a compact specialist", () => {
   render(
     <ExpertIdentityDetails name="Mina" jobTitle="Bookkeeper" size="compact" />,
   );
-  expect(screen.getByText("Mina")).toBeDefined();
+  expect(screen.queryByText("Mina")).toBeNull();
   expect(screen.getByText("Bookkeeper")).toBeDefined();
   expect(screen.queryByText("AI Expert")).toBeNull();
 });

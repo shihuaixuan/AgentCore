@@ -48,8 +48,9 @@ def compose_run_outcome(
     )
     return BriefingRunItem(
         expert_id=expert.id if expert else None,
-        expert_name=expert.name if expert else None,
+        expert_name=expert.display_title if expert else None,
         expert_role=expert.role if expert else None,
+        expert_job_title=expert.job_title if expert else None,
         expert_avatar_url=expert.avatar_url if expert else None,
         agent_name=agent_name,
         graph_id=execution.graph_id,

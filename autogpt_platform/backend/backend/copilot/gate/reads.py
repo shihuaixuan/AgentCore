@@ -39,8 +39,9 @@ from backend.data.db_accessors import experts_db
 from backend.data.workspace_scope import is_skill_package_path
 from backend.util.feature_flag import Flag, get_flag_variant
 
-from . import answered_from_chat_of_origin, held, resolve_mode, shadow
+from . import answered_from_chat_of_origin, held, resolve_mode
 from . import review as review_store
+from . import shadow
 from .content import ContentVerdict, Image, judge_content
 from .headline import Headline, named
 from .policy import DEFAULT_MODE
@@ -677,7 +678,7 @@ async def _actor(user_id: str, session: ChatSession) -> str:
         # A name on a card must never cost the hold itself.
         logger.warning("Expert lookup for a held read failed", exc_info=True)
         return AUTOPILOT_NAME
-    return expert.name if expert else AUTOPILOT_NAME
+    return expert.display_title if expert else AUTOPILOT_NAME
 
 
 def _stub(

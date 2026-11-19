@@ -138,14 +138,14 @@ def test_expert_runs_and_decisions():
     assert content.zero_expert_fallback is False
     item = content.run_items[0]
     assert (item.expert_name, item.agent_name, item.summary) == (
-        "Ana",
+        "Researcher",
         "Lead Finder",
         "Found 3 leads",
     )
     assert item.link == "/library/agents/lib-1?activeTab=runs&activeItem=run-1"
     decision = content.decision_items[0]
     assert decision.title == "Approve outreach email"
-    assert decision.expert_name == "Ana"  # attributed via the run's expert_id
+    assert decision.expert_name == "Researcher"  # attributed via the run's expert_id
     assert decision.link == "/library/agents/lib-1?activeTab=runs&activeItem=run-1"
 
 
@@ -195,7 +195,7 @@ def test_decision_prefers_enriched_expert_attribution():
         tz_name="UTC",
     )
     decision = content.decision_items[0]
-    assert (decision.expert_id, decision.expert_name) == ("exp-2", "Bob")
+    assert (decision.expert_id, decision.expert_name) == ("exp-2", "AI Expert")
     assert decision.expert_avatar_url == "https://a/b.png"
 
 
@@ -211,7 +211,7 @@ def test_decision_backfills_display_fields_from_expert_id():
         tz_name="UTC",
     )
     decision = content.decision_items[0]
-    assert (decision.expert_id, decision.expert_name) == ("exp-1", "Ana")
+    assert (decision.expert_id, decision.expert_name) == ("exp-1", "Researcher")
 
 
 def test_failed_runs_sort_before_completed():
@@ -261,14 +261,19 @@ def test_review_without_agent_info_falls_back_to_library_link():
 
 def test_markdown_has_three_sections_and_links():
     content = compose_briefing(
-        experts=[make_expert()],
+        experts=[
+            make_expert().model_copy(update={"job_title": "Market Research Analyst"})
+        ],
         executions=[make_exec()],
         reviews=[make_review()],
         agent_info_by_graph_id={"g-1": AgentInfo("Lead Finder", "lib-1")},
         generated_at=NOW,
         tz_name="UTC",
     )
+    assert content is not None
     md = render_briefing_markdown(content)
+    assert "Market Research Analyst: [Lead Finder]" in md
+    assert "- Ana:" not in md
     assert "What ran" in md and "What was found" in md and "Needs your decision" in md
     assert "(/library/agents/lib-1?activeTab=runs&activeItem=run-1)" in md
 

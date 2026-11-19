@@ -20,6 +20,7 @@ import { ExpertSkillListItem } from "./ExpertSkillListItem";
 import { useExpertLearning } from "./useExpertLearning";
 import { useExpertSkills } from "./useExpertSkills";
 import { getLearningLabel } from "@/services/skill-learning/helpers";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 interface Props {
   expert: Expert;
@@ -35,6 +36,7 @@ export function ExpertSkillsSection({
   initialVersionId = null,
 }: Props) {
   const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   const {
     query,
     setQuery,
@@ -62,7 +64,7 @@ export function ExpertSkillsSection({
     <section>
       <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
         <Text variant="large-medium" tone="primary">
-          {t(`${expert.name}'s Skills`, `${expert.name} 的技能`)}
+          {t(`${title}'s Skills`, `${title} 的技能`)}
         </Text>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <Button
@@ -106,8 +108,8 @@ export function ExpertSkillsSection({
               checked={!learning.isLearningPaused}
               disabled={learning.isTogglingLearning}
               aria-label={t(
-                `Nightly learning for ${expert.name}`,
-                `${expert.name} 的夜间学习`,
+                `Nightly learning for ${title}`,
+                `${title} 的夜间学习`,
               )}
               onCheckedChange={(checked) =>
                 learning.setLearningPaused(!checked)
@@ -131,8 +133,8 @@ export function ExpertSkillsSection({
           ]}
           title={t("No skills yet", "暂无技能")}
           description={t(
-            `Add skills from your library so ${expert.name} knows how you like things done.`,
-            `从库中添加技能，让 ${expert.name} 了解你偏好的工作方式。`,
+            `Add skills from your library so ${title} knows how you like things done.`,
+            `从库中添加技能，让 ${title} 了解你偏好的工作方式。`,
           )}
         >
           <Button
@@ -188,7 +190,7 @@ export function ExpertSkillsSection({
         <SkillLearningSheet
           scope={{
             expertId: expert.id,
-            name: expert.name,
+            name: title,
             avatarUrl: expert.avatar_url,
             color: expert.color,
           }}

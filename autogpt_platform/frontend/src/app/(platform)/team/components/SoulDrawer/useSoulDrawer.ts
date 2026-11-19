@@ -11,35 +11,33 @@ import { FormEvent, useState } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Args {
-  expert: Expert | null;
+  expert: Expert;
   onClose: () => void;
 }
 
-const EMPTY_SOUL: ExpertSoulUpdate = {
-  name: "",
-  identity: "",
-  voice_preferences: "",
-  boundaries: "",
-};
+export type EditableSoul = Omit<ExpertSoulUpdate, "name">;
 
 export function useSoulDrawer({ expert, onClose }: Args) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [soul, setSoul] = useState<ExpertSoulUpdate>(() =>
-    expert ? soulFromExpert(expert) : EMPTY_SOUL,
-  );
+  const [soul, setSoul] = useState<EditableSoul>(() => ({
+    identity: expert.identity,
+    voice_preferences: expert.voice_preferences,
+    boundaries: expert.boundaries,
+  }));
   const { mutateAsync: updateSoul, isPending } = useUpdateExpertSoul();
 
-  function updateField(field: keyof ExpertSoulUpdate, value: string) {
+  function updateField(field: keyof EditableSoul, value: string) {
     setSoul((current) => ({ ...current, [field]: value }));
   }
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!expert) return;
-
     try {
-      await updateSoul({ expertId: expert.id, data: soul });
+      await updateSoul({
+        expertId: expert.id,
+        data: { ...soul, name: expert.name },
+      });
       await Promise.all([
         invalidateExpertRosterQueries(queryClient),
         queryClient.invalidateQueries({
@@ -65,15 +63,6 @@ export function useSoulDrawer({ expert, onClose }: Args) {
     updateField,
     save,
     isPending,
-    canSave: Boolean(soul.name.trim() && soul.identity.trim()),
-  };
-}
-
-function soulFromExpert(expert: Expert): ExpertSoulUpdate {
-  return {
-    name: expert.name,
-    identity: expert.identity,
-    voice_preferences: expert.voice_preferences,
-    boundaries: expert.boundaries,
+    canSave: Boolean(expert.name.trim() && soul.identity.trim()),
   };
 }

@@ -6,6 +6,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { creditsToUsdLabel } from "@/lib/credits";
 import { cn } from "@/lib/utils";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { SpendMeter } from "../../components/ExpertTeamCard/components/SpendMeter";
@@ -20,13 +21,14 @@ interface Props {
 }
 
 export function ExpertBudgetSection({ expert, color, className }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = getExpertDisplayTitle(expert, locale);
   const weeklySpend = getWeeklySpend(expert);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   return (
     <section
-      aria-label={t(`${expert.name} budget`, `${expert.name} 的预算`)}
+      aria-label={t(`${title} budget`, `${title} 的预算`)}
       style={
         color
           ? {

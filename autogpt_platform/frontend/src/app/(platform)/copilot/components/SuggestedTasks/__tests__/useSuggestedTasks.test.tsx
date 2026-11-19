@@ -459,7 +459,7 @@ describe("useSuggestedTasks — who takes a task", () => {
 });
 
 describe("useSuggestedTasks — an expert who isn't on the team", () => {
-  it("sends the task to Otto and says Maria isn't on the team", async () => {
+  it("sends the task to Otto without exposing the unavailable expert's old name", async () => {
     const sources: (string | null)[] = [];
     const onSend = vi.fn<OnSend>(async () => {
       sources.push(takeExpertThreadSource());
@@ -476,7 +476,7 @@ describe("useSuggestedTasks — an expert who isn't on the team", () => {
 
     expect(
       await screen.findByText(
-        "Maria isn't on your team, so Otto has this one.",
+        "That expert isn't on your team, so Otto has this one.",
       ),
     ).toBeDefined();
     expect(onSend).toHaveBeenCalledExactlyOnceWith(TASKS[1].prompt);

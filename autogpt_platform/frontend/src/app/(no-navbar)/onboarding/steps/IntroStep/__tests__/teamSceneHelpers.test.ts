@@ -19,7 +19,7 @@ function member(asset: string) {
 }
 
 describe("teamBranch", () => {
-  it.each(TEAM_PARENTS)("joins $name to each of their team", (parent) => {
+  it.each(TEAM_PARENTS)("joins $asset to each of their team", (parent) => {
     const branch = teamBranch(parent);
     const children = TEAM.filter((member) => member.parent === parent.asset);
     const parentBottom =
@@ -38,18 +38,15 @@ describe("teamBranch", () => {
   });
 
   it("groups each department under its head", () => {
-    expect(TEAM.filter((m) => m.parent === "otto").map((m) => m.name)).toEqual([
-      "Maria",
-      "Max",
-      "Mina",
-    ]);
-    expect(TEAM.filter((m) => m.parent === "maria").map((m) => m.name)).toEqual(
-      ["Nadia", "Riley"],
+    expect(TEAM.filter((m) => m.parent === "otto").map((m) => m.asset)).toEqual(
+      ["maria", "max", "mina"],
     );
-    expect(TEAM.filter((m) => m.parent === "mina").map((m) => m.name)).toEqual([
-      "Frankie",
-      "Devon",
-    ]);
+    expect(
+      TEAM.filter((m) => m.parent === "maria").map((m) => m.asset),
+    ).toEqual(["nadia", "riley"]);
+    expect(TEAM.filter((m) => m.parent === "mina").map((m) => m.asset)).toEqual(
+      ["frankie", "devon"],
+    );
     expect(teamBranch(member("otto")).innerDrops).toEqual([300]);
     expect(teamBranch(member("maria"))).toMatchObject({ left: 75, right: 225 });
   });

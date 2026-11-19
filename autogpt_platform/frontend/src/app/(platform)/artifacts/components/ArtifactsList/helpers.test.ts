@@ -500,9 +500,9 @@ describe("getEmptyMessage - nested folders and the expert filter", () => {
         isInFolder: true,
         hasFolders: false,
         hasExpertFilter: true,
-        expertName: "Maria",
+        expertTitle: "Marketing Manager",
       }),
-    ).toBe("No files from Maria here");
+    ).toBe("No files from Marketing Manager here");
   });
 
   test("an expert filter at a root with folders says 'here' too", () => {
@@ -512,9 +512,9 @@ describe("getEmptyMessage - nested folders and the expert filter", () => {
         isInFolder: false,
         hasFolders: true,
         hasExpertFilter: true,
-        expertName: "Maria",
+        expertTitle: "Marketing Manager",
       }),
-    ).toBe("No files from Maria here");
+    ).toBe("No files from Marketing Manager here");
   });
 
   test("an expert filter with nowhere else to look keeps 'yet'", () => {
@@ -524,7 +524,7 @@ describe("getEmptyMessage - nested folders and the expert filter", () => {
         isInFolder: false,
         hasFolders: false,
         hasExpertFilter: true,
-        expertName: "Maria",
+        expertTitle: "Marketing Manager",
       }),
     ).toBe("No files from this expert yet");
   });
@@ -536,7 +536,7 @@ describe("getEmptyMessage - nested folders and the expert filter", () => {
         isInFolder: true,
         hasFolders: false,
         hasExpertFilter: true,
-        expertName: null,
+        expertTitle: null,
       }),
     ).toBe("No files from this expert here");
   });

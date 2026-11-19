@@ -1,11 +1,6 @@
 import { ExpertAvatarRequestCategory } from "@/app/api/__generated__/models/expertAvatarRequestCategory";
 import { describe, expect, test } from "vitest";
-import {
-  categoryForRole,
-  jobTitleSuggestionsFor,
-  nameSuggestionsFor,
-  roleFor,
-} from "./helpers";
+import { categoryForRole, jobTitleSuggestionsFor, roleFor } from "./helpers";
 
 describe("category helpers", () => {
   test("maps the wizard's role ids onto their area", () => {
@@ -20,10 +15,10 @@ describe("category helpers", () => {
   });
 
   test.each(Object.values(ExpertAvatarRequestCategory))(
-    "gives %s a role, names and job titles",
+    "gives %s a role in both languages and job title suggestions",
     (category) => {
       expect(roleFor(category)).toBeTruthy();
-      expect(nameSuggestionsFor(category)).not.toHaveLength(0);
+      expect(roleFor(category, "zh-CN")).toBeTruthy();
       expect(jobTitleSuggestionsFor(category)).not.toHaveLength(0);
     },
   );
@@ -34,7 +29,6 @@ describe("category helpers", () => {
 
   test("falls back when no area is picked", () => {
     expect(roleFor(null)).toBeNull();
-    expect(nameSuggestionsFor(null)).toEqual(["Otto", "Nova", "Juno"]);
     expect(jobTitleSuggestionsFor(null)).toEqual([]);
   });
 });

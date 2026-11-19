@@ -185,7 +185,7 @@ describe("SuggestedTasksBlock — Hide and Show", () => {
     expect(controlledRegion(toggle)?.contains(list)).toBe(true);
     expect(
       screen.getByRole("button", {
-        name: `Start with Maria: ${TASKS[0].title}`,
+        name: `Start with Bookkeeper: ${TASKS[0].title}`,
       }),
     ).toBeDefined();
   });
@@ -302,7 +302,7 @@ describe("SuggestedTasksBlock — Hide and Show", () => {
 
     await userEvent.click(
       screen.getByRole("button", {
-        name: `Start with Maria: ${TASKS[0].title}`,
+        name: `Start with Bookkeeper: ${TASKS[0].title}`,
       }),
     );
     await userEvent.click(
@@ -384,9 +384,9 @@ describe("SuggestedTasksBlock — Your team", () => {
 
     expect(within(members[0]).getByText("Otto")).toBeDefined();
     expect(within(members[0]).getByText("Head of AI")).toBeDefined();
-    expect(within(members[1]).getByText("Maria")).toBeDefined();
+    expect(within(members[1]).queryByText("Maria")).toBeNull();
     expect(within(members[1]).getByText("Bookkeeper")).toBeDefined();
-    expect(within(members[2]).getByText("Sam")).toBeDefined();
+    expect(within(members[2]).getByText("AI Expert")).toBeDefined();
   });
 
   it("lists only Otto when no expert has been hired", () => {

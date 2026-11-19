@@ -1,16 +1,24 @@
 import type { UIMessage } from "ai";
+import type { Locale } from "@/lib/i18n/locale";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
+import type { ExpertIdentity } from "../useExpertMap";
 
 export interface ReplyRecipient {
   id: string | null;
   name: string;
   avatar_url: string | null;
+  job_title?: string | null;
+  role?: string | null;
 }
 
 export const REPLY_RECIPIENT_PART_TYPE = "data-reply-recipient";
 
 export function parseReplyRecipient(value: unknown): ReplyRecipient | null {
   if (!value || typeof value !== "object") return null;
-  const { id, name, avatar_url } = value as Record<string, unknown>;
+  const { id, name, avatar_url, job_title, role } = value as Record<
+    string,
+    unknown
+  >;
   if (
     (id !== null && typeof id !== "string") ||
     typeof name !== "string" ||
@@ -19,7 +27,27 @@ export function parseReplyRecipient(value: unknown): ReplyRecipient | null {
   ) {
     return null;
   }
-  return { id, name, avatar_url };
+  return {
+    id,
+    name,
+    avatar_url,
+    ...(typeof job_title === "string" && { job_title }),
+    ...(typeof role === "string" && { role }),
+  };
+}
+
+export function getReplyProfession(
+  recipient: ReplyRecipient,
+  expert: ExpertIdentity | null | undefined,
+  locale: Locale,
+) {
+  if (recipient.job_title?.trim() || recipient.role?.trim()) {
+    return getExpertDisplayTitle(recipient, locale);
+  }
+  return getExpertDisplayTitle(
+    expert?.id === recipient.id ? expert : null,
+    locale,
+  );
 }
 
 export function getReplyRecipient(metadata: unknown): ReplyRecipient | null {
@@ -52,13 +80,21 @@ export function sameReplyRecipient(
   return (
     previous.id === next.id &&
     previous.name === next.name &&
-    previous.avatar_url === next.avatar_url
+    previous.avatar_url === next.avatar_url &&
+    previous.job_title === next.job_title &&
+    previous.role === next.role
   );
 }
 
 export function replyAuthorKey(message: UIMessage): string | null {
   const recipient = getMessageReplyRecipient(message);
   return recipient
-    ? JSON.stringify([recipient.id, recipient.name, recipient.avatar_url])
+    ? JSON.stringify([
+        recipient.id,
+        recipient.name,
+        recipient.avatar_url,
+        recipient.job_title,
+        recipient.role,
+      ])
     : null;
 }

@@ -7,6 +7,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, BeforeValidator, Field, PlainSerializer
 
+from backend.api.features.experts.copy_policy import expert_display_title
 from backend.copilot.config import CopilotLLMModel
 
 # File content that survives the JSON service RPC. Raw bytes stay bytes
@@ -326,6 +327,11 @@ class BotExpert(BaseModel):
     id: str
     name: str
     role: str
+    job_title: str | None = None
+
+    @property
+    def display_title(self) -> str:
+        return expert_display_title(self.job_title, self.role)
 
 
 class ChatTurnHandle(BaseModel):

@@ -5,6 +5,7 @@ import pytest
 from autogpt_libs.auth.models import RequestContext
 from pytest_mock import MockerFixture
 
+from backend.api.features.experts.models import ExpertIdentity
 from backend.copilot.briefing.models import BriefingContent, BriefingRunItem
 from backend.copilot.scheduled_chats.service import PausedScheduledChat
 from backend.data.activity_event import ActivityEvent
@@ -157,6 +158,65 @@ async def test_briefing_anchors_on_todays_persisted_row(
     ]
     assert dashboard.briefing.outcomes[0].title == "Filed the report."
     assert dashboard.briefing.outcomes[1].title == "Booked the flight."
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("source", ["briefing", "recent_work"])
+async def test_dashboard_carries_an_owned_archived_experts_job_title(
+    mocker: MockerFixture, home_dependencies, source: str
+) -> None:
+    if source == "briefing":
+        content = _stored_briefing()
+        content.run_items[0].expert_id = "archived-expert"
+        content.run_items[0].expert_name = "Nadia"
+        content.run_items[0].expert_role = "Ops"
+        _patch_stored_briefing(mocker, content.model_dump(mode="json"))
+    else:
+        event = ActivityEvent(
+            id="archived-event",
+            user_id="user-1",
+            created_at=datetime.now(timezone.utc),
+            category="SCHEDULE",
+            event_type="schedule.created",
+            title="Inbox triage",
+            expert_id="archived-expert",
+        )
+        mocker.patch(
+            "backend.api.features.home.service._get_work_events",
+            AsyncMock(return_value=[event]),
+        )
+    identities = mocker.patch(
+        "backend.api.features.home.service.experts_db.list_expert_identities",
+        AsyncMock(
+            return_value=[
+                ExpertIdentity(
+                    id="archived-expert",
+                    name="Nadia",
+                    avatar_url=None,
+                    role="Ops",
+                    job_title="Operations Manager",
+                    is_archived=True,
+                )
+            ]
+        ),
+    )
+
+    dashboard = await build_home_dashboard(user_id="user-1")
+
+    if source == "briefing":
+        expert = dashboard.briefing.outcomes[0].expert
+    else:
+        [actor] = [
+            group.actor
+            for group in dashboard.recent_work.groups
+            if group.actor.kind == "expert"
+        ]
+        assert actor.link is None
+        expert = actor.expert
+    assert expert is not None
+    assert expert.job_title == "Operations Manager"
+    assert dashboard.agents == []
+    identities.assert_awaited_once_with("user-1")
 
 
 @pytest.mark.asyncio

@@ -48,7 +48,7 @@ describe.each([
 ])(
   "$locale team templates",
   ({ locale, count, open, range, day, missing, more }) => {
-    test("localizes pod counts before and after opening while preserving pod and expert names", () => {
+    test("localizes pod counts and labels experts by profession", () => {
       render(
         <LanguageProvider initialLocale={locale}>
           <PodBoard
@@ -64,14 +64,16 @@ describe.each([
               },
             ]}
             onNewPod={vi.fn()}
-            renderCard={(member) => <p key={member.id}>{member.name}</p>}
+            renderCard={(member) => <p key={member.id}>{member.identity}</p>}
           />
         </LanguageProvider>,
       );
       expect(screen.getByText(count)).toBeDefined();
+      expect(screen.getByText("Custom Role")).toBeDefined();
       fireEvent.click(screen.getByRole("button", { name: open }));
       expect(screen.getByText(count)).toBeDefined();
-      expect(screen.getByText(expert.name)).toBeDefined();
+      expect(screen.getByText("Original identity")).toBeDefined();
+      expect(screen.queryByText("Original Nova")).toBeNull();
       expect(screen.getByText("Original Pod")).toBeDefined();
     });
 

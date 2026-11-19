@@ -10,8 +10,9 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
 import { HeadlineText } from "@/app/(platform)/copilot/components/ApprovalQueue/components/ApprovalHeadline";
-import { toApprovalItem } from "@/app/(platform)/copilot/components/ApprovalQueue/helpers";
 import { cn } from "@/lib/utils";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
+import { toHomeApprovalItem } from "../attentionCopy";
 import type { useReviewCarousel } from "../useReviewCarousel";
 import { HeldAvatar } from "./HeldAvatar";
 
@@ -28,7 +29,7 @@ const OUTCOME_ICONS = {
 } as const;
 
 export function ReviewSidebar({ carousel, sheet = false }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   return (
     <nav
       aria-label={
@@ -72,7 +73,9 @@ export function ReviewSidebar({ carousel, sheet = false }: Props) {
                 <HeldAvatar item={item} size={20} />
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="text-caption text-foreground-tertiary">
-                    {item.expert?.name ?? AUTOPILOT_NAME}
+                    {item.expert
+                      ? getExpertDisplayTitle(item.expert, locale)
+                      : AUTOPILOT_NAME}
                   </span>
                   <span className="flex min-w-0 items-center gap-1.5">
                     {outcome ? (
@@ -85,7 +88,13 @@ export function ReviewSidebar({ carousel, sheet = false }: Props) {
                       />
                     ) : null}
                     <span className="min-w-0 truncate">
-                      <HeadlineText item={toApprovalItem(item.review!)} />
+                      <HeadlineText
+                        item={toHomeApprovalItem(
+                          item.review!,
+                          item.expert,
+                          locale,
+                        )}
+                      />
                       {receipt ? (
                         <span className="sr-only">, {receipt.text}</span>
                       ) : null}

@@ -12,6 +12,7 @@ class HomeExpert(BaseModel):
     name: str
     role: str
     avatar_url: str | None
+    job_title: str | None = None
 
 
 class HomeAction(BaseModel):

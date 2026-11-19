@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import {
   fluidSize,
   isLead,
@@ -13,25 +14,15 @@ import {
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-const ROLE_COPY: Record<string, string> = {
-  "Head of AI": "AI 负责人",
-  Marketing: "市场营销",
-  Sales: "销售",
-  Finance: "财务",
-  Research: "研究",
-  Support: "客户支持",
-  Operations: "运营",
-  Security: "安全",
-};
-
 interface Props {
   member: TeamMember;
   animate: boolean;
 }
 
 export function TeamNode({ member, animate }: Props) {
-  const { t } = useTranslation();
+  const { locale } = useTranslation();
   const lead = isLead(member);
+  const title = getExpertDisplayTitle(member, locale);
   const position = {
     "--x": stagePercent(member.x),
     "--top": `${member.top}px`,
@@ -63,38 +54,51 @@ export function TeamNode({ member, animate }: Props) {
             className="absolute inset-x-[22%] bottom-0 h-2 rounded-full bg-scrim/10 blur-sm"
           />
           <Image
-            src={`/experts/transparent/${member.asset}.webp`}
+            src={
+              lead
+                ? "/experts/transparent/otto.webp"
+                : `/experts/professional/expert-${member.asset}.webp`
+            }
             alt=""
             width={member.size}
             height={member.size}
             sizes={`${member.size}px`}
             priority
-            className="relative size-full object-contain"
+            className={
+              lead
+                ? "relative size-full object-contain"
+                : "relative size-full rounded-xl object-cover"
+            }
           />
         </div>
-        <span
-          className={
-            lead
-              ? "absolute top-1/2 left-full ml-3 -translate-y-1/2"
-              : "mt-1.5 text-center"
-          }
-        >
+        {lead ? (
+          <span className="absolute top-1/2 left-full ml-3 -translate-y-1/2">
+            <Text
+              as="span"
+              variant="body-medium"
+              className="block whitespace-nowrap"
+            >
+              Otto
+            </Text>
+            <Text
+              as="span"
+              variant="small"
+              tone="accent"
+              className="block whitespace-nowrap"
+            >
+              {title}
+            </Text>
+          </span>
+        ) : (
           <Text
             as="span"
-            variant="body-medium"
-            className="block whitespace-nowrap"
+            variant="small-medium"
+            align="center"
+            className="mt-1.5 block w-[23cqw] text-balance"
           >
-            {member.name}
+            {title}
           </Text>
-          <Text
-            as="span"
-            variant="small"
-            tone={lead ? "accent" : "secondary"}
-            className="block whitespace-nowrap"
-          >
-            {t(member.role, ROLE_COPY[member.role] ?? member.role)}
-          </Text>
-        </span>
+        )}
       </motion.div>
     </li>
   );

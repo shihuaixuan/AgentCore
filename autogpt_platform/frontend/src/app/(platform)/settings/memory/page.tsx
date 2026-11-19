@@ -38,6 +38,7 @@ function MemorySettings() {
     selectScope,
     experts,
     scopeName,
+    expertIdentity,
     facts,
     isLoadingFacts,
     isFactsError,
@@ -108,6 +109,7 @@ function MemorySettings() {
 
       <MemoryChatPanel
         scopeName={scopeName}
+        expertIdentity={expertIdentity}
         isOpen={chatPanel.isOpen}
         isStarting={chatPanel.isStarting}
         startError={chatPanel.startError}

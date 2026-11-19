@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 import {
   LinkSquare01Icon,
@@ -213,7 +214,7 @@ export function SubSessionCard({
   output,
   minimal = false,
 }: SubSessionCardProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const frozenStatus = str(output, "status");
   const response = str(output, "response");
   const link = str(output, "sub_autopilot_session_link");
@@ -228,10 +229,14 @@ export function SubSessionCard({
     typeof output.elapsed_seconds === "number" ? output.elapsed_seconds : null;
   const expert = asObject(output.expert);
   const avatarUrl = expert && str(expert, "avatar_url");
-  const role = expert && str(expert, "role");
-  const name =
-    (expert && str(expert, "name")) ??
-    (background ? t("Background subtask", "后台子任务") : t("Expert", "专家"));
+  const name = expert
+    ? getExpertDisplayTitle(
+        { jobTitle: str(expert, "job_title"), role: str(expert, "role") },
+        locale,
+      )
+    : background
+      ? t("Background subtask", "后台子任务")
+      : t("Expert", "专家");
   return (
     <div className={cn(CARD, "w-full rounded-2xl p-2.5")}>
       <div className="flex items-center gap-2.5">
@@ -242,11 +247,6 @@ export function SubSessionCard({
           className="min-w-0 flex-1 truncate"
         >
           {name}
-          {role && (
-            <span className="ml-1.5 font-normal text-foreground-subtle">
-              {role}
-            </span>
-          )}
         </Text>
         {elapsed !== null && (
           <span className="shrink-0 text-caption-sm leading-inherit text-foreground-subtle">

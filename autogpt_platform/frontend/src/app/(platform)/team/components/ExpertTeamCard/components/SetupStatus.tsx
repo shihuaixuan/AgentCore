@@ -4,6 +4,7 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
+import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 interface Props {
   expert: Expert;
@@ -12,8 +13,9 @@ interface Props {
 }
 
 export function SetupStatus({ expert, isRetrying, onRetry }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   if (expert.setup_status === "installing") {
+    const title = getExpertDisplayTitle(expert, locale);
     return (
       <div
         role="status"
@@ -21,8 +23,8 @@ export function SetupStatus({ expert, isRetrying, onRetry }: Props) {
       >
         <Text variant="body" tone="inherit">
           {t(
-            `Setting up ${expert.name}'s skills and workflows…`,
-            `正在设置 ${expert.name} 的技能和工作流…`,
+            `Setting up ${title}'s skills and workflows…`,
+            `正在设置 ${title} 的技能和工作流…`,
           )}
         </Text>
       </div>
