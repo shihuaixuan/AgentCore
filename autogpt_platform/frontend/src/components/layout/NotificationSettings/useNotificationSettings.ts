@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useReducer, useSyncExternalStore } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import {
   hasStoredNotificationsOn,
@@ -24,6 +25,7 @@ import {
  * and the surface has to send them to their browser's site settings.
  */
 export function useNotificationSettings() {
+  const { t } = useTranslation();
   const isNotificationsEnabled = useCopilotUIStore(
     (s) => s.isNotificationsEnabled,
   );
@@ -75,8 +77,11 @@ export function useNotificationSettings() {
 
     if (typeof Notification === "undefined") {
       toast({
-        title: "Notifications not supported",
-        description: "Your browser does not support notifications.",
+        title: t("Notifications not supported", "不支持通知"),
+        description: t(
+          "Your browser does not support notifications.",
+          "此浏览器不支持通知。",
+        ),
         variant: "destructive",
       });
       return;
@@ -94,17 +99,21 @@ export function useNotificationSettings() {
     // refused, so nothing needs unblocking in browser settings.
     if (result === "default") {
       toast({
-        title: "Notifications not turned on",
-        description:
+        title: t("Notifications not turned on", "未开启通知"),
+        description: t(
           "Your browser didn't confirm permission. Try again, or allow them from the icon in the address bar.",
+          "浏览器未确认通知权限。请重试，或通过地址栏中的图标允许通知。",
+        ),
       });
       return;
     }
 
     toast({
-      title: "Notifications blocked",
-      description:
+      title: t("Notifications blocked", "通知已被阻止"),
+      description: t(
         "Please allow notifications in your browser settings to enable this feature.",
+        "请在浏览器设置中允许通知，以启用此功能。",
+      ),
       variant: "destructive",
     });
   }

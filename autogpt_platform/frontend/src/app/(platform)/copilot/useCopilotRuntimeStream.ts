@@ -1,4 +1,5 @@
 import { useReadEveryRender } from "@/hooks/useReadEveryRender";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getGetV2GetCopilotUsageQueryKey } from "@/app/api/__generated__/endpoints/chat/chat";
 import { useQueryClient } from "@tanstack/react-query";
 import type { UIMessage } from "ai";
@@ -49,12 +50,6 @@ import {
 import type { PersistedRow } from "./stream/turnLog";
 import { useCopilotStop } from "./useCopilotStop";
 
-const NOTICE_TEXT = {
-  "catching-up": "Catching up…",
-  reconnecting: "Reconnecting…",
-  offline: "Offline — waiting for the network…",
-} as const;
-
 const EMPTY_SNAPSHOT: RuntimeSnapshot = {
   segments: [],
   ownedFrom: null,
@@ -94,6 +89,7 @@ export function useCopilotRuntimeStream({
   refetchSession,
   copilotModel,
 }: Args) {
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const setInitialPrompt = useCopilotUIStore((s) => s.setInitialPrompt);
   const [rateLimitMessage, setRateLimitMessage] = useState<string | null>(null);
@@ -150,6 +146,7 @@ export function useCopilotRuntimeStream({
     }
     handleStreamError({
       error,
+      locale,
       providerFailure: parseProviderFailure(rawFailure),
       onRateLimit: (message, limitFailure, origin) => {
         restoreUnsentSend();
@@ -179,6 +176,7 @@ export function useCopilotRuntimeStream({
     if (!runtime) return;
     return runtime.bind(
       {
+        locale,
         onError: handleError,
         onTurnEnd: ({ expired }) => {
           void queryClient.invalidateQueries({
@@ -320,7 +318,17 @@ export function useCopilotRuntimeStream({
     isReconnecting: false,
     isFinishProbing: snapshot.probing,
     isRestoringActiveSession: notice !== null,
-    restoreStatusMessage: notice ? NOTICE_TEXT[notice] : null,
+    restoreStatusMessage:
+      notice === "catching-up"
+        ? t("Catching up…", "正在同步进度…")
+        : notice === "reconnecting"
+          ? t("Reconnecting…", "正在重新连接…")
+          : notice === "offline"
+            ? t(
+                "Offline — waiting for the network…",
+                "已离线 — 正在等待网络恢复…",
+              )
+            : null,
     isSyncing: false,
     isUserStoppingRef,
     isUserStopping: snapshot.stopped,

@@ -168,7 +168,7 @@ export function FloatingReviewsPanel({
               <PendingReviewsList
                 reviews={pendingReviews}
                 onReviewComplete={handleReviewComplete}
-                emptyMessage="No pending reviews"
+                emptyMessage={t("No pending reviews", "暂无待审核项")}
               />
             )}
           </div>

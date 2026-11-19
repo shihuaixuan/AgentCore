@@ -1,5 +1,6 @@
 "use client";
 import type { ReactNode } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { cn } from "@/lib/utils";
 import {
@@ -23,12 +24,13 @@ export function ColumnFilter({
   align = "start",
   children,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <Popover>
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={`Filter ${label}`}
+          aria-label={t(`Filter ${label}`, `筛选${label}`)}
           className={cn(
             "inline-flex h-6 w-6 items-center justify-center rounded-full",
             "transition-[transform,background-color,color] duration-150",

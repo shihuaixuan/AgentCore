@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { integrationIconSrc } from "@/components/molecules/IntegrationLogo/helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   id: string;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function ProviderAvatar({ id, name }: Props) {
+  const { t } = useTranslation();
   const src = integrationIconSrc(id);
   const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
   if (!src || brokenSrc === src) {
@@ -25,7 +27,7 @@ export function ProviderAvatar({ id, name }: Props) {
   return (
     <Image
       src={src}
-      alt={`${name} logo`}
+      alt={t(`${name} logo`, `${name} 标志`)}
       width={40}
       height={40}
       loading="lazy"

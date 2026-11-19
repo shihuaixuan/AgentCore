@@ -26,7 +26,7 @@ export function useThumbnailImages({
   initialImages = [],
   initialSelectedImage = null,
 }: UseThumbnailImagesProps) {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const [images, setImages] = useState<string[]>(initialImages);
 
   const [selectedImage, setSelectedImage] = useState<string | null>(
@@ -111,20 +111,34 @@ export function useThumbnailImages({
 
   async function uploadImage(file: File) {
     if (
-      isFileTooLarge({ file, maxSizeMB: SUBMISSION_MEDIA_MAX_SIZE_MB, toast })
+      isFileTooLarge({
+        file,
+        maxSizeMB: SUBMISSION_MEDIA_MAX_SIZE_MB,
+        toast,
+        locale,
+      })
     )
       return;
 
     setIsUploading(true);
     try {
-      const imageUrl = await uploadSubmissionMediaDirect(file);
+      const imageUrl = await uploadSubmissionMediaDirect(
+        file,
+        "submission",
+        locale,
+      );
 
       setImagesWithValidation([...images, imageUrl]);
       if (!selectedImage) {
         setSelectedImage(imageUrl);
       }
     } catch (error) {
-      if (toastIfPlanRequired(error, "Uploading images needs an active plan"))
+      if (
+        toastIfPlanRequired(
+          error,
+          t("Uploading images needs an active plan", "上传图片需要有效套餐"),
+        )
+      )
         return;
       const detail =
         error instanceof Error
@@ -157,7 +171,10 @@ export function useThumbnailImages({
       }
     } catch (error) {
       if (
-        toastIfPlanRequired(error, "Generating an image needs an active plan")
+        toastIfPlanRequired(
+          error,
+          t("Generating an image needs an active plan", "生成图片需要有效套餐"),
+        )
       )
         return;
       if (error instanceof ApiError && error.status === 429) {

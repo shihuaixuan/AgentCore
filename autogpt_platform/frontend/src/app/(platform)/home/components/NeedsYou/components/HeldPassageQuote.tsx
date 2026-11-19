@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   passage: string;
@@ -7,9 +8,10 @@ interface Props {
 }
 
 export function HeldPassageQuote({ passage, clamp = true }: Props) {
+  const { t } = useTranslation();
   return (
     <blockquote
-      aria-label="What it says"
+      aria-label={t("What it says", "引用内容")}
       className={cn(
         "mt-1 border-l-2 border-warning pl-2 text-body [overflow-wrap:anywhere] text-foreground-secondary",
         clamp && "line-clamp-2",

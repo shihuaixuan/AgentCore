@@ -6,12 +6,14 @@ import { useAuthStore } from "@/lib/auth/hooks/useAuthStore";
 import { refreshActivation } from "./refreshActivation";
 import { isCheckoutReturn, safeReturnTo } from "./helpers";
 import { storeConsent } from "./storage";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function useActivationReadiness(
   userID: string | undefined,
   setOpen: (open: boolean) => void,
   setError: (error: string) => void,
 ) {
+  const { t } = useTranslation();
   const client = useQueryClient();
   const router = useRouter();
   const [readyPlan, setReadyPlan] = useState<"PRO" | "MAX" | null>(null);
@@ -59,7 +61,10 @@ export function useActivationReadiness(
       if (useAuthStore.getState().user?.id === userID) {
         setOpen(true);
         setError(
-          "Your payment is confirmed. We’re refreshing your plan and usage before you continue.",
+          t(
+            "Your payment is confirmed. We’re refreshing your plan and usage before you continue.",
+            "付款已确认。正在刷新套餐和使用额度，完成后即可继续。",
+          ),
         );
       }
     } finally {

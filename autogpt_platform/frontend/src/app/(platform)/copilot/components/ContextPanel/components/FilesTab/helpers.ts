@@ -2,6 +2,7 @@ import JSZip from "jszip";
 import { getGetWorkspaceDownloadFileByIdUrl } from "@/app/api/__generated__/endpoints/workspace/workspace";
 import type { WorkspaceFileItem } from "@/app/api/__generated__/models/workspaceFileItem";
 import type { ArtifactRef } from "../../../../store";
+import type { Locale } from "@/lib/i18n/locale";
 
 export function fileDownloadUrl(fileId: string): string {
   return `/api/proxy${getGetWorkspaceDownloadFileByIdUrl(fileId)}`;
@@ -49,10 +50,13 @@ export function formatFileSize(bytes: number): string {
   return `${text} ${UNITS[exponent]}`;
 }
 
-export function formatFileTimestamp(iso: string): string {
+export function formatFileTimestamp(
+  iso: string,
+  locale: Locale = "en",
+): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(locale === "zh-CN" ? locale : undefined, {
     month: "short",
     day: "numeric",
     hour: "numeric",

@@ -8,6 +8,7 @@ import { toast } from "@/components/molecules/Toast/use-toast";
 import { invalidateExpertRosterQueries } from "@/services/experts/invalidate-experts";
 import { useQueryClient } from "@tanstack/react-query";
 import { FormEvent, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Args {
   expert: Expert | null;
@@ -22,6 +23,7 @@ const EMPTY_SOUL: ExpertSoulUpdate = {
 };
 
 export function useSoulDrawer({ expert, onClose }: Args) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [soul, setSoul] = useState<ExpertSoulUpdate>(() =>
     expert ? soulFromExpert(expert) : EMPTY_SOUL,
@@ -44,12 +46,15 @@ export function useSoulDrawer({ expert, onClose }: Args) {
           queryKey: getGetExpertQueryKey(expert.id),
         }),
       ]);
-      toast({ title: "Soul saved", variant: "success" });
+      toast({ title: t("Soul saved", "灵魂设定已保存"), variant: "success" });
       onClose();
     } catch {
       toast({
-        title: "Couldn't save Soul",
-        description: "Your edits are still here. Please try again.",
+        title: t("Couldn't save Soul", "无法保存灵魂设定"),
+        description: t(
+          "Your edits are still here. Please try again.",
+          "你的修改仍保留在此，请重试。",
+        ),
         variant: "destructive",
       });
     }

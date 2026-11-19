@@ -17,6 +17,7 @@ import Image from "next/image";
 import { isLocalStoreMediaUrl } from "@/lib/store-media";
 import { useRef, useState } from "react";
 import { AddToLibraryButton } from "../AddToLibraryButton/AddToLibraryButton";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   agent: StoreAgent;
@@ -43,6 +44,7 @@ function getWash(bg: string) {
 }
 
 export function FeaturedAgentCard({ agent, backgroundColor }: Props) {
+  const { t, locale } = useTranslation();
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -74,7 +76,10 @@ export function FeaturedAgentCard({ agent, backgroundColor }: Props) {
             <Image
               src={agent.agent_image}
               unoptimized={isLocalStoreMediaUrl(agent.agent_image)}
-              alt={`${agent.agent_name} preview image`}
+              alt={t(
+                `${agent.agent_name} preview image`,
+                `${agent.agent_name} 预览图`,
+              )}
               fill
               className="object-cover"
               onLoad={() => setImageLoaded(true)}
@@ -111,13 +116,16 @@ export function FeaturedAgentCard({ agent, backgroundColor }: Props) {
               {agent.creator_avatar && (
                 <AvatarImage
                   src={agent.creator_avatar}
-                  alt={`${agent.creator} creator avatar`}
+                  alt={t(
+                    `${agent.creator} creator avatar`,
+                    `创作者 ${agent.creator} 的头像`,
+                  )}
                 />
               )}
               <AvatarFallback size={20}>{agent.creator}</AvatarFallback>
             </Avatar>
             <span className="truncate text-body-sm leading-inherit text-foreground-tertiary">
-              by {agent.creator}
+              {t(`by ${agent.creator}`, `创建者：${agent.creator}`)}
             </span>
           </div>
         )}
@@ -129,8 +137,11 @@ export function FeaturedAgentCard({ agent, backgroundColor }: Props) {
       <div className="relative mt-auto flex w-full items-center pt-3">
         <span className="text-caption text-foreground-tertiary">
           {agent.runs === 0
-            ? "No runs"
-            : `${(agent.runs ?? 0).toLocaleString()} runs`}
+            ? t("No runs", "尚未运行")
+            : t(
+                `${(agent.runs ?? 0).toLocaleString(locale)} runs`,
+                `运行 ${(agent.runs ?? 0).toLocaleString(locale)} 次`,
+              )}
         </span>
       </div>
       {agent.creator && agent.slug && agent.agent_graph_id && (

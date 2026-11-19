@@ -8,7 +8,7 @@ import {
 } from "@/components/molecules/Sidebar/Sidebar";
 import { useMountEffect } from "@/hooks/useMountEffect";
 import dynamic from "next/dynamic";
-import { CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { TourChatHost } from "./TourChatHost";
 import { DotDistortionShader } from "./components/DotDistortionShader/DotDistortionShader";
 import { TourChatHeader } from "./components/TourChatHeader/TourChatHeader";
@@ -17,6 +17,7 @@ import { buildTourArtifactRef } from "./helpers";
 import { getTourScenario } from "./script/tourScenarios";
 import { useTourStore } from "./tourStore";
 import { trackTourScenarioComplete, trackTourStart } from "./tracking";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const ArtifactPanel = dynamic(
   () =>
@@ -39,13 +40,23 @@ function TourBackdrop() {
 }
 
 export function TourCopilot() {
+  const { locale, t } = useTranslation();
   const activeScenarioId = useTourStore((s) => s.activeScenarioId);
   const runId = useTourStore((s) => s.runId);
   const setDemoComplete = useTourStore((s) => s.setDemoComplete);
-  const scenario = getTourScenario(activeScenarioId);
+  const setActiveScenario = useTourStore((s) => s.setActiveScenario);
+  const scenario = getTourScenario(activeScenarioId, locale);
   const isMobile = useIsMobile();
   const openArtifact = useCopilotUIStore((s) => s.openArtifact);
   const closeArtifactPanel = useCopilotUIStore((s) => s.closeArtifactPanel);
+  const previousLocale = useRef(locale);
+
+  useEffect(() => {
+    if (previousLocale.current === locale) return;
+    previousLocale.current = locale;
+    closeArtifactPanel({ persist: false });
+    setActiveScenario(activeScenarioId);
+  }, [locale, activeScenarioId, closeArtifactPanel, setActiveScenario]);
 
   // The tour shares the copilot UI store but must never leak panel state
   // into the real /copilot: opens skip the localStorage write
@@ -71,7 +82,10 @@ export function TourCopilot() {
           key={`${scenario.id}-${runId}`}
           sessionId={scenario.id}
           script={scenario.script}
-          completionNotice={`Your **"${scenario.completionArtifact.filename}"** will appear in a moment on the right side.`}
+          completionNotice={t(
+            `Your **"${scenario.completionArtifact.filename}"** will appear in a moment on the right side.`,
+            `你的 **"${scenario.completionArtifact.filename}"** 即将显示在右侧。`,
+          )}
           onComplete={() => {
             trackTourScenarioComplete(scenario.id);
             setDemoComplete();

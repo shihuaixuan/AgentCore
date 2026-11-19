@@ -8,10 +8,12 @@ import {
 } from "./useGoogleDrivePicker";
 import { FolderOpenIcon, Loading03Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export type Props = BaseProps;
 
 export function GoogleDrivePicker(props: Props) {
+  const { t } = useTranslation();
   const {
     credentials,
     hasGoogleOAuth,
@@ -55,7 +57,8 @@ export function GoogleDrivePicker(props: Props) {
         disabled={props.disabled || isLoading || isAuthInProgress}
       >
         <Icon icon={FolderOpenIcon} className="size-4" />
-        {props.buttonText || "Choose file(s) from Google Drive"}
+        {props.buttonText ||
+          t("Choose file(s) from Google Drive", "从 Google 云端硬盘选择文件")}
       </Button>
     </div>
   );

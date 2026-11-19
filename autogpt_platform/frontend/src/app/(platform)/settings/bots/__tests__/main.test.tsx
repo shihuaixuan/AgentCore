@@ -14,6 +14,7 @@ import {
   getListBotPlatformsMockHandler401,
 } from "@/app/api/__generated__/endpoints/platform-linking/platform-linking.msw";
 import type { BotPlatformInfo } from "@/app/api/__generated__/models/botPlatformInfo";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 import SettingsBotsPage from "../page";
 
@@ -62,6 +63,33 @@ function telegramPlatform(
 }
 
 describe("SettingsBotsPage", () => {
+  test("localizes the header in Chinese while preserving the platform brand and invite URL", async () => {
+    server.use(getListBotPlatformsMockHandler([discordPlatform()]));
+
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <SettingsBotsPage />
+      </LanguageProvider>,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "机器人" }),
+    ).toBeDefined();
+    expect(
+      screen.getByText(
+        "将 AutoGPT 机器人连接到您的聊天平台。将机器人添加到服务器，关联私信频道以便机器人直接与您交流，或解除现有连接。",
+      ),
+    ).toBeDefined();
+    expect(
+      await screen.findByRole("heading", { name: "Discord" }),
+    ).toBeDefined();
+    expect(
+      screen
+        .getByRole("link", { name: "将机器人添加至 Discord" })
+        .getAttribute("href"),
+    ).toBe("https://discord.com/oauth2/authorize?client_id=123");
+  });
+
   test("renders the header and the Discord card with an Add bot button", async () => {
     server.use(getListBotPlatformsMockHandler([discordPlatform()]));
 

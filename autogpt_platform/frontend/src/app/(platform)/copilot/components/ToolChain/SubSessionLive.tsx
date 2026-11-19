@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 
 import {
   useGetV2GetSession,
@@ -64,7 +65,7 @@ export function SubSessionLive({
   active,
   background = false,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { session, isError, isPaused } = useLiveSubSession(
     subSessionId,
     active,
@@ -84,7 +85,7 @@ export function SubSessionLive({
 
   const isLive = !!session && isSessionLive(session) && !isPaused && !isError;
   const rows = recent.map((step, i) =>
-    toMiniRow(step, i, isLive && i === recent.length - 1),
+    toMiniRow(step, i, isLive && i === recent.length - 1, locale),
   );
 
   return (
@@ -233,12 +234,23 @@ function collectCurrentTurn(session: SessionDetailResponse) {
 
 /** Dress a polled tool call as a ChainRow so the delegate's steps reuse the
  *  main chain's icons and labels instead of raw tool names. */
-function toMiniRow(step: LiveStep, index: number, running: boolean): ChainRow {
+function toMiniRow(
+  step: LiveStep,
+  index: number,
+  running: boolean,
+  locale: Locale,
+): ChainRow {
   const state = running ? "running" : "done";
-  const catalog = getCatalogLabel(step.name, step.input, state, {
-    displayName: step.displayName,
-    output: step.output,
-  });
+  const catalog = getCatalogLabel(
+    step.name,
+    step.input,
+    state,
+    {
+      displayName: step.displayName,
+      output: step.output,
+    },
+    locale,
+  );
   const category = catalog?.category ?? getToolCategory(step.name);
   const text =
     catalog?.text ??
@@ -250,6 +262,7 @@ function toMiniRow(step: LiveStep, index: number, running: boolean): ChainRow {
         toolCallId: `live-${index}`,
       } as ToolUIPart,
       getToolCategory(step.name),
+      locale,
     );
   return {
     key: `live-${step.name}-${index}`,

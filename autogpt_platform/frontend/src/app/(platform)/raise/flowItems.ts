@@ -31,27 +31,53 @@ export type RaiseFlowItem =
 export function buildFlowItems(
   draft: RaiseDraft,
   progress: RaiseProgress,
+  t: (english: string, chinese: string) => string = (english) => english,
 ): RaiseFlowItem[] {
+  const name = draft.name || t("your expert", "你的专家");
   const items: RaiseFlowItem[] = [
     {
       kind: "message",
       id: "autogpt-greeting",
       role: "autogpt",
-      text: RAISE_PROMPTS.greeting,
+      text: t(
+        RAISE_PROMPTS.greeting,
+        "你好，我是 Otto。我会帮助你创建专属 AI 专家。",
+      ),
     },
     { kind: "startButton", id: "start-button" },
   ];
 
   const questions: Record<BeatKey, string> = {
-    category: RAISE_PROMPTS.categoryQuestion,
-    jobTitle: RAISE_PROMPTS.jobTitleQuestion,
-    name: RAISE_PROMPTS.nameQuestion,
-    avatar: RAISE_PROMPTS.avatarQuestion(draft.name),
-    about: RAISE_PROMPTS.aboutQuestion(draft.name),
-    voice: RAISE_PROMPTS.voiceQuestion(draft.name),
-    budget: RAISE_PROMPTS.budgetQuestion(draft.name),
-    marketplace: RAISE_PROMPTS.marketplaceQuestion(draft.name),
-    skills: RAISE_PROMPTS.skillsQuestion(draft.name),
+    category: t(
+      RAISE_PROMPTS.categoryQuestion,
+      "首先，你的专家应在哪个领域工作？这也会决定其颜色。",
+    ),
+    jobTitle: t(RAISE_PROMPTS.jobTitleQuestion, "专家的职位是什么？"),
+    name: t(RAISE_PROMPTS.nameQuestion, "不错的选择。你想给专家取什么名字？"),
+    avatar: t(
+      RAISE_PROMPTS.avatarQuestion(draft.name),
+      `这是 ${name} 的头像。你可以使用它、重新生成或上传图片。`,
+    ),
+    about: t(
+      RAISE_PROMPTS.aboutQuestion(draft.name),
+      `关于 ${name}，还有什么需要我了解的吗？例如工作方式、你重视的事情，也可以跳过。`,
+    ),
+    voice: t(
+      RAISE_PROMPTS.voiceQuestion(draft.name),
+      `${name} 写作时应使用什么语气？选择你觉得合适的风格。`,
+    ),
+    budget: t(
+      RAISE_PROMPTS.budgetQuestion(draft.name),
+      `${name} 每周可以使用多少预算？默认为每周 $5，你可以选择金额或跳过。`,
+    ),
+    marketplace: t(
+      RAISE_PROMPTS.marketplaceQuestion(draft.name),
+      `想让 ${name} 运行工作流吗？搜索市场和你的库，添加喜欢的工作流，也可以跳过。`,
+    ),
+    skills: t(
+      RAISE_PROMPTS.skillsQuestion(draft.name),
+      `想为 ${name} 添加额外技能吗？从市场或你的库中添加，也可以跳过。`,
+    ),
   };
 
   BEAT_KEYS.forEach((beat) => {

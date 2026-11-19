@@ -56,7 +56,7 @@ export function TrialCancelPending({
         <Text variant="small" tone="muted">
           {t(
             `Resume to keep the trial and start ${trialPlanLabels[offer.tier]} on ${formatTrialEndDate(trial.ends_at)} at ${formatPlanPrice(offer)}, plus applicable tax.`,
-            `恢复后可继续试用，并于 ${formatTrialEndDate(trial.ends_at)} 开始使用 ${trialPlanLabels[offer.tier]}，费用为 ${formatPlanPrice(offer, locale)}，另加适用税费。`,
+            `恢复后可继续试用，并于 ${formatTrialEndDate(trial.ends_at, locale)} 开始使用 ${trialPlanLabels[offer.tier]}，费用为 ${formatPlanPrice(offer, locale)}，另加适用税费。`,
           )}
         </Text>
       ) : null}

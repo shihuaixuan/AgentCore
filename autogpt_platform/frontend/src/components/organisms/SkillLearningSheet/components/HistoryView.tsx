@@ -4,8 +4,13 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { SkillVersionSummary } from "@/app/api/__generated__/models/skillVersionSummary";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
-import { canRestore } from "@/services/skill-learning/helpers";
+import {
+  canRestore,
+  getLearningLabel,
+  versionLabel,
+} from "@/services/skill-learning/helpers";
 import { formatDistanceToNow } from "date-fns";
+import { zhCN } from "date-fns/locale";
 
 interface Props {
   versions: SkillVersionSummary[];
@@ -22,7 +27,7 @@ export function HistoryView({
   onRestore,
   onSelect,
 }: Props) {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   return (
     <div
       data-slot="skill-learning-sheet-history"
@@ -52,15 +57,16 @@ export function HistoryView({
                 className="min-w-0"
               >
                 <Text variant="small-medium" tone="primary">
-                  v{version.version} · {version.origin_label}
+                  {versionLabel(version, locale)}
                   {version.id === currentVersionId
                     ? t(" · current", " · 当前版本")
                     : ""}
                 </Text>
                 <Text variant="small" tone="muted">
-                  {version.state_label} ·{" "}
+                  {getLearningLabel(version.state_label, locale)} ·{" "}
                   {formatDistanceToNow(new Date(version.created_at), {
                     addSuffix: true,
+                    locale: locale === "zh-CN" ? zhCN : undefined,
                   })}
                   {version.summary ? ` · ${version.summary}` : ""}
                 </Text>

@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/locale";
+
 /**
  * The typed reason a provider refused a turn, as it arrives on the stream.
  *
@@ -158,36 +160,71 @@ interface FailureCopy {
   description: string;
 }
 
-const COPY_BY_KIND: Record<ProviderFailureKind, FailureCopy> = {
-  auth_expired: {
-    title: "Your connection needs signing in again",
-    description: "Reconnect the account in Settings, then send this again.",
-  },
-  invalid_credential: {
-    title: "That connection can't be used",
-    description: "Reconnect the account in Settings, then send this again.",
-  },
-  usage_limit: {
-    title: "You've hit this connection's limit",
-    description: "Switch connection to keep going, or wait for it to reset.",
-  },
-  model_unavailable: {
-    title: "That model isn't available",
-    description: "Pick another model tier, or switch connection.",
-  },
-  policy_denied: {
-    title: "The provider declined this request",
-    description: "Rewording it may help. Retrying it unchanged won't.",
-  },
-  entitlement_required: {
-    title: "Your plan doesn't include this connection",
-    description: "Switch connection, or see plans to unlock it.",
-  },
-  transient: {
-    title: "Connection hiccup",
-    description: "Something went wrong on the way to the model. Try again.",
-  },
-};
+function copyByKind(locale: Locale): Record<ProviderFailureKind, FailureCopy> {
+  function t(english: string, chinese: string) {
+    return locale === "zh-CN" ? chinese : english;
+  }
+  return {
+    auth_expired: {
+      title: t(
+        "Your connection needs signing in again",
+        "你的连接需要重新登录",
+      ),
+      description: t(
+        "Reconnect the account in Settings, then send this again.",
+        "请在设置中重新连接账户，然后再次发送。",
+      ),
+    },
+    invalid_credential: {
+      title: t("That connection can't be used", "无法使用此连接"),
+      description: t(
+        "Reconnect the account in Settings, then send this again.",
+        "请在设置中重新连接账户，然后再次发送。",
+      ),
+    },
+    usage_limit: {
+      title: t(
+        "You've hit this connection's limit",
+        "你已达到此连接的使用上限",
+      ),
+      description: t(
+        "Switch connection to keep going, or wait for it to reset.",
+        "请切换连接以继续，或等待额度重置。",
+      ),
+    },
+    model_unavailable: {
+      title: t("That model isn't available", "此模型不可用"),
+      description: t(
+        "Pick another model tier, or switch connection.",
+        "请选择其他模型档位，或切换连接。",
+      ),
+    },
+    policy_denied: {
+      title: t("The provider declined this request", "服务商拒绝了此请求"),
+      description: t(
+        "Rewording it may help. Retrying it unchanged won't.",
+        "尝试调整措辞可能有帮助。原样重试不会解决问题。",
+      ),
+    },
+    entitlement_required: {
+      title: t(
+        "Your plan doesn't include this connection",
+        "你的套餐不包含此连接",
+      ),
+      description: t(
+        "Switch connection, or see plans to unlock it.",
+        "请切换连接，或查看套餐以解锁。",
+      ),
+    },
+    transient: {
+      title: t("Connection hiccup", "连接暂时异常"),
+      description: t(
+        "Something went wrong on the way to the model. Try again.",
+        "连接模型时出现问题，请重试。",
+      ),
+    },
+  };
+}
 
 /**
  * What to tell the user, preferring the provider's own words for the detail.
@@ -196,9 +233,12 @@ const COPY_BY_KIND: Record<ProviderFailureKind, FailureCopy> = {
  * invented "try again in an hour" is worse than silence, because people plan
  * around it.
  */
-export function describeProviderFailure(failure: ProviderFailure): FailureCopy {
-  const base = COPY_BY_KIND[failure.kind];
-  const reset = formatResetHint(failure.resetsAt);
+export function describeProviderFailure(
+  failure: ProviderFailure,
+  locale: Locale = "en",
+): FailureCopy {
+  const base = copyByKind(locale)[failure.kind];
+  const reset = formatResetHint(failure.resetsAt, locale);
   const detail = failure.message.trim() || base.description;
   return {
     title: base.title,
@@ -206,14 +246,24 @@ export function describeProviderFailure(failure: ProviderFailure): FailureCopy {
   };
 }
 
-function formatResetHint(resetsAt: number | null): string | null {
+function formatResetHint(
+  resetsAt: number | null,
+  locale: Locale,
+): string | null {
   if (resetsAt === null) return null;
   const seconds = resetsAt - Math.floor(Date.now() / 1000);
   if (seconds <= 0) return null;
-  if (seconds < 90) return "Resets in under a minute.";
+  if (seconds < 90)
+    return locale === "zh-CN"
+      ? "将在一分钟内重置。"
+      : "Resets in under a minute.";
   const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `Resets in about ${minutes} minutes.`;
+  if (minutes < 60)
+    return locale === "zh-CN"
+      ? `约 ${minutes} 分钟后重置。`
+      : `Resets in about ${minutes} minutes.`;
   const hours = Math.round(minutes / 60);
+  if (locale === "zh-CN") return `约 ${hours} 小时后重置。`;
   return hours === 1
     ? "Resets in about an hour."
     : `Resets in about ${hours} hours.`;

@@ -59,7 +59,10 @@ export function OttoMistakeCard({
         reasons={WORK_REASONS}
         label={t("Which of these went wrong?", "以下哪些方面出了问题？")}
         size="compact"
-        thanks="Thanks. The team reads every one of these."
+        thanks={t(
+          "Thanks. The team reads every one of these.",
+          "谢谢。团队会认真阅读每一条反馈。",
+        )}
         initialSent={initialSent}
         onReason={onReason}
         onSubmit={onSubmit}

@@ -3,6 +3,7 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { isComposingEvent } from "@/lib/keyboard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useRef } from "react";
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function WorkflowsMovedDialog({ isOpen, onDismiss }: Props) {
+  const { t } = useTranslation();
   const titleRef = useRef<HTMLHeadingElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
   return (
@@ -46,7 +48,7 @@ export function WorkflowsMovedDialog({ isOpen, onDismiss }: Props) {
             variant="icon"
             size="icon-sm"
             shape="pill"
-            aria-label="Close notice"
+            aria-label={t("Close notice", "关闭通知")}
             onClick={onDismiss}
             withTooltip={false}
             className="absolute top-4 right-4 z-10 border-surface/80 bg-surface/80"

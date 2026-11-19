@@ -30,21 +30,37 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 const STATUS_CHIP =
   "inline-flex cursor-default items-center rounded-md border border-transparent px-2.5 py-0.5 text-caption font-semibold leading-4 text-action-foreground shadow";
 
-// Moved the getStatusBadge function into the client component
-const getStatusBadge = (status: SubmissionStatus) => {
+function getStatusBadge(
+  status: SubmissionStatus,
+  t: ReturnType<typeof useTranslation>["t"],
+) {
   switch (status) {
     case SubmissionStatus.PENDING:
-      return <span className={cn(STATUS_CHIP, "bg-warning")}>待处理</span>;
+      return (
+        <span className={cn(STATUS_CHIP, "bg-warning")}>
+          {t("Pending", "待处理")}
+        </span>
+      );
     case SubmissionStatus.APPROVED:
-      return <span className={cn(STATUS_CHIP, "bg-success")}>已通过</span>;
+      return (
+        <span className={cn(STATUS_CHIP, "bg-success")}>
+          {t("Approved", "已通过")}
+        </span>
+      );
     case SubmissionStatus.REJECTED:
-      return <span className={cn(STATUS_CHIP, "bg-error")}>已拒绝</span>;
+      return (
+        <span className={cn(STATUS_CHIP, "bg-error")}>
+          {t("Rejected", "已拒绝")}
+        </span>
+      );
     default:
       return (
-        <span className={cn(STATUS_CHIP, "bg-foreground-tertiary")}>草稿</span>
+        <span className={cn(STATUS_CHIP, "bg-foreground-tertiary")}>
+          {t("Draft", "草稿")}
+        </span>
       );
   }
-};
+}
 
 export function ExpandableRow({
   listing,
@@ -78,7 +94,7 @@ export function ExpandableRow({
           {latestVersion?.sub_heading || t("No description", "暂无描述")}
         </TableCell>
         <TableCell onClick={() => setExpanded(!expanded)}>
-          {latestVersion?.status && getStatusBadge(latestVersion.status)}
+          {latestVersion?.status && getStatusBadge(latestVersion.status, t)}
         </TableCell>
         <TableCell onClick={() => setExpanded(!expanded)}>
           {latestVersion?.submitted_at
@@ -140,7 +156,9 @@ export function ExpandableRow({
                     <TableHead>{t("Sub Heading", "副标题")}</TableHead>
                     <TableHead>{t("Description", "描述")}</TableHead>
                     <TableHead>{t("Categories", "分类")}</TableHead>
-                    <TableHead className="text-right">{t("Actions", "操作")}</TableHead>
+                    <TableHead className="text-right">
+                      {t("Actions", "操作")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -160,9 +178,12 @@ export function ExpandableRow({
                             </span>
                           )}
                         </TableCell>
-                        <TableCell>{getStatusBadge(version.status)}</TableCell>
                         <TableCell>
-                          {version.changes_summary || t("No summary", "暂无摘要")}
+                          {getStatusBadge(version.status, t)}
+                        </TableCell>
+                        <TableCell>
+                          {version.changes_summary ||
+                            t("No summary", "暂无摘要")}
                         </TableCell>
                         <TableCell>
                           {version.submitted_at

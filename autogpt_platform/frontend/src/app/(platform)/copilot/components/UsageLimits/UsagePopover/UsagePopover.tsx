@@ -27,7 +27,7 @@ interface Props {
 }
 
 export function UsagePopover({ trigger, align = "start" }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { usage, experience, isLoading, isError, retry, isBillingEnabled } =
     useUsagePopover();
 
@@ -35,7 +35,7 @@ export function UsagePopover({ trigger, align = "start" }: Props) {
   if (!isError && !usage?.daily && !usage?.weekly && !experience.isActiveTrial)
     return null;
 
-  const tierLabel = formatTierLabel(experience.tier);
+  const tierLabel = formatTierLabel(experience.tier, locale);
 
   return (
     <Popover>
@@ -88,7 +88,7 @@ export function UsagePopover({ trigger, align = "start" }: Props) {
                   experience.trialEndsAt
                     ? t(
                         `Trial ends ${formatUsageDate(experience.trialEndsAt)}`,
-                        `试用将于 ${formatUsageDate(experience.trialEndsAt)} 结束`,
+                        `试用将于 ${formatUsageDate(experience.trialEndsAt, locale)} 结束`,
                       )
                     : t("Your allowance for this trial", "本次试用的可用额度")
                 }

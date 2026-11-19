@@ -9,12 +9,14 @@ import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { ExpertAvatarPicker } from "@/components/molecules/ExpertAvatarPicker/ExpertAvatarPicker";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { useExpertAvatarButton } from "./useExpertAvatarButton";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   expert: Expert;
 }
 
 export function ExpertAvatarButton({ expert }: Props) {
+  const { t } = useTranslation();
   const { isOpen, setIsOpen, saveAvatar, isPending } = useExpertAvatarButton(
     expert.id,
   );
@@ -23,7 +25,10 @@ export function ExpertAvatarButton({ expert }: Props) {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        aria-label={`Change ${expert.name}'s appearance`}
+        aria-label={t(
+          `Change ${expert.name}'s appearance`,
+          `更改 ${expert.name} 的外观`,
+        )}
         className="size-24 shrink-0 rounded-full focus-visible:ring-2 focus-visible:ring-focus"
       >
         <ExpertAvatar
@@ -40,7 +45,10 @@ export function ExpertAvatarButton({ expert }: Props) {
         />
       </button>
       <Dialog
-        title={`Change ${expert.name}'s avatar`}
+        title={t(
+          `Change ${expert.name}'s avatar`,
+          `更改 ${expert.name} 的头像`,
+        )}
         controlled={{ isOpen, set: setIsOpen }}
       >
         <Dialog.Content>

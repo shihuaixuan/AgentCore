@@ -265,8 +265,10 @@ export function SidebarRunsList({
                     {t("No triggers set up", "尚未设置触发器")}
                   </Text>
                   <Text variant="body" tone="muted">
-                    Ask an expert to set up a trigger for this workflow (e.g.
-                    &ldquo;run this when a new email arrives&rdquo;).
+                    {t(
+                      "Ask an expert to set up a trigger for this workflow (e.g. “run this when a new email arrives”).",
+                      "请让专家为此工作流设置触发器，例如“收到新邮件时运行此工作流”。",
+                    )}
                   </Text>
                 </div>
               )}

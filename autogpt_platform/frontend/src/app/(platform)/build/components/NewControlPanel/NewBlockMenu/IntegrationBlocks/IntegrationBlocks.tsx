@@ -9,8 +9,10 @@ import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { InfiniteScroll } from "@/components/contextual/InfiniteScroll/InfiniteScroll";
 import { useBlockMenuStore } from "../../../../stores/blockMenuStore";
 import { useShallow } from "zustand/react/shallow";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export const IntegrationBlocks = () => {
+  const { t } = useTranslation();
   const { integration, setIntegration } = useBlockMenuStore(
     useShallow((state) => ({
       integration: state.integration,
@@ -54,8 +56,9 @@ export const IntegrationBlocks = () => {
           responseError={error || undefined}
           httpError={{
             status: status,
-            statusText: "Request failed",
-            message: (error?.detail as string) || "An error occurred",
+            statusText: t("Request failed", "请求失败"),
+            message:
+              (error?.detail as string) || t("An error occurred", "发生错误"),
           }}
           context="block menu"
           onRetry={() => refetch()}
@@ -84,7 +87,7 @@ export const IntegrationBlocks = () => {
               }}
             >
               <Text variant="body-medium" as="span" tone="inherit">
-                Integrations
+                {t("Integrations", "集成")}
               </Text>
             </button>
             <Text variant="body-medium" tone="emphasis">

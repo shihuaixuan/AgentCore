@@ -4,8 +4,10 @@ import { useMyAgentsContent } from "./useMyAgentsContent";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { InfiniteScroll } from "@/components/contextual/InfiniteScroll/InfiniteScroll";
 import { blockMenuContainerStyle } from "../style";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export const MyAgentsContent = () => {
+  const { t } = useTranslation();
   const {
     allAgents,
     agentLoading,
@@ -40,8 +42,9 @@ export const MyAgentsContent = () => {
           responseError={error || undefined}
           httpError={{
             status: status,
-            statusText: "Request failed",
-            message: (error?.detail as string) || "An error occurred",
+            statusText: t("Request failed", "请求失败"),
+            message:
+              (error?.detail as string) || t("An error occurred", "发生错误"),
           }}
           onRetry={() => refetch()}
         />

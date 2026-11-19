@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   name: string;
@@ -24,10 +25,11 @@ export function ManagedExpertImage({
   isOtto,
   className,
 }: Props) {
+  const { t } = useTranslation();
   const [format, setFormat] = useState<"webp" | "png" | null>("webp");
   const label = isOtto
-    ? "Otto, your personal Head of AI"
-    : `${name}, AI Expert`;
+    ? t("Otto, your personal Head of AI", "Otto，你的专属 AI 负责人")
+    : t(`${name}, AI Expert`, `${name}，AI 专家`);
   const classes = cn(
     "inline-flex shrink-0 overflow-hidden rounded-xl",
     className,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +28,7 @@ function createEmailDefaultValues(user: { email?: string }) {
 // converges via the databaseHooks.user.update mirror in lib/auth/auth.ts — we
 // deliberately do NOT write the platform email here, so it can never diverge to
 // an unverified value.
-async function requestEmailChange(email: string) {
+async function requestEmailChange(email: string, fallback: string) {
   const response = await fetch("/api/auth/user", {
     method: "PUT",
     headers: {
@@ -38,20 +39,30 @@ async function requestEmailChange(email: string) {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || "Failed to update email");
+    throw new Error(error.error || fallback);
   }
 
   return response.json();
 }
 
 export function useEmailForm({ user }: { user: User }) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const defaultValues = createEmailDefaultValues(user);
   const currentEmail = user.email;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof emailFormSchema>>({
-    resolver: zodResolver(emailFormSchema),
+    resolver: zodResolver(
+      emailFormSchema.extend({
+        email: z
+          .string()
+          .min(1, t("Email is required", "请输入电子邮箱"))
+          .email(
+            t("Please enter a valid email address", "请输入有效的电子邮箱地址"),
+          ),
+      }),
+    ),
     defaultValues,
     mode: "onSubmit",
   });
@@ -61,7 +72,10 @@ export function useEmailForm({ user }: { user: User }) {
 
     setIsSubmitting(true);
     try {
-      await requestEmailChange(values.email);
+      await requestEmailChange(
+        values.email,
+        t("Failed to update email", "邮箱更新失败"),
+      );
       // Reset to the still-current address. On the verified path Better Auth
       // deliberately doesn't write the row until the link is clicked, so
       // `user.email` stays old — leaving the new value in the field would keep
@@ -70,20 +84,27 @@ export function useEmailForm({ user }: { user: User }) {
       toast(
         user.email_verified
           ? {
-              title: "Confirm your new email",
-              description:
+              title: t("Confirm your new email", "确认新邮箱"),
+              description: t(
                 "We sent a confirmation link to your current email address. Your email changes once you click it.",
+                "我们已向当前邮箱发送确认链接。点击链接后，邮箱才会更改。",
+              ),
             }
           : {
-              title: "Email updated",
-              description: `Your email is now ${values.email}.`,
+              title: t("Email updated", "邮箱已更新"),
+              description: t(
+                `Your email is now ${values.email}.`,
+                `你的邮箱现已更改为 ${values.email}。`,
+              ),
             },
       );
     } catch (error) {
       toast({
-        title: "Error updating email",
+        title: t("Error updating email", "邮箱更新出错"),
         description:
-          error instanceof Error ? error.message : "Something went wrong",
+          error instanceof Error
+            ? error.message
+            : t("Something went wrong", "出现了问题"),
         variant: "destructive",
       });
     } finally {

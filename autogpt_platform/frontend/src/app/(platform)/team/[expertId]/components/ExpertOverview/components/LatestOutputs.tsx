@@ -40,7 +40,10 @@ export function LatestOutputs({
           <Skeleton className="h-10 w-full rounded-lg" />
         </div>
       ) : isError ? (
-        <CardError message="Couldn't load outputs." onRetry={onRetry} />
+        <CardError
+          message={t("Couldn't load outputs.", "无法加载输出。")}
+          onRetry={onRetry}
+        />
       ) : outputs.length === 0 ? (
         <PanelEmptyState
           textSize="body-md"
@@ -56,7 +59,10 @@ export function LatestOutputs({
             </span>,
           ]}
           title={t("No outputs yet", "暂无输出")}
-          description={`Documents and files ${expertName} creates show up here.`}
+          description={t(
+            `Documents and files ${expertName} creates show up here.`,
+            `${expertName} 创建的文档和文件会显示在这里。`,
+          )}
         />
       ) : (
         <ul className="-mx-2 flex flex-col">

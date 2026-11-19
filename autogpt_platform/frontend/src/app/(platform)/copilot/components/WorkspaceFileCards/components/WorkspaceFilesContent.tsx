@@ -2,6 +2,7 @@
 
 import { Download01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
@@ -39,12 +40,14 @@ export function WorkspaceFilesContent({
   showHeader = true,
   rowStyle = "compact",
 }: WorkspaceFilesContentProps) {
+  const { t } = useTranslation();
   return (
     <>
       {showHeader && (
         <div className="flex items-center justify-between gap-2 pb-1.5">
           <span className="text-body-md leading-inherit text-foreground-subtle">
-            Files{files.length > 0 && ` (${files.length})`}
+            {t("Files", "文件")}
+            {files.length > 0 && ` (${files.length})`}
           </span>
           {files.length > 0 && (
             <Button
@@ -54,7 +57,7 @@ export function WorkspaceFilesContent({
               withTooltip={false}
               onClick={onDownloadAll}
               loading={isZipping}
-              aria-label="Download all"
+              aria-label={t("Download all", "下载全部")}
             >
               <Icon icon={Download01Icon} size={15} />
             </Button>
@@ -98,6 +101,7 @@ function Body({
   emptyMessage,
   rowStyle,
 }: BodyProps) {
+  const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
 
   if (isLoading) {
@@ -112,7 +116,7 @@ function Body({
   if (isError) {
     return (
       <p className="py-2 text-body-sm leading-inherit text-foreground-subtle">
-        Failed to load files.
+        {t("Failed to load files.", "加载文件失败。")}
       </p>
     );
   }
@@ -121,7 +125,10 @@ function Body({
     return (
       <p className="py-2 text-body-sm leading-inherit text-foreground-subtle">
         {emptyMessage ??
-          "No files yet. Upload one or ask an expert to create something."}
+          t(
+            "No files yet. Upload one or ask an expert to create something.",
+            "暂无文件。上传一个文件，或请专家创建内容。",
+          )}
       </p>
     );
   }
@@ -164,7 +171,9 @@ function Body({
           onClick={() => setShowAll(!showAll)}
           className="w-full pt-1.5 pb-0.5 text-left text-body-sm leading-inherit text-foreground-tertiary transition-colors hover:text-foreground-emphasis"
         >
-          {showAll ? "Show less" : `View more (${hiddenCount})`}
+          {showAll
+            ? t("Show less", "收起")
+            : t(`View more (${hiddenCount})`, `查看更多（${hiddenCount}）`)}
         </button>
       )}
     </>

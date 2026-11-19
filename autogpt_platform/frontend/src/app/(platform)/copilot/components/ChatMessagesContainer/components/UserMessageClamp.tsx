@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   children: React.ReactNode;
@@ -6,6 +7,7 @@ interface Props {
 }
 
 export function UserMessageClamp({ children, trailing }: Props) {
+  const { t } = useTranslation();
   const contentRef = useRef<HTMLDivElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -31,7 +33,7 @@ export function UserMessageClamp({ children, trailing }: Props) {
               className="text-caption font-medium text-foreground-disabled hover:text-action-foreground hover:underline"
               onClick={() => setExpanded(!expanded)}
             >
-              {expanded ? "Show less" : "Read more"}
+              {expanded ? t("Show less", "收起") : t("Read more", "展开更多")}
             </button>
           )}
           {trailing}

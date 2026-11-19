@@ -11,6 +11,8 @@ import {
   isCompletedWithErrors,
 } from "@/lib/run-health";
 import { useMemo } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { DisplayTranslate } from "../../helpers/translation";
 import type { SitrepItemData, SitrepPriority } from "../../types";
 import {
   isActive,
@@ -27,6 +29,7 @@ export function useSitrepItems(
   maxItems: number,
   scheduledWithinMs?: number,
 ): SitrepItemData[] {
+  const { t } = useTranslation();
   const { data: executions } = useGetV1ListAllExecutions({
     query: { select: okData },
   });
@@ -40,7 +43,7 @@ export function useSitrepItems(
     const coveredAgentIds = new Set<string>();
 
     for (const [agent, execs] of agentExecutions) {
-      const item = buildSitrepFromExecutions(agent, execs);
+      const item = buildSitrepFromExecutions(agent, execs, t);
       if (item) {
         items.push(item);
         coveredAgentIds.add(agent.id);
@@ -49,7 +52,7 @@ export function useSitrepItems(
 
     for (const agent of agents) {
       if (coveredAgentIds.has(agent.id)) continue;
-      const configItem = buildSitrepFromConfig(agent, scheduledWithinMs);
+      const configItem = buildSitrepFromConfig(agent, scheduledWithinMs, t);
       if (configItem) items.push(configItem);
     }
 
@@ -66,7 +69,7 @@ export function useSitrepItems(
     items.sort((a, b) => order[a.priority] - order[b.priority]);
 
     return items.slice(0, maxItems);
-  }, [agents, executions, maxItems, scheduledWithinMs]);
+  }, [agents, executions, maxItems, scheduledWithinMs, t]);
 }
 
 function groupByAgent(
@@ -92,6 +95,7 @@ function groupByAgent(
 function buildSitrepFromExecutions(
   agent: LibraryAgent,
   executions: GraphExecutionMeta[],
+  t: DisplayTranslate,
 ): SitrepItemData | null {
   const active = executions.find((e) => isActive(e.status));
   if (active) {
@@ -103,7 +107,7 @@ function buildSitrepFromExecutions(
       priority: "running",
       message:
         active.stats?.activity_status ??
-        runningMessage(active.status, active.started_at),
+        runningMessage(active.status, active.started_at, t),
       status: "running",
     };
   }
@@ -118,14 +122,17 @@ function buildSitrepFromExecutions(
     const errorMsg =
       lastFailed.stats?.error ??
       lastFailed.stats?.activity_status ??
-      "Execution failed";
+      t("Execution failed", "执行失败");
     return {
       id: `${agent.id}-${lastFailed.id}`,
       agentID: agent.id,
       agentName: agent.name,
       executionID: lastFailed.id,
       priority: "error",
-      message: typeof errorMsg === "string" ? errorMsg : "Execution failed",
+      message:
+        typeof errorMsg === "string"
+          ? errorMsg
+          : t("Execution failed", "执行失败"),
       status: "error",
     };
   }
@@ -136,8 +143,10 @@ function buildSitrepFromExecutions(
   if (lastCompleted) {
     const summary = lastCompleted.stats?.activity_status;
     if (isCompletedWithErrors(lastCompleted)) {
-      const failedSteps = describeFailedSteps(
-        getFailedStepCount(lastCompleted),
+      const failedStepCount = getFailedStepCount(lastCompleted);
+      const failedSteps = t(
+        describeFailedSteps(failedStepCount),
+        `${failedStepCount} 个步骤失败`,
       );
       return {
         id: `${agent.id}-${lastCompleted.id}`,
@@ -147,7 +156,10 @@ function buildSitrepFromExecutions(
         priority: "warning",
         message: summary
           ? `${failedSteps} — ${summary}`
-          : `Completed with errors: ${failedSteps}`,
+          : t(
+              `Completed with errors: ${failedSteps}`,
+              `已完成，但存在错误：${failedSteps}`,
+            ),
         status: "idle",
       };
     }
@@ -157,7 +169,7 @@ function buildSitrepFromExecutions(
       agentName: agent.name,
       executionID: lastCompleted.id,
       priority: "success",
-      message: summary ?? "Completed successfully",
+      message: summary ?? t("Completed successfully", "已成功完成"),
       status: "idle",
     };
   }
@@ -168,6 +180,7 @@ function buildSitrepFromExecutions(
 function buildSitrepFromConfig(
   agent: LibraryAgent,
   scheduledWithinMs?: number,
+  t: DisplayTranslate = (english) => english,
 ): SitrepItemData | null {
   if (agent.has_external_trigger) {
     return {
@@ -175,7 +188,7 @@ function buildSitrepFromConfig(
       agentID: agent.id,
       agentName: agent.name,
       priority: "listening",
-      message: "Waiting for trigger event",
+      message: t("Waiting for trigger event", "等待触发事件"),
       status: "listening",
     };
   }
@@ -189,7 +202,7 @@ function buildSitrepFromConfig(
       agentID: agent.id,
       agentName: agent.name,
       priority: "scheduled",
-      message: formatNextRun(agent.next_scheduled_run),
+      message: formatNextRun(agent.next_scheduled_run, t),
       status: "scheduled",
     };
   }
@@ -207,14 +220,19 @@ function isNextRunWithin(
   return diff <= windowMs;
 }
 
-function formatNextRun(iso: string | undefined | null): string {
-  if (!iso) return "Has a scheduled run";
+function formatNextRun(
+  iso: string | undefined | null,
+  t: DisplayTranslate,
+): string {
+  if (!iso) return t("Has a scheduled run", "有计划运行的任务");
   const diff = new Date(iso).getTime() - Date.now();
   const minutes = Math.round(diff / 60_000);
-  if (minutes <= 0) return "Scheduled to run soon";
-  if (minutes < 60) return `Scheduled to run in ${minutes}m`;
+  if (minutes <= 0) return t("Scheduled to run soon", "即将按计划运行");
+  if (minutes < 60)
+    return t(`Scheduled to run in ${minutes}m`, `计划在 ${minutes} 分钟后运行`);
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `Scheduled to run in ${hours}h`;
+  if (hours < 24)
+    return t(`Scheduled to run in ${hours}h`, `计划在 ${hours} 小时后运行`);
   const days = Math.round(hours / 24);
-  return `Scheduled to run in ${days}d`;
+  return t(`Scheduled to run in ${days}d`, `计划在 ${days} 天后运行`);
 }

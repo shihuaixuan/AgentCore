@@ -1,3 +1,4 @@
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import {
   render,
   screen,
@@ -406,7 +407,7 @@ describe("DiagnosticsContent", () => {
   it("renders oldest running hours in alert card", () => {
     setupLoadedMocks();
     render(<DiagnosticsContent />);
-    expect(screen.getByText(/oldest:.*26h/)).toBeDefined();
+    expect(screen.getByText(/oldest[:：]\s*26h/)).toBeDefined();
   });
 
   it("renders cancel queue depth error when -1", () => {
@@ -490,7 +491,7 @@ describe("DiagnosticsContent", () => {
   it("renders failure rate in failed alert card", () => {
     setupLoadedMocks();
     render(<DiagnosticsContent />);
-    expect(screen.getByText(/0.8\/hr rate/)).toBeDefined();
+    expect(screen.getByText("5 in last hour (0.8/hr)")).toBeDefined();
   });
 
   it("renders click to view text on alert cards", () => {
@@ -503,7 +504,20 @@ describe("DiagnosticsContent", () => {
   it("renders schedule next hour count", () => {
     setupLoadedMocks();
     render(<DiagnosticsContent />);
-    expect(screen.getByText(/from 4 schedules/)).toBeDefined();
+    expect(screen.getByText("from 4 schedule(s)")).toBeDefined();
+  });
+
+  it("localizes diagnostic counts and details with a Chinese provider", () => {
+    setupLoadedMocks();
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <DiagnosticsContent />
+      </LanguageProvider>,
+    );
+    expect(screen.getByRole("heading", { name: "系统诊断" })).toBeDefined();
+    expect(screen.getByText(/最早：\s*26h/)).toBeDefined();
+    expect(screen.getByText("过去一小时 5 次（0.8 次/小时）")).toBeDefined();
+    expect(screen.getByText("来自 4 个计划任务")).toBeDefined();
   });
 
   it("shows error state when only the agent query errors (coalesces error)", () => {

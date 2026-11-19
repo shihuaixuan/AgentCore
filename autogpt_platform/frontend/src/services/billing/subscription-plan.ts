@@ -1,5 +1,6 @@
 import type { SubscriptionStatusResponse } from "@/app/api/__generated__/models/subscriptionStatusResponse";
 import type { SubscriptionStatusResponseBillingCycle } from "@/app/api/__generated__/models/subscriptionStatusResponseBillingCycle";
+import type { Locale } from "@/lib/i18n/locale";
 
 export const PLAN_LABEL: Record<string, string> = {
   NO_TIER: "No active subscription",
@@ -9,6 +10,18 @@ export const PLAN_LABEL: Record<string, string> = {
   BUSINESS: "Team",
   ENTERPRISE: "Enterprise",
 };
+
+export function getPlanLabel(tier: string, locale: Locale = "en") {
+  const chinese: Record<string, string> = {
+    NO_TIER: "无有效订阅",
+    BASIC: "基础版",
+    PRO: "Pro",
+    MAX: "Max",
+    BUSINESS: "团队版",
+    ENTERPRISE: "企业版",
+  };
+  return (locale === "zh-CN" ? chinese[tier] : PLAN_LABEL[tier]) ?? tier;
+}
 
 export function getSubscriptionPlan(
   subscription: SubscriptionStatusResponse | undefined,

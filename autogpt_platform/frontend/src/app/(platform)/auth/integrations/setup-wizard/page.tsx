@@ -19,6 +19,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { CircleIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 /**
  * Provider configuration for the setup wizard.
@@ -92,6 +93,7 @@ function parseProvidersParam(providersParam: string): ProviderConfig[] {
 }
 
 export default function IntegrationSetupWizardPage() {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
 
   // Extract query parameters
@@ -184,13 +186,19 @@ export default function IntegrationSetupWizardPage() {
   if (missingParams.length > 0) {
     return (
       <div className="flex h-full min-h-[85vh] flex-col items-center justify-center py-10">
-        <AuthCard title="Invalid Request">
+        <AuthCard title={t("Invalid Request", "无效请求")}>
           <ErrorCard
-            context="request details"
+            context={t("request details", "请求详情")}
             responseError={{
-              message: `Missing required parameters: ${missingParams.join(", ")}`,
+              message: t(
+                `Missing required parameters: ${missingParams.join(", ")}`,
+                `缺少必填参数：${missingParams.join("、")}`,
+              ),
             }}
-            hint="Please contact the administrator of the app that sent you here."
+            hint={t(
+              "Please contact the administrator of the app that sent you here.",
+              "请联系发起此请求的应用管理员。",
+            )}
             isOurProblem={false}
           />
         </AuthCard>
@@ -201,7 +209,7 @@ export default function IntegrationSetupWizardPage() {
   if (isLoading) {
     return (
       <div className="flex h-full min-h-[85vh] flex-col items-center justify-center py-10">
-        <AuthCard title="Loading...">
+        <AuthCard title={t("Loading...", "加载中…")}>
           <div className="flex flex-col items-center gap-4 py-8">
             <LoadingSpinner size="large" />
           </div>
@@ -214,11 +222,18 @@ export default function IntegrationSetupWizardPage() {
   if (error || !appInfo) {
     return (
       <div className="flex h-full min-h-[85vh] flex-col items-center justify-center py-10">
-        <AuthCard title="Invalid Request">
+        <AuthCard title={t("Invalid Request", "无效请求")}>
           <ErrorCard
-            context="application"
-            responseError={error ? error : { message: "Application not found" }}
-            hint="Please contact the administrator of the app that sent you here."
+            context={t("application", "应用")}
+            responseError={
+              error
+                ? error
+                : { message: t("Application not found", "未找到应用") }
+            }
+            hint={t(
+              "Please contact the administrator of the app that sent you here.",
+              "请联系发起此请求的应用管理员。",
+            )}
             isOurProblem={false}
           />
         </AuthCard>
@@ -229,11 +244,16 @@ export default function IntegrationSetupWizardPage() {
   if (providerConfigs.length === 0) {
     return (
       <div className="flex h-full min-h-[85vh] flex-col items-center justify-center py-10">
-        <AuthCard title="Invalid Request">
+        <AuthCard title={t("Invalid Request", "无效请求")}>
           <ErrorCard
-            context="providers"
-            responseError={{ message: "No providers specified" }}
-            hint="Please contact the administrator of the app that sent you here."
+            context={t("providers", "服务提供方")}
+            responseError={{
+              message: t("No providers specified", "未指定服务提供方"),
+            }}
+            hint={t(
+              "Please contact the administrator of the app that sent you here.",
+              "请联系发起此请求的应用管理员。",
+            )}
             isOurProblem={false}
           />
           <Button
@@ -241,7 +261,7 @@ export default function IntegrationSetupWizardPage() {
             onClick={handleCancel}
             className="mt-4 w-full"
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
         </AuthCard>
       </div>
@@ -250,11 +270,14 @@ export default function IntegrationSetupWizardPage() {
 
   return (
     <div className="flex h-full min-h-[85vh] flex-col items-center justify-center py-10">
-      <AuthCard title="Connect Your Accounts">
+      <AuthCard title={t("Connect Your Accounts", "连接你的账户")}>
         <div className="flex w-full flex-col gap-6">
           <Text variant="body" tone="secondary" className="text-center">
-            <strong>{appInfo.name}</strong> is requesting you to connect the
-            following integrations to your AutoGPT account.
+            <strong>{appInfo.name}</strong>
+            {t(
+              " is requesting you to connect the following integrations to your AutoGPT account.",
+              " 请求将以下集成连接到你的 AutoGPT 账户。",
+            )}
           </Text>
 
           {/* Provider credentials list */}
@@ -272,7 +295,10 @@ export default function IntegrationSetupWizardPage() {
                     <div className="relative size-8">
                       <Image
                         src={`/integrations/${config.provider}.png`}
-                        alt={`${config.provider} icon`}
+                        alt={t(
+                          `${config.provider} icon`,
+                          `${config.provider} 图标`,
+                        )}
                         fill
                         className="object-contain group-disabled:opacity-50"
                       />
@@ -288,7 +314,7 @@ export default function IntegrationSetupWizardPage() {
                     )}
                     {isSelected && (
                       <Text variant="small" tone="success">
-                        Connected
+                        {t("Connected", "已连接")}
                       </Text>
                     )}
                   </div>
@@ -317,8 +343,11 @@ export default function IntegrationSetupWizardPage() {
               className="w-full"
             >
               {isAllComplete
-                ? "Continue"
-                : `Connect ${providerConfigs.length - Object.values(selectedCredentials).filter(Boolean).length} more`}
+                ? t("Continue", "继续")
+                : t(
+                    `Connect ${providerConfigs.length - Object.values(selectedCredentials).filter(Boolean).length} more`,
+                    `还需连接 ${providerConfigs.length - Object.values(selectedCredentials).filter(Boolean).length} 项`,
+                  )}
             </Button>
             <Button
               variant="secondary"
@@ -326,20 +355,20 @@ export default function IntegrationSetupWizardPage() {
               textSize="body-md"
               className="w-full"
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
           </div>
 
           <Text variant="small" tone="secondary" className="text-center">
-            Manage your integrations in{" "}
+            {t("Manage your integrations in ", "管理集成请前往：")}
             <Link
               href="/marketplace/connectors?view=mine"
               target="_blank"
               className="text-brand-hover underline hover:text-accent-strong"
             >
-              Marketplace → My connections
+              {t("Marketplace → My connections", "市场 → 我的连接")}
             </Link>
-            .
+            {t(".", "。")}
           </Text>
         </div>
       </AuthCard>

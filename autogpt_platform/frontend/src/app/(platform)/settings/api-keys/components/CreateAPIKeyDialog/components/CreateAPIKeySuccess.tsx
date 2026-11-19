@@ -16,11 +16,14 @@ export function CreateAPIKeySuccess({ plainTextKey, onClose }: Props) {
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(plainTextKey);
-      toast({ title: "Copied to clipboard", variant: "success" });
+      toast({
+        title: t("Copied to clipboard", "已复制到剪贴板"),
+        variant: "success",
+      });
     } catch {
       toast({
-        title: "Could not copy to clipboard",
-        description: "Please copy the key manually.",
+        title: t("Could not copy to clipboard", "无法复制到剪贴板"),
+        description: t("Please copy the key manually.", "请手动复制密钥。"),
         variant: "destructive",
       });
     }

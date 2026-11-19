@@ -7,8 +7,10 @@ import {
 import { okData } from "@/app/api/helpers";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { getQueryClient } from "@/lib/react-query/queryClient";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export const useAPISection = () => {
+  const { t } = useTranslation();
   const queryClient = getQueryClient();
   const { toast } = useToast();
 
@@ -36,13 +38,19 @@ export const useAPISection = () => {
       });
 
       toast({
-        title: "Success",
-        description: "AutoGPT Platform API key revoked successfully",
+        title: t("Success", "成功"),
+        description: t(
+          "AutoGPT Platform API key revoked successfully",
+          "AutoGPT 平台 API 密钥已成功撤销",
+        ),
       });
     } catch {
       toast({
-        title: "Error",
-        description: "Failed to revoke AutoGPT Platform API key",
+        title: t("Error", "错误"),
+        description: t(
+          "Failed to revoke AutoGPT Platform API key",
+          "撤销 AutoGPT 平台 API 密钥失败",
+        ),
         variant: "destructive",
       });
     }

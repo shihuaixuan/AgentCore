@@ -26,7 +26,7 @@ export function APIKeySelectionBar({
     <div className="flex w-full items-center justify-between rounded-xsmall border border-border-base bg-surface-hover px-4 py-2">
       <div className="flex items-center gap-5">
         <Text variant="body" as="span" tone="body">
-          {selectedCount} selected
+          {t(`${selectedCount} selected`, `已选择 ${selectedCount} 项`)}
         </Text>
         {!allSelected && (
           <Button variant="ghost" size="small" onClick={onSelectAll}>

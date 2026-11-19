@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   describeTrialTimeLeft,
   formatTrialDays,
+  formatTrialEndDate,
   formatTrialEndTime,
   getTrialDaysLeft,
 } from "../helpers";
@@ -16,6 +17,17 @@ afterEach(() => {
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 const end = new Date("2030-09-17T15:00:00Z");
+
+describe("Chinese trial date formatting", () => {
+  it("uses Chinese month names and a 24-hour clock when requested", () => {
+    const localEnd = new Date(2030, 8, 17, 14, 10);
+    expect(formatTrialEndDate(localEnd, "zh-CN")).toBe("9月17日");
+    expect(formatTrialEndTime(localEnd, "zh-CN")).toBe("14:10");
+    expect(
+      describeTrialTimeLeft(localEnd, new Date(2030, 8, 17, 11, 10), "zh-CN"),
+    ).toEqual({ kind: "today", time: "14:10" });
+  });
+});
 
 describe("getTrialDaysLeft", () => {
   it.each([

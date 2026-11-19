@@ -37,10 +37,16 @@ export function readFeedbackPrompt(part: ToolUIPart) {
   return { promptId: response.prompt_id, isFirst: Boolean(response.is_first) };
 }
 
-export function getWorkCheckNote(isFirst: boolean) {
+export function getWorkCheckNote(
+  isFirst: boolean,
+  t = (english: string, _chinese: string) => english,
+) {
   return isFirst
-    ? "Quick check-in on your first finished task"
-    : "Quick check-in on this task";
+    ? t(
+        "Quick check-in on your first finished task",
+        "快速回顾你完成的首个任务",
+      )
+    : t("Quick check-in on this task", "快速回顾此任务");
 }
 
 export const RATING_SCORES: Record<WorkCheckRating, 0 | 1 | 2> = {

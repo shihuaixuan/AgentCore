@@ -37,6 +37,7 @@ import { ArrowUp02Icon, StopIcon } from "@hugeicons/core-free-icons";
 import { Icon as UIIcon } from "@/components/atoms/Icon/Icon";
 import { isKey } from "@/lib/keyboard";
 import { isTouchDevice } from "@/lib/platform";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 // ============================================================================
 // PromptInput — form wrapper
@@ -129,11 +130,12 @@ export function PromptInputTextarea({
   onKeyDown,
   onChange,
   className,
-  placeholder = "Type your message...",
+  placeholder,
   value,
   onMultilineChange,
   ...props
 }: PromptInputTextareaProps) {
+  const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   // Ref keeps autoResize stable inside the memoized change handler while
   // still reaching the latest callback.
@@ -268,7 +270,7 @@ export function PromptInputTextarea({
       value={value}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t("Type your message...", "输入消息…")}
       {...props}
     />
   );
@@ -352,6 +354,7 @@ export function PromptInputSubmit({
   children,
   ...props
 }: PromptInputSubmitProps) {
+  const { t } = useTranslation();
   const isGenerating = status === "submitted" || status === "streaming";
   const canStop = isGenerating && Boolean(onStop);
   const isDisabled = Boolean(disabled) || (isGenerating && !canStop);
@@ -359,7 +362,13 @@ export function PromptInputSubmit({
   let Icon = <UIIcon icon={ArrowUp02Icon} className="size-4" />;
 
   if (status === "submitted") {
-    Icon = <LoadingSpinner size="small" role="status" aria-label="Loading" />;
+    Icon = (
+      <LoadingSpinner
+        size="small"
+        role="status"
+        aria-label={t("Loading", "加载中")}
+      />
+    );
   } else if (status === "streaming") {
     Icon = <UIIcon icon={StopIcon} className="size-4" />;
   }
@@ -379,7 +388,7 @@ export function PromptInputSubmit({
 
   return (
     <InputGroupButton
-      aria-label={canStop ? "Stop" : "Submit"}
+      aria-label={canStop ? t("Stop", "停止") : t("Submit", "发送")}
       className={cn(
         "size-[2.625rem] rounded-full border-action bg-action text-action-foreground hover:border-action-hover hover:bg-action-hover disabled:border-border-base disabled:bg-surface-active disabled:text-action-foreground disabled:opacity-100",
         className,

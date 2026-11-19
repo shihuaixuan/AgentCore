@@ -3,6 +3,7 @@
 import { CodeIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { MAX_RENDERED_DIFF_ROWS, parseUnifiedDiff } from "./fileDiffHelpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   file?: string;
@@ -12,6 +13,7 @@ interface Props {
 const LN_CLASSES = "select-none px-1.5 text-right text-caption-sm leading-5";
 
 export function FileDiff({ file, diff }: Props) {
+  const { t } = useTranslation();
   const { rows, added, removed, truncated } = parseUnifiedDiff(diff);
 
   return (
@@ -20,7 +22,7 @@ export function FileDiff({ file, diff }: Props) {
         <span className="inline-flex items-center gap-1.5">
           <Icon icon={CodeIcon} size={15} tone="subtle" className="shrink-0" />
           <span className="leading-none text-foreground-strong">
-            {file ?? "file"}
+            {file ?? t("file", "文件")}
           </span>
         </span>
         <span className="ml-auto inline-flex items-center gap-2 text-caption leading-none">
@@ -93,7 +95,10 @@ export function FileDiff({ file, diff }: Props) {
         ))}
         {truncated && (
           <p className="px-3 py-2 text-center text-caption text-foreground-tertiary">
-            Diff preview truncated after {MAX_RENDERED_DIFF_ROWS} lines
+            {t(
+              `Diff preview truncated after ${MAX_RENDERED_DIFF_ROWS} lines`,
+              `差异预览仅显示前 ${MAX_RENDERED_DIFF_ROWS} 行`,
+            )}
           </p>
         )}
       </div>

@@ -49,14 +49,20 @@ export function AutopilotUsageCard({ index = 0 }: Props) {
         <div className="my-auto py-8">
           <Text variant="large-medium" className="mb-2">
             {state.unlimited
-              ? "No usage limit"
-              : "Choose a plan to keep working"}
+              ? t("No usage limit", "无用量上限")
+              : t("Choose a plan to keep working", "选择套餐以继续工作")}
           </Text>
           {/* oxlint-disable-next-line design-system/no-restyle -- caption copy at a 24px line height; no Text variant has it */}
           <Text variant="small" tone="secondary" className="leading-6">
             {state.unlimited
-              ? "Your plan has no daily or weekly usage limits."
-              : "Choose a plan to continue working with your saved conversations and workflows."}
+              ? t(
+                  "Your plan has no daily or weekly usage limits.",
+                  "你的套餐没有每日或每周用量上限。",
+                )
+              : t(
+                  "Choose a plan to continue working with your saved conversations and workflows.",
+                  "选择套餐以继续使用已保存的对话和工作流。",
+                )}
           </Text>
         </div>
       ) : (
@@ -70,12 +76,17 @@ export function AutopilotUsageCard({ index = 0 }: Props) {
           {state.lifetime && (
             <div className="mt-6 border-t border-separator pt-5">
               <Text variant="small-medium" className="mb-1">
-                One allowance for your whole trial
+                {t(
+                  "One allowance for your whole trial",
+                  "整个试用期共用一份额度",
+                )}
               </Text>
               {/* oxlint-disable-next-line design-system/no-restyle -- caption copy at a 24px line height; no Text variant has it */}
               <Text variant="small" tone="secondary" className="leading-6">
-                This allowance lasts for your whole trial. It doesn’t refresh
-                each day or week.
+                {t(
+                  "This allowance lasts for your whole trial. It doesn’t refresh each day or week.",
+                  "此额度适用于整个试用期，不会每天或每周重置。",
+                )}
               </Text>
             </div>
           )}
@@ -84,8 +95,11 @@ export function AutopilotUsageCard({ index = 0 }: Props) {
       <div className="mt-auto pt-6">
         <Text variant="small-loose" tone="secondary">
           {state.inactive
-            ? "Your work stays saved."
-            : "Bigger requests use more of your allowance. Hitting the limit never adds a charge."}
+            ? t("Your work stays saved.", "你的工作内容会保留。")
+            : t(
+                "Bigger requests use more of your allowance. Hitting the limit never adds a charge.",
+                "请求越复杂，消耗的额度越多。达到上限不会产生额外费用。",
+              )}
         </Text>
       </div>
     </motion.section>
@@ -99,6 +113,7 @@ function UsageBar({
   window: UsageWindowView;
   primary?: boolean;
 }) {
+  const { t } = useTranslation();
   const percent = Math.min(Math.max(window.percent, 0), 100);
   const label = formatUsagePercent(percent).replace("%", "");
   return (
@@ -125,19 +140,21 @@ function UsageBar({
               %
             </Text>
             <Text as="span" variant="small" tone="secondary" className="ml-1">
-              used
+              {t("used", "已使用")}
             </Text>
-            <span className="sr-only">{label}% used</span>
+            <span className="sr-only">
+              {t(`${label}% used`, `已使用 ${label}%`)}
+            </span>
           </span>
         ) : (
           <Text variant="small" tone="secondary">
-            {label}% used
+            {t(`${label}% used`, `已使用 ${label}%`)}
           </Text>
         )}
       </div>
       <div
         role="progressbar"
-        aria-label={`${window.label} usage`}
+        aria-label={t(`${window.label} usage`, `${window.label}用量`)}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={percent}

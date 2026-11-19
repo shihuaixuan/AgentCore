@@ -24,6 +24,7 @@ import type { ConnectorRow as Row } from "./helpers";
 import { useExpertCredentialSelection } from "./useExpertCredentialSelection";
 import type { ExpertGrant } from "../SetupRequirementsCard/helpers";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   row: Row;
@@ -38,6 +39,15 @@ const UNUSABLE_ACCOUNT_ERROR =
 const GRANT_FAILED_ERROR = "Couldn't grant access. Try again.";
 
 export function ConnectorRow({ row }: Props) {
+  const { t } = useTranslation();
+  const copy: Record<string, string> = {
+    [UNUSABLE_ACCOUNT_ERROR]: "此账户缺少所需的访问权限，请重新连接。",
+    [GRANT_FAILED_ERROR]: "授予访问权限失败，请重试。",
+    "Grant access": "授予访问权限",
+    Reconnect: "重新连接",
+    "Choose account": "选择账户",
+    Connect: "连接",
+  };
   const [isDialogOpen, setDialogOpen] = useState(false);
   // A sign-in finished without reporting its credential, so the account it
   // added is found by diffing the provider list against `knownIds`.
@@ -292,6 +302,14 @@ export function ConnectorRow({ row }: Props) {
   const linksOnAyrshare =
     row.provider === AYRSHARE &&
     !(expertGrant && !isSatisfied && grantableOptions.length > 0);
+  const connectLabel = buttonLabel({
+    canGrant: grantableOptions.length > 0,
+    awaitingReconnect,
+    hasChoice,
+  });
+  const localizedGrantError = grantError
+    ? t(grantError, copy[grantError] ?? grantError)
+    : null;
 
   function openDialog() {
     knownIds.current = allProviders
@@ -325,7 +343,7 @@ export function ConnectorRow({ row }: Props) {
         </Text>
         {grantError && !isDialogOpen ? (
           <span className="truncate text-caption text-error-foreground">
-            {grantError}
+            {localizedGrantError}
           </span>
         ) : expertGrant && !isSatisfied ? (
           <Text
@@ -335,8 +353,11 @@ export function ConnectorRow({ row }: Props) {
             className="truncate"
           >
             {grantableOptions.length > 0
-              ? "Needs this expert's access"
-              : "This expert needs its own access"}
+              ? t("Needs this expert's access", "需要向此专家授予访问权限")
+              : t(
+                  "This expert needs its own access",
+                  "此专家需要独立的访问权限",
+                )}
           </Text>
         ) : (
           row.description && (
@@ -362,7 +383,10 @@ export function ConnectorRow({ row }: Props) {
         )}
         {awaitingReconnect && (
           <span className="text-caption text-error-foreground">
-            Access needs attention. Connect this account again.
+            {t(
+              "Access needs attention. Connect this account again.",
+              "访问权限需要处理，请重新连接此账户。",
+            )}
           </span>
         )}
       </div>
@@ -371,7 +395,7 @@ export function ConnectorRow({ row }: Props) {
         <div className="flex shrink-0 flex-col items-end gap-2">
           <span className="flex items-center gap-1.5 text-body font-medium text-foreground-tertiary">
             <Icon icon={CheckmarkCircle02Icon} size={16} />
-            {expertGrant ? "Granted" : "Connected"}
+            {expertGrant ? t("Granted", "已授权") : t("Connected", "已连接")}
           </span>
           {!expertGrant && (
             <button
@@ -379,7 +403,7 @@ export function ConnectorRow({ row }: Props) {
               onClick={openDialog}
               className="text-caption text-foreground-tertiary underline underline-offset-2"
             >
-              Change account
+              {t("Change account", "更换账户")}
             </button>
           )}
         </div>
@@ -398,12 +422,8 @@ export function ConnectorRow({ row }: Props) {
           onClick={linksOnAyrshare ? ayrshare.connect : openDialog}
         >
           {linksOnAyrshare
-            ? "Connect"
-            : buttonLabel({
-                canGrant: grantableOptions.length > 0,
-                awaitingReconnect,
-                hasChoice,
-              })}
+            ? t("Connect", "连接")
+            : t(connectLabel, copy[connectLabel])}
         </Button>
       )}
 
@@ -418,7 +438,7 @@ export function ConnectorRow({ row }: Props) {
                 credentials: grantableOptions,
                 onUse: grant,
                 isPending: isGranting,
-                error: grantError,
+                error: localizedGrantError,
               }
             : hasChoice || (isSatisfied && pickable.length > 0)
               ? {

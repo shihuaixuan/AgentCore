@@ -1,12 +1,14 @@
 import type { EntityInvalidationSummary } from "@/app/api/__generated__/models/entityInvalidationSummary";
 import { Text } from "@/components/atoms/Text/Text";
 import { shortenUuid } from "../helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   item: EntityInvalidationSummary;
 }
 
 export function DreamEntityInvalidationRow({ item }: Props) {
+  const { t } = useTranslation();
   const touched = item.edges_touched ?? [];
   return (
     <li className="border-l-2 border-error/20 py-1.5 pl-3">
@@ -15,10 +17,13 @@ export function DreamEntityInvalidationRow({ item }: Props) {
       </Text>
       <div className="mt-1 flex flex-wrap items-center gap-2 text-foreground-tertiary">
         <code className="font-mono text-tiny leading-inherit">
-          entity: {shortenUuid(item.entity_uuid)}
+          {t("entity:", "实体：")} {shortenUuid(item.entity_uuid)}
         </code>
         <Text variant="small" tone="muted" as="span">
-          {touched.length} edge{touched.length === 1 ? "" : "s"} touched
+          {t(
+            `${touched.length} edge${touched.length === 1 ? "" : "s"} touched`,
+            `涉及 ${touched.length} 条关系`,
+          )}
         </Text>
       </div>
       {touched.length > 0 ? (
@@ -33,7 +38,10 @@ export function DreamEntityInvalidationRow({ item }: Props) {
           ))}
           {touched.length > 6 ? (
             <Text variant="small" tone="muted" as="span">
-              +{touched.length - 6} more
+              {t(
+                `+${touched.length - 6} more`,
+                `另有 ${touched.length - 6} 条`,
+              )}
             </Text>
           ) : null}
         </div>

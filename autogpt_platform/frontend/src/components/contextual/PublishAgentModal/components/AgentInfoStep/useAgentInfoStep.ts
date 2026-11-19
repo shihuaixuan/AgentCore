@@ -148,13 +148,22 @@ export function useAgentInfoStep({
 
       onSuccess(response);
     } catch (error) {
-      if (toastIfPlanRequired(error, "Publishing needs an active plan")) return;
+      if (
+        toastIfPlanRequired(
+          error,
+          t("Publishing needs an active plan", "发布需要有效套餐"),
+        )
+      )
+        return;
       Sentry.captureException(error);
       toast({
         title: t("Submit Workflow Error", "提交工作流失败"),
         description:
           (error instanceof Error ? error.message : undefined) ||
-          "An error occurred while submitting the workflow. Please try again.",
+          t(
+            "An error occurred while submitting the workflow. Please try again.",
+            "提交工作流时发生错误，请重试。",
+          ),
         duration: 3000,
         variant: "destructive",
       });

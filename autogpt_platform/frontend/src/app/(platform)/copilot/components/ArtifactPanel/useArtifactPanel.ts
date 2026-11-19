@@ -1,6 +1,7 @@
 "use client";
 
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useEffect, useRef, useState } from "react";
 import { useCopilotUIStore } from "../../store";
 import { getCachedArtifactContent } from "./components/useArtifactContent";
@@ -8,6 +9,7 @@ import { downloadArtifact } from "./downloadArtifact";
 import { classifyArtifactRef } from "./helpers";
 
 export function useArtifactPanel() {
+  const { t } = useTranslation();
   const artifactPanel = useCopilotUIStore((s) => s.artifactPanel);
   const closeArtifactPanel = useCopilotUIStore((s) => s.closeArtifactPanel);
   const clearArtifactPreview = useCopilotUIStore((s) => s.clearArtifactPreview);
@@ -69,12 +71,15 @@ export function useArtifactPanel() {
     textPromise
       .then((text) => navigator.clipboard.writeText(text))
       .then(() => {
-        toast({ title: "Copied to clipboard" });
+        toast({ title: t("Copied to clipboard", "已复制到剪贴板") });
       })
       .catch(() => {
         toast({
-          title: "Copy failed",
-          description: "Couldn't read the file or access the clipboard.",
+          title: t("Copy failed", "复制失败"),
+          description: t(
+            "Couldn't read the file or access the clipboard.",
+            "无法读取文件或访问剪贴板。",
+          ),
           variant: "destructive",
         });
       });
@@ -84,8 +89,8 @@ export function useArtifactPanel() {
     if (!activeArtifact) return;
     downloadArtifact(activeArtifact).catch(() => {
       toast({
-        title: "Download failed",
-        description: "Couldn't fetch the file.",
+        title: t("Download failed", "下载失败"),
+        description: t("Couldn't fetch the file.", "无法获取文件。"),
         variant: "destructive",
       });
     });

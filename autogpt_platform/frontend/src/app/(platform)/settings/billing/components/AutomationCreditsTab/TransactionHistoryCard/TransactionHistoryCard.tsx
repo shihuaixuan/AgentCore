@@ -42,19 +42,25 @@ export function TransactionHistoryCard({ index = 0 }: Props) {
             {t("Transaction history", "交易记录")}
           </Text>
           <Text variant="small" tone="secondary" className="mt-1">
-            Changes to your automation credit balance.
+            {t(
+              "Changes to your automation credit balance.",
+              "自动化积分余额的变动记录。",
+            )}
           </Text>
         </div>
         <Text variant="small" tone="secondary">
-          USD · Your local time
+          {t("USD · Your local time", "USD · 你的当地时间")}
         </Text>
       </div>
       {history.isLoading ? (
         <HistorySkeleton />
       ) : history.isError ? (
         <ErrorCard
-          context="transaction history"
-          hint="We couldn’t load your transactions. Please try again."
+          context={t("transaction history", "交易记录")}
+          hint={t(
+            "We couldn’t load your transactions. Please try again.",
+            "无法加载交易记录，请重试。",
+          )}
           onRetry={() => void retryHistory()}
         />
       ) : history.transactions.length === 0 ? (
@@ -89,8 +95,10 @@ export function TransactionHistoryCard({ index = 0 }: Props) {
         </div>
       )}
       <Text variant="small" tone="secondary" className="mx-4">
-        Each workflow run combines its recorded charges and adjustments. Only
-        runs with credit activity appear here.
+        {t(
+          "Each workflow run combines its recorded charges and adjustments. Only runs with credit activity appear here.",
+          "每次工作流运行会汇总已记录的费用和调整。仅显示有积分变动的运行。",
+        )}
       </Text>
     </motion.section>
   );
@@ -124,7 +132,10 @@ function EmptyHistory() {
         {t("No transactions yet.", "暂无交易记录。")}
       </Text>
       <Text variant="small" tone="secondary" className="mt-2">
-        Credit purchases and paid activity will appear here.
+        {t(
+          "Credit purchases and paid activity will appear here.",
+          "购买积分和付费活动将显示在这里。",
+        )}
       </Text>
     </div>
   );

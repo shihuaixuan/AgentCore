@@ -11,8 +11,8 @@ interface BecomeACreatorProps {
 }
 
 export function BecomeACreator({
-  description = "Join a community where your workflows can inspire, engage, and be installed by users around the world.",
-  buttonText = "Publish your workflow",
+  description,
+  buttonText,
   onPublish,
 }: BecomeACreatorProps) {
   const { t } = useTranslation();
@@ -22,7 +22,7 @@ export function BecomeACreator({
       className="inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-action-hover px-8 text-body-md leading-inherit font-medium text-action-foreground shadow-[0_1px_2px_rgba(16,24,40,0.1)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-action hover:shadow-[0_10px_24px_-10px_rgba(16,24,40,0.4)]"
       onClick={onPublish}
     >
-      {buttonText}
+      {buttonText ?? t("Publish your workflow", "发布你的工作流")}
     </button>
   );
 
@@ -31,11 +31,16 @@ export function BecomeACreator({
       <div className="mx-auto w-full max-w-2xl px-4 text-center">
         <h2 className="mb-4 text-heading font-semibold tracking-heading text-foreground-strong md:text-title">
           {t("Build AI workflows and share", "构建并分享 AI 工作流")}{" "}
-          <span className="text-brand">your</span> vision
+          <span className="text-brand">{t("your", "你的")}</span>{" "}
+          {t("vision", "愿景")}
         </h2>
 
         <p className="mx-auto mb-8 max-w-xl text-body-md leading-relaxed text-foreground-tertiary md:text-lead">
-          {description}
+          {description ??
+            t(
+              "Join a community where your workflows can inspire, engage, and be installed by users around the world.",
+              "加入社区，让世界各地的用户从你的工作流中获得启发、参与互动并安装使用。",
+            )}
         </p>
 
         {onPublish ? (

@@ -10,6 +10,7 @@ import { formatTimeAgo } from "@/lib/utils/time";
 import { Loading03Icon, PlusSignIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { useImageFallback } from "@/hooks/useImageFallback";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
@@ -34,6 +35,7 @@ export const UGCAgentBlock: UGCAgentBlockComponent = ({
   highlightedText,
   ...rest
 }) => {
+  const { t, locale } = useTranslation();
   const { showImage, handleImageError } = useImageFallback(image_url);
 
   return (
@@ -52,7 +54,7 @@ export const UGCAgentBlock: UGCAgentBlockComponent = ({
           <Image
             src={image_url}
             unoptimized={isLocalStoreMediaUrl(image_url)}
-            alt="integration-icon"
+            alt={t("integration-icon", "工作流预览图")}
             fill
             sizes="5.625rem"
             className="w-full object-contain group-disabled:opacity-50"
@@ -79,7 +81,8 @@ export const UGCAgentBlock: UGCAgentBlockComponent = ({
               tone={rest.disabled ? "subtle" : "muted"}
               className="line-clamp-1"
             >
-              Edited {formatTimeAgo(edited_time.toISOString())}
+              {t("Edited", "编辑于")}{" "}
+              {formatTimeAgo(edited_time.toISOString(), locale)}
             </Text>
           )}
 
@@ -93,7 +96,7 @@ export const UGCAgentBlock: UGCAgentBlockComponent = ({
             tone={rest.disabled ? "subtle" : "muted"}
             className="line-clamp-1"
           >
-            Version {version}
+            {t("Version", "版本")} {version}
           </Text>
 
           <span className="rounded-xl bg-surface-active px-2">
@@ -103,7 +106,7 @@ export const UGCAgentBlock: UGCAgentBlockComponent = ({
               tone="muted"
               className="block"
             >
-              Your Workflow
+              {t("Your Workflow", "你的工作流")}
             </Text>
           </span>
         </div>

@@ -14,9 +14,11 @@ interface Props {
 }
 
 export function WalletTrialNote({ id, trial }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const englishLine = getTrialPlanLine(trial);
-  const date = trial?.ends_at ? formatTrialEndDate(trial.ends_at) : null;
+  const date = trial?.ends_at
+    ? formatTrialEndDate(trial.ends_at, locale)
+    : null;
   const line = englishLine
     ? t(
         englishLine,

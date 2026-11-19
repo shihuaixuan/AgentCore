@@ -57,7 +57,7 @@ export function SubmissionItem({
   onDelete,
   creatorUsername,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const reduceMotion = useReducedMotion();
   const {
     canModify,
@@ -76,7 +76,7 @@ export function SubmissionItem({
     creatorUsername,
   });
 
-  const visual = getStatusVisual(submission.status);
+  const visual = getStatusVisual(submission.status, locale);
   const thumbnail = submission.image_urls?.[0];
 
   return (
@@ -177,7 +177,7 @@ export function SubmissionItem({
       </td>
 
       <td className="px-4 py-3 align-middle text-body whitespace-nowrap text-foreground-body">
-        {formatSubmittedAt(submission.submitted_at)}
+        {formatSubmittedAt(submission.submitted_at, locale)}
       </td>
 
       <td className="px-4 py-3 text-right align-middle text-body whitespace-nowrap text-foreground-body tabular-nums">
@@ -263,8 +263,12 @@ export function SubmissionItem({
         >
           <Dialog.Content>
             <Text variant="body" tone="body">
-              This will remove <strong>{submission.name}</strong> from the
-              store. This action cannot be undone.
+              {t("This will remove", "将从市场移除")}{" "}
+              <strong>{submission.name}</strong>
+              {t(
+                " from the store. This action cannot be undone.",
+                "。此操作无法撤销。",
+              )}
             </Text>
             <Dialog.Footer>
               <Button
@@ -281,7 +285,9 @@ export function SubmissionItem({
                 onClick={handleConfirmDelete}
                 loading={isDeleting}
               >
-                {isDeleting ? "Deleting" : "Delete submission"}
+                {isDeleting
+                  ? t("Deleting", "正在删除")
+                  : t("Delete submission", "删除提交")}
               </Button>
             </Dialog.Footer>
           </Dialog.Content>

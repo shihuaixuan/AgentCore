@@ -59,7 +59,7 @@ export function PlanTaskCard({ task, owner, isFirst }: Props) {
 }
 
 function OwnerLine({ owner }: { owner: RecommendedExpert | null }) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   if (!owner)
     return (
       // Text has no accent tone, so the role classes go on the span.
@@ -70,7 +70,7 @@ function OwnerLine({ owner }: { owner: RecommendedExpert | null }) {
   return (
     <Text variant="small" as="span" tone="secondary" className="mt-1.5">
       <span className="font-medium text-foreground-strong">{owner.name}</span>,{" "}
-      {getExpertRoleLabel(owner.role)}{" "}
+      {getExpertRoleLabel(owner.role, locale)}{" "}
       <span className="text-foreground-subtle">
         {t("· joins your team", "· 加入你的团队")}
       </span>

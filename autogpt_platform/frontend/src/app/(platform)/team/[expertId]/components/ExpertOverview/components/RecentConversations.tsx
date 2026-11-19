@@ -34,7 +34,7 @@ export function RecentConversations({
   onRetry,
   onChat,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   return (
     <OverviewCard title={t("Recent conversations", "最近对话")}>
       {isLoading ? (
@@ -43,7 +43,10 @@ export function RecentConversations({
           <Skeleton className="h-10 w-full rounded-lg" />
         </div>
       ) : isError ? (
-        <CardError message="Couldn't load conversations." onRetry={onRetry} />
+        <CardError
+          message={t("Couldn't load conversations.", "无法加载对话。")}
+          onRetry={onRetry}
+        />
       ) : sessions.length === 0 ? (
         <PanelEmptyState
           textSize="body-md"
@@ -59,7 +62,10 @@ export function RecentConversations({
             </span>,
           ]}
           title={t("No conversations yet", "暂无对话")}
-          description={`Ask ${expertName} for something and the chat shows up here.`}
+          description={t(
+            `Ask ${expertName} for something and the chat shows up here.`,
+            `向 ${expertName} 提出请求后，聊天会显示在这里。`,
+          )}
         >
           <Button
             variant="primary"
@@ -89,12 +95,12 @@ export function RecentConversations({
                     as="span"
                     className="truncate"
                   >
-                    {session.title || "Untitled chat"}
+                    {session.title || t("Untitled chat", "未命名聊天")}
                   </Text>
                   <Text variant="small" tone="muted" as="span">
                     {session.is_processing
                       ? t("Working now", "正在运行")
-                      : formatRelativeDate(session.updated_at)}
+                      : formatRelativeDate(session.updated_at, locale)}
                   </Text>
                 </span>
               </Link>

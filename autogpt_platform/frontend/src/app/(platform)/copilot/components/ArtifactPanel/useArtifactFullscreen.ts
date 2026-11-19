@@ -1,9 +1,11 @@
 "use client";
 
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useEffect, useRef, useState } from "react";
 
 export function useArtifactFullscreen() {
+  const { t } = useTranslation();
   const fullscreenRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [canFullscreen, setCanFullscreen] = useState(false);
@@ -33,7 +35,7 @@ export function useArtifactFullscreen() {
       return true;
     } catch {
       toast({
-        title: "Couldn't change fullscreen mode",
+        title: t("Couldn't change fullscreen mode", "无法切换全屏模式"),
         variant: "destructive",
       });
       return false;
@@ -50,7 +52,7 @@ export function useArtifactFullscreen() {
       await fullscreenRef.current.requestFullscreen();
     } catch {
       toast({
-        title: "Couldn't change fullscreen mode",
+        title: t("Couldn't change fullscreen mode", "无法切换全屏模式"),
         variant: "destructive",
       });
     }

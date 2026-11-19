@@ -1,5 +1,6 @@
 import { useDeleteV2DeleteSession } from "@/app/api/__generated__/endpoints/chat/chat";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useCopilotUIStore } from "./store";
@@ -22,6 +23,7 @@ import {
  * `DeleteChatDialog` without duplicating the mutation wiring.
  */
 export function useSessionDeletion() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [{ sessionId }, setChatParams] = useQueryStates({
     sessionId: parseAsString,
@@ -49,9 +51,11 @@ export function useSessionDeletion() {
         },
         onError: (error) => {
           toast({
-            title: "Failed to delete chat",
+            title: t("Failed to delete chat", "删除对话失败"),
             description:
-              error instanceof Error ? error.message : "An error occurred",
+              error instanceof Error
+                ? error.message
+                : t("An error occurred", "发生了错误"),
             variant: "destructive",
           });
         },

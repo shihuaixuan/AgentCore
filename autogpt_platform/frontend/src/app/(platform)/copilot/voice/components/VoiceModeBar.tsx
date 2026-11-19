@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/Button/Button";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { VoiceState } from "../micStateMachine";
 import type { VoiceFailure } from "../useVoiceMode";
@@ -43,6 +44,7 @@ export function VoiceModeBar({
   onRetry,
   onDownload,
 }: Props) {
+  const { t } = useTranslation();
   if (state === "off") return null;
 
   // The trace says "everything is fine"; a failure has to take its place
@@ -57,10 +59,10 @@ export function VoiceModeBar({
           {failure.message}
         </span>
         <Button type="button" variant="ghost" size="xs" onClick={onRetry}>
-          Retry
+          {t("Retry", "重试")}
         </Button>
         <Button type="button" variant="ghost" size="xs" onClick={onDownload}>
-          Download recording
+          {t("Download recording", "下载录音")}
         </Button>
         {leaveButton}
       </div>

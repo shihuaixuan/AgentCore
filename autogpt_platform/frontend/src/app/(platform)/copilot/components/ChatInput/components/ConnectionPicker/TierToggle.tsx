@@ -17,6 +17,7 @@ import { isComposingEvent } from "@/lib/keyboard";
 import { nextRovingValue, rovingTabIndex } from "./radioKeys";
 import { Swap } from "./Swap";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Segment {
   tier: CopilotLlmModel;
@@ -54,6 +55,7 @@ export function TierToggle({
   onSelect,
   advancedUpgrade,
 }: Props) {
+  const { t } = useTranslation();
   const options = segments.map((segment) => ({
     value: segment.tier,
     disabled: Boolean(segment.lock),
@@ -77,7 +79,7 @@ export function TierToggle({
   return (
     <div
       role="radiogroup"
-      aria-label="Model tier"
+      aria-label={t("Model tier", "模型档位")}
       onKeyDown={handleKeyDown}
       className={cn(
         "divide-y divide-border-base",
@@ -151,6 +153,7 @@ export function TierToggle({
  * below the name has room to explain the barrier.
  */
 function LockedSegment({ segment }: { segment: Segment }) {
+  const { t } = useTranslation();
   return (
     /* The upgrade link is a sibling of the radio, not a child of it: a radio's
        descendants are presentational to assistive technology, so a link nested
@@ -161,7 +164,7 @@ function LockedSegment({ segment }: { segment: Segment }) {
         role="radio"
         aria-checked={false}
         aria-disabled="true"
-        aria-label={`${segment.label} — ${segment.lock?.reason ?? "unavailable"}`}
+        aria-label={`${segment.label} — ${segment.lock?.reason ?? t("unavailable", "不可用")}`}
         tabIndex={-1}
         className="flex items-start gap-2.5"
       >
@@ -201,7 +204,7 @@ function LockedSegment({ segment }: { segment: Segment }) {
           // answers, the way it reads when it follows that sentence inline.
           className="mt-1 ml-6 w-fit text-caption-sm leading-inherit font-medium text-foreground-strong underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-border-strong focus-visible:outline-none"
         >
-          See plans
+          {t("See plans", "查看套餐")}
         </Link>
       )}
     </div>

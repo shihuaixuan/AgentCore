@@ -18,6 +18,7 @@ import {
 import { RateLimitDisplay } from "./RateLimitDisplay";
 import { GaugeIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function RateLimitModal({
   userId,
@@ -26,6 +27,7 @@ export function RateLimitModal({
   userId: string;
   userEmail: string;
 }) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,8 +51,11 @@ export function RateLimitModal({
       } catch (error) {
         console.error("Error fetching rate limit:", error);
         toast({
-          title: "Error",
-          description: "Failed to fetch user rate limit.",
+          title: t("Error", "错误"),
+          description: t(
+            "Failed to fetch user rate limit.",
+            "无法获取用户的速率限制。",
+          ),
           variant: "destructive",
         });
         setRateLimitData(null);
@@ -60,7 +65,7 @@ export function RateLimitModal({
     }
 
     fetchRateLimit();
-  }, [open, userId, toast]);
+  }, [open, userId, toast, t]);
 
   async function handleReset(resetWeekly: boolean) {
     if (!rateLimitData) return;
@@ -75,16 +80,22 @@ export function RateLimitModal({
       }
       setRateLimitData(response.data);
       toast({
-        title: "Success",
+        title: t("Success", "成功"),
         description: resetWeekly
-          ? "Daily and weekly usage reset to zero."
-          : "Daily usage reset to zero.",
+          ? t(
+              "Daily and weekly usage reset to zero.",
+              "每日和每周用量已重置为零。",
+            )
+          : t("Daily usage reset to zero.", "每日用量已重置为零。"),
       });
     } catch (error) {
       console.error("Error resetting rate limit:", error);
       toast({
-        title: "Error",
-        description: "Failed to reset rate limit usage.",
+        title: t("Error", "错误"),
+        description: t(
+          "Failed to reset rate limit usage.",
+          "无法重置速率限制用量。",
+        ),
         variant: "destructive",
       });
     }
@@ -101,21 +112,24 @@ export function RateLimitModal({
         }}
       >
         <Icon icon={GaugeIcon} size={16} className="mr-1" />
-        Rate Limits
+        {t("Rate Limits", "速率限制")}
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Rate Limits</DialogTitle>
+            <DialogTitle>{t("Rate Limits", "速率限制")}</DialogTitle>
             <DialogDescription>
-              CoPilot rate limits for {userEmail || userId}
+              {t(
+                `CoPilot rate limits for ${userEmail || userId}`,
+                `${userEmail || userId} 的 CoPilot 速率限制`,
+              )}
             </DialogDescription>
           </DialogHeader>
 
           {isLoading && (
             <div className="py-8 text-center text-foreground-tertiary">
-              Loading rate limits...
+              {t("Loading rate limits...", "正在加载速率限制...")}
             </div>
           )}
 
@@ -129,7 +143,10 @@ export function RateLimitModal({
 
           {!isLoading && !rateLimitData && (
             <div className="py-8 text-center text-foreground-tertiary">
-              No rate limit data available for this user.
+              {t(
+                "No rate limit data available for this user.",
+                "该用户暂无速率限制数据。",
+              )}
             </div>
           )}
         </DialogContent>

@@ -48,7 +48,13 @@ export function useInlineConnectForm({
       onSuccess("id" in created.data ? created.data : undefined);
     } catch (error) {
       if (
-        toastIfPlanRequired(error, "Connecting a service needs an active plan")
+        toastIfPlanRequired(
+          error,
+          t(
+            "Connecting a service needs an active plan",
+            "连接服务需要有效套餐",
+          ),
+        )
       )
         return;
       toast({

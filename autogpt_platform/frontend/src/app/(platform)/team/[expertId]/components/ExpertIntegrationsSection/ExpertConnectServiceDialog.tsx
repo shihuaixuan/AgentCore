@@ -147,11 +147,17 @@ export function ExpertConnectServiceDialog({
                   >
                     <div className="flex flex-col gap-1">
                       <Text variant="lead-medium" as="h3" tone="primary">
-                        Connect a service for {expertName}
+                        {t(
+                          `Connect a service for ${expertName}`,
+                          `为 ${expertName} 连接服务`,
+                        )}
                       </Text>
                       <Text variant="small" tone="muted">
                         {t("Pick a service to connect.", "选择要连接的服务。")}{" "}
-                        {expertName} will be able to use it on your behalf.
+                        {t(
+                          `${expertName} will be able to use it on your behalf.`,
+                          `${expertName} 将可以代你使用此服务。`,
+                        )}
                       </Text>
                     </div>
                     {isLoading ? (
@@ -165,8 +171,11 @@ export function ExpertConnectServiceDialog({
                       </div>
                     ) : isError ? (
                       <ErrorCard
-                        context="services"
-                        hint="We could not load the services you can connect."
+                        context={t("services", "服务")}
+                        hint={t(
+                          "We could not load the services you can connect.",
+                          "无法加载可连接的服务。",
+                        )}
                         onRetry={() => refetch()}
                       />
                     ) : (
@@ -203,7 +212,10 @@ export function ExpertConnectServiceDialog({
                             </span>
                             <Text variant="body" tone="secondary">
                               {query.trim()
-                                ? `No services match "${query.trim()}"`
+                                ? t(
+                                    `No services match "${query.trim()}"`,
+                                    `没有与“${query.trim()}”匹配的服务`,
+                                  )
                                 : filter === "connected"
                                   ? t(
                                       "No services connected yet.",
@@ -273,7 +285,9 @@ export function ExpertConnectServiceDialog({
                       loading={isConnecting}
                       onClick={handleContinue}
                     >
-                      {isConnecting ? "Connecting…" : "Continue"}
+                      {isConnecting
+                        ? t("Connecting…", "正在连接…")
+                        : t("Continue", "继续")}
                     </Button>
                   ) : null}
                 </>

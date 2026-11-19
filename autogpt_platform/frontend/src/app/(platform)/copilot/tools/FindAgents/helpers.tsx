@@ -95,22 +95,25 @@ export function getSourceLabelFromToolType(toolType?: FindAgentsToolType): {
   return { source: "unknown", label: "Workflows" };
 }
 
-export function getAnimationText(part: {
-  type?: FindAgentsToolType;
-  state: ToolUIPart["state"];
-  input?: unknown;
-  output?: unknown;
-}): string {
+export function getAnimationText(
+  part: {
+    type?: FindAgentsToolType;
+    state: ToolUIPart["state"];
+    input?: unknown;
+    output?: unknown;
+  },
+  t = (english: string, _chinese: string) => english,
+): string {
   const { source } = getSourceLabelFromToolType(part.type);
   const query = (part.input as FindAgentInput | undefined)?.query?.trim();
 
   // Action phrase matching legacy ToolCallMessage
   const actionPhrase =
     source === "library"
-      ? "Looking for library workflows"
-      : "Looking for workflows in the marketplace";
+      ? t("Looking for library workflows", "正在查找工作流库中的工作流")
+      : t("Looking for workflows in the marketplace", "正在查找市场中的工作流");
 
-  const queryText = query ? ` matching "${query}"` : "";
+  const queryText = query ? t(` matching "${query}"`, `，匹配“${query}”`) : "";
 
   switch (part.state) {
     case "input-streaming":
@@ -123,20 +126,25 @@ export function getAnimationText(part: {
         return `${actionPhrase}${queryText}`;
       }
       if (isNoResultsOutput(output)) {
-        return `No workflows found${queryText}`;
+        return t(`No workflows found`, "未找到工作流") + queryText;
       }
       if (isAgentsFoundOutput(output)) {
         const count = output.count ?? output.agents?.length ?? 0;
-        return `Found ${count} workflow${count === 1 ? "" : "s"}${queryText}`;
+        return (
+          t(
+            `Found ${count} workflow${count === 1 ? "" : "s"}`,
+            `找到 ${count} 个工作流`,
+          ) + queryText
+        );
       }
       if (isErrorOutput(output)) {
-        return `Error finding workflows${queryText}`;
+        return t("Error finding workflows", "查找工作流时出错") + queryText;
       }
       return `${actionPhrase}${queryText}`;
     }
 
     case "output-error":
-      return `Error finding workflows${queryText}`;
+      return t("Error finding workflows", "查找工作流时出错") + queryText;
 
     default:
       return actionPhrase;

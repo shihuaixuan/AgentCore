@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import {
-  MICROSOFT_SETUP_MESSAGES,
+  getMicrosoftSetupMessage,
   type MicrosoftSetupReason,
 } from "@/lib/microsoft-setup";
 
@@ -22,7 +22,7 @@ const OWN_REASONS: ReadonlySet<MicrosoftSetupReason> = new Set([
 ]);
 
 export function MicrosoftAdminSetup({ reason, onRetry, retryLabel }: Props) {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
 
   const forAdmin = reason !== "app_setup_required" && !OWN_REASONS.has(reason);
   const [copyMessage, setCopyMessage] = useState("");
@@ -45,7 +45,7 @@ export function MicrosoftAdminSetup({ reason, onRetry, retryLabel }: Props) {
   return (
     <section className="flex flex-col gap-3 rounded-lg border border-border-base p-4">
       <Text variant="body" role="status">
-        {MICROSOFT_SETUP_MESSAGES[reason]}
+        {getMicrosoftSetupMessage(reason, locale)}
       </Text>
       {reason === "app_setup_required" && (
         <Text variant="small" tone="muted">

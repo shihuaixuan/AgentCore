@@ -5,6 +5,7 @@ import { SubmissionStatus } from "@/app/api/__generated__/models/submissionStatu
 import type { StoreSubmission } from "@/app/api/__generated__/models/storeSubmission";
 import { toast } from "@/components/molecules/Toast/use-toast";
 import { getApprovedMarketplaceUrl } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { buildEditPayload, type EditPayload } from "../../helpers";
 
@@ -23,6 +24,7 @@ export function useSubmissionItem({
   onDelete,
   creatorUsername,
 }: Args) {
+  const { t, locale } = useTranslation();
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -39,7 +41,7 @@ export function useSubmissionItem({
   }
 
   function handleEdit() {
-    onEdit(buildEditPayload(submission));
+    onEdit(buildEditPayload(submission, locale));
   }
 
   async function handleConfirmDelete() {
@@ -50,7 +52,7 @@ export function useSubmissionItem({
     } catch (err) {
       Sentry.captureException(err);
       toast({
-        title: "Couldn't delete submission",
+        title: t("Couldn't delete submission", "无法删除提交"),
         description: err instanceof Error ? err.message : undefined,
         variant: "destructive",
       });

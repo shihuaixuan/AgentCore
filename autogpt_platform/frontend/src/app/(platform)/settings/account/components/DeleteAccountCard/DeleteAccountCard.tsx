@@ -41,8 +41,10 @@ export function DeleteAccountCard({ index = 0 }: Props) {
             {t("Delete account", "删除账户")}
           </Text>
           <Text variant="small" as="span" tone="muted">
-            Close your account, disconnect your apps and cancel your plan.
-            Everything in it is erased after 14 days.
+            {t(
+              "Close your account, disconnect your apps and cancel your plan. Everything in it is erased after 14 days.",
+              "关闭账户、断开应用连接并取消套餐。账户中的所有内容将在 14 天后清除。",
+            )}
           </Text>
         </div>
 

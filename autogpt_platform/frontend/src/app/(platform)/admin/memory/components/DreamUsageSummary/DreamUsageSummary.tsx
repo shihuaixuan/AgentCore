@@ -20,7 +20,10 @@ export function DreamUsageSummary({ usage }: Props) {
         className="rounded-md border border-dashed bg-surface p-4 text-center text-body text-foreground-tertiary"
         data-testid="dream-usage-empty"
       >
-        {t("No token usage was recorded for this dream pass.", "此次记忆整理没有记录令牌使用量。")}
+        {t(
+          "No token usage was recorded for this dream pass.",
+          "此次记忆整理没有记录令牌使用量。",
+        )}
       </div>
     );
   }
@@ -42,7 +45,7 @@ export function DreamUsageSummary({ usage }: Props) {
             <Icon icon={Coins01Icon} size={14} />
           </span>
           <Text variant="small-medium" as="span">
-            total: {formatCost(usage.total_cost_usd)}
+            {t("total:", "总计：")} {formatCost(usage.total_cost_usd)}
           </Text>
           {discount > 0 ? (
             <Badge variant="success" size="small">
@@ -58,11 +61,21 @@ export function DreamUsageSummary({ usage }: Props) {
             <tr>
               <th className="px-2 py-1 font-medium">{t("Phase", "阶段")}</th>
               <th className="px-2 py-1 font-medium">{t("Model", "模型")}</th>
-              <th className="px-2 py-1 text-right font-medium">In</th>
-              <th className="px-2 py-1 text-right font-medium">Out</th>
-              <th className="px-2 py-1 text-right font-medium">Cache R</th>
-              <th className="px-2 py-1 text-right font-medium">Cache W</th>
-              <th className="px-2 py-1 text-right font-medium">Cost</th>
+              <th className="px-2 py-1 text-right font-medium">
+                {t("In", "输入")}
+              </th>
+              <th className="px-2 py-1 text-right font-medium">
+                {t("Out", "输出")}
+              </th>
+              <th className="px-2 py-1 text-right font-medium">
+                {t("Cache R", "缓存读取")}
+              </th>
+              <th className="px-2 py-1 text-right font-medium">
+                {t("Cache W", "缓存写入")}
+              </th>
+              <th className="px-2 py-1 text-right font-medium">
+                {t("Cost", "成本")}
+              </th>
             </tr>
           </thead>
           <tbody>

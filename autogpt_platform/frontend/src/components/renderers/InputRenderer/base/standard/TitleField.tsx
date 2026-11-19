@@ -13,14 +13,16 @@ import { cleanUpHandleId, isArrayItem } from "../../helpers";
 import { InputNodeHandle } from "@/app/(platform)/build/components/FlowEditor/handlers/NodeHandle";
 import { useNodeStore } from "@/app/(platform)/build/stores/nodeStore";
 import { getFieldDomId } from "../../field-accessibility";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export default function TitleField(props: TitleFieldProps) {
+  const { locale } = useTranslation();
   const { id, title, required, schema, registry, uiSchema } = props;
   const { nodeId, showHandles } = registry.formContext;
   const uiOptions = getUiOptions(uiSchema);
 
   const isAnyOf = isAnyOfSchema(schema) || isOneOfSchema(schema);
-  const { displayType, colorClass } = getTypeDisplayInfo(schema);
+  const { displayType, colorClass } = getTypeDisplayInfo(schema, locale);
   const description_id = descriptionId(id);
 
   const additional = ADDITIONAL_PROPERTY_FLAG in schema;

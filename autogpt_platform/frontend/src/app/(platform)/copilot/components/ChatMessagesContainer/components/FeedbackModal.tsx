@@ -5,6 +5,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { Input } from "@/components/atoms/Input/Input";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function FeedbackModal({ isOpen, onSubmit, onCancel }: Props) {
+  const { t } = useTranslation();
   const [comment, setComment] = useState("");
 
   function handleSubmit() {
@@ -28,7 +30,7 @@ export function FeedbackModal({ isOpen, onSubmit, onCancel }: Props) {
 
   return (
     <Dialog
-      title="What could have been better?"
+      title={t("What could have been better?", "哪些地方可以做得更好？")}
       controlled={{
         isOpen,
         set: (open) => {
@@ -39,12 +41,18 @@ export function FeedbackModal({ isOpen, onSubmit, onCancel }: Props) {
       <Dialog.Content>
         <div className="mx-auto w-[95%] space-y-4">
           <Text variant="body-tight" as="p" tone="muted">
-            Your feedback helps us improve. Share details below.
+            {t(
+              "Your feedback helps us improve. Share details below.",
+              "你的反馈有助于我们改进。请在下方分享详情。",
+            )}
           </Text>
           <Input
             bare
             type="textarea"
-            placeholder="Tell us what went wrong or could be improved..."
+            placeholder={t(
+              "Tell us what went wrong or could be improved...",
+              "请告诉我们哪里出了问题，或有哪些可以改进的地方…",
+            )}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={4}
@@ -57,14 +65,14 @@ export function FeedbackModal({ isOpen, onSubmit, onCancel }: Props) {
             </Text>
             <div className="flex gap-2">
               <Button variant="outline" size="small" onClick={handleClose}>
-                Cancel
+                {t("Cancel", "取消")}
               </Button>
               <Button
                 size="small"
                 onClick={handleSubmit}
                 disabled={!comment.trim()}
               >
-                Submit feedback
+                {t("Submit feedback", "提交反馈")}
               </Button>
             </div>
           </div>

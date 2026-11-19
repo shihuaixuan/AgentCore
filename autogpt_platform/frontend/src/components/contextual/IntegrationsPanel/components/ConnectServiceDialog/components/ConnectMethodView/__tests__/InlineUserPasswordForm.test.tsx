@@ -11,6 +11,7 @@ vi.mock("@/components/molecules/Toast/use-toast", () => ({
 }));
 
 import { InlineUserPasswordForm } from "../InlineUserPasswordForm";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const CREATE_CREDENTIALS_URL =
   "http://localhost:3000/api/proxy/api/integrations/:provider/credentials";
@@ -42,6 +43,54 @@ function capturePosts(provider: string) {
 }
 
 describe("InlineUserPasswordForm for a login sent to a server the workflow names", () => {
+  it("localizes app-owned name validation without modifying the typed username", async () => {
+    render(
+      <LanguageProvider>
+        <InlineUserPasswordForm
+          provider="smtp"
+          providerName="SMTP"
+          onSuccess={vi.fn()}
+        />
+      </LanguageProvider>,
+    );
+    const name = await screen.findByLabelText("名称");
+    await userEvent.type(name, "Original-name");
+    await userEvent.clear(name);
+    await userEvent.type(screen.getByLabelText("用户名"), "Original-user");
+    expect(await screen.findByText("请输入名称")).toBeDefined();
+    expect(screen.getByLabelText("用户名")).toHaveProperty(
+      "value",
+      "Original-user",
+    );
+  });
+
+  it("uses localized server validation in the inline form without submitting an invalid server", async () => {
+    const posted = capturePosts("smtp");
+    render(
+      <LanguageProvider>
+        <InlineUserPasswordForm
+          provider="smtp"
+          providerName="SMTP"
+          onSuccess={vi.fn()}
+        />
+      </LanguageProvider>,
+    );
+    await userEvent.type(
+      await screen.findByLabelText("服务器"),
+      "smtp.example.com:65536",
+    );
+    expect(
+      await screen.findByText(
+        "请输入有效的服务器地址，例如 smtp.example.com 或 smtp.example.com:587（端口范围为 1-65535）",
+      ),
+    ).toBeDefined();
+    expect(screen.getByRole("button", { name: "连接" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+    expect(posted).not.toHaveBeenCalled();
+  });
+
   it("keeps Connect disabled until the server is filled in", async () => {
     render(
       <InlineUserPasswordForm

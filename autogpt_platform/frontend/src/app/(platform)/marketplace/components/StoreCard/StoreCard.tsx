@@ -12,6 +12,7 @@ import { isLocalStoreMediaUrl } from "@/lib/store-media";
 import { useState } from "react";
 import { AddToLibraryButton } from "../AddToLibraryButton/AddToLibraryButton";
 import { isKey } from "@/lib/keyboard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   agentName: string;
@@ -42,6 +43,7 @@ export function StoreCard({
   agentSlug,
   agentGraphID,
 }: Props) {
+  const { t, locale } = useTranslation();
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -57,7 +59,7 @@ export function StoreCard({
       data-testid="store-card"
       role="button"
       tabIndex={0}
-      aria-label={`${agentName} workflow card`}
+      aria-label={t(`${agentName} workflow card`, `${agentName} 工作流卡片`)}
       onKeyDown={(e) => {
         if (isKey(e, "Enter", " ")) {
           e.preventDefault();
@@ -74,7 +76,7 @@ export function StoreCard({
             <Image
               src={agentImage}
               unoptimized={isLocalStoreMediaUrl(agentImage)}
-              alt={`${agentName} preview image`}
+              alt={t(`${agentName} preview image`, `${agentName} 预览图`)}
               fill
               className="object-cover"
               onLoad={() => setImageLoaded(true)}
@@ -99,13 +101,16 @@ export function StoreCard({
               {avatarSrc && (
                 <AvatarImage
                   src={avatarSrc}
-                  alt={`${creatorName} creator avatar`}
+                  alt={t(
+                    `${creatorName} creator avatar`,
+                    `创作者 ${creatorName} 的头像`,
+                  )}
                 />
               )}
               <AvatarFallback size={20}>{creatorName}</AvatarFallback>
             </Avatar>
             <span className="truncate text-body-sm leading-inherit text-foreground-tertiary">
-              by {creatorName}
+              {t(`by ${creatorName}`, `创建者：${creatorName}`)}
             </span>
           </div>
         )}
@@ -116,12 +121,20 @@ export function StoreCard({
 
       <div className="mt-auto flex w-full items-center pt-3">
         <span className="flex items-center gap-2 text-caption text-foreground-tertiary">
-          {runs === 0 ? "No runs" : `${runs.toLocaleString()} runs`}
+          {runs === 0
+            ? t("No runs", "尚未运行")
+            : t(
+                `${runs.toLocaleString(locale)} runs`,
+                `运行 ${runs.toLocaleString(locale)} 次`,
+              )}
           {rating >= 1 && (
             <span
               className="inline-flex items-center gap-1 text-foreground-base"
               role="img"
-              aria-label={`Rating: ${rating.toFixed(1)} out of 5 stars`}
+              aria-label={t(
+                `Rating: ${rating.toFixed(1)} out of 5 stars`,
+                `评分：${rating.toFixed(1)} / 5 星`,
+              )}
             >
               <span className="font-medium text-foreground-body">
                 {rating.toFixed(1)}
@@ -130,7 +143,7 @@ export function StoreCard({
                 <Icon
                   key={star}
                   icon={star <= rating ? StarFilledGlyph : StarGlyph}
-                  aria-label="Icon"
+                  aria-hidden
                   className="size-4"
                 />
               ))}

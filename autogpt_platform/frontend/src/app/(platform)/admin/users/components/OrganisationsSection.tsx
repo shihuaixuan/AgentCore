@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function OrganisationsSection({ userId }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const {
     data: organisations,
     isLoading,
@@ -25,7 +25,10 @@ export function OrganisationsSection({ userId }: Props) {
   return (
     <AdminSection
       title={t("Organisations", "组织")}
-      description={t("Every account has a personal organisation.", "每个账户都有一个个人组织。")}
+      description={t(
+        "Every account has a personal organisation.",
+        "每个账户都有一个个人组织。",
+      )}
     >
       {isLoading ? (
         <div className="flex flex-col gap-2" aria-busy="true">
@@ -75,7 +78,7 @@ export function OrganisationsSection({ userId }: Props) {
                 ) : null}
               </div>
               <Text variant="small" as="span" className="shrink-0" tone="muted">
-                {formatMonth(new Date(organisation.created_at))}
+                {formatMonth(new Date(organisation.created_at), locale)}
               </Text>
             </li>
           ))}

@@ -85,7 +85,7 @@ export function ProfileHeader({
         <Avatar className="h-[112px] w-[112px] shadow-[0_8px_28px_-12px_rgba(15,15,20,0.18)] ring-2 ring-surface">
           <AvatarImage
             src={avatarUrl}
-            alt={name || "Profile"}
+            alt={name || t("Profile", "个人资料")}
             width={224}
             height={224}
           />
@@ -154,7 +154,7 @@ export function ProfileHeader({
             id="profile-name"
             label={t("Display name", "显示名称")}
             hideLabel
-            placeholder="Jane Doe"
+            placeholder={t("Jane Doe", "张三")}
             value={name}
             error={errors.name}
             onChange={(e) => onChange("name", e.target.value)}
@@ -170,7 +170,7 @@ export function ProfileHeader({
               {t("Handle", "用户名")}
             </Text>
             <Text variant="small" as="span" tone="subtle">
-              agpt.co/@your-handle
+              {t("agpt.co/@your-handle", "agpt.co/@你的用户名")}
             </Text>
           </div>
           <Input

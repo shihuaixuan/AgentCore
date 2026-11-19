@@ -11,7 +11,7 @@ describe("Microsoft callback recovery", () => {
     const html = await response.text();
     expect(html).toContain("flow-state");
     expect(html).toContain("AADSTS650052");
-    expect(html).toContain("enable Work IQ");
+    expect(html).toContain("启用 Work IQ");
     expect(html).not.toContain("private-upstream-text");
     expect(response.headers.get("cache-control")).toBe("no-store");
   });
@@ -23,7 +23,7 @@ describe("Microsoft callback recovery", () => {
       ),
     );
     const html = await response.text();
-    expect(html).toContain("Approved for your organization");
+    expect(html).toContain("已获得组织授权");
     expect(html).not.toContain("oauth_popup_result");
   });
 
@@ -35,9 +35,9 @@ describe("Microsoft callback recovery", () => {
       ),
     );
     const html = await response.text();
-    expect(html).not.toContain("Approved for your organization");
+    expect(html).not.toContain("已获得组织授权");
     expect(html).toContain("AADSTS65004");
-    expect(html).toContain("Microsoft access was declined");
+    expect(html).toContain("Microsoft 访问请求被拒绝");
     expect(html).not.toContain("private-upstream-text");
     expect(html).not.toContain("oauth_popup_result");
   });

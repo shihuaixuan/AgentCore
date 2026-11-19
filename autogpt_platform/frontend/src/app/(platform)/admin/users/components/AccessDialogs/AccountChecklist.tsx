@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/atoms/Checkbox/Checkbox";
 import { cn } from "@/lib/utils";
 import { Alert02Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 import type { BanAccountResult } from "../../useBanAccounts";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export interface ChecklistAccount {
   id: string;
@@ -31,6 +32,7 @@ export function AccountChecklist({
   results,
   maxHeightClassName,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <ul
       className={cn(
@@ -47,7 +49,7 @@ export function AccountChecklist({
               checked={!account.banned && ticked.has(account.id)}
               disabled={account.banned}
               onCheckedChange={() => onToggle(account.id)}
-              aria-label={`Ban ${account.email}`}
+              aria-label={t(`Ban ${account.email}`, `封禁 ${account.email}`)}
             />
             <label
               htmlFor={`ban-${account.id}`}
@@ -72,12 +74,16 @@ export function AccountChecklist({
             </label>
             {account.banned ? (
               <Text variant="small" as="span" tone="muted">
-                already banned
+                {t("already banned", "已封禁")}
               </Text>
             ) : (
               account.badges.map((badge) => (
                 <Badge key={badge} variant="info" size="small">
-                  {badge}
+                  {badge === "This account"
+                    ? t("This account", "此账户")
+                    : badge === "Domain"
+                      ? t("Domain", "域名")
+                      : badge}
                 </Badge>
               ))
             )}
@@ -90,12 +96,13 @@ export function AccountChecklist({
 }
 
 function ResultMark({ result }: { result: BanAccountResult }) {
+  const { t } = useTranslation();
   if (result.ok) {
     return (
       <span className="flex items-center gap-1 text-success-foreground">
         <Icon icon={Tick01Icon} size={14} />
         <Text variant="small" as="span" tone="inherit">
-          banned
+          {t("banned", "已封禁")}
         </Text>
       </span>
     );
@@ -104,7 +111,7 @@ function ResultMark({ result }: { result: BanAccountResult }) {
     <span className="flex items-center gap-1 text-error-foreground">
       <Icon icon={Alert02Icon} size={14} />
       <Text variant="small" as="span" tone="inherit">
-        {result.error ?? "failed"}
+        {result.error ?? t("failed", "失败")}
       </Text>
     </span>
   );

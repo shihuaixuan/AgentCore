@@ -34,14 +34,18 @@ export function MarketplaceBanners({
                 {t("Update available", "有可用更新")}
               </Text>
               <Text variant="body" tone="body">
-                You should update your workflow in order to get the latest /
-                best results
+                {t(
+                  "You should update your workflow in order to get the latest / best results",
+                  "建议更新工作流，以获得最新、最佳的结果",
+                )}
               </Text>
             </div>
             {onUpdate && (
               <div className="flex justify-start">
                 <Button size="small" onClick={onUpdate} disabled={isUpdating}>
-                  {isUpdating ? "Updating..." : "Update workflow"}
+                  {isUpdating
+                    ? t("Updating...", "正在更新…")
+                    : t("Update workflow", "更新工作流")}
                 </Button>
               </div>
             )}
@@ -62,8 +66,10 @@ export function MarketplaceBanners({
                 {t("Unpublished changes", "未发布的更改")}
               </Text>
               <Text variant="body" tone="body">
-                You&apos;ve made changes to this workflow that aren&apos;t
-                published yet. Would you like to publish the latest version?
+                {t(
+                  "You've made changes to this workflow that aren't published yet. Would you like to publish the latest version?",
+                  "此工作流有尚未发布的更改。是否发布最新版本？",
+                )}
               </Text>
             </div>
             {onPublish && (

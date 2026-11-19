@@ -10,6 +10,7 @@ import {
   ContentMessage,
 } from "../../../../components/ToolAccordion/AccordionContent";
 import { deriveFieldTitle } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   output: BlockDetailsResponse;
@@ -24,6 +25,7 @@ function SchemaFieldList({
   properties: Record<string, unknown>;
   required?: string[];
 }) {
+  const { t } = useTranslation();
   const entries = Object.entries(properties);
   if (entries.length === 0) return null;
 
@@ -40,7 +42,7 @@ function SchemaFieldList({
               ? field.title
               : deriveFieldTitle(name);
           const fieldType =
-            typeof field?.type === "string" ? field.type : "unknown";
+            typeof field?.type === "string" ? field.type : t("unknown", "未知");
           const description =
             typeof field?.description === "string"
               ? field.description
@@ -53,7 +55,7 @@ function SchemaFieldList({
                 <div className="flex gap-1">
                   <ContentBadge>{fieldType}</ContentBadge>
                   {requiredSet.has(name) && (
-                    <ContentBadge>Required</ContentBadge>
+                    <ContentBadge>{t("Required", "必填")}</ContentBadge>
                   )}
                 </div>
               </div>
@@ -71,6 +73,7 @@ function SchemaFieldList({
 }
 
 export function BlockDetailsCard({ output }: Props) {
+  const { t } = useTranslation();
   const inputs = output.block.inputs as {
     properties?: Record<string, unknown>;
     required?: string[];
@@ -86,7 +89,7 @@ export function BlockDetailsCard({ output }: Props) {
 
       {inputs?.properties && Object.keys(inputs.properties).length > 0 && (
         <SchemaFieldList
-          title="Inputs"
+          title={t("Inputs", "输入")}
           properties={inputs.properties}
           required={inputs.required}
         />
@@ -94,7 +97,7 @@ export function BlockDetailsCard({ output }: Props) {
 
       {outputs?.properties && Object.keys(outputs.properties).length > 0 && (
         <SchemaFieldList
-          title="Outputs"
+          title={t("Outputs", "输出")}
           properties={outputs.properties}
           required={outputs.required}
         />

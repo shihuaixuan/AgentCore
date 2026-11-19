@@ -43,8 +43,10 @@ export function IntegrationIcons({ expertName, providers }: Props) {
               </span>
             </TooltipTrigger>
             <TooltipContent>
-              {expertName} has access to your {serviceLabelFromIcon(provider)}{" "}
-              account
+              {t(
+                `${expertName} has access to your ${serviceLabelFromIcon(provider)} account`,
+                `${expertName} 可以访问你的 ${serviceLabelFromIcon(provider)} 账户`,
+              )}
             </TooltipContent>
           </Tooltip>
         </li>
@@ -59,7 +61,7 @@ export function IntegrationIcons({ expertName, providers }: Props) {
                 tone="emphasis"
                 className="cursor-default whitespace-nowrap"
               >
-                +{hidden.length} more
+                {t(`+${hidden.length} more`, `另有 ${hidden.length} 项`)}
                 <span className="sr-only">: {hiddenNames}</span>
               </Text>
             </TooltipTrigger>

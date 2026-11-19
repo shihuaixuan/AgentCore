@@ -133,11 +133,14 @@ export function isErrorOutput(o: FolderToolOutput): o is ErrorOutput {
   return o.type === "error";
 }
 
-export function getAnimationText(part: {
-  type: string;
-  state: ToolUIPart["state"];
-  output?: unknown;
-}): string {
+export function getAnimationText(
+  part: {
+    type: string;
+    state: ToolUIPart["state"];
+    output?: unknown;
+  },
+  t = (english: string, _chinese: string) => english,
+): string {
   const toolName = part.type.replace(/^tool-/, "");
 
   switch (part.state) {
@@ -145,30 +148,31 @@ export function getAnimationText(part: {
     case "input-available": {
       switch (toolName) {
         case "create_folder":
-          return "Creating folder…";
+          return t("Creating folder…", "正在创建文件夹…");
         case "list_folders":
-          return "Loading folders…";
+          return t("Loading folders…", "正在加载文件夹…");
         case "update_folder":
-          return "Updating folder…";
+          return t("Updating folder…", "正在更新文件夹…");
         case "move_folder":
-          return "Moving folder…";
+          return t("Moving folder…", "正在移动文件夹…");
         case "delete_folder":
-          return "Deleting folder…";
+          return t("Deleting folder…", "正在删除文件夹…");
         case "move_agents_to_folder":
-          return "Moving workflows…";
+          return t("Moving workflows…", "正在移动工作流…");
         default:
-          return "Managing folders…";
+          return t("Managing folders…", "正在管理文件夹…");
       }
     }
     case "output-available": {
       const output = getFolderToolOutput(part);
-      if (!output) return "Done";
-      if (isErrorOutput(output)) return "Folder operation failed";
+      if (!output) return t("Done", "已完成");
+      if (isErrorOutput(output))
+        return t("Folder operation failed", "文件夹操作失败");
       return output.message;
     }
     case "output-error":
-      return "Folder operation failed";
+      return t("Folder operation failed", "文件夹操作失败");
     default:
-      return "Managing folders…";
+      return t("Managing folders…", "正在管理文件夹…");
   }
 }

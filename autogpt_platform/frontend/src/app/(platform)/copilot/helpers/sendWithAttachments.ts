@@ -1,6 +1,7 @@
 import { isPaywallError } from "@/components/contextual/PaywallToast/helpers";
 import { toast } from "@/components/molecules/Toast/use-toast";
 import { uploadFileDirect } from "@/lib/direct-upload";
+import type { Locale } from "@/lib/i18n/locale";
 import type { FileUIPart, UIMessage } from "ai";
 import {
   useCopilotStreamStore,
@@ -39,6 +40,7 @@ interface SendArgs {
   sessionId: string;
   message: OutgoingMessage;
   sendMessage: SendMessageFn;
+  locale?: Locale;
   /** Awaited once the uploads are done and before the send: `true` sends,
    *  `false` drops the message. The placeholder shows the whole time. */
   waitUntilReady?: () => Promise<boolean>;
@@ -50,13 +52,19 @@ export function hasAttachments(message: OutgoingMessage): boolean {
 
 /** Backstop for the composer's own caps; toasts and returns false when the
  *  message cannot go out. */
-export function validateAttachments(message: OutgoingMessage): boolean {
+export function validateAttachments(
+  message: OutgoingMessage,
+  locale: Locale = "en",
+): boolean {
   // Workspace references count too — uploaded or not, every attachment
   // becomes one `file_ids` entry on the request the backend bounds.
   if (message.files.length + message.parts.length > MAX_ATTACHMENTS) {
     toast({
-      title: "Too many attachments",
-      description: `You can attach up to ${MAX_ATTACHMENTS} attachments per message.`,
+      title: locale === "zh-CN" ? "附件过多" : "Too many attachments",
+      description:
+        locale === "zh-CN"
+          ? `每条消息最多可添加 ${MAX_ATTACHMENTS} 个附件。`
+          : `You can attach up to ${MAX_ATTACHMENTS} attachments per message.`,
       variant: "destructive",
     });
     return false;
@@ -64,8 +72,11 @@ export function validateAttachments(message: OutgoingMessage): boolean {
   const oversized = message.files.filter((f) => f.size > MAX_FILE_SIZE_BYTES);
   if (oversized.length > 0) {
     toast({
-      title: "File too large",
-      description: `${oversized[0].name} exceeds the 100 MB limit.`,
+      title: locale === "zh-CN" ? "文件过大" : "File too large",
+      description:
+        locale === "zh-CN"
+          ? `${oversized[0].name} 超过 100 MB 限制。`
+          : `${oversized[0].name} exceeds the 100 MB limit.`,
       variant: "destructive",
     });
     return false;
@@ -83,6 +94,7 @@ export async function sendWithAttachments({
   message,
   sendMessage,
   waitUntilReady,
+  locale = "en",
 }: SendArgs) {
   const { text, files, parts, metadata } = message;
   // The per-click UUID that becomes the backend's ``ChatMessage.id``
@@ -101,22 +113,27 @@ export async function sendWithAttachments({
   // until the uploads land and the real message takes the placeholder's
   // spot. The slot is set here because this is the one path every send with
   // files goes through, including the flush after session creation.
-  const pending = describePendingUpload(message);
+  const pending = describePendingUpload(message, locale);
   useCopilotStreamStore.getState().setPendingUploadSend(sessionId, pending);
   let send: Promise<void> | undefined;
   try {
-    const uploaded = await uploadFiles(files, sessionId);
+    const uploaded = await uploadFiles(files, sessionId, locale);
     let sentParts = [...parts, ...buildFileParts(uploaded)];
     if (files.length > 0 && uploaded.length === 0) {
       toast({
-        title: "File upload failed",
-        description: "Could not upload any files. Please try again.",
+        title: locale === "zh-CN" ? "文件上传失败" : "File upload failed",
+        description:
+          locale === "zh-CN"
+            ? "无法上传任何文件，请重试。"
+            : "Could not upload any files. Please try again.",
         variant: "destructive",
       });
       // The workspace references didn't fail to upload (they need no upload),
       // so don't discard them just because the local uploads failed.
       if (parts.length === 0) {
-        throw new Error("All file uploads failed");
+        throw new Error(
+          locale === "zh-CN" ? "所有文件均上传失败" : "All file uploads failed",
+        );
       }
       sentParts = parts;
     }
@@ -134,12 +151,13 @@ export async function sendWithAttachments({
 
 export function describePendingUpload(
   message: OutgoingMessage,
+  locale: Locale = "en",
 ): PendingUploadSend {
   const stored: PendingUploadAttachment[] = message.parts.map((part) =>
     isFolderPart(part)
       ? { name: part.data.name, mediaType: "folder", isUploading: false }
       : {
-          name: part.filename ?? "file",
+          name: part.filename ?? (locale === "zh-CN" ? "文件" : "file"),
           mediaType: part.mediaType,
           isUploading: false,
           url: part.url,
@@ -158,11 +176,12 @@ export function describePendingUpload(
 async function uploadFiles(
   files: File[],
   sessionId: string,
+  locale: Locale,
 ): Promise<UploadedFile[]> {
   const results = await Promise.allSettled(
     files.map(async (file) => {
       try {
-        const data = await uploadFileDirect(file, sessionId);
+        const data = await uploadFileDirect(file, sessionId, locale);
         if (!data.file_id) throw new Error("No file_id returned");
         return {
           file_id: data.file_id,
@@ -174,7 +193,7 @@ async function uploadFiles(
         if (isPaywallError(err)) throw err;
         console.error("File upload failed:", err);
         toast({
-          title: "File upload failed",
+          title: locale === "zh-CN" ? "文件上传失败" : "File upload failed",
           description: file.name,
           variant: "destructive",
         });

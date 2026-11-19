@@ -6,12 +6,14 @@ import { toast } from "@/components/molecules/Toast/use-toast";
 import { useState } from "react";
 import { Copy02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   text: string;
 }
 
 export function CopyButton({ text }: Props) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   if (!text.trim()) return null;
@@ -23,9 +25,11 @@ export function CopyButton({ text }: Props) {
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast({
-        title: "Failed to copy",
-        description:
+        title: t("Failed to copy", "复制失败"),
+        description: t(
           "Your browser may not support clipboard access, or something went wrong.",
+          "你的浏览器可能不支持剪贴板访问，或发生了错误。",
+        ),
         variant: "destructive",
       });
     }
@@ -33,7 +37,7 @@ export function CopyButton({ text }: Props) {
 
   return (
     <MessageAction
-      tooltip={copied ? "Copied!" : "Copy"}
+      tooltip={copied ? t("Copied!", "已复制！") : t("Copy", "复制")}
       onClick={handleCopy}
       variant="ghost"
       size="icon-sm"

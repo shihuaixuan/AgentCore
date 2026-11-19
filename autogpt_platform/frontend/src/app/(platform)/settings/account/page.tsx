@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { useCanDeleteAccount } from "@/components/organisms/DeleteAccountFlow/useCanDeleteAccount";
@@ -19,9 +20,10 @@ import { TimezoneCard } from "./components/TimezoneCard/TimezoneCard";
 import { usePreferencesPage } from "./usePreferencesPage";
 
 export default function SettingsPreferencesPage() {
+  const { t } = useTranslation();
   useEffect(() => {
-    document.title = "Account – AutoGPT Platform";
-  }, []);
+    document.title = t("Account – AutoGPT Platform", "账户 – AutoGPT 平台");
+  }, [t]);
 
   const {
     user,
@@ -49,7 +51,7 @@ export default function SettingsPreferencesPage() {
   if (isError) {
     return (
       <ErrorCard
-        context="settings"
+        context={t("settings", "设置")}
         responseError={
           error ? { detail: (error as { detail?: string }).detail } : undefined
         }

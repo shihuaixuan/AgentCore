@@ -1,6 +1,15 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 const mockListExpertTemplates = vi.hoisted(() => vi.fn());
+const metadataLocale = vi.hoisted(() => ({ current: "en" }));
+
+vi.mock("@/lib/i18n/server", () => ({
+  getServerTranslation: async () => ({
+    locale: metadataLocale.current,
+    t: (english: string, chinese: string) =>
+      metadataLocale.current === "zh-CN" ? chinese : english,
+  }),
+}));
 
 vi.mock(
   "@/app/api/__generated__/endpoints/experts/experts",
@@ -30,6 +39,7 @@ const maria = {
 describe("generateMetadata", () => {
   beforeEach(() => {
     mockListExpertTemplates.mockReset();
+    metadataLocale.current = "en";
   });
 
   test("previews the expert's name, role and tagline", async () => {
@@ -81,5 +91,50 @@ describe("generateMetadata", () => {
     });
 
     expect(metadata.title).toBe("Expert - AutoGPT Marketplace");
+  });
+
+  test("localizes Chinese metadata and known roles without translating expert content", async () => {
+    metadataLocale.current = "zh-CN";
+    mockListExpertTemplates.mockResolvedValue({
+      data: [{ ...maria, role: "SEO & Content" }],
+    });
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ expertId: maria.id }),
+    });
+    expect(metadata.title).toBe("Maria，SEO 内容经理 · AI 专家 - AutoGPT 市场");
+    expect(metadata.openGraph).toMatchObject({
+      description: maria.tagline,
+      type: "profile",
+    });
+  });
+
+  test.each([
+    { role: "Custom Strategist", job_title: null, title: "Custom Strategist" },
+    {
+      role: "SEO & Content",
+      job_title: "Original Job Title",
+      title: "Original Job Title",
+    },
+  ])(
+    "preserves custom roles and job titles in Chinese metadata",
+    async ({ role, job_title, title }) => {
+      metadataLocale.current = "zh-CN";
+      mockListExpertTemplates.mockResolvedValue({
+        data: [{ ...maria, role, job_title }],
+      });
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ expertId: maria.id }),
+      });
+      expect(metadata.title).toBe(`Maria，${title} · AI 专家 - AutoGPT 市场`);
+    },
+  );
+
+  test("localizes the Chinese metadata fallback for an unknown expert", async () => {
+    metadataLocale.current = "zh-CN";
+    mockListExpertTemplates.mockResolvedValue({ data: [] });
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ expertId: "nobody" }),
+    });
+    expect(metadata.title).toBe("专家 - AutoGPT 市场");
   });
 });

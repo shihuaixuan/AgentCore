@@ -38,7 +38,7 @@ export function ExpertOverview({
   isActivityError,
   onChat,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const overview = useExpertOverview(expert.id, activity);
 
   return (
@@ -56,7 +56,7 @@ export function ExpertOverview({
           value={activity ? overview.conversations.current : null}
           detail={
             activity
-              ? formatDelta(overview.conversations.delta)
+              ? formatDelta(overview.conversations.delta, locale)
               : t("Last 30 days", "最近 30 天")
           }
           isLoading={isActivityLoading}
@@ -67,7 +67,7 @@ export function ExpertOverview({
           value={activity ? overview.runs.current : null}
           detail={
             activity
-              ? formatDelta(overview.runs.delta)
+              ? formatDelta(overview.runs.delta, locale)
               : t("Last 30 days", "最近 30 天")
           }
           isLoading={isActivityLoading}
@@ -93,7 +93,10 @@ export function ExpertOverview({
             <Skeleton className="h-56 w-full rounded-lg" />
           ) : isActivityError ? (
             <Text variant="small" tone="muted">
-              Couldn&apos;t load the last 30 days.
+              {t(
+                "Couldn't load the last 30 days.",
+                "无法加载最近 30 天的数据。",
+              )}
             </Text>
           ) : overview.hasActivity ? (
             <ActivityChart days={overview.chartDays} />
@@ -112,7 +115,10 @@ export function ExpertOverview({
                 </span>,
               ]}
               title={t("Nothing to chart yet", "暂无可绘制的数据")}
-              description={`Once ${expert.name} starts chatting and running workflows, each day shows up here.`}
+              description={t(
+                `Once ${expert.name} starts chatting and running workflows, each day shows up here.`,
+                `${expert.name} 开始聊天和运行工作流后，每天的活动会显示在这里。`,
+              )}
             />
           )}
         </OverviewCard>

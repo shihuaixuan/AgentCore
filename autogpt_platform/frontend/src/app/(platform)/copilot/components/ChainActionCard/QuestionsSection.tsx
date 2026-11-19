@@ -18,6 +18,7 @@ import type { QuestionRequest } from "./helpers";
 import { QuestionAnswerField } from "./QuestionAnswerField";
 import { QuestionMultiAnswerField } from "./QuestionMultiAnswerField";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   requests: QuestionRequest[];
@@ -30,6 +31,7 @@ interface Props {
  *  moves between questions, and the round action button advances and, on the
  *  last step, sends every answer as one message. */
 export function QuestionsSection({ requests, isReady, onProceed }: Props) {
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
   const sectionId = useId();
   // Keyed by position, not keyword: keywords are unique only within a request,
@@ -65,7 +67,7 @@ export function QuestionsSection({ requests, isReady, onProceed }: Props) {
         <span className="flex items-center gap-2.5">
           <Icon icon={Message01Icon} size={18} tone="subtle" />
           <Text variant="body-medium-tight" as="span" tone="primary">
-            Answer a few questions
+            {t("Answer a few questions", "回答几个问题")}
           </Text>
         </span>
         <button
@@ -73,7 +75,7 @@ export function QuestionsSection({ requests, isReady, onProceed }: Props) {
           onClick={() => requests.forEach((req) => req.onSkip())}
           className="rounded-full px-2 py-0.5 text-caption text-foreground-subtle transition-colors hover:bg-surface-hover hover:text-foreground-secondary"
         >
-          Skip
+          {t("Skip", "跳过")}
         </button>
       </div>
 
@@ -120,7 +122,7 @@ export function QuestionsSection({ requests, isReady, onProceed }: Props) {
         <span className="flex items-center gap-2">
           <button
             type="button"
-            aria-label="Previous question"
+            aria-label={t("Previous question", "上一个问题")}
             disabled={current === 0}
             onClick={() => setStep(current - 1)}
             className="flex size-6 items-center justify-center rounded-lg text-foreground-subtle transition-colors enabled:hover:bg-surface-hover enabled:hover:text-foreground-secondary disabled:opacity-35"
@@ -132,7 +134,10 @@ export function QuestionsSection({ requests, isReady, onProceed }: Props) {
               <button
                 key={questionId}
                 type="button"
-                aria-label={`Go to question ${i + 1}`}
+                aria-label={t(
+                  `Go to question ${i + 1}`,
+                  `转到第 ${i + 1} 个问题`,
+                )}
                 aria-current={i === current ? "step" : undefined}
                 onClick={() => setStep(i)}
                 className={
@@ -148,7 +153,7 @@ export function QuestionsSection({ requests, isReady, onProceed }: Props) {
           </span>
           <button
             type="button"
-            aria-label="Next question"
+            aria-label={t("Next question", "下一个问题")}
             disabled={isLast}
             onClick={() => setStep(current + 1)}
             className="flex size-6 items-center justify-center rounded-lg text-foreground-subtle transition-colors enabled:hover:bg-surface-hover enabled:hover:text-foreground-secondary disabled:opacity-35"
@@ -159,7 +164,11 @@ export function QuestionsSection({ requests, isReady, onProceed }: Props) {
 
         <button
           type="button"
-          aria-label={isLast ? "Send answers" : "Next question"}
+          aria-label={
+            isLast
+              ? t("Send answers", "发送答案")
+              : t("Next question", "下一个问题")
+          }
           disabled={!actionEnabled}
           onClick={handleAction}
           className={

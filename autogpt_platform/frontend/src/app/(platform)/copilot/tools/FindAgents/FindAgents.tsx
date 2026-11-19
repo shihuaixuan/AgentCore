@@ -1,6 +1,7 @@
 "use client";
 
 import { ToolUIPart } from "ai";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { MorphingTextAnimation } from "../../components/MorphingTextAnimation/MorphingTextAnimation";
 import {
   ContentBadge,
@@ -36,7 +37,8 @@ interface Props {
 }
 
 export function FindAgentsTool({ part }: Props) {
-  const text = getAnimationText(part);
+  const { t } = useTranslation();
+  const text = getAnimationText(part, t);
   const output = getFindAgentsOutput(part);
   const isStreaming =
     part.state === "input-streaming" || part.state === "input-available";
@@ -62,13 +64,16 @@ export function FindAgentsTool({ part }: Props) {
   const { source } = getSourceLabelFromToolType(part.type);
   const scopeText =
     source === "library"
-      ? "in your library"
+      ? t("in your library", "在你的工作流库中")
       : source === "marketplace"
-        ? "in marketplace"
+        ? t("in marketplace", "在市场中")
         : "";
-  const accordionDescription = `Found ${totalCount}${scopeText ? ` ${scopeText}` : ""}${
-    query ? ` for "${query}"` : ""
-  }`;
+  const accordionDescription = t(
+    `Found ${totalCount}${scopeText ? ` ${scopeText}` : ""}${
+      query ? ` for "${query}"` : ""
+    }`,
+    `${scopeText}找到 ${totalCount} 个工作流${query ? `，搜索：“${query}”` : ""}`,
+  );
 
   return (
     <div className="py-2">
@@ -87,7 +92,7 @@ export function FindAgentsTool({ part }: Props) {
       {hasAgents && agentsFoundOutput && (
         <ToolAccordion
           icon={<AccordionIcon toolType={part.type} />}
-          title="Workflow results"
+          title={t("Workflow results", "工作流结果")}
           description={accordionDescription}
         >
           <ContentGrid className="sm:grid-cols-2">
@@ -95,15 +100,19 @@ export function FindAgentsTool({ part }: Props) {
               const href = getAgentHref(agent);
               const agentSource =
                 agent.source === "library"
-                  ? "Library"
+                  ? t("Library", "工作流库")
                   : agent.source === "marketplace"
-                    ? "Marketplace"
+                    ? t("Marketplace", "市场")
                     : null;
               return (
                 <ContentCard key={agent.id}>
                   <ContentCardHeader
                     action={
-                      href ? <ContentLink href={href}>Open</ContentLink> : null
+                      href ? (
+                        <ContentLink href={href}>
+                          {t("Open", "打开")}
+                        </ContentLink>
+                      ) : null
                     }
                   >
                     <div className="flex min-w-0 items-center gap-2">

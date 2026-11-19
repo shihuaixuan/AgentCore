@@ -9,6 +9,7 @@ import {
   reportCorruptedToolOutput,
 } from "../../helpers/toolOutput";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type Props = {
   part: ToolUIPart;
@@ -42,6 +43,7 @@ function parseError(raw: unknown): string | null {
 }
 
 export function ConnectIntegrationTool({ part }: Props) {
+  const { t } = useTranslation();
   const isStreaming =
     part.state === "input-streaming" || part.state === "input-available";
 
@@ -63,7 +65,7 @@ export function ConnectIntegrationTool({ part }: Props) {
   const errorMessage =
     part.state === "output-error"
       ? (parseError((part as { output?: unknown }).output) ??
-        "Failed to connect integration")
+        t("Failed to connect integration", "连接集成失败"))
       : null;
 
   const rawProvider =
@@ -72,15 +74,18 @@ export function ConnectIntegrationTool({ part }: Props) {
     output?.setup_info?.agent_name ??
     // Sanitize LLM-controlled provider slug: trim and cap at 64 chars to
     // prevent runaway text in the DOM.
-    (rawProvider ? rawProvider.trim().slice(0, 64) : "integration");
+    (rawProvider ? rawProvider.trim().slice(0, 64) : t("integration", "集成"));
 
   const label = isStreaming
-    ? `Connecting ${providerName}…`
+    ? t(`Connecting ${providerName}…`, `正在连接 ${providerName}…`)
     : isError
-      ? `Failed to connect ${providerName}`
+      ? t(`Failed to connect ${providerName}`, `连接 ${providerName} 失败`)
       : output
-        ? `Connect ${output.setup_info?.agent_name ?? providerName}`
-        : `Connect ${providerName}`;
+        ? t(
+            `Connect ${output.setup_info?.agent_name ?? providerName}`,
+            `连接 ${output.setup_info?.agent_name ?? providerName}`,
+          )
+        : t(`Connect ${providerName}`, `连接 ${providerName}`);
 
   return (
     <div className="py-2">
@@ -99,8 +104,10 @@ export function ConnectIntegrationTool({ part }: Props) {
 
       {isCorrupted && (
         <Text variant="body-tight" tone="error" className="mt-1">
-          The sign-in card data arrived corrupted and can&apos;t be shown. Ask
-          your expert to retry connecting {providerName}.
+          {t(
+            `The sign-in card data arrived corrupted and can't be shown. Ask your expert to retry connecting ${providerName}.`,
+            `收到的登录卡片数据已损坏，无法显示。请让你的专家重新尝试连接 ${providerName}。`,
+          )}
         </Text>
       )}
 
@@ -108,7 +115,10 @@ export function ConnectIntegrationTool({ part }: Props) {
         <div className="mt-2">
           <SetupRequirementsCard
             output={output}
-            credentialsLabel={`${output.setup_info?.agent_name ?? providerName} credentials`}
+            credentialsLabel={t(
+              `${output.setup_info?.agent_name ?? providerName} credentials`,
+              `${output.setup_info?.agent_name ?? providerName} 凭据`,
+            )}
             retryInstruction="I've connected my account. Please continue."
           />
         </div>

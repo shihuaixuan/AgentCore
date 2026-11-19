@@ -1,5 +1,7 @@
 import { serializeCredentialMention } from "../CredentialMention/helpers";
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
+import type { Locale } from "@/lib/i18n/locale";
+import { CopilotAuthError } from "../../helpers";
 import { filterSystemCredentials } from "@/components/contextual/CredentialsInput/helpers";
 import {
   serviceName,
@@ -63,8 +65,20 @@ export const CARD_SEND_BUTTON_CLASS =
 /** Shared by every path that sends a message. `recovery` is the lowercase
  *  clause telling the user where their text went, e.g. "your message is
  *  back in the composer". */
-export function describeSendFailure(error: unknown, recovery: string) {
-  const reason = error instanceof Error ? error.message.trim() : "";
+export function describeSendFailure(
+  error: unknown,
+  recovery: string,
+  locale: Locale = "en",
+) {
+  const reason =
+    locale === "zh-CN" && error instanceof CopilotAuthError
+      ? "身份验证失败，请重新登录"
+      : error instanceof Error
+        ? error.message.trim()
+        : "";
+  if (locale === "zh-CN") {
+    return reason ? `${reason} — ${recovery}。` : `${recovery}。请重试。`;
+  }
   return reason
     ? `${reason} — ${recovery}.`
     : `${recovery.charAt(0).toUpperCase()}${recovery.slice(1)}. Try again.`;

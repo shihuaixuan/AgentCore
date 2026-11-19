@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/Button/Button";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
 import {
@@ -28,6 +29,7 @@ const STEP_ANIMATION =
   "duration-500 animate-in fade-in slide-in-from-bottom-2 fill-mode-both motion-reduce:animate-none";
 
 export function RaiseFlow() {
+  const { t } = useTranslation();
   const flow = useRaisePage();
   const {
     hasStarted,
@@ -67,7 +69,9 @@ export function RaiseFlow() {
             onClick={startRaising}
             disabled={hasStarted}
           >
-            {hasStarted ? "Setting up expert now" : "Create Expert"}
+            {hasStarted
+              ? t("Setting up expert now", "正在设置专家")
+              : t("Create Expert", "创建专家")}
             {hasStarted ? null : <Icon icon={ArrowRight02Icon} size={14} />}
           </Button>
         </div>
@@ -100,7 +104,7 @@ export function RaiseFlow() {
             role="log"
             aria-live="polite"
             aria-relevant="additions text"
-            aria-label="Expert creation conversation"
+            aria-label={t("Expert creation conversation", "专家创建对话")}
             className="scrollbar-none flex flex-col gap-4 px-4 pt-6 pb-16 sm:px-6 lg:h-full lg:overflow-y-auto lg:px-8"
           >
             {items.map(renderItem)}
@@ -120,7 +124,7 @@ export function RaiseFlow() {
               variant="icon"
               size="icon-sm"
               shape="pill"
-              aria-label="Back"
+              aria-label={t("Back", "返回")}
               className="size-9"
               onClick={goBack}
               disabled={!canGoBack}
@@ -131,7 +135,7 @@ export function RaiseFlow() {
               variant="icon"
               size="icon-sm"
               shape="pill"
-              aria-label="Start over"
+              aria-label={t("Start over", "重新开始")}
               className="size-9"
               onClick={() => setIsRestartOpen(true)}
             >

@@ -6,6 +6,7 @@ import { isKeyIgnoringComposition } from "@/lib/keyboard";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { ConnectToolsPanel } from "./ConnectToolsPanel";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   isOpen: boolean;
@@ -16,6 +17,7 @@ interface Props {
 // first-run walkthrough. Escape belongs to the panel: it steps back out of a
 // provider before it closes anything, so a half-typed key is never lost.
 export function ConnectToolsDialog({ isOpen, onClose }: Props) {
+  const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   const pressStartedOnBackdrop = useRef(false);
 
@@ -82,15 +84,15 @@ export function ConnectToolsDialog({ isOpen, onClose }: Props) {
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Connect your tools"
+        aria-label={t("Connect your tools", "连接你的工具")}
         tabIndex={-1}
         className="w-full max-w-[30rem] overflow-hidden rounded-xl border border-border-base bg-surface shadow-lg outline-none"
       >
         <ConnectToolsPanel
           onBack={onClose}
           onNext={onClose}
-          backLabel="Not now"
-          nextLabel="Done"
+          backLabel={t("Not now", "暂不连接")}
+          nextLabel={t("Done", "完成")}
         />
       </div>
     </div>,

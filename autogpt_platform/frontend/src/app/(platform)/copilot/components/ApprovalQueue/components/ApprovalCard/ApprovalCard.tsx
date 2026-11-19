@@ -20,6 +20,7 @@ import { HeldPassage } from "./HeldPassage";
 import { MoneyBlock } from "./MoneyBlock";
 import { useApprovalFields } from "./useApprovalFields";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export type CardStatus = "idle" | "approving" | "rejecting";
 
@@ -46,8 +47,9 @@ export function ApprovalCard({
   note = null,
   hideActions = false,
 }: Props) {
+  const { t, locale } = useTranslation();
   const fields = useApprovalFields(item);
-  const reason = reasonLine(item) ?? note;
+  const reason = reasonLine(item, locale) ?? note;
   const read = isHeldRead(item);
   const busy = status !== "idle";
 
@@ -85,7 +87,10 @@ export function ApprovalCard({
       >
         {failed && (
           <p role="alert" className="text-body text-error-foreground">
-            Couldn&apos;t send your answer. Nothing ran. Try again.
+            {t(
+              "Couldn't send your answer. Nothing ran. Try again.",
+              "发送答复失败，未执行任何操作。请重试。",
+            )}
           </p>
         )}
         {reason && (
@@ -131,13 +136,18 @@ export function ApprovalActions({
   onReject,
   aside = null,
 }: ActionsProps) {
+  const { t, locale } = useTranslation();
   const read = isHeldRead(item);
   const busy = status !== "idle";
   return (
     <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:flex-wrap">
       <ApproveSplitButton
-        label={read ? `Release to ${item.reader}` : "Approve"}
-        subjectName={ruleSubjectName(item.subject)}
+        label={
+          read
+            ? t(`Release to ${item.reader}`, `向 ${item.reader} 放行`)
+            : t("Approve", "批准")
+        }
+        subjectName={ruleSubjectName(item.subject, locale)}
         expertName={expertName}
         rules={read || item.spend ? [] : item.chatRulesAllowed}
         loading={status === "approving"}
@@ -153,10 +163,10 @@ export function ApprovalActions({
         onClick={onReject}
       >
         {status === "rejecting"
-          ? "Rejecting…"
+          ? t("Rejecting…", "正在拒绝…")
           : read
-            ? "Keep it out"
-            : "Reject"}
+            ? t("Keep it out", "保持屏蔽")
+            : t("Reject", "拒绝")}
       </Button>
       {aside && (
         <div className="col-span-2 flex justify-end sm:ml-auto sm:self-center">

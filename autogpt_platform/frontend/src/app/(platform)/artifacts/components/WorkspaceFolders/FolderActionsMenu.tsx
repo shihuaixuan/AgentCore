@@ -38,7 +38,7 @@ export function FolderActionsMenu({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label={`Actions for ${folderName}`}
+          aria-label={t(`Actions for ${folderName}`, `${folderName} 的操作`)}
           onClick={(e) => e.stopPropagation()}
           className={cn(
             "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground-tertiary transition-colors hover:bg-surface-hover hover:text-foreground-strong",

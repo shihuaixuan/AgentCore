@@ -1,6 +1,7 @@
 "use client";
 
 import type { ToolUIPart } from "ai";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { MorphingTextAnimation } from "../../components/MorphingTextAnimation/MorphingTextAnimation";
 import {
@@ -49,8 +50,9 @@ function truncate(text: string, maxChars: number): string {
 }
 
 export function SearchDocsTool({ part }: Props) {
+  const { t } = useTranslation();
   const output = getDocsToolOutput(part);
-  const text = getAnimationText(part);
+  const text = getAnimationText(part, t);
   const isStreaming =
     part.state === "input-streaming" || part.state === "input-available";
   const isError =
@@ -58,7 +60,7 @@ export function SearchDocsTool({ part }: Props) {
 
   const normalized = output
     ? {
-        title: getDocsToolTitle(part.type, output),
+        title: getDocsToolTitle(part.type, output, t),
         label: getToolLabel(part.type),
       }
     : null;
@@ -85,7 +87,10 @@ export function SearchDocsTool({ part }: Props) {
 
   const accordionDescription =
     hasExpandableContent && docSearchOutput
-      ? `Found ${docSearchOutput.count} result${docSearchOutput.count === 1 ? "" : "s"} for "${docSearchOutput.query}"`
+      ? t(
+          `Found ${docSearchOutput.count} result${docSearchOutput.count === 1 ? "" : "s"} for "${docSearchOutput.query}"`,
+          `找到 ${docSearchOutput.count} 条结果，搜索：“${docSearchOutput.query}”`,
+        )
       : hasExpandableContent && docPageOutput
         ? docPageOutput.path
         : hasExpandableContent && (noResultsOutput || errorOutput)
@@ -119,7 +124,11 @@ export function SearchDocsTool({ part }: Props) {
                 return (
                   <ContentCard key={r.path}>
                     <ContentCardHeader
-                      action={<ContentLink href={href}>Open</ContentLink>}
+                      action={
+                        <ContentLink href={href}>
+                          {t("Open", "打开")}
+                        </ContentLink>
+                      }
                     >
                       <ContentCardTitle>{r.title}</ContentCardTitle>
                       <ContentCardSubtitle>
@@ -145,7 +154,7 @@ export function SearchDocsTool({ part }: Props) {
                       docPageOutput.doc_url ?? toDocsUrl(docPageOutput.path)
                     }
                   >
-                    Open
+                    {t("Open", "打开")}
                   </ContentLink>
                 }
               >

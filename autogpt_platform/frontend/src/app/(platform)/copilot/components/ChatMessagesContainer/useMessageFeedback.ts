@@ -5,6 +5,7 @@ import * as Sentry from "@sentry/nextjs";
 import type { UIDataTypes, UIMessage, UITools } from "ai";
 import { useState } from "react";
 import { getRatedMessageId } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type Rating = "upvote" | "downvote";
 
@@ -19,6 +20,7 @@ export function useMessageFeedback({
   message,
   savedMessageId,
 }: Args) {
+  const { t } = useTranslation();
   const [feedback, setFeedback] = useState<Rating | null>(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const { mutateAsync: submitFeedback } = usePostV2SubmitMessageFeedback();
@@ -49,14 +51,14 @@ export function useMessageFeedback({
     if (!saved) {
       setFeedback(null);
       toast({
-        title: "Couldn't save your feedback",
-        description: "Please try again.",
+        title: t("Couldn't save your feedback", "无法保存你的反馈"),
+        description: t("Please try again.", "请重试。"),
         variant: "destructive",
       });
       return;
     }
     toast({
-      title: "Thank you for your feedback!",
+      title: t("Thank you for your feedback!", "感谢你的反馈！"),
       variant: "success",
       duration: 3000,
     });
@@ -65,10 +67,14 @@ export function useMessageFeedback({
   async function handleCopy(text: string) {
     try {
       await navigator.clipboard.writeText(text);
-      toast({ title: "Copied!", variant: "success", duration: 2000 });
+      toast({
+        title: t("Copied!", "已复制！"),
+        variant: "success",
+        duration: 2000,
+      });
     } catch {
       toast({
-        title: "Failed to copy",
+        title: t("Failed to copy", "复制失败"),
         variant: "destructive",
         duration: 2000,
       });
@@ -81,9 +87,11 @@ export function useMessageFeedback({
 
   function explainNotRateableYet() {
     toast({
-      title: "Can't rate this reply yet",
-      description:
+      title: t("Can't rate this reply yet", "暂时无法评价此回复"),
+      description: t(
         "It may still be saving. Try again in a moment, or refresh the page.",
+        "回复可能仍在保存。请稍后重试或刷新页面。",
+      ),
       duration: 3000,
     });
   }

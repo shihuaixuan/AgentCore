@@ -142,7 +142,9 @@ function ChatGPTConnectionDialog({
                 {t("Connected account", "已连接账户")}
               </Text>
               <Text variant="body-medium">
-                {snapshot?.email ?? account ?? "Your ChatGPT account"}
+                {snapshot?.email ??
+                  account ??
+                  t("Your ChatGPT account", "你的 ChatGPT 账户")}
               </Text>
               {accountQuery.isLoading ? (
                 <Text variant="small" tone="muted">
@@ -318,7 +320,10 @@ function Microsoft365CopilotConnectionDialog({
               <Text variant="body-medium">
                 {displayName ??
                   credential?.username ??
-                  "Microsoft 365 Copilot account"}
+                  t(
+                    "Microsoft 365 Copilot account",
+                    "Microsoft 365 Copilot 账户",
+                  )}
               </Text>
               {displayName && credential?.username && (
                 <Text variant="small" tone="body">

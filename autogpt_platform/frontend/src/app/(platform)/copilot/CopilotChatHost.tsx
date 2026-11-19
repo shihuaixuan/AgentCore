@@ -9,6 +9,7 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
 import { useUsageExperience } from "@/services/usageExperience/useUsageExperience";
 import { useRateLimitRefresh } from "./components/RateLimitResetDialog/useRateLimitRefresh";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   droppedFiles: File[];
@@ -75,6 +76,7 @@ function ChatHostView({
   usage: ReturnType<typeof useUsageExperience>;
   usageRefresh: ReturnType<typeof useRateLimitRefresh>;
 }) {
+  const { t } = useTranslation();
   const {
     sessionId,
     messages,
@@ -131,7 +133,10 @@ function ChatHostView({
       {sessionId && sessionDryRun && (
         <div className="flex items-center justify-center gap-1.5 bg-warning-surface px-3 py-1.5 text-caption font-medium text-warning-foreground">
           <Icon icon={FlaskConicalIcon} size={13} />
-          Test mode — this session runs workflows as simulation
+          {t(
+            "Test mode — this session runs workflows as simulation",
+            "测试模式 — 此会话以模拟方式运行工作流",
+          )}
         </div>
       )}
       <div className="min-h-0 flex-1 overflow-hidden">

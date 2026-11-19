@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import {
   ContentCard,
@@ -18,6 +19,7 @@ function renderValue(value: unknown): string {
 }
 
 export function BlockInputCard({ inputData }: Props) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const entries = Object.entries(inputData);
 
@@ -29,7 +31,12 @@ export function BlockInputCard({ inputData }: Props) {
         className="text-caption text-foreground-tertiary transition-colors hover:text-foreground-base"
         onClick={() => setExpanded((prev) => !prev)}
       >
-        {expanded ? "Hide inputs" : `Show inputs (${entries.length})`}
+        {expanded
+          ? t("Hide inputs", "隐藏输入")
+          : t(
+              `Show inputs (${entries.length})`,
+              `显示输入（${entries.length}）`,
+            )}
       </button>
       {expanded && (
         <ContentGrid className="mt-2 mb-2">

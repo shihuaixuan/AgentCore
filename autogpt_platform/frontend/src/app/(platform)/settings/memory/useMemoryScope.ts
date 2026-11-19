@@ -1,5 +1,6 @@
 import { useListExperts } from "@/app/api/__generated__/endpoints/experts/experts";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getActiveExperts,
   getScopeName,
@@ -7,6 +8,7 @@ import {
 } from "./helpers";
 
 export function useMemoryScope() {
+  const { locale } = useTranslation();
   // The Soul drawer's learned-notes panel links here with ?expert=<id>, so
   // the link opens on that expert. Read once — the dropdown owns it after.
   const [scopeExpertID, setScopeExpertID] = useState<string | null>(
@@ -32,6 +34,6 @@ export function useMemoryScope() {
     scopeExpertID,
     selectScope: setScopeExpertID,
     experts,
-    scopeName: getScopeName(scopeExpertID, experts),
+    scopeName: getScopeName(scopeExpertID, experts, locale),
   };
 }

@@ -74,13 +74,16 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
         });
 
         toast({
-          title: "Workflow duplicated",
-          description: `${result.data.name} has been created.`,
+          title: t("Workflow duplicated", "工作流已复制"),
+          description: t(
+            `${result.data.name} has been created.`,
+            `${result.data.name} 已创建。`,
+          ),
         });
       }
     } catch (error: unknown) {
       toast({
-        title: "Failed to duplicate workflow",
+        title: t("Failed to duplicate workflow", "无法复制工作流"),
         description:
           error instanceof Error
             ? error.message
@@ -106,12 +109,15 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
       });
 
       toast({
-        title: "Removed from folder",
-        description: "Workflow has been moved back to your library.",
+        title: t("Removed from folder", "已从文件夹移除"),
+        description: t(
+          "Workflow has been moved back to your library.",
+          "工作流已移回工作流库。",
+        ),
       });
     } catch (error: unknown) {
       toast({
-        title: "Failed to remove from folder",
+        title: t("Failed to remove from folder", "无法从文件夹移除"),
         description:
           error instanceof Error
             ? error.message
@@ -135,12 +141,12 @@ export function AgentCardMenu({ agent }: AgentCardMenuProps) {
         queryKey: getGetV2ListLibraryAgentsQueryKey(),
       });
 
-      toast({ title: "Workflow deleted" });
+      toast({ title: t("Workflow deleted", "工作流已删除") });
       setShowDeleteDialog(false);
       router.push("/library");
     } catch (error: unknown) {
       toast({
-        title: "Failed to delete workflow",
+        title: t("Failed to delete workflow", "无法删除工作流"),
         description:
           error instanceof Error
             ? error.message

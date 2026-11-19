@@ -81,12 +81,12 @@ export function AgentActionsDropdown({
         queryKey: getGetV2ListLibraryAgentsQueryKey(),
       });
 
-      toast({ title: "Workflow deleted" });
+      toast({ title: t("Workflow deleted", "工作流已删除") });
       setShowDeleteDialog(false);
       router.push("/library");
     } catch (error: unknown) {
       toast({
-        title: "Failed to delete workflow",
+        title: t("Failed to delete workflow", "无法删除工作流"),
         description:
           error instanceof Error
             ? error.message
@@ -108,13 +108,16 @@ export function AgentActionsDropdown({
       if (res.status === 200) {
         const filename = `${agent.name}_v${agent.graph_version}.json`;
         exportAsJSONFile(res.data as any, filename);
-        toast({ title: "Workflow exported" });
+        toast({ title: t("Workflow exported", "工作流已导出") });
       } else {
-        toast({ title: "Failed to export workflow", variant: "destructive" });
+        toast({
+          title: t("Failed to export workflow", "无法导出工作流"),
+          variant: "destructive",
+        });
       }
     } catch (e: any) {
       toast({
-        title: "Failed to export workflow",
+        title: t("Failed to export workflow", "无法导出工作流"),
         description: e?.message,
         variant: "destructive",
       });
@@ -127,7 +130,7 @@ export function AgentActionsDropdown({
     try {
       await deleteRun({ graphExecId: run.id });
 
-      toast({ title: "Task deleted" });
+      toast({ title: t("Task deleted", "任务已删除") });
 
       await queryClient.refetchQueries({
         queryKey: getGetV1ListGraphExecutionsQueryKey(agentGraphId),
@@ -138,7 +141,7 @@ export function AgentActionsDropdown({
       setShowDeleteRunDialog(false);
     } catch (error: unknown) {
       toast({
-        title: "Failed to delete task",
+        title: t("Failed to delete task", "无法删除任务"),
         description:
           error instanceof Error
             ? error.message
@@ -163,7 +166,7 @@ export function AgentActionsDropdown({
       setShowDeleteDialog(false);
     } catch (error: unknown) {
       toast({
-        title: "Failed to delete schedule",
+        title: t("Failed to delete schedule", "无法删除计划"),
         description:
           error instanceof Error
             ? error.message

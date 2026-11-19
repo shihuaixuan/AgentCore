@@ -4,11 +4,15 @@ import { UsagePopover } from "@/app/(platform)/copilot/components/UsageLimits/Us
 import { useUsageIndicator } from "./useUsageIndicator";
 import { GaugeIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function UsageIndicator() {
+  const { t } = useTranslation();
   const { percent } = useUsageIndicator();
   const label =
-    percent !== null ? `Today's usage: ${percent}%` : "Today's usage";
+    percent !== null
+      ? t(`Today's usage: ${percent}%`, `今日用量：${percent}%`)
+      : t("Today's usage", "今日用量");
 
   return (
     <UsagePopover

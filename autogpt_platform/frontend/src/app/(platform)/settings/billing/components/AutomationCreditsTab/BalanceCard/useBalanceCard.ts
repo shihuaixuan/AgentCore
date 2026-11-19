@@ -8,8 +8,10 @@ import {
 } from "@/app/api/__generated__/endpoints/credits/credits";
 import { toast } from "@/components/molecules/Toast/use-toast";
 import { useCheckoutRedirect } from "@/hooks/useCheckoutRedirect";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function useBalanceCard() {
+  const { t } = useTranslation();
   const {
     data: balanceCents,
     isLoading,
@@ -63,7 +65,8 @@ export function useBalanceCard() {
         const detail =
           typeof body?.detail === "string"
             ? body.detail
-            : (body?.detail?.msg ?? `Server returned ${status}.`);
+            : (body?.detail?.msg ??
+              t(`Server returned ${status}.`, `服务器返回状态码 ${status}。`));
         throw new Error(detail);
       }
 
@@ -75,15 +78,21 @@ export function useBalanceCard() {
       }
 
       throw new Error(
-        "Stripe didn't return a checkout URL. Check backend logs for the underlying Stripe error.",
+        t(
+          "Stripe didn't return a checkout URL. Check backend logs for the underlying Stripe error.",
+          "Stripe 未返回结账链接。请查看后端日志以了解具体的 Stripe 错误。",
+        ),
       );
     } catch (error) {
       toast({
-        title: "Couldn't start checkout",
+        title: t("Couldn't start checkout", "无法开始结账"),
         description:
           error instanceof Error
             ? error.message
-            : "Something went wrong contacting Stripe. Please try again.",
+            : t(
+                "Something went wrong contacting Stripe. Please try again.",
+                "联系 Stripe 时出现问题，请重试。",
+              ),
         variant: "destructive",
       });
     }

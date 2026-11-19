@@ -20,8 +20,10 @@ export function SetupStatus({ expert, isRetrying, onRetry }: Props) {
         className="mx-4 mb-3 rounded-lg bg-info-surface px-3 py-2 text-sky-foreground ring-1 ring-sky/30 ring-inset"
       >
         <Text variant="body" tone="inherit">
-          {t("Setting up", "正在设置")} {expert.name}&apos;s skills and
-          workflows…
+          {t(
+            `Setting up ${expert.name}'s skills and workflows…`,
+            `正在设置 ${expert.name} 的技能和工作流…`,
+          )}
         </Text>
       </div>
     );
@@ -35,8 +37,11 @@ export function SetupStatus({ expert, isRetrying, onRetry }: Props) {
     >
       <Text variant="body" tone="warning">
         {failures.length
-          ? `Couldn't install: ${failures.join(", ")}`
-          : "Setup didn't finish"}
+          ? t(
+              `Couldn't install: ${failures.join(", ")}`,
+              `无法安装：${failures.join("、")}`,
+            )
+          : t("Setup didn't finish", "设置未完成")}
       </Text>
       {expert.source_template_id ? (
         <Button

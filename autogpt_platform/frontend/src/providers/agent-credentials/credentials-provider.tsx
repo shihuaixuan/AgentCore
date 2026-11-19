@@ -1,4 +1,6 @@
 import { useToastOnFail } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { useStableCallback } from "@/hooks/useStableCallback";
 import type { CredentialsMetaResponse as GeneratedCredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import {
   APIKeyCredentials,
@@ -166,6 +168,12 @@ export default function CredentialsProvider({
   const { isLoggedIn, isUserLoading } = useAuth();
   const api = useBackendAPI();
   const onFailToast = useToastOnFail();
+  const { t } = useTranslation();
+  const notifyFailure = useStableCallback(
+    (englishAction: string, chineseAction: string, error: unknown) => {
+      onFailToast(t(englishAction, chineseAction))(error);
+    },
+  );
   const queryClient = useQueryClient();
 
   // Held until a load returns them: the store can still be null when the upsert
@@ -232,11 +240,15 @@ export default function CredentialsProvider({
         upsertCredentials(provider, credsMeta);
         return credsMeta;
       } catch (error) {
-        onFailToast("complete OAuth authentication")(error);
+        notifyFailure(
+          "complete OAuth authentication",
+          "完成 OAuth 身份验证",
+          error,
+        );
         throw error;
       }
     },
-    [api, upsertCredentials, onFailToast],
+    [api, upsertCredentials, notifyFailure],
   );
 
   /** Exchanges an MCP OAuth code for tokens and adds the result to the internal credentials store. */
@@ -263,11 +275,15 @@ export default function CredentialsProvider({
         upsertCredentials("mcp", credsMeta);
         return credsMeta;
       } catch (error) {
-        onFailToast("complete MCP OAuth authentication")(error);
+        notifyFailure(
+          "complete MCP OAuth authentication",
+          "完成 MCP OAuth 身份验证",
+          error,
+        );
         throw error;
       }
     },
-    [upsertCredentials, onFailToast],
+    [upsertCredentials, notifyFailure],
   );
 
   /** Stores a manual MCP credential, and adds the result to the internal credentials store. */
@@ -308,11 +324,11 @@ export default function CredentialsProvider({
         upsertCredentials(provider, credsMeta);
         return credsMeta;
       } catch (error) {
-        onFailToast("create API key credentials")(error);
+        notifyFailure("create API key credentials", "创建 API 密钥凭据", error);
         throw error;
       }
     },
-    [api, upsertCredentials, onFailToast],
+    [api, upsertCredentials, notifyFailure],
   );
 
   /** Wraps `BackendAPI.createUserPasswordCredentials`, and adds the result to the internal credentials store. */
@@ -329,11 +345,15 @@ export default function CredentialsProvider({
         upsertCredentials(provider, credsMeta);
         return credsMeta;
       } catch (error) {
-        onFailToast("create user/password credentials")(error);
+        notifyFailure(
+          "create user/password credentials",
+          "创建用户名与密码凭据",
+          error,
+        );
         throw error;
       }
     },
-    [api, upsertCredentials, onFailToast],
+    [api, upsertCredentials, notifyFailure],
   );
 
   /** Wraps `BackendAPI.createHostScopedCredentials`, and adds the result to the internal credentials store. */
@@ -350,11 +370,15 @@ export default function CredentialsProvider({
         upsertCredentials(provider, credsMeta);
         return credsMeta;
       } catch (error) {
-        onFailToast("create host-scoped credentials")(error);
+        notifyFailure(
+          "create host-scoped credentials",
+          "创建主机范围凭据",
+          error,
+        );
         throw error;
       }
     },
-    [api, upsertCredentials, onFailToast],
+    [api, upsertCredentials, notifyFailure],
   );
 
   /** Wraps `BackendAPI.deleteCredentials`, and removes the credentials from the internal store. */
@@ -402,11 +426,11 @@ export default function CredentialsProvider({
         });
         return result;
       } catch (error) {
-        onFailToast("delete credentials")(error);
+        notifyFailure("delete credentials", "删除凭据", error);
         throw error;
       }
     },
-    [api, onFailToast],
+    [api, notifyFailure],
   );
 
   const loadCredentials = useCallback(() => {
@@ -546,7 +570,9 @@ export default function CredentialsProvider({
           return unchanged ? prev : { ...prev, ...loadedEntries };
         });
       })
-      .catch(onFailToast("load credentials"));
+      .catch((error: unknown) =>
+        notifyFailure("load credentials", "加载凭据", error),
+      );
   }, [
     api,
     isLoggedIn,
@@ -560,7 +586,7 @@ export default function CredentialsProvider({
     oAuthCallback,
     mcpOAuthCallback,
     mcpStoreToken,
-    onFailToast,
+    notifyFailure,
   ]);
 
   // Fetch provider names and system providers after authentication
@@ -579,13 +605,14 @@ export default function CredentialsProvider({
         setSystemProviders(new Set(systemList));
       })
       .catch((error) => {
-        if (isCurrent) onFailToast("Load provider names")(error);
+        if (isCurrent)
+          notifyFailure("Load provider names", "加载服务提供商名称", error);
       });
 
     return () => {
       isCurrent = false;
     };
-  }, [api, isLoggedIn, onFailToast]);
+  }, [api, isLoggedIn, notifyFailure]);
 
   useEffect(() => {
     loadCredentials();

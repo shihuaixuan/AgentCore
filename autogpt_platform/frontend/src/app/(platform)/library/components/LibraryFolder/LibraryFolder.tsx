@@ -93,7 +93,10 @@ export function LibraryFolder({
               tone="muted"
               data-testid="library-folder-agent-count"
             >
-              {agentCount} {agentCount === 1 ? "workflow" : "workflows"}
+              {t(
+                `${agentCount} ${agentCount === 1 ? "workflow" : "workflows"}`,
+                `${agentCount} 个工作流`,
+              )}
             </Text>
             {worstStatus && worstStatus !== "idle" && (
               <StatusBadge status={worstStatus} />

@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import type { RaiseAttachmentDraft } from "../../helpers";
@@ -14,11 +15,12 @@ interface Props {
 }
 
 export function SelectedAttachments({ attachments, color, onRemove }: Props) {
+  const { t } = useTranslation();
   if (attachments.length === 0) return null;
   return (
     <div
       role="list"
-      aria-label="Selected tools"
+      aria-label={t("Selected tools", "已选工具")}
       className="flex w-full max-w-[42rem] flex-wrap justify-end gap-2"
     >
       {attachments.map((attachment) => (
@@ -43,7 +45,9 @@ export function SelectedAttachments({ attachments, color, onRemove }: Props) {
             motion="opacity"
             className="opacity-50 group-hover:opacity-100"
           />
-          <span className="sr-only">Remove {attachment.name}</span>
+          <span className="sr-only">
+            {t(`Remove ${attachment.name}`, `移除 ${attachment.name}`)}
+          </span>
         </button>
       ))}
     </div>

@@ -3,6 +3,7 @@ import { focusManager, onlineManager } from "@tanstack/react-query";
 import type { ActivationResponse } from "@/app/api/__generated__/models/activationResponse";
 import { retrieveActivation, statusCode } from "./api";
 import { pendingConsent } from "./storage";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Options {
   userID?: string;
@@ -20,6 +21,7 @@ interface Options {
 }
 
 export function useActivationRecovery(options: Options) {
+  const { t } = useTranslation();
   const latest = useRef(options);
   latest.current = options;
   const { userID, attempt, checkoutReturn } = options;
@@ -35,14 +37,17 @@ export function useActivationRecovery(options: Options) {
       .catch((error) => {
         if (alive && statusCode(error) !== 404) {
           latest.current.onError(
-            "We couldn’t check your payment yet. Your activation can be recovered without starting another purchase.",
+            t(
+              "We couldn’t check your payment yet. Your activation can be recovered without starting another purchase.",
+              "暂时无法查询付款状态。无需再次购买，即可恢复激活流程。",
+            ),
           );
         }
       });
     return () => {
       alive = false;
     };
-  }, [userID, checkoutReturn]);
+  }, [userID, checkoutReturn, t]);
 
   useEffect(() => {
     if (
@@ -78,7 +83,10 @@ export function useActivationRecovery(options: Options) {
         if (alive && statusCode(error) === 404) latest.current.onMissing();
         else if (alive)
           latest.current.onError(
-            "We’re still checking your payment. You won’t be charged again by this status check.",
+            t(
+              "We’re still checking your payment. You won’t be charged again by this status check.",
+              "仍在查询付款状态。此次状态查询不会再次扣款。",
+            ),
           );
       } finally {
         inFlight = false;
@@ -98,5 +106,5 @@ export function useActivationRecovery(options: Options) {
       unsubscribeFocus();
       unsubscribeOnline();
     };
-  }, [userID, attempt?.id, attempt?.status, attempt?.retry_after_seconds]);
+  }, [userID, attempt?.id, attempt?.status, attempt?.retry_after_seconds, t]);
 }

@@ -8,6 +8,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { Clock01Icon } from "@hugeicons/core-free-icons";
 import { scheduledSendLabel } from "./helpers";
 import { useScheduledSendDue } from "./useScheduledSendDue";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   job: AtResetTurn;
@@ -17,14 +18,17 @@ interface Props {
 }
 
 export function ScheduledSendChip({ job, onEdit, onCancel, isBusy }: Props) {
+  const { t, locale } = useTranslation();
   // Once due it may already have gone: editing it then could send it twice.
   const isDue = useScheduledSendDue(job.run_at);
   // Its wording turns on the day, so read on every render rather than cached.
-  const label = useReadEveryRender(() => scheduledSendLabel(job.run_at));
+  const label = useReadEveryRender(() =>
+    scheduledSendLabel(job.run_at, new Date(), locale),
+  );
   return (
     <div
       role="status"
-      aria-label="Scheduled message"
+      aria-label={t("Scheduled message", "定时消息")}
       className="mb-2 flex items-center justify-between gap-3 rounded-2xl border border-brand/50 bg-accent-surface px-3 py-2"
     >
       <div className="flex min-w-0 items-center gap-2">
@@ -35,7 +39,7 @@ export function ScheduledSendChip({ job, onEdit, onCancel, isBusy }: Props) {
           className="shrink-0"
         />
         <Text variant="small-medium" tone="accent" className="shrink-0">
-          {isDue ? "Sending…" : label}
+          {isDue ? t("Sending…", "正在发送…") : label}
         </Text>
         {job.message && (
           <Text tone="muted" variant="small" className="min-w-0 truncate">
@@ -46,7 +50,7 @@ export function ScheduledSendChip({ job, onEdit, onCancel, isBusy }: Props) {
       {!isDue && (
         <div className="flex shrink-0 items-center gap-1">
           <Button size="xs" variant="ghost" onClick={onEdit} disabled={isBusy}>
-            Edit
+            {t("Edit", "编辑")}
           </Button>
           <Button
             size="xs"
@@ -54,7 +58,7 @@ export function ScheduledSendChip({ job, onEdit, onCancel, isBusy }: Props) {
             onClick={onCancel}
             disabled={isBusy}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
         </div>
       )}

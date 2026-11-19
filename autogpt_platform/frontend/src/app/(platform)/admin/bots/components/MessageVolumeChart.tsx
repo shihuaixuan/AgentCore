@@ -17,14 +17,16 @@ import {
 import type { BotTimeseriesPoint } from "@/app/api/__generated__/models/botTimeseriesPoint";
 
 import { formatDay } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   data: BotTimeseriesPoint[];
 }
 
 export function MessageVolumeChart({ data }: Props) {
+  const { t, locale } = useTranslation();
   const chartData = data.map((point) => ({
-    date: formatDay(point.date),
+    date: formatDay(point.date, locale),
     Messages: point.messages,
     Replies: point.replies,
     Errors: point.errors,
@@ -44,6 +46,7 @@ export function MessageVolumeChart({ data }: Props) {
         <Line
           type="monotone"
           dataKey="Messages"
+          name={t("Messages", "消息")}
           stroke="#6366f1"
           strokeWidth={2}
           dot={false}
@@ -51,6 +54,7 @@ export function MessageVolumeChart({ data }: Props) {
         <Line
           type="monotone"
           dataKey="Replies"
+          name={t("Replies", "回复")}
           stroke="#10b981"
           strokeWidth={2}
           dot={false}
@@ -58,6 +62,7 @@ export function MessageVolumeChart({ data }: Props) {
         <Line
           type="monotone"
           dataKey="Errors"
+          name={t("Errors", "错误")}
           stroke="#ef4444"
           strokeWidth={2}
           dot={false}

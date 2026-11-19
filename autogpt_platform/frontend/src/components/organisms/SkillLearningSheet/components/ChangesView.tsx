@@ -4,7 +4,12 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { SkillVersionSummary } from "@/app/api/__generated__/models/skillVersionSummary";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
-import { lineDiff, stepChanges } from "@/services/skill-learning/helpers";
+import {
+  getLearningLabel,
+  lineDiff,
+  stepChanges,
+  versionLabel,
+} from "@/services/skill-learning/helpers";
 import { useState } from "react";
 import { PackageFiles } from "./PackageFiles/PackageFiles";
 
@@ -15,7 +20,7 @@ interface Props {
 }
 
 export function ChangesView({ version, versions, onSelect }: Props) {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const [showRaw, setShowRaw] = useState(false);
   if (!version) {
     return (
@@ -27,7 +32,7 @@ export function ChangesView({ version, versions, onSelect }: Props) {
   const base = versions.find((item) => item.id === version.base_version_id);
   const before = base?.body ?? "";
   const after = version.body ?? "";
-  const changes = stepChanges(before, after);
+  const changes = stepChanges(before, after, locale);
   return (
     <div
       data-slot="skill-learning-sheet-changes"
@@ -53,7 +58,8 @@ export function ChangesView({ version, versions, onSelect }: Props) {
               data-slot="skill-learning-sheet-changes-version-option"
               value={item.id}
             >
-              v{item.version} · {item.origin_label} · {item.state_label}
+              {versionLabel(item, locale)} ·{" "}
+              {getLearningLabel(item.state_label, locale)}
             </option>
           ))}
         </select>

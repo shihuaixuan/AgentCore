@@ -12,6 +12,7 @@ import {
   readFeedbackPrompt,
 } from "./helpers";
 import { useFeedbackCard } from "./useFeedbackCard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   part: ToolUIPart;
@@ -39,6 +40,7 @@ interface PromptProps extends Omit<Props, "part"> {
 }
 
 function WorkCheckPrompt({ promptId, isFirst, target, expert }: PromptProps) {
+  const { t } = useTranslation();
   const card = useFeedbackCard({ kind: "work_check", promptId, target });
   if (card.isLoading || !card.state || card.state.dismissed) return null;
 
@@ -46,7 +48,7 @@ function WorkCheckPrompt({ promptId, isFirst, target, expert }: PromptProps) {
     <WorkCheckCard
       name={expert?.name ?? "Otto"}
       avatarUrl={expert ? expert.avatarUrl : AUTOPILOT_AVATAR_URL}
-      note={getWorkCheckNote(isFirst)}
+      note={getWorkCheckNote(isFirst, t)}
       initialRating={ratingFromState(card.state)}
       initialSent={card.state.answered}
       onRate={(rating) => card.rate(RATING_SCORES[rating])}

@@ -98,9 +98,10 @@ export function BlockCostEstimatesContent() {
       {data ? (
         <div className="flex flex-col gap-2">
           <p className="text-body text-foreground-tertiary">
-            {data.total_rows} blocks · window {data.window_days}d (cap{" "}
-            {data.max_window_days}d) · min samples {data.min_samples} ·
-            generated{" "}
+            {t(
+              `${data.total_rows} blocks · window ${data.window_days}d (cap ${data.max_window_days}d) · min samples ${data.min_samples} · generated`,
+              `${data.total_rows} 个模块 · 时间范围 ${data.window_days} 天（上限 ${data.max_window_days} 天）· 最少样本数 ${data.min_samples} · 生成时间`,
+            )}{" "}
             {data.generated_at instanceof Date
               ? data.generated_at.toISOString()
               : String(data.generated_at)}
@@ -110,10 +111,16 @@ export function BlockCostEstimatesContent() {
               <thead className="bg-surface-hover/50">
                 <tr>
                   <th className="p-2 text-left">{t("Block ID", "模块 ID")}</th>
-                  <th className="p-2 text-left">{t("Block name", "模块名称")}</th>
-                  <th className="p-2 text-left">{t("Cost type", "成本类型")}</th>
+                  <th className="p-2 text-left">
+                    {t("Block name", "模块名称")}
+                  </th>
+                  <th className="p-2 text-left">
+                    {t("Cost type", "成本类型")}
+                  </th>
                   <th className="p-2 text-right">{t("Samples", "样本数")}</th>
-                  <th className="p-2 text-right">{t("Mean (credits)", "平均值（额度）")}</th>
+                  <th className="p-2 text-right">
+                    {t("Mean (credits)", "平均值（额度）")}
+                  </th>
                   <th className="p-2 text-right">P50</th>
                   <th className="p-2 text-right">P95</th>
                 </tr>
@@ -138,7 +145,10 @@ export function BlockCostEstimatesContent() {
         </div>
       ) : (
         <p className="text-body text-foreground-tertiary">
-          {t("Pick a window and click Aggregate to compute per-block average credits-per-execution.", "选择时间范围并点击“汇总”，计算每个模块的平均每次执行额度。")}
+          {t(
+            "Pick a window and click Aggregate to compute per-block average credits-per-execution.",
+            "选择时间范围并点击“汇总”，计算每个模块的平均每次执行额度。",
+          )}
         </p>
       )}
     </div>

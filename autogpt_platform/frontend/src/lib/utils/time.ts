@@ -26,8 +26,8 @@ export function formatTimeAgo(dateStr: string, locale = "en"): string {
   return `${diffDays}d ago`;
 }
 
-export function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
+export function formatDate(date: Date, locale = "en") {
+  return new Intl.DateTimeFormat(locale === "zh-CN" ? "zh-CN" : "en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",

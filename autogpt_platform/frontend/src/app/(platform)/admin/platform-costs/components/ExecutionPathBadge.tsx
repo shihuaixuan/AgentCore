@@ -1,7 +1,5 @@
 "use client";
 
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
-
 function ExecutionPathBadge({
   executionPath,
 }: {

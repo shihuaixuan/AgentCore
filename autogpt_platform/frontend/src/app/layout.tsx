@@ -32,8 +32,8 @@ const faviconPath = isDev
     ? "/favicon-local.ico"
     : "/favicon.ico";
 
-const SITE_TITLE = "AutoGPT Platform";
-const SITE_DESCRIPTION = "Your one stop shop to creating AI Agents";
+const SITE_TITLE = "AutoGPT 平台";
+const SITE_DESCRIPTION = "一站式创建 AI 专家、构建工作流并自动完成任务";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),

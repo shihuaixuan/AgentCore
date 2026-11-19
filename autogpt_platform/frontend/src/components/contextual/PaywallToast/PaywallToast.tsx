@@ -16,17 +16,28 @@ interface DescriptionProps {
 // all. Without billing (most self-hosted installs) there is no plan to pick
 // and /settings/billing is a 404, so it points at whoever runs the server.
 export function PaywallToastDescription({ recovery }: DescriptionProps) {
+  const { t } = useTranslation();
   const isBillingEnabled = useIsBillingEnabled();
   return isBillingEnabled
-    ? `Choose one to keep chatting — ${recovery}.`
-    : `Ask whoever runs this server to set one up — ${recovery}.`;
+    ? t(
+        `Choose one to keep chatting — ${recovery}.`,
+        `选择一个套餐以继续聊天 — ${recovery}。`,
+      )
+    : t(
+        `Ask whoever runs this server to set one up — ${recovery}.`,
+        `请联系服务器管理员设置套餐 — ${recovery}。`,
+      );
 }
 
 export function PlanRequiredDescription() {
+  const { t } = useTranslation();
   const isBillingEnabled = useIsBillingEnabled();
   return isBillingEnabled
-    ? "Choose one to continue."
-    : "Ask whoever runs this server to set one up.";
+    ? t("Choose one to continue.", "选择一个套餐以继续。")
+    : t(
+        "Ask whoever runs this server to set one up.",
+        "请联系服务器管理员设置套餐。",
+      );
 }
 
 export function PaywallToastAction() {

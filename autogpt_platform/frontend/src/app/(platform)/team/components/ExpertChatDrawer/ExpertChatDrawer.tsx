@@ -65,7 +65,7 @@ export function ExpertChatDrawer({
         target ? t(`Chat with ${target.name}`, `与 ${target.name} 聊天`) : ""
       }
       panelId="chat"
-      closeLabel="Close chat panel"
+      closeLabel={t("Close chat panel", "关闭聊天面板")}
       showIdentity={!!chat.sessionId}
       headerActions={
         <>
@@ -110,7 +110,7 @@ interface BodyProps {
 }
 
 function ChatPanelBody({ target, identity, chat }: BodyProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const {
     sessionId,
     messages,
@@ -163,7 +163,7 @@ function ChatPanelBody({ target, identity, chat }: BodyProps) {
                 {t("What can I do for you?", "有什么可以帮你？")}
               </Text>
               <Text variant="small" tone="muted">
-                {target.name} · {getExpertRoleLabel(target.role)}
+                {target.name} · {getExpertRoleLabel(target.role, locale)}
               </Text>
             </div>
           </div>

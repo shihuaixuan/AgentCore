@@ -5,6 +5,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { usePathname } from "next/navigation";
 import { Folder01Icon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const ROUTE_TITLES: Record<string, { title: string; icon: IconSvgElement }> = {
   "/artifacts": { title: "Files", icon: Folder01Icon },
@@ -19,6 +20,7 @@ export function getRouteTitle(pathname: string | null) {
 }
 
 export function InsetHeaderTitle() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const entry = getRouteTitle(pathname);
 
@@ -31,7 +33,7 @@ export function InsetHeaderTitle() {
         tone="emphasis"
         className="size-5 max-md:hidden"
       />
-      <Text variant="large-medium">{entry.title}</Text>
+      <Text variant="large-medium">{t(entry.title, "文件")}</Text>
     </div>
   );
 }

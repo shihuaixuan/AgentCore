@@ -18,15 +18,20 @@ import {
   scopesIncludeDrive,
 } from "./helpers";
 import { okData } from "@/app/api/helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 
 export async function fetchPickerAccessToken(
   credentialId: string,
+  locale: Locale = "en",
 ): Promise<string> {
   const response = await postV1GetPickerToken("google", credentialId);
   const token = okData(response)?.access_token;
   if (!token) {
     throw new Error(
-      "Server did not return an access token for the Google Drive picker.",
+      locale === "zh-CN"
+        ? "服务器未返回 Google Drive 文件选择器的访问令牌。"
+        : "Server did not return an access token for the Google Drive picker.",
     );
   }
   return token;
@@ -74,6 +79,7 @@ export type Props = {
 };
 
 export function useGoogleDrivePicker(options: Props) {
+  const { t, locale } = useTranslation();
   const {
     scopes = ["https://www.googleapis.com/auth/drive.file"],
     developerKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
@@ -100,7 +106,9 @@ export function useGoogleDrivePicker(options: Props) {
   const tokenClientRef = useRef<TokenClient | null>(null);
   const pickerReadyRef = useRef(false);
   const usedCredentialIdRef = useRef<string | undefined>(undefined);
-  const credentials = useCredentials(getCredentialsSchema(requestedScopes));
+  const credentials = useCredentials(
+    getCredentialsSchema(requestedScopes, locale),
+  );
   const queryClient = useQueryClient();
   const isReady = pickerReadyRef.current && !!tokenClientRef.current;
   const { toast } = useToast();
@@ -163,10 +171,13 @@ export function useGoogleDrivePicker(options: Props) {
           if (cred && cred.type === "oauth2") {
             if (!hasAllRequiredScopes(cred.scopes, requestedScopes)) {
               const error = new Error(
-                "The saved Google OAuth credentials do not have the required permissions. Please sign in again with the correct permissions.",
+                t(
+                  "The saved Google OAuth credentials do not have the required permissions. Please sign in again with the correct permissions.",
+                  "已保存的 Google OAuth 凭据缺少所需权限。请重新登录并授予正确的权限。",
+                ),
               );
               toast({
-                title: "Insufficient Permissions",
+                title: t("Insufficient Permissions", "权限不足"),
                 description: error.message,
                 variant: "destructive",
               });
@@ -179,14 +190,20 @@ export function useGoogleDrivePicker(options: Props) {
             // strips `access_token` — see TestGetCredentialReturnsMetaOnly in
             // backend/api/features/integrations/router_test.py. Mint a fresh
             // access token via the dedicated picker-token endpoint instead.
-            const accessToken = await fetchPickerAccessToken(credentialId);
+            const accessToken = await fetchPickerAccessToken(
+              credentialId,
+              locale,
+            );
             accessTokenRef.current = accessToken;
             buildAndShowPicker(accessToken);
             return;
           }
 
           const error = new Error(
-            "Failed to retrieve Google OAuth credentials. Please try signing in again.",
+            t(
+              "Failed to retrieve Google OAuth credentials. Please try signing in again.",
+              "无法获取 Google OAuth 凭据，请尝试重新登录。",
+            ),
           );
           if (onError) onError(error);
           return;
@@ -194,10 +211,15 @@ export function useGoogleDrivePicker(options: Props) {
           const error =
             err instanceof Error
               ? err
-              : new Error("Failed to fetch Google OAuth credentials");
+              : new Error(
+                  t(
+                    "Failed to fetch Google OAuth credentials",
+                    "获取 Google OAuth 凭据失败",
+                  ),
+                );
 
           toast({
-            title: "Authentication Error",
+            title: t("Authentication Error", "身份验证错误"),
             description: error.message,
             variant: "destructive",
           });
@@ -211,10 +233,13 @@ export function useGoogleDrivePicker(options: Props) {
       // If platform credentials are required but none exist, show error
       if (options?.requirePlatformCredentials) {
         const error = new Error(
-          "Please connect your Google account in Settings before using this feature.",
+          t(
+            "Please connect your Google account in Settings before using this feature.",
+            "使用此功能前，请先在设置中连接你的 Google 账户。",
+          ),
         );
         toast({
-          title: "Google Account Required",
+          title: t("Google Account Required", "需要 Google 账户"),
           description: error.message,
           variant: "destructive",
         });
@@ -239,7 +264,13 @@ export function useGoogleDrivePicker(options: Props) {
           loadGoogleIdentityServices(),
         ]);
 
-        if (!clientId) throw new Error("Google OAuth client ID is not set");
+        if (!clientId)
+          throw new Error(
+            t(
+              "Google OAuth client ID is not set",
+              "尚未设置 Google OAuth 客户端 ID",
+            ),
+          );
         tokenClientRef.current =
           window.google!.accounts!.oauth2!.initTokenClient({
             client_id: clientId,
@@ -251,8 +282,11 @@ export function useGoogleDrivePicker(options: Props) {
       } catch (e) {
         console.error(e);
         toast({
-          title: "Error loading Google Drive Picker",
-          description: "Please try again later",
+          title: t(
+            "Error loading Google Drive Picker",
+            "加载 Google Drive 文件选择器失败",
+          ),
+          description: t("Please try again later", "请稍后重试"),
           variant: "destructive",
         });
       } finally {
@@ -270,7 +304,9 @@ export function useGoogleDrivePicker(options: Props) {
       const tokenClient = tokenClientRef.current;
 
       if (!tokenClient) {
-        return reject(new Error("Token client not initialized"));
+        return reject(
+          new Error(t("Token client not initialized", "令牌客户端尚未初始化")),
+        );
       }
 
       setIsAuthInProgress(true);
@@ -288,7 +324,10 @@ export function useGoogleDrivePicker(options: Props) {
   function buildAndShowPicker(accessToken: string): void {
     if (!developerKey) {
       const error = new Error(
-        "Missing Google Drive Picker Configuration: developer key is not set",
+        t(
+          "Missing Google Drive Picker Configuration: developer key is not set",
+          "缺少 Google Drive 文件选择器配置：尚未设置开发者密钥",
+        ),
       );
       console.error("[useGoogleDrivePicker]", error.message);
       onError(error);
@@ -297,7 +336,10 @@ export function useGoogleDrivePicker(options: Props) {
 
     if (!appId) {
       const error = new Error(
-        "Missing Google Drive Picker Configuration: app ID is not set",
+        t(
+          "Missing Google Drive Picker Configuration: app ID is not set",
+          "缺少 Google Drive 文件选择器配置：尚未设置应用 ID",
+        ),
       );
       console.error("[useGoogleDrivePicker]", error.message);
       onError(error);

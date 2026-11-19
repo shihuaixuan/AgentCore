@@ -9,6 +9,7 @@ import {
 } from "../../../../components/ToolAccordion/AccordionContent";
 import type { MCPToolOutputResponse } from "../../helpers";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   output: MCPToolOutputResponse;
@@ -30,8 +31,8 @@ function isImageResult(value: unknown): value is ImageResult {
   );
 }
 
-function formatResult(value: unknown): string {
-  if (value === null || value === undefined) return "(no result)";
+function formatResult(value: unknown, emptyLabel: string): string {
+  if (value === null || value === undefined) return emptyLabel;
   if (typeof value === "string") return value;
   try {
     return JSON.stringify(value, null, 2);
@@ -41,10 +42,13 @@ function formatResult(value: unknown): string {
 }
 
 export function MCPToolOutputCard({ output }: Props) {
+  const { t } = useTranslation();
   const result = output.result;
 
   const isImage = isImageResult(result);
-  const resultText = isImage ? "" : formatResult(result);
+  const resultText = isImage
+    ? ""
+    : formatResult(result, t("(no result)", "（无结果）"));
   const isJson =
     !isImage &&
     result !== null &&
@@ -62,7 +66,10 @@ export function MCPToolOutputCard({ output }: Props) {
           // eslint-disable-next-line @next/next/no-img-element -- a base64 data URL from the tool output
           <img
             src={`data:${result.mimeType};base64,${result.data}`}
-            alt={`Result from ${output.tool_name}`}
+            alt={t(
+              `Result from ${output.tool_name}`,
+              `来自 ${output.tool_name} 的结果`,
+            )}
             className="mt-2 max-h-96 max-w-full rounded object-contain"
           />
         ) : isJson ? (

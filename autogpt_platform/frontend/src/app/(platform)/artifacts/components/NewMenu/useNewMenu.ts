@@ -12,7 +12,7 @@ import { ARTIFACTS_LIST_QUERY_KEY } from "../../useArtifactsPage";
 import { uploadFiles } from "./helpers";
 
 export function useNewMenu(selectedFolderId: string | null) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { createFolder, isCreating } = useArtifactsFolders();
@@ -20,23 +20,31 @@ export function useNewMenu(selectedFolderId: string | null) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const upload = useMutation({
-    mutationFn: (files: File[]) => uploadFiles(files, selectedFolderId),
+    mutationFn: (files: File[]) => uploadFiles(files, selectedFolderId, locale),
     onSuccess: ({ uploaded, leftAtRoot, failed }) => {
       if (uploaded > 0) {
         toast({
-          title:
+          title: t(
             uploaded === 1 ? "File uploaded" : `${uploaded} files uploaded`,
+            `已上传 ${uploaded} 个文件`,
+          ),
         });
       }
       if (leftAtRoot.length > 0) {
         toast({
           title: t("Uploaded to the root instead", "已上传至根目录"),
-          description: `${leftAtRoot.join(", ")} couldn't be moved into this folder.`,
+          description: t(
+            `${leftAtRoot.join(", ")} couldn't be moved into this folder.`,
+            `无法将 ${leftAtRoot.join("、")} 移入此文件夹。`,
+          ),
         });
       }
       for (const failure of failed) {
         toast({
-          title: `Failed to upload ${failure.name}`,
+          title: t(
+            `Failed to upload ${failure.name}`,
+            `无法上传 ${failure.name}`,
+          ),
           description: failure.message,
           variant: "destructive",
         });

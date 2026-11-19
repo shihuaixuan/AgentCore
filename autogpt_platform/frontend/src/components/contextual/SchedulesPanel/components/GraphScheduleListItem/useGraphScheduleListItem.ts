@@ -48,7 +48,7 @@ export function useGraphScheduleListItem({ schedule }: Args) {
   const nextRunTitle = nextRunDate ? nextRunDate.toString() : undefined;
 
   const recurrenceLabel = schedule.cron
-    ? describeCron(schedule.cron, t)
+    ? describeCron(schedule.cron, locale)
     : t("Runs once", "仅运行一次");
 
   const agentLabel =

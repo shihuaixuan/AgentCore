@@ -10,6 +10,7 @@ import {
 import type { WorkspaceFileItem } from "@/app/api/__generated__/models/workspaceFileItem";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   file: WorkspaceFileItem;
@@ -18,6 +19,7 @@ interface Props {
 /** A Files-page style row: thumbnail, name, when and how big. The whole
  *  row opens the file in a new tab. */
 export function ExpertFileRow({ file }: Props) {
+  const { locale } = useTranslation();
   return (
     <a
       href={getFileDownloadUrl(file.id)}
@@ -37,7 +39,7 @@ export function ExpertFileRow({ file }: Props) {
           {file.name}
         </Text>
         <Text variant="small" tone="muted" as="span">
-          {formatRelativeDate(file.created_at)} ·{" "}
+          {formatRelativeDate(file.created_at, locale)} ·{" "}
           {formatFileSize(file.size_bytes)}
         </Text>
       </span>

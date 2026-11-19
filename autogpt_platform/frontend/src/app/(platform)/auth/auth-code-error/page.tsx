@@ -8,8 +8,10 @@ import { isWaitlistError } from "@/app/api/auth/utils";
 import { useRouter } from "next/navigation";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { environment } from "@/services/environment";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export default function AuthErrorPage() {
+  const { t } = useTranslation();
   const [errorType, setErrorType] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [errorDescription, setErrorDescription] = useState<string | null>(null);
@@ -32,7 +34,7 @@ export default function AuthErrorPage() {
   if (!errorType && !errorCode && !errorDescription) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Text variant="body">Loading...</Text>
+        <Text variant="body">{t("Loading...", "加载中…")}</Text>
       </div>
     );
   }
@@ -52,8 +54,14 @@ export default function AuthErrorPage() {
 
   // Use ErrorCard for consistent error display
   const errorMessage = errorDescription
-    ? `${errorDescription}. If this error persists, please contact support at contact@agpt.co`
-    : "An authentication error occurred. Please contact support at contact@agpt.co";
+    ? t(
+        `${errorDescription}. If this error persists, please contact support at contact@agpt.co`,
+        `${errorDescription}。如果问题持续存在，请联系支持团队：contact@agpt.co`,
+      )
+    : t(
+        "An authentication error occurred. Please contact support at contact@agpt.co",
+        "身份验证失败，请联系支持团队：contact@agpt.co",
+      );
 
   return (
     <div className="flex h-screen items-center justify-center p-4">
@@ -62,10 +70,13 @@ export default function AuthErrorPage() {
           responseError={{
             message: errorMessage,
             detail: errorCode
-              ? `Error code: ${errorCode}${errorType ? ` (${errorType})` : ""}`
+              ? t(
+                  `Error code: ${errorCode}${errorType ? ` (${errorType})` : ""}`,
+                  `错误代码：${errorCode}${errorType ? `（${errorType}）` : ""}`,
+                )
               : undefined,
           }}
-          context="authentication"
+          context={t("authentication", "身份验证")}
           onRetry={() => router.push("/login")}
         />
       </div>

@@ -7,6 +7,7 @@ import { SkillFileViewer } from "@/components/contextual/SkillPackage/SkillFileV
 import { SkillPackageFileList } from "@/components/contextual/SkillPackage/SkillPackageFileList";
 import { ArrowDown01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   versionId: string;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function AdminSkillSubmissionFiles({ versionId, files }: Props) {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [openFilePath, setOpenFilePath] = useState<string | null>(null);
 
@@ -34,7 +36,10 @@ export function AdminSkillSubmissionFiles({ versionId, files }: Props) {
           aria-hidden
         />
         <Text variant="small" tone="inherit">
-          {files.length === 1 ? "1 file" : `${files.length} files`}
+          {t(
+            files.length === 1 ? "1 file" : `${files.length} files`,
+            `${files.length} 个文件`,
+          )}
         </Text>
       </button>
 

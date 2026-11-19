@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/molecules/DropdownMenu/DropdownMenu";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -38,11 +39,12 @@ export function RecipientChip({
   onSelect,
   isLoading,
 }: Props) {
+  const { t } = useTranslation();
   if (isLoading) {
     return (
       <div
         role="status"
-        aria-label="Loading recipient"
+        aria-label={t("Loading recipient", "正在加载接收者")}
         className={CHIP_CLASSNAME}
       >
         <Skeleton className="h-6 w-6 rounded-full" />
@@ -56,7 +58,10 @@ export function RecipientChip({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label={`Sending to ${recipient.name} — change recipient`}
+          aria-label={t(
+            `Sending to ${recipient.name} — change recipient`,
+            `发送给 ${recipient.name} — 更换接收者`,
+          )}
           className={cn(
             CHIP_CLASSNAME,
             "group transition-colors hover:bg-canvas",

@@ -1,4 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
+import type { Locale } from "@/lib/i18n/locale";
+import { schemaTypeLabel } from "./schemaTypeLabel";
 
 export enum InputType {
   SINGLE_LINE_TEXT = "single-line-text",
@@ -88,14 +90,14 @@ export function extractOptions(
 }
 
 // get display type and color for schema types [need for type display next to field name]
-export const getTypeDisplayInfo = (schema: any) => {
+export const getTypeDisplayInfo = (schema: any, locale: Locale = "en") => {
   if (
     schema?.type === "array" &&
     "format" in schema &&
     schema.format === "table"
   ) {
     return {
-      displayType: "table",
+      displayType: schemaTypeLabel("table", locale),
       colorClass: "!text-indigo",
     };
   }
@@ -133,7 +135,10 @@ export const getTypeDisplayInfo = (schema: any) => {
 
     const formatInfo = formatMap[schema.format];
     if (formatInfo) {
-      return formatInfo;
+      return {
+        ...formatInfo,
+        displayType: schemaTypeLabel(formatInfo.displayType, locale),
+      };
     }
   }
 
@@ -163,7 +168,10 @@ export const getTypeDisplayInfo = (schema: any) => {
   const colorClass = colorMap[schema?.type] || "!text-foreground-tertiary";
 
   return {
-    displayType,
+    displayType:
+      !schema?.type || Object.hasOwn(typeMap, schema.type)
+        ? schemaTypeLabel(displayType, locale)
+        : displayType,
     colorClass,
   };
 };

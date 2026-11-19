@@ -15,12 +15,14 @@ import { isOptionalType } from "../../../utils/schema-utils";
 import { getTypeDisplayInfo } from "@/app/(platform)/build/components/FlowEditor/nodes/helpers";
 import { cn } from "@/lib/utils";
 import { useNodeStore } from "@/app/(platform)/build/stores/nodeStore";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface customFieldProps extends FieldProps {
   selector: JSX.Element;
 }
 
 export const AnyOfFieldTitle = (props: customFieldProps) => {
+  const { t, locale } = useTranslation();
   const { uiSchema, schema, required, name, registry, fieldPathId, selector } =
     props;
   const { isInputConnected } = useEdgeStore();
@@ -47,7 +49,7 @@ export const AnyOfFieldTitle = (props: customFieldProps) => {
   const isHandleConnected = isInputConnected(nodeId, handleId);
 
   const { isOptional, type } = isOptionalType(schema); // If we have something like int | null = we will treat it as optional int
-  const { displayType, colorClass } = getTypeDisplayInfo(type);
+  const { displayType, colorClass } = getTypeDisplayInfo(type, locale);
 
   const shouldShowSelector =
     shouldShowTypeSelector(schema) && !isArrayItem && !isHandleConnected;
@@ -80,7 +82,9 @@ export const AnyOfFieldTitle = (props: customFieldProps) => {
             decoration={isInputBroken ? "line-through" : undefined}
             className={cn(!inputMismatch && colorClass)}
           >
-            {isOptional ? `(${inputMismatch || displayType})` : "(any)"}
+            {isOptional
+              ? `(${inputMismatch || displayType})`
+              : t("(any)", "（任意类型）")}
           </Text>
         </div>
       )}

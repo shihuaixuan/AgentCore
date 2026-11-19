@@ -4,6 +4,7 @@ import type { ExpertAvatarRequestCategory } from "@/app/api/__generated__/models
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { ExpertAvatarPicker } from "@/components/molecules/ExpertAvatarPicker/ExpertAvatarPicker";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { bubbleClassFor } from "../ColorStep/helpers";
 
 interface Props {
@@ -21,6 +22,7 @@ export function AvatarStep({
   avatarUrl,
   onPick,
 }: Props) {
+  const { t } = useTranslation();
   if (avatarUrl) {
     return (
       <div
@@ -30,12 +32,14 @@ export function AvatarStep({
         )}
       >
         <ExpertAvatar
-          name={name || "Your expert"}
+          name={name || t("Your expert", "你的专家")}
           avatarUrl={avatarUrl}
           size={40}
         />
         <span className="text-body font-medium text-foreground-base">
-          {name ? `${name} has an avatar` : "Picture set"}
+          {name
+            ? t(`${name} has an avatar`, `已为 ${name} 设置头像`)
+            : t("Picture set", "头像已设置")}
         </span>
       </div>
     );

@@ -5,7 +5,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
 
-import { STATUS_OPTIONS, STATUS_VISUAL } from "../../../helpers";
+import { getStatusVisual, STATUS_OPTIONS } from "../../../helpers";
 import { ColumnFilter } from "../../ColumnFilter/ColumnFilter";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -16,7 +16,7 @@ interface Props {
 }
 
 export function StatusColumnFilter({ value, onChange }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   function toggle(status: SubmissionStatus) {
     if (value.includes(status)) {
       onChange(value.filter((s) => s !== status));
@@ -38,7 +38,7 @@ export function StatusColumnFilter({ value, onChange }: Props) {
         <ul className="flex flex-col gap-1">
           {STATUS_OPTIONS.map((option) => {
             const checked = value.includes(option.value);
-            const visual = STATUS_VISUAL[option.value];
+            const visual = getStatusVisual(option.value, locale);
             return (
               <li key={option.value}>
                 <button
@@ -55,7 +55,7 @@ export function StatusColumnFilter({ value, onChange }: Props) {
                   <span
                     className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-caption font-medium ${visual.pillClass}`}
                   >
-                    {option.label}
+                    {visual.label}
                   </span>
                   <span
                     className={cn(

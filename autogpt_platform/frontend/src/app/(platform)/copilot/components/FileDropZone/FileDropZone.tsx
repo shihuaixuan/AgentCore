@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useRef, useState } from "react";
 import { Upload03Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   children: React.ReactNode;
@@ -16,6 +17,7 @@ interface Props {
  * that the overlay can toggle without re-rendering the rest of the tree.
  */
 export function FileDropZone({ children, onFilesDropped, className }: Props) {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const dragCounter = useRef(0);
 
@@ -70,7 +72,7 @@ export function FileDropZone({ children, onFilesDropped, className }: Props) {
       >
         <Icon icon={Upload03Icon} tone="brand" className="h-10 w-10" />
         <span className="text-lead font-medium text-brand">
-          Drop files here
+          {t("Drop files here", "将文件拖放到此处")}
         </span>
       </div>
     </div>

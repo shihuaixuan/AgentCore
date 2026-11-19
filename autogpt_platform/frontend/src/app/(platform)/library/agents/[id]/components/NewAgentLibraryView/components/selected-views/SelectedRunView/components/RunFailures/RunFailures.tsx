@@ -15,6 +15,7 @@ import { ShowMoreText } from "@/components/molecules/ShowMoreText/ShowMoreText";
 import { describeFailedSteps } from "@/lib/run-health";
 import { Alert02Icon, CancelCircleIcon } from "@hugeicons/core-free-icons";
 import { useRunFailures } from "./useRunFailures";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const WarningIcon = createIconComponent(Alert02Icon);
 const FailedIcon = createIconComponent(CancelCircleIcon);
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export function RunFailures({ run }: Props) {
+  const { t } = useTranslation();
   const { steps, failedStepCount, runError, isLoadingNames } =
     useRunFailures(run);
 
@@ -45,14 +47,20 @@ export function RunFailures({ run }: Props) {
       >
         <AlertTitle>
           {failedStepCount > 0
-            ? describeFailedSteps(failedStepCount)
-            : "This run failed"}
+            ? t(
+                describeFailedSteps(failedStepCount),
+                `${failedStepCount} 个步骤失败`,
+              )
+            : t("This run failed", "本次运行失败")}
         </AlertTitle>
         <AlertDescription>
           <div className="flex flex-col gap-3">
             {run.status === AgentExecutionStatus.COMPLETED ? (
               <Text variant="small" tone="secondary">
-                The run still finished, so its output may be incomplete.
+                {t(
+                  "The run still finished, so its output may be incomplete.",
+                  "本次运行已结束，但输出可能不完整。",
+                )}
               </Text>
             ) : null}
             {runError ? (
@@ -72,7 +80,9 @@ export function RunFailures({ run }: Props) {
                     ) : isLoadingNames ? (
                       <Skeleton className="h-5 w-32" />
                     ) : (
-                      <Text variant="body-medium">Unknown step</Text>
+                      <Text variant="body-medium">
+                        {t("Unknown step", "未知步骤")}
+                      </Text>
                     )}
                     <ShowMoreText
                       variant="small"

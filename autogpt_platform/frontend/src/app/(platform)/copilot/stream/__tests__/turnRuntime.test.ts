@@ -242,6 +242,21 @@ describe("§1.7 — every disconnect cause is expected but one", () => {
     expect(toast).not.toHaveBeenCalled();
   });
 
+  it("localizes the runtime disconnect toast from its bound chat locale", async () => {
+    const unbind = runtime.bind({ locale: "zh-CN" }, null);
+    unbind();
+    await sendAndPublish(FIRST_BLOCK_DONE);
+    backend.respond(() => "network-error");
+    backend.connections[0].fail();
+    await advance(0);
+    await advance(1_000);
+    await advance(2_000 + 4_000 + 8_000);
+    expect(toast).toHaveBeenCalledWith({
+      title: "连接已断开",
+      description: "我们会继续尝试连接；你的专家可能仍在工作。",
+    });
+  });
+
   it("failures while visible and online back off, show an inline notice, and toast once after five", async () => {
     await sendAndPublish(FIRST_BLOCK_DONE);
     backend.respond(() => "network-error");

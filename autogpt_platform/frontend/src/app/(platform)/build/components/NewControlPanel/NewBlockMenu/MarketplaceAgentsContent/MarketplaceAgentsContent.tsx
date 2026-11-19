@@ -6,8 +6,10 @@ import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { cn } from "@/lib/utils";
 import { InfiniteScroll } from "@/components/contextual/InfiniteScroll/InfiniteScroll";
 import { blockMenuContainerStyle } from "../style";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export const MarketplaceAgentsContent = () => {
+  const { t } = useTranslation();
   const {
     handleAddStoreAgent,
     addingAgent,
@@ -47,10 +49,10 @@ export const MarketplaceAgentsContent = () => {
           context="block menu"
           httpError={{
             status: status,
-            statusText: "Request failed",
+            statusText: t("Request failed", "请求失败"),
             message:
               (listStoreAgentsError?.detail as unknown as string) ||
-              "An error occurred",
+              t("An error occurred", "发生错误"),
           }}
           responseError={listStoreAgentsError || undefined}
           onRetry={() => refetchListStoreAgents()}

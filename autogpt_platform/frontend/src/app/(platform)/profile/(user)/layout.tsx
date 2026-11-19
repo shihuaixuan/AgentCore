@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ProfileSidebar } from "./components/ProfileSidebar/ProfileSidebar";
 import { usePlatformPayment } from "@/hooks/usePlatformPayment";
 import {
@@ -15,41 +16,42 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 import { useNewSettingsRedirect } from "./useNewSettingsRedirect";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const { isPaymentEnabled } = usePlatformPayment();
   const { isRedirecting } = useNewSettingsRedirect();
 
   const sidebarLinks = [
     {
-      text: "Profile",
+      text: t("Profile", "个人资料"),
       href: "/profile",
       icon: <Icon icon={UserCircleIcon} className="size-5" />,
     },
     {
-      text: "Creator Dashboard",
+      text: t("Creator Dashboard", "创作者面板"),
       href: "/profile/dashboard",
       icon: <Icon icon={Store01Icon} className="size-5" />,
     },
     ...(isPaymentEnabled
       ? [
           {
-            text: "Billing",
+            text: t("Billing", "账单"),
             href: "/profile/credits",
             icon: <Icon icon={Coins01Icon} className="size-5" />,
           },
         ]
       : []),
     {
-      text: "Settings",
+      text: t("Settings", "设置"),
       href: "/profile/settings",
       icon: <Icon icon={SlidersHorizontalIcon} className="size-5" />,
     },
     {
-      text: "API Keys",
+      text: t("API Keys", "API 密钥"),
       href: "/profile/api-keys",
       icon: <Icon icon={Key01Icon} className="size-5" />,
     },
     {
-      text: "OAuth Apps",
+      text: t("OAuth Apps", "OAuth 应用"),
       href: "/profile/oauth-apps",
       icon: <Icon icon={AppWindowIcon} className="size-5" />,
     },

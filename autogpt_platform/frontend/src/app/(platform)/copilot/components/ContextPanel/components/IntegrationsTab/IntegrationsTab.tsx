@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { useCopilotUIStore, type ContextPanelExpert } from "../../../../store";
 import { StackSection } from "../../../WorkspaceFileCards/components/StackSection";
 import { PanelEmptyState } from "../PanelEmptyState/PanelEmptyState";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 /** The chat's expert's integrations, laid out like the files tab: a titled
  *  card of rows, or an empty state that offers the first connection. Same
@@ -40,6 +41,7 @@ export function IntegrationsTab() {
 }
 
 function IntegrationsTabContent({ expert }: { expert: ContextPanelExpert }) {
+  const { t } = useTranslation();
   const {
     granted,
     grantable,
@@ -67,15 +69,17 @@ function IntegrationsTabContent({ expert }: { expert: ContextPanelExpert }) {
       {isGrantableError && !isError ? (
         <div className="flex items-center justify-between gap-3 rounded-xl bg-warning-surface px-3 py-2 ring-1 ring-warning-border ring-inset">
           <Text tone="warning" variant="small">
-            Couldn&apos;t load your connected services, so &ldquo;Use
-            existing&rdquo; is unavailable.
+            {t(
+              "Couldn’t load your connected services, so “Use existing” is unavailable.",
+              "无法加载你已连接的服务，因此“使用现有连接”暂不可用。",
+            )}
           </Text>
           <Button
             variant="secondary"
             size="small"
             onClick={() => void refetch()}
           >
-            Retry
+            {t("Retry", "重试")}
           </Button>
         </div>
       ) : null}
@@ -83,8 +87,11 @@ function IntegrationsTabContent({ expert }: { expert: ContextPanelExpert }) {
         <Skeleton className="h-24 w-full rounded-lg" />
       ) : isError ? (
         <ErrorCard
-          context="this expert's integrations"
-          hint="We could not load what this expert can reach."
+          context={t("this expert's integrations", "此专家的集成")}
+          hint={t(
+            "We could not load what this expert can reach.",
+            "无法加载此专家可访问的服务。",
+          )}
           onRetry={refetch}
         />
       ) : groups.length === 0 ? (
@@ -94,8 +101,11 @@ function IntegrationsTabContent({ expert }: { expert: ContextPanelExpert }) {
             <IntegrationLogo key="notion" provider="notion" size={24} />,
             <IntegrationLogo key="google" provider="google" size={24} />,
           ]}
-          title="No integrations yet"
-          description={`Connect a tool and ${expert.name} can use it on your behalf.`}
+          title={t("No integrations yet", "暂无集成")}
+          description={t(
+            `Connect a tool and ${expert.name} can use it on your behalf.`,
+            `连接工具后，${expert.name} 就能代表你使用它。`,
+          )}
           footer={<ExpertPageLink expert={expert} className="justify-center" />}
         >
           <Button
@@ -104,7 +114,7 @@ function IntegrationsTabContent({ expert }: { expert: ContextPanelExpert }) {
             leadingIcon={PlusSignIcon}
             onClick={openConnect}
           >
-            Add integration
+            {t("Add integration", "添加集成")}
           </Button>
           {canUseExisting && (
             <Button
@@ -113,13 +123,13 @@ function IntegrationsTabContent({ expert }: { expert: ContextPanelExpert }) {
               leadingIcon={Share01Icon}
               onClick={openUseExisting}
             >
-              Use existing
+              {t("Use existing", "使用现有连接")}
             </Button>
           )}
         </PanelEmptyState>
       ) : (
         <StackSection
-          title={`${expert.name}'s integrations`}
+          title={t(`${expert.name}'s integrations`, `${expert.name} 的集成`)}
           icon={PlugSocketIcon}
           count={granted.length}
           action={
@@ -131,7 +141,7 @@ function IntegrationsTabContent({ expert }: { expert: ContextPanelExpert }) {
                   shape="soft"
                   withTooltip={false}
                   onClick={openUseExisting}
-                  aria-label="Use existing"
+                  aria-label={t("Use existing", "使用现有连接")}
                 >
                   <Icon icon={Share01Icon} size={14} />
                 </Button>
@@ -142,7 +152,7 @@ function IntegrationsTabContent({ expert }: { expert: ContextPanelExpert }) {
                 shape="soft"
                 withTooltip={false}
                 onClick={openConnect}
-                aria-label="Add integration"
+                aria-label={t("Add integration", "添加集成")}
               >
                 <Icon icon={PlusSignIcon} size={14} />
               </Button>
@@ -199,6 +209,7 @@ interface ExpertPageLinkProps {
 }
 
 function ExpertPageLink({ expert, className }: ExpertPageLinkProps) {
+  const { t } = useTranslation();
   return (
     <Link
       href={`/team/${expert.id}`}
@@ -207,7 +218,7 @@ function ExpertPageLink({ expert, className }: ExpertPageLinkProps) {
         className,
       )}
     >
-      Open {expert.name}&apos;s page
+      {t(`Open ${expert.name}'s page`, `打开 ${expert.name} 的页面`)}
       <Icon icon={ArrowRight01Icon} size={14} aria-hidden />
     </Link>
   );
@@ -230,7 +241,18 @@ function IntegrationRow({
   isRemoving,
   onRemove,
 }: RowProps) {
+  const { t } = useTranslation();
   const name = formatCredentialName(integration.title, integration.provider);
+  const typeLabel =
+    integration.type === "api_key"
+      ? t("API Key", "API 密钥")
+      : integration.type === "user_password"
+        ? t("Username & password", "用户名和密码")
+        : integration.type === "host_scoped"
+          ? t("Host", "主机")
+          : integration.type === "device_code"
+            ? t("Device auth", "设备授权")
+            : (TYPE_LABELS[integration.type] ?? integration.type);
 
   return (
     <div
@@ -240,7 +262,7 @@ function IntegrationRow({
       <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border-base bg-surface">
         <IntegrationLogo
           provider={icon}
-          alt={`${serviceName} logo`}
+          alt={t(`${serviceName} logo`, `${serviceName} 标志`)}
           size={20}
         />
       </span>
@@ -254,12 +276,12 @@ function IntegrationRow({
           {serviceName}
         </Text>
         <Text tone="muted" variant="small" as="span" className="truncate">
-          {name} · {TYPE_LABELS[integration.type] ?? integration.type}
+          {name} · {typeLabel}
         </Text>
       </span>
       <span
         aria-hidden
-        title="Ready"
+        title={t("Ready", "就绪")}
         className="size-1.5 shrink-0 rounded-full bg-success"
       />
       <span className="flex shrink-0 opacity-0 transition-opacity group-hover:opacity-100 has-[:focus-visible]:opacity-100 [@media(hover:none)]:opacity-100">
@@ -271,7 +293,7 @@ function IntegrationRow({
           onClick={onRemove}
           disabled={isRemoving}
           aria-busy={isRemoving}
-          aria-label={`Remove ${name}`}
+          aria-label={t(`Remove ${name}`, `移除 ${name}`)}
         >
           <Icon
             icon={isRemoving ? Loading03Icon : Delete02Icon}

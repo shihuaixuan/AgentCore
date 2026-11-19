@@ -6,6 +6,7 @@ import { useEdgeStore } from "../../../stores/edgeStore";
 import { CustomNode } from "../nodes/CustomNode/CustomNode";
 import { CustomEdge } from "../edges/CustomEdge";
 import { useToast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface CopyableData {
   nodes: CustomNode[];
@@ -15,6 +16,7 @@ interface CopyableData {
 const CLIPBOARD_PREFIX = "autogpt-flow-data:";
 
 export function useCopyPaste(isReadOnly = false) {
+  const { t } = useTranslation();
   const { getViewport } = useReactFlow();
   const { toast } = useToast();
 
@@ -62,8 +64,11 @@ export function useCopyPaste(isReadOnly = false) {
             .writeText(clipboardText)
             .then(() => {
               toast({
-                title: "Copied successfully",
-                description: `${selectedNodes.length} node(s) copied to clipboard`,
+                title: t("Copied successfully", "复制成功"),
+                description: t(
+                  `${selectedNodes.length} node(s) copied to clipboard`,
+                  `${selectedNodes.length} 个节点已复制到剪贴板`,
+                ),
               });
             })
             .catch((error) => {
@@ -152,7 +157,7 @@ export function useCopyPaste(isReadOnly = false) {
         }
       }
     },
-    [getViewport, toast, isReadOnly],
+    [getViewport, toast, isReadOnly, t],
   );
 
   useEffect(() => {

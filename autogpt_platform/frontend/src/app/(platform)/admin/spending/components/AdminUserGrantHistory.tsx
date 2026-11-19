@@ -23,7 +23,7 @@ export async function AdminUserGrantHistory({
   initialStatus?: CreditTransactionType;
   initialSearch?: string;
 }) {
-  const { t } = await getServerTranslation();
+  const { t, locale } = await getServerTranslation();
   // Server-side data fetching
   const { history, pagination } = await getUsersTransactionHistory(
     initialPage,
@@ -72,13 +72,13 @@ export async function AdminUserGrantHistory({
 
   // Helper function to format the date
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(locale === "zh-CN" ? "zh-CN" : "en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
       hour: "numeric",
       minute: "numeric",
-      hour12: true,
+      hour12: locale !== "zh-CN",
     }).format(new Date(date));
   };
 
@@ -99,7 +99,9 @@ export async function AdminUserGrantHistory({
               <TableHead>{t("Amount", "金额")}</TableHead>
               <TableHead>{t("Ending Balance", "结束余额")}</TableHead>
               {/* <TableHead>Current Balance</TableHead> */}
-              <TableHead className="text-right">{t("Actions", "操作")}</TableHead>
+              <TableHead className="text-right">
+                {t("Actions", "操作")}
+              </TableHead>
             </TableRow>
           </thead>
           <TableBody>
@@ -178,7 +180,7 @@ export async function AdminUserGrantHistory({
                         defaultComments={
                           transaction.transaction_type ===
                           CreditTransactionType.USAGE
-                            ? "Refund for usage"
+                            ? t("Refund for usage", "使用费用退款")
                             : undefined
                         }
                       />

@@ -62,7 +62,7 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
     <section data-testid="expert-integrations-section">
       <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
         <Text variant="large-medium" tone="primary">
-          {expertName}&apos;s Integrations
+          {t(`${expertName}'s Integrations`, `${expertName} 的集成`)}
         </Text>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <Tooltip>
@@ -88,7 +88,10 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
             </TooltipTrigger>
             {isError ? (
               <TooltipContent side="bottom">
-                Couldn&apos;t load what {expertName} already has.
+                {t(
+                  `Couldn't load what ${expertName} already has.`,
+                  `无法加载 ${expertName} 已有的连接。`,
+                )}
               </TooltipContent>
             ) : isGrantableError ? (
               <TooltipContent side="bottom">
@@ -149,8 +152,11 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
       ) : isError ? (
         <ErrorCard
           textSize="body-md"
-          context="this expert's integrations"
-          hint="We could not load what this expert can reach."
+          context={t("this expert's integrations", "此专家的集成")}
+          hint={t(
+            "We could not load what this expert can reach.",
+            "无法加载此专家可访问的服务。",
+          )}
           onRetry={refetch}
         />
       ) : granted.length === 0 ? (
@@ -161,7 +167,10 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
             <IntegrationLogo key="google" provider="google" size={24} />,
           ]}
           title={t("No integrations yet", "暂无集成")}
-          description={`Connect a tool and ${expertName} can use it on your behalf.`}
+          description={t(
+            `Connect a tool and ${expertName} can use it on your behalf.`,
+            `连接工具后，${expertName} 就能代你使用它。`,
+          )}
         >
           <Button
             variant="primary"

@@ -77,7 +77,7 @@ export function MainAgentPage({ params }: Props) {
   }
 
   const breadcrumbs = [
-    { name: "Workflows", link: "/marketplace/workflows" },
+    { name: t("Workflows", "工作流"), link: "/marketplace/workflows" },
     {
       name: agentData.creator ?? "",
       link: `/marketplace/creator/${encodeURIComponent(agentData.creator ?? "")}`,
@@ -164,14 +164,17 @@ export function MainAgentPage({ params }: Props) {
         {otherAgents && (
           <AgentsSection
             agents={otherAgents.agents}
-            sectionTitle={`Other AI workflows by ${agentData.creator ?? ""}`}
+            sectionTitle={t(
+              `Other AI workflows by ${agentData.creator ?? ""}`,
+              `${agentData.creator ?? ""} 的其他 AI 工作流`,
+            )}
           />
         )}
         <div className="mt-[60px] mb-[25px] h-px w-full shrink-0" />
         {similarAgents && similarAgents.agents.length > 0 ? (
           <AgentsSection
             agents={similarAgents.agents}
-            sectionTitle="Similar AI workflows"
+            sectionTitle={t("Similar AI workflows", "类似 AI 工作流")}
           />
         ) : null}
         <BecomeACreator />

@@ -5,6 +5,7 @@
  */
 
 import { watchSpeech } from "./speechLevel";
+import type { Locale } from "@/lib/i18n/locale";
 
 const SILENT_WAV =
   "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAAZGF0YQAAAAA=";
@@ -28,6 +29,7 @@ export function unlockAudio(): HTMLAudioElement {
 
 interface Args {
   synthesize: (text: string) => Promise<Blob>;
+  getLocale?: () => Locale;
   /** The queue ran dry. The caller decides whether the reply is over. */
   onIdle: () => void;
   /** Audio actually started — the moment the user hears anything. */
@@ -40,6 +42,7 @@ export function createSpeechPlayer({
   onIdle,
   onPlaybackStart,
   onError,
+  getLocale = () => "en",
 }: Args) {
   const queue: Promise<Blob | null>[] = [];
   let draining = false;
@@ -115,7 +118,15 @@ export function createSpeechPlayer({
         settle(resolve);
       }
       function onFailed() {
-        settle(() => reject(new Error("Audio playback failed")));
+        settle(() =>
+          reject(
+            new Error(
+              getLocale() === "zh-CN"
+                ? "音频播放失败"
+                : "Audio playback failed",
+            ),
+          ),
+        );
       }
       // Swapping `src` in stop() fires neither "ended" nor "error", so
       // without this the promise never settles, `draining` stays true, and

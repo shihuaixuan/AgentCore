@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { SHOW_TIME_AFTER_SECONDS } from "../JobStatsBar/constants";
 import { formatElapsed } from "../JobStatsBar/formatElapsed";
 import { useElapsedTimer } from "../JobStatsBar/useElapsedTimer";
@@ -46,6 +47,7 @@ interface Props {
 }
 
 export function StepClock({ stepKey }: Props) {
+  const { locale } = useTranslation();
   const [anchorIso] = useState(() => stepStartedAt(stepKey));
   const { elapsedSeconds } = useElapsedTimer(true, anchorIso);
   if (elapsedSeconds < SHOW_TIME_AFTER_SECONDS) return null;
@@ -54,7 +56,7 @@ export function StepClock({ stepKey }: Props) {
       aria-hidden
       className="shrink-0 font-mono text-caption text-foreground-subtle tabular-nums"
     >
-      {formatElapsed(elapsedSeconds)}
+      {formatElapsed(elapsedSeconds, locale)}
     </span>
   );
 }

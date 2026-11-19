@@ -8,6 +8,7 @@ import { AnchoredPanel } from "@/components/molecules/AnchoredPanel/AnchoredPane
 import { isKey } from "@/lib/keyboard";
 import { useStableCallback } from "@/hooks/useStableCallback";
 import { useUsageExperience } from "@/services/usageExperience/useUsageExperience";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useEffect, useId, useRef } from "react";
 import { isOnScreen, withMenuHint, type Box } from "../FirstRunTour/helpers";
 import { TourScrim } from "../FirstRunTour/components/TourScrim";
@@ -15,6 +16,7 @@ import { useTourStops } from "../FirstRunTour/useTourStops";
 import { tipStepOf } from "./helpers";
 import { getTipBody, TIPS, type TipID } from "./tips";
 import { useContextualTips } from "./useContextualTips";
+import { TIP_COPY } from "./tip-translations";
 
 export function ContextualTips() {
   const { active, dismiss, reportShown, postponeActive, othersWaiting } =
@@ -52,6 +54,7 @@ function ContextualTip({
   onUnavailable,
   othersWaiting,
 }: Props) {
+  const { t } = useTranslation();
   const tip = TIPS[id];
   const [stop] = useTourStops(tipStepOf(id));
   const box = stop?.box ?? null;
@@ -73,9 +76,11 @@ function ContextualTip({
   const { experience } = useUsageExperience();
   const titleID = useId();
   const isMenu = stop?.target === "menu";
-  const body = withMenuHint(
-    getTipBody(id, { isTrial: experience.isActiveTrial }),
-    isMenu,
+  const originalBody = getTipBody(id, { isTrial: experience.isActiveTrial });
+  const title = t(tip.title, TIP_COPY[tip.title] ?? tip.title);
+  const body = t(
+    withMenuHint(originalBody, isMenu),
+    `${TIP_COPY[originalBody] ?? originalBody}${isMenu ? "打开菜单即可找到。" : ""}`,
   );
   const hasBox = isOnScreen(box);
   const giveWay = useStableCallback(onUnavailable);
@@ -120,7 +125,7 @@ function ContextualTip({
           <span className="flex items-center gap-1.5 text-foreground-secondary">
             <Icon icon={BulbIcon} size={14} aria-hidden />
             <Text variant="small-medium" tone="inherit">
-              Tip
+              {t("Tip", "提示")}
             </Text>
           </span>
           <Text
@@ -130,7 +135,7 @@ function ContextualTip({
             tone="primary"
             className="[overflow-wrap:anywhere]"
           >
-            {tip.title}
+            {title}
           </Text>
           <Text
             variant="small"
@@ -146,12 +151,12 @@ function ContextualTip({
             onClick={onDismiss}
             className="mt-1 self-end"
           >
-            Got it
+            {t("Got it", "知道了")}
           </Button>
         </div>
       </AnchoredPanel>
       <p className="sr-only" role="status" aria-live="polite">
-        {`Tip: ${tip.title}. ${body}`}
+        {t(`Tip: ${title}. ${body}`, `提示：${title}。${body}`)}
       </p>
     </>
   );

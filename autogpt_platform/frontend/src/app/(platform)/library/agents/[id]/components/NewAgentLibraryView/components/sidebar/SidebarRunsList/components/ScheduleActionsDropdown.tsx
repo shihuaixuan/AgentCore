@@ -62,7 +62,7 @@ export function ScheduleActionsDropdown({
       invalidateAllScheduleQueries(queryClient, agent.graph_id);
     } catch (error: unknown) {
       toast({
-        title: "Failed to delete schedule",
+        title: t("Failed to delete schedule", "无法删除计划"),
         description:
           error instanceof Error
             ? error.message
@@ -76,7 +76,7 @@ export function ScheduleActionsDropdown({
     e.stopPropagation();
 
     try {
-      toast({ title: "Run started" });
+      toast({ title: t("Run started", "运行已开始") });
 
       const res = await executeAgent({
         graphId: schedule.graph_id,
@@ -99,7 +99,7 @@ export function ScheduleActionsDropdown({
       }
     } catch (error: unknown) {
       toast({
-        title: "Failed to start run",
+        title: t("Failed to start run", "无法开始运行"),
         description:
           error instanceof Error
             ? error.message
@@ -123,7 +123,9 @@ export function ScheduleActionsDropdown({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleRunNow} disabled={isRunning}>
-            {isRunning ? "Running..." : t("Run now", "立即运行")}
+            {isRunning
+              ? t("Running...", "正在运行…")
+              : t("Run now", "立即运行")}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem

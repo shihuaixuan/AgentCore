@@ -4,6 +4,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
 import React from "react";
 import { ShowMoreTextVariant } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   children: string;
@@ -22,6 +23,7 @@ export function ShowMoreText({
   toggleClassName,
   defaultExpanded = false,
 }: Props) {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
 
   const shouldTruncate = children.length > previewLimit;
@@ -51,6 +53,9 @@ export function ShowMoreText({
       {displayText}
       {!isExpanded && "..."}
       <button
+        aria-label={
+          isExpanded ? t("Show less", "收起内容") : t("Show more", "显示更多")
+        }
         onClick={() => setIsExpanded(!isExpanded)}
         data-slot="show-more-text-toggle"
         className={cn(

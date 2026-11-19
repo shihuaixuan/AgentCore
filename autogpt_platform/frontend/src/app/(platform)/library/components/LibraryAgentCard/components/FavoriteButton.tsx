@@ -6,6 +6,7 @@ import { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FavouriteIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface FavoriteButtonProps {
   isFavorite: boolean;
@@ -21,6 +22,7 @@ export function FavoriteButton({
   onClick,
   className,
 }: FavoriteButtonProps) {
+  const { t } = useTranslation();
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   function handleClick(e: MouseEvent<HTMLButtonElement>) {
@@ -47,7 +49,11 @@ export function FavoriteButton({
           : "text-foreground-secondary hover:text-error",
         className,
       )}
-      aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+      aria-label={
+        isFavorite
+          ? t("Remove from favorites", "取消收藏")
+          : t("Add to favorites", "添加收藏")
+      }
     >
       <AnimatePresence mode="wait" initial={false}>
         <motion.div

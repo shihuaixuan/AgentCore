@@ -2,6 +2,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { toast } from "@/components/molecules/Toast/use-toast";
 import { environment } from "@/services/environment";
 import { SessionKey } from "@/services/storage/session-storage";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const DEPLOYMENT_RELOAD_COOLDOWN_MS = 60_000;
 // Stored in place of the reload's timestamp once the page it loaded was
@@ -65,13 +66,26 @@ function promptForRefresh(reload: () => void): void {
   if (hasPromptedForRefresh) return;
   hasPromptedForRefresh = true;
   toast({
-    title: "A new version of AutoGPT is available",
-    description: "Refresh the page to keep going.",
+    title: <DeploymentCopy kind="title" />,
+    description: <DeploymentCopy kind="description" />,
     duration: Infinity,
     action: (
       <Button variant="secondary" size="small" onClick={reload}>
-        Refresh
+        <DeploymentCopy kind="action" />
       </Button>
     ),
   });
+}
+
+function DeploymentCopy({
+  kind,
+}: {
+  kind: "title" | "description" | "action";
+}) {
+  const { t } = useTranslation();
+  if (kind === "title")
+    return t("A new version of AutoGPT is available", "AutoGPT 有新版本可用");
+  if (kind === "description")
+    return t("Refresh the page to keep going.", "请刷新页面以继续使用。");
+  return t("Refresh", "刷新");
 }

@@ -46,7 +46,10 @@ export function ApiKeyConnectForm({
                 id={field.name}
                 autoComplete="off"
                 label={t("Name", "名称")}
-                placeholder={`My ${providerName} key`}
+                placeholder={t(
+                  `My ${providerName} key`,
+                  `我的 ${providerName} 密钥`,
+                )}
                 wrapperClassName="!mb-0"
               />
             </FormControl>
@@ -89,7 +92,10 @@ export function ApiKeyConnectForm({
                 id={field.name}
                 type="date"
                 label={t("Expires (optional)", "到期时间（可选）")}
-                hint="Leave blank to keep the key indefinitely"
+                hint={t(
+                  "Leave blank to keep the key indefinitely",
+                  "留空则密钥永久有效",
+                )}
                 wrapperClassName="!mb-0"
               />
             </FormControl>

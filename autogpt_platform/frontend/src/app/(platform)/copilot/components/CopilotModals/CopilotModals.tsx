@@ -10,8 +10,10 @@ import { grantToExpert } from "@/services/experts/grant-to-expert";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCopilotUIStore } from "../../store";
 import { useCopilotModal } from "../../useCopilotModal";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function CopilotModals() {
+  const { t } = useTranslation();
   const { modal, closeModal } = useCopilotModal();
   const setInitialPrompt = useCopilotUIStore((s) => s.setInitialPrompt);
   const expert = useCopilotUIStore((s) => s.contextPanelExpert);
@@ -32,8 +34,14 @@ export function CopilotModals() {
     const ok = await grantToExpert(queryClient, expert.id, credential.id);
     if (!ok) {
       toast({
-        title: `Connected, but could not give ${expert.name} access`,
-        description: "Grant it from the Integrations tab.",
+        title: t(
+          `Connected, but could not give ${expert.name} access`,
+          `已连接，但无法授予 ${expert.name} 访问权限`,
+        ),
+        description: t(
+          "Grant it from the Integrations tab.",
+          "请在集成选项卡中授予权限。",
+        ),
         variant: "destructive",
       });
     }
@@ -44,7 +52,7 @@ export function CopilotModals() {
       <Dialog
         controlled={{ isOpen: modal === "skills", set: handleOpenChange }}
         styling={{ maxWidth: "44rem" }}
-        title="Skills"
+        title={t("Skills", "技能")}
       >
         <Dialog.Content>
           <SkillsPanel
@@ -57,7 +65,7 @@ export function CopilotModals() {
       <Dialog
         controlled={{ isOpen: modal === "scheduled", set: handleOpenChange }}
         styling={{ maxWidth: "44rem" }}
-        title="Scheduled"
+        title={t("Scheduled", "已安排")}
       >
         <Dialog.Content>
           <SchedulesPanel
@@ -70,7 +78,7 @@ export function CopilotModals() {
       <Dialog
         controlled={{ isOpen: modal === "integrations", set: handleOpenChange }}
         styling={{ maxWidth: "56rem" }}
-        title="Integrations"
+        title={t("Integrations", "集成")}
       >
         <Dialog.Content>
           <IntegrationsPanel

@@ -17,14 +17,16 @@ import {
 import type { BotServerCountPoint } from "@/app/api/__generated__/models/botServerCountPoint";
 
 import { formatDay, formatNumber, SHARDING_THRESHOLD } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   data: BotServerCountPoint[];
 }
 
 export function ServerGrowthChart({ data }: Props) {
+  const { t, locale } = useTranslation();
   const chartData = data.map((point) => ({
-    date: formatDay(point.date),
+    date: formatDay(point.date, locale),
     Servers: point.server_count,
   }));
   const peak = data.reduce(
@@ -62,12 +64,13 @@ export function ServerGrowthChart({ data }: Props) {
               y={SHARDING_THRESHOLD}
               stroke="#ef4444"
               strokeDasharray="4 4"
-              label="Sharding threshold"
+              label={t("Sharding threshold", "分片阈值")}
             />
           )}
           <Area
             type="monotone"
             dataKey="Servers"
+            name={t("Servers", "服务器")}
             stroke="#6366f1"
             strokeWidth={2}
             fill="url(#serverFill)"
@@ -75,8 +78,10 @@ export function ServerGrowthChart({ data }: Props) {
         </AreaChart>
       </ResponsiveContainer>
       <p className="mt-2 text-caption text-foreground-tertiary">
-        Sharding threshold: {formatNumber(SHARDING_THRESHOLD)} servers · current
-        peak in range: {formatNumber(peak)}
+        {t(
+          `Sharding threshold: ${formatNumber(SHARDING_THRESHOLD)} servers · current peak in range: ${formatNumber(peak)}`,
+          `分片阈值：${formatNumber(SHARDING_THRESHOLD)} 台服务器 · 当前范围内峰值：${formatNumber(peak)}`,
+        )}
       </p>
     </div>
   );

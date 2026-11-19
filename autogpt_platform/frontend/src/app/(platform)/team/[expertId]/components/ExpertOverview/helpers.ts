@@ -1,5 +1,6 @@
 import type { ExpertActivityDay } from "@/app/api/__generated__/models/expertActivityDay";
 import { format, parseISO } from "date-fns";
+import type { Locale } from "@/lib/i18n/locale";
 
 export const OVERVIEW_WINDOW_DAYS = 30;
 
@@ -25,12 +26,15 @@ export interface ChartDay {
 }
 
 /** The last 30 days, oldest first, shaped for the activity chart. */
-export function getChartDays(days: ExpertActivityDay[]): ChartDay[] {
+export function getChartDays(
+  days: ExpertActivityDay[],
+  locale: Locale = "en",
+): ChartDay[] {
   return days.slice(-OVERVIEW_WINDOW_DAYS).map((day) => {
     const key = dayKey(day.day);
     return {
       key,
-      label: format(parseISO(key), "MMM d"),
+      label: format(parseISO(key), locale === "zh-CN" ? "M月d日" : "MMM d"),
       sessions: day.sessions,
       runs: day.runs,
     };
@@ -59,7 +63,12 @@ export function getWindowStat(
   return { current, delta: current - previous };
 }
 
-export function formatDelta(delta: number): string {
+export function formatDelta(delta: number, locale: Locale = "en"): string {
+  if (locale === "zh-CN") {
+    return delta === 0
+      ? "与此前 30 天相同"
+      : `比此前 30 天 ${delta > 0 ? "+" : "−"}${Math.abs(delta).toLocaleString(locale)}`;
+  }
   if (delta === 0) return "Same as the 30 days before";
   return `${delta > 0 ? "+" : "−"}${Math.abs(delta)} vs the 30 days before`;
 }

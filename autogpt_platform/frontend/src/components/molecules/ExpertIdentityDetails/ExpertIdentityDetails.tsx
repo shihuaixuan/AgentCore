@@ -1,4 +1,7 @@
+"use client";
+
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getExpertRoleLabel } from "@/services/experts/expert-role-label";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
@@ -30,9 +33,16 @@ export function ExpertIdentityDetails({
   areaClassName,
   areaColor,
 }: Props) {
+  const { t, locale } = useTranslation();
   const compact = size === "compact";
   const Container = compact ? "span" : "div";
-  const area = jobTitle || (role ? getExpertRoleLabel(role) : null);
+  const area =
+    jobTitle ||
+    (role
+      ? isOtto && role === "Head of AI"
+        ? t("Head of AI", "AI 负责人")
+        : getExpertRoleLabel(role, locale)
+      : null);
   // What someone does says more than "AI Expert" does, so on a card or a page
   // it rides the name line and takes that line's place. Compact sizes have no
   // room for it and keep it on the line below. The category pill belongs to
@@ -126,7 +136,9 @@ export function ExpertIdentityDetails({
           tone="muted"
           data-slot="expert-identity-subtitle"
         >
-          {isOtto ? "Your personal Head of AI" : "AI Expert"}
+          {isOtto
+            ? t("Your personal Head of AI", "您的专属 AI 负责人")
+            : t("AI Expert", "AI 专家")}
         </Text>
       ) : null}
       {compact && area ? (

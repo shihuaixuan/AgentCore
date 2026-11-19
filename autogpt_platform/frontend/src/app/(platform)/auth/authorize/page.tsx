@@ -12,12 +12,14 @@ import {
   useGetOauthGetOauthAppInfo,
 } from "@/app/api/__generated__/endpoints/oauth/oauth";
 import type { APIKeyPermission } from "@/app/api/__generated__/models/aPIKeyPermission";
-import { SCOPE_DESCRIPTIONS } from "@/lib/api-key-scopes";
+import { getScopeDescription } from "@/lib/api-key-scopes";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { CheckmarkBadge01Icon, Image01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 
 export default function AuthorizePage() {
+  const { t, locale } = useTranslation();
   const searchParams = useSearchParams();
 
   // Extract OAuth parameters from URL
@@ -86,13 +88,20 @@ export default function AuthorizePage() {
       if (response.status === 200 && response.data.redirect_url) {
         window.location.href = response.data.redirect_url;
       } else {
-        setAuthorizeError("Authorization failed: no redirect URL received");
+        setAuthorizeError(
+          t(
+            "Authorization failed: no redirect URL received",
+            "授权失败：未收到重定向地址",
+          ),
+        );
         setIsAuthorizing(false);
       }
     } catch (err) {
       console.error("Authorization error:", err);
       setAuthorizeError(
-        err instanceof Error ? err.message : "Authorization failed",
+        err instanceof Error
+          ? err.message
+          : t("Authorization failed", "授权失败"),
       );
       setIsAuthorizing(false);
     }
@@ -113,13 +122,19 @@ export default function AuthorizePage() {
   if (missingParams.length > 0) {
     return (
       <div className="flex h-full min-h-[85vh] flex-col items-center justify-center py-10">
-        <AuthCard title="Invalid Request">
+        <AuthCard title={t("Invalid Request", "无效请求")}>
           <ErrorCard
-            context="request parameters"
+            context={t("request parameters", "请求参数")}
             responseError={{
-              message: `Missing required parameters: ${missingParams.join(", ")}`,
+              message: t(
+                `Missing required parameters: ${missingParams.join(", ")}`,
+                `缺少必填参数：${missingParams.join("、")}`,
+              ),
             }}
-            hint="Please contact the administrator of the app that sent you here."
+            hint={t(
+              "Please contact the administrator of the app that sent you here.",
+              "请联系发起此请求的应用管理员。",
+            )}
             isOurProblem={false}
           />
         </AuthCard>
@@ -131,11 +146,11 @@ export default function AuthorizePage() {
   if (isLoading) {
     return (
       <div className="flex h-full min-h-[85vh] flex-col items-center justify-center py-10">
-        <AuthCard title="Loading...">
+        <AuthCard title={t("Loading...", "加载中…")}>
           <div className="flex flex-col items-center gap-4 py-8">
             <LoadingSpinner size="large" />
             <Text variant="body" tone="secondary" className="text-center">
-              Loading application information...
+              {t("Loading application information...", "正在加载应用信息…")}
             </Text>
           </div>
         </AuthCard>
@@ -149,16 +164,22 @@ export default function AuthorizePage() {
     return (
       <div className="flex h-full min-h-[85vh] flex-col items-center justify-center py-10">
         <AuthCard
-          title={redirectRejected ? "Invalid Request" : "Application Not Found"}
+          title={
+            redirectRejected
+              ? t("Invalid Request", "无效请求")
+              : t("Application Not Found", "未找到应用")
+          }
         >
           <ErrorCard
-            context="application"
+            context={t("application", "应用")}
             responseError={
               error
                 ? error
                 : {
-                    message:
+                    message: t(
                       "The application you're trying to authorize could not be found or is disabled.",
+                      "你要授权的应用不存在或已被停用。",
+                    ),
                   }
             }
             onRetry={refetch}
@@ -176,13 +197,19 @@ export default function AuthorizePage() {
   if (invalidScopes.length > 0) {
     return (
       <div className="flex h-full min-h-[85vh] flex-col items-center justify-center py-10">
-        <AuthCard title="Invalid Scopes">
+        <AuthCard title={t("Invalid Scopes", "无效的权限范围")}>
           <ErrorCard
-            context="scopes"
+            context={t("scopes", "权限范围")}
             responseError={{
-              message: `The application is requesting scopes it is not authorized for: ${invalidScopes.join(", ")}`,
+              message: t(
+                `The application is requesting scopes it is not authorized for: ${invalidScopes.join(", ")}`,
+                `该应用请求了未经许可的权限范围：${invalidScopes.join("、")}`,
+              ),
             }}
-            hint="Please contact the administrator of the app that sent you here."
+            hint={t(
+              "Please contact the administrator of the app that sent you here.",
+              "请联系发起此请求的应用管理员。",
+            )}
             isOurProblem={false}
           />
           <Button
@@ -190,7 +217,7 @@ export default function AuthorizePage() {
             onClick={handleDeny}
             className="mt-4 w-full"
           >
-            Return to Application
+            {t("Return to Application", "返回应用")}
           </Button>
         </AuthCard>
       </div>
@@ -199,7 +226,7 @@ export default function AuthorizePage() {
 
   return (
     <div className="flex h-full min-h-[85vh] flex-col items-center justify-center py-10">
-      <AuthCard title="Authorize Application">
+      <AuthCard title={t("Authorize Application", "授权应用")}>
         <div className="flex w-full flex-col gap-6">
           {/* App info */}
           <div className="flex flex-col items-center text-center">
@@ -209,7 +236,7 @@ export default function AuthorizePage() {
                 // eslint-disable-next-line @next/next/no-img-element -- an OAuth app logo can come from any host, which next/image only loads from listed ones
                 <img
                   src={appInfo.logo_url}
-                  alt={`${appInfo.name} logo`}
+                  alt={t(`${appInfo.name} logo`, `${appInfo.name} 标志`)}
                   className="h-full w-full object-cover"
                 />
               ) : (
@@ -229,7 +256,10 @@ export default function AuthorizePage() {
           {/* Permissions */}
           <div>
             <Text variant="body-medium" className="mb-3">
-              This application is requesting permission to:
+              {t(
+                "This application is requesting permission to:",
+                "此应用正在请求以下权限：",
+              )}
             </Text>
             <ul className="space-y-2">
               {requestedScopes.map((scopeKey) => (
@@ -240,8 +270,10 @@ export default function AuthorizePage() {
                     className="mt-0.5"
                   />
                   <Text variant="body">
-                    {SCOPE_DESCRIPTIONS[scopeKey as APIKeyPermission] ||
-                      scopeKey}
+                    {getScopeDescription(
+                      scopeKey as APIKeyPermission,
+                      locale,
+                    ) || scopeKey}
                   </Text>
                 </li>
               ))}
@@ -251,7 +283,7 @@ export default function AuthorizePage() {
           {/* Error message */}
           {authorizeError && (
             <ErrorCard
-              context="authorization"
+              context={t("authorization", "授权")}
               responseError={{ message: authorizeError }}
             />
           )}
@@ -265,7 +297,9 @@ export default function AuthorizePage() {
               textSize="body-md"
               className="w-full"
             >
-              {isAuthorizing ? "Authorizing..." : "Authorize"}
+              {isAuthorizing
+                ? t("Authorizing...", "授权中…")
+                : t("Authorize", "授权")}
             </Button>
             <Button
               variant="secondary"
@@ -274,14 +308,16 @@ export default function AuthorizePage() {
               textSize="body-md"
               className="w-full"
             >
-              Deny
+              {t("Deny", "拒绝")}
             </Button>
           </div>
 
           {/* Warning */}
           <Text variant="small" tone="secondary" className="text-center">
-            By authorizing, you allow this application to access your AutoGPT
-            account with the permissions listed above.
+            {t(
+              "By authorizing, you allow this application to access your AutoGPT account with the permissions listed above.",
+              "授权后，此应用将能够按上述权限访问你的 AutoGPT 账户。",
+            )}
           </Text>
         </div>
       </AuthCard>

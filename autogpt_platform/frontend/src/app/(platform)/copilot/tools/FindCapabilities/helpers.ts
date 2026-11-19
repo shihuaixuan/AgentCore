@@ -69,53 +69,72 @@ export function queryOf(part: FindCapabilityToolPart): string | undefined {
   return typeof query === "string" ? query.trim() : undefined;
 }
 
-export function getAnimationText(part: FindCapabilityToolPart): string {
+export function getAnimationText(
+  part: FindCapabilityToolPart,
+  t = (english: string, _chinese: string) => english,
+): string {
   const query = queryOf(part);
   const queryText = query ? ` for "${query}"` : "";
   switch (part.state) {
     case "input-streaming":
     case "input-available":
-      return `Searching capabilities${queryText}`;
+      return t(
+        `Searching capabilities${queryText}`,
+        `正在搜索能力${query ? `：“${query}”` : ""}`,
+      );
     case "output-available": {
       const parsed = parseOutput(part.output);
       if (parsed) {
-        return `Found ${parsed.count} capabilit${parsed.count === 1 ? "y" : "ies"}${queryText}`;
+        return t(
+          `Found ${parsed.count} capabilit${parsed.count === 1 ? "y" : "ies"}${queryText}`,
+          `找到 ${parsed.count} 项能力${query ? `：“${query}”` : ""}`,
+        );
       }
-      return `Searched capabilities${queryText}`;
+      return t(
+        `Searched capabilities${queryText}`,
+        `已搜索能力${query ? `：“${query}”` : ""}`,
+      );
     }
     case "output-error":
-      return `Search failed${queryText}`;
+      return t(
+        `Search failed${queryText}`,
+        `搜索失败${query ? `：“${query}”` : ""}`,
+      );
     default:
-      return "Searching capabilities";
+      return t("Searching capabilities", "正在搜索能力");
   }
 }
 
 export function connectionBadge(
   item: CapabilityListing,
+  t = (english: string, _chinese: string) => english,
 ): ConnectionBadge | null {
   if (item.connected === undefined || item.connected === null) return null;
   if (item.connected === "needs_expert_grant") {
     return {
-      label: "grant needed",
+      label: t("grant needed", "需要授权"),
       className: "bg-warning-surface text-warning-foreground",
     };
   }
   if (item.connected) {
     return {
-      label: "connected",
+      label: t("connected", "已连接"),
       className: "bg-success-surface text-success-foreground",
     };
   }
   return {
-    label: "sign in",
+    label: t("sign in", "登录"),
     className: "bg-surface-hover text-foreground-tertiary",
   };
 }
 
-export function kindLabel(item: CapabilityListing): string {
-  if (item.kind === "mcp_server") return "integration";
-  if (item.kind === "skill") return "skill";
-  if (item.class === "primitive") return "building block";
-  if (item.kind === "tool") return "tool";
-  return "action";
+export function kindLabel(
+  item: CapabilityListing,
+  t = (english: string, _chinese: string) => english,
+): string {
+  if (item.kind === "mcp_server") return t("integration", "集成");
+  if (item.kind === "skill") return t("skill", "技能");
+  if (item.class === "primitive") return t("building block", "基础模块");
+  if (item.kind === "tool") return t("tool", "工具");
+  return t("action", "动作");
 }

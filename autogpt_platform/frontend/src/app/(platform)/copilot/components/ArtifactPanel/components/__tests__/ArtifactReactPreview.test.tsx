@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ArtifactReactPreview } from "../ArtifactReactPreview";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import {
   buildReactArtifactSrcDoc,
   collectPreviewStyles,
@@ -14,6 +15,22 @@ vi.mock("../reactArtifactPreview", () => ({
 }));
 
 describe("ArtifactReactPreview", () => {
+  it("localizes preview errors without translating compiler diagnostics", async () => {
+    vi.mocked(transpileReactArtifactSource).mockRejectedValue(
+      new Error("Raw syntax error"),
+    );
+    render(
+      <LanguageProvider>
+        <ArtifactReactPreview
+          source="raw invalid source"
+          title="Original.tsx"
+        />
+      </LanguageProvider>,
+    );
+    expect(await screen.findByText("无法渲染 React 预览")).toBeDefined();
+    expect(screen.getByText("Raw syntax error")).toBeDefined();
+  });
+
   beforeEach(() => {
     vi.mocked(collectPreviewStyles).mockReturnValue("<style>preview</style>");
     vi.mocked(buildReactArtifactSrcDoc).mockReturnValue("<html>preview</html>");

@@ -39,20 +39,28 @@ export function useAttentionDecisions() {
       );
       if (response.status !== 200 || response.data.failed_count > 0) {
         const message = response.status === 200 ? response.data.error : null;
-        throw new Error(message || "The review could not be processed.");
+        throw new Error(
+          message ||
+            t("The review could not be processed.", "无法处理此审核。"),
+        );
       }
       trackFunnel("home_attention_actioned", {
         kind: item.kind,
         action: approved ? "approve" : "decline",
       });
-      toast({ title: approved ? t("Approved", "已批准") : "Declined" });
+      toast({
+        title: approved ? t("Approved", "已批准") : t("Declined", "已拒绝"),
+      });
       await queryClient.invalidateQueries({
         queryKey: getGetHomeDashboardQueryKey(),
       });
     } catch (error) {
       toast({
-        title: approved ? "Could not approve" : "Could not decline",
-        description: error instanceof Error ? error.message : "Try again.",
+        title: approved
+          ? t("Could not approve", "无法批准")
+          : t("Could not decline", "无法拒绝"),
+        description:
+          error instanceof Error ? error.message : t("Try again.", "请重试。"),
         variant: "destructive",
       });
     } finally {

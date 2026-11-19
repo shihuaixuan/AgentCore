@@ -1,3 +1,4 @@
+import type { Locale } from "@/lib/i18n/locale";
 export { integrationIconSrc } from "@/components/molecules/IntegrationLogo/helpers";
 
 /** Text the backend escaped for a model's context (`&`, `<`, `>`), as the
@@ -219,10 +220,19 @@ const DATE_TIME_FORMATTER = new Intl.DateTimeFormat(undefined, {
   minute: "2-digit",
 });
 
-export function formatWhen(iso: string): string {
+const CHINESE_DATE_TIME_FORMATTER = new Intl.DateTimeFormat("zh-CN", {
+  month: "long",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+});
+
+export function formatWhen(iso: string, locale: Locale = "en"): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return DATE_TIME_FORMATTER.format(date);
+  return (
+    locale === "zh-CN" ? CHINESE_DATE_TIME_FORMATTER : DATE_TIME_FORMATTER
+  ).format(date);
 }
 
 export function formatBytes(bytes: number): string {

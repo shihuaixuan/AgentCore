@@ -35,7 +35,10 @@ export function WeeklyPicker({
   }
   const items = weekDays.map((d) => ({
     value: String(d.value),
-    label: d.label,
+    label: t(
+      d.label,
+      ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][d.value],
+    ),
   }));
   const selectedValues = values.map((v) => String(v));
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AlertCircleIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 
@@ -36,6 +37,7 @@ export const RefundModal = ({
   formatCredits,
   refundCredits,
 }: RefundModalProps) => {
+  const { t, locale } = useTranslation();
   const [selectedTransactionId, setSelectedTransactionId] =
     useState<string>("");
   const [refundReason, setRefundReason] = useState("");
@@ -56,12 +58,19 @@ export const RefundModal = ({
     );
 
     if (!selectedTransaction) {
-      setError("Please select a transaction to refund");
+      setError(
+        t("Please select a transaction to refund", "请选择要退款的交易"),
+      );
       return;
     }
 
     if (refundReason.trim().length < 20) {
-      setError("Please provide a clear reason for the refund");
+      setError(
+        t(
+          "Please provide a clear reason for the refund",
+          "请提供清晰的退款原因",
+        ),
+      );
       return;
     }
 
@@ -74,7 +83,7 @@ export const RefundModal = ({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Request Refund</DialogTitle>
+          <DialogTitle>{t("Request Refund", "申请退款")}</DialogTitle>
         </DialogHeader>
         <div className="py-4">
           <div className="space-y-4">
@@ -89,19 +98,24 @@ export const RefundModal = ({
 
             {transactions.length === 0 ? (
               <Text variant="body-tight" tone="muted">
-                No eligible transactions found for refund.
+                {t(
+                  "No eligible transactions found for refund.",
+                  "未找到符合退款条件的交易。",
+                )}
               </Text>
             ) : (
               <div className="space-y-2">
                 <Text variant="body-medium-tight" as="label" tone="inherit">
-                  Select Transaction
+                  {t("Select Transaction", "选择交易")}
                 </Text>
                 <Select
                   value={selectedTransactionId}
                   onValueChange={setSelectedTransactionId}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a transaction" />
+                    <SelectValue
+                      placeholder={t("Select a transaction", "选择一笔交易")}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {transactions.map((transaction) => (
@@ -110,7 +124,7 @@ export const RefundModal = ({
                         value={transaction.transaction_key}
                       >
                         {new Date(transaction.transaction_time).toLocaleString(
-                          undefined,
+                          locale,
                           {
                             month: "short",
                             day: "numeric",
@@ -130,12 +144,15 @@ export const RefundModal = ({
             <div className="space-y-2">
               <label htmlFor="refundReason">
                 <Text variant="body-medium-tight" as="span" tone="inherit">
-                  Reason for Refund
+                  {t("Reason for Refund", "退款原因")}
                 </Text>
               </label>
               <Textarea
                 id="refundReason"
-                placeholder="Please explain why you're requesting a refund..."
+                placeholder={t(
+                  "Please explain why you're requesting a refund...",
+                  "请说明申请退款的原因…",
+                )}
                 value={refundReason}
                 onChange={(e) => setRefundReason(e.target.value)}
                 className="min-h-[100px]"
@@ -149,14 +166,14 @@ export const RefundModal = ({
             size="compact"
             onClick={handleClose}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button
             variant="compact-primary"
             size="compact"
             onClick={handleRefundRequest}
           >
-            Request Refund
+            {t("Request Refund", "申请退款")}
           </Button>
         </div>
       </DialogContent>

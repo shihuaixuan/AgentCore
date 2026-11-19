@@ -19,9 +19,10 @@ import { useLearningHistory } from "./useLearningHistory";
 import { useMemoryPage } from "./useMemoryPage";
 
 export default function SettingsMemoryPage() {
+  const { t } = useTranslation();
   useEffect(() => {
-    document.title = "Memory – AutoGPT Platform";
-  }, []);
+    document.title = t("Memory – AutoGPT Platform", "记忆 – AutoGPT 平台");
+  }, [t]);
 
   if (!environment.isGraphMemoryAvailable()) {
     return <UnavailableMemorySettings />;
@@ -59,7 +60,10 @@ function MemorySettings() {
           {t("Memory", "记忆")}
         </Text>
         <Text variant="body" tone="body" className="mt-4 max-w-[600px]">
-          {"What AutoGPT remembers about you — and who remembers it."}
+          {t(
+            "What AutoGPT remembers about you — and who remembers it.",
+            "AutoGPT 记住了你的哪些信息，以及由谁记住。",
+          )}
         </Text>
       </header>
 
@@ -80,7 +84,7 @@ function MemorySettings() {
       {isFactsError ? (
         <ErrorCard
           responseError={factsError || undefined}
-          context="memory"
+          context={t("memory", "记忆")}
           onRetry={refetchFacts}
         />
       ) : (

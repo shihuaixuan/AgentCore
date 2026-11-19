@@ -33,8 +33,8 @@ export function DecisionView({
   onDraftChange,
   onDecide,
 }: Props) {
-  const { t } = useTranslation();
-  const changes = stepChanges(current?.body ?? "", proposal.body ?? "");
+  const { locale, t } = useTranslation();
+  const changes = stepChanges(current?.body ?? "", proposal.body ?? "", locale);
   return (
     <section
       aria-label={t("Needs your decision", "需要你决定")}

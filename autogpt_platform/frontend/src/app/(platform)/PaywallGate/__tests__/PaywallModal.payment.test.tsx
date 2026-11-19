@@ -105,7 +105,9 @@ test("a failed first trial charge pays the open invoice instead of choosing a pl
 
   render(<PaywallModal />);
 
-  const pay = await screen.findByRole("link", { name: "Pay $50 now" });
+  const pay = await screen.findByRole("link", {
+    name: /^Pay (?:US\$|\$)50 now$/,
+  });
   expect(pay.getAttribute("href")).toBe(PAYMENT_URL);
   expect(screen.getByText("Your payment didn’t go through")).toBeDefined();
   expect(screen.queryByText("Choose a plan to keep working")).toBeNull();

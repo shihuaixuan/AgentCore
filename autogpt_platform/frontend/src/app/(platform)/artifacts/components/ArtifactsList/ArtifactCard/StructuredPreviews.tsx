@@ -15,13 +15,13 @@ import {
 import { Fallback, LoadingPlaceholder, useFileText } from "./PreviewParts";
 import { CallIcon, Mail02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 
 interface PreviewProps {
   file: WorkspaceFileItem;
   onError: () => void;
 }
-
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 interface DateParts {
   year: number;
@@ -47,10 +47,11 @@ function parseDateTime(value: string | undefined): DateParts | null {
   };
 }
 
-function weekdayLabel(dt: DateParts): string {
-  return WEEKDAYS[
-    new Date(Date.UTC(dt.year, dt.month - 1, dt.day)).getUTCDay()
-  ];
+function weekdayLabel(date: DateParts, locale: Locale): string {
+  return new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(date.year, date.month - 1, date.day)));
 }
 
 function clock(hour: number, minute: number): string {
@@ -64,18 +65,26 @@ function meridiem(hour: number): string {
 function formatTimeRange(
   start: string | undefined,
   end: string | undefined,
+  locale: Locale,
 ): string | null {
-  const s = parseDateTime(start);
-  if (!s || s.hour === null || s.minute === null) return null;
-  const e = parseDateTime(end);
-  if (e && e.hour !== null && e.minute !== null) {
-    // Collapse the meridiem when both ends share it: "3:30–4:30 PM".
-    if (meridiem(s.hour) === meridiem(e.hour)) {
-      return `${clock(s.hour, s.minute)}–${clock(e.hour, e.minute)} ${meridiem(e.hour)}`;
-    }
-    return `${clock(s.hour, s.minute)} ${meridiem(s.hour)} – ${clock(e.hour, e.minute)} ${meridiem(e.hour)}`;
+  const startDate = parseDateTime(start);
+  if (!startDate || startDate.hour === null || startDate.minute === null)
+    return null;
+  const endDate = parseDateTime(end);
+  if (locale === "zh-CN") {
+    const startTime = `${String(startDate.hour).padStart(2, "0")}:${String(startDate.minute).padStart(2, "0")}`;
+    return endDate && endDate.hour !== null && endDate.minute !== null
+      ? `${startTime}–${String(endDate.hour).padStart(2, "0")}:${String(endDate.minute).padStart(2, "0")}`
+      : startTime;
   }
-  return `${clock(s.hour, s.minute)} ${meridiem(s.hour)}`;
+  if (endDate && endDate.hour !== null && endDate.minute !== null) {
+    // Collapse the meridiem when both ends share it: "3:30–4:30 PM".
+    if (meridiem(startDate.hour) === meridiem(endDate.hour)) {
+      return `${clock(startDate.hour, startDate.minute)}–${clock(endDate.hour, endDate.minute)} ${meridiem(endDate.hour)}`;
+    }
+    return `${clock(startDate.hour, startDate.minute)} ${meridiem(startDate.hour)} – ${clock(endDate.hour, endDate.minute)} ${meridiem(endDate.hour)}`;
+  }
+  return `${clock(startDate.hour, startDate.minute)} ${meridiem(startDate.hour)}`;
 }
 
 export function IcsPreview({ file, onError }: PreviewProps) {
@@ -91,14 +100,15 @@ export function IcsPreview({ file, onError }: PreviewProps) {
 }
 
 function EventCard({ event }: { event: IcsData }) {
+  const { t, locale } = useTranslation();
   const date = parseDateTime(event.start);
-  const timeRange = formatTimeRange(event.start, event.end);
+  const timeRange = formatTimeRange(event.start, event.end, locale);
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 bg-surface p-3 text-center">
       {date ? (
         <>
           <span className="text-body leading-none font-bold tracking-wide text-error uppercase">
-            {weekdayLabel(date)}
+            {weekdayLabel(date, locale)}
           </span>
           <span className="text-title leading-none font-bold text-foreground-strong">
             {date.day}
@@ -106,7 +116,7 @@ function EventCard({ event }: { event: IcsData }) {
         </>
       ) : null}
       <span className="mt-1.5 line-clamp-2 text-body font-medium text-foreground-emphasis">
-        {event.summary ?? "Event"}
+        {event.summary ?? t("Event", "日程")}
       </span>
       {timeRange ? (
         <span className="text-caption text-foreground-secondary">
@@ -138,13 +148,14 @@ function initials(name: string): string {
 }
 
 function ContactCard({ contact }: { contact: VcardData }) {
+  const { t } = useTranslation();
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 bg-surface p-3 text-center">
       {contact.photo ? (
         // eslint-disable-next-line @next/next/no-img-element -- a contact photo from an arbitrary host, which next/image would need configured
         <img
           src={contact.photo}
-          alt={contact.name ?? "Contact"}
+          alt={contact.name ?? t("Contact", "联系人")}
           className="h-14 w-14 rounded-full object-cover"
         />
       ) : (

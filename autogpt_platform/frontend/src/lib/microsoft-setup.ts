@@ -1,5 +1,6 @@
 import type { MicrosoftCapabilityService } from "@/app/api/__generated__/models/microsoftCapabilityService";
 import type { MicrosoftCapabilityStatus } from "@/app/api/__generated__/models/microsoftCapabilityStatus";
+import type { Locale } from "@/lib/i18n/locale";
 
 export const MICROSOFT_PROVIDER = "microsoft";
 
@@ -71,6 +72,55 @@ export const MICROSOFT_SETUP_MESSAGES: Record<MicrosoftSetupReason, string> = {
     "Microsoft sign-in did not finish. Try again or open setup help.",
 };
 
+export function getMicrosoftStatusLabel(
+  status: MicrosoftCapabilityStatus,
+  locale: Locale = "en",
+) {
+  const labels: Record<MicrosoftCapabilityStatus, string> = {
+    available: "已就绪",
+    permission_needed: "需要你的授权",
+    admin_required: "需要 Microsoft 管理员批准",
+    setup_required: "你的组织仍需完成设置",
+    work_account_only: "仅支持工作或学校账户",
+    unavailable: "此账户无法使用",
+  };
+  return locale === "zh-CN" ? labels[status] : MICROSOFT_STATUS_LABELS[status];
+}
+
+export function getMicrosoftServicePurpose(
+  service: MicrosoftCapabilityService,
+  locale: Locale = "en",
+) {
+  const purposes: Record<MicrosoftCapabilityService, string> = {
+    mail: "允许 Otto 读取、起草和发送你的电子邮件",
+    calendar: "允许 Otto 查看、添加和修改你的日历活动",
+    files: "允许 Otto 打开、创建和编辑你的 OneDrive 文件",
+    teams: "允许 Otto 读取和发送你的 Teams 聊天消息",
+    copilot: "允许 Copilot 根据你有权访问的邮件、文件、会议和消息回答问题",
+    work_iq: "允许 Otto 向 Work IQ 提问，并读取和修改你的 Microsoft 365 内容",
+  };
+  return locale === "zh-CN"
+    ? purposes[service]
+    : MICROSOFT_SERVICE_PURPOSES[service];
+}
+
+export function getMicrosoftSetupMessage(
+  reason: MicrosoftSetupReason,
+  locale: Locale = "en",
+) {
+  const messages: Record<MicrosoftSetupReason, string> = {
+    tenant_setup_required: "你的组织需要启用 Work IQ。",
+    admin_consent_required: "需要 Microsoft 管理员批准访问。",
+    app_setup_required: "应用所有者需要配置浏览器登录。",
+    access_denied: "Microsoft 访问请求被拒绝。现有连接仍可使用。",
+    reconnect_required: "Microsoft 需要你重新登录此账户。",
+    sign_in_failed: "Microsoft 登录未完成。请重试或查看设置帮助。",
+  };
+  return locale === "zh-CN"
+    ? messages[reason]
+    : MICROSOFT_SETUP_MESSAGES[reason];
+}
+
 export const WORK_IQ_SETUP_URL =
   "https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/work-iq/enable-work-iq";
 export const WORK_IQ_PERMISSIONS_URL =
@@ -129,10 +179,11 @@ function readDetail(error: unknown): unknown {
 export function microsoftCallbackMessage(
   error: string,
   description: string,
+  locale: Locale = "en",
 ): string {
   const reason =
     getMicrosoftSetupReason(`${error} ${description.slice(0, 4096)}`) ??
     "sign_in_failed";
   const code = description.match(/AADSTS\d+/)?.[0];
-  return `${code ? `${code}: ` : ""}${MICROSOFT_SETUP_MESSAGES[reason]}`;
+  return `${code ? `${code}: ` : ""}${getMicrosoftSetupMessage(reason, locale)}`;
 }

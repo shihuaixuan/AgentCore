@@ -2,16 +2,21 @@ import { useDeleteWorkspaceFile } from "@/app/api/__generated__/endpoints/worksp
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { uploadFileDirect } from "@/lib/direct-upload";
 import { parseWorkspaceFileID, buildWorkspaceURI } from "@/lib/workspace-uri";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function useWorkspaceUpload() {
+  const { t, locale } = useTranslation();
   const { toast } = useToast();
 
   const { mutate: deleteMutation } = useDeleteWorkspaceFile({
     mutation: {
       onError: () => {
         toast({
-          title: "Failed to delete file",
-          description: "The file could not be removed from storage.",
+          title: t("Failed to delete file", "删除文件失败"),
+          description: t(
+            "The file could not be removed from storage.",
+            "无法从存储空间中删除此文件。",
+          ),
           variant: "destructive",
         });
       },
@@ -19,7 +24,7 @@ export function useWorkspaceUpload() {
   });
 
   async function handleUploadFile(file: File) {
-    const d = await uploadFileDirect(file);
+    const d = await uploadFileDirect(file, undefined, locale);
     return {
       file_name: d.name,
       size: d.size_bytes,

@@ -1,4 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   type postV2ContinueChatWithAnsweredReviewsResponse,
   usePostV2ContinueChatWithAnsweredReviews,
@@ -41,6 +42,7 @@ export function useApprovalQueue({
   onAnswered,
   onContinued,
 }: Args) {
+  const { t } = useTranslation();
   const outcomes = useContext(HeldOutcomesContext);
   const { processReviews } = useProcessReviews();
   const { mutateAsync: continueChat, isPending: isContinuing } =
@@ -169,8 +171,11 @@ export function useApprovalQueue({
       assertContinued(await continueChat({ chatSessionId }));
     } catch {
       toast({
-        title: "Could not continue",
-        description: "Try again, or send a message to continue.",
+        title: t("Could not continue", "无法继续"),
+        description: t(
+          "Try again, or send a message to continue.",
+          "请重试，或发送消息以继续。",
+        ),
         variant: "destructive",
       });
       return;

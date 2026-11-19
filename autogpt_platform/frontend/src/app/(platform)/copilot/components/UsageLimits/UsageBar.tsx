@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function UsageBar({ label, percentUsed, resetsAt }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const percent = Math.min(100, Math.max(0, Math.round(percentUsed)));
   const isHigh = percent >= 80;
   const percentLabel =
@@ -21,7 +21,9 @@ export function UsageBar({ label, percentUsed, resetsAt }: Props) {
       ? t("<1% used", "已用不足 1%")
       : t(`${percent}% used`, `已用 ${percent}%`);
   // Relative to the clock, so read on every render rather than cached.
-  const resetLabel = useReadEveryRender(() => formatResetTime(resetsAt));
+  const resetLabel = useReadEveryRender(() =>
+    formatResetTime(resetsAt, new Date(), locale),
+  );
 
   return (
     <div className="flex flex-col gap-2">

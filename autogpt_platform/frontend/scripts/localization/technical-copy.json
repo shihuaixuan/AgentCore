@@ -1,0 +1,13 @@
+{
+  "app/(platform)/admin/platform-costs/components/PlatformCostContent.tsx": [
+    "sync",
+    "flex",
+    "copilot"
+  ],
+  "app/(platform)/dev/brain-dump-debug/components/RecordingStatePanel.tsx": [
+    "finalized"
+  ],
+  "app/(platform)/dev/brain-dump-debug/components/ServerStatusPanel.tsx": [
+    "status"
+  ]
+}

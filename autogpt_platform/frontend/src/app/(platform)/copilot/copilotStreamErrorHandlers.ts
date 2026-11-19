@@ -1,4 +1,5 @@
 import { toast } from "@/components/molecules/Toast/use-toast";
+import type { Locale } from "@/lib/i18n/locale";
 
 import {
   describeProviderFailure,
@@ -28,69 +29,84 @@ export function parseBackendErrorCode(raw: string): {
  * `description` defaults to the backend's error message when provided;
  * `fallbackDescription` is used when the backend sends only the code.
  */
-const TOAST_BY_BACKEND_CODE: Record<
-  string,
-  { title: string; fallbackDescription: string }
-> = {
-  idle_timeout: {
-    title: "Your expert stopped responding",
-    fallbackDescription:
-      "A tool call got stuck and the session timed out. Press Try Again to resume.",
-  },
-  tool_stalled: {
-    title: "A tool call is taking too long",
-    fallbackDescription:
-      "The assistant is waiting on a tool that hasn't responded. Press Try Again to restart.",
-  },
-  transient_api_error: {
-    title: "Connection hiccup",
-    fallbackDescription:
-      "We hit a temporary error talking to the model. Press Try Again to continue.",
-  },
-  circuit_breaker_empty_tool_calls: {
-    title: "Your expert paused",
-    fallbackDescription:
-      "The assistant made too many empty tool calls in a row and was paused. Press Try Again to continue.",
-  },
-  all_attempts_exhausted: {
-    title: "Conversation too long",
-    fallbackDescription:
-      "We couldn't fit this chat's history into the model after several attempts. Start a new chat or clear some history.",
-  },
-  sdk_stream_error: {
-    title: "Your expert ran into an error",
-    fallbackDescription:
-      "Something went wrong while the assistant was responding. Press Try Again to retry.",
-  },
-  sdk_error: {
-    title: "Your expert ran into an error",
-    fallbackDescription:
-      "The assistant couldn't complete this turn. Press Try Again to retry.",
-  },
-  provider_unavailable: {
-    title: "Your expert is temporarily unavailable",
-    fallbackDescription:
-      "The AI model provider is temporarily unavailable. We've been alerted and are working on it. Please try again shortly.",
-  },
-  sandbox_limit_reached: {
-    title: "Couldn't start a sandbox",
-    fallbackDescription:
-      "Wait for one of your tasks to finish, then try again.",
-  },
-  max_budget_exhausted: {
-    title: "Turn budget reached",
-    fallbackDescription:
-      "This turn reached its spending limit. Send a follow-up to continue with a smaller scope. If your account usage limit is also reached, wait for it to reset.",
-  },
-};
+function toastByBackendCode(
+  t: (english: string, chinese: string) => string,
+): Record<string, { title: string; fallbackDescription: string }> {
+  return {
+    idle_timeout: {
+      title: t("Your expert stopped responding", "你的专家停止响应"),
+      fallbackDescription: t(
+        "A tool call got stuck and the session timed out. Press Try Again to resume.",
+        "工具调用卡住，导致会话超时。请点击“重试”以恢复。",
+      ),
+    },
+    tool_stalled: {
+      title: t("A tool call is taking too long", "工具调用耗时过长"),
+      fallbackDescription: t(
+        "The assistant is waiting on a tool that hasn't responded. Press Try Again to restart.",
+        "助手正在等待尚未响应的工具。请点击“重试”以重新开始。",
+      ),
+    },
+    transient_api_error: {
+      title: t("Connection hiccup", "连接暂时异常"),
+      fallbackDescription: t(
+        "We hit a temporary error talking to the model. Press Try Again to continue.",
+        "与模型通信时出现临时错误。请点击“重试”以继续。",
+      ),
+    },
+    circuit_breaker_empty_tool_calls: {
+      title: t("Your expert paused", "你的专家已暂停"),
+      fallbackDescription: t(
+        "The assistant made too many empty tool calls in a row and was paused. Press Try Again to continue.",
+        "助手因连续多次发出空工具调用而被暂停。请点击“重试”以继续。",
+      ),
+    },
+    all_attempts_exhausted: {
+      title: t("Conversation too long", "对话过长"),
+      fallbackDescription: t(
+        "We couldn't fit this chat's history into the model after several attempts. Start a new chat or clear some history.",
+        "多次尝试后，此对话的历史仍超出模型容量。请开始新对话或清理部分历史记录。",
+      ),
+    },
+    sdk_stream_error: {
+      title: t("Your expert ran into an error", "你的专家遇到了错误"),
+      fallbackDescription: t(
+        "Something went wrong while the assistant was responding. Press Try Again to retry.",
+        "助手回复时出现错误。请点击“重试”。",
+      ),
+    },
+    sdk_error: {
+      title: t("Your expert ran into an error", "你的专家遇到了错误"),
+      fallbackDescription: t(
+        "The assistant couldn't complete this turn. Press Try Again to retry.",
+        "助手未能完成本轮回复。请点击“重试”。",
+      ),
+    },
+    provider_unavailable: {
+      title: t("Your expert is temporarily unavailable", "你的专家暂时不可用"),
+      fallbackDescription: t(
+        "The AI model provider is temporarily unavailable. We've been alerted and are working on it. Please try again shortly.",
+        "AI 模型服务商暂时不可用。我们已收到通知并正在处理，请稍后重试。",
+      ),
+    },
+    sandbox_limit_reached: {
+      title: t("Couldn't start a sandbox", "无法启动沙盒"),
+      fallbackDescription: t(
+        "Wait for one of your tasks to finish, then try again.",
+        "请等待一个任务完成后再重试。",
+      ),
+    },
+    max_budget_exhausted: {
+      title: t("Turn budget reached", "本轮开销已达上限"),
+      fallbackDescription: t(
+        "This turn reached its spending limit. Send a follow-up to continue with a smaller scope. If your account usage limit is also reached, wait for it to reset.",
+        "本轮已达到开销上限。请发送后续消息，以更小范围继续。如果账户使用额度也已耗尽，请等待额度重置。",
+      ),
+    },
+  };
+}
 
 /** Fallback toast shown for any `[code:X]` we don't have specific copy for. */
-const GENERIC_BACKEND_TOAST = {
-  title: "Your expert ran into a problem",
-  fallbackDescription:
-    "The assistant stopped unexpectedly. Press Try Again to retry.",
-};
-
 /**
  * Extract the human-readable error detail. FastAPI typically wraps 4xx
  * responses in `{"detail": "..."}` — if the SDK surfaced that as JSON in
@@ -155,6 +171,7 @@ export type UsageLimitOrigin = "admission" | "provider";
 
 interface HandleStreamErrorArgs {
   error: Error;
+  locale?: Locale;
   onRateLimit: (
     message: string,
     providerFailure?: ProviderFailure,
@@ -198,7 +215,11 @@ export function handleStreamError({
   onPaywall,
   isUserStoppingRef,
   providerFailure: streamedProviderFailure,
+  locale = "en",
 }: HandleStreamErrorArgs): void {
+  function t(english: string, chinese: string) {
+    return locale === "zh-CN" ? chinese : english;
+  }
   if ((error as { status?: unknown }).status === 402) {
     onPaywall?.();
     return;
@@ -211,7 +232,7 @@ export function handleStreamError({
 
   // 0. The server said what went wrong, so stop guessing.
   if (providerFailure) {
-    const copy = describeProviderFailure(providerFailure);
+    const copy = describeProviderFailure(providerFailure, locale);
     if (providerFailure.kind === "usage_limit") {
       // Still routed through the rate-limit path: it restores the composer
       // text for a message the backend refused before persisting, which a
@@ -245,8 +266,13 @@ export function handleStreamError({
   const { code: backendCode, message: backendMessage } =
     parseBackendErrorCode(errorDetail);
   if (backendCode) {
-    const userToast =
-      TOAST_BY_BACKEND_CODE[backendCode] ?? GENERIC_BACKEND_TOAST;
+    const userToast = toastByBackendCode(t)[backendCode] ?? {
+      title: t("Your expert ran into a problem", "你的专家遇到了问题"),
+      fallbackDescription: t(
+        "The assistant stopped unexpectedly. Press Try Again to retry.",
+        "助手意外停止。请点击“重试”。",
+      ),
+    };
     toast({
       title: userToast.title,
       description: backendMessage || userToast.fallbackDescription,
@@ -258,7 +284,11 @@ export function handleStreamError({
   // 2. Rate limit (FastAPI 429 body contains "usage limit")
   if (errorDetail.toLowerCase().includes("usage limit")) {
     onRateLimit(
-      errorDetail || "You've reached your usage limit. Please try again later.",
+      errorDetail ||
+        t(
+          "You've reached your usage limit. Please try again later.",
+          "你已达到使用上限，请稍后重试。",
+        ),
     );
     return;
   }
@@ -271,8 +301,11 @@ export function handleStreamError({
     errorDetail.toLowerCase().includes("401");
   if (isAuthError) {
     toast({
-      title: "Authentication error",
-      description: "Your session may have expired. Please sign in again.",
+      title: t("Authentication error", "身份验证失败"),
+      description: t(
+        "Your session may have expired. Please sign in again.",
+        "你的会话可能已过期，请重新登录。",
+      ),
       variant: "destructive",
     });
     return;

@@ -17,6 +17,7 @@ import { formatWhen } from "../../ToolChain/resultHelpers";
 import type { SessionRun, SessionSchedule } from "../helpers";
 import { Text } from "@/components/atoms/Text/Text";
 import type { Tone } from "@/components/styles/tones";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface RunStatus {
   icon: IconSvgElement;
@@ -72,6 +73,7 @@ export function SchedulesList({ schedules }: { schedules: SessionSchedule[] }) {
 }
 
 function RunRow({ run }: { run: SessionRun }) {
+  const { t, locale } = useTranslation();
   // An in-flight run started by library-agent id has no name in its tool
   // input, so the row fetches it rather than showing a placeholder.
   const { data: fetchedName } = useGetV2GetLibraryAgent(
@@ -83,8 +85,18 @@ function RunRow({ run }: { run: SessionRun }) {
       },
     },
   );
-  const name = run.name ?? fetchedName ?? "Workflow run";
-  const meta = run.startedAt ? formatWhen(run.startedAt) : null;
+  const name = run.name ?? fetchedName ?? t("Workflow run", "工作流运行");
+  const meta = run.startedAt ? formatWhen(run.startedAt, locale) : null;
+  const statusLabel =
+    run.status?.toUpperCase() === "COMPLETED"
+      ? t("completed", "已完成")
+      : run.status?.toUpperCase() === "FAILED"
+        ? t("failed", "失败")
+        : run.status?.toUpperCase() === "RUNNING"
+          ? t("running", "运行中")
+          : run.status?.toUpperCase() === "QUEUED"
+            ? t("queued", "已排队")
+            : run.status?.toLowerCase();
   // The leading icon carries the status on its own — a tick, a cross, or a
   // spinner reads faster than the word did, so the label is gone.
   const status = RUN_STATUS[run.status?.toUpperCase() ?? ""] ?? FALLBACK_STATUS;
@@ -93,7 +105,7 @@ function RunRow({ run }: { run: SessionRun }) {
       <Icon
         icon={status.icon}
         size={16}
-        aria-label={run.status?.toLowerCase()}
+        aria-label={statusLabel}
         tone={status.tone}
         spin={status.spin}
         className="shrink-0"
@@ -131,8 +143,12 @@ function RunRow({ run }: { run: SessionRun }) {
 }
 
 function ScheduleRow({ schedule }: { schedule: SessionSchedule }) {
+  const { t, locale } = useTranslation();
   const when = schedule.nextRunTime
-    ? `Next ${formatWhen(schedule.nextRunTime)}`
+    ? t(
+        `Next ${formatWhen(schedule.nextRunTime, locale)}`,
+        `下次 ${formatWhen(schedule.nextRunTime, locale)}`,
+      )
     : null;
   return (
     <div className="-mx-2.5 flex items-start gap-3 rounded-xl px-2.5 py-1.5 transition-colors hover:bg-surface-muted">

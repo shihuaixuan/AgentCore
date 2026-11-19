@@ -6,6 +6,8 @@
  * invariant the rest of the feature leans on.
  */
 
+import type { Locale } from "@/lib/i18n/locale";
+
 export type VoiceState =
   | "off"
   | "listening"
@@ -65,19 +67,22 @@ export function isMicOpen(state: VoiceState): boolean {
   return state === "listening" || state === "hearing";
 }
 
-export function describeVoiceState(state: VoiceState): string {
+export function describeVoiceState(
+  state: VoiceState,
+  locale: Locale = "en",
+): string {
   switch (state) {
     case "listening":
-      return "Listening";
+      return locale === "zh-CN" ? "正在聆听" : "Listening";
     case "hearing":
-      return "Listening";
+      return locale === "zh-CN" ? "正在聆听" : "Listening";
     case "transcribing":
-      return "Transcribing";
+      return locale === "zh-CN" ? "正在转写" : "Transcribing";
     case "thinking":
-      return "Thinking";
+      return locale === "zh-CN" ? "正在思考" : "Thinking";
     case "speaking":
-      return "Speaking";
+      return locale === "zh-CN" ? "正在朗读" : "Speaking";
     case "off":
-      return "Voice mode off";
+      return locale === "zh-CN" ? "语音模式已关闭" : "Voice mode off";
   }
 }

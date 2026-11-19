@@ -42,17 +42,24 @@ export function EditBudgetDialog({ expert, open, onClose }: Props) {
               size="small"
               label={t("Weekly budget", "每周预算")}
               labelVariant="small-medium"
-              placeholder="e.g. 25"
+              placeholder={t("e.g. 25", "例如 25")}
               value={value}
               error={
-                isInvalid ? "Enter a dollar amount like 25 or 12.50" : undefined
+                isInvalid
+                  ? t(
+                      "Enter a dollar amount like 25 or 12.50",
+                      "输入美元金额，例如 25 或 12.50",
+                    )
+                  : undefined
               }
               onChange={(event) => setValue(event.target.value)}
               wrapperClassName="!mb-0"
             />
             <Text variant="small" tone="muted">
-              What {expert.name} may spend each week, in dollars. Leave empty
-              for the default, or enter 0 to remove the cap.
+              {t(
+                `What ${expert.name} may spend each week, in dollars. Leave empty for the default, or enter 0 to remove the cap.`,
+                `${expert.name} 每周可消费的美元金额。留空使用默认值，输入 0 则不设上限。`,
+              )}
             </Text>
           </div>
           <div className="flex justify-end gap-2">

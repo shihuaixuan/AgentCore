@@ -1,6 +1,7 @@
 "use client";
 
 import { FormProvider } from "react-hook-form";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   FormControl,
   FormField,
@@ -17,6 +18,7 @@ type EmailFormProps = {
 };
 
 export function EmailForm({ user }: EmailFormProps) {
+  const { t } = useTranslation();
   const { form, onSubmit, isLoading, currentEmail } = useEmailForm({ user });
 
   const hasError = Object.keys(form.formState.errors).length > 0;
@@ -25,7 +27,7 @@ export function EmailForm({ user }: EmailFormProps) {
   return (
     <div>
       <Text variant="h3" size="large-semibold">
-        Security & Access
+        {t("Security & Access", "安全与访问")}
       </Text>
       <FormProvider {...form}>
         <form
@@ -40,7 +42,7 @@ export function EmailForm({ user }: EmailFormProps) {
                 <FormControl>
                   <Input
                     id={field.name}
-                    label="Email"
+                    label={t("Email", "电子邮箱")}
                     placeholder="m@example.com"
                     type="text"
                     autoComplete="off"
@@ -61,7 +63,7 @@ export function EmailForm({ user }: EmailFormProps) {
               className="min-w-[10rem]"
               size="small"
             >
-              Reset password
+              {t("Reset password", "重置密码")}
             </Button>
             <Button
               type="submit"
@@ -70,7 +72,9 @@ export function EmailForm({ user }: EmailFormProps) {
               className="min-w-[10rem]"
               size="small"
             >
-              {isLoading ? "Saving..." : "Update email"}
+              {isLoading
+                ? t("Saving...", "正在保存…")
+                : t("Update email", "更新邮箱")}
             </Button>
           </div>
         </form>

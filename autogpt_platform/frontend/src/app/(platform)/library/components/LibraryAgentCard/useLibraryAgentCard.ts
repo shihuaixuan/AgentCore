@@ -84,7 +84,10 @@ export function useLibraryAgentCard({ agent, onFavoriteAdd }: Props) {
 
       toast({
         title: t("Error", "错误"),
-        description: "Failed to update favorite status. Please try again.",
+        description: t(
+          "Failed to update favorite status. Please try again.",
+          "无法更新收藏状态，请重试。",
+        ),
         variant: "destructive",
       });
     } finally {

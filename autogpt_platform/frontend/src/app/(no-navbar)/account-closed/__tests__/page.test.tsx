@@ -3,6 +3,7 @@ import {
   getPostAccountKeepMyAccountMockHandler200,
 } from "@/app/api/__generated__/endpoints/account/account.msw";
 import { Toaster } from "@/components/molecules/Toast/toaster";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { FEEDBACK_FORM_URL } from "@/components/molecules/TallyPoup/helpers";
 import { server } from "@/mocks/mock-server";
 import {
@@ -103,7 +104,7 @@ describe("AccountClosedPage", () => {
     expect(
       await screen.findByRole("heading", { name: "Your account is closed" }),
     ).toBeDefined();
-    expect(screen.getByText("Nov 13, 2099")).toBeDefined();
+    expect(screen.getByText(/Nov 13, 2099/)).toBeDefined();
     expect(
       screen.getByText(/API keys, schedules and share links stopped/),
     ).toBeDefined();
@@ -111,6 +112,20 @@ describe("AccountClosedPage", () => {
       screen.getByRole("button", { name: "Keep my account" }),
     ).toBeDefined();
     expect(screen.getByRole("button", { name: "Sign out" })).toBeDefined();
+  });
+
+  test("uses a Chinese erasure date in the Chinese page", async () => {
+    scheduled(new Date(2099, 10, 13, 12));
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <AccountClosedPage />
+      </LanguageProvider>,
+    );
+
+    expect(
+      await screen.findByText(/我们将在 2099年11月13日 清除账户/),
+    ).toBeDefined();
+    expect(screen.getByRole("button", { name: "保留我的账户" })).toBeDefined();
   });
 
   test("Keep my account waits until the account answers as open everywhere, then offers to continue", async () => {

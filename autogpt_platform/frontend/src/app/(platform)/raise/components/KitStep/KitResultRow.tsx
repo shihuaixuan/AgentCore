@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/Button/Button";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
 import { FlowIcon, SparklesIcon, Tick02Icon } from "@hugeicons/core-free-icons";
@@ -23,6 +24,7 @@ export function KitResultRow({
   isPending,
   onAdd,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       role="listitem"
@@ -47,7 +49,10 @@ export function KitResultRow({
           {hit.name}
         </p>
         <p className="truncate text-caption text-foreground-tertiary">
-          {hit.subtitle}
+          {t(
+            hit.subtitle,
+            `${hit.source === "library" ? "库中" : "市场"}${hit.kind === "skill" ? "技能" : "工作流"}`,
+          )}
         </p>
       </div>
 
@@ -78,7 +83,11 @@ export function KitResultRow({
           ) : undefined
         }
       >
-        {selected ? "Added" : atCap ? `${MAX_ATTACHMENTS} max` : "Add"}
+        {selected
+          ? t("Added", "已添加")
+          : atCap
+            ? t(`${MAX_ATTACHMENTS} max`, `最多 ${MAX_ATTACHMENTS} 项`)
+            : t("Add", "添加")}
       </Button>
     </div>
   );

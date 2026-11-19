@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useEffect, useRef, useState } from "react";
 import { getGetHomeDashboardQueryKey } from "@/app/api/__generated__/endpoints/home/home";
 import type { HomeAttentionItem } from "@/app/api/__generated__/models/homeAttentionItem";
@@ -36,6 +37,7 @@ interface DecideOptions {
 
 // Held calls decided here stay as receipts in place, so the list never shifts under the pointer.
 export function useHeldReview({ items }: Args) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { processReviews } = useProcessReviews();
   const [statuses, setStatuses] = useState<Record<string, CardStatus>>({});
@@ -92,7 +94,10 @@ export function useHeldReview({ items }: Args) {
         ...Object.fromEntries(
           gone.map((item) => [
             item.id,
-            { outcome: "elsewhere", text: "Answered elsewhere" },
+            {
+              outcome: "elsewhere",
+              text: t("Answered elsewhere", "已在别处处理"),
+            },
           ]),
         ),
       }));
@@ -101,7 +106,7 @@ export function useHeldReview({ items }: Args) {
       if (isHeldCall(item)) seen.current.set(item.id, item);
     }
     for (const item of gone) answeredHere.current.add(item.id);
-  }, [items]);
+  }, [items, t]);
 
   // Resolves to the ids that landed; the list moves focus on, the dialog advances itself.
   async function decide(
@@ -137,7 +142,7 @@ export function useHeldReview({ items }: Args) {
         id: item.id,
         receipt: {
           outcome: approved ? "approved" : "rejected",
-          text: receiptText(toApprovalItem(item.review!), approved),
+          text: receiptText(toApprovalItem(item.review!), approved, t),
         } satisfies HeldReceipt,
       }));
       setReceipts((prev) => ({
@@ -147,7 +152,10 @@ export function useHeldReview({ items }: Args) {
       setAnnouncement(
         next.length === 1
           ? `${done[0].title}: ${next[0].receipt.text}`
-          : `${next.length} answered: ${next[0].receipt.text.split(" · ")[0]}`,
+          : t(
+              `${next.length} answered: ${next[0].receipt.text.split(" · ")[0]}`,
+              `已处理 ${next.length} 项：${next[0].receipt.text.split(" · ")[0]}`,
+            ),
       );
       if (focusNext) focusNextAfter(ids);
       done.forEach((item) =>

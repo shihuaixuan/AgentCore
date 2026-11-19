@@ -27,7 +27,7 @@ export function UnderstandingCard() {
     return (
       <ErrorCard
         responseError={error || undefined}
-        context="what Otto knows about your work"
+        context={t("what Otto knows about your work", "Otto 对你工作的了解")}
         onRetry={refetch}
       />
     );
@@ -44,8 +44,10 @@ export function UnderstandingCard() {
             {t("What Otto knows about your work", "Otto 对你工作的了解")}
           </Text>
           <Text variant="small" as="span" tone="muted">
-            From your onboarding and your chats. Every new chat with Otto starts
-            with this.
+            {t(
+              "From your onboarding and your chats. Every new chat with Otto starts with this.",
+              "来自你的引导设置和聊天。每次与 Otto 开始新聊天时都会参考这些内容。",
+            )}
           </Text>
         </div>
         <Dialog
@@ -64,8 +66,10 @@ export function UnderstandingCard() {
           <Dialog.Content>
             <div className="flex flex-col gap-4">
               <Text variant="small" as="p" tone="secondary">
-                Otto stops starting new chats with this. Your recent memories
-                stay.
+                {t(
+                  "Otto stops starting new chats with this. Your recent memories stay.",
+                  "Otto 将不再在新聊天中使用这些内容。近期记忆会保留。",
+                )}
               </Text>
               <div className="flex justify-end gap-2">
                 <Button
@@ -125,7 +129,7 @@ function UnderstandingValue({ value }: { value: string }) {
           className="ml-1 text-foreground-tertiary underline"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          {isExpanded ? "Show less" : t("Show all", "显示全部")}
+          {isExpanded ? t("Show less", "收起") : t("Show all", "显示全部")}
         </button>
       ) : null}
     </dd>

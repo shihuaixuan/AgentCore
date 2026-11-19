@@ -11,9 +11,11 @@ import { Text } from "@/components/atoms/Text/Text";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { useAuth } from "@/lib/auth/hooks/useAuth";
 import { useEffect } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import SettingsLoading from "./loading";
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   const {
@@ -40,8 +42,8 @@ export default function SettingsPage() {
   useTimezoneDetection(!!user ? timezone : undefined);
 
   useEffect(() => {
-    document.title = "Settings – AutoGPT Platform";
-  }, []);
+    document.title = t("Settings – AutoGPT Platform", "设置 – AutoGPT 平台");
+  }, [t]);
 
   if (preferencesError) {
     return (
@@ -54,7 +56,7 @@ export default function SettingsPage() {
                 }
               : undefined
           }
-          context="settings"
+          context={t("settings", "设置")}
           onRetry={() => {
             void refetchPreferences();
           }}
@@ -70,9 +72,12 @@ export default function SettingsPage() {
   return (
     <div className="container max-w-2xl space-y-6 py-10">
       <div className="flex flex-col gap-2">
-        <Text variant="h3">My account</Text>
+        <Text variant="h3">{t("My account", "我的账户")}</Text>
         <Text variant="large">
-          Manage your account settings and preferences.
+          {t(
+            "Manage your account settings and preferences.",
+            "管理你的账户设置和偏好。",
+          )}
         </Text>
       </div>
       <SettingsForm preferences={preferences} user={user} timezone={timezone} />

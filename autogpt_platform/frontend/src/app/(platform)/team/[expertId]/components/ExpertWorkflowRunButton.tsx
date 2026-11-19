@@ -4,6 +4,7 @@ import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { RunAgentModal } from "@/app/(platform)/library/agents/[id]/components/NewAgentLibraryView/components/modals/RunAgentModal/RunAgentModal";
 import { Button } from "@/components/atoms/Button/Button";
 import { PlayIcon } from "@hugeicons/core-free-icons";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   agent: LibraryAgent;
@@ -20,10 +21,15 @@ export function ExpertWorkflowRunButton({
   onTriggerSetup,
   variant = "secondary",
 }: Props) {
+  const { t } = useTranslation();
   return (
     <RunAgentModal
       agent={agent}
-      title={isTriggerWorkflow ? "Set up trigger" : "Run workflow"}
+      title={
+        isTriggerWorkflow
+          ? t("Set up trigger", "设置触发器")
+          : t("Run workflow", "运行工作流")
+      }
       dialogVariant="compact"
       onRunCreated={onRunCreated}
       onTriggerSetup={onTriggerSetup}
@@ -35,7 +41,9 @@ export function ExpertWorkflowRunButton({
           textSize="body-md"
           leadingIcon={PlayIcon}
         >
-          {isTriggerWorkflow ? "Set up trigger" : "Run"}
+          {isTriggerWorkflow
+            ? t("Set up trigger", "设置触发器")
+            : t("Run", "运行")}
         </Button>
       }
     />

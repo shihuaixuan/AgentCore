@@ -382,7 +382,9 @@ export function EditAgentForm({
               loading={isSubmitting}
               className="w-full sm:w-auto"
             >
-              {isSubmitting ? "Saving" : t("Update submission", "更新提交")}
+              {isSubmitting
+                ? t("Saving", "保存中")
+                : t("Update submission", "更新提交")}
             </Button>
           </div>
         </form>

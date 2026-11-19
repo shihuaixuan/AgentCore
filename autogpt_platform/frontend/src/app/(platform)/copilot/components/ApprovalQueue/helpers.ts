@@ -1,4 +1,6 @@
 import type { PendingHumanReviewModel } from "@/app/api/__generated__/models/pendingHumanReviewModel";
+import type { Locale } from "@/lib/i18n/locale";
+import { approvalHeadline } from "./approval-copy";
 import { COPILOT_GATE_NODE_PREFIX } from "@/components/organisms/PendingReviewsList/helpers";
 import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
 import {
@@ -174,8 +176,13 @@ export function cardArguments(payload: Record<string, unknown>) {
 }
 
 // A rule on a bare tool covers every call of it, so it is named as an action.
-export function ruleSubjectName(subject: ApprovalItem["subject"]) {
-  return subject.kind === "tool" ? `“${subject.name}”` : subject.name;
+export function ruleSubjectName(
+  subject: ApprovalItem["subject"],
+  locale: Locale = "en",
+) {
+  return subject.kind === "tool"
+    ? `“${approvalHeadline(subject.name, subject.key, locale)}”`
+    : subject.name;
 }
 
 // A row the server wrote no headline for still names its tool.
@@ -193,7 +200,22 @@ export function isHeldRead(item: ApprovalItem) {
 }
 
 // Said once in the queue header; per card only a reason about this call.
-export function reasonLine(item: ApprovalItem): string | null {
+export function reasonLine(
+  item: ApprovalItem,
+  locale: Locale = "en",
+): string | null {
+  if (locale === "zh-CN") {
+    if (isHeldRead(item) && item.unjudged)
+      return `${AUTOPILOT_NAME} 无法检查此内容，因此需要你确认。${item.reader} 尚未看到这些内容。`;
+    if (isHeldRead(item))
+      return `内容中包含针对 ${item.reader} 的指令，因此已被暂缓。${item.reader} 尚未看到这些内容。`;
+    if (!item.reason) return null;
+    if (item.reasonKind === "supervisor")
+      return `无法确认此操作是否安全：${item.reason}`;
+    return item.reasonKind === "subject" || item.reasonKind === "rule"
+      ? item.reason
+      : null;
+  }
   if (isHeldRead(item) && item.unjudged)
     return `${AUTOPILOT_NAME} could not check this, so he asks. ${item.reader} hasn't seen it.`;
   if (isHeldRead(item))
@@ -209,23 +231,34 @@ export function reasonLine(item: ApprovalItem): string | null {
 // Home and an expert's page say a held call's reason in its card's words.
 export function attentionReason(
   review: PendingHumanReviewModel | null | undefined,
+  locale: Locale = "en",
 ) {
   if (!review || !isGateReview(review)) return null;
   const item = toApprovalItem(review);
   return {
-    line: reasonLine(item),
+    line: reasonLine(item, locale),
     passage: isHeldRead(item) ? item.passage : null,
   };
 }
 
-export function modeLabel(mode: string | null) {
+export function modeLabel(mode: string | null, locale: Locale = "en") {
+  if (locale === "zh-CN") {
+    if (mode === "ask_first") return "先询问";
+    if (mode === "unsupervised") return "无人监督";
+    if (mode === "auto") return "自动";
+    return null;
+  }
   if (mode === "ask_first") return "Ask First";
   if (mode === "unsupervised") return "Unsupervised";
   if (mode === "auto") return "Auto";
   return null;
 }
 
-export function modeLine(mode: string | null) {
+export function modeLine(mode: string | null, locale: Locale = "en") {
+  if (locale === "zh-CN")
+    return mode === "ask_first"
+      ? `已开启“先询问”模式，${AUTOPILOT_NAME} 在修改工作区以外的内容前会先征求你的同意。`
+      : `${AUTOPILOT_NAME} 在执行涉及平台以外的操作前会先征求你的同意。`;
   if (mode === "ask_first")
     return `Ask First is on, so ${AUTOPILOT_NAME} asks before he changes anything outside his workspace.`;
   return `${AUTOPILOT_NAME} asks before anything that reaches outside the platform.`;
@@ -275,7 +308,9 @@ export function canApproveAll(items: ApprovalItem[], compact: boolean) {
   );
 }
 
-export function approveAllLabel(count: number) {
+export function approveAllLabel(count: number, locale: Locale = "en") {
+  if (locale === "zh-CN")
+    return count === 2 ? "批准这两项" : `批准全部 ${count} 项`;
   return count === 2 ? "Approve both" : `Approve all ${count}`;
 }
 

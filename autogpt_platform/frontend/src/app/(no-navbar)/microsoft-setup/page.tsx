@@ -5,7 +5,7 @@ import type { MicrosoftCapabilityService } from "@/app/api/__generated__/models/
 import { Link } from "@/components/atoms/Link/Link";
 import { Text } from "@/components/atoms/Text/Text";
 import { WorkIQInstructions } from "@/components/contextual/MicrosoftConnection/WorkIQInstructions";
-import { MICROSOFT_SERVICE_PURPOSES } from "@/lib/microsoft-setup";
+import { getMicrosoftServicePurpose } from "@/lib/microsoft-setup";
 
 const SERVICES: Array<{ service: MicrosoftCapabilityService; name: string }> = [
   { service: "mail", name: "Mail" },
@@ -19,27 +19,17 @@ const SERVICES: Array<{ service: MicrosoftCapabilityService; name: string }> = [
 const ADMIN_CONSENT_GUIDE_URL =
   "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/grant-admin-consent";
 
-const SERVICE_COPY: Record<
-  MicrosoftCapabilityService,
-  { name: string; purpose: string }
-> = {
-  mail: { name: "邮件", purpose: "允许 Otto 阅读、起草和发送邮件" },
-  calendar: { name: "日历", purpose: "允许 Otto 查看、添加和修改日历事件" },
-  files: { name: "文件", purpose: "允许 Otto 打开、创建和编辑 OneDrive 文件" },
-  teams: { name: "Teams 聊天", purpose: "允许 Otto 阅读和发送 Teams 聊天消息" },
-  copilot: {
-    name: "Microsoft 365 Copilot",
-    purpose: "允许 Copilot 根据你有权访问的邮件、文件、会议和消息回答问题",
-  },
-  work_iq: {
-    name: "Work IQ",
-    purpose:
-      "允许 Otto 向 Work IQ 提问，后者可读取和更改你的 Microsoft 365 内容",
-  },
+const SERVICE_NAMES: Record<MicrosoftCapabilityService, string> = {
+  mail: "邮件",
+  calendar: "日历",
+  files: "文件",
+  teams: "Teams 聊天",
+  copilot: "Microsoft 365 Copilot",
+  work_iq: "Work IQ",
 };
 
 export default function MicrosoftSetupPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-6 p-6">
       <Text variant="h2" as="h1">
@@ -62,13 +52,10 @@ export default function MicrosoftSetupPage() {
           {SERVICES.map(({ service, name }) => (
             <li key={service} className="flex flex-col">
               <Text variant="body-medium">
-                {t(name, SERVICE_COPY[service].name)}
+                {t(name, SERVICE_NAMES[service])}
               </Text>
               <Text variant="small" tone="muted">
-                {t(
-                  MICROSOFT_SERVICE_PURPOSES[service],
-                  SERVICE_COPY[service].purpose,
-                )}
+                {getMicrosoftServicePurpose(service, locale)}
               </Text>
             </li>
           ))}
@@ -105,7 +92,7 @@ export default function MicrosoftSetupPage() {
               "如果设置中提供“为整个组织批准”，请选择该项并在 Microsoft 权限页面确认。如果未提供，则此服务器使用登录代码连接 Microsoft；请按照 Microsoft 指南，为 AutoGPT 授予整个租户的管理员同意权限。",
             )}{" "}
             <Link href={ADMIN_CONSENT_GUIDE_URL} isExternal variant="secondary">
-              {t("Microsoft’s guide", "Microsoft 指南")}
+              {t("Microsoft's guide", "Microsoft 指南")}
             </Link>
             .
           </Text>

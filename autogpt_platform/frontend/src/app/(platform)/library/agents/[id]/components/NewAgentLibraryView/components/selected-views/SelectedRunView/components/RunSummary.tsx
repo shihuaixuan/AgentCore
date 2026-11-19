@@ -4,6 +4,7 @@ import type { GraphExecution } from "@/app/api/__generated__/models/graphExecuti
 import type { GraphExecutionWithNodes } from "@/app/api/__generated__/models/graphExecutionWithNodes";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { CircleAlertGlyph } from "@/components/atoms/Icon/drawnIcons";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   Tooltip,
   TooltipContent,
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function RunSummary({ run }: Props) {
+  const { t } = useTranslation();
   if (!run.stats?.activity_status) return null;
 
   const correctnessScore = run.stats.correctness_score;
@@ -30,7 +32,7 @@ export function RunSummary({ run }: Props) {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="text-body font-medium text-foreground-secondary">
-              Success Estimate:
+              {t("Success Estimate:", "成功程度估计：")}
             </span>
             <div className="flex items-center gap-2">
               <div className="relative h-2 w-16 overflow-hidden rounded-full bg-surface-active">
@@ -62,22 +64,36 @@ export function RunSummary({ run }: Props) {
                 <span className="inline-flex cursor-help text-foreground-subtle hover:text-foreground-secondary">
                   <Icon
                     icon={CircleAlertGlyph}
-                    aria-label="Icon"
+                    aria-label={t("Icon", "成功程度估计说明")}
                     className="size-4"
                   />
                 </span>
               </TooltipTrigger>
               <TooltipContent>
                 <p className="max-w-xs">
-                  AI-generated estimate of how well this execution achieved its
-                  intended purpose. This score indicates
+                  {t(
+                    "AI-generated estimate of how well this execution achieved its intended purpose. This score indicates",
+                    "由 AI 估计本次执行达成预期目标的程度。此分数表示",
+                  )}
                   {correctnessScore >= 0.8
-                    ? " the workflow was highly successful."
+                    ? t(
+                        " the workflow was highly successful.",
+                        "工作流非常成功。",
+                      )
                     : correctnessScore >= 0.6
-                      ? " the workflow was mostly successful with minor issues."
+                      ? t(
+                          " the workflow was mostly successful with minor issues.",
+                          "工作流大体成功，仅有少量问题。",
+                        )
                       : correctnessScore >= 0.4
-                        ? " the workflow was partially successful with some gaps."
-                        : " the workflow had limited success with significant issues."}
+                        ? t(
+                            " the workflow was partially successful with some gaps.",
+                            "工作流部分成功，仍有一些不足。",
+                          )
+                        : t(
+                            " the workflow had limited success with significant issues.",
+                            "工作流成功程度有限，存在明显问题。",
+                          )}
                 </p>
               </TooltipContent>
             </Tooltip>

@@ -24,11 +24,11 @@ export function NeedsAttentionRow({
   onApprove,
   onDecline,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   // Decline rejects the agent's action outright, with no undo, in a flow
   // built for fast tapping — so it takes a second, deliberate tap.
   const [isConfirmingDecline, setIsConfirmingDecline] = useState(false);
-  const title = getReviewTitle(review);
+  const title = getReviewTitle(review, locale);
   const subtitle = [review.expert_name, review.agent_name]
     .filter(Boolean)
     .join(" · ");
@@ -78,7 +78,7 @@ export function NeedsAttentionRow({
             variant="primary"
             size="small"
             disabled={isProcessing}
-            aria-label={`Approve: ${title}`}
+            aria-label={t(`Approve: ${title}`, `批准：${title}`)}
             onClick={() => onApprove(review)}
           >
             {t("Approve", "批准")}
@@ -92,8 +92,8 @@ export function NeedsAttentionRow({
             disabled={isProcessing}
             aria-label={
               isConfirmingDecline
-                ? `Confirm decline: ${title}`
-                : `Decline: ${title}`
+                ? t(`Confirm decline: ${title}`, `确认拒绝：${title}`)
+                : t(`Decline: ${title}`, `拒绝：${title}`)
             }
             onClick={handleDecline}
             onBlur={() => setIsConfirmingDecline(false)}
@@ -106,7 +106,9 @@ export function NeedsAttentionRow({
           data-slot="needs-attention-row-announcement"
           className="sr-only"
         >
-          {isConfirmingDecline ? `Tap again to decline: ${title}` : ""}
+          {isConfirmingDecline
+            ? t(`Tap again to decline: ${title}`, `再次点击以拒绝：${title}`)
+            : ""}
         </span>
       </AttentionCard.Row>
     </AttentionCard.Root>

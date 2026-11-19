@@ -12,6 +12,7 @@ import { useNodeStore } from "@/app/(platform)/build/stores/nodeStore";
 import { BlockIOCredentialsSubSchema } from "@/lib/autogpt-server-api";
 import { updateUiOption } from "../../../helpers";
 import { uiSchema } from "@/app/(platform)/build/components/FlowEditor/nodes/uiSchema";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export const CredentialFieldTitle = (props: {
   registry: Registry;
@@ -21,6 +22,7 @@ export const CredentialFieldTitle = (props: {
   required?: boolean;
   selectedProvider?: string;
 }) => {
+  const { t } = useTranslation();
   const {
     registry,
     uiOptions,
@@ -49,8 +51,11 @@ export const CredentialFieldTitle = (props: {
     selectedProvider,
   );
   const credentialProvider = provider
-    ? `${toDisplayName(provider)} credential`
-    : "credential";
+    ? t(
+        `${toDisplayName(provider)} credential`,
+        `${toDisplayName(provider)} 凭据`,
+      )
+    : t("credential", "凭据");
 
   const updatedUiSchema = updateUiOption(uiSchema, {
     showHandles: false,

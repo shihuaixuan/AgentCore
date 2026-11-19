@@ -8,6 +8,7 @@ import { EmptyMessage } from "./EmptyMessage";
 import { AgentStatusFilter } from "@/app/(platform)/library/types";
 import { useAgentStatusMap } from "@/app/(platform)/library/hooks/useAgentStatus";
 import { SitrepItem } from "@/app/(platform)/library/components/SitrepItem/SitrepItem";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   activeTab: AgentStatusFilter;
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function AgentListSection({ activeTab, agents }: Props) {
+  const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
   const statusMap = useAgentStatusMap(agents);
 
@@ -54,7 +56,7 @@ export function AgentListSection({ activeTab, agents }: Props) {
               agentName: agent.name,
               agentImageUrl: agent.image_url,
               priority: status,
-              message: getAgentStatusLabel(activeTab, agent),
+              message: getAgentStatusLabel(activeTab, agent, t),
               status,
             }}
           />
@@ -67,7 +69,12 @@ export function AgentListSection({ activeTab, agents }: Props) {
             size="small"
             onClick={handleToggleShowAll}
           >
-            {showAll ? "Collapse" : `Show all (${filtered.length})`}
+            {showAll
+              ? t("Collapse", "收起")
+              : t(
+                  `Show all (${filtered.length})`,
+                  `显示全部（${filtered.length}）`,
+                )}
           </Button>
         </div>
       ) : null}

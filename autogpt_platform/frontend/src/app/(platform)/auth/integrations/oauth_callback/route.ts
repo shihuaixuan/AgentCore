@@ -1,6 +1,7 @@
 import { OAuthPopupResultMessage } from "./types";
 import { NextResponse } from "next/server";
 import { microsoftCallbackMessage } from "@/lib/microsoft-setup";
+import { getServerTranslation } from "@/lib/i18n/server";
 
 /**
  * Safely encode a value as JSON for embedding in a script tag.
@@ -34,12 +35,12 @@ function escapeHtml(value: string): string {
 // went. A refusal is marked admin_consent=True too, so the error decides.
 function organizationApprovalPage(error: string | null, description: string) {
   const text = error
-    ? `${microsoftCallbackMessage(error, description)} You can close this tab.`
-    : 'Approved for your organization. You can close this tab and choose "Check again" in AutoGPT.';
+    ? `${microsoftCallbackMessage(error, description, "zh-CN")} 你可以关闭此标签页。`
+    : "已获得组织授权。你可以关闭此标签页，然后在 AutoGPT 中选择“重新检查”。";
   // Only our own messages and an AADSTS number get here, but the number is
   // read out of the URL.
   return `<!DOCTYPE html>
-<html>
+<html lang="zh-CN">
   <body style="font-family: system-ui, sans-serif; padding: 2rem;">
     <p>${escapeHtml(text)}</p>
   </body>
@@ -47,6 +48,7 @@ function organizationApprovalPage(error: string | null, description: string) {
 }
 
 export async function GET(request: Request) {
+  const { t, locale } = await getServerTranslation();
   const { searchParams } = new URL(request.url);
   const providerError = searchParams.get("error");
   const providerDescription = searchParams.get("error_description") ?? "";
@@ -71,10 +73,20 @@ export async function GET(request: Request) {
           ...(state ? { state } : {}),
           message:
             providerError && /AADSTS\d+/.test(providerDescription)
-              ? microsoftCallbackMessage(providerError, providerDescription)
+              ? microsoftCallbackMessage(
+                  providerError,
+                  providerDescription,
+                  locale,
+                )
               : providerError
-                ? "Sign-in was not completed. Return to the connection page to retry or open setup help."
-                : "OAuth callback is missing its code or state",
+                ? t(
+                    "Sign-in was not completed. Return to the connection page to retry or open setup help.",
+                    "登录未完成，请返回连接页面重试或查看设置帮助。",
+                  )
+                : t(
+                    "OAuth callback is missing its code or state",
+                    "OAuth 回调缺少 code 或 state 参数",
+                  ),
         };
 
   // Emit via three channels so the result reaches the originating page
@@ -89,7 +101,7 @@ export async function GET(request: Request) {
   //      listener's state-token filter already prevents cross-talk for them.
   return new NextResponse(
     `<!DOCTYPE html>
-<html>
+<html lang="zh-CN">
   <body>
     <script>
       (function() {

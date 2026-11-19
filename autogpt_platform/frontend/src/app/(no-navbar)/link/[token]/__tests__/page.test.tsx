@@ -16,6 +16,7 @@ import {
   waitFor,
 } from "@/tests/integrations/test-utils";
 import PlatformLinkPage from "../page";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const mockUseParams = vi.hoisted(() => vi.fn());
 const mockUseSearchParams = vi.hoisted(() => vi.fn());
@@ -80,6 +81,36 @@ beforeEach(() => {
 });
 
 describe("PlatformLinkPage", () => {
+  test("localizes account-switch failure without changing the signed-in account", async () => {
+    mockLogOut.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    server.use(
+      getGetPlatformLinkingGetDisplayInfoForALinkTokenMockHandler200({
+        platform: "DISCORD",
+        link_type: LinkType.SERVER,
+        server_name: "Builders Guild",
+      }),
+    );
+    render(
+      <LanguageProvider>
+        <PlatformLinkPage />
+      </LanguageProvider>,
+    );
+    fireEvent.click(
+      await screen.findByRole("button", { name: "不是你？退出登录" }),
+    );
+    await waitFor(() =>
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "无法退出登录",
+          description: "请检查网络连接后重试。",
+          variant: "destructive",
+        }),
+      ),
+    );
+    expect(window.location.href).toBe("http://localhost/link/token-123");
+    expect(screen.getByText(/owner@example.com/)).toBeDefined();
+  });
+
   test("shows a malformed-token error without fetching link info", () => {
     const infoHandler = vi.fn();
     setRoute("bad.token");

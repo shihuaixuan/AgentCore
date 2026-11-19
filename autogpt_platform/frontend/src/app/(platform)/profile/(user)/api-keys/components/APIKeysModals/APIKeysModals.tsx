@@ -1,4 +1,6 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getScopeDescription } from "@/lib/api-key-scopes";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +22,7 @@ import { useAPIkeysModals } from "./useAPIkeysModals";
 import { APIKeyPermission } from "@/app/api/__generated__/models/aPIKeyPermission";
 
 export const APIKeysModals = () => {
+  const { t, locale } = useTranslation();
   const {
     isCreating,
     handleCreateKey,
@@ -37,19 +40,24 @@ export const APIKeysModals = () => {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogTrigger asChild>
           <Button variant="compact-primary" size="compact">
-            Create Key
+            {t("Create Key", "创建密钥")}
           </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create New API Key</DialogTitle>
+            <DialogTitle>
+              {t("Create New API Key", "创建新 API 密钥")}
+            </DialogTitle>
             <DialogDescription>
-              Create a new AutoGPT Platform API key
+              {t(
+                "Create a new AutoGPT Platform API key",
+                "创建新的 AutoGPT 平台 API 密钥",
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t("Name", "名称")}</Label>
               <BaseInput
                 id="name"
                 value={keyState.newKeyName}
@@ -59,11 +67,16 @@ export const APIKeysModals = () => {
                     newKeyName: e.target.value,
                   }))
                 }
-                placeholder="My AutoGPT Platform API Key"
+                placeholder={t(
+                  "My AutoGPT Platform API Key",
+                  "我的 AutoGPT 平台 API 密钥",
+                )}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Description (Optional)</Label>
+              <Label htmlFor="description">
+                {t("Description (Optional)", "描述（可选）")}
+              </Label>
               <BaseInput
                 id="description"
                 value={keyState.newKeyDescription}
@@ -73,11 +86,11 @@ export const APIKeysModals = () => {
                     newKeyDescription: e.target.value,
                   }))
                 }
-                placeholder="Used for..."
+                placeholder={t("Used for...", "用于…")}
               />
             </div>
             <div className="grid gap-2">
-              <Label>Permissions</Label>
+              <Label>{t("Permissions", "权限")}</Label>
               <div className="max-h-48 space-y-2 overflow-y-auto">
                 {Object.values(APIKeyPermission).map((permission) => (
                   <div className="flex items-center space-x-2" key={permission}>
@@ -97,7 +110,11 @@ export const APIKeysModals = () => {
                         }));
                       }}
                     />
-                    <Label htmlFor={permission}>{permission}</Label>
+                    <Label htmlFor={permission}>
+                      {locale === "zh-CN"
+                        ? getScopeDescription(permission, locale)
+                        : permission}
+                    </Label>
                   </div>
                 ))}
               </div>
@@ -109,7 +126,7 @@ export const APIKeysModals = () => {
               size="compact"
               onClick={() => setIsCreateOpen(false)}
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               variant="compact-primary"
@@ -117,7 +134,7 @@ export const APIKeysModals = () => {
               onClick={handleCreateKey}
               disabled={isCreating}
             >
-              Create
+              {t("Create", "创建")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -126,10 +143,17 @@ export const APIKeysModals = () => {
       <Dialog open={isKeyDialogOpen} onOpenChange={setIsKeyDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>AutoGPT Platform API Key Created</DialogTitle>
+            <DialogTitle>
+              {t(
+                "AutoGPT Platform API Key Created",
+                "AutoGPT 平台 API 密钥已创建",
+              )}
+            </DialogTitle>
             <DialogDescription>
-              Please copy your AutoGPT API key now. You won&apos;t be able to
-              see it again!
+              {t(
+                "Please copy your AutoGPT API key now. You won't be able to see it again!",
+                "请立即复制你的 AutoGPT API 密钥。之后将无法再次查看！",
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center space-x-2">
@@ -152,7 +176,7 @@ export const APIKeysModals = () => {
               size="compact"
               onClick={() => setIsKeyDialogOpen(false)}
             >
-              Close
+              {t("Close", "关闭")}
             </Button>
           </DialogFooter>
         </DialogContent>

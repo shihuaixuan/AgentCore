@@ -91,7 +91,8 @@ export function ExecutionAnalyticsForm() {
       toast({
         title: t("Trends Error", "趋势错误"),
         description:
-          (accuracyError as any)?.message || t("Failed to fetch accuracy trends", "无法获取准确性趋势"),
+          (accuracyError as any)?.message ||
+          t("Failed to fetch accuracy trends", "无法获取准确性趋势"),
         variant: "destructive",
       });
       return;
@@ -105,7 +106,10 @@ export function ExecutionAnalyticsForm() {
       if (data.alert) {
         toast({
           title: t("🚨 Accuracy Alert Detected", "🚨 检测到准确性告警"),
-          description: `${data.alert.drop_percent.toFixed(1)}% ${t("accuracy drop detected for this agent", "准确性下降（工作流：")} ${formData.graph_id})`,
+          description: t(
+            `${data.alert.drop_percent.toFixed(1)}% accuracy drop detected for this agent ${formData.graph_id}`,
+            `工作流 ${formData.graph_id} 的准确性下降了 ${data.alert.drop_percent.toFixed(1)}%`,
+          ),
           variant: "destructive",
         });
       }
@@ -132,6 +136,7 @@ export function ExecutionAnalyticsForm() {
           <Line
             type="monotone"
             dataKey="Daily Score"
+            name={t("Daily Score", "每日评分")}
             stroke="#3b82f6"
             strokeWidth={2}
             dot={{ r: 3 }}
@@ -139,6 +144,7 @@ export function ExecutionAnalyticsForm() {
           <Line
             type="monotone"
             dataKey="3-Day Avg"
+            name={t("3-Day Avg", "3 日平均")}
             stroke="#10b981"
             strokeWidth={2}
             dot={{ r: 3 }}
@@ -146,6 +152,7 @@ export function ExecutionAnalyticsForm() {
           <Line
             type="monotone"
             dataKey="7-Day Avg"
+            name={t("7-Day Avg", "7 日平均")}
             stroke="#f59e0b"
             strokeWidth={2}
             dot={{ r: 3 }}
@@ -153,6 +160,7 @@ export function ExecutionAnalyticsForm() {
           <Line
             type="monotone"
             dataKey="14-Day Avg"
+            name={t("14-Day Avg", "14 日平均")}
             stroke="#8b5cf6"
             strokeWidth={2}
             dot={{ r: 3 }}
@@ -192,8 +200,11 @@ export function ExecutionAnalyticsForm() {
         setResults(result);
 
         toast({
-        title: t("Analytics Generated", "分析已生成"),
-          description: `Processed ${result.processed_executions} executions. ${result.successful_analytics} successful, ${result.failed_analytics} failed, ${result.skipped_executions} skipped.`,
+          title: t("Analytics Generated", "分析已生成"),
+          description: t(
+            `Processed ${result.processed_executions} executions. ${result.successful_analytics} successful, ${result.failed_analytics} failed, ${result.skipped_executions} skipped.`,
+            `已处理 ${result.processed_executions} 个执行。${result.successful_analytics} 个成功，${result.failed_analytics} 个失败，${result.skipped_executions} 个已跳过。`,
+          ),
           variant: "default",
         });
       },
@@ -201,9 +212,11 @@ export function ExecutionAnalyticsForm() {
         console.error("Analytics generation error:", error);
 
         const errorMessage =
-          error?.message || error?.detail || t("An unexpected error occurred", "发生意外错误");
+          error?.message ||
+          error?.detail ||
+          t("An unexpected error occurred", "发生意外错误");
         const isOpenAIError = errorMessage.includes(
-          t("OpenAI API key not configured", "未配置 OpenAI API 密钥"),
+          "OpenAI API key not configured",
         );
 
         toast({
@@ -211,7 +224,10 @@ export function ExecutionAnalyticsForm() {
             ? t("Analytics Generation Skipped", "已跳过生成分析")
             : t("Analytics Generation Failed", "分析生成失败"),
           description: isOpenAIError
-            ? t("Analytics generation requires OpenAI configuration, but accuracy trends are still available above.", "生成分析需要配置 OpenAI，但上方仍可查看准确性趋势。")
+            ? t(
+                "Analytics generation requires OpenAI configuration, but accuracy trends are still available above.",
+                "生成分析需要配置 OpenAI，但上方仍可查看准确性趋势。",
+              )
             : errorMessage,
           variant: isOpenAIError ? "default" : "destructive",
         });
@@ -303,7 +319,9 @@ export function ExecutionAnalyticsForm() {
   if (configLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="text-foreground-tertiary">{t("Loading configuration...", "正在加载配置...")}</div>
+        <div className="text-foreground-tertiary">
+          {t("Loading configuration...", "正在加载配置...")}
+        </div>
       </div>
     );
   }
@@ -312,7 +330,9 @@ export function ExecutionAnalyticsForm() {
   if (configError || !config) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="text-error">{t("Failed to load configuration", "无法加载配置")}</div>
+        <div className="text-error">
+          {t("Failed to load configuration", "无法加载配置")}
+        </div>
       </div>
     );
   }
@@ -323,7 +343,7 @@ export function ExecutionAnalyticsForm() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="graph_id">
-              Graph ID <span className="text-error">*</span>
+              {t("Graph ID", "工作流 ID")} <span className="text-error">*</span>
             </Label>
             <BaseInput
               id="graph_id"
@@ -335,7 +355,9 @@ export function ExecutionAnalyticsForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="graph_version">{t("Graph Version", "工作流版本")}</Label>
+            <Label htmlFor="graph_version">
+              {t("Graph Version", "工作流版本")}
+            </Label>
             <BaseInput
               id="graph_version"
               type="number"
@@ -346,7 +368,10 @@ export function ExecutionAnalyticsForm() {
                   e.target.value ? parseInt(e.target.value) : undefined,
                 )
               }
-              placeholder={t("Optional - leave empty for all versions", "可选，不填表示所有版本")}
+              placeholder={t(
+                "Optional - leave empty for all versions",
+                "可选，不填表示所有版本",
+              )}
             />
           </div>
 
@@ -356,12 +381,17 @@ export function ExecutionAnalyticsForm() {
               id="user_id"
               value={formData.user_id || ""}
               onChange={(e) => handleInputChange("user_id", e.target.value)}
-              placeholder={t("Optional - leave empty for all users", "可选，不填表示所有用户")}
+              placeholder={t(
+                "Optional - leave empty for all users",
+                "可选，不填表示所有用户",
+              )}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="created_after">{t("Created After", "创建时间晚于")}</Label>
+            <Label htmlFor="created_after">
+              {t("Created After", "创建时间晚于")}
+            </Label>
             <BaseInput
               id="created_after"
               type="datetime-local"
@@ -379,7 +409,9 @@ export function ExecutionAnalyticsForm() {
               onValueChange={(value) => handleInputChange("model_name", value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder={t("Select AI model", "选择 AI 模型")} />
+                <SelectValue
+                  placeholder={t("Select AI model", "选择 AI 模型")}
+                />
               </SelectTrigger>
               <SelectContent>
                 {config.available_models.map((model) => (
@@ -415,8 +447,10 @@ export function ExecutionAnalyticsForm() {
                 />
                 <Label htmlFor="skip_existing">
                   <Text variant="body-medium-tight" as="span" tone="inherit">
-                    Skip executions that already have activity status and
-                    correctness score
+                    {t(
+                      "Skip executions that already have activity status and correctness score",
+                      "跳过已有活动状态和正确性评分的执行",
+                    )}
                   </Text>
                 </Label>
               </div>
@@ -430,7 +464,10 @@ export function ExecutionAnalyticsForm() {
                 />
                 <Label htmlFor="show_accuracy_chart">
                   <Text variant="body-medium-tight" as="span" tone="inherit">
-                    {t("Show accuracy trends chart and historical data visualization", "显示准确性趋势图和历史数据可视化")}
+                    {t(
+                      "Show accuracy trends chart and historical data visualization",
+                      "显示准确性趋势图和历史数据可视化",
+                    )}
                   </Text>
                 </Label>
               </div>
@@ -438,7 +475,10 @@ export function ExecutionAnalyticsForm() {
               {/* Custom System Prompt */}
               <div className="space-y-2">
                 <Label htmlFor="system_prompt">
-                  {t("Custom System Prompt (Optional)", "自定义系统提示词（可选）")}
+                  {t(
+                    "Custom System Prompt (Optional)",
+                    "自定义系统提示词（可选）",
+                  )}
                 </Label>
                 <Textarea
                   id="system_prompt"
@@ -451,15 +491,20 @@ export function ExecutionAnalyticsForm() {
                   className="resize-y"
                 />
                 <Text variant="body-tight" tone="secondary">
-                  Customize how the AI evaluates execution success and failure.
-                  Leave empty to use the default prompt shown above.
+                  {t(
+                    "Customize how the AI evaluates execution success and failure. Leave empty to use the default prompt shown above.",
+                    "自定义 AI 评估执行成功或失败的方式。留空则使用上方的默认提示词。",
+                  )}
                 </Text>
               </div>
 
               {/* Custom User Prompt */}
               <div className="space-y-2">
                 <Label htmlFor="user_prompt">
-                  {t("Custom User Prompt Template (Optional)", "自定义用户提示词模板（可选）")}
+                  {t(
+                    "Custom User Prompt Template (Optional)",
+                    "自定义用户提示词模板（可选）",
+                  )}
                 </Label>
                 <Textarea
                   id="user_prompt"
@@ -472,16 +517,21 @@ export function ExecutionAnalyticsForm() {
                   className="resize-y"
                 />
                 <Text variant="body-tight" tone="secondary">
-                  Customize the analysis instructions. Use{" "}
+                  {t(
+                    "Customize the analysis instructions. Use",
+                    "自定义分析指令。使用",
+                  )}{" "}
                   <code className="rounded bg-surface-hover px-1">
                     {"{{GRAPH_NAME}}"}
                   </code>{" "}
-                  and{" "}
+                  {t("and", "和")}{" "}
                   <code className="rounded bg-surface-hover px-1">
                     {"{{EXECUTION_DATA}}"}
                   </code>{" "}
-                  as placeholders. Leave empty to use the default template shown
-                  above.
+                  {t(
+                    "as placeholders. Leave empty to use the default template shown above.",
+                    "作为占位符。留空则使用上方的默认模板。",
+                  )}
                 </Text>
               </div>
 
@@ -552,12 +602,25 @@ export function ExecutionAnalyticsForm() {
             </Text>
             <div className="rounded-md bg-info-surface px-3 py-2 text-caption leading-4 text-info-foreground">
               <p className="font-medium">
-                {t("Chart Filters (matches monitoring system):", "图表筛选条件（与监控系统一致）：")}
+                {t(
+                  "Chart Filters (matches monitoring system):",
+                  "图表筛选条件（与监控系统一致）：",
+                )}
               </p>
               <ul className="mt-1 list-inside list-disc space-y-1">
-                <li>{t("Only days with ≥1 execution with correctness score", "仅统计至少有 1 次执行且有正确性评分的日期")}</li>
+                <li>
+                  {t(
+                    "Only days with ≥1 execution with correctness score",
+                    "仅统计至少有 1 次执行且有正确性评分的日期",
+                  )}
+                </li>
                 <li>{t("Last 30 days", "最近 30 天")}</li>
-                <li>{t("Averages calculated from scored executions only", "平均值仅根据有评分的执行计算")}</li>
+                <li>
+                  {t(
+                    "Averages calculated from scored executions only",
+                    "平均值仅根据有评分的执行计算",
+                  )}
+                </li>
               </ul>
             </div>
           </div>
@@ -571,32 +634,35 @@ export function ExecutionAnalyticsForm() {
                 </Text>
                 <div className="ml-3 space-y-2">
                   <h4 className="text-lead font-semibold text-error-foreground">
-                    Accuracy Alert Detected
+                    {t("Accuracy Alert Detected", "检测到准确性告警")}
                   </h4>
                   <p className="text-error-foreground">
                     <strong>
-                      {trendsData.alert.drop_percent.toFixed(1)}% accuracy drop
+                      {t(
+                        `${trendsData.alert.drop_percent.toFixed(1)}% accuracy drop`,
+                        `准确性下降 ${trendsData.alert.drop_percent.toFixed(1)}%`,
+                      )}
                     </strong>{" "}
-                    detected for agent{" "}
+                    {t("detected for agent", "对应工作流")}{" "}
                     <code className="rounded bg-error-surface px-1 font-mono text-body leading-5">
                       {formData.graph_id}
                     </code>
                   </p>
                   <div className="space-y-1 text-body leading-5 text-error-foreground">
                     <p>
-                      • 3-day average:{" "}
+                      {t("• 3-day average:", "• 3 日平均：")}{" "}
                       <strong>
                         {trendsData.alert.three_day_avg.toFixed(2)}%
                       </strong>
                     </p>
                     <p>
-                      • 7-day average:{" "}
+                      {t("• 7-day average:", "• 7 日平均：")}{" "}
                       <strong>
                         {trendsData.alert.seven_day_avg.toFixed(2)}%
                       </strong>
                     </p>
                     <p>
-                      • Detected at:{" "}
+                      {t("• Detected at:", "• 检测时间：")}{" "}
                       <strong>
                         {new Date(
                           trendsData.alert.detected_at,
@@ -613,7 +679,8 @@ export function ExecutionAnalyticsForm() {
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div className="rounded-lg border bg-surface p-4 text-center text-info-foreground">
               <Text variant="heading-md-bold" as="div" tone="inherit">
-                {trendsData.latest_data.daily_score?.toFixed(2) || t("N/A", "不适用")}
+                {trendsData.latest_data.daily_score?.toFixed(2) ||
+                  t("N/A", "不适用")}
               </Text>
               <Text variant="body-tight" as="div" tone="secondary">
                 {t("Daily Score", "每日评分")}
@@ -621,7 +688,8 @@ export function ExecutionAnalyticsForm() {
             </div>
             <div className="rounded-lg border bg-surface p-4 text-center">
               <Text variant="heading-md-bold" as="div" tone="success">
-                {trendsData.latest_data.three_day_avg?.toFixed(2) || t("N/A", "不适用")}
+                {trendsData.latest_data.three_day_avg?.toFixed(2) ||
+                  t("N/A", "不适用")}
               </Text>
               <Text variant="body-tight" as="div" tone="secondary">
                 {t("3-Day Avg", "3 日平均")}
@@ -629,7 +697,8 @@ export function ExecutionAnalyticsForm() {
             </div>
             <div className="rounded-lg border bg-surface p-4 text-center text-orange-foreground">
               <Text variant="heading-md-bold" as="div" tone="inherit">
-                {trendsData.latest_data.seven_day_avg?.toFixed(2) || t("N/A", "不适用")}
+                {trendsData.latest_data.seven_day_avg?.toFixed(2) ||
+                  t("N/A", "不适用")}
               </Text>
               <Text variant="body-tight" as="div" tone="secondary">
                 {t("7-Day Avg", "7 日平均")}
@@ -637,7 +706,8 @@ export function ExecutionAnalyticsForm() {
             </div>
             <div className="rounded-lg border bg-surface p-4 text-center text-brand-hover">
               <Text variant="heading-md-bold" as="div" tone="inherit">
-                {trendsData.latest_data.fourteen_day_avg?.toFixed(2) || t("N/A", "不适用")}
+                {trendsData.latest_data.fourteen_day_avg?.toFixed(2) ||
+                  t("N/A", "不适用")}
               </Text>
               <Text variant="body-tight" as="div" tone="secondary">
                 {t("14-Day Avg", "14 日平均")}
@@ -654,7 +724,7 @@ export function ExecutionAnalyticsForm() {
                 tone="inherit"
                 className="mb-4"
               >
-                {t("Execution Accuracy Trends", "执行准确性趋势")} Chart
+                {t("Execution Accuracy Trends Chart", "执行准确性趋势图")}
               </Text>
               <div className="rounded-lg border bg-surface p-6">
                 <AccuracyChart data={trendsData.historical_data} />

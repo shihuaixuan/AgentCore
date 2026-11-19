@@ -25,13 +25,8 @@ interface Props {
   user: AdminUser;
 }
 
-const DURATION_OPTIONS = BAN_DURATIONS.map(({ value, label }) => ({
-  value,
-  label,
-}));
-
 export function BanDialog({ user }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [duration, setDuration] = useState<BanDuration>("permanent");
@@ -62,24 +57,29 @@ export function BanDialog({ user }: Props) {
       <Dialog.Content>
         <div className="flex flex-col gap-4">
           <Text variant="body" tone="secondary">
-            They&apos;re signed out and can&apos;t sign in again until the ban
-          {t(
-            "ends, but for up to 5 minutes they can still get a token that works for an hour. Their API keys, schedules and triggers keep running.",
-            "结束。但在接下来的 5 分钟内，用户仍可能获得一个可使用 1 小时的令牌。其 API 密钥、计划任务和触发器仍会继续运行。",
-          )}
+            {t(
+              "They're signed out and can't sign in again until the ban ends, but for up to 5 minutes they can still get a token that works for an hour. Their API keys, schedules and triggers keep running.",
+              "用户会退出登录，封禁结束前无法再次登录。但在接下来的 5 分钟内，仍可能获得可使用 1 小时的令牌。其 API 密钥、计划任务和触发器仍会继续运行。",
+            )}
           </Text>
           {related > 0 ? (
             <Text variant="small" tone="muted">
-              Only this account. To include the{" "}
+              {t("Only this account. To include the", "仅封禁此账户。如需包含")}{" "}
               {related === 1
                 ? t("1 related account", "1 个关联账户")
                 : `${related.toLocaleString("en-GB")} ${t("related accounts", "个关联账户")}`}
-              ，{t("use Ban all in Related accounts.", "请在“关联账户”中使用“全部封禁”。")}
+              ，
+              {t(
+                "use Ban all in Related accounts.",
+                "请在“关联账户”中使用“全部封禁”。",
+              )}
             </Text>
           ) : null}
           {user.role === "admin" ? (
             <Alert variant="warning">
-              <AlertDescription>{t("This account is an admin.", "此账户具有管理员权限。")}</AlertDescription>
+              <AlertDescription>
+                {t("This account is an admin.", "此账户具有管理员权限。")}
+              </AlertDescription>
             </Alert>
           ) : null}
           <Input
@@ -99,12 +99,25 @@ export function BanDialog({ user }: Props) {
               label={t("Duration", "时长")}
               value={duration}
               onValueChange={(value) => setDuration(value as BanDuration)}
-              options={DURATION_OPTIONS}
+              options={BAN_DURATIONS.map(({ value, label }) => ({
+                value,
+                label: t(
+                  label,
+                  {
+                    permanent: "永久",
+                    "1h": "1 小时",
+                    "1d": "1 天",
+                    "7d": "7 天",
+                    "30d": "30 天",
+                  }[value],
+                ),
+              }))}
               wrapperClassName="mb-0"
             />
             <Text variant="small" tone="muted">
               {banEnd
-                ? t("Ends", "结束时间") + ` ${formatDateTime(banEnd)}（${formatTimeUntil(banEnd)}）`
+                ? t("Ends", "结束时间") +
+                  ` ${formatDateTime(banEnd, locale)}（${formatTimeUntil(banEnd, undefined, locale)}）`
                 : t("Doesn't end on its own.", "不会自动结束。")}
             </Text>
           </div>

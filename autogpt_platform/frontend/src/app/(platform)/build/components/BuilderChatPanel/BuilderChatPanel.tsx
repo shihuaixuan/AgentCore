@@ -11,12 +11,14 @@ import { useBuilderChatPanel } from "./useBuilderChatPanel";
 import { BubbleChatIcon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   className?: string;
 }
 
 export function BuilderChatPanel({ className }: Props) {
+  const { t } = useTranslation();
   const panelRef = useRef<HTMLDivElement>(null);
   const {
     isOpen,
@@ -51,10 +53,10 @@ export function BuilderChatPanel({ className }: Props) {
         ? retryTransportCheck
         : null;
   const activeErrorTitle = bindError
-    ? "Could not start the builder chat"
+    ? t("Could not start the builder chat", "无法启动构建助手对话")
     : bootstrapError
-      ? "Could not create a blank workflow"
-      : "Could not check the AI connection";
+      ? t("Could not create a blank workflow", "无法创建空白工作流")
+      : t("Could not check the AI connection", "无法检查 AI 连接");
 
   return (
     <div
@@ -68,7 +70,7 @@ export function BuilderChatPanel({ className }: Props) {
           <div
             ref={panelRef}
             role="complementary"
-            aria-label="Builder chat panel"
+            aria-label={t("Builder chat panel", "构建助手对话面板")}
             className="pointer-events-auto flex h-[70vh] max-h-[calc(100vh-6rem)] w-[26rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-node-border bg-surface shadow-2xl sm:h-[75vh]"
           >
             <PanelHeader
@@ -93,7 +95,10 @@ export function BuilderChatPanel({ className }: Props) {
                       {activeErrorTitle}
                     </Text>
                     <Text variant="body-tight" tone="muted">
-                      Something went wrong. Retry to try again.
+                      {t(
+                        "Something went wrong. Retry to try again.",
+                        "出现问题，请重试。",
+                      )}
                     </Text>
                     <button
                       type="button"
@@ -105,7 +110,7 @@ export function BuilderChatPanel({ className }: Props) {
                         as="span"
                         tone="inherit"
                       >
-                        Retry
+                        {t("Retry", "重试")}
                       </Text>
                     </button>
                   </Text>
@@ -113,7 +118,7 @@ export function BuilderChatPanel({ className }: Props) {
               ) : isBootstrapping ? (
                 <div className="flex flex-1 items-center justify-center px-4 py-6">
                   <Text variant="body-tight" tone="muted" as="div">
-                    Preparing builder chat…
+                    {t("Preparing builder chat…", "正在准备构建助手对话…")}
                   </Text>
                 </div>
               ) : sessionId ? (
@@ -138,7 +143,10 @@ export function BuilderChatPanel({ className }: Props) {
                       isTurnStarting={status === "submitted"}
                       onStop={stop}
                       onEnqueue={onSend}
-                      placeholder="Ask the builder to edit or run this workflow…"
+                      placeholder={t(
+                        "Ask the builder to edit or run this workflow…",
+                        "让构建助手编辑或运行此工作流…",
+                      )}
                       hasSession={true}
                     />
                   </div>
@@ -146,7 +154,10 @@ export function BuilderChatPanel({ className }: Props) {
               ) : (
                 <div className="flex flex-1 items-center justify-center px-4 py-6">
                   <Text variant="body-tight" tone="muted" as="div">
-                    Open a workflow to start chatting with the builder.
+                    {t(
+                      "Open a workflow to start chatting with the builder.",
+                      "打开工作流，即可与构建助手对话。",
+                    )}
                   </Text>
                 </div>
               )}
@@ -159,7 +170,11 @@ export function BuilderChatPanel({ className }: Props) {
         type="button"
         onClick={handleToggle}
         aria-expanded={isOpen}
-        aria-label={isOpen ? "Close chat" : "Chat with builder"}
+        aria-label={
+          isOpen
+            ? t("Close chat", "关闭对话")
+            : t("Chat with builder", "与构建助手对话")
+        }
         className={cn(
           "pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-colors",
           "focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:outline-none",

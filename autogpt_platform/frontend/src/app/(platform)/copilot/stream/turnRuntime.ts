@@ -1,5 +1,6 @@
 import { getV2GetSession } from "@/app/api/__generated__/endpoints/chat/chat";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import type { Locale } from "@/lib/i18n/locale";
 import { environment } from "@/services/environment";
 import * as Sentry from "@sentry/nextjs";
 import type { FileUIPart, UIMessage } from "ai";
@@ -130,6 +131,7 @@ export interface RuntimeDeps {
 }
 
 export interface RuntimeHandlers {
+  locale?: Locale;
   /** A turn's error entry or a refused send, with the provider failure sent before it. */
   onError?: (error: Error, providerFailure: unknown) => void;
   /** `expired`: the stream went away before the turn's finish or error, so
@@ -223,6 +225,7 @@ export class TurnRuntime {
   private listeners = new Set<() => void>();
   private snapshot: RuntimeSnapshot;
   private handlers: RuntimeHandlers = {};
+  private locale: Locale = "en";
   private boundFetchSession: (() => Promise<SessionView | null>) | null = null;
   private disposed = false;
   private probes = 0;
@@ -256,6 +259,7 @@ export class TurnRuntime {
     fetchSession: (() => Promise<SessionView | null>) | null,
   ) {
     this.handlers = handlers;
+    this.locale = handlers.locale ?? this.locale;
     this.boundFetchSession = fetchSession;
     return () => {
       if (this.handlers === handlers) this.handlers = {};
@@ -721,7 +725,14 @@ export class TurnRuntime {
     if (this.failures >= INDICATOR_AFTER_FAILURES) this.notice = "reconnecting";
     if (this.failures >= BACKOFF_MS.length && !this.anomalyShown) {
       this.anomalyShown = true;
-      this.deps.toast(ANOMALY_TOAST);
+      this.deps.toast(
+        this.locale === "zh-CN"
+          ? {
+              title: "连接已断开",
+              description: "我们会继续尝试连接；你的专家可能仍在工作。",
+            }
+          : ANOMALY_TOAST,
+      );
     }
     const delay = BACKOFF_MS[this.failures - 1] ?? ANOMALY_RETRY_MS;
     this.clearRetry();

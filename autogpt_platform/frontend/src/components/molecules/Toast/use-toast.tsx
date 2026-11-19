@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { toast as sonnerToast } from "sonner";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { useStableCallback } from "@/hooks/useStableCallback";
 
 export interface ToastProps {
   title?: React.ReactNode;
@@ -99,13 +101,15 @@ interface ToastOnFailOptions {
 }
 
 function useToastOnFail() {
-  return React.useCallback(
+  const { t } = useTranslation();
+  return useStableCallback(
     (action: string, { rethrow = false }: ToastOnFailOptions = {}) =>
       (error: any) => {
         const err = error as Error;
         toast({
-          title: `Unable to ${action}`,
-          description: err.message ?? "Something went wrong",
+          title: t(`Unable to ${action}`, `无法${action}`),
+          description:
+            err.message || t("Something went wrong", "发生错误，请重试"),
           variant: "destructive",
           duration: 10000,
         });
@@ -113,7 +117,6 @@ function useToastOnFail() {
           throw error;
         }
       },
-    [],
   );
 }
 

@@ -43,6 +43,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   part: ToolUIPart;
@@ -73,6 +74,7 @@ function ToolStatusIcon({
 /* ------------------------------------------------------------------ */
 
 function FolderCard({ folder }: { folder: FolderInfo }) {
+  const { t } = useTranslation();
   return (
     <ContentCard>
       <ContentCardHeader>
@@ -89,9 +91,15 @@ function FolderCard({ folder }: { folder: FolderInfo }) {
         </div>
       </ContentCardHeader>
       <ContentHint>
-        {folder.agent_count} workflow{folder.agent_count !== 1 ? "s" : ""}
+        {t(
+          `${folder.agent_count} workflow${folder.agent_count !== 1 ? "s" : ""}`,
+          `${folder.agent_count} 个工作流`,
+        )}
         {folder.subfolder_count > 0 &&
-          ` · ${folder.subfolder_count} subfolder${folder.subfolder_count !== 1 ? "s" : ""}`}
+          t(
+            ` · ${folder.subfolder_count} subfolder${folder.subfolder_count !== 1 ? "s" : ""}`,
+            ` · ${folder.subfolder_count} 个子文件夹`,
+          )}
       </ContentHint>
       {folder.agents && folder.agents.length > 0 && (
         <div className="mt-2 space-y-1 border-t border-border-base pt-2">
@@ -115,10 +123,13 @@ function FolderCard({ folder }: { folder: FolderInfo }) {
 
 type TreeNode = TreeViewElement & { isAgent?: boolean };
 
-function folderTreeToElements(nodes: FolderTreeInfo[]): TreeNode[] {
+function folderTreeToElements(
+  nodes: FolderTreeInfo[],
+  t: ReturnType<typeof useTranslation>["t"],
+): TreeNode[] {
   return nodes.map((node) => {
     const children: TreeNode[] = [
-      ...folderTreeToElements(node.children),
+      ...folderTreeToElements(node.children, t),
       ...(node.agents ?? []).map((a) => ({
         id: a.id,
         name: a.name,
@@ -127,7 +138,10 @@ function folderTreeToElements(nodes: FolderTreeInfo[]): TreeNode[] {
     ];
     return {
       id: node.id,
-      name: `${node.name} (${node.agent_count} workflow${node.agent_count !== 1 ? "s" : ""})`,
+      name: t(
+        `${node.name} (${node.agent_count} workflow${node.agent_count !== 1 ? "s" : ""})`,
+        `${node.name}（${node.agent_count} 个工作流）`,
+      ),
       children: children.length > 0 ? children : undefined,
     };
   });
@@ -138,7 +152,8 @@ function collectAllIDs(nodes: FolderTreeInfo[]): string[] {
 }
 
 function FolderTreeView({ tree }: { tree: FolderTreeInfo[] }) {
-  const elements = folderTreeToElements(tree);
+  const { t } = useTranslation();
+  const elements = folderTreeToElements(tree, t);
   const allIDs = collectAllIDs(tree);
 
   return (
@@ -188,6 +203,7 @@ function FolderTreeNodes({ element }: { element: TreeNode }) {
 /* ------------------------------------------------------------------ */
 
 function AccordionContent({ output }: { output: FolderToolOutput }) {
+  const { t } = useTranslation();
   if (isFolderCreated(output)) {
     return (
       <ContentGrid>
@@ -209,7 +225,11 @@ function AccordionContent({ output }: { output: FolderToolOutput }) {
         </ContentGrid>
       );
     }
-    return <ContentMessage>No folders found.</ContentMessage>;
+    return (
+      <ContentMessage>
+        {t("No folders found.", "未找到文件夹。")}
+      </ContentMessage>
+    );
   }
 
   if (isFolderUpdated(output) || isFolderMoved(output)) {
@@ -235,16 +255,34 @@ function AccordionContent({ output }: { output: FolderToolOutput }) {
 /*  Main component                                                     */
 /* ------------------------------------------------------------------ */
 
-function getAccordionTitle(output: FolderToolOutput): string {
-  if (isFolderCreated(output)) return `Created "${output.folder.name}"`;
+function getAccordionTitle(
+  output: FolderToolOutput,
+  t: ReturnType<typeof useTranslation>["t"],
+): string {
+  if (isFolderCreated(output))
+    return t(
+      `Created "${output.folder.name}"`,
+      `已创建“${output.folder.name}”`,
+    );
   if (isFolderList(output))
-    return `${output.count} folder${output.count !== 1 ? "s" : ""}`;
-  if (isFolderUpdated(output)) return `Updated "${output.folder.name}"`;
-  if (isFolderMoved(output)) return `Moved "${output.folder.name}"`;
-  if (isFolderDeleted(output)) return "Folder deleted";
+    return t(
+      `${output.count} folder${output.count !== 1 ? "s" : ""}`,
+      `${output.count} 个文件夹`,
+    );
+  if (isFolderUpdated(output))
+    return t(
+      `Updated "${output.folder.name}"`,
+      `已更新“${output.folder.name}”`,
+    );
+  if (isFolderMoved(output))
+    return t(`Moved "${output.folder.name}"`, `已移动“${output.folder.name}”`);
+  if (isFolderDeleted(output)) return t("Folder deleted", "文件夹已删除");
   if (isAgentsMoved(output))
-    return `Moved ${output.count} workflow${output.count !== 1 ? "s" : ""}`;
-  return "Folder operation";
+    return t(
+      `Moved ${output.count} workflow${output.count !== 1 ? "s" : ""}`,
+      `已移动 ${output.count} 个工作流`,
+    );
+  return t("Folder operation", "文件夹操作");
 }
 
 function getAccordionIcon(output: FolderToolOutput) {
@@ -255,7 +293,8 @@ function getAccordionIcon(output: FolderToolOutput) {
 }
 
 export function FolderTool({ part }: Props) {
-  const text = getAnimationText(part);
+  const { t } = useTranslation();
+  const text = getAnimationText(part, t);
   const output = getFolderToolOutput(part);
 
   const isStreaming =
@@ -279,7 +318,7 @@ export function FolderTool({ part }: Props) {
       {hasContent && output && (
         <ToolAccordion
           icon={getAccordionIcon(output)}
-          title={getAccordionTitle(output)}
+          title={getAccordionTitle(output, t)}
           defaultExpanded={isFolderList(output)}
         >
           <AccordionContent output={output} />

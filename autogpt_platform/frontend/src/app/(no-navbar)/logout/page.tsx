@@ -38,8 +38,11 @@ export default function LogoutPage() {
           // live. Say so, and leave the user in the app rather than on a
           // login page that would only send them back in.
           toast({
-            title: "Couldn't sign you out",
-            description: "Check your connection and try again.",
+            title: t("Couldn't sign you out", "无法退出登录"),
+            description: t(
+              "Check your connection and try again.",
+              "请检查网络连接后重试。",
+            ),
             variant: "destructive",
           });
           router.replace("/");
@@ -51,7 +54,7 @@ export default function LogoutPage() {
 
       void runLogout();
     },
-    [logOut, router, toast],
+    [logOut, router, toast, t],
   );
 
   return (

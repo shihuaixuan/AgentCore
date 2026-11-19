@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/locale";
+
 export function formatCents(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
 }
@@ -11,21 +13,25 @@ export function formatMicrodollarsAsUsd(microdollars: number): string {
 export function formatResetTime(
   resetsAt: Date | string,
   now: Date = new Date(),
+  locale: Locale = "en",
 ): string {
   const resetDate =
     typeof resetsAt === "string" ? new Date(resetsAt) : resetsAt;
   const diffMs = resetDate.getTime() - now.getTime();
-  if (diffMs <= 0) return "now";
+  if (diffMs <= 0) return locale === "zh-CN" ? "立即" : "now";
 
   const hours = Math.floor(diffMs / (1000 * 60 * 60));
 
   if (hours < 24) {
     const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    if (locale === "zh-CN") {
+      return hours > 0 ? `${hours}小时${minutes}分钟后` : `${minutes}分钟后`;
+    }
     if (hours > 0) return `in ${hours}h ${minutes}m`;
     return `in ${minutes}m`;
   }
 
-  return resetDate.toLocaleString(undefined, {
+  return resetDate.toLocaleString(locale === "zh-CN" ? locale : undefined, {
     weekday: "short",
     hour: "numeric",
     minute: "2-digit",
@@ -35,10 +41,11 @@ export function formatResetTime(
 
 export function formatTierLabel(
   tier: string | null | undefined,
+  locale: Locale = "en",
 ): string | null {
   if (!tier || tier === "NO_TIER") return null;
   if (tier === "BUSINESS") return "Team";
-  if (tier === "TRIAL") return "Free trial";
+  if (tier === "TRIAL") return locale === "zh-CN" ? "免费试用" : "Free trial";
   return tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase();
 }
 

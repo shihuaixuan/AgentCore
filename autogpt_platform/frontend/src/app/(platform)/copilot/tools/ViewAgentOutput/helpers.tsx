@@ -81,10 +81,15 @@ export function getViewAgentOutputToolOutput(
 
 function getAgentIdentifierText(
   input: ViewAgentOutputInput | undefined,
+  t: (english: string, chinese: string) => string,
 ): string | null {
   if (!input) return null;
   const libraryId = input.library_agent_id?.trim();
-  if (libraryId) return `Library workflow ${libraryId}`;
+  if (libraryId)
+    return t(
+      `Library workflow ${libraryId}`,
+      `工作流库中的工作流 ${libraryId}`,
+    );
   const slug = input.store_slug?.trim();
   if (slug) return slug;
   const name = input.agent_name?.trim();
@@ -92,34 +97,48 @@ function getAgentIdentifierText(
   return null;
 }
 
-export function getAnimationText(part: {
-  state: ToolUIPart["state"];
-  input?: unknown;
-  output?: unknown;
-}): string {
+export function getAnimationText(
+  part: {
+    state: ToolUIPart["state"];
+    input?: unknown;
+    output?: unknown;
+  },
+  t = (english: string, _chinese: string) => english,
+): string {
   const input = part.input as ViewAgentOutputInput | undefined;
-  const agent = getAgentIdentifierText(input);
+  const agent = getAgentIdentifierText(input, t);
   const agentText = agent ? ` "${agent}"` : "";
 
   switch (part.state) {
     case "input-streaming":
     case "input-available":
-      return `Retrieving workflow output${agentText}`;
+      return t(
+        `Retrieving workflow output${agentText}`,
+        `正在获取工作流输出${agentText}`,
+      );
     case "output-available": {
       const output = parseOutput(part.output);
-      if (!output) return `Retrieving workflow output${agentText}`;
+      if (!output)
+        return t(
+          `Retrieving workflow output${agentText}`,
+          `正在获取工作流输出${agentText}`,
+        );
       if (isAgentOutputResponse(output)) {
         if (output.execution)
-          return `Retrieved output (${output.execution.status})`;
-        return "Retrieved workflow output";
+          return t(
+            `Retrieved output (${output.execution.status})`,
+            `已获取输出（${output.execution.status}）`,
+          );
+        return t("Retrieved workflow output", "已获取工作流输出");
       }
-      if (isNoResultsResponse(output)) return "No outputs found";
-      return "Error loading workflow output";
+      if (isNoResultsResponse(output))
+        return t("No outputs found", "未找到输出");
+      return t("Error loading workflow output", "加载工作流输出时出错");
     }
     case "output-error":
-      return "Error loading workflow output";
+      return t("Error loading workflow output", "加载工作流输出时出错");
     default:
-      return "Retrieving workflow output";
+      return t("Retrieving workflow output", "正在获取工作流输出");
   }
 }
 

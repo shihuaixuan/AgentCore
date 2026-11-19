@@ -5,8 +5,10 @@ import { usePaginatedIntegrationList } from "./usePaginatedIntegrationList";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { blockMenuContainerStyle } from "../style";
 import { useBlockMenuStore } from "../../../../stores/blockMenuStore";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export const PaginatedIntegrationList = () => {
+  const { t } = useTranslation();
   const setIntegration = useBlockMenuStore((state) => state.setIntegration);
   const {
     allProviders: providers,
@@ -28,8 +30,9 @@ export const PaginatedIntegrationList = () => {
           context="block menu"
           httpError={{
             status: status,
-            statusText: "Request failed",
-            message: (error?.detail as string) || "An error occurred",
+            statusText: t("Request failed", "请求失败"),
+            message:
+              (error?.detail as string) || t("An error occurred", "发生错误"),
           }}
           onRetry={() => refetch()}
         />

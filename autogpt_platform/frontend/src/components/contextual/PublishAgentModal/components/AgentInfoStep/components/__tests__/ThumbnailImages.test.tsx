@@ -13,6 +13,7 @@ import {
 } from "@/tests/integrations/test-utils";
 
 import { ThumbnailImages } from "../ThumbnailImages";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const toastSpy = vi.hoisted(() => vi.fn());
 vi.mock("@/components/molecules/Toast/use-toast", async (importOriginal) => {
@@ -50,6 +51,54 @@ function selectFile(input: HTMLInputElement, file: File) {
 }
 
 describe("ThumbnailImages", () => {
+  it("passes the locale and submission purpose to the media upload", async () => {
+    uploadSpy.mockClear();
+    uploadSpy.mockResolvedValueOnce("https://cdn.test/Original.png");
+    const onImagesChange = vi.fn();
+    render(
+      <LanguageProvider>
+        <ThumbnailImages agentId="agent-1" onImagesChange={onImagesChange} />
+      </LanguageProvider>,
+    );
+    const file = new File(["original"], "Original.png", { type: "image/png" });
+    selectFile(
+      document.getElementById("image-upload") as HTMLInputElement,
+      file,
+    );
+    await waitFor(() =>
+      expect(onImagesChange).toHaveBeenCalledWith([
+        "https://cdn.test/Original.png",
+      ]),
+    );
+    expect(uploadSpy).toHaveBeenCalledWith(file, "submission", "zh-CN");
+  });
+
+  it("localizes generation controls and the upload size guard before uploading", async () => {
+    toastSpy.mockClear();
+    uploadSpy.mockClear();
+    render(
+      <LanguageProvider>
+        <ThumbnailImages agentId="agent-1" onImagesChange={() => {}} />
+      </LanguageProvider>,
+    );
+    expect(screen.getByRole("button", { name: "生成" })).toBeDefined();
+    const file = new File(["raw"], "Original.png", { type: "image/png" });
+    Object.defineProperty(file, "size", { value: 25 * 1024 * 1024 });
+    selectFile(
+      document.getElementById("image-upload") as HTMLInputElement,
+      file,
+    );
+    await waitFor(() =>
+      expect(toastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "文件过大",
+          description: "文件过大（25.0 MB）。最大允许 4 MB，请选择较小的文件。",
+        }),
+      ),
+    );
+    expect(uploadSpy).not.toHaveBeenCalled();
+  });
+
   it("renders the empty state with an Add image label and Generate button", () => {
     render(
       <ThumbnailImages

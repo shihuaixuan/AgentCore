@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { PencilEdit02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
@@ -38,6 +39,7 @@ export function QuestionOptionList({
   required = true,
   selectedContent,
 }: Props) {
+  const { t } = useTranslation();
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const showPencil = editable && Boolean(onEdit);
   const selected = options.indexOf(value.trim());
@@ -116,8 +118,8 @@ export function QuestionOptionList({
               {showPencil && (
                 <button
                   type="button"
-                  aria-label={`Edit ${option}`}
-                  title="Edit before sending"
+                  aria-label={t(`Edit ${option}`, `编辑 ${option}`)}
+                  title={t("Edit before sending", "发送前编辑")}
                   onClick={() => onEdit?.(option)}
                   className="absolute top-1/2 right-2 flex size-8 -translate-y-1/2 items-center justify-center rounded-xl text-foreground-subtle transition-colors hover:bg-surface-active/60 hover:text-foreground-body"
                 >

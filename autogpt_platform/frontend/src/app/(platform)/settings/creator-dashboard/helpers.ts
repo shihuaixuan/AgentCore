@@ -9,13 +9,17 @@ import {
   UnavailableIcon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
+import type { Locale } from "@/lib/i18n/locale";
 
 export interface EditPayload extends StoreSubmissionEditRequest {
   store_listing_version_id: string;
   graph_id: string;
 }
 
-export function buildEditPayload(submission: StoreSubmission): EditPayload {
+export function buildEditPayload(
+  submission: StoreSubmission,
+  locale: Locale = "en",
+): EditPayload {
   return {
     name: submission.name,
     sub_heading: submission.sub_heading,
@@ -23,7 +27,9 @@ export function buildEditPayload(submission: StoreSubmission): EditPayload {
     image_urls: submission.image_urls,
     video_url: submission.video_url,
     categories: submission.categories,
-    changes_summary: submission.changes_summary || "Update Submission",
+    changes_summary:
+      submission.changes_summary ||
+      (locale === "zh-CN" ? "更新提交" : "Update Submission"),
     store_listing_version_id: submission.listing_version_id,
     graph_id: submission.graph_id,
   };
@@ -101,8 +107,20 @@ export interface StatusVisual {
   dotClass: string;
 }
 
-export function getStatusVisual(status: SubmissionStatus): StatusVisual {
-  return STATUS_VISUAL[status] ?? STATUS_VISUAL[SubmissionStatus.DRAFT];
+export function getStatusVisual(
+  status: SubmissionStatus,
+  locale: Locale = "en",
+): StatusVisual {
+  const visual = STATUS_VISUAL[status] ?? STATUS_VISUAL[SubmissionStatus.DRAFT];
+  const labels: Record<SubmissionStatus, string> = {
+    DRAFT: "草稿",
+    PENDING: "审核中",
+    APPROVED: "已通过",
+    REJECTED: "需要修改",
+  };
+  return locale === "zh-CN"
+    ? { ...visual, label: labels[status] ?? labels.DRAFT }
+    : visual;
 }
 
 export const STATUS_VISUAL: Record<SubmissionStatus, StatusVisual> = {
@@ -188,11 +206,14 @@ export function formatRuns(value: number): string {
   return value.toLocaleString();
 }
 
-export function formatSubmittedAt(value: Date | null | undefined): string {
+export function formatSubmittedAt(
+  value: Date | null | undefined,
+  locale: Locale = "en",
+): string {
   if (!value) return "—";
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",

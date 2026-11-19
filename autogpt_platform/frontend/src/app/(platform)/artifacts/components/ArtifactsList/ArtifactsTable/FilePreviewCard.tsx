@@ -4,6 +4,7 @@ import type { WorkspaceFileItem } from "@/app/api/__generated__/models/workspace
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { PreviewBody } from "../ArtifactCard/CardPreview";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   formatDayLabel,
   formatFileSize,
@@ -20,6 +21,7 @@ interface Props {
 export const PREVIEW_IMAGE_WIDTH = 800;
 
 export function FilePreviewCard({ file }: Props) {
+  const { t, locale } = useTranslation();
   const kind = getPreviewKind(file.mime_type, file.size_bytes, file.name);
 
   return (
@@ -41,9 +43,9 @@ export function FilePreviewCard({ file }: Props) {
             {file.name}
           </Text>
           <Text variant="small" as="span" tone="muted" className="truncate">
-            {getFileTypeLabel(file.mime_type, file.name)} ·{" "}
+            {getFileTypeLabel(file.mime_type, file.name, t)} ·{" "}
             {formatFileSize(file.size_bytes)} ·{" "}
-            {formatDayLabel(file.created_at)}
+            {formatDayLabel(file.created_at, locale)}
           </Text>
         </div>
       </div>

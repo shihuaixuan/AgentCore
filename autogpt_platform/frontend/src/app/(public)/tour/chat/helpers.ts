@@ -12,7 +12,7 @@ export function buildTourArtifactRef(scenario: TourScenario): ArtifactRef {
     mimeType: "text/markdown",
     sourceUrl: `data:text/markdown;charset=utf-8,${encodeURIComponent(markdown)}`,
     origin: "agent",
-    sizeBytes: markdown.length,
+    sizeBytes: new TextEncoder().encode(markdown).length,
   };
 }
 

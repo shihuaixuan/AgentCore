@@ -12,9 +12,9 @@ interface Props {
 }
 
 export function ReferenceCard({ reference }: Props) {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const facts = reference.kind
-    ? reference.meta.map(factText).join(" · ")
+    ? reference.meta.map((fact) => factText(fact, locale)).join(" · ")
     : reference.summary;
   const hasAvatar = Boolean(reference.avatarURL || reference.avatarColor);
   return (
@@ -77,7 +77,7 @@ export function ReferenceCard({ reference }: Props) {
           >
             {t("Skills:", "技能：")}{" "}
           </span>
-          {skillsText(reference.skills)}
+          {skillsText(reference.skills, t)}
         </p>
       )}
       <p
@@ -91,8 +91,13 @@ export function ReferenceCard({ reference }: Props) {
   );
 }
 
-function skillsText(skills: string[]) {
+function skillsText(
+  skills: string[],
+  t: (english: string, chinese: string) => string,
+) {
   const named = skills.slice(0, NAMED_SKILLS).join(", ");
   const rest = skills.length - NAMED_SKILLS;
-  return rest > 0 ? `${named} +${rest} more` : named;
+  return rest > 0
+    ? t(`${named} +${rest} more`, `${named}，还有 ${rest} 项`)
+    : named;
 }

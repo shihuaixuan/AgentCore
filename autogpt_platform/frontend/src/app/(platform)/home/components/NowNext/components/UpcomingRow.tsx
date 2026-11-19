@@ -28,13 +28,15 @@ export function UpcomingRow({ item }: Props) {
           {item.kind === "agent" ? (
             <span className="font-normal text-foreground-tertiary">
               {" "}
-              workflow
+              {t("workflow", "工作流")}
             </span>
           ) : null}
         </Text>
         <Text variant="body" tone="muted" className="truncate">
           {item.expert?.name ??
-            (item.kind === "followup" ? "Follow-up" : "Scheduled task")}
+            (item.kind === "followup"
+              ? t("Follow-up", "跟进任务")
+              : t("Scheduled task", "计划任务"))}
           <span aria-hidden="true"> · </span>
           <span className="tabular-nums">
             {formatUntil(item.next_run_time, undefined, t, locale)}

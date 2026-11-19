@@ -1,6 +1,7 @@
 "use client";
 
 import type { ToolUIPart } from "ai";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AgentSavedCard } from "../../components/AgentSavedCard/AgentSavedCard";
 import { useCopilotChatActions } from "../../components/CopilotChatActionsProvider/useCopilotChatActions";
 import { ToolErrorCard } from "../../components/ToolErrorCard/ToolErrorCard";
@@ -39,20 +40,26 @@ interface Props {
   part: CreateAgentToolPart;
 }
 
-function getAccordionMeta(output: CreateAgentToolOutput | null) {
+function getAccordionMeta(
+  output: CreateAgentToolOutput | null,
+  t: ReturnType<typeof useTranslation>["t"],
+) {
   const icon = <AccordionIcon />;
 
   if (output && isAgentPreviewOutput(output)) {
     return {
       icon,
       title: output.agent_name,
-      description: `${output.node_count} block${output.node_count === 1 ? "" : "s"}`,
+      description: t(
+        `${output.node_count} block${output.node_count === 1 ? "" : "s"}`,
+        `${output.node_count} 个模块`,
+      ),
     };
   }
   if (output && isSuggestedGoalOutput(output)) {
     return {
       icon,
-      title: "Goal needs refinement",
+      title: t("Goal needs refinement", "目标需要完善"),
       expanded: true,
     };
   }
@@ -60,7 +67,8 @@ function getAccordionMeta(output: CreateAgentToolOutput | null) {
 }
 
 export function CreateAgentTool({ part }: Props) {
-  const text = getAnimationText(part);
+  const { t } = useTranslation();
+  const text = getAnimationText(part, t);
   const { onSend } = useCopilotChatActions();
 
   const isStreaming =
@@ -92,16 +100,19 @@ export function CreateAgentTool({ part }: Props) {
       {isError && output && isErrorOutput(output) && (
         <ToolErrorCard
           message={output.message}
-          fallbackMessage="Failed to generate the workflow. Please try again."
+          fallbackMessage={t(
+            "Failed to generate the workflow. Please try again.",
+            "生成工作流失败。请重试。",
+          )}
           error={output.error ? formatMaybeJson(output.error) : undefined}
           details={output.details ? formatMaybeJson(output.details) : undefined}
           actions={[
             {
-              label: "Try again",
+              label: t("Try again", "重试"),
               onClick: () => onSend("Please try creating the workflow again."),
             },
             {
-              label: "Simplify goal",
+              label: t("Simplify goal", "简化目标"),
               variant: "ghost",
               onClick: () => onSend("Can you help me simplify this goal?"),
             },
@@ -112,7 +123,7 @@ export function CreateAgentTool({ part }: Props) {
       {output &&
         !isError &&
         (isAgentPreviewOutput(output) || isSuggestedGoalOutput(output)) && (
-          <ToolAccordion {...getAccordionMeta(output)}>
+          <ToolAccordion {...getAccordionMeta(output, t)}>
             {isAgentPreviewOutput(output) && (
               <ContentGrid>
                 <ContentMessage>{output.message}</ContentMessage>
@@ -142,7 +153,10 @@ export function CreateAgentTool({ part }: Props) {
       {output && isAgentSavedOutput(output) && (
         <AgentSavedCard
           agentName={output.agent_name}
-          message="has been saved to your library!"
+          message={t(
+            "has been saved to your library!",
+            "已保存到你的工作流库！",
+          )}
           libraryAgentLink={output.library_agent_link}
           agentPageLink={output.agent_page_link}
         />

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { formatCents } from "@/app/(platform)/copilot/components/usageHelpers";
 import { useIsBillingEnabled } from "@/hooks/useIsBillingEnabled";
 import type { FleetSummary, AgentStatusFilter } from "../../../../types";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   summary: FleetSummary;
@@ -68,6 +69,16 @@ const TILES: {
 ];
 
 export function StatsGrid({ summary, activeTab, onTabChange }: Props) {
+  const { t } = useTranslation();
+  const labels: Record<keyof FleetSummary, string> = {
+    monthlySpend: "本月支出",
+    running: "正在运行",
+    completed: "最近完成",
+    error: "需要处理",
+    scheduled: "已计划",
+    listening: "监听中",
+    idle: "空闲",
+  };
   const isBillingEnabled = useIsBillingEnabled();
   const tiles = isBillingEnabled
     ? TILES
@@ -102,7 +113,11 @@ export function StatsGrid({ summary, activeTab, onTabChange }: Props) {
           >
             <div className="flex min-w-0 items-center gap-1.5">
               <Emoji text={tile.emoji} size={18} />
-              <OverflowText value={tile.label} variant="body" tone="emphasis" />
+              <OverflowText
+                value={t(tile.label, labels[tile.key])}
+                variant="body"
+                tone="emphasis"
+              />
             </div>
             <Text variant="h4">{value}</Text>
           </button>

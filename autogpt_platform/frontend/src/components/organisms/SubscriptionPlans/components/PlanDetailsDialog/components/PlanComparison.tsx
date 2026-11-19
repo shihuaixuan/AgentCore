@@ -26,7 +26,8 @@ export function PlanComparison({ plans }: Props) {
                 className="pr-3 pb-3 font-medium"
               >
                 {plan.name}
-                {plan.usage && ` · ${plan.usage} usage`}
+                {plan.usage &&
+                  t(` · ${plan.usage} usage`, ` · ${plan.usage} 用量`)}
               </th>
             ))}
           </tr>

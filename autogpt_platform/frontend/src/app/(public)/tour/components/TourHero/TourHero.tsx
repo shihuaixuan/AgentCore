@@ -1,3 +1,5 @@
+"use client";
+
 import { AutoGPTLogo } from "@/components/atoms/AutoGPTLogo/AutoGPTLogo";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -5,8 +7,11 @@ import { CookieSettingsLink } from "@/components/molecules/CookieSettingsLink/Co
 import { TourBackground } from "./TourBackground";
 import { ArrowRight02Icon, SparklesIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function TourHero() {
+  const { t } = useTranslation();
+
   return (
     <section className="relative flex flex-1 flex-col overflow-hidden border-b border-separator">
       <TourBackground />
@@ -16,6 +21,7 @@ export function TourHero() {
             hideText
             viewBox="46 0 43 40"
             className="mb-6 h-20 w-20"
+            aria-label={t("AutoGPT Logo", "AutoGPT 标志")}
           />
 
           {/* oxlint-disable-next-line design-system/no-arbitrary-values -- hero glass badge's indigo gradient ring and glow, no token */}
@@ -26,13 +32,16 @@ export function TourHero() {
                 <Icon icon={SparklesIcon} className="h-4 w-4" />
               </span>
               <Text variant="body-medium-tight" tone="body">
-                Live demo, no signup required
+                {t("Live demo, no signup required", "实时演示，无需注册")}
               </Text>
             </span>
           </span>
 
           <Text as="h1" variant="hero" className="text-balance">
-            Build AI agents by just chatting
+            {t(
+              "Build AI agents by just chatting",
+              "聊聊天，就能构建 AI 工作流",
+            )}
           </Text>
 
           <Text
@@ -40,8 +49,10 @@ export function TourHero() {
             tone="secondary"
             className="mt-5 max-w-xl text-balance"
           >
-            Describe a goal in plain English and watch Otto build and run a
-            working AutoGPT workflow for you, in seconds, right in your browser.
+            {t(
+              "Describe a goal in plain English and watch Otto build and run a working AutoGPT workflow for you, in seconds, right in your browser.",
+              "用日常语言描述目标，Otto 就能在几秒内为你构建并运行可用的 AutoGPT 工作流，全程都在浏览器中完成。",
+            )}
           </Text>
 
           <div className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
@@ -57,7 +68,7 @@ export function TourHero() {
               // oxlint-disable-next-line design-system/no-restyle -- the hero CTA is wider than the large size; no Button size for it
               className="group w-full sm:w-auto sm:px-8"
             >
-              Try the demo
+              {t("Try the demo", "体验演示")}
             </Button>
             <Button
               as="NextLink"
@@ -68,7 +79,7 @@ export function TourHero() {
               size="large"
               className="w-full sm:w-auto"
             >
-              See pricing
+              {t("See pricing", "查看价格")}
             </Button>
           </div>
         </div>

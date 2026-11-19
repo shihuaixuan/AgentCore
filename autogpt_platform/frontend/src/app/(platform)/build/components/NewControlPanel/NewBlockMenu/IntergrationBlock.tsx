@@ -11,6 +11,7 @@ import { useAddBlockToBuilder } from "./hooks/useAddBlockToBuilder";
 import { BlockInfo } from "@/app/api/__generated__/models/blockInfo";
 import { blockDragPreviewClassName, blockDragPreviewStyle } from "./style";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   title?: string;
@@ -33,6 +34,7 @@ export const IntegrationBlock: IntegrationBlockComponent = ({
   blockData,
   ...rest
 }) => {
+  const { t } = useTranslation();
   const setBlockMenuOpen = useControlPanelStore(
     (state) => state.setBlockMenuOpen,
   );
@@ -80,7 +82,7 @@ export const IntegrationBlock: IntegrationBlockComponent = ({
         {icon_url && (
           <Image
             src={icon_url}
-            alt="integration-icon"
+            alt={t("integration-icon", "集成图标")}
             fill
             sizes="2.25rem"
             className="w-full object-contain group-disabled:opacity-50"

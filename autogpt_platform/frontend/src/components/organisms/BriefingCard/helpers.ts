@@ -1,4 +1,6 @@
 import { format, isToday, parseISO } from "date-fns";
+import { zhCN } from "date-fns/locale";
+import type { Locale } from "@/lib/i18n/locale";
 import type { BriefingResponse } from "@/app/api/__generated__/models/briefingResponse";
 import type { BriefingRunItem } from "@/app/api/__generated__/models/briefingRunItem";
 
@@ -44,14 +46,18 @@ export function getScrollEdges(list: HTMLElement) {
   };
 }
 
-export function formatBriefingDate(date: Date | string): string {
+export function formatBriefingDate(
+  date: Date | string,
+  locale: Locale = "en",
+): string {
   // The generated type says Date, but date-only strings ("2026-08-07") skip
   // the client's date transformer (its regex requires a time part), so the
   // runtime value is still a string. parseISO reads it as LOCAL midnight —
   // `new Date("2026-08-07")` would read UTC midnight and shift the label a
   // day back for viewers west of UTC.
   const parsed = typeof date === "string" ? parseISO(date) : date;
-  if (isToday(parsed)) return "This morning";
+  if (isToday(parsed)) return locale === "zh-CN" ? "今天早上" : "This morning";
+  if (locale === "zh-CN") return format(parsed, "M月d日", { locale: zhCN });
   return format(parsed, "MMMM d");
 }
 

@@ -30,10 +30,30 @@ export function LearningHistoryCard({
   onStateChange,
   onOpen,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const originLabels: Record<string, string> = {
+    all: "所有来源",
+    saved_overnight: "夜间保存",
+    saved_during_work: "工作期间保存",
+    requested: "按请求创建",
+    edited: "已编辑",
+    restored: "已恢复",
+    imported: "已导入",
+  };
+  const stateLabels: Record<string, string> = {
+    all: "所有状态",
+    ready: "可使用",
+    needs_decision: "需要你决策",
+    blocked_content: "未通过内容检查",
+    archived: "已归档",
+    invalidated: "已归档（来源不可用）",
+  };
   function expertName(expertId: string | null | undefined) {
     if (!expertId) return "Otto";
-    return experts.find((expert) => expert.id === expertId)?.name ?? "Expert";
+    return (
+      experts.find((expert) => expert.id === expertId)?.name ??
+      t("Expert", "专家")
+    );
   }
   return (
     <div
@@ -44,8 +64,10 @@ export function LearningHistoryCard({
         {t("Learning history", "学习记录")}
       </Text>
       <Text variant="small" as="span" tone="muted">
-        What overnight learning changed, where it came from, and what it did not
-        learn.
+        {t(
+          "What overnight learning changed, where it came from, and what it did not learn.",
+          "夜间学习改变了什么、依据来自哪里，以及哪些内容未被学习。",
+        )}
       </Text>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
         <Select
@@ -55,7 +77,10 @@ export function LearningHistoryCard({
           size="small"
           value={origin}
           onValueChange={onOriginChange}
-          options={ORIGIN_FILTERS}
+          options={ORIGIN_FILTERS.map((option) => ({
+            ...option,
+            label: t(option.label, originLabels[option.value] ?? option.label),
+          }))}
         />
         <Select
           id="learning-state"
@@ -64,7 +89,10 @@ export function LearningHistoryCard({
           size="small"
           value={state}
           onValueChange={onStateChange}
-          options={STATE_FILTERS}
+          options={STATE_FILTERS.map((option) => ({
+            ...option,
+            label: t(option.label, stateLabels[option.value] ?? option.label),
+          }))}
         />
       </div>
       <div className="mt-2 flex flex-col divide-y divide-separator">
@@ -75,7 +103,10 @@ export function LearningHistoryCard({
           </div>
         ) : items.length === 0 ? (
           <Text variant="small" as="p" tone="muted" className="my-3">
-            Nothing learned yet. A quiet night means nothing needed to change.
+            {t(
+              "Nothing learned yet. A quiet night means nothing needed to change.",
+              "尚无学习记录。安静的一夜意味着没有需要调整的内容。",
+            )}
           </Text>
         ) : (
           items.map((item) => (
@@ -96,7 +127,7 @@ export function LearningHistoryCard({
                       {item.version ? ` v${item.version}` : ""}
                     </button>
                   ) : (
-                    "Review"
+                    t("Review", "审核")
                   )}
                 </Text>
                 <Text
@@ -105,7 +136,7 @@ export function LearningHistoryCard({
                   tone="subtle"
                   className="shrink-0"
                 >
-                  {formatWhen(new Date(item.created_at).toISOString())}
+                  {formatWhen(new Date(item.created_at).toISOString(), locale)}
                 </Text>
               </div>
               <Text variant="small" as="span" tone="secondary">
@@ -114,8 +145,14 @@ export function LearningHistoryCard({
               <Text variant="small" as="span" tone="muted">
                 {[
                   expertName(item.expert_id),
-                  item.origin_label,
-                  item.state_label,
+                  t(
+                    item.origin_label ?? "",
+                    originLabels[item.origin ?? ""] ?? item.origin_label ?? "",
+                  ),
+                  t(
+                    item.state_label ?? "",
+                    stateLabels[item.state ?? ""] ?? item.state_label ?? "",
+                  ),
                 ]
                   .filter(Boolean)
                   .join(" · ")}

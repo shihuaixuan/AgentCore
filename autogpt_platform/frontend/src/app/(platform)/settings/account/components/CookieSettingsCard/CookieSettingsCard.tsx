@@ -55,8 +55,10 @@ export function CookieSettingsCard({ index = 0 }: Props) {
             tone="muted"
             className="max-w-64 text-right"
           >
-            Cookie settings couldn&apos;t load. A content blocker may be
-            stopping them.
+            {t(
+              "Cookie settings couldn't load. A content blocker may be stopping them.",
+              "无法加载 Cookie 设置。内容拦截器可能阻止了加载。",
+            )}
           </Text>
         ) : (
           <Button

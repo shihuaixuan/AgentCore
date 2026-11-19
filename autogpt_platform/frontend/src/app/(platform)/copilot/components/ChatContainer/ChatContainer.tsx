@@ -34,6 +34,7 @@ import { useShareChatExpert } from "../ContextPanel/useShareChatExpert";
 import { ArchivedExpertNotice } from "./components/ArchivedExpertNotice";
 import { SessionNotFound } from "./components/SessionNotFound";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useIsMobile } from "../../useIsMobile";
 import { ComposerPanelTab } from "./components/ComposerPanelTab";
 import { SharedChatNotice } from "./components/SharedChatNotice";
@@ -196,6 +197,7 @@ export const ChatContainer = ({
   onBackendTurn,
   floatingControls,
 }: ChatContainerProps) => {
+  const { t, locale } = useTranslation();
   const isTaskBarEnabled = useGetFlag(Flag.TASK_PROGRESS_BAR);
   useAutoOpenArtifacts({
     sessionId,
@@ -423,9 +425,10 @@ export const ChatContainer = ({
     } catch (error) {
       takeVoiceStart();
       toastSendFailure({
-        title: "Could not start a new chat session",
+        title: t("Could not start a new chat session", "无法开始新对话"),
         error,
-        recovery: "voice mode did not start",
+        recovery: t("voice mode did not start", "语音模式未启动"),
+        locale,
       });
     }
   }
@@ -477,9 +480,13 @@ export const ChatContainer = ({
     await resend()
       .catch((error) => {
         toastSendFailure({
-          title: "Couldn't retry message",
+          title: t("Couldn't retry message", "无法重试发送消息"),
           error,
-          recovery: "your previous message is still in the chat",
+          recovery: t(
+            "your previous message is still in the chat",
+            "你的上一条消息仍保留在对话中",
+          ),
+          locale,
         });
       })
       .finally(() => {
@@ -613,7 +620,10 @@ export const ChatContainer = ({
                           onEnqueue={onEnqueue ? handleEnqueue : undefined}
                           placeholder={
                             (atReset && composer.placeholder) ||
-                            "What else can I help with?"
+                            t(
+                              "What else can I help with?",
+                              "还有什么我可以帮您的吗？",
+                            )
                           }
                           droppedFiles={droppedFiles}
                           onDroppedFilesConsumed={
@@ -633,8 +643,10 @@ export const ChatContainer = ({
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-sm">
-                      Sending is paused. Your draft is saved and you can keep
-                      editing it.
+                      {t(
+                        "Sending is paused. Your draft is saved and you can keep editing it.",
+                        "发送已暂停。草稿已保存，你可以继续编辑。",
+                      )}
                     </TooltipContent>
                   </Tooltip>
                   {composer.showLowHint && usage && (

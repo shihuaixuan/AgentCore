@@ -68,7 +68,10 @@ export function AgentRow({ agent }: Props) {
           variant="icon"
           size="icon-sm"
           leadingIcon={BubbleChatIcon}
-          aria-label={`Chat with ${agent.expert.name}`}
+          aria-label={t(
+            `Chat with ${agent.expert.name}`,
+            `与 ${agent.expert.name} 聊天`,
+          )}
         />
         <Button
           as="NextLink"
@@ -76,7 +79,10 @@ export function AgentRow({ agent }: Props) {
           variant="icon"
           size="icon-sm"
           leadingIcon={Settings01Icon}
-          aria-label={`Manage ${agent.expert.name}`}
+          aria-label={t(
+            `Manage ${agent.expert.name}`,
+            `管理 ${agent.expert.name}`,
+          )}
           onClick={() =>
             trackFunnel("home_team_member_clicked", {
               expert_id: agent.expert.id,

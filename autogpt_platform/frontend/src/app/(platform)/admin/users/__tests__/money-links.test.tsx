@@ -1,4 +1,5 @@
 import { render } from "@/tests/integrations/test-utils";
+import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { PlatformCostContent } from "../../platform-costs/components/PlatformCostContent";
 import SpendingDashboardPage from "../../spending/page";
@@ -57,7 +58,10 @@ describe("the user page's money links", () => {
     const page = await SpendingDashboardPage({
       searchParams: Promise.resolve(paramsOf(getSpendingSearchHref(USER_ID))),
     });
-    render(page);
+    const Component = page.type as (
+      props: typeof page.props,
+    ) => Promise<ReactElement>;
+    render(await Component(page.props));
 
     expect(mockGrantHistory).toHaveBeenCalledWith(
       expect.objectContaining({ initialSearch: USER_ID }),

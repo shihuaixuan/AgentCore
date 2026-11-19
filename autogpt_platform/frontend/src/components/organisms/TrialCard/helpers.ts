@@ -1,4 +1,5 @@
 import type { TrialOfferResponse } from "@/app/api/__generated__/models/trialOfferResponse";
+import type { Locale } from "@/lib/i18n/locale";
 
 export const trialPlanLabels: Record<TrialOfferResponse["tier"], string> = {
   BASIC: "Basic",
@@ -70,15 +71,27 @@ export function formatTrialEnd(
   );
 }
 
-export function formatTrialEndDate(value: Date | string) {
-  return new Date(value).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
+export function formatTrialEndDate(
+  value: Date | string,
+  locale: Locale = "en",
+) {
+  return new Date(value).toLocaleDateString(
+    locale === "zh-CN" ? locale : undefined,
+    {
+      month: "short",
+      day: "numeric",
+    },
+  );
 }
 
-export function formatTrialEndTime(value: Date | string) {
-  return new Date(value).toLocaleTimeString(undefined, { timeStyle: "short" });
+export function formatTrialEndTime(
+  value: Date | string,
+  locale: Locale = "en",
+) {
+  return new Date(value).toLocaleTimeString(
+    locale === "zh-CN" ? locale : undefined,
+    { timeStyle: "short" },
+  );
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -98,12 +111,16 @@ export function formatTrialDays(days: number) {
 // Under a day the count would always read "1 day", so name the clock time,
 // but only for today or tomorrow: a DST day can put an end under 24 hours
 // away two dates out, and that keeps the dated form.
-export function describeTrialTimeLeft(endsAt: Date | string, now = new Date()) {
+export function describeTrialTimeLeft(
+  endsAt: Date | string,
+  now = new Date(),
+  locale: Locale = "en",
+) {
   const end = new Date(endsAt);
   const left = end.getTime() - now.getTime();
   if (left <= 0) return { kind: "ended" as const };
   const day = left < DAY_MS ? getNearDay(end, now) : null;
-  if (day) return { kind: day, time: formatTrialEndTime(end) };
+  if (day) return { kind: day, time: formatTrialEndTime(end, locale) };
   return {
     kind: "days" as const,
     days: getTrialDaysLeft(end, now.getTime()),

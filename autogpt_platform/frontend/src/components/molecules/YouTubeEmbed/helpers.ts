@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/locale";
+
 const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
 // Paths that carry the ID as the next segment: /embed/ID, /shorts/ID, ...
 const ID_PATH_PREFIXES = new Set(["embed", "v", "e", "shorts", "live"]);
@@ -125,10 +127,18 @@ export function getYouTubeWatchUrl(url: string): string | null {
 export function getNoticeText({
   hasVideoId,
   canAllowHere,
+  locale = "en",
 }: {
   hasVideoId: boolean;
   canAllowHere: boolean;
+  locale?: Locale;
 }): string {
+  if (locale === "zh-CN") {
+    if (!hasVideoId) return "此视频只能在 YouTube 上观看。";
+    return canAllowHere
+      ? "加载此视频时，YouTube 会设置广告 Cookie。若要在此观看，请允许营销 Cookie。"
+      : "加载此视频时，YouTube 会设置广告 Cookie。";
+  }
   if (!hasVideoId) return "This video can only be watched on YouTube.";
   if (canAllowHere) {
     return "YouTube sets advertising cookies when this video loads. To watch it here, allow marketing cookies.";

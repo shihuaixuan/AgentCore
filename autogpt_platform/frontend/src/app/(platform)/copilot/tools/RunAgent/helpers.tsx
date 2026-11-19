@@ -117,28 +117,36 @@ export function getRunAgentToolOutput(
 
 function getAgentIdentifierText(
   input: RunAgentInput | undefined,
+  t: (english: string, chinese: string) => string,
 ): string | null {
   if (!input) return null;
   const slug = input.username_agent_slug?.trim();
   if (slug) return slug;
   const libraryId = input.library_agent_id?.trim();
-  if (libraryId) return `Library workflow ${libraryId}`;
+  if (libraryId)
+    return t(
+      `Library workflow ${libraryId}`,
+      `工作流库中的工作流 ${libraryId}`,
+    );
   return null;
 }
 
-export function getAnimationText(part: {
-  state: ToolUIPart["state"];
-  input?: unknown;
-  output?: unknown;
-}): string {
+export function getAnimationText(
+  part: {
+    state: ToolUIPart["state"];
+    input?: unknown;
+    output?: unknown;
+  },
+  t = (english: string, _chinese: string) => english,
+): string {
   const input = part.input as RunAgentInput | undefined;
-  const agentIdentifier = getAgentIdentifierText(input);
+  const agentIdentifier = getAgentIdentifierText(input, t);
   const isSchedule = Boolean(
     input?.schedule_name?.trim() || input?.cron?.trim(),
   );
   const actionPhrase = isSchedule
-    ? "Scheduling the workflow to run"
-    : "Running the workflow";
+    ? t("Scheduling the workflow to run", "正在安排工作流运行")
+    : t("Running the workflow", "正在运行工作流");
   const identifierText = agentIdentifier ? ` "${agentIdentifier}"` : "";
 
   switch (part.state) {
@@ -149,36 +157,57 @@ export function getAnimationText(part: {
       const output = parseOutput(part.output);
       if (!output) return `${actionPhrase}${identifierText}`;
       if (isRunAgentExecutionStartedOutput(output)) {
-        return `Started "${output.graph_name}"`;
+        return t(
+          `Started "${output.graph_name}"`,
+          `已启动“${output.graph_name}”`,
+        );
       }
       if (isRunAgentAgentDetailsOutput(output)) {
         if (output.agent.trigger_info) {
-          return `Webhook trigger setup for "${output.agent.name}"`;
+          return t(
+            `Webhook trigger setup for "${output.agent.name}"`,
+            `为“${output.agent.name}”设置 Webhook 触发器`,
+          );
         }
-        return `Workflow inputs needed for "${output.agent.name}"`;
+        return t(
+          `Workflow inputs needed for "${output.agent.name}"`,
+          `“${output.agent.name}”需要工作流输入`,
+        );
       }
       if (isRunAgentSetupRequirementsOutput(output)) {
-        return `Setup needed for "${output.setup_info.agent_name}"`;
+        return t(
+          `Setup needed for "${output.setup_info.agent_name}"`,
+          `“${output.setup_info.agent_name}”需要设置`,
+        );
       }
       if (isRunAgentNeedLoginOutput(output))
-        return "Sign in required to run workflow";
-      return "Something went wrong";
+        return t("Sign in required to run workflow", "运行工作流需要登录");
+      return t("Something went wrong", "发生了错误");
     }
     case "output-error":
-      return "Something went wrong";
+      return t("Something went wrong", "发生了错误");
     default:
       return actionPhrase;
   }
 }
 
-export function getStreamingLoadingText(part: { input?: unknown }): string {
+export function getStreamingLoadingText(
+  part: { input?: unknown },
+  t = (english: string, _chinese: string) => english,
+): string {
   const input = part.input as RunAgentInput | undefined;
   const isSchedule = Boolean(
     input?.schedule_name?.trim() || input?.cron?.trim(),
   );
   return isSchedule
-    ? "Scheduling workflow, this might take a minute"
-    : "Running workflow, this might take a minute";
+    ? t(
+        "Scheduling workflow, this might take a minute",
+        "正在安排工作流，可能需要一分钟",
+      )
+    : t(
+        "Running workflow, this might take a minute",
+        "正在运行工作流，可能需要一分钟",
+      );
 }
 
 export function ToolIcon({
@@ -210,7 +239,10 @@ export function formatMaybeJson(value: unknown): string {
   }
 }
 
-export function getAccordionMeta(output: RunAgentToolOutput): {
+export function getAccordionMeta(
+  output: RunAgentToolOutput,
+  t = (english: string, _chinese: string) => english,
+): {
   icon: React.ReactNode;
   title: string;
   titleClassName?: string;
@@ -222,11 +254,11 @@ export function getAccordionMeta(output: RunAgentToolOutput): {
     const statusText =
       typeof output.status === "string" && output.status.trim()
         ? output.status.trim()
-        : "started";
+        : t("started", "已启动");
     return {
       icon,
       title: output.graph_name,
-      description: `Status: ${statusText}`,
+      description: t(`Status: ${statusText}`, `状态：${statusText}`),
     };
   }
 
@@ -235,8 +267,8 @@ export function getAccordionMeta(output: RunAgentToolOutput): {
       icon,
       title: output.agent.name,
       description: output.agent.trigger_info
-        ? "Webhook trigger setup"
-        : "Inputs required",
+        ? t("Webhook trigger setup", "设置 Webhook 触发器")
+        : t("Inputs required", "需要输入"),
     };
   }
 
@@ -252,7 +284,10 @@ export function getAccordionMeta(output: RunAgentToolOutput): {
       title: output.setup_info.agent_name,
       description:
         missingCredsCount > 0
-          ? `Missing ${missingCredsCount} credential${missingCredsCount === 1 ? "" : "s"}`
+          ? t(
+              `Missing ${missingCredsCount} credential${missingCredsCount === 1 ? "" : "s"}`,
+              `缺少 ${missingCredsCount} 个凭据`,
+            )
           : output.message,
     };
   }
@@ -261,17 +296,17 @@ export function getAccordionMeta(output: RunAgentToolOutput): {
     return {
       icon,
       title: output.agent_name,
-      description: "Execution completed",
+      description: t("Execution completed", "执行已完成"),
     };
   }
 
   if (isRunAgentNeedLoginOutput(output)) {
-    return { icon, title: "Sign in required" };
+    return { icon, title: t("Sign in required", "需要登录") };
   }
 
   return {
     icon: <Icon icon={AlertDiamondIcon} size={28} tone="error" />,
-    title: "Error",
+    title: t("Error", "错误"),
     titleClassName: "text-error",
   };
 }

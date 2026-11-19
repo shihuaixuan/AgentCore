@@ -158,6 +158,7 @@ export function getAnimationText(
     output?: unknown;
   },
   blockNamesById?: Map<string, string>,
+  t = (english: string, _chinese: string) => english,
 ): string {
   const input = part.input as RunBlockInput | undefined;
   const blockName = input?.block_name?.trim();
@@ -176,30 +177,46 @@ export function getAnimationText(
   switch (part.state) {
     case "input-streaming":
     case "input-available":
-      return isDryRun ? `Simulating${blockText}` : `Running${blockText}`;
+      return isDryRun
+        ? t(`Simulating${blockText}`, `正在模拟${blockText}`)
+        : t(`Running${blockText}`, `正在运行${blockText}`);
     case "output-available": {
       const output = parseOutput(part.output);
       if (!output)
-        return isDryRun ? `Simulating${blockText}` : `Running${blockText}`;
+        return isDryRun
+          ? t(`Simulating${blockText}`, `正在模拟${blockText}`)
+          : t(`Running${blockText}`, `正在运行${blockText}`);
       if (isRunBlockBlockOutput(output)) {
         return output.is_dry_run
-          ? `Simulated "${output.block_name}"`
-          : `Ran "${output.block_name}"`;
+          ? t(
+              `Simulated "${output.block_name}"`,
+              `已模拟“${output.block_name}”`,
+            )
+          : t(`Ran "${output.block_name}"`, `已运行“${output.block_name}”`);
       }
       if (isRunBlockDetailsOutput(output))
-        return `Details for "${output.block.name}"`;
+        return t(
+          `Details for "${output.block.name}"`,
+          `“${output.block.name}”的详情`,
+        );
       if (isRunBlockSetupRequirementsOutput(output)) {
-        return `Setup needed for "${output.setup_info.agent_name}"`;
+        return t(
+          `Setup needed for "${output.setup_info.agent_name}"`,
+          `“${output.setup_info.agent_name}”需要设置`,
+        );
       }
       if (isRunBlockReviewRequiredOutput(output)) {
-        return `Review needed for "${output.block_name}"`;
+        return t(
+          `Review needed for "${output.block_name}"`,
+          `“${output.block_name}”需要审核`,
+        );
       }
-      return "Action failed";
+      return t("Action failed", "动作执行失败");
     }
     case "output-error":
-      return "Action failed";
+      return t("Action failed", "动作执行失败");
     default:
-      return isDryRun ? "Simulating" : "Running";
+      return isDryRun ? t("Simulating", "正在模拟") : t("Running", "正在运行");
   }
 }
 
@@ -246,7 +263,10 @@ export function formatMaybeJson(value: unknown): string {
   }
 }
 
-export function getAccordionMeta(output: RunBlockToolOutput): {
+export function getAccordionMeta(
+  output: RunBlockToolOutput,
+  t = (english: string, _chinese: string) => english,
+): {
   icon: React.ReactNode;
   title: string;
   titleClassName?: string;
@@ -258,13 +278,16 @@ export function getAccordionMeta(output: RunBlockToolOutput): {
     const keys = Object.keys(output.outputs ?? {});
     const outputCount =
       keys.length > 0
-        ? `${keys.length} output key${keys.length === 1 ? "" : "s"}`
+        ? t(
+            `${keys.length} output key${keys.length === 1 ? "" : "s"}`,
+            `${keys.length} 个输出字段`,
+          )
         : output.message;
     return {
       icon,
       title: output.block_name,
       description: output.is_dry_run
-        ? `Simulated · ${outputCount}`
+        ? t(`Simulated · ${outputCount}`, `已模拟 · ${outputCount}`)
         : outputCount,
     };
   }
@@ -279,7 +302,10 @@ export function getAccordionMeta(output: RunBlockToolOutput): {
       title: output.block.name,
       description:
         inputKeys.length > 0
-          ? `${inputKeys.length} input field${inputKeys.length === 1 ? "" : "s"} available`
+          ? t(
+              `${inputKeys.length} input field${inputKeys.length === 1 ? "" : "s"} available`,
+              `${inputKeys.length} 个可用输入字段`,
+            )
           : output.message,
     };
   }
@@ -296,7 +322,10 @@ export function getAccordionMeta(output: RunBlockToolOutput): {
       title: output.setup_info.agent_name,
       description:
         missingCredsCount > 0
-          ? `Missing ${missingCredsCount} credential${missingCredsCount === 1 ? "" : "s"}`
+          ? t(
+              `Missing ${missingCredsCount} credential${missingCredsCount === 1 ? "" : "s"}`,
+              `缺少 ${missingCredsCount} 个凭据`,
+            )
           : output.message,
     };
   }
@@ -305,13 +334,16 @@ export function getAccordionMeta(output: RunBlockToolOutput): {
     return {
       icon,
       title: output.block_name,
-      description: "Sensitive action — awaiting review",
+      description: t(
+        "Sensitive action — awaiting review",
+        "敏感操作 — 等待审核",
+      ),
     };
   }
 
   return {
     icon: <Icon icon={AlertDiamondIcon} size={32} tone="error" />,
-    title: "Error",
+    title: t("Error", "错误"),
     titleClassName: "text-error",
   };
 }

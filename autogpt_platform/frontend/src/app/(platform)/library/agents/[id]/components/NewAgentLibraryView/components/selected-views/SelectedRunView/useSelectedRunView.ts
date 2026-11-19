@@ -4,8 +4,10 @@ import { useGetV1GetExecutionDetails } from "@/app/api/__generated__/endpoints/g
 import { useGetV2GetASpecificPreset } from "@/app/api/__generated__/endpoints/presets/presets";
 import { AgentExecutionStatus } from "@/app/api/__generated__/models/agentExecutionStatus";
 import { okData } from "@/app/api/helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function useSelectedRunView(graphId: string, runId: string) {
+  const { t } = useTranslation();
   const executionQuery = useGetV1GetExecutionDetails(graphId, runId, {
     query: {
       refetchInterval: (q) => {
@@ -44,7 +46,10 @@ export function useSelectedRunView(graphId: string, runId: string) {
 
   const httpError =
     status && status !== 200
-      ? { status, statusText: `Request failed: ${status}` }
+      ? {
+          status,
+          statusText: t(`Request failed: ${status}`, `请求失败：${status}`),
+        }
       : undefined;
 
   return {

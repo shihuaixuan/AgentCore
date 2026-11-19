@@ -13,6 +13,7 @@ import {
   StopCircleIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type StatusIconMap = {
   icon: React.ReactNode;
@@ -63,12 +64,22 @@ type Props = {
 };
 
 export function RunStatusBadge({ status, completedWithErrors = false }: Props) {
+  const { t } = useTranslation();
+  const labels: Record<AgentExecutionStatus, string> = {
+    INCOMPLETE: "未完成",
+    QUEUED: "排队中",
+    RUNNING: "运行中",
+    REVIEW: "待审核",
+    COMPLETED: "已完成",
+    TERMINATED: "已终止",
+    FAILED: "失败",
+  };
   const style = completedWithErrors
     ? completedWithErrorsStyle
     : statusIconMap[status];
   const label = completedWithErrors
-    ? "Completed with errors"
-    : getRunStatusInfo(status).label;
+    ? t("Completed with errors", "已完成，但存在错误")
+    : t(getRunStatusInfo(status).label, labels[status]);
 
   return (
     <div

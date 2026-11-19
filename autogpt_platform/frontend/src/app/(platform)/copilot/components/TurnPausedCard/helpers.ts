@@ -1,4 +1,5 @@
 import type { UIMessage } from "ai";
+import type { Locale } from "@/lib/i18n/locale";
 
 import { TURN_PAUSED_PART_TYPE, type TurnPause } from "../../turnPause";
 
@@ -53,7 +54,18 @@ const BUDGET: Record<"daily" | "weekly", string> = {
   weekly: "this week's budget",
 };
 
-export function pauseTitle(pause: TurnPause): string {
+export function pauseTitle(pause: TurnPause, locale: Locale = "en"): string {
+  if (locale === "zh-CN") {
+    const lead = pause.started ? "已暂停" : "未开始";
+    if (neverResets(pause)) return `${lead} · 额度已用尽`;
+    if (isBudgetPause(pause))
+      return `${lead} · ${pause.reason === "daily" ? "今日" : "本周"}额度已用尽`;
+    if (pause.reason === "trial") return `${lead} · 试用额度已用尽`;
+    if (!pause.started) return lead;
+    return pause.reason === "task"
+      ? "已暂停 · 此任务已达到大小限制"
+      : "已暂停 · 长时间运行后检查进度";
+  }
   const lead = pause.started ? "Paused" : "Not started";
   // No plan behind it, so no window that will refill to name.
   if (neverResets(pause)) return `${lead} · out of budget`;
@@ -71,6 +83,7 @@ interface BodyArgs {
   /** The budget refilled after the pause, so there is nothing to wait for. */
   budgetBack?: boolean;
   now?: Date;
+  locale?: Locale;
 }
 
 export function pauseBody({
@@ -78,9 +91,21 @@ export function pauseBody({
   name,
   budgetBack = false,
   now = new Date(),
+  locale = "en",
 }: BodyArgs): string {
-  if (pause.reason === "steps" && pause.started) return stepsBody(pause, name);
-  if (!pause.started) return notStartedBody(pause, name, budgetBack, now);
+  if (pause.reason === "steps" && pause.started)
+    return stepsBody(pause, name, locale);
+  if (!pause.started)
+    return notStartedBody(pause, name, budgetBack, now, locale);
+  if (locale === "zh-CN") {
+    const saved = pause.checkpoint_saved
+      ? `${name} 已在上方保存进度。`
+      : `${name} 在总结进度之前已被停止。`;
+    if (!isBudgetPause(pause)) return saved;
+    if (budgetBack) return `${saved}你的额度已重置。`;
+    const reset = resetPhrase(pause.resets_at, now, locale);
+    return reset ? `${saved}你的额度将于 ${reset}。` : saved;
+  }
   const saved = pause.checkpoint_saved
     ? `${name} saved its progress above.`
     : `${name} was stopped before it could summarize its progress.`;
@@ -90,7 +115,16 @@ export function pauseBody({
   return reset ? `${saved} Your budget resets ${reset}.` : saved;
 }
 
-function stepsBody(pause: TurnPause, name: string): string {
+function stepsBody(pause: TurnPause, name: string, locale: Locale): string {
+  if (locale === "zh-CN") {
+    const done =
+      pause.steps !== null
+        ? `已为此执行 ${pause.steps.toLocaleString(locale)} 个步骤`
+        : "已为此运行了一段时间";
+    return pause.checkpoint_saved
+      ? `${name} ${done}，并在上方总结了进度。`
+      : `${name} ${done}，但在总结进度之前已被停止。`;
+  }
   const done =
     pause.steps !== null
       ? `has taken ${pause.steps.toLocaleString()} steps on this`
@@ -105,7 +139,20 @@ function notStartedBody(
   name: string,
   budgetBack: boolean,
   now: Date,
+  locale: Locale,
 ): string {
+  if (locale === "zh-CN") {
+    if (pause.reason === "trial")
+      return `${name} 尚未开始，因为你的试用额度已用尽。`;
+    if (!isBudgetPause(pause)) return `${name} 尚未开始。`;
+    if (neverResets(pause)) return `${name} 尚未开始，因为你的额度已用尽。`;
+    const budget = pause.reason === "daily" ? "今日额度" : "本周额度";
+    if (budgetBack)
+      return `${name} 此前因你的${budget}已用尽而未开始。额度现已重置。`;
+    const reset = resetPhrase(pause.resets_at, now, locale);
+    const lead = `${name} 尚未开始，因为你的${budget}已用尽。`;
+    return reset ? `${lead}额度将于 ${reset}。` : lead;
+  }
   if (pause.reason === "trial") {
     return `${name} didn't start this because you're out of your trial allowance.`;
   }
@@ -123,16 +170,30 @@ function notStartedBody(
 }
 
 /** "at 1:00 AM, in 4 h 12 min", or nothing when the time is unknown. */
-function resetPhrase(resetsAt: string | null, now: Date): string | null {
+function resetPhrase(
+  resetsAt: string | null,
+  now: Date,
+  locale: Locale = "en",
+): string | null {
   if (!resetsAt) return null;
   const date = new Date(resetsAt);
   if (!Number.isFinite(date.getTime())) return null;
-  return `${resetAt(date, now)}, ${resetIn(date, now)}`;
+  return locale === "zh-CN"
+    ? `${resetAt(date, now, locale)} 重置（${resetIn(date, now, locale)}）`
+    : `${resetAt(date, now)}, ${resetIn(date, now)}`;
 }
 
 /** "Resume at 1:00 AM", or a plain "Resume at reset" when the time is unknown. */
-export function resumeLabel(resetsAt: string | null, now = new Date()) {
+export function resumeLabel(
+  resetsAt: string | null,
+  now = new Date(),
+  locale: Locale = "en",
+) {
   const date = resetsAt ? new Date(resetsAt) : null;
+  if (locale === "zh-CN")
+    return date && Number.isFinite(date.getTime())
+      ? `${resetAt(date, now, locale)} 恢复`
+      : "额度重置后恢复";
   return date && Number.isFinite(date.getTime())
     ? `Resume ${resetAt(date, now)}`
     : "Resume at reset";
@@ -141,7 +202,27 @@ export function resumeLabel(resetsAt: string | null, now = new Date()) {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** "at 1:00 AM" within a day, "Monday at 1:00 AM" within a week. */
-export function resetAt(date: Date, now = new Date()): string {
+export function resetAt(
+  date: Date,
+  now = new Date(),
+  locale: Locale = "en",
+): string {
+  if (locale === "zh-CN") {
+    const time = date.toLocaleTimeString(locale, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    const ms = date.getTime() - now.getTime();
+    if (ms < DAY_MS) return time;
+    const day = date.toLocaleDateString(
+      locale,
+      ms < 7 * DAY_MS
+        ? { weekday: "long" }
+        : { month: "short", day: "numeric" },
+    );
+    return `${day} ${time}`;
+  }
   const time = date.toLocaleTimeString(undefined, {
     hour: "numeric",
     minute: "2-digit",
@@ -156,9 +237,22 @@ export function resetAt(date: Date, now = new Date()): string {
 }
 
 /** "in 4 h 12 min", "in 45 min", "in 2 days". */
-export function resetIn(date: Date, now = new Date()): string {
+export function resetIn(
+  date: Date,
+  now = new Date(),
+  locale: Locale = "en",
+): string {
   const ms = date.getTime() - now.getTime();
   const minutes = Math.max(1, Math.ceil(ms / 60_000));
+  if (locale === "zh-CN") {
+    if (minutes < 60) return `${minutes} 分钟后`;
+    if (ms < DAY_MS) {
+      const hours = Math.floor(minutes / 60);
+      const rest = minutes % 60;
+      return rest ? `${hours} 小时 ${rest} 分钟后` : `${hours} 小时后`;
+    }
+    return `${Math.round(minutes / (24 * 60))} 天后`;
+  }
   if (minutes < 60) return `in ${minutes} min`;
   // resetAt's cut-off: a time it names without the day never reads "in 1 day".
   if (ms < DAY_MS) {

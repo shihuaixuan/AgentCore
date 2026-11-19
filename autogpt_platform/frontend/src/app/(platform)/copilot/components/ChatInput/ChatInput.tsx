@@ -182,7 +182,7 @@ export const ChatInput = memo(function ChatInput({
   canAttachWhileStreaming = false,
   atReset,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const isDryRun = useCopilotUIStore((s) => s.isDryRun);
   const setIsDryRun = useCopilotUIStore((s) => s.setIsDryRun);
   // Still the CHAT_MODE_OPTION flag, which no longer names what it gates: the
@@ -227,8 +227,14 @@ export const ChatInput = memo(function ChatInput({
     setRefusedCount(refused);
     if (refusedFolders > 0) {
       toast({
-        title: `Up to ${MAX_FOLDER_ATTACHMENTS} folders per message`,
-        description: `${refusedFolders} not added.`,
+        title: t(
+          `Up to ${MAX_FOLDER_ATTACHMENTS} folders per message`,
+          `每条消息最多可添加 ${MAX_FOLDER_ATTACHMENTS} 个文件夹`,
+        ),
+        description: t(
+          `${refusedFolders} not added.`,
+          `${refusedFolders} 个未添加。`,
+        ),
       });
     }
   }
@@ -291,7 +297,9 @@ export const ChatInput = memo(function ChatInput({
       inputId,
       draftKey,
       autoFocus,
-      failureTitle: atReset ? sendAtResetFailureTitle : undefined,
+      failureTitle: atReset
+        ? (error) => sendAtResetFailureTitle(error, locale)
+        : undefined,
     });
 
   const integrations = useConnectedIntegrations(expertId);
@@ -630,8 +638,8 @@ export const ChatInput = memo(function ChatInput({
             )}
             {isStreaming && canSend && canQueue && (
               <PromptInputButton
-                aria-label="Queue message"
-                tooltip="Queue message"
+                aria-label={t("Queue message", "将消息加入队列")}
+                tooltip={t("Queue message", "将消息加入队列")}
                 variant="default"
                 disabled={isEnqueueing}
                 type={hasAttachments ? "submit" : "button"}

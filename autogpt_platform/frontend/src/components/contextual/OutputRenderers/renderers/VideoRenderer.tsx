@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { YouTubeEmbed } from "@/components/molecules/YouTubeEmbed/YouTubeEmbed";
 import {
   getYouTubeVideoId,
@@ -102,6 +103,17 @@ function renderVideo(
   value: unknown,
   metadata?: OutputMetadata,
 ): React.ReactNode {
+  return <VideoPreview value={value} metadata={metadata} />;
+}
+
+function VideoPreview({
+  value,
+  metadata,
+}: {
+  value: unknown;
+  metadata?: OutputMetadata;
+}) {
+  const { t } = useTranslation();
   const videoUrl = String(value);
 
   if (isYouTubeVideoURL(videoUrl)) {
@@ -140,7 +152,7 @@ function renderVideo(
           allow="autoplay; fullscreen; picture-in-picture"
           allowFullScreen
           sandbox="allow-scripts allow-same-origin allow-presentation allow-fullscreen allow-popups"
-          title="Vimeo video"
+          title={t("Vimeo video", "Vimeo 视频")}
         />
       </div>
     );
@@ -154,7 +166,10 @@ function renderVideo(
         preload="metadata"
       >
         <source src={videoUrl} type={metadata?.mimeType || "video/mp4"} />
-        Your browser does not support the video tag.
+        {t(
+          "Your browser does not support the video tag.",
+          "您的浏览器不支持视频播放。",
+        )}
       </video>
     </div>
   );

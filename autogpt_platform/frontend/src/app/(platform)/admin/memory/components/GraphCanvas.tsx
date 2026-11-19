@@ -7,17 +7,23 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { GraphNode } from "@/app/api/__generated__/models/graphNode";
 import type { GraphEdge } from "@/app/api/__generated__/models/graphEdge";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 // react-force-graph-2d uses HTMLCanvas + window APIs at import time, so it
 // can't run during Next's server rendering pass.
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
   ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center text-body text-foreground-tertiary">
-      Loading graph engine…
-    </div>
-  ),
+  loading: GraphLoading,
 });
+
+function GraphLoading() {
+  const { t } = useTranslation();
+  return (
+    <div className="flex h-full items-center justify-center text-body text-foreground-tertiary">
+      {t("Loading graph engine…", "正在加载图谱引擎…")}
+    </div>
+  );
+}
 
 // Color palette per node "type" (custom-typed entities) / "label" fallback.
 // Mirrors the FalkorDB-browser palette in spirit — distinct, saturated,

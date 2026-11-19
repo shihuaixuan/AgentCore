@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { SidebarLeftIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { parseSidebarCookie, SIDEBAR_COOKIE_NAME } from "./sidebar-cookie";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 const SIDEBAR_WIDTH = "20rem";
@@ -232,6 +233,7 @@ const Sidebar = React.forwardRef<
     ref,
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+    const { t } = useTranslation();
 
     function handleLinkClick(event: React.MouseEvent<HTMLDivElement>) {
       if (isSameTabLinkClick(event)) setOpenMobile(false);
@@ -283,8 +285,10 @@ const Sidebar = React.forwardRef<
             onClick={handleLinkClick}
           >
             <SheetHeader className="sr-only">
-              <SheetTitle>Sidebar</SheetTitle>
-              <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+              <SheetTitle>{t("Sidebar", "侧边栏")}</SheetTitle>
+              <SheetDescription>
+                {t("Displays the mobile sidebar.", "显示移动端侧边栏。")}
+              </SheetDescription>
             </SheetHeader>
             <div className="flex h-full w-full flex-col">{children}</div>
           </SheetContent>
@@ -345,6 +349,7 @@ const SidebarTrigger = React.forwardRef<
   React.ButtonHTMLAttributes<HTMLButtonElement>
 >(({ className, onClick }, ref) => {
   const { toggleSidebar } = useSidebar();
+  const { t } = useTranslation();
 
   return (
     <Button
@@ -359,7 +364,7 @@ const SidebarTrigger = React.forwardRef<
       }}
     >
       <Icon icon={SidebarLeftIcon} className="!size-5" />
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only">{t("Toggle Sidebar", "切换侧边栏")}</span>
     </Button>
   );
 });
@@ -370,15 +375,16 @@ const SidebarRail = React.forwardRef<
   React.ComponentProps<"button">
 >(({ className, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
+  const { t } = useTranslation();
 
   return (
     <button
       ref={ref}
       data-sidebar="rail"
-      aria-label="Toggle Sidebar"
+      aria-label={t("Toggle Sidebar", "切换侧边栏")}
       tabIndex={-1}
       onClick={toggleSidebar}
-      title="Toggle Sidebar"
+      title={t("Toggle Sidebar", "切换侧边栏")}
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-border-base sm:flex",
         "[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize",

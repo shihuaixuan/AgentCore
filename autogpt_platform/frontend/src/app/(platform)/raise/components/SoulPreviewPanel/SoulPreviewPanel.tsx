@@ -8,6 +8,7 @@ import Image from "next/image";
 import { kitBudgetLabel, kitToolsLabel, type RaiseKit } from "../../helpers";
 import { roleFor } from "../CategoryStep/helpers";
 import { SoulDetailCard } from "./SoulDetailCard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const REVEAL =
   "duration-700 animate-in fade-in slide-in-from-bottom-2 fill-mode-both motion-reduce:animate-none";
@@ -40,12 +41,25 @@ export function SoulPreviewPanel({
   voiceLabel,
   kit,
 }: Props) {
-  const roleLabel = jobTitle || roleFor(category);
+  const { t } = useTranslation();
+  const roles: Record<ExpertAvatarRequestCategory, string> = {
+    general: "助理",
+    marketing: "营销专员",
+    sales: "销售",
+    finance: "分析师",
+    support: "客户支持",
+    operations: "运营",
+    research: "研究员",
+    content: "作家",
+    development: "开发者",
+  };
+  const roleLabel =
+    jobTitle || (category ? t(roleFor(category) ?? "", roles[category]) : null);
   const details = [
-    { label: "About", value: about },
-    { label: "Voice", value: voiceLabel },
-    { label: "Weekly budget", value: kitBudgetLabel(kit) },
-    { label: "Tools", value: kitToolsLabel(kit) },
+    { label: t("About", "关于"), value: about },
+    { label: t("Voice", "声音"), value: voiceLabel },
+    { label: t("Weekly budget", "每周预算"), value: kitBudgetLabel(kit, t) },
+    { label: t("Tools", "工具"), value: kitToolsLabel(kit) },
   ].filter((detail): detail is SoulDetail => Boolean(detail.value));
 
   return (
@@ -56,7 +70,10 @@ export function SoulPreviewPanel({
           {avatarUrl ? (
             <Image
               src={avatarUrl}
-              alt={`${name || "Your expert"}'s picture`}
+              alt={t(
+                `${name || "Your expert"}'s picture`,
+                name ? `${name} 的头像` : "你的专家的头像",
+              )}
               width={112}
               height={112}
               className="size-28 rounded-full object-cover"
@@ -76,7 +93,7 @@ export function SoulPreviewPanel({
                 : "text-foreground-tertiary/50",
             )}
           >
-            {name || "No name yet"}
+            {name || t("No name yet", "尚未命名")}
           </h2>
           {roleLabel ? (
             <p

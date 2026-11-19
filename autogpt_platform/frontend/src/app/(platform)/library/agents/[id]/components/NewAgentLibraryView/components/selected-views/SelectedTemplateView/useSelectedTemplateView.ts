@@ -81,7 +81,9 @@ export function useSelectedTemplateView({
       onError: (error: any) => {
         toast({
           title: t("Failed to update template", "无法更新模板"),
-          description: error.message || "An unexpected error occurred.",
+          description:
+            error.message ||
+            t("An unexpected error occurred.", "发生意外错误。"),
           variant: "destructive",
         });
       },
@@ -107,7 +109,9 @@ export function useSelectedTemplateView({
       onError: (error: any) => {
         toast({
           title: t("Failed to start task", "无法启动任务"),
-          description: error.message || "An unexpected error occurred.",
+          description:
+            error.message ||
+            t("An unexpected error occurred.", "发生意外错误。"),
           variant: "destructive",
         });
       },
@@ -189,7 +193,7 @@ export function useSelectedTemplateView({
 
   const httpError =
     query.isSuccess && !query.data
-      ? { status: 404, statusText: "Not found" }
+      ? { status: 404, statusText: t("Not found", "未找到") }
       : undefined;
 
   useEffect(() => {

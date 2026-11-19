@@ -7,6 +7,7 @@ import {
 import type { DesktopStream } from "@/app/api/__generated__/models/desktopStream";
 import { okData } from "@/app/api/helpers";
 import { desktopStartFailure } from "@/app/(platform)/copilot/components/ArtifactPanel/components/desktopStartFailure";
+import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -47,7 +48,13 @@ export function useExpertComputerSection({ expertId }: Args) {
         onError: (error) => {
           toast({
             title: t("Could not open the desktop", "无法打开桌面"),
-            description: desktopStartFailure(error),
+            description:
+              error instanceof ApiError && error.status === 429
+                ? desktopStartFailure(error)
+                : t(
+                    "The sandbox did not come up. Try again in a moment.",
+                    "沙盒未能启动，请稍后重试。",
+                  ),
             variant: "destructive",
           });
         },

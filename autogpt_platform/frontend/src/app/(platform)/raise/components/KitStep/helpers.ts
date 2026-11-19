@@ -5,6 +5,7 @@ import type { RaiseAttachment } from "@/app/api/__generated__/models/raiseAttach
 import type { StoreAgent } from "@/app/api/__generated__/models/storeAgent";
 import { parseUsdToCredits } from "@/lib/credits";
 import type { RaiseAttachmentDraft } from "../../helpers";
+import type { Locale } from "@/lib/i18n/locale";
 
 export const MAX_ATTACHMENTS = 20;
 export const DEFAULT_BUDGET_CREDITS = 500;
@@ -174,6 +175,7 @@ export function toRaiseAttachments(
 export function failedAttachmentMessage(
   failures: { kind: string; source: string; id: string; reason: string }[],
   drafts: RaiseAttachmentDraft[],
+  locale: Locale = "en",
 ) {
   return failures
     .map((failure) => {
@@ -188,9 +190,12 @@ export function failedAttachmentMessage(
         failure.reason === "unavailable"
           ? "is no longer available"
           : "couldn't be installed";
+      if (locale === "zh-CN") {
+        return `${name} ${failure.reason === "unavailable" ? "已不可用" : "无法安装"}`;
+      }
       return `${name} ${reason}`;
     })
-    .join(". ");
+    .join(locale === "zh-CN" ? "。" : ". ");
 }
 
 function marketplaceWorkflowHit(agent: StoreAgent): SearchHit {

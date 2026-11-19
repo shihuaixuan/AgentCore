@@ -15,6 +15,7 @@ import { okData } from "@/app/api/helpers";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Params {
   agentGraphId: string;
@@ -29,6 +30,7 @@ export function useSelectedRunActions({
   agent,
   onSelectRun,
 }: Params) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -56,18 +58,18 @@ export function useSelectedRunActions({
         graphExecId: run?.id ?? "",
       });
 
-      toast({ title: "Run stopped" });
+      toast({ title: t("Run stopped", "运行已停止") });
 
       await queryClient.invalidateQueries({
         queryKey: getGetV1ListGraphExecutionsQueryKey(agentGraphId),
       });
     } catch (error: unknown) {
       toast({
-        title: "Failed to stop run",
+        title: t("Failed to stop run", "无法停止运行"),
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     }
@@ -76,15 +78,15 @@ export function useSelectedRunActions({
   async function handleRunAgain() {
     if (!run) {
       toast({
-        title: "Run not found",
-        description: "Run not found",
+        title: t("Run not found", "未找到运行记录"),
+        description: t("Run not found", "未找到运行记录"),
         variant: "destructive",
       });
       return;
     }
 
     try {
-      toast({ title: "Run started" });
+      toast({ title: t("Run started", "运行已开始") });
 
       const res = await executeRun({
         graphId: run.graph_id,
@@ -105,11 +107,11 @@ export function useSelectedRunActions({
       if (newRunId && onSelectRun) onSelectRun(newRunId);
     } catch (error: unknown) {
       toast({
-        title: "Failed to start run",
+        title: t("Failed to start run", "无法开始运行"),
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     }
@@ -122,8 +124,11 @@ export function useSelectedRunActions({
   async function handleCreateTemplate(name: string, description: string) {
     if (!run) {
       toast({
-        title: "Run not found",
-        description: "Cannot create template from missing run",
+        title: t("Run not found", "未找到运行记录"),
+        description: t(
+          "Cannot create template from missing run",
+          "无法从不存在的运行记录创建模板",
+        ),
         variant: "destructive",
       });
       return;
@@ -140,7 +145,7 @@ export function useSelectedRunActions({
 
       if (res.status === 200) {
         toast({
-          title: "Template created",
+          title: t("Template created", "模板已创建"),
         });
 
         if (agent) {
@@ -155,11 +160,11 @@ export function useSelectedRunActions({
       }
     } catch (error: unknown) {
       toast({
-        title: "Failed to create template",
+        title: t("Failed to create template", "无法创建模板"),
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     }

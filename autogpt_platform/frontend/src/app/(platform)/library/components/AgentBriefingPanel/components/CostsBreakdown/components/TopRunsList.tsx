@@ -17,7 +17,7 @@ interface Props {
 const INITIAL_VISIBLE = 5;
 
 export function TopRunsList({ runs, agentLookup }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [showAll, setShowAll] = useState(false);
   if (runs.length === 0) return null;
 
@@ -32,7 +32,12 @@ export function TopRunsList({ runs, agentLookup }: Props) {
       <ul className="flex flex-col divide-y divide-separator rounded-medium border border-separator bg-surface">
         {visible.map((run) => {
           const agent = agentLookup.get(run.graph_id);
-          const label = agent?.name ?? `Workflow ${run.graph_id.slice(0, 8)}`;
+          const label =
+            agent?.name ??
+            t(
+              `Workflow ${run.graph_id.slice(0, 8)}`,
+              `工作流 ${run.graph_id.slice(0, 8)}`,
+            );
           const href = agent
             ? `/library/agents/${agent.libraryAgentId}?activeItem=${run.execution_id}`
             : null;
@@ -44,9 +49,12 @@ export function TopRunsList({ runs, agentLookup }: Props) {
                   {label}
                 </Text>
                 <Text variant="small" tone="subtle">
-                  {formatRelativeDate(run.started_at)}
+                  {formatRelativeDate(run.started_at, locale)}
                   {run.node_error_count > 0
-                    ? ` · ${run.node_error_count} error${run.node_error_count === 1 ? "" : "s"}`
+                    ? t(
+                        ` · ${run.node_error_count} error${run.node_error_count === 1 ? "" : "s"}`,
+                        ` · ${run.node_error_count} 个错误`,
+                      )
                     : ""}
                 </Text>
               </div>
@@ -78,7 +86,9 @@ export function TopRunsList({ runs, agentLookup }: Props) {
             size="small"
             onClick={() => setShowAll(!showAll)}
           >
-            {showAll ? "Collapse" : `Show all (${runs.length})`}
+            {showAll
+              ? t("Collapse", "收起")
+              : t(`Show all (${runs.length})`, `显示全部（${runs.length}）`)}
           </Button>
         </div>
       )}

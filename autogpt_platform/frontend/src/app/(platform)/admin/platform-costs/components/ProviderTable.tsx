@@ -18,7 +18,7 @@ interface Props {
 }
 
 function ProviderTable({ data, rateOverrides, onRateOverride }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-body">
@@ -39,14 +39,20 @@ function ProviderTable({ data, rateOverrides, onRateOverride }: Props) {
             <th
               scope="col"
               className="px-4 py-3 text-right"
-              title="Only populated for token-tracking providers (e.g. LLM calls). Non-token rows (per_run, characters, etc.) show —."
+              title={t(
+                "Only populated for token-tracking providers (e.g. LLM calls). Non-token rows (per_run, characters, etc.) show —.",
+                "仅按令牌计量的服务提供商（例如 LLM 调用）有此数据。其他计量类型（per_run、characters 等）显示 —。",
+              )}
             >
               {t("Input Tokens", "输入令牌")}
             </th>
             <th
               scope="col"
               className="px-4 py-3 text-right"
-              title="Only populated for token-tracking providers (e.g. LLM calls). Non-token rows (per_run, characters, etc.) show —."
+              title={t(
+                "Only populated for token-tracking providers (e.g. LLM calls). Non-token rows (per_run, characters, etc.) show —.",
+                "仅按令牌计量的服务提供商（例如 LLM 调用）有此数据。其他计量类型（per_run、characters 等）显示 —。",
+              )}
             >
               {t("Output Tokens", "输出令牌")}
             </th>
@@ -62,9 +68,9 @@ function ProviderTable({ data, rateOverrides, onRateOverride }: Props) {
             <th
               scope="col"
               className="px-4 py-3 text-right"
-              title="Per-session only"
+              title={t("Per-session only", "仅在当前会话有效")}
             >
-              {t("Rate", "费率")} {" "}
+              {t("Rate", "费率")}{" "}
               <span className="text-tiny leading-inherit font-normal">
                 {t("(unsaved)", "（未保存）")}
               </span>
@@ -93,7 +99,9 @@ function ProviderTable({ data, rateOverrides, onRateOverride }: Props) {
                 <td className="px-4 py-3">
                   <TrackingBadge trackingType={row.tracking_type} />
                 </td>
-                <td className="px-4 py-3 text-right">{trackingValue(row)}</td>
+                <td className="px-4 py-3 text-right">
+                  {trackingValue(row, locale)}
+                </td>
                 <td className="px-4 py-3 text-right">
                   {row.total_input_tokens > 0
                     ? formatTokens(row.total_input_tokens)
@@ -126,7 +134,10 @@ function ProviderTable({ data, rateOverrides, onRateOverride }: Props) {
                         type="number"
                         step="0.0001"
                         min="0"
-                        aria-label={`Rate for ${row.provider} (${tt})`}
+                        aria-label={t(
+                          `Rate for ${row.provider} (${tt})`,
+                          `${row.provider}（${tt}）的费率`,
+                        )}
                         className="w-24 rounded border px-2 py-1 text-right text-caption"
                         placeholder={fallback !== null ? String(fallback) : "0"}
                         value={currentRate ?? ""}
@@ -139,14 +150,14 @@ function ProviderTable({ data, rateOverrides, onRateOverride }: Props) {
                       />
                       <span
                         className="text-tiny leading-inherit text-foreground-tertiary"
-                        title={rateUnitLabel(tt)}
+                        title={rateUnitLabel(tt, locale)}
                       >
-                        {rateUnitLabel(tt)}
+                        {rateUnitLabel(tt, locale)}
                       </span>
                     </div>
                   ) : (
                     <span className="text-caption text-foreground-tertiary">
-                {t("auto", "自动")}
+                      {t("auto", "自动")}
                     </span>
                   )}
                 </td>

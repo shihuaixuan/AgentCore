@@ -17,7 +17,7 @@ interface Args {
 }
 
 export function useFollowupListItem({ followup }: Args) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -46,7 +46,7 @@ export function useFollowupListItem({ followup }: Args) {
   );
 
   const recurrenceLabel = followup.cron
-    ? describeCron(followup.cron, t)
+    ? describeCron(followup.cron, locale)
     : t("Runs once", "仅运行一次");
 
   function openDelete() {

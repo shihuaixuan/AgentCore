@@ -20,6 +20,7 @@ import { TypingComposer } from "./components/TypingComposer";
 import { OrbControlButton } from "./components/OrbControlButton";
 import { toOrbScreen } from "./helpers";
 import { useBrainDumpStep } from "./useBrainDumpStep";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const MIC_UNAVAILABLE_COPY =
   "We couldn't open your microphone. You can write it instead.";
@@ -27,6 +28,7 @@ const TIME_LIMIT_CAPTION =
   "That's 30 minutes, the most we record in one go. Saving all of it…";
 
 export function BrainDumpStep() {
+  const { t } = useTranslation();
   const dump = useBrainDumpStep();
   const isRecording = dump.screen === "recording";
   const isProcessing = dump.screen === "processing";
@@ -148,7 +150,10 @@ export function BrainDumpStep() {
                         role="alert"
                         className="mt-3 text-center"
                       >
-                        {MIC_UNAVAILABLE_COPY}
+                        {t(
+                          MIC_UNAVAILABLE_COPY,
+                          "无法打开麦克风，你可以改用文字输入。",
+                        )}
                       </Text>
                     )}
                   </>
@@ -164,8 +169,11 @@ export function BrainDumpStep() {
               {isProcessing && (
                 <Text variant="body" tone="muted" className="text-center">
                   {dump.reachedTimeLimit
-                    ? TIME_LIMIT_CAPTION
-                    : "Got it. One second…"}
+                    ? t(
+                        TIME_LIMIT_CAPTION,
+                        "已达到单次录音的 30 分钟上限，正在保存全部内容…",
+                      )
+                    : t("Got it. One second…", "收到了，请稍等…")}
                 </Text>
               )}
             </RevealItem>

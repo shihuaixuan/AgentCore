@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/Button/Button";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
 import { Forward02Icon } from "@hugeicons/core-free-icons";
@@ -24,6 +25,7 @@ export function BudgetStep({
   onSubmit,
   onSkip,
 }: Props) {
+  const { t } = useTranslation();
   const budget = useBudgetStep({ onSubmit });
 
   if (submittedBudget !== null) {
@@ -40,8 +42,10 @@ export function BudgetStep({
         onCustomChange={budget.changeCustomAmount}
       />
       <p className="max-w-[42rem] text-right text-caption text-foreground-tertiary">
-        Skip to use the default {creditsToUsdLabel(DEFAULT_BUDGET_CREDITS)} a
-        week. $0 disables the weekly limit.
+        {t(
+          `Skip to use the default ${creditsToUsdLabel(DEFAULT_BUDGET_CREDITS)} a week. $0 disables the weekly limit.`,
+          `跳过以使用默认每周 ${creditsToUsdLabel(DEFAULT_BUDGET_CREDITS)} 的预算。设为 $0 可取消每周上限。`,
+        )}
       </p>
       <div className="flex items-center gap-2">
         {budget.canSubmitCustom ? (
@@ -53,7 +57,7 @@ export function BudgetStep({
             shape="rounded"
             className="h-[2.625rem]"
           >
-            {"That's it"}
+            {t("That's it", "就这样")}
           </Button>
         ) : null}
         <Button
@@ -64,7 +68,7 @@ export function BudgetStep({
           shape="rounded"
           className="h-[2.625rem]"
         >
-          Skip
+          {t("Skip", "跳过")}
         </Button>
       </div>
     </div>
@@ -78,7 +82,8 @@ function BudgetAnswer({
   credits: number | null;
   color: string | null;
 }) {
-  const label = kitBudgetLabel({ weeklyBudget: credits, attachments: [] });
+  const { t } = useTranslation();
+  const label = kitBudgetLabel({ weeklyBudget: credits, attachments: [] }, t);
   const skipped = !label;
   return (
     <div
@@ -91,7 +96,7 @@ function BudgetAnswer({
       {skipped ? (
         <>
           <Icon icon={Forward02Icon} size={16} aria-hidden />
-          Skipped
+          {t("Skipped", "已跳过")}
         </>
       ) : (
         label

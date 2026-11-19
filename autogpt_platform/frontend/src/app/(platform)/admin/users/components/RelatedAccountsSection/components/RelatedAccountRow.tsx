@@ -20,7 +20,7 @@ interface Props {
 }
 
 export function RelatedAccountRow({ account }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const ips = account.via_ips.map(formatBlockedAddress);
   const hidden = ips.length - SHOWN_IPS;
 
@@ -67,7 +67,7 @@ export function RelatedAccountRow({ account }: Props) {
         )}
       </div>
       <Text variant="small" as="span" tone="muted">
-        {formatDate(account.created_at)}
+        {formatDate(account.created_at, locale)}
       </Text>
       <span className="md:text-right">
         {account.banned ? (

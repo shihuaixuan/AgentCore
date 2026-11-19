@@ -1,5 +1,6 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { PlanChoiceDetails } from "./helpers";
 
@@ -20,6 +21,7 @@ export function PlanChoice({
   isDisabled,
   onSelect,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <li className="flex flex-col gap-3 rounded-large border border-border-base bg-surface p-5 shadow-message-table">
       <Text variant="body-medium" as="h3">
@@ -31,7 +33,7 @@ export function PlanChoice({
             {plan.amount}
           </Text>
           <Text variant="small" as="span" tone="muted">
-            / {plan.cadence}
+            / {plan.cadence === "year" ? t("year", "年") : t("month", "月")}
           </Text>
         </p>
         <Text variant="small" tone="secondary">

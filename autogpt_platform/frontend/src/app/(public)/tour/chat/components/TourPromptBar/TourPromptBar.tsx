@@ -7,6 +7,7 @@ import { useTextReveal } from "../../useTextReveal";
 import { ArrowUp02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { isKey } from "@/lib/keyboard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   prompt: string | null;
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function TourPromptBar({ prompt, isStreaming, onSend }: Props) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   // The parent re-keys this component per turn, so the reveal restarts
   // whenever a new prompt prefills — it types itself in like the transcript.
@@ -47,7 +49,11 @@ export function TourPromptBar({ prompt, isStreaming, onSend }: Props) {
       ref={ref}
       role="button"
       tabIndex={isDisabled ? -1 : 0}
-      aria-label={prompt ? `Send: ${prompt}` : "Otto is working"}
+      aria-label={
+        prompt
+          ? t(`Send: ${prompt}`, `发送：${prompt}`)
+          : t("Otto is working", "Otto 正在工作")
+      }
       aria-disabled={isDisabled}
       onKeyDown={handleKeyDown}
       onClick={send}
@@ -65,7 +71,7 @@ export function TourPromptBar({ prompt, isStreaming, onSend }: Props) {
       </span>
       {!isDisabled && isTyped && (
         <span className="hidden shrink-0 items-center gap-1 text-caption text-foreground-subtle sm:flex">
-          Press
+          {t("Press", "按下")}
           <kbd className="rounded border border-border-base bg-surface-muted px-1.5 py-0.5 font-sans text-caption-sm text-foreground-tertiary">
             Enter
           </kbd>

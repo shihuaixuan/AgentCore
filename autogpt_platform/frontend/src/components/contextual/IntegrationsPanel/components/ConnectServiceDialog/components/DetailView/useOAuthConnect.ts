@@ -113,7 +113,9 @@ export function useOAuthConnect({
       // runtime — it exists only to narrow the discriminated union so the
       // 200-only LoginResponse shape is accessible below.
       if (initiateResponse.status !== 200) {
-        throw new Error("Unexpected OAuth initiate response");
+        throw new Error(
+          t("Unexpected OAuth initiate response", "OAuth 初始化返回了意外响应"),
+        );
       }
       const { login_url, state_token, cancel_url } = initiateResponse.data;
 
@@ -146,7 +148,10 @@ export function useOAuthConnect({
       if (popupBlocked && !fallbackBlocked) {
         toast({
           title: t("Popup blocked", "弹出窗口被阻止"),
-          description: OAUTH_ERROR_POPUP_BLOCKED,
+          description: t(
+            OAUTH_ERROR_POPUP_BLOCKED,
+            "弹出窗口被阻止，已改为在新标签页中打开。",
+          ),
         });
       }
 
@@ -183,7 +188,13 @@ export function useOAuthConnect({
       }
       if (isUnmountedRef.current) return;
       if (
-        toastIfPlanRequired(error, "Connecting a service needs an active plan")
+        toastIfPlanRequired(
+          error,
+          t(
+            "Connecting a service needs an active plan",
+            "连接服务需要有效套餐",
+          ),
+        )
       )
         return;
       if (onError) {

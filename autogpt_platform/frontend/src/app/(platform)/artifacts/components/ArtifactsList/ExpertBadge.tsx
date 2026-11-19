@@ -4,6 +4,7 @@ import { useExpertMap } from "@/app/(platform)/copilot/useExpertMap";
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   expertId: string | null | undefined;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function ExpertBadge({ expertId, className }: Props) {
+  const { t } = useTranslation();
   const { expertsById } = useExpertMap();
   const expert = expertId ? expertsById.get(expertId) : undefined;
   if (!expert) return null;
@@ -18,7 +20,7 @@ export function ExpertBadge({ expertId, className }: Props) {
   return (
     <span
       className={cn("inline-flex items-center", className)}
-      title={`From ${expert.name}`}
+      title={t(`From ${expert.name}`, `来自 ${expert.name}`)}
       data-testid="artifacts-expert-badge"
     >
       {/* oxlint-disable-next-line design-system/no-restyle -- the avatar sits nearer the edge than a label; Badge has no leading-avatar size */}

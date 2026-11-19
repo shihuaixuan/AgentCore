@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { DisplayTranslate } from "../helpers/translation";
 import { useGetV1ListAllExecutions } from "@/app/api/__generated__/endpoints/graphs/graphs";
 import { AgentExecutionStatus } from "@/app/api/__generated__/models/agentExecutionStatus";
 import type { GraphExecutionMeta } from "@/app/api/__generated__/models/graphExecutionMeta";
@@ -36,6 +38,7 @@ function deriveHealth(
 function computeAgentStatus(
   agent: LibraryAgent,
   agentExecutions: GraphExecutionMeta[],
+  t: DisplayTranslate,
 ): AgentStatusInfo {
   const activeExec = agentExecutions.find((e) => isActive(e.status));
 
@@ -62,7 +65,7 @@ function computeAgentStatus(
       lastError =
         (recentFailed.stats?.error as string) ??
         (recentFailed.stats?.activity_status as string) ??
-        "Execution failed";
+        t("Execution failed", "执行失败");
     } else if (agent.has_external_trigger) {
       status = "listening";
     } else if (isAgentScheduled(agent)) {
@@ -99,6 +102,7 @@ function computeAgentStatus(
 export function useAgentStatusMap(
   agents: LibraryAgent[],
 ): Map<string, AgentStatusInfo> {
+  const { t } = useTranslation();
   const { data: executions } = useGetV1ListAllExecutions({
     query: { select: okData },
   });
@@ -118,11 +122,11 @@ export function useAgentStatusMap(
 
     for (const agent of agents) {
       const agentExecs = execsByGraph.get(agent.graph_id) ?? [];
-      map.set(agent.graph_id, computeAgentStatus(agent, agentExecs));
+      map.set(agent.graph_id, computeAgentStatus(agent, agentExecs, t));
     }
 
     return map;
-  }, [agents, executions]);
+  }, [agents, executions, t]);
 }
 
 const DEFAULT_STATUS: AgentStatusInfo = {

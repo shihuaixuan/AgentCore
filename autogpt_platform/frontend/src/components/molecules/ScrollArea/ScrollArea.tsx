@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ArrowUp02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface ScrollAreaProps
   extends React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> {
@@ -135,6 +136,7 @@ interface ScrollToTopFabProps {
 }
 
 function ScrollToTopFab({ visible, onClick }: ScrollToTopFabProps) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   return (
@@ -143,7 +145,7 @@ function ScrollToTopFab({ visible, onClick }: ScrollToTopFabProps) {
         <motion.button
           type="button"
           onClick={onClick}
-          aria-label="Scroll to top"
+          aria-label={t("Scroll to top", "返回顶部")}
           className="absolute bottom-6 left-1/2 z-30 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full bg-action text-action-foreground shadow-md transition-colors hover:bg-action/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
           initial={
             reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 8 }

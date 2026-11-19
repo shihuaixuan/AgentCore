@@ -88,9 +88,12 @@ function SettingsBillingPage() {
     if (isBillingTab(value)) setActiveTab(value);
   }
 
-  useEffect(function setBillingDocumentTitle() {
-    document.title = "Billing – AutoGPT Platform";
-  }, []);
+  useEffect(
+    function setBillingDocumentTitle() {
+      document.title = t("Billing – AutoGPT Platform", "账单 – AutoGPT 平台");
+    },
+    [t],
+  );
 
   useEffect(
     function handleTopupRedirect() {
@@ -137,9 +140,11 @@ function SettingsBillingPage() {
 
       if (subscriptionStatus === "success") {
         toast({
-          title: "Confirming your subscription",
-          description:
+          title: t("Confirming your subscription", "正在确认你的订阅"),
+          description: t(
             "Your new plan is being applied. It may take a moment to reflect.",
+            "正在应用新套餐，可能需要稍等片刻才能显示。",
+          ),
         });
         queryClient.invalidateQueries({
           queryKey: getGetSubscriptionStatusQueryKey(),
@@ -157,7 +162,7 @@ function SettingsBillingPage() {
 
       router.replace("/settings/billing");
     },
-    [subscriptionStatus, queryClient, router, searchParams],
+    [subscriptionStatus, queryClient, router, searchParams, t],
   );
 
   useEffect(

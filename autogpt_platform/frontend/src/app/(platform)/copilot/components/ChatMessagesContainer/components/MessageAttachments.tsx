@@ -26,6 +26,7 @@ import Link from "next/link";
 import { folderSummary } from "@/app/(platform)/artifacts/components/WorkspaceFolders/folderTree";
 import type { WorkspaceFolderPartData } from "../../../helpers/workspaceAttachments";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   files: FileUIPart[];
@@ -67,6 +68,7 @@ export function MessageAttachments({
   filePattern,
   readOnly,
 }: Props) {
+  const { t } = useTranslation();
   if (files.length === 0 && folders.length === 0) return null;
 
   const { images, otherFiles } = splitUserImages(files, isUser, filePattern);
@@ -124,12 +126,14 @@ export function MessageAttachments({
                   : "text-foreground-tertiary"
               }`}
             >
-              <span className="truncate">{file.filename || "file"}</span>
+              <span className="truncate">
+                {file.filename || t("file", "文件")}
+              </span>
               {file.url && (
                 <a
                   href={file.url}
                   download
-                  aria-label="Download file"
+                  aria-label={t("Download file", "下载文件")}
                   className="ml-auto shrink-0 opacity-50 hover:opacity-100"
                 >
                   <Icon icon={Download04Icon} className="h-3.5 w-3.5" />
@@ -155,7 +159,7 @@ export function MessageAttachments({
                     tone="emphasis"
                     className="truncate"
                   >
-                    {file.filename || "file"}
+                    {file.filename || t("file", "文件")}
                   </Text>
                   <Text
                     variant="small-mono-tight"
@@ -163,7 +167,7 @@ export function MessageAttachments({
                     tone="emphasis"
                     className="mt-0.5 truncate"
                   >
-                    {file.mediaType || "file"}
+                    {file.mediaType || t("file", "文件")}
                   </Text>
                 </div>
               </div>
@@ -171,7 +175,7 @@ export function MessageAttachments({
                 <a
                   href={file.url}
                   download
-                  aria-label="Download file"
+                  aria-label={t("Download file", "下载文件")}
                   className="shrink-0 text-brand hover:text-brand-hover"
                 >
                   <Icon icon={Download04Icon} className="h-5 w-5" />
@@ -187,7 +191,7 @@ export function MessageAttachments({
                   <a
                     href={file.url}
                     download
-                    aria-label="Download file"
+                    aria-label={t("Download file", "下载文件")}
                     className="shrink-0 text-foreground-subtle hover:text-foreground-secondary"
                   >
                     <Icon icon={Download04Icon} className="h-5 w-5" />
@@ -202,9 +206,11 @@ export function MessageAttachments({
                   className="h-5 w-5 shrink-0"
                 />
                 <div className="min-w-0">
-                  <ContentCardTitle>{file.filename || "file"}</ContentCardTitle>
+                  <ContentCardTitle>
+                    {file.filename || t("file", "文件")}
+                  </ContentCardTitle>
                   <ContentCardSubtitle>
-                    {file.mediaType || "file"}
+                    {file.mediaType || t("file", "文件")}
                   </ContentCardSubtitle>
                 </div>
               </div>
@@ -242,6 +248,7 @@ function FolderAttachmentCard({
   folder: WorkspaceFolderPartData;
   readOnly?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex min-w-0 items-center gap-3 rounded-lg border border-brand/70 bg-accent-surface p-3">
       <Icon icon={Folder01Icon} size={20} tone="body" className="shrink-0" />
@@ -257,15 +264,21 @@ function FolderAttachmentCard({
         <Text variant="small-tight" as="span" tone="secondary">
           {/* The part counts direct files only, so zero is not "Empty". */}
           {folder.fileCount > 0
-            ? `Folder · ${folderSummary(folder.fileCount, 0)}`
-            : "Folder"}
+            ? t(
+                `Folder · ${folderSummary(folder.fileCount, 0)}`,
+                `文件夹 · ${folder.fileCount} 个文件`,
+              )
+            : t("Folder", "文件夹")}
         </Text>
       </div>
       {/* The share viewer has no Files page to send anyone to. */}
       {readOnly ? null : (
         <Link
           href={`/artifacts?folder=${encodeURIComponent(folder.id)}`}
-          aria-label={`Open folder ${folder.name} in Files`}
+          aria-label={t(
+            `Open folder ${folder.name} in Files`,
+            `在文件中打开文件夹 ${folder.name}`,
+          )}
           className="shrink-0 rounded-md p-1 text-foreground-tertiary transition-colors hover:bg-brand/50 hover:text-foreground-emphasis"
         >
           <Icon icon={LinkSquare01Icon} size={16} />

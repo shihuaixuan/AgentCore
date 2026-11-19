@@ -90,7 +90,9 @@ export const useMarketplaceAgentsContent = () => {
       );
       if (status !== 200) {
         Sentry.captureException("Store listing version not found");
-        throw new Error("Store listing version not found");
+        throw new Error(
+          t("Store listing version not found", "未找到市场工作流版本"),
+        );
       }
 
       const response = await addMarketplaceAgent({

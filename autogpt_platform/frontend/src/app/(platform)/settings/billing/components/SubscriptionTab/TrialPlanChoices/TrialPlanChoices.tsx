@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function TrialPlanChoices({ offer }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const {
     isVisible,
     ownPlan,
@@ -67,7 +67,7 @@ export function TrialPlanChoices({ offer }: Props) {
       <ConfirmTrialPlanDialog
         isOpen={confirmPlan !== null}
         planLabel={dialogPlan.label}
-        price={formatChoicePrice(dialogPlan)}
+        price={formatChoicePrice(dialogPlan, locale)}
         isSaving={requestedTier === dialogPlan.tier}
         onConfirm={onConfirmPlan}
         onClose={onCloseConfirm}

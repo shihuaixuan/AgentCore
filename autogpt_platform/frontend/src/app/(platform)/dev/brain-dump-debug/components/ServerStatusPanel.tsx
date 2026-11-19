@@ -12,6 +12,7 @@ import {
   STATUS_POLL_MS,
 } from "../helpers";
 import { DebugField, DebugNote, DebugPanel } from "./DebugPanel";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   dump: DumpStatusResponse | null;
@@ -36,17 +37,21 @@ export function ServerStatusPanel({
   isFinalizing,
   onFinalize,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <DebugPanel
-      title="Server status"
-      description={`GET /onboarding/brain-dump/status, polled every ${STATUS_POLL_MS}ms.`}
+      title={t("Server status", "服务端状态")}
+      description={t(
+        `GET /onboarding/brain-dump/status, polled every ${STATUS_POLL_MS}ms.`,
+        `GET /onboarding/brain-dump/status，每 ${STATUS_POLL_MS}ms 轮询一次。`,
+      )}
       icon={AudioWaveformIcon}
       action={
         dump?.has_audio ? (
           <Link href={recordingDownloadHref()} isExternal variant="secondary">
             <span className="inline-flex items-center gap-2">
               <Icon icon={Download01Icon} size={16} />
-              Download server-side recording
+              {t("Download server-side recording", "下载服务端录音")}
             </span>
           </Link>
         ) : null
@@ -54,11 +59,15 @@ export function ServerStatusPanel({
     >
       {isError ? (
         <DebugNote>
-          Status request failed — check that you are signed in and the backend
-          is available.
+          {t(
+            "Status request failed — check that you are signed in and the backend is available.",
+            "状态请求失败：请检查是否已登录，以及后端是否可用。",
+          )}
         </DebugNote>
       ) : null}
-      {isLoading && !dump ? <DebugNote>Loading status…</DebugNote> : null}
+      {isLoading && !dump ? (
+        <DebugNote>{t("Loading status…", "正在加载状态…")}</DebugNote>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <DebugField label="status" value={formatValue(dump?.status)} />
@@ -69,10 +78,12 @@ export function ServerStatusPanel({
 
       <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Badge variant="info">last finalize response</Badge>
+          <Badge variant="info">
+            {t("last finalize response", "最近一次 finalize 响应")}
+          </Badge>
           {finalizeRoundTripMs !== null ? (
             <Badge variant="info">
-              round-trip {formatMs(finalizeRoundTripMs)}
+              {t("round-trip", "往返耗时")} {formatMs(finalizeRoundTripMs)}
             </Badge>
           ) : null}
         </div>
@@ -83,13 +94,18 @@ export function ServerStatusPanel({
           disabled={!canFinalize}
           loading={isFinalizing}
         >
-          Run finalize on the stored recording
+          {t(
+            "Run finalize on the stored recording",
+            "对已存储录音执行 finalize",
+          )}
         </Button>
       </div>
 
       {finalizeError ? (
         <div className="mt-4">
-          <DebugNote>Finalize failed: {finalizeError}</DebugNote>
+          <DebugNote>
+            {t("Finalize failed:", "Finalize 失败：")} {finalizeError}
+          </DebugNote>
         </div>
       ) : null}
 
@@ -111,10 +127,10 @@ export function ServerStatusPanel({
       ) : (
         <div className="mt-4">
           <DebugNote>
-            No finalize response captured. Nothing persists the response from
-            the real onboarding run, so this page can only show one it issued
-            itself. Finalize is idempotent per recording_id and consumes the
-            server-side part buffer.
+            {t(
+              "No finalize response captured. Nothing persists the response from the real onboarding run, so this page can only show one it issued itself. Finalize is idempotent per recording_id and consumes the server-side part buffer.",
+              "尚未捕获 finalize 响应。真实入门流程的响应不会持久化，因此本页只能显示由本页发起的响应。Finalize 对每个 recording_id 是幂等的，且会消耗服务端分片缓冲区。",
+            )}
           </DebugNote>
         </div>
       )}

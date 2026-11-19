@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   OutputRenderer,
   OutputMetadata,
@@ -107,8 +108,19 @@ function renderImage(
   value: unknown,
   metadata?: OutputMetadata,
 ): React.ReactNode {
+  return <ImagePreview value={value} metadata={metadata} />;
+}
+
+function ImagePreview({
+  value,
+  metadata,
+}: {
+  value: unknown;
+  metadata?: OutputMetadata;
+}) {
+  const { t } = useTranslation();
   const imageUrl = String(value);
-  const altText = metadata?.filename || "Output image";
+  const altText = metadata?.filename || t("Output image", "输出图片");
 
   return (
     <div className="group relative">

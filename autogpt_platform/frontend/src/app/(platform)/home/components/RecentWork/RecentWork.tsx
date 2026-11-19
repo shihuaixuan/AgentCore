@@ -54,11 +54,11 @@ export function RecentWork({ dashboard, className }: Props) {
             ·
           </span>
           <Text variant="small" as="span" tone="muted" tabular>
-            {completed} completed
+            {t(`${completed} completed`, `${completed} 项已完成`)}
           </Text>
           {failed > 0 ? (
             <Text variant="small" as="span" tone="danger" tabular>
-              {failed} failed
+              {t(`${failed} failed`, `${failed} 项失败`)}
             </Text>
           ) : null}
         </>

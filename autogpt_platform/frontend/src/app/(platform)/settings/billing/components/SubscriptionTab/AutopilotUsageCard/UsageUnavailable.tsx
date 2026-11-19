@@ -30,7 +30,10 @@ export function UsageUnavailable({ onRetry }: Props) {
         </Text>
         {/* oxlint-disable-next-line design-system/no-restyle -- caption copy at a 24px line height; no Text variant has it */}
         <Text variant="small" tone="secondary" className="leading-6">
-          Your plan and your work aren’t affected. Try again in a moment.
+          {t(
+            "Your plan and your work aren’t affected. Try again in a moment.",
+            "你的套餐和工作内容不受影响。请稍后重试。",
+          )}
         </Text>
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Button

@@ -15,6 +15,7 @@ import {
   ThumbsUpIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   message: UIMessage<unknown, UIDataTypes, UITools>;
@@ -39,6 +40,7 @@ export function AssistantMessageActions({
   savedMessageId,
   className,
 }: Props) {
+  const { t } = useTranslation();
   const {
     feedback,
     canRate,
@@ -56,7 +58,7 @@ export function AssistantMessageActions({
     <>
       <MessageActions className={cn("mt-1", className)}>
         <MessageAction
-          tooltip="Copy"
+          tooltip={t("Copy", "复制")}
           onClick={() => handleCopy(text)}
           variant="ghost"
           size="icon-sm"
@@ -65,7 +67,7 @@ export function AssistantMessageActions({
         </MessageAction>
 
         <MessageAction
-          tooltip="Good response"
+          tooltip={t("Good response", "回答得好")}
           onClick={handleUpvote}
           variant="ghost"
           size="icon-sm"
@@ -82,7 +84,7 @@ export function AssistantMessageActions({
         </MessageAction>
 
         <MessageAction
-          tooltip="Bad response"
+          tooltip={t("Bad response", "回答不好")}
           onClick={handleDownvoteClick}
           variant="ghost"
           size="icon-sm"

@@ -16,13 +16,23 @@ import { invalidateExpertRosterQueries } from "@/services/experts/invalidate-exp
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
-function celebrate(result: HireResult) {
+function celebrate(
+  result: HireResult,
+  t: ReturnType<typeof useTranslation>["t"],
+) {
   toast({
-    title: `${result.expert.name} joined your team`,
+    title: t(
+      `${result.expert.name} joined your team`,
+      `${result.expert.name} 已加入你的团队`,
+    ),
     description:
       result.expert.setup_status === "installing"
-        ? "Their skills and workflows are installing."
+        ? t(
+            "Their skills and workflows are installing.",
+            "正在安装这位专家的技能和工作流。",
+          )
         : undefined,
     variant: "success",
     action: (
@@ -33,7 +43,7 @@ function celebrate(result: HireResult) {
         size="small"
         className="border-surface text-action-foreground hover:border-surface hover:bg-surface/15 hover:text-action-foreground"
       >
-        View team
+        {t("View team", "查看团队")}
       </Button>
     ),
   });
@@ -43,6 +53,7 @@ function celebrate(result: HireResult) {
  *  the persona ships writing samples, then celebrate and hand the user to
  *  the expert's first thread. */
 export function useHireFlow(expert: Expert | null) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const router = useRouter();
   const [hireResult, setHireResult] = useState<HireResult | null>(null);
@@ -59,7 +70,7 @@ export function useHireFlow(expert: Expert | null) {
     setHireResult(null);
     setIsVoicePickOpen(false);
     if (completedHire) {
-      celebrate(completedHire);
+      celebrate(completedHire, t);
       // Hiring isn't installing: hand the user straight to the expert's
       // thread with kickoff=1 so it introduces itself and starts its job.
       router.push(`/copilot?expertId=${completedHire.expert.id}&kickoff=1`);
@@ -83,8 +94,11 @@ export function useHireFlow(expert: Expert | null) {
       finish();
     } catch {
       toast({
-        title: `Couldn't hire ${expert.name}`,
-        description: "Something went wrong. Please try again.",
+        title: t(`Couldn't hire ${expert.name}`, `无法聘用 ${expert.name}`),
+        description: t(
+          "Something went wrong. Please try again.",
+          "出现了问题，请重试。",
+        ),
         variant: "destructive",
       });
     }
@@ -126,8 +140,11 @@ export function useHireFlow(expert: Expert | null) {
       // The hire itself succeeded; keep the picker open so the choice can be
       // retried, and point at the Soul editor as the fallback.
       toast({
-        title: "Couldn't save the voice",
-        description: "You can set it later in the Soul editor.",
+        title: t("Couldn't save the voice", "无法保存表达风格"),
+        description: t(
+          "You can set it later in the Soul editor.",
+          "你可以稍后在个性编辑器中设置。",
+        ),
         variant: "destructive",
       });
       return;

@@ -1,7 +1,10 @@
+"use client";
+
 import { ditherColorsFor } from "@/app/(platform)/raise/components/ColorStep/helpers";
 import { ExpertActivityDay } from "@/app/api/__generated__/models/expertActivityDay";
 import { cn } from "@/lib/utils";
 import { getActivityCells, getActivitySummary } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const LEVEL_OPACITY = [
   "opacity-0",
@@ -17,8 +20,9 @@ interface Props {
 }
 
 export function ExpertActivityGraph({ days, color }: Props) {
-  const cells = getActivityCells(days);
-  const { rangeLabel } = getActivitySummary(days);
+  const { t, locale } = useTranslation();
+  const cells = getActivityCells(days, locale);
+  const { rangeLabel } = getActivitySummary(days, locale);
   // The dither ramp's first stop is the -400 shade, dark enough to read at
   // 25% opacity for the lightest level.
   const fillColor = ditherColorsFor(color ?? null)?.[0];
@@ -27,7 +31,7 @@ export function ExpertActivityGraph({ days, color }: Props) {
     <div className="w-full pb-1">
       <div
         role="img"
-        aria-label={`Activity over the ${rangeLabel}`}
+        aria-label={t(`Activity over the ${rangeLabel}`, `${rangeLabel}的活动`)}
         className="grid w-full auto-cols-fr grid-flow-col grid-rows-7 gap-0.5"
         data-testid="expert-activity-graph"
       >

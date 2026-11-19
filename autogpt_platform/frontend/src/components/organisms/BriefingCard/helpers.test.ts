@@ -35,6 +35,13 @@ describe("formatBriefingDate", () => {
 
     expect(formatBriefingDate(new Date(2026, 7, 7, 9, 0))).toBe("August 7");
   });
+
+  it("localizes the date without shifting date-only strings", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 7, 9, 12));
+    expect(formatBriefingDate("2026-08-07", "zh-CN")).toBe("8月7日");
+    expect(formatBriefingDate("2026-08-09", "zh-CN")).toBe("今天早上");
+  });
 });
 
 describe("isInternalLink", () => {

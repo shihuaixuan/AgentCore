@@ -41,7 +41,9 @@ function LogsTable({
           disabled={exporting}
           className="rounded border px-3 py-1.5 text-body hover:bg-surface-hover disabled:opacity-50"
         >
-          {exporting ? t("Exporting…", "正在导出…") : t("Export CSV", "导出 CSV")}
+          {exporting
+            ? t("Exporting…", "正在导出…")
+            : t("Export CSV", "导出 CSV")}
         </button>
       </div>
       <div className="overflow-x-auto">
@@ -153,8 +155,10 @@ function LogsTable({
       {pagination && pagination.total_pages > 1 && (
         <div className="flex items-center justify-between px-4">
           <span className="text-body text-foreground-tertiary">
-            Page {pagination.current_page} of {pagination.total_pages} (
-            {pagination.total_items} total)
+            {t(
+              `Page ${pagination.current_page} of ${pagination.total_pages} (${pagination.total_items} total)`,
+              `第 ${pagination.current_page} / ${pagination.total_pages} 页（共 ${pagination.total_items} 条）`,
+            )}
           </span>
           <div className="flex gap-2">
             <button
@@ -162,7 +166,7 @@ function LogsTable({
               onClick={() => onPageChange(pagination.current_page - 1)}
               className="rounded border px-3 py-1 text-body disabled:opacity-50"
             >
-            {t("Previous", "上一页")}
+              {t("Previous", "上一页")}
             </button>
             <button
               disabled={pagination.current_page >= pagination.total_pages}

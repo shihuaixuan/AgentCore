@@ -118,9 +118,10 @@ export function EditScheduleModal({
             </>
           ) : (
             <Text variant="body" tone="muted">
-              {t("Repeats", "重复")} {recurrenceLabel.toLowerCase()}. This
-              timing can&apos;t be changed here, so saving only renames the
-              schedule.
+              {t(
+                `Repeats ${recurrenceLabel.toLowerCase()}. This timing can't be changed here, so saving only renames the schedule.`,
+                `重复周期：${recurrenceLabel}。此处无法更改运行时间，保存时仅修改计划名称。`,
+              )}
             </Text>
           )}
         </div>
@@ -141,7 +142,7 @@ export function EditScheduleModal({
               loading={isPending}
               className="min-w-32"
             >
-              {isPending ? "Saving…" : t("Save", "保存")}
+              {isPending ? t("Saving…", "正在保存…") : t("Save", "保存")}
             </Button>
           </div>
         </Dialog.Footer>

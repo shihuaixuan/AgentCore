@@ -4,6 +4,7 @@ import { SparklesIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   YEARLY_PRICE_FACTOR,
   type PlanDef,
@@ -26,13 +27,17 @@ export function PaywallPlanChoices({
   pending,
   selectedTier,
 }: Props) {
+  const { t } = useTranslation();
   const team = plans.find((plan) => plan.key === "BUSINESS");
   return (
-    <section aria-label="Choose your AutoGPT plan" className="w-full space-y-5">
+    <section
+      aria-label={t("Choose your AutoGPT plan", "选择你的 AutoGPT 套餐")}
+      className="w-full space-y-5"
+    >
       <div className="flex justify-center">
         <div
           role="group"
-          aria-label="Billing period"
+          aria-label={t("Billing period", "计费周期")}
           className="inline-flex rounded-full border border-border-base bg-surface-hover p-1"
         >
           {(["monthly", "yearly"] as const).map((value) => (
@@ -45,10 +50,13 @@ export function PaywallPlanChoices({
               disabled={pending}
               className={cycle === value ? "bg-surface shadow-sm" : undefined}
             >
-              {value === "monthly" ? "Monthly" : "Yearly"}
+              {value === "monthly" ? t("Monthly", "按月") : t("Yearly", "按年")}
               {value === "yearly" && (
                 <span className="text-caption text-success">
-                  Save {Math.round((1 - YEARLY_PRICE_FACTOR) * 100)}%
+                  {t(
+                    `Save ${Math.round((1 - YEARLY_PRICE_FACTOR) * 100)}%`,
+                    `节省 ${Math.round((1 - YEARLY_PRICE_FACTOR) * 100)}%`,
+                  )}
                 </span>
               )}
             </Button>
@@ -72,9 +80,12 @@ export function PaywallPlanChoices({
       {team && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border-base px-4 py-3">
           <div>
-            <Text variant="small-medium">Team</Text>
+            <Text variant="small-medium">{t("Team", "团队版")}</Text>
             <Text variant="small" tone="secondary">
-              Custom capacity for your organization.
+              {t(
+                "Custom capacity for your organization.",
+                "为你的组织定制使用容量。",
+              )}
             </Text>
           </div>
           <Button
@@ -82,12 +93,15 @@ export function PaywallPlanChoices({
             size="small"
             onClick={() => onSelect(team.key)}
           >
-            Talk to sales
+            {t("Talk to sales", "联系销售")}
           </Button>
         </div>
       )}
       <Text variant="small-tight" tone="secondary" className="text-center">
-        Your conversations and workflows stay saved. Cancel anytime.
+        {t(
+          "Your conversations and workflows stay saved. Cancel anytime.",
+          "对话和工作流会继续保存，可随时取消订阅。",
+        )}
       </Text>
     </section>
   );
@@ -100,6 +114,7 @@ function PlanChoice({
   pending,
   selectedTier,
 }: { plan: PlanDef } & Omit<Props, "plans" | "onCycle">) {
+  const { t } = useTranslation();
   const amount = cycle === "yearly" ? plan.usdYearly : plan.usdMonthly;
   const formatted =
     amount == null
@@ -112,18 +127,30 @@ function PlanChoice({
   const isPro = plan.key === "PRO";
   const features = isPro
     ? [
-        "Experts for content, sales and research, with Otto coordinating",
-        "Workflows that keep working in the background on a schedule",
+        t(
+          "Experts for content, sales and research, with Otto coordinating",
+          "由 Otto 协调内容、销售和研究领域的专家",
+        ),
+        t(
+          "Workflows that keep working in the background on a schedule",
+          "按计划在后台持续运行的工作流",
+        ),
       ]
     : [
         plan.usage
-          ? `${plan.usage.replace(/x|×/, "")} times the usage of Pro`
-          : "More usage for demanding work",
-        "More file storage and priority support",
+          ? t(
+              `${plan.usage.replace(/x|×/, "")} times the usage of Pro`,
+              `Pro 套餐 ${plan.usage.replace(/x|×/, "")} 倍的使用额度`,
+            )
+          : t("More usage for demanding work", "为高强度工作提供更多使用额度"),
+        t(
+          "More file storage and priority support",
+          "更多文件存储空间和优先支持",
+        ),
       ];
   return (
     <section
-      aria-label={`${plan.name} plan`}
+      aria-label={t(`${plan.name} plan`, `${plan.name} 套餐`)}
       className={`flex flex-col rounded-2xl border p-5 sm:p-6 ${isPro ? "border-brand/30 bg-gradient-to-br from-accent-surface via-surface to-info-surface" : "border-border-base bg-surface"}`}
     >
       <div className="mb-4 flex items-center gap-2">
@@ -138,17 +165,20 @@ function PlanChoice({
       </div>
       <Text variant="small" tone="secondary" className="mb-4">
         {isPro
-          ? "For the work you do every day."
-          : "For bigger ideas and heavier work."}
+          ? t("For the work you do every day.", "适合日常工作。")
+          : t(
+              "For bigger ideas and heavier work.",
+              "适合更大的创意和更繁重的工作。",
+            )}
       </Text>
       <div className="mb-5">
         <Text variant="h3-tracking-tight" as="span">
-          {formatted ?? "Unavailable"}
+          {formatted ?? t("Unavailable", "暂不可用")}
         </Text>
         {formatted && (
           <Text variant="small" as="span" tone="secondary">
             {" "}
-            / {cycle === "yearly" ? "year" : "month"}
+            / {cycle === "yearly" ? t("year", "年") : t("month", "月")}
           </Text>
         )}
       </div>
@@ -174,7 +204,7 @@ function PlanChoice({
         loading={pending && selectedTier === plan.key}
         disabled={pending || !formatted}
       >
-        Start {plan.name}
+        {t(`Start ${plan.name}`, `开通 ${plan.name}`)}
       </Button>
     </section>
   );

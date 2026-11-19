@@ -17,6 +17,7 @@ import {
   wrapWithHeadInjection,
 } from "@/lib/iframe-sandbox-csp";
 import { useArtifactContent } from "./useArtifactContent";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   artifact: ArtifactRef;
@@ -29,6 +30,7 @@ function ArtifactContentLoader({
   isSourceView,
   classification,
 }: Props) {
+  const { t } = useTranslation();
   const { content, pdfUrl, isLoading, error, scrollRef, retry } =
     useArtifactContent(artifact, classification);
 
@@ -43,7 +45,7 @@ function ArtifactContentLoader({
         className="flex flex-col items-center justify-center gap-3 p-8 text-center"
       >
         <Text variant="body-tight" as="p" tone="muted">
-          Failed to load content
+          {t("Failed to load content", "加载内容失败")}
         </Text>
         <Text variant="small-tight" as="p" tone="subtle">
           {error}
@@ -59,7 +61,7 @@ function ArtifactContentLoader({
             tone="body"
             className="block"
           >
-            Try again
+            {t("Try again", "重试")}
           </Text>
         </button>
       </div>
@@ -93,6 +95,7 @@ function withCacheBust(src: string, nonce: number): string {
 }
 
 function ArtifactImage({ src, alt }: { src: string; alt: string }) {
+  const { t } = useTranslation();
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   // Incremented on every Try Again so the URL changes and the browser
@@ -106,7 +109,7 @@ function ArtifactImage({ src, alt }: { src: string; alt: string }) {
         className="flex flex-col items-center justify-center gap-3 p-8 text-center"
       >
         <Text variant="body-tight" as="p" tone="muted">
-          Failed to load image
+          {t("Failed to load image", "加载图片失败")}
         </Text>
         <button
           type="button"
@@ -123,7 +126,7 @@ function ArtifactImage({ src, alt }: { src: string; alt: string }) {
             tone="body"
             className="block"
           >
-            Try again
+            {t("Try again", "重试")}
           </Text>
         </button>
       </div>
@@ -151,6 +154,7 @@ function ArtifactImage({ src, alt }: { src: string; alt: string }) {
 }
 
 function ArtifactVideo({ src }: { src: string }) {
+  const { t } = useTranslation();
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [retryNonce, setRetryNonce] = useState(0);
@@ -162,7 +166,7 @@ function ArtifactVideo({ src }: { src: string }) {
         className="flex flex-col items-center justify-center gap-3 p-8 text-center"
       >
         <Text variant="body-tight" as="p" tone="muted">
-          Failed to load video
+          {t("Failed to load video", "加载视频失败")}
         </Text>
         <button
           type="button"
@@ -179,7 +183,7 @@ function ArtifactVideo({ src }: { src: string }) {
             tone="body"
             className="block"
           >
-            Try again
+            {t("Try again", "重试")}
           </Text>
         </button>
       </div>

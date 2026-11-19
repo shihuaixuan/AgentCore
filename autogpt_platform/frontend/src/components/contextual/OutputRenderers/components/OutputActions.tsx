@@ -11,6 +11,7 @@ import {
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface OutputActionsProps {
   items: Array<{
@@ -26,6 +27,7 @@ export function OutputActions({
   items,
   isPrimary = false,
 }: OutputActionsProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopyAll = async () => {
@@ -75,7 +77,7 @@ export function OutputActions({
         variant={isPrimary ? "primary" : "ghost"}
         size={isPrimary ? "small" : "icon"}
         onClick={handleCopyAll}
-        aria-label="Copy all text outputs"
+        aria-label={t("Copy all text outputs", "复制所有文本输出")}
         className={cn(isPrimary ? "min-w-0" : "")}
       >
         {copied ? (
@@ -87,14 +89,14 @@ export function OutputActions({
             className="size-4"
           />
         )}
-        {isPrimary && <span>Copy All</span>}
+        {isPrimary && <span>{t("Copy All", "全部复制")}</span>}
       </Button>
 
       <Button
         variant={isPrimary ? "primary" : "ghost"}
         size={isPrimary ? "small" : "icon"}
         onClick={handleDownloadAll}
-        aria-label="Download outputs"
+        aria-label={t("Download outputs", "下载输出内容")}
         className={cn(isPrimary ? "min-w-0" : "")}
       >
         <Icon
@@ -102,7 +104,7 @@ export function OutputActions({
           tone={isPrimary ? "inverse" : "muted"}
           className="size-4"
         />
-        {isPrimary && <span>Download All</span>}
+        {isPrimary && <span>{t("Download All", "全部下载")}</span>}
       </Button>
     </div>
   );

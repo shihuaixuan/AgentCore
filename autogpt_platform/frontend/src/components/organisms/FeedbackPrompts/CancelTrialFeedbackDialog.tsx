@@ -69,9 +69,11 @@ export function CancelTrialFeedbackDialog({
               )}
             </Text>
             <Text variant="body" tone="emphasis">
+              {t("You keep full access until ", "你仍可完整使用至 ")}
+              <strong>{localizedEndDate}</strong>
               {t(
-                `You keep full access until ${endDate}, and you can resume your trial any time before then.`,
-                `你仍可完整使用至 ${localizedEndDate}，并可在此之前随时恢复试用。`,
+                ", and you can resume your trial any time before then.",
+                "，并可在此之前随时恢复试用。",
               )}
             </Text>
           </div>

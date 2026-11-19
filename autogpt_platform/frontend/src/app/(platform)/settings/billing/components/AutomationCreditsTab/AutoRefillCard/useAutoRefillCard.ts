@@ -8,8 +8,10 @@ import {
 } from "@/app/api/__generated__/endpoints/credits/credits";
 import type { AutoTopUpConfig } from "@/app/api/__generated__/models/autoTopUpConfig";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function useAutoRefillCard() {
+  const { t } = useTranslation();
   const {
     data: config,
     isLoading,
@@ -80,11 +82,14 @@ export function useAutoRefillCard() {
       setOpen(false);
     } catch (error) {
       toast({
-        title: "Couldn't save auto top-up",
+        title: t("Couldn't save auto top-up", "无法保存自动充值设置"),
         description:
           error instanceof Error
             ? error.message
-            : "Auto top-up settings weren't saved. Please try again.",
+            : t(
+                "Auto top-up settings weren't saved. Please try again.",
+                "自动充值设置未保存，请重试。",
+              ),
         variant: "destructive",
       });
     }
@@ -97,11 +102,14 @@ export function useAutoRefillCard() {
       setOpen(false);
     } catch (error) {
       toast({
-        title: "Couldn't disable auto top-up",
+        title: t("Couldn't disable auto top-up", "无法关闭自动充值"),
         description:
           error instanceof Error
             ? error.message
-            : "Auto top-up couldn't be disabled. Please try again.",
+            : t(
+                "Auto top-up couldn't be disabled. Please try again.",
+                "未能关闭自动充值，请重试。",
+              ),
         variant: "destructive",
       });
     }

@@ -5,8 +5,10 @@ import { Alert, AlertDescription } from "@/components/molecules/Alert/Alert";
 import { isValidUUID } from "@/lib/utils";
 import Link from "next/link";
 import { parseAsString, useQueryStates } from "nuqs";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export const WebhookDisclaimer = ({ nodeId }: { nodeId: string }) => {
+  const { t } = useTranslation();
   const [{ flowID }] = useQueryStates({
     flowID: parseAsString,
   });
@@ -33,7 +35,10 @@ export const WebhookDisclaimer = ({ nodeId }: { nodeId: string }) => {
         <Alert className="mb-3 rounded-xlarge">
           <AlertDescription>
             <Text variant="small-medium">
-              You can set up and manage this trigger in your{" "}
+              {t(
+                "You can set up and manage this trigger in your",
+                "你可以在工作流库中设置和管理此触发器：",
+              )}{" "}
               <Link
                 href={
                   libraryAgent
@@ -43,17 +48,22 @@ export const WebhookDisclaimer = ({ nodeId }: { nodeId: string }) => {
                 className="underline"
               >
                 <Text variant="small-medium-inherit" as="span" tone="inherit">
-                  Workflow Library
+                  {t("Workflow Library", "工作流库")}
                 </Text>
               </Link>
-              {!isNodeSaved && " (after saving the workflow)"}.
+              {!isNodeSaved &&
+                t(" (after saving the workflow)", "（保存工作流后）")}
+              .
             </Text>
           </AlertDescription>
         </Alert>
       </div>
 
       <Text variant="small" tone="accent" className="mb-4 ml-6">
-        Below inputs are only for display purposes and cannot be edited.
+        {t(
+          "Below inputs are only for display purposes and cannot be edited.",
+          "以下输入仅供展示，无法编辑。",
+        )}
       </Text>
     </>
   );

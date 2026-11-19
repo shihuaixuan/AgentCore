@@ -18,6 +18,7 @@ import { ExpertWorkflowRunButton } from "./ExpertWorkflowRunButton";
 import { useExpertWorkflowCard } from "./useExpertWorkflowCard";
 import { WorkflowChain } from "./WorkflowChain";
 import { WorkflowCredentialStack } from "./WorkflowCredentialStack";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   workflow: ExpertWorkflowRef;
@@ -34,6 +35,7 @@ export function ExpertWorkflowCard({
   coverColor,
   onAsk,
 }: Props) {
+  const { t, locale } = useTranslation();
   const {
     name,
     runCount,
@@ -61,7 +63,7 @@ export function ExpertWorkflowCard({
       {libraryHref ? (
         <NextLink
           href={libraryHref}
-          aria-label={`Open ${name} tasks`}
+          aria-label={t(`Open ${name} tasks`, `打开 ${name} 的任务`)}
           className="absolute inset-0 z-0 rounded-xl"
         />
       ) : null}
@@ -113,7 +115,7 @@ export function ExpertWorkflowCard({
         </div>
         {workflow.schedule_cron ? (
           <Text variant="small" tone="muted" className="mt-0.5">
-            {safeHumanizeCronExpression(workflow.schedule_cron)}
+            {safeHumanizeCronExpression(workflow.schedule_cron, locale)}
           </Text>
         ) : null}
         {workflow.description ? (
@@ -126,7 +128,10 @@ export function ExpertWorkflowCard({
             <div className="flex items-center gap-1.5 text-foreground-tertiary">
               <Icon icon={Activity01Icon} size={14} className="shrink-0" />
               <Text variant="body-md" tone="muted">
-                {runCount} {runCount === 1 ? "run" : "runs"}
+                {t(
+                  `${runCount} ${runCount === 1 ? "run" : "runs"}`,
+                  `${runCount} 次运行`,
+                )}
               </Text>
             </div>
           ) : null}

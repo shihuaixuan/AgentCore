@@ -39,8 +39,10 @@ export function LinksSection({ links, onChange, onAdd, onRemove }: Props) {
           {t("Your links", "你的链接")}
         </Text>
         <Text variant="small" tone="muted">
-          Add up to {MAX_LINKS} links. Site, GitHub, X, anything you want
-          visible.
+          {t(
+            `Add up to ${MAX_LINKS} links. Site, GitHub, X, anything you want visible.`,
+            `最多可添加 ${MAX_LINKS} 个链接。网站、GitHub、X，或其他希望公开的内容。`,
+          )}
         </Text>
       </div>
 
@@ -67,7 +69,7 @@ export function LinksSection({ links, onChange, onAdd, onRemove }: Props) {
                       type="url"
                       value={link.value}
                       placeholder="https://"
-                      aria-label={`Link ${index + 1}`}
+                      aria-label={t(`Link ${index + 1}`, `链接 ${index + 1}`)}
                       onChange={(e) => onChange(index, e.target.value)}
                       className="h-[2.875rem] w-full border-none bg-transparent text-body text-foreground-base placeholder:text-foreground-subtle focus:outline-none"
                     />
@@ -75,7 +77,10 @@ export function LinksSection({ links, onChange, onAdd, onRemove }: Props) {
                   <Button
                     variant="icon"
                     size="icon"
-                    aria-label={`Remove link ${index + 1}`}
+                    aria-label={t(
+                      `Remove link ${index + 1}`,
+                      `移除链接 ${index + 1}`,
+                    )}
                     onClick={() => onRemove(index)}
                   >
                     <Icon icon={Delete02Icon} size={16} />
@@ -100,7 +105,12 @@ export function LinksSection({ links, onChange, onAdd, onRemove }: Props) {
             onClick={onAdd}
             disabled={!canAdd}
           >
-            {canAdd ? "Add link" : `Limit of ${MAX_LINKS} reached`}
+            {canAdd
+              ? t("Add link", "添加链接")
+              : t(
+                  `Limit of ${MAX_LINKS} reached`,
+                  `已达到 ${MAX_LINKS} 个链接的上限`,
+                )}
           </Button>
         </div>
       </div>

@@ -67,10 +67,16 @@ export function ExpertWorkflowCardMenu({
         }),
         invalidateExpertRosterQueries(queryClient),
       ]);
-      toast({ title: "Workflow removed", variant: "success" });
+      toast({
+        title: t("Workflow removed", "工作流已移除"),
+        variant: "success",
+      });
       setIsRemoveOpen(false);
     } catch {
-      toast({ title: "Couldn't remove workflow", variant: "destructive" });
+      toast({
+        title: t("Couldn't remove workflow", "无法移除工作流"),
+        variant: "destructive",
+      });
     }
   }
 
@@ -127,13 +133,15 @@ export function ExpertWorkflowCardMenu({
           },
         }}
         className="max-h-[60vh] max-w-md"
-        title={`Remove ${name}?`}
+        title={t(`Remove ${name}?`, `移除 ${name}？`)}
       >
         <Dialog.Content>
           <div className="flex flex-col gap-4">
             <Text variant="body" tone="secondary">
-              This expert will stop running it and its schedule will be removed.
-              The workflow stays in your library.
+              {t(
+                "This expert will stop running it and its schedule will be removed. The workflow stays in your library.",
+                "此专家将停止运行该工作流，其计划任务将被移除。工作流仍会保留在你的库中。",
+              )}
             </Text>
             <div className="flex justify-end gap-2">
               <Button

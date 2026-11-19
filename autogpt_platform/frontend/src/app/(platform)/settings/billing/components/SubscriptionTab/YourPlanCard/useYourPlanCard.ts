@@ -30,6 +30,7 @@ import {
 } from "@/services/analytics/monetization-analytics";
 import {
   getSubscriptionPlan,
+  getPlanLabel,
   PLAN_LABEL,
 } from "@/services/billing/subscription-plan";
 
@@ -69,7 +70,7 @@ function getPreviousTier(current: string): SubscriptionTierRequestTier | null {
 }
 
 export function useYourPlanCard() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const [handledUpgrade, setHandledUpgrade] = useState(false);
@@ -172,27 +173,23 @@ export function useYourPlanCard() {
   const plan = subscription.data
     ? {
         tierKey: effectiveTier ?? subscription.data.tier,
-        label:
-          PLAN_LABEL[effectiveTier ?? subscription.data.tier] ??
-          subscription.data.tier,
+        label: getPlanLabel(effectiveTier ?? subscription.data.tier, locale),
         monthlyCostCents: subscription.data.monthly_cost,
         isPaidPlan: isPaid,
         nextTier: nextTierKey,
-        nextTierLabel: nextTierKey
-          ? (PLAN_LABEL[nextTierKey] ?? nextTierKey)
-          : null,
+        nextTierLabel: nextTierKey ? getPlanLabel(nextTierKey, locale) : null,
         // Team (BUSINESS) is contact-sales, not a self-serve Checkout. The
         // upgrade button for MAX users opens the marketing/sales page rather
         // than POSTing to /credits/subscription.
         nextTierIsTeamLink: nextTierKey === "BUSINESS",
         previousTier: previousTierKey,
         previousTierLabel: previousTierKey
-          ? (PLAN_LABEL[previousTierKey] ?? previousTierKey)
+          ? getPlanLabel(previousTierKey, locale)
           : null,
         currentPeriodEnd: subscription.data.current_period_end ?? null,
         pendingTier,
         pendingTierLabel: pendingTier
-          ? (PLAN_LABEL[pendingTier] ?? pendingTier)
+          ? getPlanLabel(pendingTier, locale)
           : null,
         pendingEffectiveAt,
         pendingCycle: pendingBillingCycle,
@@ -283,7 +280,10 @@ export function useYourPlanCard() {
       ) {
         upgradeReview.invalidate(
           error.status === 402
-            ? "Payment wasn’t completed. Check your payment method, then review the charge again."
+            ? t(
+                "Payment wasn’t completed. Check your payment method, then review the charge again.",
+                "支付未完成。请检查支付方式，然后重新核对费用。",
+              )
             : undefined,
         );
         return false;
@@ -299,18 +299,24 @@ export function useYourPlanCard() {
         billingCycle === "yearly"
       ) {
         toast({
-          title: "Yearly billing is not yet available for your plan.",
-          description: "Please contact support.",
+          title: t(
+            "Yearly billing is not yet available for your plan.",
+            "你的套餐暂不支持按年计费。",
+          ),
+          description: t("Please contact support.", "请联系支持。"),
           variant: "destructive",
         });
         return false;
       }
       toast({
-        title: "Couldn't update your plan",
+        title: t("Couldn't update your plan", "无法更新你的套餐"),
         description:
           error instanceof Error
             ? error.message
-            : "Stripe didn't accept the change. Please try again.",
+            : t(
+                "Stripe didn't accept the change. Please try again.",
+                "Stripe 未接受此更改，请重试。",
+              ),
         variant: "destructive",
       });
       return false;
@@ -324,7 +330,7 @@ export function useYourPlanCard() {
     // schedules a phase change at current_period_end. No proration today —
     // user keeps higher tier until period end, then drops to lower price.
     if (!plan?.isPaidPlan) return;
-    const targetLabel = PLAN_LABEL[targetTier] ?? targetTier;
+    const targetLabel = getPlanLabel(targetTier, locale);
     // Preserve the user's current cycle on downgrade — without forwarding
     // serverCycle, the backend would default the missing billing_cycle to
     // "monthly" and silently flip a yearly subscriber to monthly at period
@@ -332,12 +338,15 @@ export function useYourPlanCard() {
     const ok = await changeTier(targetTier, serverCycle);
     if (!ok) return;
     const periodEnd = plan.currentPeriodEnd
-      ? formatShortDate(plan.currentPeriodEnd * 1000)
+      ? formatShortDate(plan.currentPeriodEnd * 1000, locale)
       : null;
     toast({
-      title: "Downgrade scheduled",
+      title: t("Downgrade scheduled", "已安排降级"),
       description: periodEnd
-        ? `You keep ${plan.label} until ${periodEnd}, then switch to ${targetLabel}. No charge today.`
+        ? t(
+            `You keep ${plan.label} until ${periodEnd}, then switch to ${targetLabel}. No charge today.`,
+            `你可继续使用 ${plan.label} 至 ${periodEnd}，之后将切换至 ${targetLabel}。今天不扣款。`,
+          )
         : t(
             `Your plan will switch to ${targetLabel} at the close of the current billing period. No charge today.`,
             `当前计费周期结束后，你的套餐将切换至 ${targetLabel}。今天不扣款。`,
@@ -369,11 +378,14 @@ export function useYourPlanCard() {
     if (!ok) return;
     toast({
       title: plan.isPendingCancel
-        ? "Subscription resumed"
+        ? t("Subscription resumed", "订阅已恢复")
         : plan.isPendingCycleSwitch
-          ? "Cycle switch cancelled"
-          : "Downgrade cancelled",
-      description: `Your ${plan.label} plan will continue to renew as normal.`,
+          ? t("Cycle switch cancelled", "已取消周期切换")
+          : t("Downgrade cancelled", "已取消降级"),
+      description: t(
+        `Your ${plan.label} plan will continue to renew as normal.`,
+        `你的 ${plan.label} 套餐将继续正常续订。`,
+      ),
     });
   }
 
@@ -406,12 +418,21 @@ export function useYourPlanCard() {
     toast({
       title:
         pendingCycle === "yearly"
-          ? "Switched to yearly billing"
-          : "Switching to monthly at period end",
+          ? t("Switched to yearly billing", "已改为按年计费")
+          : t(
+              "Switching to monthly at period end",
+              "将在周期结束时改为按月计费",
+            ),
       description:
         pendingCycle === "yearly"
-          ? "Stripe will charge the prorated difference today."
-          : "Your plan will switch to monthly at the end of the current period.",
+          ? t(
+              "Stripe will charge the prorated difference today.",
+              "Stripe 今天将按比例收取差额。",
+            )
+          : t(
+              "Your plan will switch to monthly at the end of the current period.",
+              "你的套餐将在当前周期结束时改为按月计费。",
+            ),
     });
   }
 
@@ -421,7 +442,10 @@ export function useYourPlanCard() {
 
   function getDialogTitle(): string {
     if (!pendingCycle) return "";
-    const tierLabel = effectiveTier ? PLAN_LABEL[effectiveTier] : null;
+    const tierLabel =
+      effectiveTier && PLAN_LABEL[effectiveTier]
+        ? getPlanLabel(effectiveTier, locale)
+        : null;
     // NO_TIER / unknown tiers don't have a meaningful label for the title
     // ("Switch No active subscription to yearly billing?" reads as nonsense).
     if (
@@ -447,10 +471,12 @@ export function useYourPlanCard() {
   function getDialogBody(): { label?: string; text: string }[] {
     if (!pendingCycle) return [];
     const periodEndLabel = currentPeriodEndMs
-      ? formatShortDate(currentPeriodEndMs)
+      ? formatShortDate(currentPeriodEndMs, locale)
       : null;
     if (pendingCycle === "yearly") {
-      const tierLabel = effectiveTier ? PLAN_LABEL[effectiveTier] : null;
+      const tierLabel = effectiveTier
+        ? getPlanLabel(effectiveTier, locale)
+        : null;
       // `<=` (not `<`) so a misconfigured 0%-savings yearly price still gets
       // the explicit price breakdown rather than falling through to generic
       // copy — the savings line itself is suppressed when savings == 0.
@@ -639,11 +665,10 @@ export function useYourPlanCard() {
 
   function getTierDowngradeDialogBody(): string {
     if (!pendingTierDowngrade || !plan) return "";
-    const targetLabel =
-      PLAN_LABEL[pendingTierDowngrade] ?? pendingTierDowngrade;
+    const targetLabel = getPlanLabel(pendingTierDowngrade, locale);
     const cycleNoun = serverCycle === "yearly" ? "yearly" : "monthly";
     const periodEnd = plan.currentPeriodEnd
-      ? formatShortDate(plan.currentPeriodEnd * 1000)
+      ? formatShortDate(plan.currentPeriodEnd * 1000, locale)
       : null;
     if (periodEnd) {
       return t(
@@ -725,11 +750,11 @@ export function useYourPlanCard() {
     pendingCycle,
     pendingTierUpgrade,
     pendingTierUpgradeLabel: pendingTierUpgrade
-      ? (PLAN_LABEL[pendingTierUpgrade] ?? pendingTierUpgrade)
+      ? getPlanLabel(pendingTierUpgrade, locale)
       : null,
     pendingTierDowngrade,
     pendingTierDowngradeLabel: pendingTierDowngrade
-      ? (PLAN_LABEL[pendingTierDowngrade] ?? pendingTierDowngrade)
+      ? getPlanLabel(pendingTierDowngrade, locale)
       : null,
     isCycleToggleVisible,
     cycleDialogTitle: getDialogTitle(),

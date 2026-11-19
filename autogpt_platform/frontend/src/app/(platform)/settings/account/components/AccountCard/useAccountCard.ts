@@ -7,17 +7,12 @@ import { z } from "zod";
 
 import { useState } from "react";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 
-const emailSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Enter a valid email address"),
-});
+type EmailFormValues = { email: string };
 
-type EmailFormValues = z.infer<typeof emailSchema>;
-
-async function updateEmailViaAuthAPI(email: string) {
+async function updateEmailViaAuthAPI(email: string, locale: Locale = "en") {
   const response = await fetch("/api/auth/user", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -26,14 +21,24 @@ async function updateEmailViaAuthAPI(email: string) {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.error ?? "Failed to update email");
+    throw new Error(
+      error.error ??
+        (locale === "zh-CN" ? "无法更新邮箱" : "Failed to update email"),
+    );
   }
 
   return response.json();
 }
 
 export function useAccountCard({ user }: { user: User }) {
+  const { t, locale } = useTranslation();
   const currentEmail = user.email ?? "";
+  const emailSchema = z.object({
+    email: z
+      .string()
+      .min(1, t("Email is required", "请输入邮箱"))
+      .email(t("Enter a valid email address", "请输入有效的邮箱地址")),
+  });
 
   const emailForm = useForm<EmailFormValues>({
     resolver: zodResolver(emailSchema),
@@ -54,7 +59,7 @@ export function useAccountCard({ user }: { user: User }) {
     // Mirrors EmailForm.
     setIsUpdatingEmail(true);
     try {
-      await updateEmailViaAuthAPI(values.email);
+      await updateEmailViaAuthAPI(values.email, locale);
       // Reset to the still-current address: on the verified path the row isn't
       // written until the link is clicked, so leaving the new value in the
       // field would let every further click send another email. Mirrors
@@ -63,21 +68,26 @@ export function useAccountCard({ user }: { user: User }) {
       toast(
         user.email_verified
           ? {
-              title: "Confirm your new email",
-              description:
+              title: t("Confirm your new email", "请确认新邮箱"),
+              description: t(
                 "We sent a confirmation link to your current email address. Your email changes once you click it.",
+                "我们已向你当前的邮箱发送确认链接。点击链接后，邮箱地址才会更改。",
+              ),
               variant: "success",
             }
           : {
-              title: "Email updated",
-              description: `Your email is now ${values.email}.`,
+              title: t("Email updated", "邮箱已更新"),
+              description: t(
+                `Your email is now ${values.email}.`,
+                `你的邮箱现已更改为 ${values.email}。`,
+              ),
               variant: "success",
             },
       );
       return true;
     } catch (err) {
       toast({
-        title: "Couldn't update email",
+        title: t("Couldn't update email", "无法更新邮箱"),
         description: err instanceof Error ? err.message : undefined,
         variant: "destructive",
       });

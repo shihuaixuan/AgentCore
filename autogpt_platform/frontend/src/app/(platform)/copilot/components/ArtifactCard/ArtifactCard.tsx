@@ -11,6 +11,7 @@ import { classifyArtifact } from "../ArtifactPanel/helpers";
 import { ArrowRight01Icon, Download01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   artifact: ArtifactRef;
@@ -35,6 +36,7 @@ function formatSize(bytes?: number): string {
 }
 
 export function ArtifactCard({ artifact, readOnly }: Props) {
+  const { t } = useTranslation();
   const isActive = useCopilotUIStore(
     (s) => s.artifactPanel.activeArtifact?.id === artifact.id,
   );
@@ -65,8 +67,8 @@ export function ArtifactCard({ artifact, readOnly }: Props) {
   function handleDownloadOnly() {
     downloadArtifact(artifact).catch(() => {
       toast({
-        title: "Download failed",
-        description: "Couldn't fetch the file.",
+        title: t("Download failed", "下载失败"),
+        description: t("Couldn't fetch the file.", "无法获取文件。"),
         variant: "destructive",
       });
     });

@@ -5,6 +5,7 @@ import { useEffect, useInsertionEffect, useRef, useState } from "react";
 import { useTextToSpeech } from "@/components/contextual/Chat/components/ChatMessage/useTextToSpeech";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { synthesizeSpeech } from "../../../voice/speechApi";
 import { takeSpeakableChunks } from "../../../voice/speechChunker";
@@ -40,14 +41,17 @@ export function useTTSButton({ text, sessionID }: Args) {
 }
 
 function useServerSpeech(text: string, sessionID: string | null) {
+  const { t, locale } = useTranslation();
   const { toast } = useToast();
   const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef<SpeechPlayer | null>(null);
   const reportedRef = useRef(false);
   const sessionRef = useRef(sessionID);
+  const translationRef = useRef({ t, locale });
   useInsertionEffect(() => {
     sessionRef.current = sessionID;
-  }, [sessionID]);
+    translationRef.current = { t, locale };
+  }, [sessionID, t, locale]);
 
   useEffect(() => {
     playerRef.current?.stop();
@@ -78,7 +82,13 @@ function useServerSpeech(text: string, sessionID: string | null) {
   function ensurePlayer(): SpeechPlayer {
     if (!playerRef.current) {
       playerRef.current = createSpeechPlayer({
-        synthesize: (chunk) => synthesizeSpeech(chunk, sessionRef.current),
+        getLocale: () => translationRef.current.locale,
+        synthesize: (chunk) =>
+          synthesizeSpeech(
+            chunk,
+            sessionRef.current,
+            translationRef.current.locale,
+          ),
         onIdle: () => setIsPlaying(false),
         onError: report,
       });
@@ -94,9 +104,11 @@ function useServerSpeech(text: string, sessionID: string | null) {
     setIsPlaying(false);
     console.error("[Read aloud]", error);
     toast({
-      title: "Read aloud",
+      title: translationRef.current.t("Read aloud", "朗读"),
       description:
-        error instanceof Error ? error.message : "Something went wrong.",
+        error instanceof Error
+          ? error.message
+          : translationRef.current.t("Something went wrong.", "发生了错误。"),
       variant: "destructive",
     });
   }

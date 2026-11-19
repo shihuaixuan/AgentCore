@@ -1,6 +1,7 @@
 "use client";
 
 import type { ToolUIPart } from "ai";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useCopilotChatActions } from "../../components/CopilotChatActionsProvider/useCopilotChatActions";
 import { MorphingTextAnimation } from "../../components/MorphingTextAnimation/MorphingTextAnimation";
 import {
@@ -24,7 +25,8 @@ interface Props {
 }
 
 export function DecomposeGoalTool({ part }: Props) {
-  const text = getAnimationText(part);
+  const { t } = useTranslation();
+  const text = getAnimationText(part, t);
   const { onSend } = useCopilotChatActions();
 
   const isStreaming =
@@ -52,10 +54,13 @@ export function DecomposeGoalTool({ part }: Props) {
           message={
             output && isErrorOutput(output) ? (output.message ?? "") : ""
           }
-          fallbackMessage="Failed to analyze the goal. Please try again."
+          fallbackMessage={t(
+            "Failed to analyze the goal. Please try again.",
+            "分析目标失败。请重试。",
+          )}
           actions={[
             {
-              label: "Try again",
+              label: t("Try again", "重试"),
               onClick: () => onSend("Please try decomposing the goal again."),
             },
           ]}
@@ -65,7 +70,10 @@ export function DecomposeGoalTool({ part }: Props) {
       {output && isDecompositionOutput(output) && (
         <ToolAccordion
           icon={<AccordionIcon />}
-          title={`Build Plan — ${output.step_count} steps`}
+          title={t(
+            `Build Plan — ${output.step_count} steps`,
+            `构建计划 — ${output.step_count} 个步骤`,
+          )}
           description={output.goal}
           defaultExpanded
         >

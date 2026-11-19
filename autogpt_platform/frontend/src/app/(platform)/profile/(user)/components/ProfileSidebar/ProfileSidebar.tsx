@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import Link from "next/link";
 import {
   Sheet,
@@ -19,6 +22,7 @@ interface Props {
 }
 
 export function ProfileSidebar({ links }: Props) {
+  const { t } = useTranslation();
   const renderedLinks = links.map((link, index) => (
     <Link
       key={`${link.href}-${index}`}
@@ -37,11 +41,13 @@ export function ProfileSidebar({ links }: Props) {
       <Sheet>
         <SheetTrigger asChild>
           <button
-            aria-label="Open sidebar menu"
+            aria-label={t("Open sidebar menu", "打开侧边栏菜单")}
             className="fixed top-4 left-4 z-50 flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg border border-foreground-tertiary bg-surface-active px-4 py-2 font-sans text-body leading-5 font-medium tracking-tight whitespace-nowrap text-foreground-base transition-colors hover:bg-surface-active/50 focus-visible:ring-1 focus-visible:ring-focus focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 md:block lg:hidden"
           >
             <Icon aria-hidden icon={Menu01Icon} className="h-8 w-8" />
-            <span className="sr-only">Open sidebar menu</span>
+            <span className="sr-only">
+              {t("Open sidebar menu", "打开侧边栏菜单")}
+            </span>
           </button>
         </SheetTrigger>
         <SheetContent

@@ -51,7 +51,7 @@ export function AgentImages({ images }: AgentImagesProps) {
       {images.length > 1 && (
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1 sm:mt-4 sm:gap-3">
           {images.map((image, index) => {
-            const thumbnail = getThumbnail(image, advertising);
+            const thumbnail = getThumbnail(image, advertising, t);
             const thumbnailFailed =
               thumbnail.kind === "image" && failedThumbs.has(thumbnail.src);
 
@@ -79,7 +79,7 @@ export function AgentImages({ images }: AgentImagesProps) {
                 ) : thumbnail.kind === "image" ? (
                   <img
                     src={thumbnail.src}
-                    alt={`Thumbnail ${index + 1}`}
+                    alt={t(`Thumbnail ${index + 1}`, `缩略图 ${index + 1}`)}
                     loading="lazy"
                     className="absolute inset-0 h-full w-full object-cover"
                     onLoad={() =>

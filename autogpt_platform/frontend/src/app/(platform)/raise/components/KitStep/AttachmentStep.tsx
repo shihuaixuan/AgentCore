@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/Button/Button";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { RaiseAttachmentDraft } from "../../helpers";
 import { AttachmentAnswer } from "./AttachmentAnswer";
 import { KitSearchField } from "./KitSearchField";
@@ -38,6 +39,7 @@ export function AttachmentStep({
   onSubmit,
   onSkip,
 }: Props) {
+  const { t } = useTranslation();
   const picker = useAttachmentPicker({
     scope,
     existingCount,
@@ -91,7 +93,7 @@ export function AttachmentStep({
           shape="rounded"
           className="h-[2.625rem]"
         >
-          Skip
+          {t("Skip", "跳过")}
         </Button>
       </div>
     </div>

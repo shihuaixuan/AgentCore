@@ -33,7 +33,6 @@ export function useNeedsAttentionList() {
     review: PendingHumanReviewModel,
     approved: boolean,
   ): Promise<void> {
-    const verb = approved ? "approve" : "decline";
     setPending(review.node_exec_id, true);
     try {
       const res = await processReviews(
@@ -55,10 +54,15 @@ export function useNeedsAttentionList() {
       // execution gone). Reporting either as success would leave the row
       // reappearing on the next refetch with nothing explaining why.
       if (res.status !== 200) {
-        throw new Error("Unexpected response from server");
+        throw new Error(
+          t("Unexpected response from server", "服务器返回了意外响应"),
+        );
       }
       if (res.data.failed_count > 0) {
-        throw new Error(res.data.error || "The review could not be processed.");
+        throw new Error(
+          res.data.error ||
+            t("The review could not be processed.", "无法处理此审核项。"),
+        );
       }
 
       toast({
@@ -66,7 +70,9 @@ export function useNeedsAttentionList() {
       });
     } catch (error) {
       toast({
-        title: `Failed to ${verb} review`,
+        title: approved
+          ? t("Failed to approve review", "批准审核项失败")
+          : t("Failed to decline review", "拒绝审核项失败"),
         description:
           error instanceof Error
             ? error.message

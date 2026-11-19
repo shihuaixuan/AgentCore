@@ -204,7 +204,7 @@ export function AnalyticsResultsTable({ results }: Props) {
                   </th>
                   <th className="px-4 py-3 text-left">
                     <Text variant="body-medium" tone="secondary">
-                      Version
+                      {t("Version", "版本")}
                     </Text>
                   </th>
                   <th className="px-4 py-3 text-left">
@@ -239,16 +239,25 @@ export function AnalyticsResultsTable({ results }: Props) {
                   <React.Fragment key={result.exec_id}>
                     <tr className="hover:bg-surface-muted">
                       <td className="px-4 py-3">
-                        {createCopyableId(result.agent_id, "Agent ID")}
+                        {createCopyableId(
+                          result.agent_id,
+                          t("Agent ID", "工作流 ID"),
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <Text variant="body">{result.version_id}</Text>
                       </td>
                       <td className="px-4 py-3">
-                        {createCopyableId(result.user_id, "User ID")}
+                        {createCopyableId(
+                          result.user_id,
+                          t("User ID", "用户 ID"),
+                        )}
                       </td>
                       <td className="px-4 py-3">
-                        {createCopyableId(result.exec_id, "Execution ID")}
+                        {createCopyableId(
+                          result.exec_id,
+                          t("Execution ID", "执行 ID"),
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         {getStatusBadge(result.status)}
@@ -265,6 +274,10 @@ export function AnalyticsResultsTable({ results }: Props) {
                           variant="ghost"
                           size="small"
                           onClick={() => toggleRowExpansion(result.exec_id)}
+                          aria-label={t(
+                            `View execution ${result.exec_id}`,
+                            `查看执行 ${result.exec_id}`,
+                          )}
                         >
                           <Icon icon={EyeIcon} size={16} />
                         </Button>

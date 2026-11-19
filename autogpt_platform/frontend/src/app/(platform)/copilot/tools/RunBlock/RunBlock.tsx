@@ -28,6 +28,7 @@ import {
 } from "./helpers";
 import type { RunBlockInput } from "./helpers";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export interface RunBlockToolPart {
   type: string;
@@ -42,6 +43,7 @@ interface Props {
 }
 
 export function RunBlockTool({ part }: Props) {
+  const { t } = useTranslation();
   const input = part.input as RunBlockInput | undefined;
   // The LLM's input only carries a block_id; resolve it to a name so the
   // in-flight state doesn't show a raw UUID (outputs carry the name already)
@@ -53,6 +55,7 @@ export function RunBlockTool({ part }: Props) {
   const text = getAnimationText(
     part,
     needsBlockNameLookup ? getBlockNamesById(blocksResponse) : undefined,
+    t,
   );
   const isStreaming =
     part.state === "input-streaming" || part.state === "input-available";
@@ -94,15 +97,21 @@ export function RunBlockTool({ part }: Props) {
       <div className="flex items-center gap-2 text-body text-foreground-tertiary">
         <ToolIcon isStreaming={isStreaming} isError={isError} />
         <MorphingTextAnimation
-          text={isCorrupted ? "Block result could not be displayed" : text}
+          text={
+            isCorrupted
+              ? t("Block result could not be displayed", "无法显示模块结果")
+              : text
+          }
           className={isError ? "text-error" : undefined}
         />
       </div>
 
       {isCorrupted && (
         <Text variant="body-tight" tone="error" className="mt-1">
-          The result data arrived corrupted, so any sign-in or setup card it
-          contained can&apos;t be shown. Ask your expert to retry this step.
+          {t(
+            "The result data arrived corrupted, so any sign-in or setup card it contained can't be shown. Ask your expert to retry this step.",
+            "收到的结果数据已损坏，无法显示其中的登录或设置卡片。请让你的专家重试此步骤。",
+          )}
         </Text>
       )}
 
@@ -114,7 +123,7 @@ export function RunBlockTool({ part }: Props) {
 
       {hasExpandableContent && output && (
         <ToolAccordion
-          {...getAccordionMeta(output)}
+          {...getAccordionMeta(output, t)}
           className={HIDDEN_FROM_REPLAY}
         >
           {hasInputData && <BlockInputCard inputData={inputData} />}

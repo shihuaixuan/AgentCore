@@ -71,7 +71,7 @@ export function WorkflowCredentialStack({ providers }: Props) {
         <span
           role="listitem"
           className="-ml-2 flex size-7 items-center justify-center rounded-full border border-border-base bg-surface-hover font-sans text-caption font-medium text-foreground-secondary ring-2 ring-surface"
-          aria-label={`${hidden} more`}
+          aria-label={t(`${hidden} more`, `另外 ${hidden} 个`)}
         >
           +{hidden}
         </span>

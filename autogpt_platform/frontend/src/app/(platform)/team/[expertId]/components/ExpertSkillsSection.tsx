@@ -19,6 +19,7 @@ import { AddSkillDialog } from "./AddSkillDialog";
 import { ExpertSkillListItem } from "./ExpertSkillListItem";
 import { useExpertLearning } from "./useExpertLearning";
 import { useExpertSkills } from "./useExpertSkills";
+import { getLearningLabel } from "@/services/skill-learning/helpers";
 
 interface Props {
   expert: Expert;
@@ -33,7 +34,7 @@ export function ExpertSkillsSection({
   initialSkill = null,
   initialVersionId = null,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const {
     query,
     setQuery,
@@ -89,7 +90,7 @@ export function ExpertSkillsSection({
         >
           <Text variant="small" tone="secondary">
             {learning.recentChange
-              ? `${learning.recentChange.summary} · ${learning.recentChange.origin_label ?? ""} · ${learning.recentChange.state_label}`
+              ? `${learning.recentChange.summary} · ${getLearningLabel(learning.recentChange.origin_label ?? "", locale)} · ${getLearningLabel(learning.recentChange.state_label, locale)}`
               : t(
                   "No overnight changes yet. Verified procedures from chats are reviewed nightly.",
                   "暂无夜间更新。系统每晚会审核聊天中已验证的操作流程。",
@@ -97,12 +98,17 @@ export function ExpertSkillsSection({
           </Text>
           <label className="flex shrink-0 items-center gap-2 whitespace-nowrap">
             <Text variant="small" tone="primary">
-              {learning.isLearningPaused ? "Learning paused" : "Learning on"}
+              {learning.isLearningPaused
+                ? t("Learning paused", "学习已暂停")
+                : t("Learning on", "学习已开启")}
             </Text>
             <Switch
               checked={!learning.isLearningPaused}
               disabled={learning.isTogglingLearning}
-              aria-label={`Nightly learning for ${expert.name}`}
+              aria-label={t(
+                `Nightly learning for ${expert.name}`,
+                `${expert.name} 的夜间学习`,
+              )}
               onCheckedChange={(checked) =>
                 learning.setLearningPaused(!checked)
               }
@@ -124,7 +130,10 @@ export function ExpertSkillsSection({
             </span>,
           ]}
           title={t("No skills yet", "暂无技能")}
-          description={`Add skills from your library so ${expert.name} knows how you like things done.`}
+          description={t(
+            `Add skills from your library so ${expert.name} knows how you like things done.`,
+            `从库中添加技能，让 ${expert.name} 了解你偏好的工作方式。`,
+          )}
         >
           <Button
             variant="primary"

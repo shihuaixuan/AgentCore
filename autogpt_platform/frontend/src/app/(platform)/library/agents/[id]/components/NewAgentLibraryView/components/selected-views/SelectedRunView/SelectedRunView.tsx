@@ -118,7 +118,7 @@ export function SelectedRunView({
               >
                 {withReviews && (
                   <ScrollableTabsTrigger value="reviews">
-                    Reviews ({pendingReviews.length})
+                    {t("Reviews", "审核")} ({pendingReviews.length})
                   </ScrollableTabsTrigger>
                 )}
                 {withSummary && (

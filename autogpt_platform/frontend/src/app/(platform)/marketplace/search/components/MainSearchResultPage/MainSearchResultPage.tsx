@@ -14,6 +14,7 @@ import { SkillCard } from "../../../components/SkillsSection/components/SkillCar
 import { SearchFilterChips } from "./components/SearchFilterChips/SearchFilterChips";
 import { SortDropdown } from "./components/SortDropdown/SortDropdown";
 import { useMainSearchResultPage } from "./useMainSearchResultPage";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type MarketplaceSearchSort = GetV2ListStoreAgentsParams["sorted_by"];
 
@@ -24,6 +25,7 @@ export const MainSearchResultPage = ({
   searchTerm: string;
   sort: MarketplaceSearchSort;
 }) => {
+  const { t } = useTranslation();
   const {
     agents,
     creators,
@@ -64,8 +66,10 @@ export const MainSearchResultPage = ({
       <div className="flex min-h-[500px] items-center justify-center">
         <ErrorCard
           isSuccess={false}
-          responseError={{ message: "Failed to load marketplace data" }}
-          context="marketplace page"
+          responseError={{
+            message: t("Failed to load marketplace data", "无法加载市场数据"),
+          }}
+          context={t("marketplace page", "市场页面")}
           onRetry={() => window.location.reload()}
         />
       </div>
@@ -82,13 +86,13 @@ export const MainSearchResultPage = ({
             href="/marketplace"
             leftIcon={<Icon icon={ArrowLeft02Icon} size={16} />}
           >
-            Go back
+            {t("Go back", "返回")}
           </Button>
         </div>
         <div className="flex flex-col gap-4 md:flex-row md:items-center">
           <div className="flex-1">
             <Text variant="large-medium-tight" as="h2" tone="emphasis">
-              Showing results for:
+              {t("Showing results for:", "搜索结果：")}
             </Text>
             <h1 className="font-poppins text-heading-md leading-8 font-semibold text-foreground-emphasis">
               &quot;{searchTerm}&quot;
@@ -119,7 +123,7 @@ export const MainSearchResultPage = ({
               {showExperts && expertsCount > 0 ? (
                 <section aria-labelledby="search-experts-heading">
                   <SectionHeader
-                    title="Experts"
+                    title={t("Experts", "专家")}
                     titleId="search-experts-heading"
                   />
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -139,7 +143,7 @@ export const MainSearchResultPage = ({
               {showSkills && skillsCount > 0 ? (
                 <section aria-labelledby="search-skills-heading">
                   <SectionHeader
-                    title="Skills"
+                    title={t("Skills", "技能")}
                     titleId="search-skills-heading"
                   />
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -167,10 +171,13 @@ export const MainSearchResultPage = ({
               tone="secondary"
               className="mb-2"
             >
-              No results found
+              {t("No results found", "未找到结果")}
             </Text>
             <p className="text-foreground-tertiary">
-              Try adjusting your search terms or filters
+              {t(
+                "Try adjusting your search terms or filters",
+                "请尝试调整搜索词或筛选条件",
+              )}
             </p>
           </div>
         )}

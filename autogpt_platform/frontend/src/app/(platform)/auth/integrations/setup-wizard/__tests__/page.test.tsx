@@ -7,6 +7,7 @@ import {
 import { server } from "@/mocks/mock-server";
 import { fireEvent, render, screen } from "@/tests/integrations/test-utils";
 import IntegrationSetupWizardPage from "../page";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const mockUseSearchParams = vi.hoisted(() => vi.fn());
 
@@ -61,6 +62,28 @@ beforeEach(() => {
 });
 
 describe("IntegrationSetupWizardPage", () => {
+  test("localizes its own instructions and preserves the requesting app name", async () => {
+    openWith({ providers: btoa(JSON.stringify([{ provider: "github" }])) });
+    server.use(
+      getGetOauthGetOauthAppInfoMockHandler200({
+        name: "My English App",
+        scopes: ["IDENTITY"],
+      }),
+    );
+    render(
+      <LanguageProvider>
+        <IntegrationSetupWizardPage />
+      </LanguageProvider>,
+    );
+    expect(await screen.findByText("连接你的账户")).toBeDefined();
+    expect(screen.getByText("My English App")).toBeDefined();
+    expect(screen.getByRole("button", { name: "还需连接 1 项" })).toBeDefined();
+    expect(
+      screen
+        .getByRole("link", { name: "市场 → 我的连接" })
+        .getAttribute("href"),
+    ).toBe("/marketplace/connectors?view=mine");
+  });
   test("needs a client_id to check the redirect_uri against", () => {
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams({

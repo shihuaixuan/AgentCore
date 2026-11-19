@@ -281,10 +281,18 @@ export function raisedIdentity(name: string): string {
   return `I'm ${name}, an AI Expert created by you. I use your instructions to help with your work.`;
 }
 
-export function kitBudgetLabel(kit: RaiseKit | null): string | null {
+export function kitBudgetLabel(
+  kit: RaiseKit | null,
+  translate: (english: string, chinese: string) => string = (english) =>
+    english,
+): string | null {
   if (!kit || kit.weeklyBudget === null) return null;
-  if (kit.weeklyBudget === 0) return "No weekly limit";
-  return `${creditsToUsdLabel(kit.weeklyBudget)} / week`;
+  if (kit.weeklyBudget === 0)
+    return translate("No weekly limit", "不设每周上限");
+  return translate(
+    `${creditsToUsdLabel(kit.weeklyBudget)} / week`,
+    `${creditsToUsdLabel(kit.weeklyBudget)} / 周`,
+  );
 }
 
 export function kitToolsLabel(kit: RaiseKit | null): string | null {

@@ -32,7 +32,7 @@ export function SelectedScheduleView({
   onSelectRun,
   banner,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { schedule, isLoading, error } = useSelectedScheduleView(
     agent.graph_id,
     scheduleId,
@@ -51,7 +51,7 @@ export function SelectedScheduleView({
             ? {
                 message: String(
                   (error as unknown as { message?: string })?.message ||
-                    "Failed to load schedule",
+                    t("Failed to load schedule", "无法加载计划"),
                 ),
               }
             : undefined
@@ -84,7 +84,7 @@ export function SelectedScheduleView({
                 run={undefined}
                 scheduleRecurrence={
                   schedule
-                    ? `${humanizeCronExpression(schedule.cron || "")} · ${getTimezoneDisplayName(schedule.timezone || userTimezone || "UTC")}`
+                    ? `${humanizeCronExpression(schedule.cron || "", locale)} · ${getTimezoneDisplayName(schedule.timezone || userTimezone || "UTC", locale)}`
                     : undefined
                 }
               />
@@ -120,7 +120,7 @@ export function SelectedScheduleView({
                       </Text>
                       <div className="flex items-center gap-3">
                         <Text variant="body" as="span">
-                          {humanizeCronExpression(schedule.cron)}
+                          {humanizeCronExpression(schedule.cron, locale)}
                         </Text>{" "}
                         <Text variant="body" as="span" tone="muted">
                           •
@@ -128,6 +128,7 @@ export function SelectedScheduleView({
                         <Text variant="body" as="span" tone="muted">
                           {getTimezoneDisplayName(
                             schedule.timezone || userTimezone || "UTC",
+                            locale,
                           )}
                         </Text>
                       </div>
@@ -149,6 +150,7 @@ export function SelectedScheduleView({
                               minute: "2-digit",
                               hour12: false,
                             },
+                            locale,
                           )}
                         </Text>{" "}
                         <Text variant="body" as="span" tone="muted">
@@ -157,6 +159,7 @@ export function SelectedScheduleView({
                         <Text variant="body" as="span" tone="muted">
                           {getTimezoneDisplayName(
                             schedule.timezone || userTimezone || "UTC",
+                            locale,
                           )}
                         </Text>
                       </div>

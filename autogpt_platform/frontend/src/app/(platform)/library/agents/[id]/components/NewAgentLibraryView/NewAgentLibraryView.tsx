@@ -330,7 +330,10 @@ export function NewAgentLibraryView() {
           >
             <ErrorCard
               context="workflow tasks"
-              hint="Use Try Again in the sidebar to reload your tasks."
+              hint={t(
+                "Use Try Again in the sidebar to reload your tasks.",
+                "请使用侧栏中的“重试”重新加载任务。",
+              )}
             />
           </SelectedViewLayout>
         ) : sidebarLoading ? (

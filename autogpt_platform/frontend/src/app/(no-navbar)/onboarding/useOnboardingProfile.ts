@@ -1,5 +1,6 @@
 import { postV1SubmitOnboardingProfile } from "@/app/api/__generated__/endpoints/onboarding/onboarding";
 import type { User } from "@/lib/auth/types";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useEffect, useRef, useState } from "react";
 import { accountDisplayName, normalizeOnboardingProfile } from "./helpers";
 import { useOnboardingWizardStore } from "./store";
@@ -14,6 +15,7 @@ export function useOnboardingProfile({
   user: User | null;
   enabled: boolean;
 }) {
+  const { t } = useTranslation();
   const userID = user?.id ?? null;
   const activeUserID = useRef(userID);
   activeUserID.current = userID;
@@ -92,8 +94,30 @@ export function useOnboardingProfile({
     return promise;
   }
 
+  function localizeError(message: string) {
+    switch (message) {
+      case SAVE_ERROR:
+        return t(message, "无法保存个人资料。回答已保存，请重试后再继续。");
+      case "Your account changed. Please reload onboarding.":
+        return t(message, "账户已更改，请重新加载首次使用向导。");
+      case "Your account changed.":
+        return t(message, "账户已更改。");
+      default:
+        return message;
+    }
+  }
+
   return {
-    ensureSaved,
-    error: failure?.userID === userID ? failure.message : null,
+    ensureSaved: async () => {
+      try {
+        await ensureSaved();
+      } catch (error) {
+        if (!(error instanceof Error)) throw error;
+        const message = localizeError(error.message);
+        if (message === error.message) throw error;
+        throw new Error(message, { cause: error });
+      }
+    },
+    error: failure?.userID === userID ? localizeError(failure.message) : null,
   };
 }

@@ -2,6 +2,7 @@
 
 import type { ExpertAvatarRequestCategory } from "@/app/api/__generated__/models/expertAvatarRequestCategory";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { bubbleClassFor } from "../ColorStep/helpers";
 import { categoryOptionsForSelection } from "./helpers";
 
@@ -12,12 +13,24 @@ interface Props {
 }
 
 export function CategoryStep({ selectedCategory, color, onPick }: Props) {
+  const { t } = useTranslation();
+  const labels: Record<ExpertAvatarRequestCategory, string> = {
+    general: "通用",
+    marketing: "市场营销",
+    sales: "销售",
+    finance: "财务",
+    support: "客户支持",
+    operations: "运营",
+    research: "研究",
+    content: "内容创作",
+    development: "开发",
+  };
   const options = categoryOptionsForSelection(selectedCategory);
 
   return (
     <div
       role="group"
-      aria-label="What the expert works on"
+      aria-label={t("What the expert works on", "专家的工作领域")}
       className="flex flex-wrap justify-end gap-2.5"
     >
       {options.map((option) => (
@@ -40,7 +53,7 @@ export function CategoryStep({ selectedCategory, color, onPick }: Props) {
             // oxlint-disable-next-line design-system/no-inline-styles -- the swatch is the category's own colour, from data
             style={{ backgroundColor: option.hex }}
           />
-          {option.label}
+          {t(option.label, labels[option.id])}
         </button>
       ))}
     </div>

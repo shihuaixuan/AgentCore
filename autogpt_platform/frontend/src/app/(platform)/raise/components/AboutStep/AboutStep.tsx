@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/Button/Button";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Input } from "@/components/atoms/Input/Input";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,7 @@ export function AboutStep({
   onSubmit,
   onSkip,
 }: Props) {
+  const { t } = useTranslation();
   const [value, setValue] = useState("");
   const trimmed = value.trim();
 
@@ -41,7 +43,7 @@ export function AboutStep({
         {isSkipped ? (
           <>
             <Icon icon={Forward02Icon} size={16} aria-hidden />
-            Skipped
+            {t("Skipped", "已跳过")}
           </>
         ) : (
           submittedAbout
@@ -64,11 +66,14 @@ export function AboutStep({
       <Input
         id="raise-about"
         type="textarea"
-        label="Anything about your expert"
+        label={t("Anything about your expert", "关于专家的补充说明")}
         hideLabel
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        placeholder={aboutPlaceholderFor(name)}
+        placeholder={t(
+          aboutPlaceholderFor(name),
+          `描述${name?.trim() || "专家"}应如何工作、你关心什么，以及其他有助于体现你偏好的信息…`,
+        )}
         rows={4}
         maxLength={2000}
         wrapperClassName="mb-0 w-full max-w-[42rem]"
@@ -82,7 +87,7 @@ export function AboutStep({
           shape="rounded"
           className="h-[2.625rem]"
         >
-          That&apos;s it
+          {t("That's it", "就这样")}
         </Button>
         <Button
           type="button"
@@ -92,7 +97,7 @@ export function AboutStep({
           shape="rounded"
           className="h-[2.625rem]"
         >
-          Skip
+          {t("Skip", "跳过")}
         </Button>
       </div>
     </form>

@@ -51,6 +51,7 @@ import {
 } from "../../../tools/FeedbackPrompts/helpers";
 import { WorkspaceLink, WorkspaceLinksContext } from "./WorkspaceLink";
 import { ReasoningCollapse } from "./ReasoningCollapse";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 /**
  * Custom img component for Streamdown that renders <video> elements
@@ -58,6 +59,7 @@ import { ReasoningCollapse } from "./ReasoningCollapse";
  * Falls back to <video> when an <img> fails to load for workspace files.
  */
 function WorkspaceMediaImage(props: React.JSX.IntrinsicElements["img"]) {
+  const { t } = useTranslation();
   const { src, alt, ...rest } = props;
 
   if (!src) return null;
@@ -75,7 +77,10 @@ function WorkspaceMediaImage(props: React.JSX.IntrinsicElements["img"]) {
           preload="metadata"
         >
           <source src={src} />
-          Your browser does not support the video tag.
+          {t(
+            "Your browser does not support the video tag.",
+            "你的浏览器不支持视频播放。",
+          )}
         </video>
       </span>
     );
@@ -85,7 +90,7 @@ function WorkspaceMediaImage(props: React.JSX.IntrinsicElements["img"]) {
     // eslint-disable-next-line @next/next/no-img-element -- a user or workspace image URL next/image cannot optimise
     <img
       src={src}
-      alt={alt || "Image"}
+      alt={alt || t("Image", "图片")}
       className="h-auto max-w-full rounded-md border border-border-base"
       loading="lazy"
       {...rest}
@@ -195,6 +200,7 @@ export function MessagePartRenderer({
   isCurrentlyStreaming,
   feedbackTarget,
 }: Props) {
+  const { t } = useTranslation();
   const key = `${messageID}-${partIndex}`;
 
   switch (part.type) {
@@ -233,7 +239,7 @@ export function MessagePartRenderer({
           <ErrorCard
             key={key}
             responseError={{ message: markerText }}
-            context="the response"
+            context={t("the response", "回复")}
             onRetry={markerType === "retryable_error" ? onRetry : undefined}
           />
         );

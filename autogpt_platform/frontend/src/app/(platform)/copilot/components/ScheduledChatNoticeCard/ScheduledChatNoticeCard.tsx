@@ -17,6 +17,7 @@ import type { IconSvgElement } from "@hugeicons/react";
 import { RunLessOftenDialog } from "./components/RunLessOftenDialog/RunLessOftenDialog";
 import type { NoticeAction, ScheduledChatNotice } from "./helpers";
 import { useScheduledChatNoticeCard } from "./useScheduledChatNoticeCard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   notice: ScheduledChatNotice;
@@ -35,6 +36,7 @@ const REASON_ICONS: Record<string, IconSvgElement> = {
 };
 
 export function ScheduledChatNoticeCard({ notice, sessionID = null }: Props) {
+  const { t } = useTranslation();
   const card = useScheduledChatNoticeCard({
     scheduleKey: notice.scheduleKey,
     sessionID,
@@ -89,7 +91,7 @@ export function ScheduledChatNoticeCard({ notice, sessionID = null }: Props) {
         disabled={card.resumed}
         onClick={card.resume}
       >
-        {card.resumed ? "Resumed" : action.label}
+        {card.resumed ? t("Resumed", "已恢复") : action.label}
       </Button>
     );
   }

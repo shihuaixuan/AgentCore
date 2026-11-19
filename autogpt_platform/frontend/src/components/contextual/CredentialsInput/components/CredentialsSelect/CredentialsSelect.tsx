@@ -84,7 +84,10 @@ export function CredentialsSelect({
           onChange={handleValueChange}
           disabled={readOnly}
           className="absolute inset-0 z-10 cursor-pointer opacity-0"
-          aria-label={`Select ${displayName} credential`}
+          aria-label={t(
+            `Select ${displayName} credential`,
+            `选择 ${displayName} 凭据`,
+          )}
         >
           {allowNone ? (
             <option value="__none__">

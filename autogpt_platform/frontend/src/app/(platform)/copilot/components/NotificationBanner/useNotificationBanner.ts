@@ -6,12 +6,14 @@ import { useNotificationSettings } from "@/components/layout/NotificationSetting
 import { toast } from "@/components/molecules/Toast/use-toast";
 import { useSyncExternalStore } from "react";
 import { useCopilotUIStore } from "../../store";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 function hiddenOnServer() {
   return "unsupported" as const;
 }
 
 export function useNotificationBanner() {
+  const { t } = useTranslation();
   const { isNotificationsEnabled, toggleNotifications } =
     useNotificationSettings();
   const isDismissed = useCopilotUIStore((s) => s.isNotificationBannerDismissed);
@@ -36,8 +38,11 @@ export function useNotificationBanner() {
     await toggleNotifications();
     if (useCopilotUIStore.getState().isNotificationsEnabled) {
       toast({
-        title: "Notifications are on",
-        description: "We'll let you know when Otto or your experts finish.",
+        title: t("Notifications are on", "通知已开启"),
+        description: t(
+          "We'll let you know when Otto or your experts finish.",
+          "Otto 或你的专家完成任务时，我们会通知你。",
+        ),
       });
     }
   }

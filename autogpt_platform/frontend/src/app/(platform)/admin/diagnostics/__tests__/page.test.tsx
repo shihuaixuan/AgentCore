@@ -173,7 +173,7 @@ describe("AdminDiagnosticsPage", () => {
 
     // Dashboard header is the canonical "we rendered something" signal.
     expect(screen.getByText("System Diagnostics")).toBeDefined();
-    expect(screen.getByRole("button", { name: /refresh/i })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Refresh" })).toBeDefined();
     // ``Click to view →`` text appears only inside an alert card; its
     // absence confirms the conditional branches stayed off. (The
     // card titles themselves also appear in the always-rendered legend,

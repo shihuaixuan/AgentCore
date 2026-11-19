@@ -32,7 +32,7 @@ interface Props {
 }
 
 export function IPRow({ ip, ownIP }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const hiddenEvents = ip.event_count - ip.events.length;
 
@@ -56,7 +56,10 @@ export function IPRow({ ip, ownIP }: Props) {
         ) : null}
         {ip.sign_in_count > 0 ? (
           <Badge variant="info" size="small">
-            {pluralize(ip.sign_in_count, "sign-in")}
+            {t(
+              pluralize(ip.sign_in_count, "sign-in"),
+              `${ip.sign_in_count} 次登录`,
+            )}
           </Badge>
         ) : null}
         <div className="ml-auto flex shrink-0 items-center gap-2">
@@ -65,7 +68,7 @@ export function IPRow({ ip, ownIP }: Props) {
               <Badge variant="warning" size="small">
                 <span className="flex items-center gap-1">
                   <Icon icon={SquareLock01Icon} size={12} />
-            {t("Blocked", "已拦截")}
+                  {t("Blocked", "已拦截")}
                 </span>
               </Badge>
               <UnblockDialog block={ip.block} triggerVariant="link" />
@@ -82,11 +85,12 @@ export function IPRow({ ip, ownIP }: Props) {
             </Text>
           </TooltipTrigger>
           <TooltipContent>
-          {ip.last_user_agent ?? t("No user agent", "未知浏览器")}
+            {ip.last_user_agent ?? t("No user agent", "未知浏览器")}
           </TooltipContent>
         </Tooltip>
         <Text variant="small" as="span" tone="muted">
-          {formatDateTime(ip.last_seen)} (<RelativeTime date={ip.last_seen} />)
+          {formatDateTime(ip.last_seen, locale)} (
+          <RelativeTime date={ip.last_seen} />)
         </Text>
         <Text variant="small" as="span" tone="secondary">
           {ip.other_account_count > 0
@@ -101,16 +105,19 @@ export function IPRow({ ip, ownIP }: Props) {
               key={`${event.kind}-${event.created_at.toISOString()}-${index}`}
             >
               <Text variant="small" className="break-words" tone="muted">
-                {formatDateTime(event.created_at)} ·{" "}
-                {event.kind === "SIGN_UP" ? t("Sign-up", "注册") : t("Sign-in", "登录")} ·{" "}
-                {event.user_agent ?? t("No user agent", "未知浏览器")}
+                {formatDateTime(event.created_at, locale)} ·{" "}
+                {event.kind === "SIGN_UP"
+                  ? t("Sign-up", "注册")
+                  : t("Sign-in", "登录")}{" "}
+                · {event.user_agent ?? t("No user agent", "未知浏览器")}
               </Text>
             </li>
           ))}
           {hiddenEvents > 0 ? (
             <li>
               <Text variant="small" tone="muted">
-                {t("and", "以及")} {hiddenEvents.toLocaleString("en-GB")} {t("more", "条记录")}
+                {t("and", "以及")} {hiddenEvents.toLocaleString("en-GB")}{" "}
+                {t("more", "条记录")}
               </Text>
             </li>
           ) : null}
@@ -132,7 +139,10 @@ function Address({ ip }: { ip: AccountIP }) {
     <Tooltip>
       <TooltipTrigger asChild>{address}</TooltipTrigger>
       <TooltipContent>
-        {t("IPv6 is recorded and blocked by its /64 prefix.", "IPv6 地址按 /64 前缀记录和拦截。")}
+        {t(
+          "IPv6 is recorded and blocked by its /64 prefix.",
+          "IPv6 地址按 /64 前缀记录和拦截。",
+        )}
       </TooltipContent>
     </Tooltip>
   );

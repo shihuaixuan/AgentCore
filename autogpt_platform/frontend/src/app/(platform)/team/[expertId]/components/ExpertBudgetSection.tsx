@@ -26,7 +26,7 @@ export function ExpertBudgetSection({ expert, color, className }: Props) {
 
   return (
     <section
-      aria-label={`${expert.name} budget`}
+      aria-label={t(`${expert.name} budget`, `${expert.name} 的预算`)}
       style={
         color
           ? {

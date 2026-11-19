@@ -39,7 +39,10 @@ export function PanelHeader({
             leftIcon={<Icon icon={RefreshIcon} size={14} />}
             aria-label={
               revertTargetVersion != null
-                ? `Revert to version ${revertTargetVersion}`
+                ? t(
+                    `Revert to version ${revertTargetVersion}`,
+                    `恢复到版本 ${revertTargetVersion}`,
+                  )
                 : t("Revert to previous version", "恢复到上一版本")
             }
             title={t(

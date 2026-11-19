@@ -53,21 +53,29 @@ export function useShareRunButton({
         setShareToken(response.data.share_token);
         setIsShared(true);
         toast({
-          title: "Sharing enabled",
-          description:
+          title: t("Sharing enabled", "分享已启用"),
+          description: t(
             "Your workflow run is now publicly accessible via the share link.",
+            "现在可通过分享链接公开访问此次工作流运行。",
+          ),
         });
       } else {
         toast({
           title: t("Error", "错误"),
-          description: "Failed to enable sharing. Please try again.",
+          description: t(
+            "Failed to enable sharing. Please try again.",
+            "无法启用分享，请重试。",
+          ),
           variant: "destructive",
         });
       }
     } catch {
       toast({
         title: t("Error", "错误"),
-        description: "Failed to enable sharing. Please try again.",
+        description: t(
+          "Failed to enable sharing. Please try again.",
+          "无法启用分享，请重试。",
+        ),
         variant: "destructive",
       });
     }
@@ -83,13 +91,19 @@ export function useShareRunButton({
       setIsShared(false);
       setShareToken(null);
       toast({
-        title: "Sharing disabled",
-        description: "The share link is no longer accessible.",
+        title: t("Sharing disabled", "分享已停用"),
+        description: t(
+          "The share link is no longer accessible.",
+          "分享链接已无法访问。",
+        ),
       });
     } catch {
       toast({
         title: t("Error", "错误"),
-        description: "Failed to disable sharing. Please try again.",
+        description: t(
+          "Failed to disable sharing. Please try again.",
+          "无法停用分享，请重试。",
+        ),
         variant: "destructive",
       });
     }
@@ -101,13 +115,19 @@ export function useShareRunButton({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       toast({
-        title: "Copied!",
-        description: "Share link copied to clipboard.",
+        title: t("Copied!", "已复制！"),
+        description: t(
+          "Share link copied to clipboard.",
+          "分享链接已复制到剪贴板。",
+        ),
       });
     } catch {
       toast({
         title: t("Error", "错误"),
-        description: "Failed to copy link. Please try again.",
+        description: t(
+          "Failed to copy link. Please try again.",
+          "无法复制链接，请重试。",
+        ),
         variant: "destructive",
       });
     }

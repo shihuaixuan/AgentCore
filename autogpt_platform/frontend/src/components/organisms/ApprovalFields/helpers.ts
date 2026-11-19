@@ -1,5 +1,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { humanizeCronExpression } from "@/lib/cron-expression-utils";
+import type { Locale } from "@/lib/i18n/locale";
+import { zhCN } from "date-fns/locale";
 
 export const REDACTED = "[redacted]";
 export const MAX_FIELDS = 6;
@@ -52,19 +54,19 @@ export interface Fact {
   at: string | null;
 }
 
-export function factText(fact: Fact) {
-  if (fact.cron) return cronText(fact.cron) ?? fact.text;
+export function factText(fact: Fact, locale: Locale = "en") {
+  if (fact.cron) return cronText(fact.cron, locale) ?? fact.text;
   if (fact.label && fact.at) {
     const at = new Date(fact.at);
     if (!Number.isNaN(at.getTime()))
-      return `${fact.label} ${formatDistanceToNow(at, { addSuffix: true })}`;
+      return `${fact.label} ${formatDistanceToNow(at, { addSuffix: true, locale: locale === "zh-CN" ? zhCN : undefined })}`;
   }
   return fact.text;
 }
 
-function cronText(cron: string) {
+function cronText(cron: string, locale: Locale) {
   try {
-    return humanizeCronExpression(cron);
+    return humanizeCronExpression(cron, locale);
   } catch {
     return null;
   }
@@ -73,13 +75,14 @@ function cronText(cron: string) {
 export function formattedText(
   format: string | null | undefined,
   value: unknown,
+  locale: Locale = "en",
 ) {
   if (format === "seconds" && typeof value === "number" && value >= 0)
-    return durationText(value);
+    return durationText(value, locale);
   if (format !== "cron") return null;
   const crons = Array.isArray(value) ? value : [value];
   const texts = crons.map((cron) =>
-    typeof cron === "string" ? cronText(cron) : null,
+    typeof cron === "string" ? cronText(cron, locale) : null,
   );
   return texts.every(Boolean) ? listText(texts) : null;
 }
@@ -92,20 +95,29 @@ const UNITS = [
 ] as const;
 
 // The two largest units, the smaller one rounded: 183420 is "2 days 3 hours".
-function durationText(seconds: number) {
+function durationText(seconds: number, locale: Locale) {
   const at = UNITS.findIndex(([, size]) => seconds >= size);
   if (at === -1 || at === UNITS.length - 1)
-    return unitText(Math.round(seconds), "second");
+    return unitText(Math.round(seconds), "second", locale);
   const [big, bigSize] = UNITS[at];
   const [small, smallSize] = UNITS[at + 1];
   const total = Math.round(seconds / smallSize);
   const perBig = bigSize / smallSize;
   const rest = total % perBig;
-  const head = unitText(Math.floor(total / perBig), big);
-  return rest ? `${head} ${unitText(rest, small)}` : head;
+  const head = unitText(Math.floor(total / perBig), big, locale);
+  return rest ? `${head} ${unitText(rest, small, locale)}` : head;
 }
 
-function unitText(count: number, unit: string) {
+function unitText(count: number, unit: string, locale: Locale) {
+  if (locale === "zh-CN") {
+    const units: Record<string, string> = {
+      day: "天",
+      hour: "小时",
+      minute: "分钟",
+      second: "秒",
+    };
+    return `${count} ${units[unit] ?? unit}`;
+  }
   return `${count} ${unit}${count === 1 ? "" : "s"}`;
 }
 

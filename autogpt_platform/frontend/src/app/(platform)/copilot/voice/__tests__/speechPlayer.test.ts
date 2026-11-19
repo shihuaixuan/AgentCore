@@ -11,6 +11,28 @@ describe("createSpeechPlayer", () => {
 
   afterEach(() => vi.restoreAllMocks());
 
+  it("localizes app-owned playback failures", async () => {
+    vi.spyOn(window.HTMLMediaElement.prototype, "play").mockImplementation(
+      function (this: HTMLAudioElement) {
+        queueMicrotask(() => this.dispatchEvent(new Event("error")));
+        return Promise.resolve();
+      },
+    );
+    const onError = vi.fn();
+    const player = createSpeechPlayer({
+      synthesize: async () => new Blob(["Raw speech"]),
+      onIdle: () => undefined,
+      onError,
+      getLocale: () => "zh-CN",
+    });
+    player.enqueue("Original English reply");
+    await settle();
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "音频播放失败" }),
+    );
+    player.destroy();
+  });
+
   it("plays chunks in the order they were enqueued", async () => {
     const played: string[] = [];
     const player = createSpeechPlayer({

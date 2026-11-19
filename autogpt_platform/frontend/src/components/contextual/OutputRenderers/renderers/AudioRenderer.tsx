@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   OutputRenderer,
   OutputMetadata,
@@ -67,6 +68,17 @@ function renderAudio(
   value: unknown,
   metadata?: OutputMetadata,
 ): React.ReactNode {
+  return <AudioPreview value={value} metadata={metadata} />;
+}
+
+function AudioPreview({
+  value,
+  metadata,
+}: {
+  value: unknown;
+  metadata?: OutputMetadata;
+}) {
+  const { t } = useTranslation();
   const audioURL = String(value);
   const mimeType =
     metadata?.mimeType || guessMimeType(audioURL) || "audio/mpeg";
@@ -75,7 +87,10 @@ function renderAudio(
     <div className="group relative">
       <audio controls preload="metadata" className="w-full">
         <source src={audioURL} type={mimeType} />
-        Your browser does not support the audio element.
+        {t(
+          "Your browser does not support the audio element.",
+          "您的浏览器不支持音频播放。",
+        )}
       </audio>
     </div>
   );

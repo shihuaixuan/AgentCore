@@ -11,6 +11,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { ExpertPage } from "./components/ExpertPage";
+import { getServerTranslation } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,7 @@ export async function generateMetadata({
 }: {
   params: Promise<MarketplaceExpertPageParams>;
 }): Promise<Metadata> {
+  const { t, locale } = await getServerTranslation();
   const params = await _params;
   const path = `/marketplace/experts/${params.expertId}`;
   const expert = findExpertTemplate(
@@ -33,13 +35,19 @@ export async function generateMetadata({
   );
 
   if (!expert) {
-    return buildPageMetadata({ title: "Expert - AutoGPT Marketplace", path });
+    return buildPageMetadata({
+      title: t("Expert - AutoGPT Marketplace", "专家 - AutoGPT 市场"),
+      path,
+    });
   }
 
   // avatar_url points at an SVG, which no unfurler renders, so this stays a
   // text card until experts have a raster image.
   return buildPageMetadata({
-    title: `${expert.name}, ${expert.job_title || getExpertRoleLabel(expert.role)} · AI Expert - AutoGPT Marketplace`,
+    title: t(
+      `${expert.name}, ${expert.job_title || getExpertRoleLabel(expert.role, locale)} · AI Expert - AutoGPT Marketplace`,
+      `${expert.name}，${expert.job_title || getExpertRoleLabel(expert.role, locale)} · AI 专家 - AutoGPT 市场`,
+    ),
     description: expert.tagline || expert.bio,
     path,
     type: "profile",

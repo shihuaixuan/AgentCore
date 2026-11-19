@@ -26,7 +26,10 @@ export function useSelectionBar(
       const failed = results.filter((r) => r.status === "rejected").length;
       if (failed > 0) {
         throw new Error(
-          `${failed} of ${fileIds.length} files could not be deleted.`,
+          t(
+            `${failed} of ${fileIds.length} files could not be deleted.`,
+            `${fileIds.length} 个文件中有 ${failed} 个无法删除。`,
+          ),
         );
       }
     },
@@ -36,7 +39,10 @@ export function useSelectionBar(
         title:
           fileIds.length === 1
             ? t("File deleted", "文件已删除")
-            : `${fileIds.length} files deleted`,
+            : t(
+                `${fileIds.length} files deleted`,
+                `已删除 ${fileIds.length} 个文件`,
+              ),
       });
       onDone();
     },
@@ -56,8 +62,11 @@ export function useSelectionBar(
     if (isDeleting || count === 0) return;
     const confirmed = window.confirm(
       count === 1
-        ? `Delete "${selectedFiles[0].name}"?`
-        : `Delete ${count} files?`,
+        ? t(
+            `Delete "${selectedFiles[0].name}"?`,
+            `删除“${selectedFiles[0].name}”？`,
+          )
+        : t(`Delete ${count} files?`, `删除 ${count} 个文件？`),
     );
     if (!confirmed) return;
     try {
@@ -79,7 +88,10 @@ export function useSelectionBar(
     setIsMoveOpen,
     isDeleting,
     handleDelete,
-    moveSubject: count === 1 ? `“${selectedFiles[0].name}”` : `${count} files`,
+    moveSubject:
+      count === 1
+        ? `“${selectedFiles[0].name}”`
+        : t(`${count} files`, `${count} 个文件`),
     sharedFolderId,
   };
 }

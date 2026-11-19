@@ -24,21 +24,33 @@ import {
 
 import { useInlineConnectForm } from "./useInlineConnectForm";
 
-const userPasswordConnectSchema = z
-  .object({
-    title: z
-      .string()
-      .trim()
-      .min(1, "Name is required")
-      .max(100, "Name must be 100 characters or less"),
-    username: z.string().trim().min(1, "Username is required"),
-    password: z.string().min(1, "Password is required"),
-    server: z.string().trim(),
-    scheme: z.string(),
-  })
-  .strict();
+function createUserPasswordConnectSchema(
+  t: (english: string, chinese: string) => string,
+) {
+  return z
+    .object({
+      title: z
+        .string()
+        .trim()
+        .min(1, t("Name is required", "请输入名称"))
+        .max(
+          100,
+          t("Name must be 100 characters or less", "名称不能超过 100 个字符"),
+        ),
+      username: z
+        .string()
+        .trim()
+        .min(1, t("Username is required", "请输入用户名")),
+      password: z.string().min(1, t("Password is required", "请输入密码")),
+      server: z.string().trim(),
+      scheme: z.string(),
+    })
+    .strict();
+}
 
-type UserPasswordConnectFormValues = z.infer<typeof userPasswordConnectSchema>;
+type UserPasswordConnectFormValues = z.infer<
+  ReturnType<typeof createUserPasswordConnectSchema>
+>;
 
 interface Props {
   provider: string;
@@ -53,7 +65,7 @@ export function InlineUserPasswordForm({
   providerName,
   onSuccess,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const { submit, isPending } = useInlineConnectForm({
     provider,
@@ -63,12 +75,13 @@ export function InlineUserPasswordForm({
   });
 
   const schemes = getServerScopeSchemes(provider);
+  const userPasswordConnectSchema = createUserPasswordConnectSchema(t);
 
   const form = useForm<UserPasswordConnectFormValues>({
     resolver: zodResolver(
       schemes
         ? userPasswordConnectSchema.extend({
-            server: getServerFieldSchema(provider),
+            server: getServerFieldSchema(provider, locale),
           })
         : userPasswordConnectSchema,
     ),
@@ -108,7 +121,10 @@ export function InlineUserPasswordForm({
                 label={t("Name", "名称")}
                 labelVariant="small-medium"
                 size="small"
-                placeholder={`My ${providerName} account`}
+                placeholder={t(
+                  `My ${providerName} account`,
+                  `我的 ${providerName} 账号`,
+                )}
                 wrapperClassName="!mb-0"
               />
             </FormControl>
@@ -153,8 +169,11 @@ export function InlineUserPasswordForm({
                   label={t("Server", "服务器")}
                   labelVariant="small-medium"
                   size="small"
-                  placeholder="host or host:port"
-                  hint="This login is only ever sent to this server."
+                  placeholder={t("host or host:port", "主机名或主机名:端口")}
+                  hint={t(
+                    "This login is only ever sent to this server.",
+                    "此登录信息只会发送给该服务器。",
+                  )}
                   wrapperClassName="!mb-0"
                 />
               </FormControl>
@@ -216,7 +235,7 @@ export function InlineUserPasswordForm({
         disabled={!form.formState.isValid}
         loading={isPending}
       >
-        {isPending ? "Connecting…" : "Connect"}
+        {isPending ? t("Connecting…", "正在连接…") : t("Connect", "连接")}
       </Button>
     </Form>
   );

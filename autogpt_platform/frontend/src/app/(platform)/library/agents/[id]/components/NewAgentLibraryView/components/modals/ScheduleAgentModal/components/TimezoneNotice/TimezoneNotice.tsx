@@ -7,7 +7,7 @@ import { InformationCircleIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export function TimezoneNotice() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const userTimezone = useUserTimezone();
 
   if (!userTimezone) {
@@ -31,7 +31,7 @@ export function TimezoneNotice() {
     );
   }
 
-  const tzName = getTimezoneDisplayName(userTimezone || "UTC");
+  const tzName = getTimezoneDisplayName(userTimezone || "UTC", locale);
 
   return (
     <div className="mt-1 flex items-center gap-2 rounded-md bg-surface-hover/50 p-3 text-foreground-tertiary">

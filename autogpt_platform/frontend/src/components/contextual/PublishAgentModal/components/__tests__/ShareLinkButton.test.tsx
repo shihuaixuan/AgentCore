@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 
 const toast = vi.fn();
 vi.mock("@/components/molecules/Toast/use-toast", () => ({
@@ -7,6 +13,7 @@ vi.mock("@/components/molecules/Toast/use-toast", () => ({
 }));
 
 import { ShareLinkButton } from "../ShareLinkButton";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 function mockClipboard(writeText: () => Promise<void>) {
   Object.defineProperty(navigator, "clipboard", {
@@ -48,5 +55,28 @@ describe("ShareLinkButton", () => {
         variant: "destructive",
       }),
     );
+  });
+
+  it("localizes the copied state without changing the share URL", async () => {
+    vi.useFakeTimers();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    mockClipboard(writeText);
+    try {
+      render(
+        <LanguageProvider>
+          <ShareLinkButton url="/marketplace/agent/creator/Original" />
+        </LanguageProvider>,
+      );
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "复制分享链接" }));
+      });
+      expect(screen.getByRole("button", { name: "已复制" })).toBeDefined();
+      expect(writeText).toHaveBeenCalledWith(
+        `${window.location.origin}/marketplace/agent/creator/Original`,
+      );
+      act(() => vi.runAllTimers());
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

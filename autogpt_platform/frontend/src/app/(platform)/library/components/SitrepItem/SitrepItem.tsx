@@ -86,7 +86,7 @@ export function SitrepItem({ item }: Props) {
   const router = useRouter();
 
   function handleAskAutoPilot() {
-    const prompt = buildAutoPilotPrompt(item);
+    const prompt = buildAutoPilotPrompt(item, t);
     const encoded = encodeURIComponent(prompt);
     router.push(`/home?autosubmit=true#prompt=${encoded}`);
   }

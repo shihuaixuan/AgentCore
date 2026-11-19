@@ -1,5 +1,6 @@
 import { Text } from "@/components/atoms/Text/Text";
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   OutputRenderer,
   OutputMetadata,
@@ -87,6 +88,7 @@ function CSVTable({
   value: string;
   delimiter: "," | "\t";
 }) {
+  const { t } = useTranslation();
   const { headers, rows } = useMemo(
     () => parseDelimitedText(value, delimiter),
     [delimiter, value],
@@ -118,7 +120,11 @@ function CSVTable({
   }
 
   if (headers.length === 0) {
-    return <p className="p-4 text-body text-foreground-tertiary">Empty CSV</p>;
+    return (
+      <p className="p-4 text-body text-foreground-tertiary">
+        {t("Empty CSV", "CSV 暂无数据")}
+      </p>
+    );
   }
 
   return (

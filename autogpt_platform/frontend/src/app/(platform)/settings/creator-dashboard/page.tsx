@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { EditAgentModal } from "@/components/contextual/EditAgentModal/EditAgentModal";
@@ -14,9 +15,13 @@ import { SubmissionsList } from "./components/SubmissionsList/SubmissionsList";
 import { useCreatorDashboardPage } from "./useCreatorDashboardPage";
 
 export default function SettingsCreatorDashboardPage() {
+  const { t } = useTranslation();
   useEffect(() => {
-    document.title = "Creator dashboard – AutoGPT Platform";
-  }, []);
+    document.title = t(
+      "Creator dashboard – AutoGPT Platform",
+      "创作者面板 – AutoGPT 平台",
+    );
+  }, [t]);
 
   const {
     submissions,
@@ -50,7 +55,7 @@ export default function SettingsCreatorDashboardPage() {
   if (error) {
     return (
       <ErrorCard
-        context="creator dashboard"
+        context={t("creator dashboard", "创作者面板")}
         responseError={
           error ? { detail: (error as { detail?: string }).detail } : undefined
         }

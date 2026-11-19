@@ -1,6 +1,7 @@
 "use client";
 
 import { useContext, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { parseTurnPause } from "../../turnPause";
 import { CopilotChatActionsContext } from "../CopilotChatActionsProvider/useCopilotChatActions";
@@ -16,6 +17,7 @@ interface Args {
 }
 
 export function useTurnPausedCard({ data, pauseKey, isStoredRow }: Args) {
+  const { t } = useTranslation();
   const actions = useContext(CopilotChatActionsContext);
   const current = useContext(CurrentPauseContext);
   const pause = parseTurnPause(data);
@@ -45,9 +47,9 @@ export function useTurnPausedCard({ data, pauseKey, isStoredRow }: Args) {
     assistantName: actions?.assistantName ?? "Otto",
     isLive: isCurrent && canAct && !isStopped && !isPickedUp,
     note: isStopped
-      ? "Stopped here"
+      ? t("Stopped here", "在此停止")
       : isPickedUp || (isTracked && !isCurrent)
-        ? "Picked back up"
+        ? t("Picked back up", "已恢复继续")
         : null,
     stop,
     followTurn,

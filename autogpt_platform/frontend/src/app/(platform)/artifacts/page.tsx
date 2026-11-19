@@ -186,18 +186,21 @@ export default function ArtifactsPage() {
           isLoading={isListLoading}
           isError={isError || (showFolders && isFoldersError)}
           error={isError ? error : showFolders ? foldersError : undefined}
-          emptyState={getEmptyState({
-            hasSearchTerm: isSearching,
-            isInFolder,
-            hasFolders,
-            folderId: selectedFolderId,
-            expert: expertFilter
-              ? {
-                  id: expertFilter,
-                  name: expertsById.get(expertFilter)?.name ?? null,
-                }
-              : null,
-          })}
+          emptyState={getEmptyState(
+            {
+              hasSearchTerm: isSearching,
+              isInFolder,
+              hasFolders,
+              folderId: selectedFolderId,
+              expert: expertFilter
+                ? {
+                    id: expertFilter,
+                    name: expertsById.get(expertFilter)?.name ?? null,
+                  }
+                : null,
+            },
+            t,
+          )}
           compactEmpty={hasFolders}
           hasMore={hasMore}
           isLoadingMore={isLoadingMore}

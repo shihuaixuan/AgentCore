@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { zhCN } from "date-fns/locale";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   ArrowDown01Icon,
   ArrowLeft01Icon,
@@ -79,8 +81,10 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+  const { locale } = useTranslation();
   return (
     <DayPicker
+      locale={locale === "zh-CN" ? zhCN : undefined}
       showOutsideDays={showOutsideDays}
       captionLayout={"dropdown"}
       endMonth={new Date(2100, 0)}
@@ -178,6 +182,7 @@ const CustomDropdown = ({
   name,
   disabled,
 }: DropdownProps) => {
+  const { t } = useTranslation();
   const handleValueChange = (newValue: string) => {
     if (onChange) {
       const syntheticEvent = {
@@ -200,7 +205,10 @@ const CustomDropdown = ({
         data-slot="calendar-dropdown-trigger"
         className="w-[120px] space-x-2 bg-surface"
       >
-        <SelectValue data-slot="calendar-dropdown-value" placeholder="Select" />
+        <SelectValue
+          data-slot="calendar-dropdown-value"
+          placeholder={t("Select", "选择")}
+        />
       </SelectTrigger>
       <SelectContent data-slot="calendar-dropdown-popup" className="bg-surface">
         {options?.map((option) => (

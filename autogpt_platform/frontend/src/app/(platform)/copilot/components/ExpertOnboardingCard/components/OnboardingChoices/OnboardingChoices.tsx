@@ -3,6 +3,7 @@
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { Ref } from "react";
 import type { QuestionAnswer } from "../../../../tools/clarifying-questions";
 import { getOptionLetter } from "../../helpers";
@@ -36,6 +37,7 @@ export function OnboardingChoices({
   onChange,
   onSubmit,
 }: Props) {
+  const { t } = useTranslation();
   const {
     active,
     isTyping,
@@ -109,7 +111,11 @@ export function OnboardingChoices({
           value={text}
           onChange={(event) => changeText(event.target.value)}
           onKeyDown={handleTextKeyDown}
-          placeholder={isMultiple ? "Add your own answer" : "Type your answer"}
+          placeholder={
+            isMultiple
+              ? t("Add your own answer", "添加你自己的回答")
+              : t("Type your answer", "输入你的回答")
+          }
           // 16px on phones: iOS zooms the page into any smaller text field.
           className="resize-none rounded-md bg-surface-muted px-4 py-3 text-body-lg leading-relaxed text-foreground-emphasis ring-1 ring-border-base transition-shadow placeholder:text-foreground-subtle focus:ring-foreground-subtle focus:outline-none sm:text-body-md sm:leading-relaxed"
         />
@@ -120,7 +126,7 @@ export function OnboardingChoices({
           className="flex w-full items-center gap-3 rounded-md border border-dashed border-border-base px-3 py-3 text-left text-body-lg text-foreground-tertiary transition-colors outline-none hover:bg-surface-muted hover:text-foreground-body focus-visible:ring-2 focus-visible:ring-foreground-subtle focus-visible:ring-offset-1 sm:py-2.5 sm:text-body-md [@media(hover:none)]:min-h-11"
         >
           <LetterBadge index={options.length} isSelected={false} />
-          Other
+          {t("Other", "其他")}
         </button>
       )}
     </div>

@@ -11,6 +11,7 @@ import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { useState } from "react";
 import { ArrowRight01Icon, BulbIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   children: React.ReactNode;
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export function ReasoningCollapse({ children, isActive = false }: Props) {
+  const { t } = useTranslation();
   const [value, setValue] = useState("");
 
   return (
@@ -54,7 +56,7 @@ export function ReasoningCollapse({ children, isActive = false }: Props) {
                 className="shrink-0 group-data-[state=open]:rotate-90"
               />
             )}
-            Reasoning
+            {t("Reasoning", "推理过程")}
           </AccordionPrimitive.Trigger>
         </AccordionPrimitive.Header>
         <AccordionContent className="pt-0 pb-1 font-sans text-body text-foreground-tertiary [&_pre]:m-0 [&_pre]:bg-transparent [&_pre]:p-0 [&_pre]:font-sans [&_pre]:text-body [&_pre]:whitespace-pre-wrap [&_pre]:text-foreground-tertiary">
@@ -65,7 +67,7 @@ export function ReasoningCollapse({ children, isActive = false }: Props) {
             className="mt-2"
             onClick={() => setValue("")}
           >
-            Collapse
+            {t("Collapse", "收起")}
           </Button>
         </AccordionContent>
       </AccordionItem>

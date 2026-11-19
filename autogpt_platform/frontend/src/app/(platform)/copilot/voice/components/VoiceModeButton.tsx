@@ -3,6 +3,7 @@
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Button } from "@/components/atoms/Button/Button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { StopIcon, VoiceIcon } from "@hugeicons/core-free-icons";
 
 interface Props {
@@ -21,13 +22,18 @@ export function VoiceModeButton({
   onClick,
   className,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <Button
       type="button"
       variant="tray"
       size="icon"
       aria-label={
-        speaking ? "Stop" : isActive ? "Leave voice mode" : "Start voice mode"
+        speaking
+          ? t("Stop", "停止")
+          : isActive
+            ? t("Leave voice mode", "退出语音模式")
+            : t("Start voice mode", "开启语音模式")
       }
       aria-pressed={isActive}
       disabled={disabled}

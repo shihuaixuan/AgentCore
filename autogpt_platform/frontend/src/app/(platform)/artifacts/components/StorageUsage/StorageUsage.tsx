@@ -31,7 +31,10 @@ export function StorageUsage() {
   if (isError || !data) return null;
 
   const percent = Math.min(Math.max(data.used_percent, 0), 100);
-  const usedLabel = `${Math.round(percent)}% of storage used`;
+  const usedLabel = t(
+    `${Math.round(percent)}% of storage used`,
+    `已使用 ${Math.round(percent)}% 的存储空间`,
+  );
   const internalBytes = data.internal_bytes ?? 0;
 
   return (
@@ -61,7 +64,7 @@ export function StorageUsage() {
         <span className="font-medium text-foreground-body">
           {formatFileSize(data.used_bytes)}
         </span>{" "}
-        of {formatFileSize(data.limit_bytes)}
+        {t("of", "/")} {formatFileSize(data.limit_bytes)}
       </Text>
       {internalBytes > 0 ? (
         <Text
@@ -70,7 +73,10 @@ export function StorageUsage() {
           tone="secondary"
           className="hidden lg:inline"
         >
-          {`${formatFileSize(internalBytes)} is your team's skills and working files`}
+          {t(
+            `${formatFileSize(internalBytes)} is your team's skills and working files`,
+            `${formatFileSize(internalBytes)} 用于团队技能和工作文件`,
+          )}
         </Text>
       ) : null}
     </div>

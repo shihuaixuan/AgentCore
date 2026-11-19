@@ -28,7 +28,7 @@ interface Props {
 }
 
 export function YourPlanCard({ index = 0, showUsage = false }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const reduceMotion = useReducedMotion();
   const controller = useYourPlanCard();
   const {
@@ -69,7 +69,10 @@ export function YourPlanCard({ index = 0, showUsage = false }: Props) {
   const sectionMotion = getSectionMotionProps(index, Boolean(reduceMotion));
 
   if (plan?.tierKey === "TRIAL") return null;
-  if (isError) return <ErrorCard context="your subscription" onRetry={retry} />;
+  if (isError)
+    return (
+      <ErrorCard context={t("your subscription", "你的订阅")} onRetry={retry} />
+    );
 
   if (isLoading || !plan) {
     return (
@@ -129,14 +132,17 @@ export function YourPlanCard({ index = 0, showUsage = false }: Props) {
           </div>
           {plan.isAdminManaged ? (
             <Text variant="body" as="span" tone="body">
-              Managed by your AutoGPT account team.{" "}
+              {t(
+                "Managed by your AutoGPT account team.",
+                "由你的 AutoGPT 账户团队管理。",
+              )}{" "}
               <a
                 href={ENTERPRISE_CONTACT_URL}
                 className="font-medium text-brand no-underline hover:text-brand-hover"
               >
                 {t("Contact us", "联系我们")}
               </a>{" "}
-              for changes.
+              {t("for changes.", "以进行更改。")}
             </Text>
           ) : plan.isPaidPlan ? (
             <Text variant="body" as="span" tone="body">
@@ -146,29 +152,32 @@ export function YourPlanCard({ index = 0, showUsage = false }: Props) {
                 : t(" / month", " / 月")}
               {plan.isPendingCancel && plan.pendingEffectiveAt
                 ? t(
-                    ` · Ends on ${formatShortDate(plan.pendingEffectiveAt)}`,
-                    ` · 于 ${formatShortDate(plan.pendingEffectiveAt)} 结束`,
+                    ` · Ends on ${formatShortDate(plan.pendingEffectiveAt, locale)}`,
+                    ` · 于 ${formatShortDate(plan.pendingEffectiveAt, locale)} 结束`,
                   )
                 : plan.isPendingDowngrade && plan.pendingEffectiveAt
                   ? t(
-                      ` · Switches to ${plan.pendingTierLabel} on ${formatShortDate(plan.pendingEffectiveAt)}`,
-                      ` · 于 ${formatShortDate(plan.pendingEffectiveAt)} 切换至 ${plan.pendingTierLabel}`,
+                      ` · Switches to ${plan.pendingTierLabel} on ${formatShortDate(plan.pendingEffectiveAt, locale)}`,
+                      ` · 于 ${formatShortDate(plan.pendingEffectiveAt, locale)} 切换至 ${plan.pendingTierLabel}`,
                     )
                   : plan.isPendingCycleSwitch && plan.pendingEffectiveAt
                     ? t(
-                        ` · Active until ${formatShortDate(plan.pendingEffectiveAt)}`,
-                        ` · 有效期至 ${formatShortDate(plan.pendingEffectiveAt)}`,
+                        ` · Active until ${formatShortDate(plan.pendingEffectiveAt, locale)}`,
+                        ` · 有效期至 ${formatShortDate(plan.pendingEffectiveAt, locale)}`,
                       )
                     : plan.currentPeriodEnd
                       ? t(
-                          ` · Renews on ${formatShortDate(plan.currentPeriodEnd * 1000)}`,
-                          ` · 于 ${formatShortDate(plan.currentPeriodEnd * 1000)} 续订`,
+                          ` · Renews on ${formatShortDate(plan.currentPeriodEnd * 1000, locale)}`,
+                          ` · 于 ${formatShortDate(plan.currentPeriodEnd * 1000, locale)} 续订`,
                         )
                       : null}
             </Text>
           ) : (
             <Text variant="body" as="span" tone="body">
-              Pick a plan to continue using AutoGPT.
+              {t(
+                "Pick a plan to continue using AutoGPT.",
+                "选择套餐以继续使用 AutoGPT。",
+              )}
             </Text>
           )}
           {plan.isPaidPlan &&
@@ -176,8 +185,10 @@ export function YourPlanCard({ index = 0, showUsage = false }: Props) {
           plan.pendingEffectiveAt &&
           plan.pendingCycle ? (
             <Text variant="small" as="span" tone="muted">
-              Switching to {plan.pendingCycle} {plan.label} on{" "}
-              {formatShortDate(plan.pendingEffectiveAt)} · No charge today
+              {t(
+                `Switching to ${plan.pendingCycle} ${plan.label} on ${formatShortDate(plan.pendingEffectiveAt, locale)} · No charge today`,
+                `将于 ${formatShortDate(plan.pendingEffectiveAt, locale)} 切换至${plan.pendingCycle === "yearly" ? "按年" : "按月"}计费的 ${plan.label} · 今天不扣款`,
+              )}
             </Text>
           ) : null}
         </div>
@@ -206,7 +217,10 @@ export function YourPlanCard({ index = 0, showUsage = false }: Props) {
               disabled={isUpdatingTier || isRedirecting}
               loading={isUpdatingTier}
             >
-              Downgrade to {plan.previousTierLabel}
+              {t(
+                `Downgrade to ${plan.previousTierLabel}`,
+                `降级至 ${plan.previousTierLabel}`,
+              )}
             </Button>
           ) : null}
           {plan.isPaidPlan && !plan.isAdminManaged ? (

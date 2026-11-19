@@ -115,7 +115,7 @@ function Header({
       await downloadFileBlob(fileId, name);
     } catch (error) {
       toast({
-        title: "Failed to download file",
+        title: t("Failed to download file", "无法下载文件"),
         description:
           error instanceof Error
             ? error.message
@@ -147,7 +147,7 @@ function Header({
               )
             }
           >
-            {isSourceView ? "Preview" : "Source"}
+            {isSourceView ? t("Preview", "预览") : t("Source", "源代码")}
           </Button>
         ) : null}
         <Button
@@ -158,7 +158,9 @@ function Header({
           leftIcon={<Icon icon={Download04Icon} size={14} />}
           data-testid="file-viewer-download"
         >
-          {isDownloading ? "Downloading…" : t("Download", "下载")}
+          {isDownloading
+            ? t("Downloading…", "正在下载…")
+            : t("Download", "下载")}
         </Button>
       </div>
     </div>

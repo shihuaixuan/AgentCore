@@ -1,6 +1,7 @@
 "use client";
 
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { CreateAPIKeyForm } from "./components/CreateAPIKeyForm";
 import { CreateAPIKeySuccess } from "./components/CreateAPIKeySuccess";
@@ -12,11 +13,14 @@ interface Props {
 }
 
 export function CreateAPIKeyDialog({ open, onOpenChange }: Props) {
+  const { t } = useTranslation();
   const { form, view, plainTextKey, isPending, handleSubmit, handleClose } =
     useCreateAPIKeyForm({ onClose: () => onOpenChange(false) });
 
   const isSuccess = view === "success";
-  const title = isSuccess ? "Your new API key" : "Create API key";
+  const title = isSuccess
+    ? t("Your new API key", "你的新 API 密钥")
+    : t("Create API key", "创建 API 密钥");
 
   return (
     <Dialog

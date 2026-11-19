@@ -39,7 +39,10 @@ export function InlineApiKeyForm({ form, providerName, onSubmit }: Props) {
                 label={t("Name", "名称")}
                 labelVariant="small-medium"
                 size="small"
-                placeholder={`My ${providerName} key`}
+                placeholder={t(
+                  `My ${providerName} key`,
+                  `我的 ${providerName} 密钥`,
+                )}
                 wrapperClassName="!mb-0"
               />
             </FormControl>

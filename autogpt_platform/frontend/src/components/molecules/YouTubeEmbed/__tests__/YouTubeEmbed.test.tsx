@@ -12,6 +12,7 @@ import {
   screen,
 } from "@/tests/integrations/test-utils";
 import { YouTubeEmbed } from "../YouTubeEmbed";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const VIDEO_ID = "dQw4w9WgXcQ";
 const VIDEO_URL = `https://www.youtube.com/watch?v=${VIDEO_ID}`;
@@ -32,6 +33,29 @@ afterEach(() => {
 });
 
 describe("YouTubeEmbed", () => {
+  test("localizes consent controls and preserves the requested video and title", () => {
+    configureCookiebot();
+    const { renew } = installCookiebot({ marketing: false });
+    render(
+      <LanguageProvider>
+        <YouTubeEmbed url={VIDEO_URL} title="Original video" />
+      </LanguageProvider>,
+    );
+    expect(screen.getByRole("group", { name: "Original video" })).toBeDefined();
+    expect(
+      screen.getByText(
+        "加载此视频时，YouTube 会设置广告 Cookie。若要在此观看，请允许营销 Cookie。",
+      ),
+    ).toBeDefined();
+    expect(
+      screen
+        .getByRole("link", { name: "在 YouTube 上观看" })
+        .getAttribute("href"),
+    ).toBe(`https://www.youtube.com/watch?v=${VIDEO_ID}`);
+    fireEvent.click(screen.getByRole("button", { name: "Cookie 设置" }));
+    expect(renew).toHaveBeenCalledOnce();
+  });
+
   test("loads the privacy-enhanced player once marketing cookies are allowed", () => {
     configureCookiebot();
     installCookiebot({ marketing: true });

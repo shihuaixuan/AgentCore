@@ -3,6 +3,7 @@
 import type { AccountIPReport } from "@/app/api/__generated__/models/accountIPReport";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { type ReactNode, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   type BanDuration,
   getBanEnd,
@@ -12,7 +13,7 @@ import {
 import { type BanAccountResult, useBanAccounts } from "../../../useBanAccounts";
 import type { ChecklistAccount } from "../AccountChecklist";
 import {
-  BAN_SENTENCE,
+  getBanSentence,
   getBanTargets,
   hasFailedBans,
   mergeBanResults,
@@ -38,6 +39,7 @@ export function useBlockDomainDialog({
   submitBlock,
   viewBlocksAction,
 }: Args) {
+  const { t, locale } = useTranslation();
   const { toast } = useToast();
   const { banAccounts, isBanning } = useBanAccounts();
   const domain = report.domain.value;
@@ -91,7 +93,7 @@ export function useBlockDomainDialog({
         value: domain,
         reason,
         expiresAt,
-        failureTitle: "Couldn't block the domain",
+        failureTitle: t("Couldn't block the domain", "无法阻止该域名"),
       });
       if (!ok) return;
       setIsBlocked(true);
@@ -99,8 +101,8 @@ export function useBlockDomainDialog({
     if (toBan.length === 0) {
       setIsOpen(false);
       toast({
-        title: `Blocked ${domain}`,
-        description: "No new sign-ups on it.",
+        title: t(`Blocked ${domain}`, `已阻止 ${domain}`),
+        description: t("No new sign-ups on it.", "该域名无法再注册新账户。"),
         variant: "success",
         action: viewBlocksAction,
       });
@@ -111,8 +113,8 @@ export function useBlockDomainDialog({
       banResults = await banAccounts({ userIds: toBan, reason, duration });
     } catch (error) {
       toast({
-        title: "Couldn't ban the accounts",
-        description: getErrorMessage(error),
+        title: t("Couldn't ban the accounts", "无法封禁这些账户"),
+        description: getErrorMessage(error, locale),
         variant: "destructive",
       });
       return;
@@ -120,13 +122,16 @@ export function useBlockDomainDialog({
     const { merged, total, failed } = mergeBanResults(results, banResults);
     setResults(merged);
     if (failed > 0) {
-      toast(partialBanFailure(total, failed));
+      toast(partialBanFailure(total, failed, [], locale));
       return;
     }
     setIsOpen(false);
     toast({
-      title: `Blocked ${domain} and banned ${pluralize(total, "account")}`,
-      description: BAN_SENTENCE,
+      title: t(
+        `Blocked ${domain} and banned ${pluralize(total, "account")}`,
+        `已阻止 ${domain}，并封禁 ${total} 个账户`,
+      ),
+      description: getBanSentence(locale),
       variant: "success",
       action: viewBlocksAction,
     });

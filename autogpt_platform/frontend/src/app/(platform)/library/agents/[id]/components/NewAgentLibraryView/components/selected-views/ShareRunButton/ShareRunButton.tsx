@@ -80,10 +80,10 @@ export function ShareRunButton({
                 <Alert>
                   <Icon icon={Alert01Icon} className="h-4 w-4" />
                   <Text variant="body">
-                    When you enable sharing, the output of this workflow run
-                    will be publicly accessible to anyone with the link. The
-                    page will include a noindex directive to discourage search
-                    engine crawling, but this cannot be guaranteed.
+                    {t(
+                      "When you enable sharing, the output of this workflow run will be publicly accessible to anyone with the link. The page will include a noindex directive to discourage search engine crawling, but this cannot be guaranteed.",
+                      "启用分享后，任何拥有链接的人都可公开访问此次工作流运行的输出。页面会包含 noindex 指令，建议搜索引擎不要收录，但无法保证其遵守。",
+                    )}
                   </Text>
                 </Alert>
               </div>
@@ -124,9 +124,10 @@ export function ShareRunButton({
               <Alert>
                 <Icon icon={Alert01Icon} className="h-4 w-4" />
                 <AlertDescription>
-                  This link is publicly accessible. Only share it with people
-                  you trust. The shared page includes noindex directives to
-                  discourage search engines.
+                  {t(
+                    "This link is publicly accessible. Only share it with people you trust. The shared page includes noindex directives to discourage search engines.",
+                    "此链接可被公开访问，请仅分享给你信任的人。共享页面包含 noindex 指令，以建议搜索引擎不要收录。",
+                  )}
                 </AlertDescription>
               </Alert>
               <Button

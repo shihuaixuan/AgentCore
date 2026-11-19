@@ -27,7 +27,7 @@ export function ActionButtons({
   context,
   textSize = "body",
 }: ActionButtonsProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   return (
     <div
       data-slot="error-card-actions"
@@ -51,7 +51,9 @@ export function ActionButtons({
       )}
 
       <Button
-        onClick={() => handleReportError(responseError, httpError, context)}
+        onClick={() =>
+          handleReportError(responseError, httpError, context, locale)
+        }
         variant="ghost"
         size="small"
         textSize={textSize}

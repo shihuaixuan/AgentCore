@@ -3,6 +3,8 @@ import { Text } from "@/components/atoms/Text/Text";
 import { COPILOT_TOOL_CATALOG } from "../../ToolChain/toolCatalog";
 import { RowIcon } from "../../ToolChain/RowIcon";
 import type { ApprovalItem } from "../helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { approvalHeadline } from "../approval-copy";
 
 interface Props {
   item: ApprovalItem;
@@ -11,6 +13,7 @@ interface Props {
 }
 
 export function ApprovalHeadline({ item, compact = false }: Props) {
+  const { t } = useTranslation();
   const category = COPILOT_TOOL_CATALOG[item.toolName]?.category ?? "other";
   return (
     <div className="flex min-w-0 items-start gap-2.5">
@@ -34,7 +37,7 @@ export function ApprovalHeadline({ item, compact = false }: Props) {
       </div>
       {item.subject.irreversible && (
         <span className="mt-0.5 shrink-0 rounded-md bg-error-surface px-1.5 py-0.5 text-caption font-medium text-error-foreground">
-          Can&apos;t be undone
+          {t("Can't be undone", "无法撤销")}
         </span>
       )}
     </div>
@@ -48,11 +51,12 @@ interface HeadlineTextProps {
 }
 
 export function HeadlineText({ item, linked = false }: HeadlineTextProps) {
+  const { locale } = useTranslation();
   const { ask, object } = item.headline;
   const reference = linked ? objectReference(item) : null;
   return (
     <>
-      {ask}
+      {approvalHeadline(ask, item.toolName, locale)}
       {object && (
         <>
           {" "}

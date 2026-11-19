@@ -31,7 +31,10 @@ export function ExpertNeedsYouSection({ expert }: Props) {
       {/* No visible heading: the cards say what needs doing. The count is
           still announced for screen readers. */}
       <span role="status" className="sr-only">
-        {`${pendingCount} ${pendingCount === 1 ? "item needs" : "items need"} your attention`}
+        {t(
+          `${pendingCount} ${pendingCount === 1 ? "item needs" : "items need"} your attention`,
+          `${pendingCount} 项事项需要你处理`,
+        )}
       </span>
       <div className="flex flex-col gap-2">
         {rows.map(({ item, receipt }) =>

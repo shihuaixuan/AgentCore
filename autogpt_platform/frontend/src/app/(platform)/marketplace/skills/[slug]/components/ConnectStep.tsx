@@ -14,8 +14,8 @@ interface Props {
 /** Offered after the install has already succeeded, so it reads as the next
  *  thing worth doing rather than something that went wrong. */
 export function ConnectStep({ names, onConnect }: Props) {
-  const { t } = useTranslation();
-  const providers = new Intl.ListFormat("en", {
+  const { t, locale } = useTranslation();
+  const providers = new Intl.ListFormat(locale, {
     style: "long",
     type: "conjunction",
   }).format(names);
@@ -27,7 +27,10 @@ export function ConnectStep({ names, onConnect }: Props) {
     >
       <Icon icon={PlugSocketIcon} size={18} aria-hidden />
       <Text variant="small" tone="secondary">
-        Its steps use {providers}. Connect when you first need it.
+        {t(
+          `Its steps use ${providers}. Connect when you first need it.`,
+          `其步骤使用 ${providers}。首次需要时再连接即可。`,
+        )}
       </Text>
       <Button
         variant="secondary"

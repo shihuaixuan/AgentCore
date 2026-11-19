@@ -94,7 +94,10 @@ export function MobileSubmissionsList({
           </Text>
         </div>
         <Text variant="small" tone="muted">
-          {submissions.length} of {totalCount}
+          {t(
+            `${submissions.length} of ${totalCount}`,
+            `显示 ${submissions.length} 项，共 ${totalCount} 项`,
+          )}
         </Text>
       </div>
 
@@ -126,8 +129,8 @@ export function MobileSubmissionsList({
             activeKey={filterState.sortKey}
             activeDir={filterState.sortDir}
             onChange={setSort}
-            ascLabel="Oldest first"
-            descLabel="Newest first"
+            ascLabel={t("Oldest first", "最早优先")}
+            descLabel={t("Newest first", "最新优先")}
           />
         </FilterChip>
         <FilterChip label={t("Runs", "运行记录")}>
@@ -136,8 +139,8 @@ export function MobileSubmissionsList({
             activeKey={filterState.sortKey}
             activeDir={filterState.sortDir}
             onChange={setSort}
-            ascLabel="Lowest first"
-            descLabel="Highest first"
+            ascLabel={t("Lowest first", "最少优先")}
+            descLabel={t("Highest first", "最多优先")}
           />
         </FilterChip>
       </div>
@@ -159,8 +162,14 @@ export function MobileSubmissionsList({
           <div className="flex flex-col items-center justify-center gap-3 px-4 py-10 text-center">
             <Text variant="body-medium">
               {debouncedSearch
-                ? `No submissions match "${debouncedSearch}"`
-                : "No submissions match these filters"}
+                ? t(
+                    `No submissions match "${debouncedSearch}"`,
+                    `没有与“${debouncedSearch}”匹配的提交记录`,
+                  )
+                : t(
+                    "No submissions match these filters",
+                    "没有符合这些筛选条件的提交记录",
+                  )}
             </Text>
             {debouncedSearch ? (
               <Button

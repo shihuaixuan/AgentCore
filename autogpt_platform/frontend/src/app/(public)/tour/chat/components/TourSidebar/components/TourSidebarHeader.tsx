@@ -9,15 +9,21 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { SidebarLeftIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function TourSidebarHeader() {
+  const { t } = useTranslation();
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
 
   const toggleButton = (
     <button
       type="button"
-      aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      aria-label={
+        isCollapsed
+          ? t("Expand sidebar", "展开侧边栏")
+          : t("Collapse sidebar", "收起侧边栏")
+      }
       onClick={toggleSidebar}
       className={cn(
         "size-8 shrink-0 items-center justify-center rounded-md text-foreground-emphasis transition-colors hover:bg-surface-active",
@@ -49,9 +55,17 @@ export function TourSidebarHeader() {
           )}
         >
           {isCollapsed ? (
-            <AutoGPTLogo hideText viewBox="47 -1 42 42" className="size-8" />
+            <AutoGPTLogo
+              hideText
+              viewBox="47 -1 42 42"
+              className="size-8"
+              aria-label={t("AutoGPT Logo", "AutoGPT 标志")}
+            />
           ) : (
-            <AutoGPTLogo className="h-9 w-auto" />
+            <AutoGPTLogo
+              className="h-9 w-auto"
+              aria-label={t("AutoGPT Logo", "AutoGPT 标志")}
+            />
           )}
         </Link>
         {isCollapsed ? toggleButton : null}

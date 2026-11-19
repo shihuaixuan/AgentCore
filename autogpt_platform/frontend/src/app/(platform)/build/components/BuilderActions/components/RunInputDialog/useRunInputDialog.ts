@@ -12,6 +12,7 @@ import { useNodeStore } from "@/app/(platform)/build/stores/nodeStore";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { useReactFlow } from "@xyflow/react";
 import type { CredentialField } from "@/components/contextual/CredentialsInput/components/CredentialsGroupedView/helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export const useRunInputDialog = ({
   setIsOpen,
@@ -22,6 +23,7 @@ export const useRunInputDialog = ({
   graphID?: string;
   graphVersion?: number | null;
 }) => {
+  const { t } = useTranslation();
   const credentialsSchema = useGraphStore(
     (state) => state.credentialsInputSchema,
   );
@@ -75,9 +77,13 @@ export const useRunInputDialog = ({
             }
 
             toast({
-              title: errorData?.message || "Workflow validation failed",
-              description:
+              title:
+                errorData?.message ||
+                t("Workflow validation failed", "工作流校验失败"),
+              description: t(
                 "Please fix the validation errors on the highlighted nodes and try again.",
+                "请修复高亮节点中的校验错误后重试。",
+              ),
               variant: "destructive",
             });
             setIsOpen(false);
@@ -111,9 +117,10 @@ export const useRunInputDialog = ({
             }
           } else {
             toast({
-              title: "Error running workflow",
+              title: t("Error running workflow", "运行工作流时出错"),
               description:
-                (error as Error).message || "An unexpected error occurred.",
+                (error as Error).message ||
+                t("An unexpected error occurred.", "发生意外错误。"),
               variant: "destructive",
             });
             setIsOpen(false);

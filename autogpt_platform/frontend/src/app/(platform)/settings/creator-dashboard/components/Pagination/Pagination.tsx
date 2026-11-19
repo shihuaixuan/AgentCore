@@ -44,7 +44,10 @@ export function Pagination({ pagination, onPageChange, disabled }: Props) {
       data-testid="submissions-pagination"
     >
       <Text variant="small" tone="muted">
-        Showing {startItem}–{endItem} of {total_items}
+        {t(
+          `Showing ${startItem}–${endItem} of ${total_items}`,
+          `显示第 ${startItem}–${endItem} 项，共 ${total_items} 项`,
+        )}
       </Text>
       <div className="flex items-center gap-1.5">
         <Button
@@ -55,7 +58,7 @@ export function Pagination({ pagination, onPageChange, disabled }: Props) {
           onClick={() => onPageChange(current_page - 1)}
           aria-label={t("Previous page", "上一页")}
         >
-          {t("Previous", "上一步")}
+          {t("Previous", "上一页")}
         </Button>
         <div className="flex items-center gap-1">
           {visiblePages.map((page) => {
@@ -66,7 +69,7 @@ export function Pagination({ pagination, onPageChange, disabled }: Props) {
                 type="button"
                 disabled={disabled}
                 onClick={() => onPageChange(page)}
-                aria-label={`Go to page ${page}`}
+                aria-label={t(`Go to page ${page}`, `转到第 ${page} 页`)}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-caption font-medium tabular-nums transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50",
@@ -88,7 +91,7 @@ export function Pagination({ pagination, onPageChange, disabled }: Props) {
           onClick={() => onPageChange(current_page + 1)}
           aria-label={t("Next page", "下一页")}
         >
-          {t("Next", "下一步")}
+          {t("Next", "下一页")}
         </Button>
       </div>
     </div>

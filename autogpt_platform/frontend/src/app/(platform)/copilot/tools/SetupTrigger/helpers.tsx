@@ -113,31 +113,43 @@ export function getSetupTriggerToolOutput(
   return parseOutput((part as { output?: unknown }).output);
 }
 
-export function getAnimationText(part: {
-  state: ToolUIPart["state"];
-  output?: unknown;
-}): string {
+export function getAnimationText(
+  part: {
+    state: ToolUIPart["state"];
+    output?: unknown;
+  },
+  t = (english: string, _chinese: string) => english,
+): string {
   switch (part.state) {
     case "input-streaming":
     case "input-available":
-      return "Setting up the trigger";
+      return t("Setting up the trigger", "正在设置触发器");
     case "output-available": {
       const output = parseOutput(part.output);
-      if (!output) return "Setting up the trigger";
+      if (!output) return t("Setting up the trigger", "正在设置触发器");
       if (isTriggerSetupOutput(output))
-        return `Trigger "${output.name}" set up`;
+        return t(
+          `Trigger "${output.name}" set up`,
+          `触发器“${output.name}”已设置`,
+        );
       if (isSetupTriggerSetupRequirementsOutput(output))
-        return `Setup needed for "${output.setup_info.agent_name}"`;
+        return t(
+          `Setup needed for "${output.setup_info.agent_name}"`,
+          `“${output.setup_info.agent_name}”需要设置`,
+        );
       if (isTriggerConfigRequiredOutput(output))
-        return "Trigger configuration needed";
+        return t("Trigger configuration needed", "需要配置触发器");
       if (isSetupTriggerNeedLoginOutput(output))
-        return "Sign in required to set up the trigger";
-      return "Something went wrong";
+        return t(
+          "Sign in required to set up the trigger",
+          "设置触发器需要登录",
+        );
+      return t("Something went wrong", "发生了错误");
     }
     case "output-error":
-      return "Something went wrong";
+      return t("Something went wrong", "发生了错误");
     default:
-      return "Setting up the trigger";
+      return t("Setting up the trigger", "正在设置触发器");
   }
 }
 

@@ -670,12 +670,13 @@ function soulChanges(output: Record<string, unknown>) {
 }
 
 export function ExpertChangeCardSkeleton() {
+  const { t } = useTranslation();
   return (
     <div className={SHELL}>
       <div className={HEADER}>
         <Icon icon={UserAdd01Icon} size={18} tone="subtle" />
         <Text variant="body-medium-tight" as="span" tone="primary">
-          Create an Expert
+          {t("Create an Expert", "创建专家")}
         </Text>
       </div>
       <div className="px-4 py-3">
@@ -783,7 +784,7 @@ export function ExpertChangeGroup({
   isCurrentlyStreaming = false,
   readOnly = false,
 }: GroupProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<StepDirection | undefined>();
   const [decisions, setDecisions] = useState<Record<string, Decision>>({});
@@ -834,11 +835,17 @@ export function ExpertChangeGroup({
     // needs saying.
     void Promise.resolve(actions.onSend(message)).catch((error: unknown) =>
       toastSendFailure({
-        title: "Couldn't send message",
+        title: t("Couldn't send message", "消息发送失败"),
+        locale,
         error,
-        recovery: "it is still in the thread, use Retry to send it again",
-        paywallRecovery:
+        recovery: t(
+          "it is still in the thread, use Retry to send it again",
+          "消息仍保留在对话中，请点击“重试”重新发送",
+        ),
+        paywallRecovery: t(
           "it is still in the thread, use Retry once you have a plan",
+          "消息仍保留在对话中，开通套餐后请点击“重试”",
+        ),
       }),
     );
   }

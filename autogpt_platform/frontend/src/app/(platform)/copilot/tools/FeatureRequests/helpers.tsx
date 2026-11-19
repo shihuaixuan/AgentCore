@@ -148,19 +148,21 @@ export function isErrorOutput(
 export function getAccordionTitle(
   toolType: FeatureRequestToolType,
   output: FeatureRequestOutput,
+  t = (english: string, _chinese: string) => english,
 ): string {
   if (toolType === "tool-search_feature_requests") {
-    if (isSearchResultsOutput(output)) return "Feature requests";
-    if (isNoResultsOutput(output)) return "No feature requests found";
-    return "Feature request search error";
+    if (isSearchResultsOutput(output)) return t("Feature requests", "功能请求");
+    if (isNoResultsOutput(output))
+      return t("No feature requests found", "未找到功能请求");
+    return t("Feature request search error", "搜索功能请求时出错");
   }
   if (isCreatedOutput(output)) {
     return output.is_new_issue
-      ? "Feature request created"
-      : "Added to feature request";
+      ? t("Feature request created", "功能请求已创建")
+      : t("Added to feature request", "已添加到功能请求");
   }
-  if (isErrorOutput(output)) return "Feature request error";
-  return "Feature request";
+  if (isErrorOutput(output)) return t("Feature request error", "功能请求出错");
+  return t("Feature request", "功能请求");
 }
 
 /* ------------------------------------------------------------------ */
@@ -174,29 +176,46 @@ interface AnimationPart {
   output?: unknown;
 }
 
-export function getAnimationText(part: AnimationPart): string {
+export function getAnimationText(
+  part: AnimationPart,
+  t = (english: string, _chinese: string) => english,
+): string {
   if (part.type === "tool-search_feature_requests") {
     const query = (part.input as { query?: string } | undefined)?.query?.trim();
-    const queryText = query ? ` for "${query}"` : "";
+    const queryText = query ? t(` for "${query}"`, `：“${query}”`) : "";
 
     switch (part.state) {
       case "input-streaming":
       case "input-available":
-        return `Searching feature requests${queryText}`;
+        return t("Searching feature requests", "正在搜索功能请求") + queryText;
       case "output-available": {
         const output = parseOutput(part.output);
-        if (!output) return `Searching feature requests${queryText}`;
+        if (!output)
+          return (
+            t("Searching feature requests", "正在搜索功能请求") + queryText
+          );
         if (isSearchResultsOutput(output)) {
-          return `Found ${output.count} feature request${output.count === 1 ? "" : "s"}${queryText}`;
+          return (
+            t(
+              `Found ${output.count} feature request${output.count === 1 ? "" : "s"}`,
+              `找到 ${output.count} 个功能请求`,
+            ) + queryText
+          );
         }
         if (isNoResultsOutput(output))
-          return `No feature requests found${queryText}`;
-        return `Error searching feature requests${queryText}`;
+          return t("No feature requests found", "未找到功能请求") + queryText;
+        return (
+          t("Error searching feature requests", "搜索功能请求时出错") +
+          queryText
+        );
       }
       case "output-error":
-        return `Error searching feature requests${queryText}`;
+        return (
+          t("Error searching feature requests", "搜索功能请求时出错") +
+          queryText
+        );
       default:
-        return "Searching feature requests";
+        return t("Searching feature requests", "正在搜索功能请求");
     }
   }
 
@@ -207,22 +226,33 @@ export function getAnimationText(part: AnimationPart): string {
   switch (part.state) {
     case "input-streaming":
     case "input-available":
-      return `Creating feature request${titleText}`;
+      return t(
+        `Creating feature request${titleText}`,
+        `正在创建功能请求${titleText}`,
+      );
     case "output-available": {
       const output = parseOutput(part.output);
-      if (!output) return `Creating feature request${titleText}`;
+      if (!output)
+        return t(
+          `Creating feature request${titleText}`,
+          `正在创建功能请求${titleText}`,
+        );
       if (isCreatedOutput(output)) {
         return output.is_new_issue
-          ? "Feature request created"
-          : "Added to existing feature request";
+          ? t("Feature request created", "功能请求已创建")
+          : t("Added to existing feature request", "已添加到现有功能请求");
       }
-      if (isErrorOutput(output)) return "Error creating feature request";
-      return `Created feature request${titleText}`;
+      if (isErrorOutput(output))
+        return t("Error creating feature request", "创建功能请求时出错");
+      return t(
+        `Created feature request${titleText}`,
+        `已创建功能请求${titleText}`,
+      );
     }
     case "output-error":
-      return "Error creating feature request";
+      return t("Error creating feature request", "创建功能请求时出错");
     default:
-      return "Creating feature request";
+      return t("Creating feature request", "正在创建功能请求");
   }
 }
 

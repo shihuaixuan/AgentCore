@@ -9,6 +9,8 @@ import { capabilityTargetRow } from "./capabilityRow";
 import type { ChainRow } from "./helpers";
 import { asObject, str } from "./resultHelpers";
 import { getCatalogLabel } from "./toolCatalog";
+import type { Locale } from "@/lib/i18n/locale";
+import { approvalHeadline } from "../ApprovalQueue/approval-copy";
 
 export type HeldState =
   | "waiting"
@@ -33,18 +35,25 @@ export function applyHeldOutcome(
   row: ChainRow,
   outcomes: ReadonlyMap<string, HeldOutcome>,
   answers: Readonly<Record<string, HeldAnswer>> = {},
+  locale: Locale = "en",
 ): ChainRow {
   const data = asObject(row.output);
   if (!row.tool || data?.type !== "approval_required") return row;
   const reviewId = str(data, "review_id");
   const tool = heldToolName(data, row.tool);
-  const ask = heldAskText(data, tool);
+  const ask = heldAskText(data, tool, locale);
   const read = isHeldReadId(reviewId);
-  const didnt = read ? ask : `Didn't ${lowerFirst(ask)}`;
+  const didnt = read
+    ? ask
+    : locale === "zh-CN"
+      ? `未执行：${ask}`
+      : `Didn't ${lowerFirst(ask)}`;
   if (!reviewId) {
     return settle(
       row,
-      `Couldn't ask about ${lowerFirst(ask)}`,
+      locale === "zh-CN"
+        ? `无法请求确认：${ask}`
+        : `Couldn't ask about ${lowerFirst(ask)}`,
       "not-run",
       reviewId,
     );
@@ -73,7 +82,8 @@ export function applyHeldOutcome(
     return settle(row, didnt, outcome.outcome, reviewId, read, outcome.card);
   }
   const result = asObject(outcome.output);
-  const done = getCatalogLabel(tool, row.input, "done")?.text ?? ask;
+  const done =
+    getCatalogLabel(tool, row.input, "done", {}, locale)?.text ?? ask;
   // It ran and failed: the normal error row, still marked as approved.
   if (result?.type === "error") {
     return {
@@ -106,8 +116,16 @@ export function heldToolName(
 }
 
 // The server's words for the call, quoted as every other chain row quotes.
-export function heldAskText(output: Record<string, unknown>, toolName: string) {
-  const ask = str(output, "ask") ?? fallbackAsk(toolName);
+export function heldAskText(
+  output: Record<string, unknown>,
+  toolName: string,
+  locale: Locale = "en",
+) {
+  const ask = approvalHeadline(
+    str(output, "ask") ?? fallbackAsk(toolName),
+    toolName,
+    locale,
+  );
   const object = str(output, "object");
   return object ? `${ask} "${object}"` : ask;
 }

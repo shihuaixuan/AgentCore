@@ -12,6 +12,7 @@ import {
   SUBSCRIBE_NOW_VALUE,
 } from "@/components/organisms/TrialCard/helpers";
 import { useAuthStore } from "@/lib/auth/hooks/useAuthStore";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   trackPaywallViewed,
   trackPlanSelected,
@@ -26,6 +27,7 @@ import {
 import { useTrialPlanRequest } from "./useTrialPlanRequest";
 
 export function useTrialPlanChoices(offer: TrialOfferResponse) {
+  const { locale } = useTranslation();
   const userID = useAuthStore((state) => state.user?.id);
   const subscription = useGetSubscriptionStatus({
     query: {
@@ -45,9 +47,9 @@ export function useTrialPlanChoices(offer: TrialOfferResponse) {
   // A trial status that lags behind a plan change must not offer the choices
   // again, so they wait for the subscription itself to still be the trial.
   const isVisible = subscription.data?.tier === "TRIAL";
-  const ownPlan = getOwnPlanChoice(offer);
+  const ownPlan = getOwnPlanChoice(offer, locale);
   const upgradePlan = subscription.data
-    ? getUpgradePlanChoice(offer, subscription.data)
+    ? getUpgradePlanChoice(offer, subscription.data, locale)
     : null;
   const confirmPlan =
     confirming && confirming.ownerID === userID

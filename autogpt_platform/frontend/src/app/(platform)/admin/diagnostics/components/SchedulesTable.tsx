@@ -180,7 +180,10 @@ export function SchedulesTable({
         title: t("Success", "成功"),
         description:
           (result.data as CleanupResponseData)?.message ||
-          `Deleted ${(result.data as CleanupResponseData)?.deleted_count || 0} schedule(s)`,
+          t(
+            `Deleted ${(result.data as CleanupResponseData)?.deleted_count || 0} schedule(s)`,
+            `已删除 ${(result.data as CleanupResponseData)?.deleted_count || 0} 个计划任务`,
+          ),
       });
 
       setSelectedIds(new Set());
@@ -191,7 +194,9 @@ export function SchedulesTable({
       toast({
         title: t("Error", "错误"),
         description:
-          err instanceof Error ? err.message : t("Failed to delete schedules", "删除计划任务失败"),
+          err instanceof Error
+            ? err.message
+            : t("Failed to delete schedules", "删除计划任务失败"),
         variant: "destructive",
       });
     }
@@ -240,6 +245,7 @@ export function SchedulesTable({
                     if (onRefresh) onRefresh();
                   }}
                   disabled={isLoading}
+                  aria-label={t("Refresh schedules", "刷新计划任务")}
                 >
                   <span
                     className={cn("block h-4 w-4", isLoading && "animate-spin")}
@@ -257,7 +263,7 @@ export function SchedulesTable({
                 {diagnosticsData && ` (${diagnosticsData.user_schedules})`}
               </TabsLineTrigger>
               <TabsLineTrigger value="orphaned">
-                Orphaned
+                {t("Orphaned", "孤立计划任务")}
                 {diagnosticsData && ` (${diagnosticsData.total_orphaned})`}
               </TabsLineTrigger>
             </TabsLineList>
@@ -266,7 +272,11 @@ export function SchedulesTable({
           <TabsLineContent value={activeTab}>
             <CardContent>
               {isLoading && schedules.length === 0 ? (
-                <div className="flex h-32 items-center justify-center">
+                <div
+                  className="flex h-32 items-center justify-center"
+                  role="status"
+                  aria-label={t("Loading schedules", "正在加载计划任务")}
+                >
                   <span className="block h-6 w-6 animate-spin text-foreground-subtle">
                     <Icon icon={Refresh01Icon} className="h-6 w-6" />
                   </span>
@@ -281,6 +291,10 @@ export function SchedulesTable({
                     <TableRow>
                       <TableHead className="w-12">
                         <Checkbox
+                          aria-label={t(
+                            "Select all schedules",
+                            "选择全部计划任务",
+                          )}
                           checked={
                             selectedIds.size === schedules.length &&
                             schedules.length > 0
@@ -310,6 +324,10 @@ export function SchedulesTable({
                           >
                             <TableCell>
                               <Checkbox
+                                aria-label={t(
+                                  `Select schedule ${schedule.schedule_name}`,
+                                  `选择计划任务 ${schedule.schedule_name}`,
+                                )}
                                 checked={selectedIds.has(schedule.schedule_id)}
                                 onCheckedChange={(checked) =>
                                   handleSelectSchedule(
@@ -321,7 +339,9 @@ export function SchedulesTable({
                             </TableCell>
                             <TableCell>{schedule.schedule_name}</TableCell>
                             <TableCell>
-                              <div>{schedule.graph_name || t("Unknown", "未知")}</div>
+                              <div>
+                                {schedule.graph_name || t("Unknown", "未知")}
+                              </div>
                               <Text
                                 variant="small-mono-tight"
                                 as="div"
@@ -334,7 +354,7 @@ export function SchedulesTable({
                               <div>
                                 {(schedule as ScheduleDetail).user_email || (
                                   <span className="text-foreground-subtle">
-                                    Unknown
+                                    {t("Unknown", "未知")}
                                   </span>
                                 )}
                               </div>
@@ -346,10 +366,16 @@ export function SchedulesTable({
                                   );
                                   toast({
                                     title: t("Copied", "已复制"),
-                                    description: t("User ID copied to clipboard", "用户 ID 已复制到剪贴板"),
+                                    description: t(
+                                      "User ID copied to clipboard",
+                                      "用户 ID 已复制到剪贴板",
+                                    ),
                                   });
                                 }}
-                                title={t("Click to copy user ID", "点击复制用户 ID")}
+                                title={t(
+                                  "Click to copy user ID",
+                                  "点击复制用户 ID",
+                                )}
                               >
                                 <Text
                                   variant="small-mono-tight"
@@ -379,7 +405,7 @@ export function SchedulesTable({
                                 </>
                               ) : (
                                 <span className="text-foreground-subtle">
-                                  t("N/A", "不适用")
+                                  {t("N/A", "不适用")}
                                 </span>
                               )}
                             </TableCell>
@@ -396,7 +422,7 @@ export function SchedulesTable({
                                   {(
                                     schedule as OrphanedScheduleDetail
                                   ).orphan_reason?.replace(/_/g, " ") ||
-                                    "unknown"}
+                                    t("unknown", "未知")}
                                 </span>
                               </TableCell>
                             )}
@@ -411,9 +437,10 @@ export function SchedulesTable({
               {totalPages > 1 && activeTab === "all" && (
                 <div className="mt-4 flex items-center justify-between">
                   <Text variant="body-tight" as="div" tone="secondary">
-                    Showing {(currentPage - 1) * pageSize + 1} to{" "}
-                    {Math.min(currentPage * pageSize, total)} of {total}{" "}
-                    schedules
+                    {t(
+                      `Showing ${(currentPage - 1) * pageSize + 1} to ${Math.min(currentPage * pageSize, total)} of ${total} schedules`,
+                      `显示第 ${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, total)} 条，共 ${total} 个计划任务`,
+                    )}
                   </Text>
                   <div className="flex gap-2">
                     <Button
@@ -422,10 +449,13 @@ export function SchedulesTable({
                       onClick={() => setCurrentPage(currentPage - 1)}
                       disabled={currentPage === 1}
                     >
-                      Previous
+                      {t("Previous", "上一页")}
                     </Button>
                     <div className="flex items-center px-3">
-                      Page {currentPage} of {totalPages}
+                      {t(
+                        `Page ${currentPage} of ${totalPages}`,
+                        `第 ${currentPage} / ${totalPages} 页`,
+                      )}
                     </div>
                     <Button
                       variant="outline"
@@ -433,7 +463,7 @@ export function SchedulesTable({
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
                     >
-                      Next
+                      {t("Next", "下一页")}
                     </Button>
                   </div>
                 </div>
@@ -446,24 +476,35 @@ export function SchedulesTable({
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("Confirm Delete Schedules", "确认删除计划任务")}</DialogTitle>
+            <DialogTitle>
+              {t("Confirm Delete Schedules", "确认删除计划任务")}
+            </DialogTitle>
             <DialogDescription>
               {activeTab === "orphaned" && selectedIds.size === 0 ? (
                 <>
-                  Are you sure you want to delete ALL {total} orphaned
-                  schedules?
+                  {t(
+                    `Are you sure you want to delete ALL ${total} orphaned schedules?`,
+                    `确定要删除全部 ${total} 个孤立计划任务吗？`,
+                  )}
                   <br />
                   <br />
-                  These schedules reference deleted graphs or graphs the user no
-                  longer has access to. Deleting them is safe.
+                  {t(
+                    "These schedules reference deleted graphs or graphs the user no longer has access to. Deleting them is safe.",
+                    "这些计划任务引用了已删除或用户已无权访问的工作流，可以安全删除。",
+                  )}
                 </>
               ) : (
                 <>
-                  Are you sure you want to delete {selectedIds.size} selected
-                  schedule(s)?
+                  {t(
+                    `Are you sure you want to delete ${selectedIds.size} selected schedule(s)?`,
+                    `确定要删除选中的 ${selectedIds.size} 个计划任务吗？`,
+                  )}
                   <br />
                   <br />
-                  This will permanently remove the schedules from the system.
+                  {t(
+                    "This will permanently remove the schedules from the system.",
+                    "这将从系统中永久删除这些计划任务。",
+                  )}
                 </>
               )}
             </DialogDescription>
@@ -473,10 +514,10 @@ export function SchedulesTable({
               variant="outline"
               onClick={() => setShowDeleteDialog(false)}
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
-              Delete Schedules
+              {t("Delete Schedules", "删除计划任务")}
             </Button>
           </DialogFooter>
         </DialogContent>

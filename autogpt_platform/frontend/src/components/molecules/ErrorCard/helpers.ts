@@ -61,6 +61,7 @@ export function handleReportError(
   responseError?: ErrorCardProps["responseError"],
   httpError?: ErrorCardProps["httpError"],
   context?: string,
+  locale: Locale = "en",
 ): void {
   try {
     // Import Sentry dynamically to avoid SSR issues
@@ -105,21 +106,32 @@ export function handleReportError(
 
       // Show success toast notification after pressing the report error button
       import("sonner").then(({ toast }) => {
-        toast.success("Error reported successfully", {
-          description:
-            "Thank you for helping us improve! Our team has been notified.",
-          duration: 4000,
-        });
+        toast.success(
+          locale === "zh-CN" ? "错误已成功报告" : "Error reported successfully",
+          {
+            description:
+              locale === "zh-CN"
+                ? "感谢你帮助改进产品！我们已通知相关团队。"
+                : "Thank you for helping us improve! Our team has been notified.",
+            duration: 4000,
+          },
+        );
       });
     });
   } catch (error) {
     console.error("Failed to report error to Sentry:", error);
     // Fallback toast notification
     import("sonner").then(({ toast }) => {
-      toast.error("Failed to report error", {
-        description: "Please try again or contact support directly.",
-        duration: 4000,
-      });
+      toast.error(
+        locale === "zh-CN" ? "无法报告错误" : "Failed to report error",
+        {
+          description:
+            locale === "zh-CN"
+              ? "请重试，或直接联系支持团队。"
+              : "Please try again or contact support directly.",
+          duration: 4000,
+        },
+      );
     });
   }
 }

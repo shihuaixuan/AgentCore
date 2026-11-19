@@ -4,6 +4,7 @@ import { preprocessInputSchema } from "@/components/renderers/InputRenderer/util
 import { CustomNodeData } from "../CustomNode";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type StickyNoteBlockType = {
   selected: boolean;
@@ -12,6 +13,7 @@ type StickyNoteBlockType = {
 };
 
 export const StickyNoteBlock = ({ data, nodeId }: StickyNoteBlockType) => {
+  const { t } = useTranslation();
   const { angle, color } = useMemo(() => {
     const hash = nodeId.split("").reduce((acc, char) => {
       return char.charCodeAt(0) + ((acc << 5) - acc);
@@ -43,7 +45,7 @@ export const StickyNoteBlock = ({ data, nodeId }: StickyNoteBlockType) => {
       style={{ "--note-angle": `${angle}deg` } as CSSProperties}
     >
       <Text variant="h3-tracking-tight" tone="body">
-        Notes #{nodeId.split("-")[0]}
+        {t("Notes", "便笺")} #{nodeId.split("-")[0]}
       </Text>
       <FormCreator
         jsonSchema={preprocessInputSchema(data.inputSchema)}

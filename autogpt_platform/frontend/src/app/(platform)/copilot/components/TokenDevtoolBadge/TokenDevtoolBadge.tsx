@@ -11,6 +11,7 @@ import { DashboardSpeed02Icon } from "@hugeicons/core-free-icons";
 import { formatTokenCount } from "../../tokenDevtool/tokenMath";
 import { TokenDevtoolPanel } from "./components/TokenDevtoolPanel";
 import { useTokenDevtoolBadge } from "./useTokenDevtoolBadge";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   sessionId: string;
@@ -26,6 +27,7 @@ interface Props {
  *  per-turn usage; ⟲ marks a turn where the stream carried a
  *  `context_compaction` tool call. */
 export function TokenDevtoolBadge({ sessionId, className }: Props) {
+  const { t } = useTranslation();
   const devtool = useTokenDevtoolBadge(sessionId);
   const { context } = devtool;
 
@@ -34,9 +36,12 @@ export function TokenDevtoolBadge({ sessionId, className }: Props) {
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={`Token devtool, context ${
-            context === null ? "unknown" : formatTokenCount(context)
-          }`}
+          aria-label={t(
+            `Token devtool, context ${
+              context === null ? "unknown" : formatTokenCount(context)
+            }`,
+            `Token 调试工具，上下文 ${context === null ? "未知" : formatTokenCount(context)}`,
+          )}
           className={cn(
             "flex h-8 w-8 items-center justify-center rounded-full text-foreground-tertiary transition-colors hover:bg-surface-hover hover:text-foreground-body",
             className,
@@ -44,7 +49,12 @@ export function TokenDevtoolBadge({ sessionId, className }: Props) {
         >
           <Icon icon={DashboardSpeed02Icon} size={16} />
           <span className="sr-only">
-            {context === null ? "ctx —" : `ctx ~${formatTokenCount(context)}`}
+            {context === null
+              ? t("ctx —", "上下文 —")
+              : t(
+                  `ctx ~${formatTokenCount(context)}`,
+                  `上下文约 ${formatTokenCount(context)}`,
+                )}
           </span>
         </button>
       </PopoverTrigger>

@@ -28,14 +28,14 @@ export function useExpertAvatarPicker({
   avatarUrl,
   onPick,
 }: Args) {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const generation = useAvatarGeneration();
   const upload = useMutation({
     mutationFn: (file: File) =>
-      uploadSubmissionMediaDirect(file, "expert-avatar"),
+      uploadSubmissionMediaDirect(file, "expert-avatar", locale),
   });
 
   const generatedUrl =
@@ -55,11 +55,15 @@ export function useExpertAvatarPicker({
 
   async function uploadFile(file: File | undefined) {
     if (!file) return;
-    const sizeError = getFileSizeError(file, SUBMISSION_MEDIA_MAX_SIZE_MB);
+    const sizeError = getFileSizeError(
+      file,
+      SUBMISSION_MEDIA_MAX_SIZE_MB,
+      locale,
+    );
     if (!ACCEPTED_AVATAR_TYPES.split(",").includes(file.type) || sizeError) {
       setUploadError(
         sizeError
-          ? t(sizeError, `图片不能超过 ${SUBMISSION_MEDIA_MAX_SIZE_MB} MB。`)
+          ? sizeError
           : t(
               "Choose a PNG, JPEG, or WEBP.",
               "请选择 PNG、JPEG 或 WEBP 图片。",

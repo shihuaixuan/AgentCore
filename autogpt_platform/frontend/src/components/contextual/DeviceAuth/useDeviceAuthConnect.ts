@@ -91,7 +91,7 @@ export function useDeviceAuthConnect({
         if (isUnmountedRef.current || runId !== runIdRef.current) return;
 
         if (response.status !== 200) {
-          throw new Error("Device auth poll failed");
+          throw new Error(t("Device auth poll failed", "查询设备授权状态失败"));
         }
         consecutiveFailuresRef.current = 0;
         const { status, credentials } = response.data;
@@ -132,7 +132,10 @@ export function useDeviceAuthConnect({
               new Error(
                 status === "denied"
                   ? "access_denied"
-                  : "The sign-in code expired. Please try again.",
+                  : t(
+                      "The sign-in code expired. Please try again.",
+                      "登录代码已过期，请重试。",
+                    ),
               ),
             );
             return;
@@ -140,12 +143,15 @@ export function useDeviceAuthConnect({
           toast({
             title:
               status === "denied"
-                ? "Authorization denied"
-                : "Authorization expired",
+                ? t("Authorization denied", "授权被拒绝")
+                : t("Authorization expired", "授权已过期"),
             description:
               status === "denied"
-                ? "The authorization request was denied."
-                : "The authorization request expired. Please try again.",
+                ? t("The authorization request was denied.", "授权请求被拒绝。")
+                : t(
+                    "The authorization request expired. Please try again.",
+                    "授权请求已过期，请重试。",
+                  ),
             variant: "destructive",
           });
           return;
@@ -184,7 +190,7 @@ export function useDeviceAuthConnect({
           return;
         }
         toast({
-          title: "Device auth polling failed",
+          title: t("Device auth polling failed", "查询设备授权状态失败"),
           description:
             error instanceof Error
               ? error.message
@@ -200,6 +206,7 @@ export function useDeviceAuthConnect({
       stopPolling,
       credentialsActions,
       onError,
+      t,
     ],
   );
 
@@ -220,7 +227,7 @@ export function useDeviceAuthConnect({
       if (isUnmountedRef.current || runId !== runIdRef.current) return;
 
       if (response.status !== 200) {
-        throw new Error("Device auth initiation failed");
+        throw new Error(t("Device auth initiation failed", "发起设备授权失败"));
       }
       const data = response.data;
       setUserCode(data.user_code);
@@ -242,7 +249,13 @@ export function useDeviceAuthConnect({
       if (isUnmountedRef.current || runId !== runIdRef.current) return;
       setPhase("error");
       if (
-        toastIfPlanRequired(error, "Connecting a service needs an active plan")
+        toastIfPlanRequired(
+          error,
+          t(
+            "Connecting a service needs an active plan",
+            "连接服务需要有效套餐",
+          ),
+        )
       )
         return;
       if (onError) {
@@ -250,7 +263,7 @@ export function useDeviceAuthConnect({
         return;
       }
       toast({
-        title: "Device auth initiation failed",
+        title: t("Device auth initiation failed", "发起设备授权失败"),
         description:
           error instanceof Error
             ? error.message

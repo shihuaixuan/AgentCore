@@ -8,6 +8,7 @@ import { SitrepItem } from "@/app/(platform)/library/components/SitrepItem/Sitre
 import type { AgentStatusFilter } from "@/app/(platform)/library/types";
 import { MAX_VISIBLE } from "../helpers";
 import { EmptyMessage } from "./EmptyMessage";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   activeTab: AgentStatusFilter;
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function ExecutionListSection({ activeTab, agents }: Props) {
+  const { t } = useTranslation();
   const allItems = useSitrepItems(agents, agents.length);
   const [showAll, setShowAll] = useState(false);
 
@@ -50,7 +52,12 @@ export function ExecutionListSection({ activeTab, agents }: Props) {
             size="small"
             onClick={handleToggleShowAll}
           >
-            {showAll ? "Collapse" : `Show all (${filtered.length})`}
+            {showAll
+              ? t("Collapse", "收起")
+              : t(
+                  `Show all (${filtered.length})`,
+                  `显示全部（${filtered.length}）`,
+                )}
           </Button>
         </div>
       ) : null}

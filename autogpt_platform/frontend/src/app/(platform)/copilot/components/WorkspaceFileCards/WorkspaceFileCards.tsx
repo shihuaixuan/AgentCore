@@ -12,6 +12,7 @@ import { WorkspaceFilesContent } from "./components/WorkspaceFilesContent";
 import { useExpertDocuments } from "./useExpertDocuments";
 import { useSessionActivity } from "./useSessionActivity";
 import { useWorkspaceFileCards } from "./useWorkspaceFileCards";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   sessionId: string;
@@ -21,6 +22,7 @@ interface Props {
 /** The chat's files, then the runs and schedules it set in motion — the
  *  files tab of the docked side panel. */
 export function WorkspaceFileCards({ sessionId, expert = null }: Props) {
+  const { t } = useTranslation();
   const {
     files,
     documentCount: sessionDocumentCount,
@@ -55,7 +57,7 @@ export function WorkspaceFileCards({ sessionId, expert = null }: Props) {
       )}
       {showFilesCard && (
         <StackSection
-          title="Files in this chat"
+          title={t("Files in this chat", "此对话中的文件")}
           icon={File02Icon}
           plain
           count={files.length || undefined}
@@ -68,7 +70,7 @@ export function WorkspaceFileCards({ sessionId, expert = null }: Props) {
                 withTooltip={false}
                 onClick={handleDownloadAll}
                 loading={isZipping}
-                aria-label="Download all"
+                aria-label={t("Download all", "下载全部")}
               >
                 <Icon icon={Download01Icon} size={14} />
               </Button>
@@ -91,7 +93,10 @@ export function WorkspaceFileCards({ sessionId, expert = null }: Props) {
       )}
       {expert && (
         <StackSection
-          title={`All ${expert.name}'s documents`}
+          title={t(
+            `All ${expert.name}'s documents`,
+            `${expert.name} 的所有文档`,
+          )}
           icon={File02Icon}
           plain
         >
@@ -104,7 +109,10 @@ export function WorkspaceFileCards({ sessionId, expert = null }: Props) {
             onDownload={handleDownload}
             onRequestDelete={setPendingDelete}
             onDownloadAll={() => undefined}
-            emptyMessage={`${expert.name} hasn't created any documents yet.`}
+            emptyMessage={t(
+              `${expert.name} hasn't created any documents yet.`,
+              `${expert.name} 尚未创建任何文档。`,
+            )}
             showHeader={false}
             rowStyle="detailed"
           />

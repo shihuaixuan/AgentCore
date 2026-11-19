@@ -1,3 +1,4 @@
+import type { Locale } from "@/lib/i18n/locale";
 import type { UIDataTypes, UIMessage, UITools } from "ai";
 import { parseSpecialMarkers } from "../../helpers/messageMarkers";
 import { TURN_PAUSED_PART_TYPE } from "../../turnPause";
@@ -134,8 +135,15 @@ export function getDisplayedOutcome(
 export function getTurnEndLabel(
   outcome: TurnOutcome,
   seconds: number | null,
+  locale: Locale = "en",
 ): string | null {
-  const time = seconds === null ? null : formatElapsed(seconds);
+  const time = seconds === null ? null : formatElapsed(seconds, locale);
+  if (locale === "zh-CN") {
+    if (outcome === "done") return time ? `已完成，用时 ${time}` : "已完成";
+    if (outcome === "stopped") return time ? `已停止，用时 ${time}` : "已停止";
+    if (outcome === "settling") return time;
+    return time ? `思考用时 ${time}` : null;
+  }
   if (outcome === "done") return time ? `Done in ${time}` : "Done";
   if (outcome === "stopped") return time ? `Stopped after ${time}` : "Stopped";
   if (outcome === "settling") return time;
@@ -143,9 +151,13 @@ export function getTurnEndLabel(
 }
 
 /** What a screen reader hears when a turn it watched streaming ends. */
-export function getLiveTurnEndAnnouncement(messages: ChatMessage[]): string {
+export function getLiveTurnEndAnnouncement(
+  messages: ChatMessage[],
+  locale: Locale = "en",
+): string {
   const last = messages.length - 1;
   if (messages[last]?.role !== "assistant") return "";
   const outcome = getTurnOutcome(getTurnMessages(messages, last));
-  return outcome === "done" ? "Reply finished" : "";
+  if (outcome !== "done") return "";
+  return locale === "zh-CN" ? "回复已完成" : "Reply finished";
 }

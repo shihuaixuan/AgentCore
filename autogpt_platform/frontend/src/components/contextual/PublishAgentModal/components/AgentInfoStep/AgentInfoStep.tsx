@@ -46,7 +46,7 @@ export function AgentInfoStep({
   initialData,
   isMarketplaceUpdate,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const {
     form,
@@ -483,7 +483,7 @@ export function AgentInfoStep({
                           className="truncate"
                         >
                           {field.value
-                            ? describeCron(field.value, t)
+                            ? describeCron(field.value, locale)
                             : t("Set schedule", "设置计划")}
                         </Text>
                       </button>
@@ -515,7 +515,7 @@ export function AgentInfoStep({
                 className="w-full sm:w-auto"
               >
                 {isSubmitting
-                  ? "Submitting"
+                  ? t("Submitting", "提交中")
                   : t("Submit for review", "提交审核")}
               </Button>
             }

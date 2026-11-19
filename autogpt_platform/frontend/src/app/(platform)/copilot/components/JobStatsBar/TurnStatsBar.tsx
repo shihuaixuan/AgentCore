@@ -1,4 +1,6 @@
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 import { cn } from "@/lib/utils";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import type { UIDataTypes, UIMessage, UITools } from "ai";
@@ -19,10 +21,10 @@ interface Props {
   isSettling?: boolean;
 }
 
-function formatLocalDate(iso: string): string {
+function formatLocalDate(iso: string, locale: Locale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   });
@@ -82,9 +84,12 @@ export function TurnStatsBar({
   isSettled = true,
   isSettling = false,
 }: Props) {
-  const { counters } = getWorkDoneCounters(turnMessages);
+  const { locale } = useTranslation();
+  const { counters } = getWorkDoneCounters(turnMessages, locale);
   const displaySeconds = resolveDisplaySeconds(elapsedSeconds, stats);
-  const localDate = stats?.createdAt ? formatLocalDate(stats.createdAt) : null;
+  const localDate = stats?.createdAt
+    ? formatLocalDate(stats.createdAt, locale)
+    : null;
   const outcome = getDisplayedOutcome(
     turnMessages,
     isLatest,
@@ -94,7 +99,7 @@ export function TurnStatsBar({
 
   const seconds =
     displaySeconds !== undefined && displaySeconds > 0 ? displaySeconds : null;
-  const label = getTurnEndLabel(outcome, seconds);
+  const label = getTurnEndLabel(outcome, seconds, locale);
   if (counters.length === 0 && label === null) return null;
 
   return (

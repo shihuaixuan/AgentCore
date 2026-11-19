@@ -19,6 +19,7 @@ import {
 } from "./helpers";
 import { useSuggestedTaskList } from "./useSuggestedTaskList";
 import { useTaskRecipient } from "./useTaskRecipient";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export type SuggestionSurface = "intro" | "home";
 
@@ -65,6 +66,7 @@ export function useSuggestedTasks({
   canSend,
   isRecipientResolving,
 }: Args) {
+  const { t, locale } = useTranslation();
   const [sendingId, setSendingId] = useState<string | null>(null);
   const recipient = useTaskRecipient({
     recipientID,
@@ -118,9 +120,13 @@ export function useSuggestedTasks({
       .catch((error: unknown) => {
         giveBack(task);
         toastSendFailure({
-          title: "Could not start that task",
+          title: t("Could not start that task", "无法启动此任务"),
           error,
-          recovery: "it is still in your suggestions",
+          recovery: t(
+            "it is still in your suggestions",
+            "它仍在你的建议列表中",
+          ),
+          locale,
         });
       })
       .finally(() => {
@@ -151,7 +157,10 @@ export function useSuggestedTasks({
     // says nothing about the team.
     if (owner.kind === "otto" && task.expert_template_id && !hasRosterFailed) {
       toast({
-        title: `${task.expert_name ?? "That expert"} isn't on your team, so Otto has this one.`,
+        title: t(
+          `${task.expert_name ?? "That expert"} isn't on your team, so Otto has this one.`,
+          `${task.expert_name ?? "该专家"}不在你的团队中，因此此任务将由 Otto 负责。`,
+        ),
       });
     }
     return true;
@@ -173,7 +182,7 @@ export function useSuggestedTasks({
 
     const toastId = `suggestion-removed-${task.id}`;
     toast({
-      title: "Task removed",
+      title: t("Task removed", "任务已移除"),
       duration: UNDO_TOAST_MS,
       replaceKey: toastId,
       action: (
@@ -185,7 +194,7 @@ export function useSuggestedTasks({
             undoRemove(before, [task.id]);
           }}
         >
-          Undo
+          {t("Undo", "撤销")}
         </Button>
       ),
     });
@@ -214,9 +223,12 @@ export function useSuggestedTasks({
     setSendingId(null);
     giveBack(task);
     toastSendFailure({
-      title: "Could not start that task",
-      error: new Error("The task's expert could not be selected"),
-      recovery: "it is still in your suggestions",
+      title: t("Could not start that task", "无法启动此任务"),
+      error: new Error(
+        t("The task's expert could not be selected", "无法选择此任务的专家"),
+      ),
+      recovery: t("it is still in your suggestions", "它仍在你的建议列表中"),
+      locale,
     });
   });
 

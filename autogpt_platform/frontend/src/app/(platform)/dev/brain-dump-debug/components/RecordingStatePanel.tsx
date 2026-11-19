@@ -14,6 +14,7 @@ import {
   type RecordingSnapshot,
 } from "../helpers";
 import { DebugField, DebugNote, DebugPanel } from "./DebugPanel";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   snapshot: RecordingSnapshot;
@@ -21,12 +22,16 @@ interface Props {
 }
 
 export function RecordingStatePanel({ snapshot, onRefresh }: Props) {
+  const { t } = useTranslation();
   const { meta, parts } = snapshot;
 
   return (
     <DebugPanel
-      title="IndexedDB recording state"
-      description="Read live from the autogpt-onboarding-brain-dump database every second."
+      title={t("IndexedDB recording state", "IndexedDB 录音状态")}
+      description={t(
+        "Read live from the autogpt-onboarding-brain-dump database every second.",
+        "每秒从 autogpt-onboarding-brain-dump 数据库实时读取。",
+      )}
       icon={DatabaseIcon}
       action={
         <Button
@@ -35,15 +40,22 @@ export function RecordingStatePanel({ snapshot, onRefresh }: Props) {
           onClick={onRefresh}
           leftIcon={<Icon icon={ArrowReloadHorizontalIcon} size={16} />}
         >
-          Refresh
+          {t("Refresh", "刷新")}
         </Button>
       }
     >
       {!snapshot.supported ? (
-        <DebugNote>IndexedDB is not available in this browser.</DebugNote>
+        <DebugNote>
+          {t(
+            "IndexedDB is not available in this browser.",
+            "此浏览器不支持 IndexedDB。",
+          )}
+        </DebugNote>
       ) : null}
       {snapshot.error ? (
-        <DebugNote>Read failed: {snapshot.error}</DebugNote>
+        <DebugNote>
+          {t("Read failed:", "读取失败：")} {snapshot.error}
+        </DebugNote>
       ) : null}
 
       {meta ? (
@@ -57,20 +69,29 @@ export function RecordingStatePanel({ snapshot, onRefresh }: Props) {
           />
           <DebugField label="finalized" value={formatValue(meta.finalized)} />
           <DebugField
-            label="parts read at"
+            label={t("parts read at", "分片读取时间")}
             value={formatClock(snapshot.readAt)}
           />
         </div>
       ) : (
         <DebugNote>
-          No meta row stored — nothing has been recorded in this browser, or the
-          dump completed and the store was cleared.
+          {t(
+            "No meta row stored — nothing has been recorded in this browser, or the dump completed and the store was cleared.",
+            "未存储元数据记录：此浏览器尚未录音，或梳理已完成且存储已清空。",
+          )}
         </DebugNote>
       )}
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <Badge variant="info">{parts.length} parts</Badge>
-        <Badge variant="info">{formatBytes(snapshot.totalBytes)} total</Badge>
+        <Badge variant="info">
+          {t(`${parts.length} parts`, `${parts.length} 个分片`)}
+        </Badge>
+        <Badge variant="info">
+          {t(
+            `${formatBytes(snapshot.totalBytes)} total`,
+            `总计 ${formatBytes(snapshot.totalBytes)}`,
+          )}
+        </Badge>
       </div>
 
       {parts.length > 0 ? (

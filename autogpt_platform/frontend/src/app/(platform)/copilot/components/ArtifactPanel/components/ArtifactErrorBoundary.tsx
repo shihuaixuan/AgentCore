@@ -3,6 +3,7 @@
 import * as Sentry from "@sentry/nextjs";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   children: ReactNode;
@@ -73,39 +74,59 @@ export class ArtifactErrorBoundary extends Component<Props, State> {
     const { error } = this.state;
     if (!error) return this.props.children;
 
-    const message = error.message || "Unknown rendering error";
-
     return (
-      <div
-        role="alert"
-        className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center"
-      >
-        <Text variant="body-medium-tight" tone="body">
-          This artifact couldn&apos;t be rendered
-        </Text>
-        <Text
-          variant="small-tight"
-          tone="muted"
-          className="max-w-md break-words"
-        >
-          Something in{" "}
-          <span className="font-mono">{this.props.artifactTitle}</span> threw an
-          error while rendering. The chat and sidebar are still working.
-        </Text>
-        <pre className="max-h-32 max-w-md overflow-auto rounded-md bg-surface-hover px-3 py-2 text-left text-caption break-words whitespace-pre-wrap text-foreground-body">
-          {message}
-        </pre>
-        <button
-          type="button"
-          onClick={this.handleCopy}
-          className="rounded-md border border-border-base bg-surface px-3 py-1.5 text-caption font-medium text-foreground-body shadow-sm transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-brand/60 focus-visible:outline-none"
-        >
-          Copy error details
-        </button>
-        <Text variant="small-tight" tone="subtle" className="max-w-md">
-          Paste this into the chat so a working version can be regenerated.
-        </Text>
-      </div>
+      <ArtifactRenderError
+        error={error}
+        title={this.props.artifactTitle}
+        onCopy={this.handleCopy}
+      />
     );
   }
+}
+
+function ArtifactRenderError({
+  error,
+  title,
+  onCopy,
+}: {
+  error: Error;
+  title: string;
+  onCopy: () => void;
+}) {
+  const { t } = useTranslation();
+  const message = error.message || t("Unknown rendering error", "未知渲染错误");
+  return (
+    <div
+      role="alert"
+      className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center"
+    >
+      <Text variant="body-medium-tight" tone="body">
+        {t("This artifact couldn't be rendered", "无法渲染此产物")}
+      </Text>
+      <Text variant="small-tight" tone="muted" className="max-w-md break-words">
+        {t("Something in ", "产物 ")}
+        <span className="font-mono">{title}</span>
+        {t(
+          " threw an error while rendering. The chat and sidebar are still working.",
+          " 渲染时出错。对话和侧栏仍可正常使用。",
+        )}
+      </Text>
+      <pre className="max-h-32 max-w-md overflow-auto rounded-md bg-surface-hover px-3 py-2 text-left text-caption break-words whitespace-pre-wrap text-foreground-body">
+        {message}
+      </pre>
+      <button
+        type="button"
+        onClick={onCopy}
+        className="rounded-md border border-border-base bg-surface px-3 py-1.5 text-caption font-medium text-foreground-body shadow-sm transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-brand/60 focus-visible:outline-none"
+      >
+        {t("Copy error details", "复制错误详情")}
+      </button>
+      <Text variant="small-tight" tone="subtle" className="max-w-md">
+        {t(
+          "Paste this into the chat so a working version can be regenerated.",
+          "将错误详情粘贴到对话中，以便重新生成可用版本。",
+        )}
+      </Text>
+    </div>
+  );
 }

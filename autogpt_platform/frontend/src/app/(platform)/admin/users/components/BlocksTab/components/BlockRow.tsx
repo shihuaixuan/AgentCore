@@ -11,6 +11,7 @@ import {
   formatEnds,
 } from "../../../helpers";
 import { UnblockDialog } from "../../AccessDialogs/UnblockDialog";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const HOUR_MS = 60 * 60 * 1000;
 
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function BlockRow({ block }: Props) {
+  const { t, locale } = useTranslation();
   const isIP = block.kind === "IP";
   const endsSoon =
     block.expires_at !== null &&
@@ -41,17 +43,17 @@ export function BlockRow({ block }: Props) {
       </div>
       <OverflowText value={block.reason} variant="body" tone="body" />
       <Text variant="small" as="span" className="truncate" tone="muted">
-        {block.created_by_email ?? "unknown"}
+        {block.created_by_email ?? t("unknown", "未知")}
       </Text>
       <Text variant="small" as="span" tone="muted">
-        {formatDateTime(block.created_at)}
+        {formatDateTime(block.created_at, locale)}
       </Text>
       <Text
         variant="small"
         as="span"
         tone={!block.expires_at ? "muted" : endsSoon ? "warning" : "body"}
       >
-        {formatEnds(block.expires_at)}
+        {formatEnds(block.expires_at, undefined, locale)}
       </Text>
       <div className="lg:text-right">
         <UnblockDialog block={block} triggerVariant="ghost" />

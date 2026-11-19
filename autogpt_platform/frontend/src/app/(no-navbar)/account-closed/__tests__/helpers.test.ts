@@ -1,10 +1,34 @@
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { describe, expect, test, vi } from "vitest";
-import { getPageView, waitUntilAnsweredAsOpen } from "../helpers";
+import {
+  getEraseDateLabel,
+  getKeepErrorMessage,
+  getPageView,
+  waitUntilAnsweredAsOpen,
+} from "../helpers";
 
 const SETTINGS = { intervalMS: 0, streak: 2, minWaitMS: 0, maxProbes: 10 };
 const CLOSED = new ApiError("This account is closed.", 401, {
   detail: "This account is closed.",
+});
+
+describe("account closure localization", () => {
+  test("formats the erasure date in Chinese when requested", () => {
+    expect(getEraseDateLabel(new Date(2099, 10, 13, 12), "zh-CN")).toBe(
+      "2099年11月13日",
+    );
+    expect(getEraseDateLabel(null, "zh-CN")).toBeNull();
+  });
+
+  test("translates the fallback without rewriting raw API diagnostics", () => {
+    expect(getKeepErrorMessage(new Error("network error"), "zh-CN")).toBe(
+      "无法保留你的账户，请重试。",
+    );
+    expect(getKeepErrorMessage(CLOSED, "zh-CN")).toBe(CLOSED.message);
+    expect(getKeepErrorMessage(new Error("network error"))).toBe(
+      "We couldn't keep your account. Try again.",
+    );
+  });
 });
 
 describe("waitUntilAnsweredAsOpen", () => {

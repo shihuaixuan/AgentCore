@@ -22,7 +22,7 @@ import {
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function BotsContent() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const state = useBotsContent();
   const { summary } = state;
 
@@ -31,13 +31,22 @@ export function BotsContent() {
   const showPlatform = state.platform === "all";
 
   const tiles = [
-    { label: t("Live servers", "在线服务器"), value: formatNumber(summary?.live_servers) },
+    {
+      label: t("Live servers", "在线服务器"),
+      value: formatNumber(summary?.live_servers),
+    },
     {
       label: t("Messages received", "收到的消息"),
       value: formatNumber(summary?.messages_received),
     },
-    { label: t("Replies sent", "发送的回复"), value: formatNumber(summary?.replies_sent) },
-    { label: t("Commands used", "使用的命令"), value: formatNumber(summary?.commands_used) },
+    {
+      label: t("Replies sent", "发送的回复"),
+      value: formatNumber(summary?.replies_sent),
+    },
+    {
+      label: t("Commands used", "使用的命令"),
+      value: formatNumber(summary?.commands_used),
+    },
     {
       label: t("Error rate", "错误率"),
       value: formatPercent(summary?.error_rate),
@@ -58,7 +67,13 @@ export function BotsContent() {
           hideLabel
           value={state.platform}
           onValueChange={state.setPlatform}
-          options={PLATFORM_OPTIONS}
+          options={PLATFORM_OPTIONS.map((option) => ({
+            ...option,
+            label:
+              option.value === "all"
+                ? t(option.label, "全部平台")
+                : option.label,
+          }))}
           size="small"
         />
         <Select
@@ -67,7 +82,10 @@ export function BotsContent() {
           hideLabel
           value={String(state.days)}
           onValueChange={(value) => state.setDays(Number(value))}
-          options={DAYS_OPTIONS}
+          options={DAYS_OPTIONS.map((option) => ({
+            ...option,
+            label: t(option.label, `最近 ${option.value} 天`),
+          }))}
           size="small"
         />
       </div>
@@ -80,8 +98,11 @@ export function BotsContent() {
                 ? state.error.message
                 : t("Failed to load bot analytics", "无法加载机器人分析数据"),
           }}
-          context="bot analytics"
-          hint={t("Make sure the backend is running the latest build and try again.", "请确认后端运行的是最新版本，然后重试。")}
+          context={t("bot analytics", "机器人分析")}
+          hint={t(
+            "Make sure the backend is running the latest build and try again.",
+            "请确认后端运行的是最新版本，然后重试。",
+          )}
         />
       ) : state.isLoading ? (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
@@ -99,13 +120,15 @@ export function BotsContent() {
 
           <Card>
             <h2 className="mb-4 text-lead font-semibold">
-              Server growth & sharding outlook
+              {t("Server growth & sharding outlook", "服务器增长与分片规划")}
             </h2>
             <ServerGrowthChart data={state.servers} />
           </Card>
 
           <Card>
-            <h2 className="mb-4 text-lead font-semibold">{t("Message volume", "消息量")}</h2>
+            <h2 className="mb-4 text-lead font-semibold">
+              {t("Message volume", "消息量")}
+            </h2>
             <MessageVolumeChart data={state.messages} />
           </Card>
 
@@ -133,7 +156,9 @@ export function BotsContent() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             <Card>
-              <h2 className="mb-4 text-lead font-semibold">{t("Command usage", "命令使用情况")}</h2>
+              <h2 className="mb-4 text-lead font-semibold">
+                {t("Command usage", "命令使用情况")}
+              </h2>
               <SimpleTable
                 columns={[
                   ...(showPlatform ? [t("Platform", "平台")] : []),
@@ -151,7 +176,9 @@ export function BotsContent() {
             </Card>
 
             <Card>
-              <h2 className="mb-4 text-lead font-semibold">{t("Server roster", "服务器列表")}</h2>
+              <h2 className="mb-4 text-lead font-semibold">
+                {t("Server roster", "服务器列表")}
+              </h2>
               <SimpleTable
                 columns={[
                   ...(showPlatform ? [t("Platform", "平台")] : []),
@@ -165,7 +192,7 @@ export function BotsContent() {
                     : []),
                   guild.name || guild.server_id,
                   guild.active ? t("Active", "活跃") : t("Left", "已离开"),
-                  formatDate(guild.joined_at),
+                  formatDate(guild.joined_at, locale),
                 ])}
               />
             </Card>

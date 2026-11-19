@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
 import { Forward02Icon } from "@hugeicons/core-free-icons";
@@ -12,6 +14,7 @@ interface Props {
 }
 
 export function AttachmentAnswer({ attachments, color }: Props) {
+  const { t } = useTranslation();
   const skipped = attachments.length === 0;
   return (
     <div
@@ -24,7 +27,7 @@ export function AttachmentAnswer({ attachments, color }: Props) {
       {skipped ? (
         <>
           <Icon icon={Forward02Icon} size={16} aria-hidden />
-          Skipped
+          {t("Skipped", "已跳过")}
         </>
       ) : (
         attachments.map((attachment) => attachment.name).join(", ")

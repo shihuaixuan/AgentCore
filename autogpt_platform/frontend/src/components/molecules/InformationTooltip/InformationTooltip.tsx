@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Tooltip,
   TooltipContent,
@@ -7,6 +9,7 @@ import {
 import { InformationCircleIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import ReactMarkdown from "react-markdown";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type Props = {
   description?: string;
@@ -14,6 +17,7 @@ type Props = {
 };
 
 export function InformationTooltip({ description, iconSize = 24 }: Props) {
+  const { t } = useTranslation();
   if (!description) return null;
 
   return (
@@ -27,7 +31,7 @@ export function InformationTooltip({ description, iconSize = 24 }: Props) {
               an info mark asks for. */}
           <button
             type="button"
-            aria-label="More information"
+            aria-label={t("More information", "更多信息")}
             onClick={(event) => event.preventDefault()}
             data-slot="information-tooltip-trigger"
             className="inline-flex flex-none items-center justify-center rounded-full p-1 text-current hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-border-strong focus-visible:outline-none"

@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import type { ClarifyingQuestion } from "../../tools/clarifying-questions";
 import { QuestionOptionList } from "./QuestionOptionList";
 import { isKey } from "@/lib/keyboard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   question: ClarifyingQuestion;
@@ -32,6 +33,7 @@ export function QuestionAnswerField({
   onChange,
   onSubmit,
 }: Props) {
+  const { t } = useTranslation();
   const options = question.options ?? [];
   const isCustom = value.trim().length > 0 && !options.includes(value.trim());
   const [typing, setTyping] = useState(() => options.length > 0 && isCustom);
@@ -60,8 +62,8 @@ export function QuestionAnswerField({
       // those same options would only be noise.
       placeholder={
         options.length === 0 && question.example
-          ? `e.g. ${question.example}`
-          : "Type your answer"
+          ? t(`e.g. ${question.example}`, `例如：${question.example}`)
+          : t("Type your answer", "输入你的答案")
       }
       className="resize-none rounded-2xl bg-surface-muted px-4 py-3 text-body-lg leading-relaxed text-foreground-emphasis ring-1 ring-separator transition-shadow placeholder:text-foreground-subtle focus:ring-border-strong focus:outline-none"
     />
@@ -111,7 +113,7 @@ export function QuestionAnswerField({
           className="flex items-center gap-2.5 rounded-2xl border border-dashed border-border-base px-4 py-3 text-left text-body-lg text-foreground-tertiary transition-colors hover:border-border-strong hover:text-foreground-body"
         >
           <Icon icon={PencilEdit02Icon} size={16} className="shrink-0" />
-          Type something…
+          {t("Type something…", "输入其他内容…")}
         </button>
       )}
     </div>

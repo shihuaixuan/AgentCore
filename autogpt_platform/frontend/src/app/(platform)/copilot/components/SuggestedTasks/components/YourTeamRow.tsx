@@ -3,6 +3,7 @@ import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/Autopilo
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { getExpertRoleLabel } from "@/services/experts/expert-role-label";
 import { useId } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { ExpertIdentity } from "../../../useExpertMap";
 
 const AVATAR_SIZE = 22;
@@ -14,11 +15,12 @@ interface Props {
 // Who is on the team on the first visit: Otto and the experts the plan
 // hired. Read-only; the walkthrough's Team step points at the sidebar.
 export function YourTeamRow({ experts }: Props) {
+  const { t, locale } = useTranslation();
   const labelID = useId();
   return (
     <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 px-1">
       <Text variant="eyebrow" as="span" id={labelID}>
-        Your team
+        {t("Your team", "你的团队")}
       </Text>
       <ul
         aria-labelledby={labelID}
@@ -33,7 +35,7 @@ export function YourTeamRow({ experts }: Props) {
             Otto
           </Text>
           <Text variant="small" as="span" tone="secondary">
-            Head of AI
+            {t("Head of AI", "AI 负责人")}
           </Text>
         </li>
         {experts.map((expert) => (
@@ -54,7 +56,7 @@ export function YourTeamRow({ experts }: Props) {
             </Text>
             {expert.role ? (
               <Text variant="small" as="span" tone="secondary">
-                {getExpertRoleLabel(expert.role)}
+                {getExpertRoleLabel(expert.role, locale)}
               </Text>
             ) : null}
           </li>

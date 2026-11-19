@@ -47,7 +47,7 @@ export function ShareLinkButton({ url }: Props) {
       className="w-full sm:w-auto"
       data-testid="copy-share-link-button"
     >
-      {copied ? "Copied" : t("Copy share link", "复制分享链接")}
+      {copied ? t("Copied", "已复制") : t("Copy share link", "复制分享链接")}
     </Button>
   );
 }

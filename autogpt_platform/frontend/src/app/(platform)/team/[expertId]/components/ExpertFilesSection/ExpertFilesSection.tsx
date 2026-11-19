@@ -39,7 +39,7 @@ export function ExpertFilesSection({ expertId, expertName }: Props) {
     <section>
       <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
         <Text variant="large-medium" tone="primary">
-          {expertName}&apos;s Files
+          {t(`${expertName}'s Files`, `${expertName} 的文件`)}
         </Text>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <ToolbarSearch
@@ -54,7 +54,15 @@ export function ExpertFilesSection({ expertId, expertName }: Props) {
             label={t("Filter files", "筛选文件")}
             value={files.filter}
             defaultValue="all"
-            options={FILTERS}
+            options={FILTERS.map((option) => ({
+              ...option,
+              label: t(
+                option.label,
+                { all: "全部文件", generated: "已创建", uploaded: "已上传" }[
+                  option.value
+                ],
+              ),
+            }))}
             onChange={files.setFilter}
           />
         </div>
@@ -69,8 +77,8 @@ export function ExpertFilesSection({ expertId, expertName }: Props) {
       ) : files.isError ? (
         <ErrorCard
           textSize="body-md"
-          context={`${expertName}'s files`}
-          hint="We could not load the files."
+          context={t(`${expertName}'s files`, `${expertName} 的文件`)}
+          hint={t("We could not load the files.", "无法加载文件。")}
           onRetry={() => files.refetch()}
         />
       ) : files.files.length === 0 ? (
@@ -87,7 +95,10 @@ export function ExpertFilesSection({ expertId, expertName }: Props) {
             </span>,
           ]}
           title={t("No files yet", "暂无文件")}
-          description={`Files you share with ${expertName} and documents it creates show up here.`}
+          description={t(
+            `Files you share with ${expertName} and documents it creates show up here.`,
+            `你与 ${expertName} 分享的文件及其创建的文档会显示在这里。`,
+          )}
         />
       ) : files.visible.length === 0 ? (
         <Text variant="body-md" tone="muted" className="mt-4">
@@ -95,7 +106,10 @@ export function ExpertFilesSection({ expertId, expertName }: Props) {
         </Text>
       ) : (
         <div className="mt-4 rounded-2xl bg-surface p-2 smooth-shadow-ring-sm">
-          <ul aria-label={`${expertName}'s files`} className="flex flex-col">
+          <ul
+            aria-label={t(`${expertName}'s files`, `${expertName} 的文件`)}
+            className="flex flex-col"
+          >
             {files.visible.map((file) => (
               <li key={file.id}>
                 <ExpertFileRow file={file} />

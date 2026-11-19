@@ -36,7 +36,10 @@ export function OpenDecisionsCard({
         {t("Needs your decision", "需要你决策")}
       </Text>
       <Text variant="small" as="span" tone="muted">
-        Proposed changes to skills you control. Unrelated learning continues.
+        {t(
+          "Proposed changes to skills you control. Unrelated learning continues.",
+          "对你管理的技能提出的修改建议。其他学习仍会继续。",
+        )}
       </Text>
       <ul className="mt-2 flex flex-col divide-y divide-warning/20">
         {decisions.map((proposal) => (
@@ -72,7 +75,7 @@ export function OpenDecisionsCard({
                 disabled={isDeciding}
                 onClick={() => onDecide(proposal, "keep_current")}
               >
-                Keep current
+                {t("Keep current", "保留当前版本")}
               </Button>
               <Button
                 variant="primary"
@@ -80,7 +83,7 @@ export function OpenDecisionsCard({
                 disabled={isDeciding}
                 onClick={() => onDecide(proposal, "apply")}
               >
-                Apply change
+                {t("Apply change", "应用修改")}
               </Button>
             </div>
           </li>

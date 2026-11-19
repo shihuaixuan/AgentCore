@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { HIDDEN_FROM_REPLAY } from "@/lib/replay-privacy";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useCopilotUIStore } from "../../store";
 import { ACCORDION_PANEL, accordionState, PANEL_REVEAL } from "./accordion";
 import type { ChainRow } from "./helpers";
@@ -78,6 +79,7 @@ function isLiveSubSessionRow(row: ChainRow): boolean {
 }
 
 export function ChainRowView({ row, isLast, readOnly = false }: Props) {
+  const { locale } = useTranslation();
   const [open, setOpen] = useState(row.requiresAction === true);
   const isReasoning = row.category === "reasoning";
   const artifactPanelOpen = useCopilotUIStore((s) => s.artifactPanel.isOpen);
@@ -138,7 +140,8 @@ export function ChainRowView({ row, isLast, readOnly = false }: Props) {
     <SwapText
       text={
         stillWorking && row.tool
-          ? (getCatalogLabel(row.tool, row.input, "running")?.text ?? row.text)
+          ? (getCatalogLabel(row.tool, row.input, "running", {}, locale)
+              ?.text ?? row.text)
           : row.text
       }
       shimmer={row.state === "running" || stillWorking}

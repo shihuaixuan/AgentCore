@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { server } from "@/mocks/mock-server";
 
 import { UsageIndicator } from "../UsageIndicator";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 // UsagePopover pulls in the full usage limits stack; stub it to a passthrough
 // that just renders its trigger so we can assert the indicator button itself.
@@ -26,6 +27,27 @@ afterEach(() => {
 });
 
 describe("UsageIndicator", () => {
+  it.each([null, 0, 64])(
+    "localizes today's usage at %s percent",
+    async (percent) => {
+      server.use(
+        usageHandler({
+          daily: percent === null ? null : { percent_used: percent },
+        }),
+      );
+      render(
+        <LanguageProvider>
+          <UsageIndicator />
+        </LanguageProvider>,
+      );
+      expect(
+        await screen.findByRole("button", {
+          name: percent === null ? "今日用量" : `今日用量：${percent}%`,
+        }),
+      ).toBeDefined();
+    },
+  );
+
   it("renders a generic label before usage resolves", async () => {
     server.use(usageHandler({ daily: null }));
     render(<UsageIndicator />);

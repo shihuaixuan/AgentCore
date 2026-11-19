@@ -8,6 +8,7 @@ import {
 } from "@/tests/integrations/test-utils";
 
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 import { OAuthAppsSection } from "../OAuthAppsSection";
 
@@ -65,22 +66,36 @@ describe("OAuthAppsSection - logo upload", () => {
     uploadSpy.mockClear();
   });
 
-  it("uploads a logo and shows a success toast", async () => {
-    uploadSpy.mockResolvedValueOnce(undefined);
+  it.each([
+    {
+      locale: "en",
+      title: "Success",
+      description: "Logo uploaded successfully",
+    },
+    { locale: "zh-CN", title: "成功", description: "标志上传成功" },
+  ] as const)(
+    "uploads a logo with $locale and shows a success toast",
+    async ({ locale, title, description }) => {
+      uploadSpy.mockResolvedValueOnce(undefined);
 
-    render(<OAuthAppsSection />);
-    await screen.findByText("My App");
-
-    const file = new File(["x"], "logo.png", { type: "image/png" });
-    fireEvent.change(logoInput(), { target: { files: [file] } });
-
-    await waitFor(() => {
-      expect(uploadSpy).toHaveBeenCalledWith("app-1", file);
-      expect(toastSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ title: "Success" }),
+      render(
+        <LanguageProvider initialLocale={locale}>
+          <OAuthAppsSection />
+        </LanguageProvider>,
       );
-    });
-  });
+      await screen.findByText("My App");
+
+      const file = new File(["x"], "logo.png", { type: "image/png" });
+      fireEvent.change(logoInput(), { target: { files: [file] } });
+
+      await waitFor(() => {
+        expect(uploadSpy).toHaveBeenCalledWith("app-1", file, locale);
+        expect(toastSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ title, description }),
+        );
+      });
+    },
+  );
 
   it("rejects an oversized logo before uploading and explains the 3MB limit", async () => {
     render(<OAuthAppsSection />);

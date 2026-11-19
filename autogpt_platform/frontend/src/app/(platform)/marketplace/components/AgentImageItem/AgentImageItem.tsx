@@ -112,7 +112,7 @@ export function AgentImageItem({
               />
             }
           >
-            Play demo
+            {t("Play demo", "播放演示")}
           </Button>
         </div>
       )}

@@ -35,7 +35,7 @@ export function PasswordCredentialsModal({
   onCredentialsCreate,
   siblingInputs,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const credentials = useCredentials(schema, siblingInputs);
   const schemes = credentials
@@ -45,7 +45,7 @@ export function PasswordCredentialsModal({
   const formSchema = z.object({
     server:
       schemes && credentials
-        ? getServerFieldSchema(credentials.provider)
+        ? getServerFieldSchema(credentials.provider, locale)
         : z.string().trim(),
     scheme: z.string(),
     username: z.string().min(1, t("Username is required", "请输入用户名")),
@@ -137,8 +137,11 @@ export function PasswordCredentialsModal({
                     error={fieldState.error?.message}
                     label={t("Server", "服务器")}
                     type="text"
-                    placeholder="host or host:port"
-                    hint="This login is only ever sent to this server."
+                    placeholder={t("host or host:port", "主机名或主机名:端口")}
+                    hint={t(
+                      "This login is only ever sent to this server.",
+                      "此登录信息只会发送给该服务器。",
+                    )}
                     {...field}
                   />
                 )}

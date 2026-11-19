@@ -1,6 +1,7 @@
 "use client";
 
 import { FormProvider } from "react-hook-form";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   Card,
   CardContent,
@@ -34,6 +35,7 @@ type Props = {
 };
 
 export function TimezoneForm({ user, currentTimezone = "not-set" }: Props) {
+  const { t } = useTranslation();
   // If timezone is not set, try to detect it from the browser
   const effectiveTimezone = React.useMemo(() => {
     if (currentTimezone === "not-set") {
@@ -55,7 +57,7 @@ export function TimezoneForm({ user, currentTimezone = "not-set" }: Props) {
   return (
     <Card variant="outlined">
       <CardHeader>
-        <CardTitle>Timezone</CardTitle>
+        <CardTitle>{t("Timezone", "时区")}</CardTitle>
       </CardHeader>
       <CardContent>
         <FormProvider {...form}>
@@ -71,7 +73,7 @@ export function TimezoneForm({ user, currentTimezone = "not-set" }: Props) {
                       as="span"
                       tone="inherit"
                     >
-                      Select your timezone
+                      {t("Select your timezone", "选择你的时区")}
                     </Text>
                   </FormLabel>
                   <Select
@@ -80,7 +82,9 @@ export function TimezoneForm({ user, currentTimezone = "not-set" }: Props) {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a timezone" />
+                        <SelectValue
+                          placeholder={t("Select a timezone", "选择时区")}
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -96,7 +100,9 @@ export function TimezoneForm({ user, currentTimezone = "not-set" }: Props) {
               )}
             />
             <Button type="submit" disabled={isLoading} size="small">
-              {isLoading ? "Saving..." : "Save timezone"}
+              {isLoading
+                ? t("Saving...", "正在保存…")
+                : t("Save timezone", "保存时区")}
             </Button>
           </form>
         </FormProvider>

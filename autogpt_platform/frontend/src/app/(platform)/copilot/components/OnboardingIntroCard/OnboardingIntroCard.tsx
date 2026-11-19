@@ -21,6 +21,7 @@ import { useState } from "react";
 import { SuggestedTasksBlock } from "../SuggestedTasks/SuggestedTasksBlock";
 import type { useCollapsedSuggestions } from "../SuggestedTasks/useCollapsedSuggestions";
 import type { useSuggestedTasks } from "../SuggestedTasks/useSuggestedTasks";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   name: string | null;
@@ -61,6 +62,7 @@ export function OnboardingIntroCard({
   transcript = "",
   disabled = false,
 }: Props) {
+  const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
   const [isCopied, setIsCopied] = useState(false);
   const hasTasks = suggestions.tasks.length > 0;
@@ -74,8 +76,11 @@ export function OnboardingIntroCard({
       await navigator.clipboard.writeText(transcript);
     } catch {
       toast({
-        title: "Could not copy the transcript",
-        description: "Your browser blocked clipboard access.",
+        title: t("Could not copy the transcript", "无法复制转写文本"),
+        description: t(
+          "Your browser blocked clipboard access.",
+          "你的浏览器阻止了剪贴板访问。",
+        ),
         variant: "destructive",
       });
       return;
@@ -121,13 +126,14 @@ export function OnboardingIntroCard({
         </motion.span>
         <motion.div {...reveal(HEADING_START)}>
           <Text variant="large-medium" tone="primary">
-            Hey
+            {t("Hey", "你好")}
             {name ? (
               <>
-                , <span className="text-foreground-strong">{name}</span>
+                {t(", ", "，")}
+                <span className="text-foreground-strong">{name}</span>
               </>
             ) : (
-              " there"
+              t(" there", "")
             )}
           </Text>
         </motion.div>
@@ -138,7 +144,10 @@ export function OnboardingIntroCard({
                 <button
                   type="button"
                   onClick={handleCopyTranscript}
-                  aria-label="Copy your recording's transcript"
+                  aria-label={t(
+                    "Copy your recording's transcript",
+                    "复制录音的转写文本",
+                  )}
                   className="rounded-full p-2 text-foreground-subtle transition-colors hover:bg-surface-hover hover:text-foreground-body"
                 >
                   {isCopied ? (
@@ -150,7 +159,12 @@ export function OnboardingIntroCard({
               </TooltipTrigger>
               <TooltipPortal>
                 <TooltipContent>
-                  {isCopied ? "Copied!" : "Copy everything you told me"}
+                  {isCopied
+                    ? t("Copied!", "已复制！")
+                    : t(
+                        "Copy everything you told me",
+                        "复制你告诉我的所有内容",
+                      )}
                 </TooltipContent>
               </TooltipPortal>
             </Tooltip>
@@ -181,8 +195,14 @@ export function OnboardingIntroCard({
         <motion.div {...reveal(footerStart)}>
           <Text variant="body" tone="muted" className="mt-5">
             {hasTasks
-              ? "Want to do something else? Just write it in the textbox below."
-              : "Tell me what you'd like to start with in the textbox below."}
+              ? t(
+                  "Want to do something else? Just write it in the textbox below.",
+                  "想做其他事情？在下方输入框中告诉我即可。",
+                )
+              : t(
+                  "Tell me what you'd like to start with in the textbox below.",
+                  "在下方输入框中告诉我你想从什么开始。",
+                )}
           </Text>
         </motion.div>
       )}

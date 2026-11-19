@@ -28,7 +28,7 @@ export function useEditScheduleModal(
   graphId: string,
   schedule: GraphExecutionJobInfo,
 ) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -64,7 +64,7 @@ export function useEditScheduleModal(
             description:
               error instanceof Error
                 ? error.message
-                : "An unexpected error occurred.",
+                : t("An unexpected error occurred.", "发生意外错误。"),
             variant: "destructive",
           });
         },
@@ -72,16 +72,19 @@ export function useEditScheduleModal(
     });
 
   function handleSave() {
-    const errorsNow: FormErrors = validateSchedule({
-      scheduleName: form.name,
-      time: form.canEditTiming ? form.time : undefined,
-    });
+    const errorsNow: FormErrors = validateSchedule(
+      {
+        scheduleName: form.name,
+        time: form.canEditTiming ? form.time : undefined,
+      },
+      t,
+    );
     if (
       form.canEditTiming &&
       form.repeat === "weekly" &&
       form.selectedDays.length === 0
     ) {
-      errorsNow.days = "Pick at least one day";
+      errorsNow.days = t("Pick at least one day", "请至少选择一天");
     }
     setErrors(errorsNow);
     if (Object.keys(errorsNow).length > 0) return;
@@ -99,7 +102,7 @@ export function useEditScheduleModal(
     name: form.name,
     setName: (name: string) => update({ name }),
     canEditTiming: form.canEditTiming,
-    recurrenceLabel: safeHumanizeCronExpression(schedule.cron),
+    recurrenceLabel: safeHumanizeCronExpression(schedule.cron, locale),
     repeat: form.repeat,
     setRepeat: (repeat: string) => update({ repeat }),
     selectedDays: form.selectedDays,
@@ -107,8 +110,19 @@ export function useEditScheduleModal(
     time: form.time,
     setTime: (time: string) => update({ time }),
     errors,
-    repeatOptions: REPEAT_OPTIONS,
-    dayItems: DAY_ITEMS,
+    repeatOptions: REPEAT_OPTIONS.map((option) => ({
+      ...option,
+      label: t(option.label, option.value === "daily" ? "每天" : "每周"),
+    })),
+    dayItems: DAY_ITEMS.map((day) => ({
+      ...day,
+      label: t(
+        day.label,
+        ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][
+          Number(day.value)
+        ],
+      ),
+    })),
     handleSave,
     isPending,
   };

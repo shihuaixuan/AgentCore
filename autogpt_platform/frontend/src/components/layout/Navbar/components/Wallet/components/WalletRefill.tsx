@@ -244,7 +244,10 @@ export function WalletRefill() {
             className="mb-3 justify-start"
           >
             <span className="text-foreground-tertiary">
-              To update your billing details, head to{" "}
+              {t(
+                "To update your billing details, head to",
+                "如需更新账单信息，请前往",
+              )}{" "}
             </span>
             <Link
               href="/settings/billing"

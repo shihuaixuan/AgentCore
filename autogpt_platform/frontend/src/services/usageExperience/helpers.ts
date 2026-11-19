@@ -149,10 +149,10 @@ export function formatUsagePercent(value: number) {
   return `${Math.min(100, Math.max(0, Math.round(value)))}%`;
 }
 
-export function formatUsageDate(value: string | Date) {
+export function formatUsageDate(value: string | Date, locale: Locale = "en") {
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(locale === "zh-CN" ? locale : undefined, {
     month: "short",
     day: "numeric",
     hour: "numeric",

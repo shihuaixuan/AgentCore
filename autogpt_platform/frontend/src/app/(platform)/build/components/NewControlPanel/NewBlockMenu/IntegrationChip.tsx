@@ -4,6 +4,7 @@ import { beautifyString, cn } from "@/lib/utils";
 import { blockMenuButtonBase } from "./style";
 import Image from "next/image";
 import React, { ButtonHTMLAttributes } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   name?: string;
@@ -20,6 +21,7 @@ export const IntegrationChip: IntegrationChipComponent = ({
   className,
   ...rest
 }) => {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
@@ -35,7 +37,7 @@ export const IntegrationChip: IntegrationChipComponent = ({
         {icon_url && (
           <Image
             src={icon_url}
-            alt="integration-icon"
+            alt={t("integration-icon", "集成图标")}
             fill
             sizes="2.25rem"
             className="w-full object-contain"

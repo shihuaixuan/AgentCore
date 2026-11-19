@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CHANGELOG_INDEX_MD_URL, STORAGE_KEY } from "../changelog-constants";
 import { ChangelogPopup } from "../ChangelogPopup";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const LATEST = "june-18-july-9-2026";
 const INDEX_MD = `
@@ -33,6 +34,22 @@ afterEach(() => {
 });
 
 describe("ChangelogPopup", () => {
+  it("localizes changelog chrome without rewriting release highlights or URLs", async () => {
+    render(
+      <LanguageProvider>
+        <ChangelogPopup />
+      </LanguageProvider>,
+    );
+    expect(
+      await screen.findByRole("dialog", { name: "更新动态" }),
+    ).toBeDefined();
+    expect(screen.getByText("File folders")).toBeDefined();
+    expect(
+      screen.getByRole("link", { name: "查看更新日志" }).getAttribute("href"),
+    ).toContain(`/changelog/${LATEST}`);
+    expect(screen.getByRole("button", { name: "关闭更新日志" })).toBeDefined();
+  });
+
   it("slides in for an unseen release with highlights and a View changelog link", async () => {
     render(<ChangelogPopup />);
 

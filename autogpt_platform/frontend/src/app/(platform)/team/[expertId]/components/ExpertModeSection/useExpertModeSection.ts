@@ -37,14 +37,17 @@ export function useExpertModeSection({ expert }: Args) {
             queryKey: getListExpertIdentitiesQueryKey(),
           }),
         ]);
-        toast({ title: "Approval mode updated" });
+        toast({ title: t("Approval mode updated", "审批模式已更新") });
       },
       onError: (error) => {
         const isDisabled = error instanceof ApiError && error.status === 403;
         toast({
           title: isDisabled
-            ? "Approval modes are not enabled for your account"
-            : "Could not update the approval mode",
+            ? t(
+                "Approval modes are not enabled for your account",
+                "你的账户尚未启用审批模式",
+              )
+            : t("Could not update the approval mode", "无法更新审批模式"),
           description: isDisabled
             ? undefined
             : t("Please try again.", "请重试。"),

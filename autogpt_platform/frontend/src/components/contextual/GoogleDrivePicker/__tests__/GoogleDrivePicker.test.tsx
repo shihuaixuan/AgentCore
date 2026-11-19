@@ -34,6 +34,8 @@ import {
 } from "@/app/api/__generated__/endpoints/integrations/integrations";
 import type { CredentialsMetaResponse } from "@/lib/autogpt-server-api";
 import { GoogleDrivePicker } from "../GoogleDrivePicker";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 
 const mockUseCredentials = useCredentials as unknown as ReturnType<
   typeof vi.fn
@@ -164,26 +166,114 @@ afterEach(() => {
 
 function renderPicker(
   overrides: Partial<Parameters<typeof GoogleDrivePicker>[0]> = {},
+  locale: Locale = "en",
 ) {
   const onPicked = vi.fn();
   const onCanceled = vi.fn();
   const onError = vi.fn();
   const utils = render(
-    <GoogleDrivePicker
-      scopes={["drive.file", "drive.metadata"]}
-      developerKey="dev-key"
-      clientId="client-id"
-      appId="app-id"
-      onPicked={onPicked}
-      onCanceled={onCanceled}
-      onError={onError}
-      {...overrides}
-    />,
+    <LanguageProvider initialLocale={locale}>
+      <GoogleDrivePicker
+        scopes={["drive.file", "drive.metadata"]}
+        developerKey="dev-key"
+        clientId="client-id"
+        appId="app-id"
+        onPicked={onPicked}
+        onCanceled={onCanceled}
+        onError={onError}
+        {...overrides}
+      />
+    </LanguageProvider>,
   );
   return { ...utils, onPicked, onCanceled, onError };
 }
 
 describe("GoogleDrivePicker – click-to-open flow", () => {
+  it("localizes insufficient permissions without changing the credential ID or scopes", async () => {
+    setupGoogleGlobals();
+    const savedCred = makeCred({
+      id: "Original-credential",
+      scopes: ["drive.file"],
+    });
+    mockUseCredentials.mockReturnValue({
+      provider: "google",
+      providerName: "Google",
+      savedCredentials: [savedCred],
+      upgradeableCredentials: [],
+      supportsOAuth2: true,
+      supportsApiKey: false,
+      supportsUserPassword: false,
+      supportsHostScoped: false,
+      isLoading: false,
+      isSystemProvider: false,
+    });
+    mockGetQueryOptions.mockReturnValue({
+      queryKey: ["cred", savedCred.id],
+      queryFn: () => Promise.resolve({ status: 200, data: savedCred }),
+    });
+    const { onError } = renderPicker({}, "zh-CN");
+    fireEvent.click(
+      await screen.findByRole("button", { name: "从 Google 云端硬盘选择文件" }),
+    );
+    await waitFor(() =>
+      expect(toastMock).toHaveBeenCalledWith({
+        title: "权限不足",
+        description:
+          "已保存的 Google OAuth 凭据缺少所需权限。请重新登录并授予正确的权限。",
+        variant: "destructive",
+      }),
+    );
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message:
+          "已保存的 Google OAuth 凭据缺少所需权限。请重新登录并授予正确的权限。",
+      }),
+    );
+    expect(mockGetQueryOptions).toHaveBeenCalledWith(
+      "google",
+      "Original-credential",
+    );
+    expect(mockPostPickerToken).not.toHaveBeenCalled();
+  });
+
+  it("preserves a provider error verbatim under the Chinese locale", async () => {
+    setupGoogleGlobals();
+    const savedCred = makeCred({
+      id: "Original-credential",
+      scopes: ["drive.file", "drive.metadata"],
+    });
+    mockUseCredentials.mockReturnValue({
+      provider: "google",
+      providerName: "Google",
+      savedCredentials: [savedCred],
+      upgradeableCredentials: [],
+      supportsOAuth2: true,
+      supportsApiKey: false,
+      supportsUserPassword: false,
+      supportsHostScoped: false,
+      isLoading: false,
+      isSystemProvider: false,
+    });
+    mockGetQueryOptions.mockReturnValue({
+      queryKey: ["cred", savedCred.id],
+      queryFn: () => Promise.resolve({ status: 200, data: savedCred }),
+    });
+    const error = new Error("Raw provider failure: access_denied");
+    mockPostPickerToken.mockRejectedValueOnce(error);
+    const { onError } = renderPicker({}, "zh-CN");
+    fireEvent.click(
+      await screen.findByRole("button", { name: "从 Google 云端硬盘选择文件" }),
+    );
+    await waitFor(() =>
+      expect(toastMock).toHaveBeenCalledWith({
+        title: "身份验证错误",
+        description: "Raw provider failure: access_denied",
+        variant: "destructive",
+      }),
+    );
+    expect(onError).toHaveBeenCalledWith(error);
+  });
+
   it("shows insufficient scopes toast and calls onError when credential lacks required scopes", async () => {
     const { build } = setupGoogleGlobals();
 

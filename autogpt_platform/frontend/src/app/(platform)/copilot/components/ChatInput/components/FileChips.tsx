@@ -17,6 +17,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   attachments: Attachment[];
@@ -37,6 +38,7 @@ export function FileChips({
   isUploading,
   stacked = false,
 }: Props) {
+  const { t, locale } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   return (
@@ -84,6 +86,10 @@ export function FileChips({
                       attachment.subfolderCount,
                     )
                   : null;
+                const localizedCount =
+                  isFolder && locale === "zh-CN"
+                    ? `${attachment.fileCount} 个文件${attachment.subfolderCount ? `、${attachment.subfolderCount} 个子文件夹` : ""}`
+                    : count;
                 // Workspace files are already stored — only local files show
                 // the upload spinner while a send is in flight.
                 const showSpinner = isUploading && attachment.kind === "local";
@@ -114,7 +120,12 @@ export function FileChips({
                     transition={{ duration: DURATION, ease: EASE_OUT }}
                     style={{ willChange: "transform, opacity, filter" }}
                     aria-label={
-                      isFolder ? `Folder: ${name}, ${count}` : undefined
+                      isFolder
+                        ? t(
+                            `Folder: ${name}, ${count}`,
+                            `文件夹：${name}，${localizedCount}`,
+                          )
+                        : undefined
                     }
                     className={cn(
                       "inline-flex items-center gap-1 rounded-full bg-surface-hover px-3 py-1 text-body text-foreground-body",
@@ -134,7 +145,7 @@ export function FileChips({
                     <span className="max-w-[160px] truncate">{name}</span>
                     {count ? (
                       <span className="shrink-0 text-foreground-tertiary">
-                        · {count}
+                        · {localizedCount}
                       </span>
                     ) : null}
                     {showSpinner ? (
@@ -148,7 +159,9 @@ export function FileChips({
                       <button
                         type="button"
                         aria-label={
-                          isFolder ? `Remove folder ${name}` : `Remove ${name}`
+                          isFolder
+                            ? t(`Remove folder ${name}`, `移除文件夹 ${name}`)
+                            : t(`Remove ${name}`, `移除 ${name}`)
                         }
                         onClick={() => onRemove(index)}
                         className={cn(

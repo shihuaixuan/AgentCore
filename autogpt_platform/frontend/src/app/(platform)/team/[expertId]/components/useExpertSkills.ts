@@ -21,6 +21,7 @@ import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { invalidateExpertRosterQueries } from "@/services/experts/invalidate-experts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export interface ExpertSkillEntry {
   name: string;
@@ -29,6 +30,7 @@ export interface ExpertSkillEntry {
 }
 
 export function useExpertSkills(expert: Expert) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
@@ -96,7 +98,7 @@ export function useExpertSkills(expert: Expert) {
       return true;
     } catch (error) {
       toast({
-        title: "Couldn't update skills",
+        title: t("Couldn't update skills", "无法更新技能"),
         description: error instanceof ApiError ? error.message : undefined,
         variant: "destructive",
       });
@@ -105,7 +107,10 @@ export function useExpertSkills(expert: Expert) {
   }
 
   async function addSkill(name: string) {
-    const saved = await save({ skills: [name] }, `Added ${name}`);
+    const saved = await save(
+      { skills: [name] },
+      t(`Added ${name}`, `已添加 ${name}`),
+    );
     if (saved) setIsAddOpen(false);
   }
 
@@ -119,11 +124,14 @@ export function useExpertSkills(expert: Expert) {
       });
       if (response.status !== 200) throw new Error("install failed");
       await refreshExpert();
-      toast({ title: `Added ${skill.name}`, variant: "success" });
+      toast({
+        title: t(`Added ${skill.name}`, `已添加 ${skill.name}`),
+        variant: "success",
+      });
       setIsAddOpen(false);
     } catch (error) {
       toast({
-        title: "Couldn't add that skill",
+        title: t("Couldn't add that skill", "无法添加该技能"),
         description: error instanceof ApiError ? error.message : undefined,
         variant: "destructive",
       });
@@ -143,7 +151,7 @@ export function useExpertSkills(expert: Expert) {
   }
 
   function removeSkill(name: string) {
-    return save({ remove: [name] }, `Removed ${name}`);
+    return save({ remove: [name] }, t(`Removed ${name}`, `已移除 ${name}`));
   }
 
   return {

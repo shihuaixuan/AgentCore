@@ -24,10 +24,10 @@ export function SetupNeededRow({
   onConnect,
   onAllow,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const provider = item.providers[0];
   const isCredential = isCredentialItem(item);
-  const { title, detail } = getSetupRowCopy(item);
+  const { title, detail } = getSetupRowCopy(item, locale);
 
   return (
     <article className="flex items-center gap-2.5 rounded-2xl bg-surface px-3.5 py-2.5 smooth-shadow-ring-sm">
@@ -68,7 +68,7 @@ export function SetupNeededRow({
             </Button>
           ) : (
             <Text variant="small" as="span" tone="muted">
-              Needs a platform key
+              {t("Needs a platform key", "需要平台密钥")}
             </Text>
           )
         ) : item.library_agent_id ? (

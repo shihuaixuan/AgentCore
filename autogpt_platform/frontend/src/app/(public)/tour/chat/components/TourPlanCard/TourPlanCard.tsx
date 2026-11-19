@@ -14,6 +14,7 @@ import {
   PlusSignCircleIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const STEP_STAGGER_MS = 200;
 
@@ -21,16 +22,24 @@ const STEP_STAGGER_MS = 200;
  * shell, but the steps stream in with a staggered fade/slide and the check
  * icons pop in after each row. */
 export function TourPlanCard({ plan }: { plan: TourPlan }) {
+  const { t } = useTranslation();
+
   return (
     <ToolAccordion
       icon={<Icon icon={PlusSignCircleIcon} size={32} />}
-      title={`Build Plan — ${plan.steps.length} steps`}
+      title={t(
+        `Build Plan — ${plan.steps.length} steps`,
+        `构建计划 — ${plan.steps.length} 个步骤`,
+      )}
       description={plan.goal}
       defaultExpanded
     >
       <ContentGrid>
         <ContentMessage>
-          {`Here's the plan (${plan.steps.length} steps):`}
+          {t(
+            `Here's the plan (${plan.steps.length} steps):`,
+            `计划如下（共 ${plan.steps.length} 个步骤）：`,
+          )}
         </ContentMessage>
 
         <div className="mb-6 rounded-lg bg-surface p-3">
@@ -56,6 +65,8 @@ function TourPlanStepItem({
   step: TourPlanStep;
   index: number;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div
       // oxlint-disable-next-line design-system/no-arbitrary-values -- per-row stagger delay set at runtime through --step-delay
@@ -69,7 +80,11 @@ function TourPlanStepItem({
     >
       {/* oxlint-disable-next-line design-system/no-arbitrary-values -- per-row check pop-in delay set at runtime through --check-delay */}
       <span className="mt-0.5 flex shrink-0 text-success duration-300 animate-in [animation-delay:var(--check-delay)] fade-in fill-mode-both zoom-in-50">
-        <Icon icon={CheckmarkCircle02Icon} size={18} aria-label="completed" />
+        <Icon
+          icon={CheckmarkCircle02Icon}
+          size={18}
+          aria-label={t("completed", "已完成")}
+        />
       </span>
       <div className="min-w-0 flex-1">
         <Text variant="large-medium-tight">

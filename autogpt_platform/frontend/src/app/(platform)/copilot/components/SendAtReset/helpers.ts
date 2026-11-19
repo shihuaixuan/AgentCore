@@ -1,5 +1,6 @@
 import type { AtResetTurn } from "@/app/api/__generated__/models/atResetTurn";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
+import type { Locale } from "@/lib/i18n/locale";
 import {
   formatResetClock,
   formatWeekday,
@@ -24,7 +25,12 @@ export class SentNowError extends Error {
 }
 
 /** What the toast calls a failed Send at reset: a send, if it went out now. */
-export function sendAtResetFailureTitle(error: unknown): string {
+export function sendAtResetFailureTitle(
+  error: unknown,
+  locale: Locale = "en",
+): string {
+  if (locale === "zh-CN")
+    return error instanceof SentNowError ? "无法发送消息" : "无法安排消息发送";
   return error instanceof SentNowError
     ? "Couldn't send message"
     : SCHEDULE_FAILED_TITLE;
@@ -57,8 +63,22 @@ export function isJoinedSendTooLong(error: unknown) {
   );
 }
 
-export function scheduledSendLabel(runAt: Date | string, now = new Date()) {
+export function scheduledSendLabel(
+  runAt: Date | string,
+  now = new Date(),
+  locale: Locale = "en",
+) {
   const date = new Date(runAt);
+  if (locale === "zh-CN") {
+    const clock = date.toLocaleTimeString(locale, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    return date.toDateString() === now.toDateString()
+      ? `${clock} 发送`
+      : `${date.toLocaleDateString(locale, { weekday: "long" })} ${clock} 发送`;
+  }
   const clock = formatResetClock(date);
   return date.toDateString() === now.toDateString()
     ? `Sends at ${clock}`

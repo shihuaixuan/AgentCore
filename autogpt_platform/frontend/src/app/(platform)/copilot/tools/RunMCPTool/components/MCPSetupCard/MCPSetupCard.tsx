@@ -36,6 +36,7 @@ import { ChainActionsContext } from "../../../../components/ToolChain/chainActio
 import { CredentialRejectionNotice } from "../../../../components/CredentialRejectionNotice/CredentialRejectionNotice";
 import { coerceExpertGrant } from "../../../../components/SetupRequirementsCard/helpers";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   output: SetupRequirementsResponse;
@@ -46,7 +47,11 @@ interface Props {
   retryInstruction?: string;
 }
 
-async function storeManualToken(serverUrl: string, token: string) {
+async function storeManualToken(
+  serverUrl: string,
+  token: string,
+  t: ReturnType<typeof useTranslation>["t"],
+) {
   // Probe before storing so a rejected credential never shows as Connected.
   const probe = await postV2DiscoverAvailableToolsOnAnMcpServer({
     server_url: serverUrl,
@@ -60,7 +65,10 @@ async function storeManualToken(serverUrl: string, token: string) {
     throw new Error(
       typeof probeDetail === "string"
         ? probeDetail
-        : "This server did not accept the credential.",
+        : t(
+            "This server did not accept the credential.",
+            "此服务器未接受该凭据。",
+          ),
     );
   }
 
@@ -74,7 +82,9 @@ async function storeManualToken(serverUrl: string, token: string) {
         ? res.data.detail
         : null;
     throw new Error(
-      typeof detail === "string" ? detail : "Failed to store token",
+      typeof detail === "string"
+        ? detail
+        : t("Failed to store token", "保存令牌失败"),
     );
   }
   return res.status === 200 ? res.data.id : undefined;
@@ -90,6 +100,7 @@ async function storeManualToken(serverUrl: string, token: string) {
  * to provide an API credential manually.
  */
 export function MCPSetupCard({ output, retryInstruction }: Props) {
+  const { t } = useTranslation();
   const { onSend } = useCopilotChatActions();
   const queryClient = useQueryClient();
   const allProviders = useContext(CredentialsProvidersContext);
@@ -261,7 +272,10 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
       if (!ok) {
         setFailedGrantId(credentialId);
         setGrantError(
-          "Connected, but could not grant access. Try Grant access again.",
+          t(
+            "Connected, but could not grant access. Try Grant access again.",
+            "已连接，但无法授予访问权限。请再次点击“授予访问权限”。",
+          ),
         );
         return;
       }
@@ -315,11 +329,17 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
       setForceDisconnected(true);
       const message = getErrorMessage(
         error,
-        "Failed to complete sign-in. Please try again.",
+        t(
+          "Failed to complete sign-in. Please try again.",
+          "无法完成登录。请重试。",
+        ),
       );
       setError(
         message === "OAuth flow timed out"
-          ? "OAuth sign-in timed out. Please try again."
+          ? t(
+              "OAuth sign-in timed out. Please try again.",
+              "OAuth 登录超时。请重试。",
+            )
           : message,
       );
     }
@@ -340,6 +360,7 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
     const invalid = validateMCPAuthCredential(
       token,
       detectMCPAuthScheme(token) ?? manualAuthScheme,
+      t,
     );
     if (invalid) {
       setForceDisconnected(true);
@@ -351,7 +372,7 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
     setError(null);
     setGrantError(null);
     try {
-      const credentialId = await storeManualToken(serverUrl, token);
+      const credentialId = await storeManualToken(serverUrl, token, t);
       // Only clear the force-disconnect override AFTER the API confirms
       // the token was stored.  Clearing it before the await would let
       // ``liveHasCred=true`` (from an existing stale cred) re-render the
@@ -368,7 +389,10 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
       const err = e as Record<string, unknown>;
       setError(
         (typeof err?.message === "string" ? err.message : null) ||
-          "Failed to save token. Please try again.",
+          t(
+            "Failed to save token. Please try again.",
+            "保存令牌失败。请重试。",
+          ),
       );
     }
     setLoading(false);
@@ -443,14 +467,16 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
     return (
       <div className="mt-2 grid gap-2">
         <div className="rounded-lg border border-success/40 bg-success-surface px-3 py-2 text-body text-success-foreground">
-          Connected to {service}.{" "}
+          {t(`Connected to ${service}.`, `已连接 ${service}。`)}{" "}
           <button
             type="button"
             onClick={handleConnect}
             disabled={loading}
             className="ml-1 underline underline-offset-2 hover:no-underline disabled:opacity-60"
           >
-            {loading ? "Reconnecting…" : "Reconnect"}
+            {loading
+              ? t("Reconnecting…", "正在重新连接…")
+              : t("Reconnect", "重新连接")}
           </button>
         </div>
       </div>
@@ -472,7 +498,9 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
             disabled={granting || loading}
             className="mr-2"
           >
-            {granting ? "Granting…" : "Grant access"}
+            {granting
+              ? t("Granting…", "正在授权…")
+              : t("Grant access", "授予访问权限")}
           </Button>
         ) : null}
         <Button
@@ -481,7 +509,9 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
           onClick={handleConnect}
           disabled={loading || granting}
         >
-          {loading ? "Connecting…" : `Connect ${service}`}
+          {loading
+            ? t("Connecting…", "正在连接…")
+            : t(`Connect ${service}`, `连接 ${service}`)}
         </Button>
 
         {(error || grantError) && (
@@ -511,17 +541,20 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
               tone="body"
               htmlFor={manualTokenInputId}
             >
-              {`${mcpAuthTokenLabel(manualAuthScheme)} for ${service}`}
+              {t(
+                `${mcpAuthTokenLabel(manualAuthScheme)} for ${service}`,
+                `${service} 的${mcpAuthTokenLabel(manualAuthScheme, t)}`,
+              )}
             </Text>
             <Text variant="small-tight" tone="muted" id={manualTokenHintId}>
-              {mcpAuthTokenHint(manualAuthScheme)}
+              {mcpAuthTokenHint(manualAuthScheme, t)}
             </Text>
             <div className="flex gap-2">
               <input
                 id={manualTokenInputId}
                 aria-describedby={manualTokenHintId}
                 type="password"
-                placeholder={mcpAuthTokenPlaceholder(manualAuthScheme)}
+                placeholder={mcpAuthTokenPlaceholder(manualAuthScheme, t)}
                 value={manualToken}
                 onChange={(e) => {
                   const nextToken = e.target.value;
@@ -539,7 +572,9 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
                 onClick={() => handleManualToken()}
                 disabled={loading || !manualToken.trim()}
               >
-                {loading ? "Verifying…" : "Use Token"}
+                {loading
+                  ? t("Verifying…", "正在验证…")
+                  : t("Use Token", "使用令牌")}
               </Button>
             </div>
           </div>

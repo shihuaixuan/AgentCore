@@ -15,6 +15,7 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 import { useIsMobile } from "../../useIsMobile";
 import { IntegrationsToggle } from "./components/IntegrationsToggle/IntegrationsToggle";
 import { useSessionFiles } from "./components/FilesTab/useSessionFiles";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   sessionId?: string | null;
@@ -40,6 +41,7 @@ export function ContextPanelToggle({
   expert = null,
   hideIntegrationsOnMobile = false,
 }: Props) {
+  const { t } = useTranslation();
   const { deliverables, documentCount: liveDocumentCount } =
     useSessionFiles(sessionId);
   const documentCount = Math.max(deliverables.length, liveDocumentCount);
@@ -89,11 +91,14 @@ export function ContextPanelToggle({
               variant="compact-ghost"
               size="compact-icon"
               onClick={() => toggleContextPanelTab("files")}
-              aria-label={`${isFilesOpen ? "Hide" : "Open"} files${
-                documentCount > 0
-                  ? ` (${documentCount} ${documentCount === 1 ? "document" : "documents"})`
-                  : ""
-              }`}
+              aria-label={t(
+                `${isFilesOpen ? "Hide" : "Open"} files${
+                  documentCount > 0
+                    ? ` (${documentCount} ${documentCount === 1 ? "document" : "documents"})`
+                    : ""
+                }`,
+                `${isFilesOpen ? "隐藏" : "打开"}文件${documentCount > 0 ? `（${documentCount} 份文档）` : ""}`,
+              )}
               aria-pressed={isFilesOpen}
               className={cn(
                 toggleClass,
@@ -119,7 +124,7 @@ export function ContextPanelToggle({
           </TooltipTrigger>
           <TooltipPortal>
             <TooltipContent side="bottom">
-              {isFilesOpen ? "Hide files" : "Files"}
+              {isFilesOpen ? t("Hide files", "隐藏文件") : t("Files", "文件")}
             </TooltipContent>
           </TooltipPortal>
         </Tooltip>
@@ -132,7 +137,11 @@ export function ContextPanelToggle({
               variant="compact-ghost"
               size="compact-icon"
               onClick={handleComputerToggle}
-              aria-label={isComputerOpen ? "Hide computer" : "Open computer"}
+              aria-label={
+                isComputerOpen
+                  ? t("Hide computer", "隐藏电脑")
+                  : t("Open computer", "打开电脑")
+              }
               aria-pressed={isComputerOpen}
               className={cn(toggleClass, "size-8")}
             >
@@ -145,7 +154,9 @@ export function ContextPanelToggle({
           </TooltipTrigger>
           <TooltipPortal>
             <TooltipContent side="bottom">
-              {isComputerOpen ? "Hide computer" : "Computer"}
+              {isComputerOpen
+                ? t("Hide computer", "隐藏电脑")
+                : t("Computer", "电脑")}
             </TooltipContent>
           </TooltipPortal>
         </Tooltip>

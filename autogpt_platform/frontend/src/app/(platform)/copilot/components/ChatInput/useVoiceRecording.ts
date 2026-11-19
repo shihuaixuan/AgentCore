@@ -3,6 +3,7 @@ import { useStableCallback } from "@/hooks/useStableCallback";
 import { isKey } from "@/lib/keyboard";
 import { isMicrophonePermissionDenied } from "@/lib/microphone";
 import { isTouchDevice } from "@/lib/platform";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React, { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { downloadRecording } from "../../voice/downloadRecording";
 import { focusComposer } from "./helpers";
@@ -24,6 +25,7 @@ export function useVoiceRecording({
   inputId,
   isStreaming = false,
 }: Args) {
+  const { t } = useTranslation();
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -115,7 +117,7 @@ export function useVoiceRecording({
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || "Transcription failed");
+        throw new Error(data.error || t("Transcription failed", "转写失败"));
       }
 
       const data = await response.json();
@@ -137,7 +139,7 @@ export function useVoiceRecording({
         const message =
           err instanceof Error && err.message
             ? err.message
-            : "Transcription failed";
+            : t("Transcription failed", "转写失败");
         setTranscriptionError(message);
         setFailedRecording(audioBlob);
       })
@@ -236,9 +238,9 @@ export function useVoiceRecording({
     } catch (err) {
       console.error("Failed to start recording:", err);
       if (isMicrophonePermissionDenied(err)) {
-        setError("Microphone permission denied");
+        setError(t("Microphone permission denied", "麦克风权限被拒绝"));
       } else {
-        setError("Failed to access microphone");
+        setError(t("Failed to access microphone", "无法访问麦克风"));
       }
       cleanup();
     }
@@ -257,12 +259,12 @@ export function useVoiceRecording({
   useEffect(() => {
     if (error) {
       toast({
-        title: "Voice recording failed",
+        title: t("Voice recording failed", "录音失败"),
         description: error,
         variant: "destructive",
       });
     }
-  }, [error, toast]);
+  }, [error, toast, t]);
 
   // Puts the caret back once the words land; focus on mount is useChatInput's.
   // Not on a phone: there focus opens the keyboard over the thread.

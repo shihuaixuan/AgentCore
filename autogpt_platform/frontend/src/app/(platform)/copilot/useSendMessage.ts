@@ -1,4 +1,6 @@
 import { useEffect, useInsertionEffect, useRef } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 import { pendingUploadKey, useCopilotStreamStore } from "./copilotStreamStore";
 import { toastSendFailure } from "./helpers/sendFailureToast";
 import type { ExpertKickoffMetadata } from "./expertKickoff";
@@ -45,6 +47,8 @@ export function useSendMessage({
   createSession,
   isUserStoppingRef,
 }: Args) {
+  const { locale } = useTranslation();
+  const localeRef = useRef(locale);
   // Synchronous concurrency guard for the "no session yet" path: rapid
   // double-press / double-Enter would otherwise overwrite `pendingFirstSend`
   // (losing the first message) AND fire two parallel `createSession`
@@ -54,7 +58,12 @@ export function useSendMessage({
   const isCreatingSessionRef = useRef(false);
 
   function dispatchToSession(sid: string, message: OutgoingMessage) {
-    return sendWithAttachments({ sessionId: sid, message, sendMessage });
+    return sendWithAttachments({
+      sessionId: sid,
+      message,
+      sendMessage,
+      locale,
+    });
   }
 
   // Hold dispatchToSession in a ref so the queued-send effect can fire
@@ -64,6 +73,7 @@ export function useSendMessage({
   const dispatchRef = useRef(dispatchToSession);
   useInsertionEffect(() => {
     dispatchRef.current = dispatchToSession;
+    localeRef.current = locale;
   });
 
   useEffect(() => {
@@ -84,7 +94,7 @@ export function useSendMessage({
         metadata: send.metadata,
       })
       .catch((error: unknown) => {
-        recoverFailedDeferredSend(send.text, parts, error);
+        recoverFailedDeferredSend(send.text, parts, error, localeRef.current);
       });
   }, [sessionId]);
 
@@ -104,7 +114,7 @@ export function useSendMessage({
     };
     if (!trimmed && !hasAttachments(outgoing)) return;
     // Backstop: the composer caps each attach, so the UI cannot reach this.
-    if (!validateAttachments(outgoing)) return;
+    if (!validateAttachments(outgoing, locale)) return;
 
     isUserStoppingRef.current = false;
 
@@ -124,7 +134,7 @@ export function useSendMessage({
     if (files && files.length > 0) {
       useCopilotStreamStore
         .getState()
-        .setPendingUploadSend(null, describePendingUpload(outgoing));
+        .setPendingUploadSend(null, describePendingUpload(outgoing, locale));
     }
     // Workspace parts must reach the post-creation flush, which reads them
     // from the store via `takePendingFirstSend`. Append so a pre-set part
@@ -198,15 +208,22 @@ export function recoverFailedDeferredSend(
   text: string,
   parts: StoredAttachmentPart[],
   error: unknown,
+  locale: Locale = "en",
 ) {
   if (text) useCopilotUIStore.getState().setInitialPrompt(text);
   if (parts.length > 0)
     useCopilotStreamStore.getState().setPendingFileParts(parts);
   toastSendFailure({
-    title: "Couldn't send message",
+    title: locale === "zh-CN" ? "无法发送消息" : "Couldn't send message",
     error,
-    recovery: text
-      ? "your message is back in the composer"
-      : "your files were not sent",
+    recovery:
+      locale === "zh-CN"
+        ? text
+          ? "你的消息已返回输入框"
+          : "你的文件未发送"
+        : text
+          ? "your message is back in the composer"
+          : "your files were not sent",
+    locale,
   });
 }

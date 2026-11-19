@@ -7,6 +7,7 @@ import { WorkOutputSheet } from "@/components/organisms/WorkOutputSheet/WorkOutp
 import { useState } from "react";
 import { type WorkRunMetadata } from "./helpers";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   metadata: WorkRunMetadata;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function WorkCard({ metadata, preview }: Props) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const runLink = buildRunLink(metadata.libraryAgentId, metadata.executionId);
 
@@ -36,7 +38,7 @@ export function WorkCard({ metadata, preview }: Props) {
           size="small"
           onClick={() => setIsOpen(true)}
         >
-          Open
+          {t("Open", "打开")}
         </Button>
       </div>
       {preview ? (

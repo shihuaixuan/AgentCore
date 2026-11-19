@@ -52,7 +52,7 @@ export function MainCreatorPage({ params }: Props) {
   if (!creator) return null;
 
   const breadcrumbs = [
-    { name: "Marketplace", link: "/marketplace" },
+    { name: t("Marketplace", "市场"), link: "/marketplace" },
     { name: creator.name, link: "#" },
   ];
 
@@ -86,7 +86,10 @@ export function MainCreatorPage({ params }: Props) {
                     {creator.avatar_url && (
                       <AvatarImage
                         src={creator.avatar_url}
-                        alt={`${creator.name} avatar`}
+                        alt={t(
+                          `${creator.name} avatar`,
+                          `${creator.name} 的头像`,
+                        )}
                       />
                     )}
                     <AvatarFallback size={96}>
@@ -156,7 +159,10 @@ export function MainCreatorPage({ params }: Props) {
           <AgentsSection
             agents={creatorAgents.agents}
             hideAvatars
-            sectionTitle={`AI Workflows by ${creator.name}`}
+            sectionTitle={t(
+              `AI Workflows by ${creator.name}`,
+              `${creator.name} 的 AI 工作流`,
+            )}
           />
         )}
       </main>

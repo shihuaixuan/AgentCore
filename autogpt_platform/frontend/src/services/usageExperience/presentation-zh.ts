@@ -64,7 +64,7 @@ export function chineseUsagePresentation(
         ? "已达到本周使用上限"
         : "已达到今日使用上限";
   return {
-    eyebrow: `${formatTierLabel(tier) ?? "你的套餐"} · ${trialSpent ? "试用额度已用完" : window === "weekly" ? "本周额度已用完" : "今日额度已用完"}`,
+    eyebrow: `${formatTierLabel(tier, "zh-CN") ?? "你的套餐"} · ${trialSpent ? "试用额度已用完" : window === "weekly" ? "本周额度已用完" : "今日额度已用完"}`,
     title,
     noticeTitle: title,
     description: trialSpent

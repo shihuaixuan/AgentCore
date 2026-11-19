@@ -70,12 +70,18 @@ export function PlatformCostContent({ searchParams }: Props) {
           {
             label: t("Known Cost", "已知成本"),
             value: formatMicrodollars(dashboard.total_cost_microdollars),
-            subtitle: t("From providers that report USD cost", "来自报告美元成本的服务提供商"),
+            subtitle: t(
+              "From providers that report USD cost",
+              "来自报告美元成本的服务提供商",
+            ),
           },
           {
             label: t("Estimated Total", "估算总额"),
             value: formatMicrodollars(totalEstimatedCost),
-            subtitle: t("Including per-run cost estimates", "包括每次运行的成本估算"),
+            subtitle: t(
+              "Including per-run cost estimates",
+              "包括每次运行的成本估算",
+            ),
           },
           {
             label: t("Total Requests", "请求总数"),
@@ -90,26 +96,41 @@ export function PlatformCostContent({ searchParams }: Props) {
             value: formatMicrodollars(
               dashboard.avg_cost_microdollars_per_request ?? 0,
             ),
-            subtitle: t("Known cost divided by cost-bearing requests", "已知成本除以产生成本的请求数"),
+            subtitle: t(
+              "Known cost divided by cost-bearing requests",
+              "已知成本除以产生成本的请求数",
+            ),
           },
           {
             label: t("Avg Input Tokens", "平均输入令牌"),
             value: Math.round(
               dashboard.avg_input_tokens_per_request ?? 0,
             ).toLocaleString(),
-            subtitle: t("Prompt tokens per request (context size)", "每次请求的提示令牌（上下文大小）"),
+            subtitle: t(
+              "Prompt tokens per request (context size)",
+              "每次请求的提示令牌（上下文大小）",
+            ),
           },
           {
             label: t("Avg Output Tokens", "平均输出令牌"),
             value: Math.round(
               dashboard.avg_output_tokens_per_request ?? 0,
             ).toLocaleString(),
-            subtitle: t("Completion tokens per request (response length)", "每次请求的完成令牌（响应长度）"),
+            subtitle: t(
+              "Completion tokens per request (response length)",
+              "每次请求的完成令牌（响应长度）",
+            ),
           },
           {
             label: t("Total Tokens", "令牌总数"),
-            value: `${formatTokens(dashboard.total_input_tokens ?? 0)} in / ${formatTokens(dashboard.total_output_tokens ?? 0)} out`,
-            subtitle: t("Prompt vs completion token split", "提示令牌与完成令牌的拆分"),
+            value: t(
+              `${formatTokens(dashboard.total_input_tokens ?? 0)} in / ${formatTokens(dashboard.total_output_tokens ?? 0)} out`,
+              `输入 ${formatTokens(dashboard.total_input_tokens ?? 0)} / 输出 ${formatTokens(dashboard.total_output_tokens ?? 0)}`,
+            ),
+            subtitle: t(
+              "Prompt vs completion token split",
+              "提示令牌与完成令牌的拆分",
+            ),
           },
           {
             label: t("Typical Cost (P50)", "典型成本（P50）"),
@@ -144,7 +165,10 @@ export function PlatformCostContent({ searchParams }: Props) {
           >
             {t("Start Date", "开始日期")}{" "}
             <span className="text-caption">
-              {t("(local time — defaults to last 30 days)", "（本地时间 — 默认为最近 30 天）")}
+              {t(
+                "(local time — defaults to last 30 days)",
+                "（本地时间 — 默认为最近 30 天）",
+              )}
             </span>
           </label>
           <input
@@ -160,7 +184,10 @@ export function PlatformCostContent({ searchParams }: Props) {
             htmlFor="end-date"
             className="text-body text-foreground-tertiary"
           >
-            {t("End Date", "结束日期")} <span className="text-caption">{t("(local time)", "（本地时间）")}</span>
+            {t("End Date", "结束日期")}{" "}
+            <span className="text-caption">
+              {t("(local time)", "（本地时间）")}
+            </span>
           </label>
           <input
             id="end-date"
@@ -180,7 +207,7 @@ export function PlatformCostContent({ searchParams }: Props) {
           <input
             id="provider-filter"
             type="text"
-            placeholder="e.g. openai"
+            placeholder={t("e.g. openai", "例如 openai")}
             className="rounded border px-3 py-1.5 text-body"
             value={providerInput}
             onChange={(e) => setProviderInput(e.target.value)}
@@ -196,7 +223,7 @@ export function PlatformCostContent({ searchParams }: Props) {
           <input
             id="user-id-filter"
             type="text"
-            placeholder="Filter by user"
+            placeholder={t("Filter by user", "按用户筛选")}
             className="rounded border px-3 py-1.5 text-body"
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
@@ -212,7 +239,7 @@ export function PlatformCostContent({ searchParams }: Props) {
           <input
             id="model-filter"
             type="text"
-            placeholder="e.g. gpt-4o"
+            placeholder={t("e.g. gpt-4o", "例如 gpt-4o")}
             className="rounded border px-3 py-1.5 text-body"
             value={modelInput}
             onChange={(e) => setModelInput(e.target.value)}
@@ -228,7 +255,7 @@ export function PlatformCostContent({ searchParams }: Props) {
           <input
             id="block-filter"
             type="text"
-            placeholder="e.g. LLMBlock"
+            placeholder={t("e.g. LLMBlock", "例如 LLMBlock")}
             className="rounded border px-3 py-1.5 text-body"
             value={blockInput}
             onChange={(e) => setBlockInput(e.target.value)}
@@ -244,7 +271,7 @@ export function PlatformCostContent({ searchParams }: Props) {
           <input
             id="type-filter"
             type="text"
-            placeholder="e.g. tokens"
+            placeholder={t("e.g. tokens", "例如 tokens")}
             className="rounded border px-3 py-1.5 text-body"
             value={typeInput}
             onChange={(e) => setTypeInput(e.target.value)}
@@ -260,7 +287,7 @@ export function PlatformCostContent({ searchParams }: Props) {
           <input
             id="execution-id-filter"
             type="text"
-            placeholder="Filter by execution"
+            placeholder={t("Filter by execution", "按执行记录筛选")}
             className="rounded border px-3 py-1.5 text-body"
             value={executionIDInput}
             onChange={(e) => setExecutionIDInput(e.target.value)}
@@ -284,7 +311,9 @@ export function PlatformCostContent({ searchParams }: Props) {
             <option value="anthropic_batch">anthropic_batch</option>
             <option value="openai_batch">openai_batch</option>
             <option value="flex">flex</option>
-            <option value="sync_baseline">sync_baseline (dream)</option>
+            <option value="sync_baseline">
+              {t("sync_baseline (dream)", "sync_baseline（记忆整理）")}
+            </option>
           </select>
         </div>
         <div className="flex flex-col gap-1">
@@ -379,7 +408,7 @@ export function PlatformCostContent({ searchParams }: Props) {
               {dashboard.cost_buckets && dashboard.cost_buckets.length > 0 && (
                 <div className="rounded-lg border p-4">
                   <h3 className="mb-3 text-body font-medium">
-                    Cost Distribution by Bucket
+                    {t("Cost Distribution by Bucket", "按区间划分的成本分布")}
                   </h3>
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6">
                     {dashboard.cost_buckets.map((b: CostBucket) => (
@@ -403,7 +432,7 @@ export function PlatformCostContent({ searchParams }: Props) {
 
           <div
             role="tablist"
-            aria-label="Cost view tabs"
+            aria-label={t("Cost view tabs", "成本视图选项卡")}
             className="flex gap-2 border-b"
           >
             {["overview", "by-user", "logs"].map((tabKey) => (
@@ -417,7 +446,7 @@ export function PlatformCostContent({ searchParams }: Props) {
                 className={`px-4 py-2 text-body font-medium ${tab === tabKey ? "border-b-2 border-action text-action" : "text-foreground-tertiary hover:text-foreground-base"}`}
               >
                 {tabKey === "overview"
-                    ? t("By Provider", "按服务提供商")
+                  ? t("By Provider", "按服务提供商")
                   : tabKey === "by-user"
                     ? t("By User", "按用户")
                     : t("Raw Logs", "原始日志")}

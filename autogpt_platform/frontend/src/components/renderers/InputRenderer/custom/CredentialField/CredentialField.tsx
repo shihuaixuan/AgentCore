@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { CredentialFieldTitle } from "./components/CredentialFieldTitle";
 import { useCredentialAvailability } from "./useCredentialAvailability";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   credentialNotApplicable,
   credentialRequiredForSelection,
@@ -20,6 +21,7 @@ import {
 } from "./helpers";
 
 export const CredentialsField = (props: FieldProps) => {
+  const { t } = useTranslation();
   const { formData, onChange, schema, registry, fieldPathId, required } = props;
 
   const formContext = registry.formContext;
@@ -155,8 +157,10 @@ export const CredentialsField = (props: FieldProps) => {
       />
       {unsupportedSelection && (
         <Text variant="small" role="alert">
-          This selection is no longer supported. Choose another model or
-          transport.
+          {t(
+            "This selection is no longer supported. Choose another model or transport.",
+            "不再支持此选项，请选择其他模型或连接方式。",
+          )}
         </Text>
       )}
       {availability === "unavailable" && (
@@ -166,7 +170,7 @@ export const CredentialsField = (props: FieldProps) => {
           tone="muted"
           aria-live="polite"
         >
-          Not available on your account.
+          {t("Not available on your account.", "你的账号无法使用此项。")}
         </Text>
       )}
       <CredentialsInput
@@ -197,7 +201,10 @@ export const CredentialsField = (props: FieldProps) => {
               htmlFor={optionalToggleId}
               className="cursor-pointer text-caption text-foreground-tertiary"
             >
-              Optional - skip block if not configured
+              {t(
+                "Optional - skip block if not configured",
+                "可选：未配置时跳过此模块",
+              )}
             </label>
           </div>
         )}

@@ -26,6 +26,8 @@ import type { JobTriggerResponse } from "@/app/api/__generated__/models/jobTrigg
 import type { MemoryOverview } from "@/app/api/__generated__/models/memoryOverview";
 import type { RatificationResult } from "@/app/api/__generated__/models/ratificationResult";
 import { useToast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 import { getDreamResult } from "./helpers";
 import type { AnyJobStatus } from "./memoryJobStatus";
 
@@ -60,6 +62,7 @@ function invalidateAutoPilotMemoryQueries(queryClient: QueryClient) {
 }
 
 export function useMemoryVisualizer(expertID?: string) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [force, setForce] = useState(false);
@@ -127,7 +130,7 @@ export function useMemoryVisualizer(expertID?: string) {
       },
       onError: (error: Error) => {
         toast({
-          title: "Rebuild failed to schedule",
+          title: t("Rebuild failed to schedule", "无法安排重建任务"),
           description: error.message,
           variant: "destructive",
         });
@@ -144,7 +147,7 @@ export function useMemoryVisualizer(expertID?: string) {
       },
       onError: (error: Error) => {
         toast({
-          title: "Dream pass failed to schedule",
+          title: t("Dream pass failed to schedule", "无法安排记忆整理任务"),
           description: error.message,
           variant: "destructive",
         });
@@ -160,7 +163,7 @@ export function useMemoryVisualizer(expertID?: string) {
       },
       onError: (error: Error) => {
         toast({
-          title: "Nightly batch failed to schedule",
+          title: t("Nightly batch failed to schedule", "无法安排夜间批处理"),
           description: error.message,
           variant: "destructive",
         });
@@ -176,24 +179,26 @@ export function useMemoryVisualizer(expertID?: string) {
         const result = res.data as RatificationResult;
         if (result.error) {
           toast({
-            title: "Ratification failed",
+            title: t("Ratification failed", "确认失败"),
             description: result.error,
             variant: "destructive",
           });
         } else {
           toast({
-            title: "Ratification complete",
-            description:
+            title: t("Ratification complete", "确认已完成"),
+            description: t(
               `examined=${result.examined_count}, ` +
-              `ratified=${result.ratified_count}, ` +
-              `superseded=${result.superseded_count}`,
+                `ratified=${result.ratified_count}, ` +
+                `superseded=${result.superseded_count}`,
+              `已检查=${result.examined_count}，已确认=${result.ratified_count}，已替代=${result.superseded_count}`,
+            ),
           });
         }
         invalidateAutoPilotMemoryQueries(queryClient);
       },
       onError: (error: Error) => {
         toast({
-          title: "Ratification failed",
+          title: t("Ratification failed", "确认失败"),
           description: error.message,
           variant: "destructive",
         });
@@ -360,10 +365,12 @@ export function useMemoryVisualizer(expertID?: string) {
   useEffect(() => {
     if (!scopeMismatch) return;
     toast({
-      title: "Memory scope mismatch",
-      description:
+      title: t("Memory scope mismatch", "记忆范围不匹配"),
+      description: t(
         "The server returned memory for a different scope than " +
-        "requested. The mismatched data was not rendered.",
+          "requested. The mismatched data was not rendered.",
+        "服务器返回的记忆范围与请求不一致，未显示这些不匹配的数据。",
+      ),
       variant: "destructive",
     });
     // ``toast`` changes identity every render; the mismatch flag is the
@@ -424,6 +431,15 @@ function useTerminalEffect(
   onTerminal: (finishedStatus?: AnyJobStatus) => void,
   toast: ReturnType<typeof useToast>["toast"],
 ) {
+  const { t, locale } = useTranslation();
+  const labelZh =
+    label === "Dream pass"
+      ? "记忆整理"
+      : label === "Nightly batch"
+        ? "夜间批处理"
+        : label === "Community rebuild"
+          ? "社区重建"
+          : label;
   // Reacts to ``status`` transitioning to a terminal state OR the
   // status-endpoint poll erroring out. Only fires when we have an
   // active job — protects against late polls from a prior run.
@@ -438,7 +454,7 @@ function useTerminalEffect(
     // without this branch nothing would ever clear the active job id.
     if (queryError) {
       toast({
-        title: `${label} status unavailable`,
+        title: t(`${label} status unavailable`, `无法获取${labelZh}状态`),
         description: String(
           (queryError as { message?: string } | null)?.message ?? queryError,
         ),
@@ -453,13 +469,13 @@ function useTerminalEffect(
 
     if (status.state === "complete") {
       toast({
-        title: `${label} complete`,
-        description: completionSummary(status),
+        title: t(`${label} complete`, `${labelZh}已完成`),
+        description: completionSummary(status, locale),
       });
     } else {
       toast({
-        title: `${label} failed`,
-        description: status.error ?? "unknown error",
+        title: t(`${label} failed`, `${labelZh}失败`),
+        description: status.error ?? t("unknown error", "未知错误"),
         variant: "destructive",
       });
     }
@@ -471,34 +487,44 @@ function useTerminalEffect(
   }, [activeJobId, status?.state, queryError]);
 }
 
-function completionSummary(status: AnyJobStatus): string {
+function completionSummary(
+  status: AnyJobStatus,
+  locale: Locale = "en",
+): string {
+  const zh = locale === "zh-CN";
   const result = status.result as Record<string, unknown> | null | undefined;
-  if (!result) return "OK";
+  if (!result) return zh ? "完成" : "OK";
   // The result shape varies by kind; pick a few common fields and
   // render whatever's present.
   const parts: string[] = [];
   if (typeof result.consolidated_count === "number") {
-    parts.push(`writes=${result.consolidated_count}`);
+    parts.push(`${zh ? "写入" : "writes"}=${result.consolidated_count}`);
   }
   if (typeof result.proposal_count === "number") {
-    parts.push(`proposals=${result.proposal_count}`);
+    parts.push(`${zh ? "提案" : "proposals"}=${result.proposal_count}`);
   }
   if (typeof result.demotion_count === "number") {
-    parts.push(`demotions=${result.demotion_count}`);
+    parts.push(`${zh ? "降级" : "demotions"}=${result.demotion_count}`);
   }
   if (
     typeof result.communities_built === "object" &&
     result.communities_built
   ) {
-    parts.push(`communities=${JSON.stringify(result.communities_built)}`);
+    parts.push(
+      `${zh ? "社区" : "communities"}=${JSON.stringify(result.communities_built)}`,
+    );
   }
   if (typeof (result.elapsed_seconds as number | undefined) === "number") {
-    parts.push(`${(result.elapsed_seconds as number).toFixed(1)}s`);
+    parts.push(
+      `${(result.elapsed_seconds as number).toFixed(1)}${zh ? " 秒" : "s"}`,
+    );
   }
   if (result.dream_in_flight === true) {
     parts.push(
-      "dream apply still in flight — counts land async via the dream pass job",
+      zh
+        ? "记忆应用仍在进行中，统计将随记忆整理任务异步更新"
+        : "dream apply still in flight — counts land async via the dream pass job",
     );
   }
-  return parts.length ? parts.join(" — ") : "OK";
+  return parts.length ? parts.join(" — ") : zh ? "完成" : "OK";
 }

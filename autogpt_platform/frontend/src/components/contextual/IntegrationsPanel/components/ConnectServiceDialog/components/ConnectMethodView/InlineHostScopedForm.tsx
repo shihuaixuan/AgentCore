@@ -208,7 +208,7 @@ export function InlineHostScopedForm({ provider, host, onSuccess }: Props) {
         disabled={!canSubmit}
         loading={isPending}
       >
-        {isPending ? "Connecting…" : "Connect"}
+        {isPending ? t("Connecting…", "正在连接…") : t("Connect", "连接")}
       </Button>
     </Form>
   );

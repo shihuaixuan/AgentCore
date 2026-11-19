@@ -1,3 +1,4 @@
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { render, screen } from "@/tests/integrations/test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as testDataHelpers from "../test-data/helpers";
@@ -28,6 +29,7 @@ const ADMIN_LINK_LABELS_ZH: Record<string, string> = {
   "Block Cost Estimates": "模块成本估算",
   "Memory Inspector": "记忆检查器",
   "Admin settings": "管理设置",
+  "Test Data": "测试数据",
 };
 
 describe("AdminLayout", () => {
@@ -45,30 +47,33 @@ describe("AdminLayout", () => {
   });
 
   it("translates admin navigation labels to Chinese", () => {
+    vi.spyOn(testDataHelpers, "isTestDataSurfaceEnabled").mockReturnValue(true);
     render(
-      <AdminLayout>
-        <div />
-      </AdminLayout>,
+      <LanguageProvider initialLocale="zh-CN">
+        <AdminLayout>
+          <div />
+        </AdminLayout>
+      </LanguageProvider>,
     );
 
     const links = screen.getAllByRole("link");
     for (const { text, href } of ADMIN_LINKS) {
-      const link = links.find((element) => element.getAttribute("href") === href);
+      const link = links.find(
+        (element) => element.getAttribute("href") === href,
+      );
       expect(link?.textContent).toContain(ADMIN_LINK_LABELS_ZH[text]);
     }
   });
 
   it("renders every admin sidebar link with the correct href", () => {
-    vi.spyOn(testDataHelpers, "isTestDataSurfaceEnabled").mockReturnValue(
-      true,
-    );
+    vi.spyOn(testDataHelpers, "isTestDataSurfaceEnabled").mockReturnValue(true);
     render(
       <AdminLayout>
         <div />
       </AdminLayout>,
     );
     const links = screen.getAllByRole("link");
-    for (const { text, href } of ADMIN_LINKS.slice(0, -1)) {
+    for (const { text, href } of ADMIN_LINKS) {
       const link = links.find((el) => el.getAttribute("href") === href);
       expect(link).toBeDefined();
       expect(link?.textContent).toContain(text);
@@ -86,7 +91,7 @@ describe("AdminLayout", () => {
       .getAllByRole("link")
       .find((el) => el.getAttribute("href") === "/admin/test-data");
     expect(link).toBeDefined();
-    expect(link?.textContent).toContain("测试数据");
+    expect(link?.textContent).toContain("Test Data");
   });
 
   it("hides the Test Data link outside a local stack", () => {

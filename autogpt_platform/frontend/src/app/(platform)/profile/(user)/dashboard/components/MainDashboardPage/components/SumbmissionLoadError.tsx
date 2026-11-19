@@ -1,9 +1,13 @@
+"use client";
+
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { InboxIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export function SubmissionLoadError() {
+  const { t } = useTranslation();
   return (
     <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-border-base bg-canvas">
       <div className="flex flex-col items-center gap-4 text-center">
@@ -12,10 +16,13 @@ export function SubmissionLoadError() {
         </div>
         <div className="space-y-2">
           <Text variant="large-medium" tone="primary">
-            Failed to load workflows
+            {t("Failed to load workflows", "加载工作流失败")}
           </Text>
           <Text variant="body" tone="secondary">
-            Something went wrong while loading your submitted workflows.
+            {t(
+              "Something went wrong while loading your submitted workflows.",
+              "加载你提交的工作流时出现了问题。",
+            )}
           </Text>
         </div>
         <Button
@@ -23,7 +30,7 @@ export function SubmissionLoadError() {
           size="small"
           onClick={() => window.location.reload()}
         >
-          Try again
+          {t("Try again", "重试")}
         </Button>
       </div>
     </div>
