@@ -46,6 +46,7 @@ import {
 import { DryRunToggleButton } from "./components/DryRunToggleButton";
 import { ExpertMenuEntries } from "./components/ExpertMenuEntries";
 import { FileChips } from "./components/FileChips";
+import { FixedRecipientLabel } from "./components/FixedRecipientLabel";
 import { MentionConnectDialog } from "./components/MentionConnectDialog";
 import { MentionDropdown } from "./components/MentionDropdown";
 import { ConnectionPickerDialog } from "./components/ConnectionPicker/ConnectionPickerDialog";
@@ -53,7 +54,7 @@ import { ManagedModelPicker } from "./components/ManagedModelPicker";
 import { NoAIConnectionNotice } from "./components/NoAIConnectionNotice/NoAIConnectionNotice";
 import { RecordingButton } from "./components/RecordingButton";
 import { RecordingIndicator } from "./components/RecordingIndicator";
-import { RecipientChip, ThreadRecipientChip } from "./components/RecipientChip";
+import { RecipientChip } from "./components/RecipientChip";
 import {
   newTaskDraftKey,
   type RecipientPickerConfig,
@@ -127,8 +128,11 @@ interface Props {
   sessionId?: string | null;
   /** When true, the submit button is hidden until there is something to send. */
   hideSubmitWhenEmpty?: boolean;
-  recipientPicker?: RecipientPickerConfig;
+  recipientPicker?: RecipientPickerConfig & {
+    onSelect: (id: string | null) => void;
+  };
   recipientPickerDisabled?: boolean;
+  /** Static identity for an existing chat that cannot change recipients. */
   threadRecipient?: ExpertIdentity | null;
   /** Card composer: the text always keeps its own row above the controls,
    *  instead of sharing a single pill row until it wraps. Empty state only. */
@@ -436,6 +440,8 @@ export const ChatInput = memo(function ChatInput({
   const plusButtonRef = useRef<HTMLButtonElement>(null);
   const [isRecipientPickerOpen, setIsRecipientPickerOpen] = useState(false);
   const isRecipientPickerDisabled =
+    !recipientPicker ||
+    recipientPicker.isLoading ||
     recipientPickerDisabled ||
     isBusy ||
     isSending ||
@@ -456,25 +462,24 @@ export const ChatInput = memo(function ChatInput({
   const taskDraft = useChatDraftAccess(
     recipientPicker && !recipientPicker.isThreadPicker ? draftKey : undefined,
   );
-  const selectRecipient = recipientPicker?.onSelect;
 
   function handleRecipientSelect(id: string | null) {
     if (
-      !selectRecipient ||
+      !recipientPicker ||
       recipientSelectionBlocked ||
       isRecipientPickerDisabled
     )
       return;
-    if (recipientPicker?.isThreadPicker) {
+    if (recipientPicker.isThreadPicker) {
       setIsPickerOpen(false);
       mentions.close();
-      selectRecipient(id);
+      recipientPicker.onSelect(id);
       return;
     }
     // Only an explicit, unblocked switch carries the text. Link navigation
     // restores the destination's own draft, including only its own mentions.
     taskDraft.moveTo(newTaskDraftKey(id), value);
-    selectRecipient(id);
+    recipientPicker.onSelect(id);
   }
 
   // Voice mode, model tier and the dev token readout sit behind the +
@@ -490,13 +495,18 @@ export const ChatInput = memo(function ChatInput({
       ? [
           {
             key: "experts",
-            label: t("Experts", "专家"),
+            label: recipientPicker
+              ? t("Experts", "专家")
+              : t(
+                  "Expert switching unavailable in this chat",
+                  "此对话暂无法切换专家",
+                ),
             icon: UserCircleIcon,
-            disabled: isRecipientPickerDisabled || recipientPicker?.isLoading,
+            disabled: isRecipientPickerDisabled,
             opensPopover: true,
             onSelect: () => setIsRecipientPickerOpen(true),
             submenu:
-              recipientPicker && selectRecipient && !isMobile
+              recipientPicker && !isMobile
                 ? {
                     entries: (
                       <ExpertMenuEntries
@@ -665,7 +675,7 @@ export const ChatInput = memo(function ChatInput({
             {recipientPicker && (
               <RecipientChip
                 {...recipientPicker}
-                onSelect={selectRecipient ? handleRecipientSelect : undefined}
+                onSelect={handleRecipientSelect}
                 anchorRef={plusButtonRef}
                 disabled={isRecipientPickerDisabled}
                 open={isRecipientPickerOpen}
@@ -673,13 +683,10 @@ export const ChatInput = memo(function ChatInput({
                 selectionBlocked={recipientSelectionBlocked}
               />
             )}
-            {threadRecipient !== undefined && (
-              <ThreadRecipientChip
+            {!recipientPicker && threadRecipient && (
+              <FixedRecipientLabel
                 expert={threadRecipient}
-                anchorRef={plusButtonRef}
-                disabled={isRecipientPickerDisabled}
-                open={isRecipientPickerOpen}
-                onOpenChange={setIsRecipientPickerOpen}
+                name={expertName ?? threadRecipient.name}
               />
             )}
           </InputGroupAddon>
