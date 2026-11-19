@@ -2,11 +2,6 @@
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { MarketplaceSkill } from "@/app/api/__generated__/models/marketplaceSkill";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/atoms/Avatar/Avatar";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { IntegrationLogo } from "@/components/molecules/IntegrationLogo/IntegrationLogo";
 import { formatProviderName } from "@/components/contextual/IntegrationsPanel/helpers";
@@ -77,35 +72,23 @@ export function SkillCard({ skill, isInstalled, categoryLabel }: Props) {
           >
             {title}
           </h3>
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-body-sm leading-inherit text-foreground-tertiary">
-            <span className="inline-flex items-center gap-1.5">
-              <Avatar className="h-5 w-5">
-                {skill.creator_avatar ? (
-                  <AvatarImage
-                    src={skill.creator_avatar}
-                    alt={skill.creator ?? "AutoGPT"}
-                  />
-                ) : null}
-                <AvatarFallback>{skill.creator ?? "AutoGPT"}</AvatarFallback>
-              </Avatar>
-              by {skill.creator ?? "AutoGPT"}
-            </span>
-            {skill.source_repo ? (
-              <span className="inline-flex items-center gap-1.5">
-                <span aria-hidden>·</span>
-                From {skill.source_repo}
-              </span>
-            ) : null}
-            {providers.length > 0 ? (
-              <span className="inline-flex items-center gap-1.5">
-                <span aria-hidden>·</span>
-
-                {t("Works with", "适用服务")}
-                <IntegrationLogo provider={providers[0]} size={14} alt="" />
-                {formatProviderList(providers)}
-              </span>
-            ) : null}
-          </div>
+          {(skill.source_repo || providers.length > 0) && (
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-body-sm leading-inherit text-foreground-tertiary">
+              {skill.source_repo && (
+                <span className="min-w-0 break-words">
+                  From {skill.source_repo}
+                </span>
+              )}
+              {providers.length > 0 && (
+                <span className="inline-flex items-center gap-1.5">
+                  {skill.source_repo && <span aria-hidden>·</span>}
+                  {t("Works with", "适用服务")}
+                  <IntegrationLogo provider={providers[0]} size={14} alt="" />
+                  {formatProviderList(providers)}
+                </span>
+              )}
+            </div>
+          )}
           <p className="mt-2 line-clamp-3 text-body leading-relaxed text-foreground-secondary">
             {skill.description}
           </p>
