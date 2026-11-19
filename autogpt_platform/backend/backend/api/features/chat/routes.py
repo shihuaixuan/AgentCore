@@ -595,7 +595,6 @@ class CreateSessionResponse(BaseModel):
     user_id: str | None
     metadata: ChatSessionMetadata = ChatSessionMetadata()
     expert_id: str | None = None
-    supports_turn_recipient: bool = False
 
 
 class ActiveStreamInfo(BaseModel):
@@ -629,6 +628,7 @@ class SessionDetailResponse(BaseModel):
     total_completion_tokens: int = 0
     metadata: ChatSessionMetadata = ChatSessionMetadata()
     expert_id: str | None = None
+    supports_turn_recipient: bool = False
     # From the background-task record, not the transcript page: a child's
     # outcome, and whether a parent still has a continuation to come.
     background_outcome: str | None = None
