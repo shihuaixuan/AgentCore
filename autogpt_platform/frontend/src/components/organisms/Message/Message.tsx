@@ -27,6 +27,7 @@ import type {
 } from "react";
 import { createContext, memo, useContext, useEffect, useState } from "react";
 import { useReadEveryRender } from "@/hooks/useReadEveryRender";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { defaultSchema } from "hast-util-sanitize";
 import {
   defaultRehypePlugins,
@@ -280,11 +281,12 @@ export const MessageBranchPrevious = ({
   children,
   ...props
 }: MessageBranchPreviousProps) => {
+  const { t } = useTranslation();
   const { goToPrevious, totalBranches } = useMessageBranch();
 
   return (
     <Button
-      aria-label="Previous branch"
+      aria-label={t("Previous branch", "上一个分支")}
       disabled={totalBranches <= 1}
       onClick={goToPrevious}
       size="compact-icon-sm"
@@ -303,11 +305,12 @@ export const MessageBranchNext = ({
   children,
   ...props
 }: MessageBranchNextProps) => {
+  const { t } = useTranslation();
   const { goToNext, totalBranches } = useMessageBranch();
 
   return (
     <Button
-      aria-label="Next branch"
+      aria-label={t("Next branch", "下一个分支")}
       disabled={totalBranches <= 1}
       onClick={goToNext}
       size="compact-icon-sm"
@@ -326,12 +329,16 @@ export const MessageBranchPage = ({
   className,
   ...props
 }: MessageBranchPageProps) => {
+  const { t } = useTranslation();
   const { currentBranch, totalBranches } = useMessageBranch();
 
   return (
     <div className={cn("flex items-center px-4", className)} {...props}>
       <Text variant="body-medium-tight" tone="muted" as="span">
-        {currentBranch + 1} of {totalBranches}
+        {t(
+          `${currentBranch + 1} of ${totalBranches}`,
+          `第 ${currentBranch + 1} 个，共 ${totalBranches} 个`,
+        )}
       </Text>
     </div>
   );

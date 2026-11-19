@@ -81,4 +81,31 @@ describe("uploadFiles", () => {
     expect(outcome.uploaded).toBe(1);
     expect(outcome.failed).toEqual([{ name: "big.bin", message: "Too large" }]);
   });
+
+  test("passes the requested locale to direct upload without changing the file or folder", async () => {
+    const file = makeFile("Original 自定义.txt");
+    const outcome = await uploadFiles([file], "original-folder", "zh-CN");
+    expect(uploadFileDirectMock).toHaveBeenCalledWith(file, undefined, "zh-CN");
+    expect(bulkMoveMock).toHaveBeenCalledWith({
+      file_ids: ["id-Original 自定义.txt"],
+      folder_id: "original-folder",
+    });
+    expect(outcome).toEqual({ uploaded: 1, leftAtRoot: [], failed: [] });
+  });
+
+  test("uses English by default and localizes only the fallback for unknown upload failures", async () => {
+    const file = makeFile("Original.txt");
+    uploadFileDirectMock.mockRejectedValue(null);
+    expect(await uploadFiles([file], null, "zh-CN")).toMatchObject({
+      failed: [{ name: file.name, message: "请重试。" }],
+    });
+    expect(await uploadFiles([file], null)).toMatchObject({
+      failed: [{ name: file.name, message: "Please try again." }],
+    });
+    expect(uploadFileDirectMock).toHaveBeenLastCalledWith(
+      file,
+      undefined,
+      "en",
+    );
+  });
 });

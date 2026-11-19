@@ -9,6 +9,7 @@ import type { SubscriptionTierRequestTier } from "@/app/api/__generated__/models
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { useCheckoutRedirect } from "@/hooks/useCheckoutRedirect";
 import { usePlatformPayment } from "@/hooks/usePlatformPayment";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getTierLabel } from "./helpers";
 import {
   getSubscriptionValue,
@@ -20,6 +21,7 @@ export type SubscriptionStatus = SubscriptionStatusResponse;
 const TIER_ORDER = ["NO_TIER", "BASIC", "PRO", "MAX", "BUSINESS", "ENTERPRISE"];
 
 export function useSubscriptionTierSection() {
+  const { t, locale } = useTranslation();
   const { isPaymentEnabled } = usePlatformPayment();
   const searchParams = useSearchParams();
   const subscriptionStatus = searchParams.get("subscription");
@@ -43,7 +45,9 @@ export function useSubscriptionTierSection() {
     query: { select: (data) => (data.status === 200 ? data.data : null) },
   });
 
-  const fetchError = queryError ? "Failed to load subscription info" : null;
+  const fetchError = queryError
+    ? t("Failed to load subscription info", "无法加载订阅信息")
+    : null;
 
   const {
     mutateAsync: doUpdateTier,
@@ -58,9 +62,11 @@ export function useSubscriptionTierSection() {
     if (subscriptionStatus === "success") {
       refetch();
       toast({
-        title: "Subscription upgraded",
-        description:
+        title: t("Subscription upgraded", "订阅已升级"),
+        description: t(
           "Your plan has been updated. It may take a moment to reflect.",
+          "你的套餐已更新，可能需要稍等片刻才能显示。",
+        ),
       });
     }
     // Strip ?subscription=success|cancelled from the URL so a page refresh
@@ -75,7 +81,7 @@ export function useSubscriptionTierSection() {
     // refetch and toast are new references each render but are stable in
     // practice; the effect must only re-run when subscriptionStatus/pathname
     // changes.
-  }, [subscriptionStatus, refetch, toast, router, pathname]);
+  }, [subscriptionStatus, refetch, toast, router, pathname, t]);
 
   async function changeTier(tier: string) {
     if (isPending) return;
@@ -108,18 +114,30 @@ export function useSubscriptionTierSection() {
         : -1;
       const targetIdx = TIER_ORDER.indexOf(tier);
       const isDowngrade = targetIdx >= 0 && targetIdx < currentIdx;
+      const tierLabel = getTierLabel(tier, locale);
       toast({
-        title: "Subscription updated",
+        title: t("Subscription updated", "订阅已更新"),
         description:
           tier === "NO_TIER"
-            ? "Your subscription is cancelled at the end of your current billing period; no further charges."
+            ? t(
+                "Your subscription is cancelled at the end of your current billing period; no further charges.",
+                "你的订阅将在当前账单周期结束时取消，之后不再扣费。",
+              )
             : isDowngrade
-              ? `Your plan will be downgraded to ${getTierLabel(tier)} at the end of your current billing period; from then your saved card is billed at the new lower rate.`
-              : `Upgraded to ${getTierLabel(tier)}. On the next invoice your saved card is charged for the upgrade proration plus the next month at the new rate.`,
+              ? t(
+                  `Your plan will be downgraded to ${tierLabel} at the end of your current billing period; from then your saved card is billed at the new lower rate.`,
+                  `你的套餐将在当前账单周期结束时降级至${tierLabel}；此后将按新的较低费率向已保存的银行卡扣款。`,
+                )
+              : t(
+                  `Upgraded to ${tierLabel}. On the next invoice your saved card is charged for the upgrade proration plus the next month at the new rate.`,
+                  `已升级至${tierLabel}。下次出账时，将向已保存的银行卡收取按比例计算的升级费用，以及按新费率计算的下月费用。`,
+                ),
       });
     } catch (e: unknown) {
       const msg =
-        e instanceof Error ? e.message : "Failed to change subscription tier";
+        e instanceof Error
+          ? e.message
+          : t("Failed to change subscription tier", "无法更改订阅套餐");
       setTierError(msg);
     } finally {
       setIsChangingTier(false);
@@ -164,16 +182,22 @@ export function useSubscriptionTierSection() {
       });
       await refetch();
       toast({
-        title: "Pending subscription change cancelled.",
+        title: t(
+          "Pending subscription change cancelled.",
+          "已取消待生效的订阅更改。",
+        ),
       });
     } catch (e: unknown) {
       const msg =
         e instanceof Error
           ? e.message
-          : "Failed to cancel pending subscription change";
+          : t(
+              "Failed to cancel pending subscription change",
+              "无法取消待生效的订阅更改",
+            );
       setTierError(msg);
       toast({
-        title: "Failed to cancel pending change",
+        title: t("Failed to cancel pending change", "无法取消待生效的更改"),
         description: msg,
         variant: "destructive",
       });

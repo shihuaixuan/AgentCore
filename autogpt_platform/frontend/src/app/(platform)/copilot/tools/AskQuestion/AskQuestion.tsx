@@ -1,5 +1,6 @@
 "use client";
 import type { ToolUIPart } from "ai";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ClarificationQuestionsCard } from "../../components/ClarificationQuestionsCard/ClarificationQuestionsCard";
 import { useCopilotChatActions } from "../../components/CopilotChatActionsProvider/useCopilotChatActions";
 import { MorphingTextAnimation } from "../../components/MorphingTextAnimation/MorphingTextAnimation";
@@ -18,7 +19,8 @@ interface Props {
 }
 
 export function AskQuestionTool({ part }: Props) {
-  const text = getAnimationText(part);
+  const { t } = useTranslation();
+  const text = getAnimationText(part, t);
   const { onSend } = useCopilotChatActions();
 
   const isStreaming =

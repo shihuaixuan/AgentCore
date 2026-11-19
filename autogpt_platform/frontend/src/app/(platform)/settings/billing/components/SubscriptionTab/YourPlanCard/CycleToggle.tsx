@@ -38,12 +38,12 @@ export function CycleToggle({ value, onChange, disabled }: Props) {
             )}
           >
             {cycle === "monthly" ? (
-              "Monthly"
+              t("Monthly", "每月")
             ) : (
               <>
                 {t("Yearly", "每年")}{" "}
                 <span className="ml-1 bg-gradient-to-r from-success via-success to-sky bg-clip-text text-caption-sm leading-inherit font-semibold text-transparent">
-                  Save 15%
+                  {t("Save 15%", "节省 15%")}
                 </span>
               </>
             )}

@@ -3,12 +3,14 @@
 import Image from "next/image";
 import { useState } from "react";
 import { resolvePlatformLogo } from "./platformLogos";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   sourcePlatform?: string | null;
 }
 
 export function ChatOriginIcon({ sourcePlatform }: Props) {
+  const { t } = useTranslation();
   const logo = resolvePlatformLogo(sourcePlatform);
   const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
 
@@ -17,7 +19,7 @@ export function ChatOriginIcon({ sourcePlatform }: Props) {
   return (
     <span
       className="inline-flex size-3.5 shrink-0 items-center justify-center"
-      title={`From ${logo.name}`}
+      title={t(`From ${logo.name}`, `来自 ${logo.name}`)}
     >
       <Image
         src={logo.src}

@@ -6,6 +6,7 @@ import {
 } from "@/app/api/__generated__/endpoints/brain-dump/brain-dump";
 import type { SuggestedTask } from "@/app/api/__generated__/models/suggestedTask";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { mergeUpdatedTasks } from "./helpers";
 
@@ -14,6 +15,7 @@ const QUERY_KEY = getGetBrainDumpSuggestedTasksQueryKey();
 // The stored list and its writes. Changes are applied to the cache first and
 // written in the order they were made.
 export function useSuggestedTaskList({ enabled }: { enabled: boolean }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { data: response } = useGetBrainDumpSuggestedTasks({
     query: { enabled },
@@ -44,8 +46,8 @@ export function useSuggestedTaskList({ enabled }: { enabled: boolean }) {
       onError: () => {
         void queryClient.invalidateQueries({ queryKey: QUERY_KEY });
         toast({
-          title: "Couldn't update your suggestions",
-          description: "Please try again.",
+          title: t("Couldn't update your suggestions", "无法更新你的建议"),
+          description: t("Please try again.", "请重试。"),
           variant: "destructive",
         });
       },

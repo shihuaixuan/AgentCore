@@ -1,6 +1,7 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { approveAllLabel, modeLabel } from "../helpers";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   count: number;
@@ -18,16 +19,17 @@ export function QueueHeader({
   onReviewAll,
   onShow,
 }: Props) {
+  const { t, locale } = useTranslation();
   return (
     <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-separator bg-surface-muted/60 px-4 py-2">
       <span className="flex items-baseline gap-2 text-body font-medium text-foreground-strong">
-        Waiting for you
+        {t("Waiting for you", "等待你处理")}
         <span className="text-foreground-tertiary tabular-nums">{count}</span>
       </span>
       <div className="flex items-center gap-3">
-        {modeLabel(mode) && (
+        {modeLabel(mode, locale) && (
           <Text variant="small-tight" as="span" tone="muted">
-            {modeLabel(mode)}
+            {modeLabel(mode, locale)}
           </Text>
         )}
         {onShow ? (
@@ -36,13 +38,13 @@ export function QueueHeader({
             size="small"
             variant="secondary"
             className="min-w-0"
-            aria-label="Show waiting cards"
+            aria-label={t("Show waiting cards", "显示待处理卡片")}
             aria-expanded={false}
             // Close and continue removed the button that had focus.
             autoFocus
             onClick={onShow}
           >
-            Show
+            {t("Show", "显示")}
           </Button>
         ) : (
           <>
@@ -54,7 +56,7 @@ export function QueueHeader({
                 className="min-w-0"
                 onClick={onReviewAll}
               >
-                Review all
+                {t("Review all", "审核全部")}
               </Button>
             )}
             {approveAll && (
@@ -65,7 +67,7 @@ export function QueueHeader({
                 disabled={approveAll.busy}
                 onClick={approveAll.onClick}
               >
-                {approveAllLabel(approveAll.count)}
+                {approveAllLabel(approveAll.count, locale)}
               </Button>
             )}
           </>

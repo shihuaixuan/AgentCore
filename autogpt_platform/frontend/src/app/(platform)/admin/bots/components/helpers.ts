@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/locale";
+
 export const SHARDING_THRESHOLD = 2500;
 
 export const DAYS_OPTIONS = [
@@ -30,18 +32,27 @@ export function formatPercent(rate: number | null | undefined): string {
   return `${(rate * 100).toFixed(1)}%`;
 }
 
-export function formatDay(value: string | Date): string {
-  return new Date(value).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
+export function formatDay(value: string | Date, locale: Locale = "en"): string {
+  return new Date(value).toLocaleDateString(
+    locale === "zh-CN" ? locale : undefined,
+    {
+      month: "short",
+      day: "numeric",
+    },
+  );
 }
 
-export function formatDate(value: string | Date | null | undefined): string {
+export function formatDate(
+  value: string | Date | null | undefined,
+  locale: Locale = "en",
+): string {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return new Date(value).toLocaleDateString(
+    locale === "zh-CN" ? locale : undefined,
+    {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    },
+  );
 }

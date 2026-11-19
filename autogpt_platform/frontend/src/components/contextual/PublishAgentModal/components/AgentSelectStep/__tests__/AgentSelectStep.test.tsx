@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "@/tests/integrations/test-utils";
 import { server } from "@/mocks/mock-server";
 import { http, HttpResponse } from "msw";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 vi.mock("@/lib/auth/hooks/useAuth", () => ({
   useAuth: () => ({ isLoggedIn: true }),
@@ -152,6 +153,26 @@ describe("AgentSelectStep", () => {
       1,
       expect.objectContaining({ name: "Agent 1" }),
     );
+  });
+
+  it("localizes pagination ranges and controls without translating agent names", async () => {
+    installHandler(47, 10);
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <AgentSelectStep
+          onSelect={onSelect}
+          onCancel={onCancel}
+          onNext={onNext}
+          onOpenBuilder={onOpenBuilder}
+        />
+      </LanguageProvider>,
+    );
+
+    await screen.findByText("Agent 1");
+    expect(screen.getByText("第 1–10 项，共 47 项")).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+    expect(await screen.findByText("第 11–20 项，共 47 项")).toBeDefined();
+    expect(await screen.findByText("Agent 11")).toBeDefined();
   });
 
   it("clicking the Next page button advances to page 2", async () => {

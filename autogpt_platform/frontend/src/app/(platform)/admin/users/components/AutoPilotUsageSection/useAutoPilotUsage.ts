@@ -12,8 +12,10 @@ import { useToast } from "@/components/molecules/Toast/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { getErrorMessage, getPlanName } from "../../helpers";
 import type { ResetScope } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function useAutoPilotUsage(userId: string) {
+  const { t, locale } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -30,11 +32,17 @@ export function useAutoPilotUsage(userId: string) {
         toast(
           warning
             ? {
-                title: `Plan set to ${planName}, but Stripe will revert it`,
+                title: t(
+                  `Plan set to ${planName}, but Stripe will revert it`,
+                  `套餐已设为 ${planName}，但 Stripe 会将其还原`,
+                ),
                 description: warning,
                 variant: "destructive",
               }
-            : { title: `Plan set to ${planName}`, variant: "success" },
+            : {
+                title: t(`Plan set to ${planName}`, `套餐已设为 ${planName}`),
+                variant: "success",
+              },
         );
         void queryClient.invalidateQueries({
           queryKey: getUsageQueryKey(data.user_id),
@@ -42,8 +50,8 @@ export function useAutoPilotUsage(userId: string) {
       },
       onError: (error) => {
         toast({
-          title: "Couldn't change the plan",
-          description: getErrorMessage(error),
+          title: t("Couldn't change the plan", "无法更改套餐"),
+          description: getErrorMessage(error, locale),
           variant: "destructive",
         });
       },
@@ -56,15 +64,15 @@ export function useAutoPilotUsage(userId: string) {
         queryClient.setQueryData(getUsageQueryKey(data.user_id), response);
         toast({
           title: data.reset_weekly
-            ? "Daily and weekly usage reset"
-            : "Daily usage reset",
+            ? t("Daily and weekly usage reset", "每日和每周用量已重置")
+            : t("Daily usage reset", "每日用量已重置"),
           variant: "success",
         });
       },
       onError: (error) => {
         toast({
-          title: "Couldn't reset usage",
-          description: getErrorMessage(error),
+          title: t("Couldn't reset usage", "无法重置用量"),
+          description: getErrorMessage(error, locale),
           variant: "destructive",
         });
       },

@@ -47,23 +47,27 @@ export function WebhookTriggerSection({ preset, triggerSetupInfo }: Props) {
             }`}
           >
             {status === "active"
-              ? "Active"
+              ? t("Active", "已启用")
               : status === "inactive"
-                ? "Inactive"
-                : "Broken"}
+                ? t("Inactive", "已停用")
+                : t("Broken", "异常")}
           </span>
         </div>
 
         {!preset.webhook_id ? (
           <Text variant="body" tone="danger">
-            This trigger is not attached to a webhook. Use &quot;Set up
-            trigger&quot; to fix this.
+            {t(
+              'This trigger is not attached to a webhook. Use "Set up trigger" to fix this.',
+              "此触发器尚未关联 Webhook。请使用“设置触发器”来修复。",
+            )}
           </Text>
         ) : !triggerSetupInfo.credentials_input_name && webhook ? (
           <div className="flex flex-col gap-2">
             <Text variant="body">
-              This trigger is ready to be used. Use the Webhook URL below to set
-              up the trigger connection with the service of your choosing.
+              {t(
+                "This trigger is ready to be used. Use the Webhook URL below to set up the trigger connection with the service of your choosing.",
+                "此触发器已准备就绪。使用下方的 Webhook 地址，与所选服务建立触发连接。",
+              )}
             </Text>
             <div className="flex flex-col gap-1">
               <Text variant="small-medium">
@@ -88,10 +92,16 @@ export function WebhookTriggerSection({ preset, triggerSetupInfo }: Props) {
           </div>
         ) : (
           <Text variant="body" tone="muted">
-            This workflow trigger is{" "}
+            {t("This workflow trigger is", "此工作流触发器")}{" "}
             {preset.is_active
-              ? "ready. When a trigger is received, it will run with the provided settings."
-              : "disabled. It will not respond to triggers until you enable it."}
+              ? t(
+                  "ready. When a trigger is received, it will run with the provided settings.",
+                  "已就绪，收到触发事件后将按提供的设置运行。",
+                )
+              : t(
+                  "disabled. It will not respond to triggers until you enable it.",
+                  "已停用，启用之前不会响应触发事件。",
+                )}
           </Text>
         )}
       </div>

@@ -6,12 +6,14 @@ import { TourMessageList } from "../TourMessageList/TourMessageList";
 import { TourPromptBar } from "../TourPromptBar/TourPromptBar";
 import { FlashIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   chat: ReturnType<typeof useTourCopilot>;
 }
 
 export function TourChatContainer({ chat }: Props) {
+  const { t } = useTranslation();
   const isDemoComplete = useTourStore((s) => s.isDemoComplete);
 
   return (
@@ -34,7 +36,10 @@ export function TourChatContainer({ chat }: Props) {
             />
             <p className="mt-2 flex items-center justify-center gap-1 text-body text-foreground-subtle">
               <Icon icon={FlashIcon} className="size-3.5 shrink-0" />
-              Simulated demo — sign up to put Otto to work on your own tasks.
+              {t(
+                "Simulated demo — sign up to put Otto to work on your own tasks.",
+                "模拟演示 — 注册后，让 Otto 处理你的真实任务。",
+              )}
             </p>
           </div>
         )}

@@ -14,6 +14,7 @@ import type { PendingQuestions } from "../../QuestionDock/helpers";
 import { PendingQuestionsContext } from "../../QuestionDock/PendingQuestionsContext";
 import { ToolChain } from "../ToolChain";
 import { expectTypingKept } from "@/tests/integrations/typing";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 vi.mock("@/components/molecules/Toast/use-toast", () => ({
   toast: vi.fn(),
@@ -93,6 +94,30 @@ function getRowToggle(name: RegExp): HTMLElement {
 }
 
 describe("ToolChain", () => {
+  it("renders Chinese summary, reasoning and completion labels", async () => {
+    const user = userEvent.setup();
+    render(
+      <LanguageProvider>
+        <ToolChain
+          parts={[
+            reasoningPart("Keep this original reasoning"),
+            toolPart("list_schedules", "output-available", {
+              output: { schedules: [{ id: "schedule-1" }] },
+            }),
+          ]}
+          isStreaming={false}
+        />
+      </LanguageProvider>,
+    );
+    const heading = screen.getByRole("button", {
+      name: "已完成思考，已管理定时任务",
+    });
+    await user.click(heading);
+    expect(screen.getByText("思考过程")).toBeDefined();
+    expect(screen.getByText("已检查你的定时任务")).toBeDefined();
+    expect(screen.getAllByText("已完成").length).toBeGreaterThan(0);
+  });
+
   beforeEach(() => {
     onSend.mockClear();
     vi.mocked(toast).mockClear();
@@ -571,6 +596,48 @@ describe("ToolChain", () => {
       ),
     );
     expect(screen.queryByText("Answer a few questions")).toBeNull();
+  });
+
+  it("localizes rejected answer sends without translating the server error", async () => {
+    const user = userEvent.setup();
+    onSend.mockRejectedValueOnce(new Error("Raw backend failure"));
+    const pending: PendingQuestions = {
+      dockId: "m1:call-ask_question",
+      callIds: ["call-ask_question"],
+      questions: [
+        { question: "Which region?", keyword: "region", example: "Europe" },
+      ],
+    };
+    render(
+      <LanguageProvider>
+        <CopilotChatActionsProvider onSend={onSend}>
+          <PendingQuestionsContext.Provider value={pending}>
+            <ToolChain
+              parts={[
+                toolPart("ask_question", "output-available", {
+                  output: {
+                    type: "agent_builder_clarification_needed",
+                    questions: pending.questions,
+                  },
+                }),
+              ]}
+              isStreaming={false}
+            />
+          </PendingQuestionsContext.Provider>
+        </CopilotChatActionsProvider>
+      </LanguageProvider>,
+    );
+    await user.type(screen.getByRole("textbox"), "Western Europe");
+    await user.click(screen.getByRole("button", { name: "发送答案" }));
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "消息发送失败",
+          description:
+            "Raw backend failure — 消息仍保留在对话中，请点击“重试”重新发送。",
+        }),
+      ),
+    );
   });
 
   it("offers a Proceed step for confirm-only setup cards", async () => {

@@ -132,12 +132,17 @@ export function UseExistingCredentialsDialog({
                 {t("All connections", "全部连接")}
               </button>
               <Text variant="body-tight" tone="muted">
-                You have {selected.credentials.length} {selected.provider.name}{" "}
-                connections. Choose which one {expertName} should use.
+                {t(
+                  `You have ${selected.credentials.length} ${selected.provider.name} connections. Choose which one ${expertName} should use.`,
+                  `你有 ${selected.credentials.length} 个 ${selected.provider.name} 连接。请选择供 ${expertName} 使用的连接。`,
+                )}
               </Text>
               <ul
                 className="flex flex-col gap-2"
-                aria-label={`${selected.provider.name} connections`}
+                aria-label={t(
+                  `${selected.provider.name} connections`,
+                  `${selected.provider.name} 连接`,
+                )}
               >
                 {selected.credentials.map((credential) => {
                   const name = formatCredentialName(
@@ -166,9 +171,12 @@ export function UseExistingCredentialsDialog({
                         size="small"
                         disabled={isGranting}
                         onClick={() => onUse(credential.id)}
-                        aria-label={`Let ${expertName} use ${name}`}
+                        aria-label={t(
+                          `Let ${expertName} use ${name}`,
+                          `允许 ${expertName} 使用 ${name}`,
+                        )}
                       >
-                        Use
+                        {t("Use", "使用")}
                       </Button>
                     </li>
                   );
@@ -229,7 +237,10 @@ export function UseExistingCredentialsDialog({
                                       group.provider.name,
                                     group.credentials[0].provider,
                                   )
-                                : `${group.credentials.length} connections · choose one`
+                                : t(
+                                    `${group.credentials.length} connections · choose one`,
+                                    `${group.credentials.length} 个连接 · 请选择一个`,
+                                  )
                           }
                         />
                       </li>

@@ -1,6 +1,7 @@
 import type { hireBrainDumpPlanResponse } from "@/app/api/__generated__/endpoints/brain-dump/brain-dump";
 import { toast } from "@/components/molecules/Toast/use-toast";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
+import type { Locale } from "@/lib/i18n/locale";
 import {
   joinNames,
   pause,
@@ -61,14 +62,20 @@ export async function sendMarked(
   }
 }
 
-export function toastHireFailed(names: string[]) {
+export function toastHireFailed(names: string[], locale: Locale = "en") {
+  const chinese = locale === "zh-CN";
   toast({
     title:
       names.length > 0
-        ? `Couldn't hire ${joinNames(names)}`
-        : "Couldn't hire your team",
-    description:
-      "Otto takes on their tasks for now. You can hire experts any time.",
+        ? chinese
+          ? `未能聘用${names.join("、")}`
+          : `Couldn't hire ${joinNames(names)}`
+        : chinese
+          ? "未能聘用你的团队"
+          : "Couldn't hire your team",
+    description: chinese
+      ? "这些任务暂由 Otto 负责。你随时可以聘用专家。"
+      : "Otto takes on their tasks for now. You can hire experts any time.",
     variant: "destructive",
     // Until closed: the screen moves on to Home, and this should be there.
     duration: Infinity,

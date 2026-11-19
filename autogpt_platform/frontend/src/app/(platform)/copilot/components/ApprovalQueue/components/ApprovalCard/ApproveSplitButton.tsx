@@ -17,6 +17,8 @@ import {
 import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
 import type { ChatRule, RuleScope } from "../../helpers";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 
 interface Props {
   label: string;
@@ -37,6 +39,7 @@ export function ApproveSplitButton({
   disabled,
   onApprove,
 }: Props) {
+  const { t, locale } = useTranslation();
   const [scope, setScope] = useState<RuleScope>("expert");
   const who = expertName ?? AUTOPILOT_NAME;
   const main = (
@@ -50,7 +53,7 @@ export function ApproveSplitButton({
         rules.length > 0 ? "min-w-0 flex-1 rounded-r-none pr-2.5" : "min-w-0"
       }
     >
-      {loading ? "Approving…" : label}
+      {loading ? t("Approving…", "正在批准…") : label}
     </Button>
   );
   if (rules.length === 0) return main;
@@ -64,7 +67,7 @@ export function ApproveSplitButton({
             size="small"
             variant="primary"
             disabled={disabled}
-            aria-label="More ways to approve"
+            aria-label={t("More ways to approve", "更多批准方式")}
             withTooltip={false}
             className="min-w-0 rounded-l-none border-l-foreground-secondary px-2"
           >
@@ -73,7 +76,13 @@ export function ApproveSplitButton({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-80">
           {rules.map((rule) => {
-            const [title, detail] = ruleCopy(rule, scope, subjectName, who);
+            const [title, detail] = ruleCopy(
+              rule,
+              scope,
+              subjectName,
+              who,
+              locale,
+            );
             return (
               <DropdownMenuItem
                 key={rule}
@@ -91,7 +100,7 @@ export function ApproveSplitButton({
           })}
           <DropdownMenuSeparator />
           <DropdownMenuLabel className="text-caption font-normal text-foreground-tertiary">
-            Applies to
+            {t("Applies to", "适用范围")}
           </DropdownMenuLabel>
           <DropdownMenuRadioGroup
             value={scope}
@@ -105,7 +114,7 @@ export function ApproveSplitButton({
                 onSelect={(event) => event.preventDefault()}
                 className="text-body text-foreground-strong"
               >
-                {scopeLabel(option, who)}
+                {scopeLabel(option, who, locale)}
               </DropdownMenuRadioItem>
             ))}
           </DropdownMenuRadioGroup>
@@ -117,7 +126,13 @@ export function ApproveSplitButton({
 
 const SCOPES: RuleScope[] = ["chat", "expert", "team"];
 
-function scopeLabel(scope: RuleScope, who: string) {
+function scopeLabel(scope: RuleScope, who: string, locale: Locale) {
+  if (locale === "zh-CN")
+    return scope === "chat"
+      ? "当前对话"
+      : scope === "expert"
+        ? `${who} 的所有对话`
+        : "团队中的所有专家";
   if (scope === "chat") return "This chat";
   if (scope === "expert") return `${who}, every chat`;
   return "Every Expert on my team";
@@ -129,7 +144,22 @@ function ruleCopy(
   scope: RuleScope,
   subject: string,
   who: string,
+  locale: Locale,
 ): [string, string] {
+  if (locale === "zh-CN") {
+    const target =
+      scope === "chat"
+        ? "当前对话"
+        : scope === "expert"
+          ? `${who} 的所有对话`
+          : "团队中的所有专家";
+    return rule === "allow"
+      ? [`今后允许 ${subject}`, `在${target}中执行此操作时不再询问`]
+      : [
+          `今后由 ${AUTOPILOT_NAME} 判断 ${subject}`,
+          `在${target}中每次执行前进行检查，仅在无法确定时询问你`,
+        ];
+  }
   if (rule === "allow") {
     const detail = {
       chat: `${who} won't ask again for this in this chat`,

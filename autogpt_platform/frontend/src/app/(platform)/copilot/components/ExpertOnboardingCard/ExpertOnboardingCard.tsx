@@ -18,6 +18,7 @@ import { OnboardingReview } from "./components/OnboardingReview";
 import { parseExpertOnboarding, type ExpertOnboardingOutput } from "./helpers";
 import { PendingOnboardingContext } from "./PendingOnboardingContext";
 import { useExpertOnboardingCard } from "./useExpertOnboardingCard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   part: ToolUIPart;
@@ -28,6 +29,7 @@ interface Props {
  *  outside the tool chain because a chain collapses on top of its rows, and
  *  this one is the only thing on screen the user is meant to act on. */
 export function ExpertOnboardingCard({ part }: Props) {
+  const { t } = useTranslation();
   const pendingCallId = useContext(PendingOnboardingContext);
   const onboarding = parseExpertOnboarding(part);
 
@@ -39,13 +41,13 @@ export function ExpertOnboardingCard({ part }: Props) {
     if (isSettled) {
       return (
         <div className="py-2 text-body text-foreground-tertiary">
-          Couldn&apos;t open the setup questions.
+          {t("Couldn't open the setup questions.", "无法打开设置问题。")}
         </div>
       );
     }
     return (
       <div className="flex items-center gap-2 py-2 text-body text-foreground-tertiary">
-        <MorphingTextAnimation text="Getting set up…" />
+        <MorphingTextAnimation text={t("Getting set up…", "正在准备设置…")} />
       </div>
     );
   }
@@ -66,6 +68,7 @@ interface FormProps {
 }
 
 function OnboardingForm({ callId, onboarding, isLive }: FormProps) {
+  const { t } = useTranslation();
   const { expertsById } = useExpertMap();
   // What the user's reply in the chat said, as opposed to the form's answers.
   const sentAnswers = useContext(AnsweredQuestionsContext).get(callId);
@@ -97,7 +100,7 @@ function OnboardingForm({ callId, onboarding, isLive }: FormProps) {
   const expert = onboarding.expertId
     ? expertsById.get(onboarding.expertId)
     : undefined;
-  const name = expert?.name ?? "Your new hire";
+  const name = expert?.name ?? t("Your new hire", "你的新专家");
   const labelId = `${sectionId}-${currentStep?.keyword ?? "review"}`;
 
   if (isDone) {
@@ -117,7 +120,7 @@ function OnboardingForm({ callId, onboarding, isLive }: FormProps) {
             tone="subtle"
             className="shrink-0"
           />
-          Setup questions from {name}
+          {t(`Setup questions from ${name}`, `来自 ${name} 的设置问题`)}
         </div>
         {answered.length > 0 && <AnsweredQuestions items={answered} />}
       </div>
@@ -137,12 +140,17 @@ function OnboardingForm({ callId, onboarding, isLive }: FormProps) {
     >
       <div
         role="progressbar"
-        aria-label="Setup progress"
+        aria-label={t("Setup progress", "设置进度")}
         aria-valuemin={1}
         aria-valuemax={total}
         aria-valuenow={shown}
         aria-valuetext={
-          isReview ? "Check your answers" : `Question ${shown} of ${total}`
+          isReview
+            ? t("Check your answers", "检查你的回答")
+            : t(
+                `Question ${shown} of ${total}`,
+                `第 ${shown} 题，共 ${total} 题`,
+              )
         }
         className="h-1 bg-surface-hover"
       >
@@ -177,7 +185,7 @@ function OnboardingForm({ callId, onboarding, isLive }: FormProps) {
                 </span>
                 {currentStep.allow_multiple && (
                   <span className="text-body text-foreground-tertiary">
-                    Choose as many as you like
+                    {t("Choose as many as you like", "可选择多项")}
                   </span>
                 )}
               </span>

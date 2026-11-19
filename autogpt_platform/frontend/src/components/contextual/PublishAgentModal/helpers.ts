@@ -1,4 +1,5 @@
 import { SubmissionStatus } from "@/app/api/__generated__/models/submissionStatus";
+import type { Locale } from "@/lib/i18n/locale";
 
 export const emptyModalState = {
   agent_id: "",
@@ -24,11 +25,12 @@ export interface SubmissionMetaItem {
 
 export function formatSubmissionDate(
   value: string | Date | null | undefined,
+  locale: Locale = "en",
 ): string | null {
   if (!value) return null;
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(locale === "zh-CN" ? locale : undefined, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -65,13 +67,14 @@ function dateItem(
   label: string,
   value: string | Date | null | undefined,
   t: (english: string, chinese: string) => string,
+  locale: Locale,
 ): SubmissionMetaItem | null {
   const relative = formatRelativeDate(value, t);
   if (!relative) return null;
   return {
     label,
     value: relative,
-    title: formatSubmissionDate(value) ?? undefined,
+    title: formatSubmissionDate(value, locale) ?? undefined,
   };
 }
 
@@ -94,6 +97,7 @@ export function getSubmissionMeta(
     runCount,
   }: SubmissionMetaArgs,
   t: (english: string, chinese: string) => string = (english) => english,
+  locale: Locale = "en",
 ): SubmissionMetaItem[] {
   const items: SubmissionMetaItem[] = [];
 
@@ -105,7 +109,12 @@ export function getSubmissionMeta(
   }
 
   if (status === SubmissionStatus.APPROVED) {
-    const liveSince = dateItem(t("Live since", "上线时间"), reviewedAt, t);
+    const liveSince = dateItem(
+      t("Live since", "上线时间"),
+      reviewedAt,
+      t,
+      locale,
+    );
     if (liveSince) items.push(liveSince);
     if (typeof runCount === "number") {
       items.push({
@@ -114,7 +123,7 @@ export function getSubmissionMeta(
       });
     }
   } else if (status === SubmissionStatus.REJECTED) {
-    const reviewed = dateItem(t("Reviewed", "审核时间"), reviewedAt, t);
+    const reviewed = dateItem(t("Reviewed", "审核时间"), reviewedAt, t, locale);
     if (reviewed) items.push(reviewed);
   } else if (status === SubmissionStatus.DRAFT) {
     items.push({
@@ -122,7 +131,12 @@ export function getSubmissionMeta(
       value: t("Not submitted yet", "尚未提交"),
     });
   } else {
-    const submitted = dateItem(t("Submitted", "提交时间"), submittedAt, t);
+    const submitted = dateItem(
+      t("Submitted", "提交时间"),
+      submittedAt,
+      t,
+      locale,
+    );
     if (submitted) items.push(submitted);
   }
 

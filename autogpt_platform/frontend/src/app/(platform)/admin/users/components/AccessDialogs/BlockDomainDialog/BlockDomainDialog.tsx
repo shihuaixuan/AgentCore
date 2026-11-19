@@ -11,6 +11,7 @@ import { AccountChecklist } from "../AccountChecklist";
 import { ReasonFields } from "../ReasonFields";
 import { useBlockSubmit } from "../useBlockSubmit";
 import { useBlockDomainDialog } from "./useBlockDomainDialog";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   report: AccountIPReport;
@@ -25,6 +26,7 @@ export function BlockDomainDialog({
   signedInUserId,
   showTrigger,
 }: Props) {
+  const { t } = useTranslation();
   const block = useBlockSubmit();
   const dialog = useBlockDomainDialog({
     report,
@@ -42,23 +44,24 @@ export function BlockDomainDialog({
 
   return (
     <Dialog
-      title={`Block ${dialog.domain}?`}
+      title={t(`Block ${dialog.domain}?`, `阻止 ${dialog.domain}？`)}
       styling={{ maxWidth: "520px" }}
       controlled={{ isOpen: dialog.isOpen, set: handleOpenChange }}
     >
       {showTrigger ? (
         <Dialog.Trigger>
           <Button variant="ghost" size="small">
-            Block domain…
+            {t("Block domain…", "阻止域名…")}
           </Button>
         </Dialog.Trigger>
       ) : null}
       <Dialog.Content>
         <div className="flex flex-col gap-4">
           <Text variant="body" tone="secondary">
-            No one can sign up with an @{dialog.domain} address until the block
-            ends. Accounts that already exist aren&apos;t affected unless you
-            ban them below.
+            {t(
+              `No one can sign up with an @${dialog.domain} address until the block ends. Accounts that already exist aren't affected unless you ban them below.`,
+              `阻止结束前，任何人都无法使用 @${dialog.domain} 邮箱注册。现有账户不受影响，除非你在下方封禁它们。`,
+            )}
           </Text>
           {block.conflict ? (
             <Alert variant="warning">
@@ -76,9 +79,10 @@ export function BlockDomainDialog({
                   }
                 />
                 <Text variant="body" as="span" tone="body">
-                  Also ban the{" "}
-                  {pluralize(dialog.banCount || existing, "existing account")}{" "}
-                  on this domain
+                  {t(
+                    `Also ban the ${pluralize(dialog.banCount || existing, "existing account")} on this domain`,
+                    `同时封禁此域名下的 ${dialog.banCount || existing} 个现有账户`,
+                  )}
                 </Text>
               </label>
               {dialog.alsoBan ? (
@@ -107,7 +111,7 @@ export function BlockDomainDialog({
             disabled={block.isCreating || dialog.isBanning}
             onClick={() => dialog.handleOpenChange(false)}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button
             variant={bansPeople ? "destructive" : "primary"}
@@ -117,10 +121,16 @@ export function BlockDomainDialog({
             onClick={() => void dialog.submit()}
           >
             {dialog.isRetry
-              ? `Retry ${dialog.banCount} failed`
+              ? t(
+                  `Retry ${dialog.banCount} failed`,
+                  `重试 ${dialog.banCount} 个失败项`,
+                )
               : bansPeople
-                ? `Block domain and ban ${pluralize(dialog.banCount, "account")}`
-                : "Block domain"}
+                ? t(
+                    `Block domain and ban ${pluralize(dialog.banCount, "account")}`,
+                    `阻止域名并封禁 ${dialog.banCount} 个账户`,
+                  )
+                : t("Block domain", "阻止域名")}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

@@ -2,6 +2,7 @@ import type { ExpertAvatarRequestCategory } from "@/app/api/__generated__/models
 import type { VoicePickResult } from "@/components/organisms/VoicePicker/helpers";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   beatTriggers,
   buildFlowItems,
@@ -30,6 +31,7 @@ import { useRaiseSubmission } from "./useRaiseSubmission";
 import { useSkillsAvailability } from "./useSkillsAvailability";
 
 export function useRaisePage() {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   // Seeded in the initialiser rather than an effect: an effect would render
   // the area question first and then snatch it away.
@@ -175,7 +177,7 @@ export function useRaisePage() {
     avatarUrl: draft.avatarUrl,
     about: draft.about,
     voiceLabel: draft.voiceLabel,
-    items: buildFlowItems(draft, progress),
+    items: buildFlowItems(draft, progress, t),
     name: draft.name,
     budget: draft.budget,
     marketplace: draft.marketplace,

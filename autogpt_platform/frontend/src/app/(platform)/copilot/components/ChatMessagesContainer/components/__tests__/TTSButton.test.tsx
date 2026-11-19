@@ -31,6 +31,7 @@ vi.mock("@/components/molecules/Toast/use-toast", () => ({
 }));
 
 import { TooltipProvider } from "@/components/atoms/Tooltip/BaseTooltip";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { TTSButton } from "../TTSButton";
 
 function render(ui: React.ReactElement) {
@@ -79,6 +80,24 @@ describe("TTSButton", () => {
     expect(synthesizeSpeech.mock.calls[0]).toEqual([
       "No local voice reads this.",
       "s-1",
+      "en",
+    ]);
+  });
+
+  it("passes the current locale to synthesis without changing reply text", async () => {
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <TTSButton text="Original English reply" sessionID="raw-session" />
+      </LanguageProvider>,
+    );
+
+    await userEvent.click(await screen.findByRole("button"));
+
+    await waitFor(() => expect(synthesizeSpeech).toHaveBeenCalled());
+    expect(synthesizeSpeech.mock.calls[0]).toEqual([
+      "Original English reply",
+      "raw-session",
+      "zh-CN",
     ]);
   });
 

@@ -15,6 +15,7 @@
     "lint:ds-baseline": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/eslint-rules/update-design-system-baseline.mts",
     "format": "next lint --fix; prettier --write .",
     "types": "tsc --noEmit",
+    "audit:localization": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/localization/check-ui-copy.ts",
     "knip": "knip",
     "test": "NEXT_PUBLIC_PW_TEST=true next build --turbo && pnpm test:e2e:no-build",
     "test-ui": "NEXT_PUBLIC_PW_TEST=true next build --turbo && pnpm test:e2e:ui",

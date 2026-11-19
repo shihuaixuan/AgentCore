@@ -43,7 +43,10 @@ export function NeedsYou({ dashboard, className }: Props) {
             variant="small-medium"
             as="span"
             role="status"
-            aria-label={`${pendingCount} ${pendingCount === 1 ? "item needs" : "items need"} your attention`}
+            aria-label={t(
+              `${pendingCount} ${pendingCount === 1 ? "item needs" : "items need"} your attention`,
+              `${pendingCount} 项事项需要你处理`,
+            )}
             tone="secondary"
             tabular
             className="block"
@@ -55,7 +58,7 @@ export function NeedsYou({ dashboard, className }: Props) {
       meta={
         hasFilters ? (
           <HomeTileFilter
-            ariaLabelPrefix="Filter interventions"
+            ariaLabelPrefix={t("Filter interventions", "筛选待处理事项")}
             value={selectedKind}
             options={filterOptions}
             onChange={(value) => selectKind(value as typeof selectedKind)}

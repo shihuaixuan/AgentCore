@@ -35,7 +35,7 @@ export function ExpertFilter({ experts, value, onChange }: Props) {
     <LayoutGroup id="artifacts-expert-filter">
       <div className="flex flex-col gap-1">
         <Text variant="small" as="span" tone="muted" className="ml-4">
-          From
+          {t("From", "来源")}
         </Text>
         <div
           role="tablist"

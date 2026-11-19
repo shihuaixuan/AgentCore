@@ -20,6 +20,14 @@ afterEach(() => {
 });
 
 describe("fetchPickerAccessToken", () => {
+  it("localizes a missing picker token while retaining the raw credential ID", async () => {
+    mockPost.mockResolvedValue({ status: 200, data: {} });
+    await expect(
+      fetchPickerAccessToken("Original-credential", "zh-CN"),
+    ).rejects.toThrow("服务器未返回 Google Drive 文件选择器的访问令牌。");
+    expect(mockPost).toHaveBeenCalledWith("google", "Original-credential");
+  });
+
   it("returns the access token when the picker-token endpoint succeeds", async () => {
     // Backend `POST /api/integrations/google/credentials/{id}/picker-token`
     // returns { access_token, access_token_expires_at } on success. The hook

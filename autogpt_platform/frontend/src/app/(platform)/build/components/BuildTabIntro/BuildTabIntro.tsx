@@ -6,11 +6,13 @@ import { useTabIntroCard } from "@/app/(platform)/components/TabIntroCard/useTab
 import { FlowIcon } from "@hugeicons/core-free-icons";
 import { useRouter, useSearchParams } from "next/navigation";
 import { startTutorial } from "../FlowEditor/tutorial";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 // First visit to the Build tab. Otto is the primary route on purpose —
 // most users should not start on an empty canvas — with the existing builder
 // tutorial kept as the quiet alternative for people who want the canvas.
 export function BuildTabIntro() {
+  const { t } = useTranslation();
   // Deep link into an existing graph: the intro is about starting something,
   // and its tutorial clears the canvas — neither belongs over someone's saved
   // agent. Vetoing the visit leaves the step unrecorded, so a later blank
@@ -35,7 +37,7 @@ export function BuildTabIntro() {
 
   function learnToBuild() {
     takeAction("builder_tutorial");
-    startTutorial();
+    startTutorial(t);
     setIsTutorialRunning(true);
   }
 
@@ -43,10 +45,19 @@ export function BuildTabIntro() {
     <TabIntroCard
       isOpen={isOpen}
       icon={FlowIcon}
-      title="Create your own workflows."
-      body="Wire blocks into a workflow that runs exactly how you want — or let Otto build it."
-      cta={{ label: "Ask Otto to build it", onClick: askAutoPilot }}
-      altAction={{ label: "Learn to build it yourself", onClick: learnToBuild }}
+      title={t("Create your own workflows.", "创建你自己的工作流。")}
+      body={t(
+        "Wire blocks into a workflow that runs exactly how you want — or let Otto build it.",
+        "连接模块，构建按你所想运行的工作流，也可以让 Otto 帮你构建。",
+      )}
+      cta={{
+        label: t("Ask Otto to build it", "让 Otto 帮我构建"),
+        onClick: askAutoPilot,
+      }}
+      altAction={{
+        label: t("Learn to build it yourself", "学习自行构建"),
+        onClick: learnToBuild,
+      }}
       onDismiss={dismiss}
     />
   );

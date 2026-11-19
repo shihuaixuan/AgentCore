@@ -22,6 +22,7 @@ import {
 } from "./helpers";
 import { isKey } from "@/lib/keyboard";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface FormProps {
   dockId: string;
@@ -31,6 +32,7 @@ interface FormProps {
 /** The clarifying-question answer form — rendered inline in the tool chain
  *  on the ask_question row (and reused by the legacy QuestionDock). */
 export function QuestionsForm({ dockId, questions }: FormProps) {
+  const { t } = useTranslation();
   const actions = useContext(CopilotChatActionsContext);
   const chainActions = useContext(ChainActionsContext);
   const [answers, setAnswers] = useState<Record<string, QuestionAnswer>>({});
@@ -92,14 +94,16 @@ export function QuestionsForm({ dockId, questions }: FormProps) {
     >
       <div className="flex items-center justify-between px-0.5 pb-2">
         <Text variant="small-medium-tight" as="span" tone="muted">
-          {questions.length === 1 ? "Quick question" : "Quick questions"}
+          {questions.length === 1
+            ? t("Quick question", "一个小问题")
+            : t("Quick questions", "几个小问题")}
         </Text>
         <button
           type="button"
           onClick={() => setDismissedId(dockId)}
           className="rounded-full px-2 py-0.5 text-caption text-foreground-subtle transition-colors hover:bg-surface-hover hover:text-foreground-secondary"
         >
-          Skip
+          {t("Skip", "跳过")}
         </button>
       </div>
       <div className="flex flex-col gap-2.5">
@@ -148,7 +152,9 @@ export function QuestionsForm({ dockId, questions }: FormProps) {
                   if (isKey(e, "Enter")) handleSubmit();
                 }}
                 placeholder={
-                  q.example ? `e.g. ${q.example}` : "Type your answer"
+                  q.example
+                    ? t(`e.g. ${q.example}`, `例如：${q.example}`)
+                    : t("Type your answer", "输入你的回答")
                 }
                 className="rounded-xl bg-surface-muted px-2.5 py-1.5 text-body-sm leading-inherit text-foreground-emphasis ring-1 ring-border-base/70 transition-shadow placeholder:text-foreground-subtle focus:ring-foreground-subtle focus:outline-none"
               />
@@ -164,7 +170,7 @@ export function QuestionsForm({ dockId, questions }: FormProps) {
             aria-disabled={!allAnswered}
             className="rounded-full bg-action-hover px-3.5 py-1.5 text-caption font-medium text-action-foreground transition-opacity hover:bg-action aria-disabled:opacity-40"
           >
-            Answer
+            {t("Answer", "回答")}
           </button>
         </div>
       )}

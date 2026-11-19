@@ -104,7 +104,9 @@ export function ThumbnailImages({
                 <Icon icon={PlusSignIcon} size={16} />
               )}
               <span>
-                {isUploading ? "Uploading" : t("Add image", "添加图片")}
+                {isUploading
+                  ? t("Uploading", "上传中")
+                  : t("Add image", "添加图片")}
               </span>
             </label>
             <Button
@@ -116,7 +118,7 @@ export function ThumbnailImages({
               loading={isGenerating}
               leftIcon={<Icon icon={MagicWand01Icon} className="h-4 w-4" />}
             >
-              {isGenerating ? "Generating" : "Generate"}
+              {isGenerating ? t("Generating", "生成中") : t("Generate", "生成")}
             </Button>
           </div>
         ) : (
@@ -188,7 +190,9 @@ export function ThumbnailImages({
                   }
                   data-testid="thumbnail-add-image"
                 >
-                  {isUploading ? "Uploading" : t("Add image", "添加图片")}
+                  {isUploading
+                    ? t("Uploading", "上传中")
+                    : t("Add image", "添加图片")}
                 </Button>
               ) : null}
               <Button
@@ -201,10 +205,10 @@ export function ThumbnailImages({
                 leftIcon={<Icon icon={MagicWand01Icon} className="h-4 w-4" />}
               >
                 {isGenerating
-                  ? "Generating"
+                  ? t("Generating", "生成中")
                   : images.length >= 5
                     ? t("Max images reached", "已达到图片数量上限")
-                    : "Generate"}
+                    : t("Generate", "生成")}
               </Button>
             </div>
           </div>

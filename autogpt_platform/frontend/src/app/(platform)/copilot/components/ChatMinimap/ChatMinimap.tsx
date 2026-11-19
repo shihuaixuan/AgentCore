@@ -11,6 +11,7 @@ import {
   toMinimapEntries,
 } from "./helpers";
 import { isKey } from "@/lib/keyboard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const TICK_SPRING = { type: "spring", stiffness: 200, damping: 15 } as const;
 const CARD_TRANSITION = { duration: 0.15, delay: 0.0875 } as const;
@@ -34,6 +35,7 @@ export const ChatMinimap = memo(function ChatMinimap({
   messages,
   onJumpToUnmounted,
 }: Props) {
+  const { t } = useTranslation();
   const [hovered, setHovered] = useState<number | null>(null);
   const reducedMotion = useReducedMotion();
   const entries = toMinimapEntries(messages);
@@ -67,7 +69,7 @@ export const ChatMinimap = memo(function ChatMinimap({
             }}
             role="button"
             tabIndex={0}
-            aria-label={`Jump to: ${entry.title}`}
+            aria-label={t(`Jump to: ${entry.title}`, `跳转到：${entry.title}`)}
           >
             <motion.div
               className={cn(

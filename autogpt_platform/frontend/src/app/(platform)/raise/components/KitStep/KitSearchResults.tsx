@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Search01Icon } from "@hugeicons/core-free-icons";
 import { isHitSelected } from "./helpers";
@@ -18,6 +20,7 @@ export function KitSearchResults({
   emptyQueryHint,
   emptyResultsHint,
 }: Props) {
+  const { t } = useTranslation();
   if (picker.isSearching) {
     return <KitSearchSkeleton />;
   }
@@ -41,7 +44,7 @@ export function KitSearchResults({
   return (
     <div
       role="list"
-      aria-label="Search results"
+      aria-label={t("Search results", "搜索结果")}
       className="w-full max-w-[42rem] overflow-hidden rounded-2xl border border-border-base bg-canvas shadow-sm"
     >
       {picker.hits.map((hit, index) => (

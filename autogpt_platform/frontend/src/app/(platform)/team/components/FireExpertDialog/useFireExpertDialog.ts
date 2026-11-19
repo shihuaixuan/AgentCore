@@ -9,6 +9,7 @@ import { toast } from "@/components/molecules/Toast/use-toast";
 import { invalidateExpertRosterQueries } from "@/services/experts/invalidate-experts";
 import { invalidateAllScheduleQueries } from "@/services/schedules/invalidate-schedules";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Args {
   expertId: string;
@@ -25,6 +26,7 @@ export function useFireExpertDialog({
   onClose,
   onFired,
 }: Args) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const previewQuery = useGetExpertDetachPreview(expertId, {
@@ -45,16 +47,22 @@ export function useFireExpertDialog({
           invalidateAllScheduleQueries(queryClient),
         ]);
         toast({
-          title: `${expertName} was fired`,
-          description: `You can re-hire ${expertName} anytime from the marketplace.`,
+          title: t(`${expertName} was fired`, `已解雇 ${expertName}`),
+          description: t(
+            `You can re-hire ${expertName} anytime from the marketplace.`,
+            `你随时可以从市场重新聘用 ${expertName}。`,
+          ),
         });
         onClose();
         onFired?.();
       },
       onError: () => {
         toast({
-          title: `Could not fire ${expertName}`,
-          description: `${expertName} is still on your team. Please try again.`,
+          title: t(`Could not fire ${expertName}`, `无法解雇 ${expertName}`),
+          description: t(
+            `${expertName} is still on your team. Please try again.`,
+            `${expertName} 仍在你的团队中，请重试。`,
+          ),
           variant: "destructive",
         });
       },

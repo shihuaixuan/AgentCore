@@ -10,6 +10,7 @@ import {
 import type { BlockListResponse } from "@/app/api/__generated__/models/blockListResponse";
 import type { BlockInfoSummary } from "@/app/api/__generated__/models/blockInfoSummary";
 import { ToolUIPart } from "ai";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { HorizontalScroll } from "@/app/(platform)/build/components/NewControlPanel/NewBlockMenu/HorizontalScroll";
 import {
   AccordionIcon,
@@ -50,7 +51,8 @@ function BlockCard({ block }: { block: BlockInfoSummary }) {
 }
 
 export function FindBlocksTool({ part }: Props) {
-  const text = getAnimationText(part);
+  const { t } = useTranslation();
+  const text = getAnimationText(part, t);
   const isStreaming =
     part.state === "input-streaming" || part.state === "input-available";
   const isError = part.state === "output-error";
@@ -61,7 +63,10 @@ export function FindBlocksTool({ part }: Props) {
 
   const query = (part.input as FindBlockInput | undefined)?.query?.trim();
   const accordionDescription = parsed
-    ? `Found ${parsed.count} action${parsed.count === 1 ? "" : "s"}${query ? ` for "${query}"` : ""}`
+    ? t(
+        `Found ${parsed.count} action${parsed.count === 1 ? "" : "s"}${query ? ` for "${query}"` : ""}`,
+        `找到 ${parsed.count} 个动作${query ? `，搜索：“${query}”` : ""}`,
+      )
     : undefined;
 
   return (
@@ -77,7 +82,7 @@ export function FindBlocksTool({ part }: Props) {
       {hasBlocks && parsed && (
         <ToolAccordion
           icon={<AccordionIcon />}
-          title="Results"
+          title={t("Results", "结果")}
           description={accordionDescription}
         >
           <HorizontalScroll dependencyList={[parsed.blocks.length]}>

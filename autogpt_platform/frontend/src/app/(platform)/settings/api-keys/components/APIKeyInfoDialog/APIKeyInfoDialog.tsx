@@ -3,6 +3,7 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { ReactNode } from "react";
 import { format } from "date-fns";
+import { enUS, zhCN } from "date-fns/locale";
 
 import type { APIKeyInfo } from "@/app/api/__generated__/models/aPIKeyInfo";
 import { Text } from "@/components/atoms/Text/Text";
@@ -19,7 +20,8 @@ interface Props {
 }
 
 export function APIKeyInfoDialog({ open, apiKey, onOpenChange }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const dateOptions = { locale: locale === "zh-CN" ? zhCN : enUS };
   return (
     <Dialog
       title={apiKey.name}
@@ -54,11 +56,11 @@ export function APIKeyInfoDialog({ open, apiKey, onOpenChange }: Props) {
                     key={scope}
                     className="rounded-full bg-surface-hover px-2.5 py-1 text-caption text-foreground-body"
                   >
-                    {humanizePermission(scope)}
+                    {humanizePermission(scope, locale)}
                     {SCOPE_API_VERSION[scope] === "v1" && (
                       <span className="text-foreground-secondary">
                         {" "}
-                        · v1 only
+                        {t("· v1 only", "· 仅 v1")}
                       </span>
                     )}
                   </li>
@@ -69,14 +71,14 @@ export function APIKeyInfoDialog({ open, apiKey, onOpenChange }: Props) {
 
           <Section label={t("Created", "创建时间")}>
             <Text variant="body" tone="body">
-              {format(new Date(apiKey.created_at), "PPP p")}
+              {format(new Date(apiKey.created_at), "PPP p", dateOptions)}
             </Text>
           </Section>
 
           <Section label={t("Last used", "上次使用")}>
             <Text variant="body" tone="body">
               {apiKey.last_used_at
-                ? format(new Date(apiKey.last_used_at), "PPP p")
+                ? format(new Date(apiKey.last_used_at), "PPP p", dateOptions)
                 : t("Never used", "从未使用")}
             </Text>
           </Section>

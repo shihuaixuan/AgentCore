@@ -12,12 +12,14 @@ import { TopRunsList } from "./components/TopRunsList";
 import { useCostsBreakdown } from "./useCostsBreakdown";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import type { Locale } from "@/lib/i18n/locale";
 
 interface Props {
   agents: LibraryAgent[];
 }
 
 export function CostsBreakdown({ agents }: Props) {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const { summary, agentLookup, isLoading, isError, hasAnySpend } =
     useCostsBreakdown(agents, { enabled: isExpanded });
@@ -33,7 +35,9 @@ export function CostsBreakdown({ agents }: Props) {
         // oxlint-disable-next-line design-system/no-restyle -- no Button variant is a bare text toggle with no hover fill and a 4px gap
         className="h-9 w-fit gap-1 hover:bg-transparent"
       >
-        {isExpanded ? "Hide costs breakdown" : "See costs breakdown"}
+        {isExpanded
+          ? t("Hide costs breakdown", "隐藏费用明细")
+          : t("See costs breakdown", "查看费用明细")}
         <Icon
           icon={ArrowDown01Icon}
           size={14}
@@ -70,11 +74,11 @@ function ExpandedBody({
   isError,
   hasAnySpend,
 }: ExpandedBodyProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   if (isError) {
     return (
       <Text variant="body" tone="muted">
-        Couldn&apos;t load cost breakdown.
+        {t("Couldn't load cost breakdown.", "无法加载费用明细。")}
       </Text>
     );
   }
@@ -110,7 +114,8 @@ function ExpandedBody({
   return (
     <>
       <Text variant="small" tone="muted">
-        Calendar month so far · {formatMonthRangeLabel()}
+        {t("Calendar month so far", "本月截至目前")} ·{" "}
+        {formatMonthRangeLabel(locale)}
       </Text>
       <StatRow
         items={[
@@ -120,11 +125,11 @@ function ExpandedBody({
           },
           { label: t("Tasks", "任务"), value: String(summary.run_count) },
           {
-            label: "Avg / task",
+            label: t("Avg / task", "平均每项任务"),
             value: formatCents(Math.round(avgCostCents)),
           },
           {
-            label: "Wasted on failed",
+            label: t("Wasted on failed", "失败任务消耗"),
             value: formatCents(summary.failed_cost_cents),
             tone: summary.failed_cost_cents > 0 ? "warn" : undefined,
           },
@@ -143,18 +148,18 @@ function ExpandedBody({
   );
 }
 
-function formatMonthRangeLabel(): string {
+function formatMonthRangeLabel(locale: Locale): string {
   const now = new Date();
   const monthStart = new Date(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
   );
   const fmt = (d: Date) =>
-    d.toLocaleDateString(undefined, {
+    d.toLocaleDateString(locale === "zh-CN" ? "zh-CN" : undefined, {
       month: "short",
       day: "numeric",
       timeZone: "UTC",
     });
-  return `${fmt(monthStart)} – today (UTC)`;
+  return `${fmt(monthStart)} – ${locale === "zh-CN" ? "今天" : "today"} (UTC)`;
 }
 
 interface StatItem {

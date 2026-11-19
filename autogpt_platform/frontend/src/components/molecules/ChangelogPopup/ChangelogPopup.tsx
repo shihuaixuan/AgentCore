@@ -10,8 +10,10 @@ import {
   NewsIcon,
 } from "@hugeicons/core-free-icons";
 import { useChangelog } from "./useChangelog";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function ChangelogPopup() {
+  const { t } = useTranslation();
   const {
     isVisible,
     isFading,
@@ -54,7 +56,7 @@ export function ChangelogPopup() {
         }
       }}
       role="dialog"
-      aria-label="What's new"
+      aria-label={t("What's new", "更新动态")}
     >
       <div
         data-slot="changelog-popup-card"
@@ -76,7 +78,7 @@ export function ChangelogPopup() {
           </div>
           <div data-slot="changelog-popup-heading" className="min-w-0 flex-1">
             <Text variant="body-medium" data-slot="changelog-popup-title">
-              What&apos;s new
+              {t("What's new", "更新动态")}
             </Text>
             <Text variant="small" data-slot="changelog-popup-date" tone="muted">
               {latestEntry.dateRange}
@@ -90,7 +92,7 @@ export function ChangelogPopup() {
             onClick={dismiss}
             data-slot="changelog-popup-dismiss"
             className="-mt-1 -mr-1"
-            aria-label="Dismiss changelog"
+            aria-label={t("Dismiss changelog", "关闭更新日志")}
           >
             <Icon
               data-slot="changelog-popup-dismiss-icon"
@@ -130,7 +132,7 @@ export function ChangelogPopup() {
             data-slot="changelog-popup-link"
             className="inline-flex items-center gap-1.5 text-foreground-base"
           >
-            View changelog
+            {t("View changelog", "查看更新日志")}
             <Icon
               data-slot="changelog-popup-link-icon"
               icon={ArrowUpRight01Icon}

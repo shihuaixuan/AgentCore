@@ -1,6 +1,7 @@
 "use client";
 
 import { useStableCallback } from "@/hooks/useStableCallback";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   ArrowDown01Icon,
   SentIcon,
@@ -85,6 +86,7 @@ interface Props {
 }
 
 export function ToolChain({ parts, isStreaming, readOnly = false }: Props) {
+  const { locale, t } = useTranslation();
   const [manualExpanded, setManualExpanded] = useState<boolean | null>(null);
   const panelId = useId();
   const reducedMotion = useReducedMotion();
@@ -184,11 +186,17 @@ export function ToolChain({ parts, isStreaming, readOnly = false }: Props) {
   function sendReply(message: string) {
     void Promise.resolve(onSend(message)).catch((error: unknown) =>
       toastSendFailure({
-        title: "Couldn't send message",
+        title: t("Couldn't send message", "消息发送失败"),
+        locale,
         error,
-        recovery: "it is still in the thread, use Retry to send it again",
-        paywallRecovery:
+        recovery: t(
+          "it is still in the thread, use Retry to send it again",
+          "消息仍保留在对话中，请点击“重试”重新发送",
+        ),
+        paywallRecovery: t(
           "it is still in the thread, use Retry once you have a plan",
+          "消息仍保留在对话中，开通套餐后请点击“重试”",
+        ),
       }),
     );
   }
@@ -226,9 +234,11 @@ export function ToolChain({ parts, isStreaming, readOnly = false }: Props) {
     () =>
       markSupersededSubSessionRows(
         parts
-          .map((part, i) => toChainRow(part, i))
+          .map((part, index) => toChainRow(part, index, locale))
           .filter((row): row is ChainRow => row !== null)
-          .map((row) => applyHeldOutcome(row, heldOutcomes, heldAnswers))
+          .map((row) =>
+            applyHeldOutcome(row, heldOutcomes, heldAnswers, locale),
+          )
           // Unanswered clarifying questions and setup cards render their work
           // in the card below the chain — their rows are lifted out of view.
           .map((row) =>
@@ -239,7 +249,7 @@ export function ToolChain({ parts, isStreaming, readOnly = false }: Props) {
                 : row,
           ),
       ),
-    [parts, pendingQuestions, heldOutcomes, heldAnswers],
+    [parts, pendingQuestions, heldOutcomes, heldAnswers, locale],
   );
   useNoteRunningSteps(rows);
   if (rows.length === 0) return null;
@@ -266,7 +276,7 @@ export function ToolChain({ parts, isStreaming, readOnly = false }: Props) {
   const liftedRows = rows.filter((row) => row.lifted);
 
   const expanded = manualExpanded === true;
-  const heading = getChainHeading(rows, isStreaming && !expanded);
+  const heading = getChainHeading(rows, isStreaming && !expanded, locale);
   const hasError = rows.some((row) => row.state === "error");
   const hasRequiredAction = shownRows.some((row) => row.requiresAction);
   // Auto-open only while streaming; once the chain finishes (or on reload)
@@ -422,7 +432,7 @@ export function ToolChain({ parts, isStreaming, readOnly = false }: Props) {
                         <Icon icon={Tick02Icon} size={14} tone="secondary" />
                       </div>
                       <div className="flex h-7 items-center text-body text-foreground-secondary">
-                        Done
+                        {t("Done", "已完成")}
                       </div>
                     </div>
                   )}
@@ -477,8 +487,11 @@ export function ToolChain({ parts, isStreaming, readOnly = false }: Props) {
             <span className="flex items-center gap-1.5 text-body text-foreground-secondary">
               <Icon icon={SentIcon} size={16} tone="subtle" />
               {allActionsReady
-                ? "Everything's filled in"
-                : "Complete the steps above to continue"}
+                ? t("Everything's filled in", "已填写完毕")
+                : t(
+                    "Complete the steps above to continue",
+                    "请完成以上步骤以继续",
+                  )}
             </span>
             <Button
               variant="primary"
@@ -486,7 +499,7 @@ export function ToolChain({ parts, isStreaming, readOnly = false }: Props) {
               disabled={!allActionsReady}
               onClick={handleProceed}
             >
-              Proceed
+              {t("Proceed", "继续")}
             </Button>
           </div>
         )}

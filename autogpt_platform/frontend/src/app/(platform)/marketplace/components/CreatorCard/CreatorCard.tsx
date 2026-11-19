@@ -6,6 +6,7 @@ import Avatar, {
 } from "@/components/atoms/Avatar/Avatar";
 import { Text } from "@/components/atoms/Text/Text";
 import { backgroundColor } from "./helper";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   creatorName: string;
@@ -26,6 +27,7 @@ export function CreatorCard({
   onClick,
   index,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
@@ -37,7 +39,10 @@ export function CreatorCard({
       {/* Avatar */}
       <Avatar className="h-14 w-14 shrink-0">
         {creatorImage && (
-          <AvatarImage src={creatorImage} alt={`${creatorName} avatar`} />
+          <AvatarImage
+            src={creatorImage}
+            alt={t(`${creatorName} avatar`, `${creatorName} 的头像`)}
+          />
         )}
         <AvatarFallback size={56}>
           {creatorUsername || creatorName}
@@ -55,7 +60,10 @@ export function CreatorCard({
 
       {/* Stats */}
       <Text variant="body" tone="muted" className="absolute bottom-4 left-4">
-        {agentsUploaded} {agentsUploaded === 1 ? "workflow" : "workflows"}
+        {t(
+          `${agentsUploaded} ${agentsUploaded === 1 ? "workflow" : "workflows"}`,
+          `${agentsUploaded} 个工作流`,
+        )}
       </Text>
     </button>
   );

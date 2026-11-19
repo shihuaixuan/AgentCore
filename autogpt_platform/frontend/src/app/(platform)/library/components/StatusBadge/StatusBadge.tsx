@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import type { AgentStatus } from "../../types";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const STATUS_CONFIG: Record<
   AgentStatus,
@@ -45,6 +46,14 @@ interface Props {
 }
 
 export function StatusBadge({ status, className }: Props) {
+  const { t } = useTranslation();
+  const labels: Record<AgentStatus, string> = {
+    running: "运行中",
+    error: "错误",
+    listening: "监听中",
+    scheduled: "已计划",
+    idle: "空闲",
+  };
   const config = STATUS_CONFIG[status];
 
   return (
@@ -63,7 +72,7 @@ export function StatusBadge({ status, className }: Props) {
           statusDotColor(status),
         )}
       />
-      {config.label}
+      {t(config.label, labels[status])}
     </span>
   );
 }

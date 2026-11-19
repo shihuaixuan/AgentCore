@@ -10,6 +10,7 @@ import {
   type SearchHit,
 } from "./helpers";
 import { useKitSearch } from "./useKitSearch";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Args {
   scope: KitSearchScope;
@@ -24,6 +25,7 @@ export function useAttachmentPicker({
   onSubmit,
   onSkip,
 }: Args) {
+  const { t } = useTranslation();
   const search = useKitSearch(scope);
   const [attachments, setAttachments] = useState<RaiseAttachmentDraft[]>([]);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
@@ -69,8 +71,11 @@ export function useAttachmentPicker({
       });
     } catch {
       toast({
-        title: `Couldn't add ${hit.name}`,
-        description: "Something went wrong. Please try again.",
+        title: t(`Couldn't add ${hit.name}`, `无法添加 ${hit.name}`),
+        description: t(
+          "Something went wrong. Please try again.",
+          "出现错误，请重试。",
+        ),
         variant: "destructive",
       });
     } finally {

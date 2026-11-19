@@ -2,6 +2,7 @@
 
 import type { ToolUIPart } from "ai";
 import React from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   globalRegistry,
   OutputItem,
@@ -88,7 +89,10 @@ function RenderOutputValue({ value }: { value: unknown }) {
   return null;
 }
 
-function getAccordionMeta(output: ViewAgentOutputToolOutput): {
+function getAccordionMeta(
+  output: ViewAgentOutputToolOutput,
+  t: ReturnType<typeof useTranslation>["t"],
+): {
   icon: React.ReactNode;
   title: string;
   description?: string;
@@ -100,17 +104,20 @@ function getAccordionMeta(output: ViewAgentOutputToolOutput): {
     return {
       icon,
       title: output.agent_name,
-      description: status ? `Status: ${status}` : output.message,
+      description: status
+        ? t(`Status: ${status}`, `状态：${status}`)
+        : output.message,
     };
   }
   if (isNoResultsResponse(output)) {
-    return { icon, title: "No results" };
+    return { icon, title: t("No results", "无结果") };
   }
-  return { icon, title: "Error" };
+  return { icon, title: t("Error", "错误") };
 }
 
 export function ViewAgentOutputTool({ part }: Props) {
-  const text = getAnimationText(part);
+  const { t } = useTranslation();
+  const text = getAnimationText(part, t);
   const isStreaming =
     part.state === "input-streaming" || part.state === "input-available";
 
@@ -135,7 +142,7 @@ export function ViewAgentOutputTool({ part }: Props) {
       </div>
 
       {hasExpandableContent && output && (
-        <ToolAccordion {...getAccordionMeta(output)}>
+        <ToolAccordion {...getAccordionMeta(output, t)}>
           {isAgentOutputResponse(output) && (
             <ContentGrid>
               <ContentCardHeader
@@ -143,7 +150,7 @@ export function ViewAgentOutputTool({ part }: Props) {
                 action={
                   output.library_agent_link ? (
                     <ContentLink href={output.library_agent_link}>
-                      Open
+                      {t("Open", "打开")}
                     </ContentLink>
                   ) : null
                 }
@@ -154,19 +161,21 @@ export function ViewAgentOutputTool({ part }: Props) {
               {output.execution ? (
                 <ContentGrid>
                   <ContentCard>
-                    <ContentCardTitle size="small">Execution</ContentCardTitle>
+                    <ContentCardTitle size="small">
+                      {t("Execution", "执行记录")}
+                    </ContentCardTitle>
                     <ContentCardSubtitle className="mt-1">
                       {output.execution.execution_id}
                     </ContentCardSubtitle>
                     <ContentCardSubtitle className="mt-1">
-                      Status: {output.execution.status}
+                      {t("Status:", "状态：")} {output.execution.status}
                     </ContentCardSubtitle>
                   </ContentCard>
 
                   {output.execution.inputs_summary && (
                     <ContentCard>
                       <ContentCardTitle size="small">
-                        Inputs summary
+                        {t("Inputs summary", "输入摘要")}
                       </ContentCardTitle>
                       <div className="mt-2">
                         <RenderOutputValue
@@ -184,8 +193,10 @@ export function ViewAgentOutputTool({ part }: Props) {
                             {key}
                           </ContentCardTitle>
                           <ContentBadge>
-                            {items.length} item
-                            {items.length === 1 ? "" : "s"}
+                            {t(
+                              `${items.length} item${items.length === 1 ? "" : "s"}`,
+                              `${items.length} 项`,
+                            )}
                           </ContentBadge>
                         </div>
                         <div className="mt-2">
@@ -199,9 +210,14 @@ export function ViewAgentOutputTool({ part }: Props) {
                 </ContentGrid>
               ) : (
                 <ContentCard>
-                  <ContentMessage>No execution selected.</ContentMessage>
+                  <ContentMessage>
+                    {t("No execution selected.", "未选择执行记录。")}
+                  </ContentMessage>
                   <ContentCardSubtitle className="mt-1">
-                    Try asking for a specific run or execution_id.
+                    {t(
+                      "Try asking for a specific run or execution_id.",
+                      "请尝试指定某次运行或 execution_id。",
+                    )}
                   </ContentCardSubtitle>
                 </ContentCard>
               )}

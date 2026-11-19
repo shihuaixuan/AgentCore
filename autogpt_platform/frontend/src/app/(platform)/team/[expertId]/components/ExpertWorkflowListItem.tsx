@@ -12,6 +12,7 @@ import { ExpertWorkflowActions } from "./ExpertWorkflowActions";
 import { ExpertWorkflowRunButton } from "./ExpertWorkflowRunButton";
 import { useExpertWorkflowCard } from "./useExpertWorkflowCard";
 import { WorkflowCredentialStack } from "./WorkflowCredentialStack";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   workflow: ExpertWorkflowRef;
@@ -26,6 +27,7 @@ export function ExpertWorkflowListItem({
   expertId,
   onAsk,
 }: Props) {
+  const { t, locale } = useTranslation();
   const {
     name,
     runCount,
@@ -45,10 +47,13 @@ export function ExpertWorkflowListItem({
   });
   const meta = [
     workflow.schedule_cron
-      ? safeHumanizeCronExpression(workflow.schedule_cron)
+      ? safeHumanizeCronExpression(workflow.schedule_cron, locale)
       : null,
     runCount !== undefined
-      ? `${runCount} ${runCount === 1 ? "run" : "runs"}`
+      ? t(
+          `${runCount} ${runCount === 1 ? "run" : "runs"}`,
+          `${runCount} 次运行`,
+        )
       : null,
   ].filter((part): part is string => Boolean(part));
 
@@ -60,7 +65,7 @@ export function ExpertWorkflowListItem({
       {libraryHref ? (
         <NextLink
           href={libraryHref}
-          aria-label={`Open ${name} tasks`}
+          aria-label={t(`Open ${name} tasks`, `打开 ${name} 的任务`)}
           className="absolute inset-0 z-0 rounded-lg"
         />
       ) : null}

@@ -22,7 +22,7 @@ export function RecentMemoriesCard({
   onForget,
   onForgetTopic,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   return (
     <div className="flex flex-col rounded-large border border-border-base bg-surface px-4 py-4 shadow-message-table">
       <Text variant="body-medium" as="span">
@@ -64,7 +64,7 @@ export function RecentMemoriesCard({
                 tone="subtle"
                 className="hidden shrink-0 sm:inline"
               >
-                {formatWhen(fact.created_at)}
+                {formatWhen(fact.created_at, locale)}
               </Text>
               <Button
                 variant="ghost"

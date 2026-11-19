@@ -80,7 +80,7 @@ const TAB_LABELS: Record<string, string> = {
 };
 
 export default function ExpertDetailPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { expertId } = useParams<{ expertId: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -137,8 +137,8 @@ export default function ExpertDetailPage() {
       <main className={MAIN_CLASS}>
         <BackToTeamLink />
         <ErrorCard
-          context="this expert"
-          hint="We could not load this expert."
+          context={t("this expert", "此专家")}
+          hint={t("We could not load this expert.", "无法加载此专家。")}
           onRetry={() => refetch()}
         />
       </main>
@@ -218,7 +218,10 @@ export default function ExpertDetailPage() {
 
           <TabsLineContent value="schedules">
             <ExpertSchedulesSection
-              title={`${expert.name}'s Schedules`}
+              title={t(
+                `${expert.name}'s Schedules`,
+                `${expert.name} 的计划任务`,
+              )}
               accentClassName={
                 getRaisedExpertAccent(expert.role, expert.color).pill
               }
@@ -226,7 +229,7 @@ export default function ExpertDetailPage() {
               expertId={expert.id}
               workflows={expert.workflows}
               schedules={schedules}
-              lastRunLabel={getLastRunLabel(expert)}
+              lastRunLabel={getLastRunLabel(expert, locale)}
             />
           </TabsLineContent>
 

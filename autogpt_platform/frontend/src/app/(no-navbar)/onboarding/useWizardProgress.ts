@@ -2,6 +2,7 @@ import {
   getV1OnboardingState,
   patchV1UpdateOnboardingState,
 } from "@/app/api/__generated__/endpoints/onboarding/onboarding";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -30,6 +31,7 @@ export function useWizardProgress({
   steps: StepLayout;
   hasPaywall?: boolean;
 }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useSearchParams();
   const currentUserID = useRef(userID);
@@ -222,10 +224,38 @@ export function useWizardProgress({
     void clearSkippedRecordings(userID).catch(() => undefined);
   }
 
+  function localizeError(message: string | null) {
+    switch (message) {
+      case "Onboarding was updated in another session. Reload its latest progress to continue. This device's unsaved answers will be replaced.":
+        return t(
+          message,
+          "首次使用向导已在其他会话中更新。请重新加载最新进度以继续，此设备上未保存的回答将被替换。",
+        );
+      case "Your signed-in account changed. Reload the page to restore its progress.":
+        return t(message, "登录账户已更改。请重新加载页面以恢复该账户的进度。");
+      case "We couldn't restore your onboarding progress. Please retry.":
+        return t(message, "无法恢复首次使用向导进度，请重试。");
+      case "Your saved progress is available on this device. Changes will sync when the connection returns.":
+        return t(
+          message,
+          "此设备上可使用已保存的进度。连接恢复后，更改将自动同步。",
+        );
+      case "We couldn't save your progress to your account. We'll keep retrying; you can continue here.":
+        return t(
+          message,
+          "无法将进度保存到账户。我们会继续重试，你可以在此继续操作。",
+        );
+      case "Your progress hasn't been saved yet. Please keep this page open while we retry.":
+        return t(message, "进度尚未保存。请保持此页面打开，我们会继续重试。");
+      default:
+        return message;
+    }
+  }
+
   return {
     isReady:
       status.loaded && status.userID === userID && status.layout === layout,
-    error: status.userID === userID ? status.error : null,
+    error: status.userID === userID ? localizeError(status.error) : null,
     conflict: status.userID === userID && status.conflict,
     retry,
     finish,

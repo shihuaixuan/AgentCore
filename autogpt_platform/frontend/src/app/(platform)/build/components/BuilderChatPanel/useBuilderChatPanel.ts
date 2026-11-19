@@ -26,6 +26,7 @@ import { useGetV2GetSession } from "@/app/api/__generated__/endpoints/chat/chat"
 import { isKey } from "@/lib/keyboard";
 import { retryUnlessClientError } from "../../helpers/graphLoadError";
 import { getDeploymentModelStatus, isNoModelError } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface UseBuilderChatPanelArgs {
   panelRef?: React.RefObject<HTMLElement | null>;
@@ -66,6 +67,7 @@ function parseToolOutput(raw: unknown): Record<string, unknown> | null {
 export function useBuilderChatPanel({
   panelRef,
 }: UseBuilderChatPanelArgs = {}) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [revertTargetVersion, setRevertTargetVersion] = useState<number | null>(
@@ -286,8 +288,11 @@ export function useBuilderChatPanel({
         setBindError("failed_to_bind_builder_session");
         toast({
           variant: "destructive",
-          title: "Could not start the builder chat",
-          description: "Please retry or close and reopen the chat panel.",
+          title: t("Could not start the builder chat", "无法启动构建助手对话"),
+          description: t(
+            "Please retry or close and reopen the chat panel.",
+            "请重试，或关闭后重新打开对话面板。",
+          ),
         });
       } finally {
         bindingRef.current = false;
@@ -305,6 +310,7 @@ export function useBuilderChatPanel({
     bindError,
     createBuilderSession,
     toast,
+    t,
   ]);
 
   // Auto-create a blank agent when the panel is opened without one.
@@ -347,8 +353,8 @@ export function useBuilderChatPanel({
         setBootstrapError("failed_to_bootstrap_agent");
         toast({
           variant: "destructive",
-          title: "Could not create a blank workflow",
-          description: "Please try again.",
+          title: t("Could not create a blank workflow", "无法创建空白工作流"),
+          description: t("Please try again.", "请重试。"),
         });
       } finally {
         isBootstrappingRef.current = false;
@@ -363,6 +369,7 @@ export function useBuilderChatPanel({
     createNewGraph,
     setQueryStates,
     toast,
+    t,
   ]);
 
   // Inline tool-integration: run_agent exec_id -> URL; edit_agent -> graph refetch + record revert point.
@@ -519,15 +526,18 @@ export function useBuilderChatPanel({
       }
       setRevertTargetVersion(null);
       toast({
-        title: "Reverted to the previous version",
-        description: `Now viewing version ${revertTargetVersion}.`,
+        title: t("Reverted to the previous version", "已恢复到上一版本"),
+        description: t(
+          `Now viewing version ${revertTargetVersion}.`,
+          `当前显示版本 ${revertTargetVersion}。`,
+        ),
       });
     } catch (err) {
       Sentry.captureException(err);
       toast({
         variant: "destructive",
-        title: "Revert failed",
-        description: "Please try again.",
+        title: t("Revert failed", "恢复失败"),
+        description: t("Please try again.", "请重试。"),
       });
     }
   }

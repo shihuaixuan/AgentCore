@@ -33,8 +33,9 @@ vi.mock("@/hooks/useIsBillingEnabled", () => ({
   }),
 }));
 
+const usageExperience = vi.hoisted(() => ({ isActiveTrial: true }));
 vi.mock("@/services/usageExperience/useUsageExperience", () => ({
-  useUsageExperience: () => ({ experience: { isActiveTrial: true } }),
+  useUsageExperience: () => ({ experience: usageExperience }),
 }));
 
 const sessionList = vi.hoisted(() => ({
@@ -61,6 +62,7 @@ import { isKey } from "@/lib/keyboard";
 import { useOrgTeamStore } from "@/services/org-team/store";
 import type { User } from "@/lib/auth/types";
 import { tourTarget } from "@/lib/tour-targets";
+import { LanguageProvider, useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useFirstRunTourStore } from "../../FirstRunTour/store";
 import { ContextualTips } from "../ContextualTips";
 import { isFirstSecondChat } from "../helpers";
@@ -108,6 +110,7 @@ beforeEach(() => {
   placed.clear();
   billing.enabled = true;
   billing.resolved = true;
+  usageExperience.isActiveTrial = true;
   window.localStorage.clear();
   capture.mockReset();
   onboarding.current = { state: { completedSteps: [] }, completeStep: vi.fn() };
@@ -441,6 +444,83 @@ describe("contextual tips — the first second chat", () => {
 });
 
 describe("contextual tips — showing one", () => {
+  it.each([
+    [
+      "second-chat",
+      true,
+      "你现在有两段对话了",
+      "每项任务都有独立对话。你可以在这里切换。",
+    ],
+    [
+      "first-cost",
+      true,
+      "费用从哪里产生",
+      "对话和专家会消耗试用额度，自动化任务会消耗积分。你可以在这里查看两者。",
+    ],
+    [
+      "first-cost",
+      false,
+      "费用从哪里产生",
+      "对话和专家会消耗套餐额度，自动化任务会消耗积分。你可以在这里查看两者。",
+    ],
+    [
+      "first-expert",
+      true,
+      "专家可以负责整个任务",
+      "批准后，这位专家会加入团队并接手任务。在团队页面可以查看每位专家的分工。",
+    ],
+  ] as const)(
+    "localizes %s for a trial=%s account",
+    async (id, isTrial, title, body) => {
+      usageExperience.isActiveTrial = isTrial;
+      render(
+        <LanguageProvider>
+          <Page />
+        </LanguageProvider>,
+      );
+      act(() => requestTip(id));
+
+      expect(await screen.findByRole("region", { name: title })).toBeDefined();
+      expect(screen.getByText(body)).toBeDefined();
+      expect(screen.getByText("提示")).toBeDefined();
+      expect(screen.getByRole("status").textContent).toBe(
+        `提示：${title}。${body}`,
+      );
+      await userEvent.click(screen.getByRole("button", { name: "知道了" }));
+      await waitFor(() =>
+        expect(screen.queryByTestId("contextual-tip")).toBeNull(),
+      );
+    },
+  );
+
+  it("localizes the mobile menu hint and switches an open tip to English", async () => {
+    function SwitchLanguage() {
+      const { setLocale } = useTranslation();
+      return <button onClick={() => setLocale("en")}>English</button>;
+    }
+    hidden.add("chats");
+    render(
+      <LanguageProvider>
+        <SwitchLanguage />
+        <Page />
+      </LanguageProvider>,
+    );
+    act(() => requestTip("second-chat"));
+
+    expect(
+      await screen.findByText(
+        "每项任务都有独立对话。你可以在这里切换。打开菜单即可找到。",
+      ),
+    ).toBeDefined();
+    await userEvent.click(screen.getByRole("button", { name: "English" }));
+    expect(
+      screen.getByRole("region", { name: "You have two chats now" }),
+    ).toBeDefined();
+    expect(screen.getByRole("status").textContent).toBe(
+      "Tip: You have two chats now. Each task keeps its own chat. Switch between them here. Open the menu to find it.",
+    );
+  });
+
   it("shows beside its target without taking focus, and is gone for good after Got it", async () => {
     render(<Page />);
     const textarea = screen.getByRole("textbox", { name: "Message" });

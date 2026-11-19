@@ -1,4 +1,5 @@
 import type { RelatedAccountPaymentStatus } from "@/app/api/__generated__/models/relatedAccountPaymentStatus";
+import type { Locale } from "@/lib/i18n/locale";
 
 export const USER_QUERY_PARAM = "user";
 
@@ -98,8 +99,6 @@ export function getUserPlatformCostsHref(userId: string) {
   return `/admin/platform-costs?${new URLSearchParams({ user_id: userId })}`;
 }
 
-// Pinned to en-GB so dates read "12 Mar 2026" and times 24h whatever the
-// admin's browser locale.
 const DATE_FORMAT = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "short",
@@ -118,28 +117,55 @@ const MONTH_FORMAT = new Intl.DateTimeFormat("en-GB", {
   year: "numeric",
 });
 const RELATIVE_FORMAT = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+const DATE_FORMAT_ZH = new Intl.DateTimeFormat("zh-CN", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+const DATE_TIME_FORMAT_ZH = new Intl.DateTimeFormat("zh-CN", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+const MONTH_FORMAT_ZH = new Intl.DateTimeFormat("zh-CN", {
+  month: "short",
+  year: "numeric",
+});
+const RELATIVE_FORMAT_ZH = new Intl.RelativeTimeFormat("zh-CN", {
+  numeric: "auto",
+});
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
-export function formatDate(date: Date) {
-  return DATE_FORMAT.format(date);
+export function formatDate(date: Date, locale: Locale = "en") {
+  return (locale === "zh-CN" ? DATE_FORMAT_ZH : DATE_FORMAT).format(date);
 }
 
-export function formatDateTime(date: Date) {
-  return DATE_TIME_FORMAT.format(date);
+export function formatDateTime(date: Date, locale: Locale = "en") {
+  return (locale === "zh-CN" ? DATE_TIME_FORMAT_ZH : DATE_TIME_FORMAT).format(
+    date,
+  );
 }
 
-export function formatMonth(date: Date) {
-  return MONTH_FORMAT.format(date);
+export function formatMonth(date: Date, locale: Locale = "en") {
+  return (locale === "zh-CN" ? MONTH_FORMAT_ZH : MONTH_FORMAT).format(date);
 }
 
-export function formatTimeUntil(date: Date, now = new Date()) {
+export function formatTimeUntil(
+  date: Date,
+  now = new Date(),
+  locale: Locale = "en",
+) {
   const ms = date.getTime() - now.getTime();
+  const formatter = locale === "zh-CN" ? RELATIVE_FORMAT_ZH : RELATIVE_FORMAT;
   if (Math.abs(ms) < DAY_MS) {
-    return RELATIVE_FORMAT.format(Math.round(ms / HOUR_MS), "hour");
+    return formatter.format(Math.round(ms / HOUR_MS), "hour");
   }
-  return RELATIVE_FORMAT.format(Math.round(ms / DAY_MS), "day");
+  return formatter.format(Math.round(ms / DAY_MS), "day");
 }
 
 export function getBanEnd(duration: BanDuration, now = new Date()) {
@@ -169,8 +195,12 @@ export function getPlanName(tier: string) {
 
 // Orval types a mutation's error as the response body, but the mutator throws
 // an ApiError carrying the server's message.
-export function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Something went wrong.";
+export function getErrorMessage(error: unknown, locale: Locale = "en") {
+  return error instanceof Error
+    ? error.message
+    : locale === "zh-CN"
+      ? "出了点问题。"
+      : "Something went wrong.";
 }
 
 export const TAB_QUERY_PARAM = "tab";
@@ -239,9 +269,13 @@ export function formatBlockedAddress(value: string) {
   return `${compressed}/64`;
 }
 
-export function formatEnds(expiresAt: Date | null, now = new Date()) {
-  if (!expiresAt) return "Permanent";
-  return `${formatDateTime(expiresAt)} (${formatTimeUntil(expiresAt, now)})`;
+export function formatEnds(
+  expiresAt: Date | null,
+  now = new Date(),
+  locale: Locale = "en",
+) {
+  if (!expiresAt) return locale === "zh-CN" ? "永久" : "Permanent";
+  return `${formatDateTime(expiresAt, locale)} (${formatTimeUntil(expiresAt, now, locale)})`;
 }
 
 const PAYMENT_STATUS_LABELS: Record<RelatedAccountPaymentStatus, string> = {

@@ -13,7 +13,7 @@ interface ModalHeaderProps {
 }
 
 export function ModalHeader({ agent }: ModalHeaderProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const creator = agent.marketplace_listing?.creator;
 
   return (
@@ -25,7 +25,7 @@ export function ModalHeader({ agent }: ModalHeaderProps) {
         <Text variant="h2">{agent.name}</Text>
         {creator ? (
           <Link href={`/marketplace/creator/${creator.slug}`} isExternal>
-            by {creator.name}
+            {t("by", "作者：")} {creator.name}
           </Link>
         ) : null}
 
@@ -48,9 +48,13 @@ export function ModalHeader({ agent }: ModalHeaderProps) {
             <div className="h-px w-full bg-info/20" />
 
             <Text variant="body">
-              For best results, run this workflow{" "}
+              {t(
+                "For best results, run this workflow",
+                "为获得最佳效果，建议按以下计划运行此工作流：",
+              )}{" "}
               {humanizeCronExpression(
                 agent.recommended_schedule_cron,
+                locale,
               ).toLowerCase()}
             </Text>
           </div>

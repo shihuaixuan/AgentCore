@@ -59,7 +59,7 @@ function UndoActions({
           }
         }}
       >
-        {isUndoing ? "Undoing..." : "Undo"}
+        {isUndoing ? t("Undoing...", "正在撤销…") : t("Undo", "撤销")}
       </Button>
     </div>
   );
@@ -124,7 +124,9 @@ export function AddToLibraryButton({
       const details = await getV2GetSpecificAgent(creatorSlug, agentSlug);
 
       if (details.status !== 200) {
-        throw new Error("Failed to fetch workflow details");
+        throw new Error(
+          t("Failed to fetch workflow details", "无法获取工作流详情"),
+        );
       }
 
       const { data: response } = await addToLibrary({
@@ -141,7 +143,10 @@ export function AddToLibraryButton({
       });
 
       const addedToast = toast({
-        title: `Workflow ${agentName} added to your library.`,
+        title: t(
+          `Workflow ${agentName} added to your library.`,
+          `工作流 ${agentName} 已添加到你的工作流库。`,
+        ),
         description: (
           <UndoActions
             libraryAgentID={data.id}
@@ -155,14 +160,17 @@ export function AddToLibraryButton({
                 setJustAdded(false);
                 addedToast.dismiss();
                 toast({
-                  title: "Action undone.",
+                  title: t("Action undone.", "操作已撤销。"),
                   variant: "info",
                   duration: 3000,
                 });
               } catch (undoError) {
                 Sentry.captureException(undoError);
                 toast({
-                  title: "Failed to undo. Please try again.",
+                  title: t(
+                    "Failed to undo. Please try again.",
+                    "撤销失败，请重试。",
+                  ),
                   variant: "destructive",
                 });
               }
@@ -176,7 +184,10 @@ export function AddToLibraryButton({
       Sentry.captureException(error);
       toast({
         title: t("Error", "错误"),
-        description: "Failed to add workflow to library. Please try again.",
+        description: t(
+          "Failed to add workflow to library. Please try again.",
+          "无法将工作流添加到库，请重试。",
+        ),
         variant: "destructive",
       });
     }
@@ -190,7 +201,10 @@ export function AddToLibraryButton({
       leftIcon={<Icon icon={PlusSignIcon} size={14} />}
       onClick={handleClick}
       className={`z-10 ${className ?? ""}`}
-      aria-label={`Add ${agentName} to library`}
+      aria-label={t(
+        `Add ${agentName} to library`,
+        `将 ${agentName} 添加到工作流库`,
+      )}
     >
       {isPending ? t("Adding...", "正在添加…") : t("Add", "添加")}
     </Button>

@@ -76,7 +76,7 @@ export function SkillCard({ skill, isInstalled, categoryLabel }: Props) {
             <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-body-sm leading-inherit text-foreground-tertiary">
               {skill.source_repo && (
                 <span className="min-w-0 break-words">
-                  From {skill.source_repo}
+                  {t(`From ${skill.source_repo}`, `来源：${skill.source_repo}`)}
                 </span>
               )}
               {providers.length > 0 && (
@@ -84,7 +84,7 @@ export function SkillCard({ skill, isInstalled, categoryLabel }: Props) {
                   {skill.source_repo && <span aria-hidden>·</span>}
                   {t("Works with", "适用服务")}
                   <IntegrationLogo provider={providers[0]} size={14} alt="" />
-                  {formatProviderList(providers)}
+                  {formatProviderList(providers, locale)}
                 </span>
               )}
             </div>
@@ -106,7 +106,10 @@ export function SkillCard({ skill, isInstalled, categoryLabel }: Props) {
             {/* Nobody having installed it yet makes a listing new, not failing. */}
             {skill.install_count === 0
               ? t("New", "新建")
-              : `${skill.install_count.toLocaleString()} installed`}
+              : t(
+                  `${skill.install_count.toLocaleString(locale)} installed`,
+                  `已安装 ${skill.install_count.toLocaleString(locale)} 次`,
+                )}
           </span>
           {isInstalled ? (
             <span className="flex items-center gap-1.5 text-body-lg font-medium text-success">
@@ -132,9 +135,9 @@ export function SkillCard({ skill, isInstalled, categoryLabel }: Props) {
   );
 }
 
-function formatProviderList(providers: string[]): string {
+function formatProviderList(providers: string[], locale: string): string {
   const names = providers.map(formatProviderName).filter(Boolean);
-  return new Intl.ListFormat("en", {
+  return new Intl.ListFormat(locale, {
     style: "long",
     type: "conjunction",
   }).format(names);

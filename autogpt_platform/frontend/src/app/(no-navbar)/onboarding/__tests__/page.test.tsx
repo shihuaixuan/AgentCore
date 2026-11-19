@@ -8,6 +8,7 @@ import {
   waitFor,
 } from "@/tests/integrations/test-utils";
 import type { User } from "@/lib/auth/types";
+import { LanguageProvider, useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { OnboardingWizardProgress } from "@/app/api/__generated__/models/onboardingWizardProgress";
 import { getGetBrainDumpPlanMockHandler200 } from "@/app/api/__generated__/endpoints/brain-dump/brain-dump.msw";
 import { server } from "@/mocks/mock-server";
@@ -271,6 +272,68 @@ function atPaywall() {
     completedSteps: ["role", "painPoints"],
   });
 }
+
+function LanguageSwitch() {
+  const { setLocale } = useTranslation();
+  return <button onClick={() => setLocale("en")}>English</button>;
+}
+
+it("localizes completion failures and keeps the same attempt when the language changes", async () => {
+  atPaywall();
+  tier = "PRO";
+  completeStep.mockRejectedValue(new Error("offline"));
+  render(
+    <LanguageProvider initialLocale="zh-CN">
+      <OnboardingPage />
+      <LanguageSwitch />
+    </LanguageProvider>,
+  );
+  fireEvent.click(await screen.findByTestId("step-preparing"));
+  expect(
+    await screen.findByText("无法完成账户设置。进度已保存，请重试。"),
+  ).toBeDefined();
+  expect(completeStep).toHaveBeenCalledOnce();
+  fireEvent.click(screen.getByRole("button", { name: "English" }));
+  expect(
+    await screen.findByText(
+      "We couldn't finish setting up your account. Your progress is saved; please retry.",
+    ),
+  ).toBeDefined();
+  expect(completeStep).toHaveBeenCalledOnce();
+  expect(submitProfile).toHaveBeenCalledOnce();
+  expect(routerReplace).not.toHaveBeenCalledWith("/home");
+  expect(localStorage.getItem(progressStorageKey("u1"))).not.toBeNull();
+});
+
+it.each(["network", "http"])(
+  "localizes a %s profile failure without resubmitting when the language changes",
+  async (failure) => {
+    atPaywall();
+    tier = "PRO";
+    if (failure === "network")
+      submitProfile.mockRejectedValue(new Error("offline"));
+    else submitProfile.mockResolvedValue({ status: 503 });
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <OnboardingPage />
+        <LanguageSwitch />
+      </LanguageProvider>,
+    );
+    expect(
+      await screen.findByText("无法保存个人资料。回答已保存，请重试后再继续。"),
+    ).toBeDefined();
+    expect(submitProfile).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole("button", { name: "English" }));
+    expect(
+      await screen.findByText(
+        "We couldn't save your profile. Your answers are saved; please retry before continuing.",
+      ),
+    ).toBeDefined();
+    expect(submitProfile).toHaveBeenCalledOnce();
+    expect(completeStep).not.toHaveBeenCalled();
+    expect(routerReplace).not.toHaveBeenCalledWith("/home");
+  },
+);
 
 describe("onboarding before payment", () => {
   it("starts a Microsoft sign-up on its Microsoft 365 connection", async () => {

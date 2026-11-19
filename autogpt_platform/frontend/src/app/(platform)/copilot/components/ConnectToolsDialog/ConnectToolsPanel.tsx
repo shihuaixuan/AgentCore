@@ -12,6 +12,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect } from "react";
 import { useConnectToolsPanel } from "./useConnectToolsPanel";
 import { isKey } from "@/lib/keyboard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   onBack: () => void;
@@ -41,9 +42,10 @@ const STEP_TRANSITION = { duration: 0.15, ease: [0, 0, 0.2, 1] as const };
 export function ConnectToolsPanel({
   onBack,
   onNext,
-  backLabel = "Back",
-  nextLabel = "Next",
+  backLabel,
+  nextLabel,
 }: Props) {
+  const { t } = useTranslation();
   const {
     query,
     setQuery,
@@ -89,7 +91,7 @@ export function ConnectToolsPanel({
   return (
     <div className="flex flex-col gap-4 px-5 pt-4 pb-5">
       <Text variant="h5" tone="primary">
-        Connect your tools
+        {t("Connect your tools", "连接你的工具")}
       </Text>
 
       <div className="overflow-hidden">
@@ -135,7 +137,7 @@ export function ConnectToolsPanel({
                 </div>
               ) : isError ? (
                 <ErrorCard
-                  context="providers"
+                  context={t("providers", "服务提供商")}
                   responseError={
                     error instanceof Error
                       ? { message: error.message }
@@ -156,8 +158,8 @@ export function ConnectToolsPanel({
                       type="text"
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Search services..."
-                      aria-label="Search services"
+                      placeholder={t("Search services...", "搜索服务…")}
+                      aria-label={t("Search services", "搜索服务")}
                       className="h-9 w-full rounded-md border border-border-base bg-surface pr-3 pl-9 text-body leading-5.5 text-foreground-strong transition-colors placeholder:text-foreground-subtle focus:border-action-hover focus:outline-none"
                     />
                   </div>
@@ -167,7 +169,10 @@ export function ConnectToolsPanel({
                       <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border-base py-8 text-center">
                         <Icon icon={Plug01Icon} size={16} tone="subtle" />
                         <Text variant="body" tone="secondary">
-                          {`No services match "${query.trim()}"`}
+                          {t(
+                            `No services match "${query.trim()}"`,
+                            `没有与“${query.trim()}”匹配的服务`,
+                          )}
                         </Text>
                       </div>
                     ) : (
@@ -187,8 +192,11 @@ export function ConnectToolsPanel({
                     <div className="flex flex-col gap-2">
                       <Text variant="eyebrow" as="span">
                         {isPersonalized
-                          ? "Recommended from our conversation"
-                          : "Popular places to start"}
+                          ? t(
+                              "Recommended from our conversation",
+                              "根据我们的对话推荐",
+                            )
+                          : t("Popular places to start", "热门入门服务")}
                       </Text>
                       <ul className="grid grid-cols-2 gap-2">
                         {recommendedProviders.map((provider) => (
@@ -209,7 +217,10 @@ export function ConnectToolsPanel({
                       tone="secondary"
                       className="text-center"
                     >
-                      Search to find a service to connect.
+                      {t(
+                        "Search to find a service to connect.",
+                        "搜索并找到要连接的服务。",
+                      )}
                     </Text>
                   )}
                 </div>
@@ -223,7 +234,7 @@ export function ConnectToolsPanel({
         {selectedProvider ? (
           <>
             <Button variant="outline" size="xs" onClick={handleBackToList}>
-              Back
+              {t("Back", "返回")}
             </Button>
             {showContinue && (
               <Button
@@ -233,17 +244,19 @@ export function ConnectToolsPanel({
                 loading={isConnecting}
                 onClick={handleContinue}
               >
-                {isConnecting ? "Connecting…" : "Continue"}
+                {isConnecting
+                  ? t("Connecting…", "正在连接…")
+                  : t("Continue", "继续")}
               </Button>
             )}
           </>
         ) : (
           <>
             <Button variant="outline" size="xs" onClick={onBack}>
-              {backLabel}
+              {backLabel ?? t("Back", "返回")}
             </Button>
             <Button variant="primary" size="xs" onClick={onNext}>
-              {nextLabel}
+              {nextLabel ?? t("Next", "下一步")}
             </Button>
           </>
         )}

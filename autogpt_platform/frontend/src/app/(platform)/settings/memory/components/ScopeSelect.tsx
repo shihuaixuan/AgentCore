@@ -82,7 +82,10 @@ export function ScopeSelect({ scopeExpertID, experts, onSelect }: Props) {
               Otto
             </span>
             <span className="text-caption text-foreground-tertiary">
-              Your account memory — everything you do together
+              {t(
+                "Your account memory — everything you do together",
+                "你的账户记忆——你们共同完成的所有事情",
+              )}
             </span>
           </span>
           <ScopeCheck selected={scopeExpertID === null} />

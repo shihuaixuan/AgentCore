@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   ArrowExpandIcon,
   ArrowUpRight01Icon,
@@ -70,6 +71,7 @@ export function DesktopStreamPreview({
   ownerView = true,
   textSize = "body",
 }: PreviewProps) {
+  const { t } = useTranslation();
   const frameRef = useRef<HTMLIFrameElement>(null);
   const ownerOnly = value.requires_auth === true && !ownerView;
   const [canFullscreen, setCanFullscreen] = useState(false);
@@ -101,7 +103,7 @@ export function DesktopStreamPreview({
             as="span"
             tone="body"
           >
-            Interactive Desktop
+            {t("Interactive Desktop", "交互式桌面")}
           </Text>
           <span className="flex rounded bg-surface-active px-1.5 py-0.5">
             <Text variant="small-uppercase-tight" as="span" tone="secondary">
@@ -116,11 +118,11 @@ export function DesktopStreamPreview({
                 type="button"
                 onClick={handleFullscreen}
                 className="flex items-center gap-1 rounded px-2 py-1 text-foreground-secondary hover:bg-surface-active"
-                aria-label="Fullscreen"
+                aria-label={t("Fullscreen", "全屏")}
               >
                 <Icon icon={ArrowExpandIcon} size={14} />
                 <Text variant="small-tight" as="span" tone="secondary">
-                  Fullscreen
+                  {t("Fullscreen", "全屏")}
                 </Text>
               </button>
             )}
@@ -132,7 +134,7 @@ export function DesktopStreamPreview({
             >
               <Icon icon={ArrowUpRight01Icon} size={14} />
               <Text variant="small-tight" as="span" tone="secondary">
-                Open in new tab
+                {t("Open in new tab", "在新标签页中打开")}
               </Text>
             </a>
           </div>
@@ -145,7 +147,10 @@ export function DesktopStreamPreview({
             tone="subtle"
             className="text-center"
           >
-            The live desktop is only visible to the owner of this chat.
+            {t(
+              "The live desktop is only visible to the owner of this chat.",
+              "实时桌面仅对本聊天的所有者可见。",
+            )}
           </Text>
         </div>
       ) : (
@@ -155,16 +160,24 @@ export function DesktopStreamPreview({
           sandbox="allow-scripts allow-same-origin allow-popups"
           allow="clipboard-read; clipboard-write; fullscreen"
           className="aspect-video w-full bg-action-hover"
-          title={`Interactive desktop (${value.sandbox_id})`}
+          title={t(
+            `Interactive desktop (${value.sandbox_id})`,
+            `交互式桌面（${value.sandbox_id}）`,
+          )}
         />
       )}
       <div className="border-t border-border-base bg-surface-muted px-3 py-2">
         <Text variant="small-medium-tight" tone="body">
           {value.requires_auth
-            ? "Only the owner of this chat can view the live desktop. "
+            ? t(
+                "Only the owner of this chat can view the live desktop. ",
+                "只有本聊天的所有者可以查看实时桌面。",
+              )
             : ""}
-          The AI works on this desktop with full access, so anything signed in
-          here is visible to it. Do not sign into personal accounts.
+          {t(
+            "The AI works on this desktop with full access, so anything signed in here is visible to it. Do not sign into personal accounts.",
+            "AI 拥有此桌面的完整访问权限，可查看在此登录的所有内容。请勿登录个人账号。",
+          )}
         </Text>
       </div>
     </div>

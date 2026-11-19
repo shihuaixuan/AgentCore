@@ -16,7 +16,10 @@ async function TestDataDashboard() {
               {t("Test Data Generation", "测试数据生成")}
             </Text>
             <Text variant="body" tone="muted">
-              {t("Generate sample data for testing and development", "生成用于测试和开发的示例数据")}
+              {t(
+                "Generate sample data for testing and development",
+                "生成用于测试和开发的示例数据",
+              )}
             </Text>
           </div>
         </div>
@@ -26,7 +29,10 @@ async function TestDataDashboard() {
             {t("Generate Test Data", "生成测试数据")}
           </Text>
           <Text variant="body" className="mb-6" tone="secondary">
-            {t("Use this tool to populate the database with sample test data. This is useful for development and testing purposes.", "使用此工具向数据库填充示例测试数据，便于开发和测试。")}
+            {t(
+              "Use this tool to populate the database with sample test data. This is useful for development and testing purposes.",
+              "使用此工具向数据库填充示例测试数据，便于开发和测试。",
+            )}
           </Text>
 
           <div className="mb-6">
@@ -39,7 +45,10 @@ async function TestDataDashboard() {
                   <Text variant="body-medium" as="span">
                     {t("E2E Test Data:", "E2E 测试数据：")}
                   </Text>{" "}
-                    {t("Creates up to 15 test users with graphs, library agents, presets, store submissions, and API 密钥。 Uses API functions for better compatibility.", "创建最多 15 个测试用户及其工作流、库中工作流、预设、市场提交和 API 密钥。使用 API 函数以获得更好的兼容性。")}
+                  {t(
+                    "Creates up to 15 test users with graphs, library agents, presets, store submissions, and API keys. Uses API functions for better compatibility.",
+                    "创建最多 15 个测试用户及其工作流、库中工作流、预设、市场提交和 API 密钥。使用 API 函数以获得更好的兼容性。",
+                  )}
                 </Text>
               </li>
               <li>
@@ -47,7 +56,10 @@ async function TestDataDashboard() {
                   <Text variant="body-medium" as="span">
                     {t("Full Test Data:", "完整测试数据：")}
                   </Text>{" "}
-                    {t("Creates 100+ users with comprehensive test data including agent blocks, nodes, executions, analytics, and more. Takes longer to complete.", "创建 100 多个用户及完整测试数据，包括模块、节点、执行记录、分析数据等，耗时较长。")}
+                  {t(
+                    "Creates 100+ users with comprehensive test data including agent blocks, nodes, executions, analytics, and more. Takes longer to complete.",
+                    "创建 100 多个用户及完整测试数据，包括模块、节点、执行记录、分析数据等，耗时较长。",
+                  )}
                 </Text>
               </li>
             </ul>
@@ -62,7 +74,9 @@ async function TestDataDashboard() {
           </Text>
           <div className="grid gap-4 text-body text-foreground-secondary md:grid-cols-2">
             <div>
-              <Text variant="body-medium">{t("E2E Script:", "E2E 脚本：")}</Text>
+              <Text variant="body-medium">
+                {t("E2E Script:", "E2E 脚本：")}
+              </Text>
               <ul className="mt-1 list-inside list-disc">
                 <li>
                   <Text variant="small" as="span">
@@ -91,7 +105,7 @@ async function TestDataDashboard() {
                 </li>
                 <li>
                   <Text variant="small" as="span">
-                    API keys
+                    {t("API keys", "API 密钥")}
                   </Text>
                 </li>
                 <li>
@@ -102,7 +116,9 @@ async function TestDataDashboard() {
               </ul>
             </div>
             <div>
-              <Text variant="body-medium">{t("Full Script:", "完整脚本：")}</Text>
+              <Text variant="body-medium">
+                {t("Full Script:", "完整脚本：")}
+              </Text>
               <ul className="mt-1 list-inside list-disc">
                 <li>
                   <Text variant="small" as="span">

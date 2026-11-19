@@ -11,6 +11,7 @@ import { ArrowRight01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { motion, useReducedMotion } from "framer-motion";
 import NextLink from "next/link";
 import { useId } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   getChatHref,
   getOwnerName,
@@ -49,6 +50,7 @@ export function TaskRow({
   onSend,
   onRemove,
 }: Props) {
+  const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
   const pillID = useId();
   const whyID = useId();
@@ -75,7 +77,10 @@ export function TaskRow({
       {isSent ? (
         <NextLink
           href={getChatHref(task.session_id ?? "")}
-          aria-label={`Open the chat with ${name}: ${task.title}`}
+          aria-label={t(
+            `Open the chat with ${name}: ${task.title}`,
+            `打开与 ${name} 的对话：${task.title}`,
+          )}
           className={ROW_CLASSES}
           {...control}
         >
@@ -87,7 +92,7 @@ export function TaskRow({
               tone="success-strong"
               className="sm:whitespace-nowrap"
             >
-              In progress with {name}
+              {t(`In progress with ${name}`, `正在由 ${name} 处理`)}
             </Text>
           </RowText>
         </NextLink>
@@ -96,7 +101,10 @@ export function TaskRow({
           type="button"
           {...tourStartingPoint()}
           {...control}
-          aria-label={`Start with ${name}: ${task.title}`}
+          aria-label={t(
+            `Start with ${name}: ${task.title}`,
+            `与 ${name} 开始：${task.title}`,
+          )}
           aria-describedby={describedBy}
           aria-busy={isSending || undefined}
           disabled={isBusy}
@@ -138,7 +146,7 @@ export function TaskRow({
             variant="toggle"
             size="icon-xs"
             withTooltip={false}
-            aria-label={`Remove: ${task.title}`}
+            aria-label={t(`Remove: ${task.title}`, `移除：${task.title}`)}
             disabled={isRemoveDisabled}
             onClick={() => onRemove(task)}
           >
@@ -174,6 +182,7 @@ function RowText({
   whyID,
   children,
 }: RowTextProps) {
+  const { t } = useTranslation();
   return (
     <span className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
       <span className="flex min-w-0 flex-1 flex-col">
@@ -188,7 +197,7 @@ function RowText({
               id={pillID}
               className="mr-2 inline-block -translate-y-px rounded-full bg-accent-strong/10 px-2 py-0.5 align-middle text-caption-sm font-semibold tracking-eyebrow text-accent-strong uppercase"
             >
-              Start here
+              {t("Start here", "从这里开始")}
             </span>
           ) : null}
           {task.title}

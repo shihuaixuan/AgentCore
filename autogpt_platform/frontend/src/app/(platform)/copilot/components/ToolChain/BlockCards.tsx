@@ -17,6 +17,7 @@ import {
   str,
 } from "./resultHelpers";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface CardProviderIconProps {
   provider: string | null;
@@ -56,6 +57,7 @@ export function CardProviderIcon({
 const BLOCK_ICON = <Icon icon={PuzzleIcon} size={15} tone="secondary" />;
 
 export function BlockListCard({ blocks }: BlockListCardProps) {
+  const { t } = useTranslation();
   return (
     <div className={RESULT_GRID}>
       {blocks.map((block, i) => {
@@ -81,7 +83,7 @@ export function BlockListCard({ blocks }: BlockListCardProps) {
                 tone="emphasis"
                 className="truncate"
               >
-                {getBlockDisplayName(block.name, block) ?? "Block"}
+                {getBlockDisplayName(block.name, block) ?? t("Block", "模块")}
               </Text>
               {str(block, "description") && (
                 <Text variant="small-tight" tone="muted" className="truncate">
@@ -102,7 +104,8 @@ export function BlockListCard({ blocks }: BlockListCardProps) {
 }
 
 export function BlockOutputCard({ output }: BlockOutputCardProps) {
-  const name = getBlockDisplayName(undefined, output) ?? "Block";
+  const { t } = useTranslation();
+  const name = getBlockDisplayName(undefined, output) ?? t("Block", "模块");
   const ok = output.success !== false;
   const entries = Object.entries(
     output.outputs && typeof output.outputs === "object"

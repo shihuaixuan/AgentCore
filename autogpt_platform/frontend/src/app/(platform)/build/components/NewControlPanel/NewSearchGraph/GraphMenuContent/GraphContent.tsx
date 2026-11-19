@@ -9,6 +9,7 @@ import { useGraphContent } from "./useGraphContent";
 import { CornerUpRightIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   searchQuery: string;
@@ -23,6 +24,7 @@ export function GraphSearchContent({
   filteredNodes,
   onNodeSelect,
 }: Props) {
+  const { t } = useTranslation();
   const { selectedIndex, setSelectedIndex, setItemRef, handleKeyDown } =
     useGraphContent({
       searchQuery,
@@ -46,8 +48,10 @@ export function GraphSearchContent({
         {trimmedQuery && (
           <div className="px-4 pt-3">
             <Text variant="small-tight" as="div" tone="muted">
-              Found {filteredNodes.length} node
-              {filteredNodes.length !== 1 ? "s" : ""}
+              {t(
+                `Found ${filteredNodes.length} node${filteredNodes.length !== 1 ? "s" : ""}`,
+                `找到 ${filteredNodes.length} 个节点`,
+              )}
             </Text>
           </div>
         )}
@@ -61,8 +65,8 @@ export function GraphSearchContent({
                 className="flex h-32 items-center justify-center"
               >
                 {trimmedQuery
-                  ? "No nodes found matching your search"
-                  : "Start typing to search nodes"}
+                  ? t("No nodes found matching your search", "未找到匹配的节点")
+                  : t("Start typing to search nodes", "输入内容以搜索节点")}
               </Text>
             ) : (
               filteredNodes.map((node, index) => {
@@ -74,7 +78,7 @@ export function GraphSearchContent({
                   "",
                 );
                 const description =
-                  getNodeInputOutputSummary(node) ||
+                  getNodeInputOutputSummary(node, t) ||
                   node.data.description ||
                   "";
 

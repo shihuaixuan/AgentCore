@@ -18,9 +18,9 @@ import { cn } from "@/lib/utils";
 import { useTrialStatus } from "@/services/trials/useTrialStatus";
 
 export function WalletCopilotUsage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { data: usage, isError, refetch } = useCopilotUsage();
-  const tierLabel = formatTierLabel(usage?.tier);
+  const tierLabel = formatTierLabel(usage?.tier, locale);
 
   return (
     <section
@@ -82,7 +82,7 @@ function UsageWindows({ usage }: { usage: CoPilotUsagePublic }) {
 }
 
 function TrialUsage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { data: trial, isPending, refetch } = useTrialStatus();
   if (isPending) return <UsageLoading />;
   if (trial?.allowance_used_percent == null) {
@@ -118,7 +118,7 @@ function TrialUsage() {
       />
       <Text variant="small" tone="muted">
         {trial.active ? t("Ends", "结束时间：") : t("Ended", "已结束：")}{" "}
-        {formatTrialEnd(trial.ends_at)}
+        {formatTrialEnd(trial.ends_at, locale)}
       </Text>
     </div>
   );

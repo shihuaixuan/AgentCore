@@ -53,7 +53,7 @@ export function MobileSubmissionItem({
   onDelete,
   creatorUsername,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const reduceMotion = useReducedMotion();
   const {
     canModify,
@@ -72,7 +72,7 @@ export function MobileSubmissionItem({
     creatorUsername,
   });
 
-  const visual = getStatusVisual(submission.status);
+  const visual = getStatusVisual(submission.status, locale);
   const thumbnail = submission.image_urls?.[0];
   const hasRating =
     !!submission.review_avg_rating && submission.review_avg_rating > 0;
@@ -241,13 +241,16 @@ export function MobileSubmissionItem({
           {visual.label}
         </span>
         <span className="text-caption whitespace-nowrap text-foreground-tertiary">
-          {formatSubmittedAt(submission.submitted_at)}
+          {formatSubmittedAt(submission.submitted_at, locale)}
         </span>
         <span aria-hidden className="text-caption text-foreground-disabled">
           ·
         </span>
         <span className="text-caption whitespace-nowrap text-foreground-tertiary tabular-nums">
-          {formatRuns(submission.run_count ?? 0)} runs
+          {t(
+            `${formatRuns(submission.run_count ?? 0)} runs`,
+            `${formatRuns(submission.run_count ?? 0)} 次运行`,
+          )}
         </span>
         {hasRating ? (
           <>
@@ -273,8 +276,12 @@ export function MobileSubmissionItem({
       >
         <Dialog.Content>
           <Text variant="body" tone="body">
-            This will remove <strong>{submission.name}</strong> from the store.
-            This action cannot be undone.
+            {t("This will remove", "将从市场移除")}{" "}
+            <strong>{submission.name}</strong>
+            {t(
+              " from the store. This action cannot be undone.",
+              "。此操作无法撤销。",
+            )}
           </Text>
           <Dialog.Footer>
             <Button
@@ -291,7 +298,9 @@ export function MobileSubmissionItem({
               onClick={handleConfirmDelete}
               loading={isDeleting}
             >
-              {isDeleting ? "Deleting" : "Delete submission"}
+              {isDeleting
+                ? t("Deleting", "正在删除")
+                : t("Delete submission", "删除提交")}
             </Button>
           </Dialog.Footer>
         </Dialog.Content>

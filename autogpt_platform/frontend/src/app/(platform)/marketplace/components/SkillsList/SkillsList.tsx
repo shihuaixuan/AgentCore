@@ -24,7 +24,7 @@ interface Props {
 }
 
 export function SkillsList({ category }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   // Seeded from the page filter and reset with it by the parent's `key`, so
   // the chips narrow the shelf further without fighting the page.
   const [topic, setTopic] = useState(category ?? null);
@@ -96,7 +96,10 @@ export function SkillsList({ category }: Props) {
         <div className="flex items-center gap-2 text-body text-foreground-secondary">
           <span>
             {topic
-              ? `No ${formatCategoryLabel(topic).toLowerCase()} skills yet.`
+              ? t(
+                  `No ${formatCategoryLabel(topic).toLowerCase()} skills yet.`,
+                  `暂无${formatCategoryLabel(topic, locale)}技能。`,
+                )
               : t("No skills yet.", "暂无技能。")}
           </span>
           {topic ? (

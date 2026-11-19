@@ -79,7 +79,11 @@ export function makeCronExpression(params: CronExpressionParams): string {
   return "";
 }
 
-export function humanizeCronExpression(cronExpression: string): string {
+export function humanizeCronExpression(
+  cronExpression: string,
+  locale: Locale = "en",
+): string {
+  const chinese = locale === "zh-CN";
   const parts = cronExpression.trim().split(/\s+/);
   if (parts.length !== 5) {
     throw new Error("Invalid cron expression format.");
@@ -89,7 +93,7 @@ export function humanizeCronExpression(cronExpression: string): string {
 
   // Handle every minute
   if (cronExpression === "* * * * *") {
-    return "Every minute";
+    return chinese ? "每分钟" : "Every minute";
   }
 
   // Handle minute intervals (e.g., */5 * * * *)
@@ -101,7 +105,7 @@ export function humanizeCronExpression(cronExpression: string): string {
     dayOfWeek === "*"
   ) {
     const interval = minute.substring(2);
-    return `Every ${interval} minutes`;
+    return chinese ? `每 ${interval} 分钟` : `Every ${interval} minutes`;
   }
 
   // Handle hour intervals (e.g., 30 * * * *)
@@ -112,7 +116,9 @@ export function humanizeCronExpression(cronExpression: string): string {
     month === "*" &&
     dayOfWeek === "*"
   ) {
-    return `Every hour at minute ${minute}`;
+    return chinese
+      ? `每小时第 ${minute} 分钟`
+      : `Every hour at minute ${minute}`;
   }
 
   // Handle every N hours (e.g., 0 */2 * * *)
@@ -124,7 +130,7 @@ export function humanizeCronExpression(cronExpression: string): string {
     dayOfWeek === "*"
   ) {
     const interval = hour.substring(2);
-    return `Every ${interval} hours`;
+    return chinese ? `每 ${interval} 小时` : `Every ${interval} hours`;
   }
 
   // Handle daily (e.g., 30 14 * * *)
@@ -135,7 +141,9 @@ export function humanizeCronExpression(cronExpression: string): string {
     !minute.includes("/") &&
     !hour.includes("/")
   ) {
-    return `Every day at ${formatTime(hour, minute)}`;
+    return chinese
+      ? `每天 ${formatTime(hour, minute)}`
+      : `Every day at ${formatTime(hour, minute)}`;
   }
 
   // Handle weekly (e.g., 30 14 * * 1,3,5)
@@ -146,8 +154,10 @@ export function humanizeCronExpression(cronExpression: string): string {
     !minute.includes("/") &&
     !hour.includes("/")
   ) {
-    const days = getDayNames(dayOfWeek);
-    return `Every ${days} at ${formatTime(hour, minute)}`;
+    const days = getDayNames(dayOfWeek, locale);
+    return chinese
+      ? `每${days} ${formatTime(hour, minute)}`
+      : `Every ${days} at ${formatTime(hour, minute)}`;
   }
 
   // Handle custom minute intervals with other fields as * (e.g., every N minutes)
@@ -159,7 +169,7 @@ export function humanizeCronExpression(cronExpression: string): string {
     dayOfWeek === "*"
   ) {
     const interval = minute.split("/")[1];
-    return `Every ${interval} minutes`;
+    return chinese ? `每 ${interval} 分钟` : `Every ${interval} minutes`;
   }
 
   // Handle custom hour intervals with other fields as * (e.g., every N hours)
@@ -171,7 +181,7 @@ export function humanizeCronExpression(cronExpression: string): string {
     dayOfWeek === "*"
   ) {
     const interval = hour.split("/")[1];
-    return `Every ${interval} hours`;
+    return chinese ? `每 ${interval} 小时` : `Every ${interval} hours`;
   }
 
   // Handle specific days with custom intervals (e.g., every N days)
@@ -184,7 +194,9 @@ export function humanizeCronExpression(cronExpression: string): string {
     !hour.includes("/")
   ) {
     const interval = dayOfMonth.substring(2);
-    return `Every ${interval} days at ${formatTime(hour, minute)}`;
+    return chinese
+      ? `每 ${interval} 天 ${formatTime(hour, minute)}`
+      : `Every ${interval} days at ${formatTime(hour, minute)}`;
   }
 
   // Handle monthly (e.g., 30 14 1,15 * *)
@@ -199,7 +211,9 @@ export function humanizeCronExpression(cronExpression: string): string {
   ) {
     const days = dayOfMonth.split(",").map(Number);
     const dayList = days.join(", ");
-    return `On day ${dayList} of every month at ${formatTime(hour, minute)}`;
+    return chinese
+      ? `每月 ${days.join("、")} 日 ${formatTime(hour, minute)}`
+      : `On day ${dayList} of every month at ${formatTime(hour, minute)}`;
   }
 
   // Handle yearly (e.g., 30 14 1 1,6,12 *)
@@ -212,18 +226,25 @@ export function humanizeCronExpression(cronExpression: string): string {
     !minute.includes("/") &&
     !hour.includes("/")
   ) {
-    const months = getMonthNames(month);
-    return `Every year on the 1st day of ${months} at ${formatTime(hour, minute)}`;
+    const months = getMonthNames(month, locale);
+    return chinese
+      ? `每年 ${months}的第 1 天 ${formatTime(hour, minute)}`
+      : `Every year on the 1st day of ${months} at ${formatTime(hour, minute)}`;
   }
 
-  return `Cron Expression: ${cronExpression}`;
+  return chinese
+    ? `Cron 表达式：${cronExpression}`
+    : `Cron Expression: ${cronExpression}`;
 }
 
-export function safeHumanizeCronExpression(cronExpression: string): string {
+export function safeHumanizeCronExpression(
+  cronExpression: string,
+  locale: Locale = "en",
+): string {
   try {
-    return humanizeCronExpression(cronExpression);
+    return humanizeCronExpression(cronExpression, locale);
   } catch {
-    return "Scheduled";
+    return locale === "zh-CN" ? "已安排" : "Scheduled";
   }
 }
 
@@ -258,7 +279,7 @@ function expandCronFieldList(field: string): number[] {
   return values;
 }
 
-function getDayNames(dayOfWeek: string): string {
+function getDayNames(dayOfWeek: string, locale: Locale): string {
   const days = expandCronFieldList(dayOfWeek);
   const dayNames = days
     .map((d) => {
@@ -271,13 +292,16 @@ function getDayNames(dayOfWeek: string): string {
         "Friday",
         "Saturday",
       ];
-      return names[d] || `Unknown(${d})`;
+      return locale === "zh-CN"
+        ? ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][d] ||
+            `未知(${d})`
+        : names[d] || `Unknown(${d})`;
     })
-    .join(", ");
+    .join(locale === "zh-CN" ? "、" : ", ");
   return dayNames;
 }
 
-function getMonthNames(month: string): string {
+function getMonthNames(month: string, locale: Locale): string {
   const months = expandCronFieldList(month);
   const monthNames = months
     .map((m) => {
@@ -295,8 +319,13 @@ function getMonthNames(month: string): string {
         "November",
         "December",
       ];
-      return names[m - 1] || `Unknown(${m})`;
+      return locale === "zh-CN"
+        ? m >= 1 && m <= 12
+          ? `${m}月`
+          : `未知(${m})`
+        : names[m - 1] || `Unknown(${m})`;
     })
-    .join(", ");
+    .join(locale === "zh-CN" ? "、" : ", ");
   return monthNames;
 }
+import type { Locale } from "@/lib/i18n/locale";

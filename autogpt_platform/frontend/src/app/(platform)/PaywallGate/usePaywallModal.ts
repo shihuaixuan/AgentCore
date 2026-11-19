@@ -31,18 +31,14 @@ import {
   trackPlanSelected,
 } from "@/services/analytics/monetization-analytics";
 import { buildPaywallCancelUrl, consumePaywallCheckoutCancel } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getPlanLabel } from "@/services/billing/subscription-plan";
 
 interface CheckoutResponse {
   url?: string;
 }
 
 const TIER_DISPLAY_ORDER: BackendTierKey[] = ["PRO", "MAX", "BUSINESS"];
-
-const PLAN_LABEL: Record<string, string> = {
-  PRO: "Pro",
-  MAX: "Max",
-  BUSINESS: "Team",
-};
 
 // Build a PlanDef per priceable tier exposed by /credits/subscription. Static
 // metadata (features / cta / highlight) is layered on top of the API-driven
@@ -77,6 +73,7 @@ function deriveAvailablePlans(
 }
 
 export function usePaywallModal() {
+  const { t, locale } = useTranslation();
   const {
     data: subscription,
     isLoading,
@@ -188,11 +185,14 @@ export function usePaywallModal() {
         return;
       }
       toast({
-        title: "Couldn't start checkout",
+        title: t("Couldn't start checkout", "无法开始结账"),
         description:
           error instanceof Error
             ? error.message
-            : "Stripe didn't accept the request. Please try again.",
+            : t(
+                "Stripe didn't accept the request. Please try again.",
+                "Stripe 未接受请求，请重试。",
+              ),
         variant: "destructive",
       });
     } finally {
@@ -250,7 +250,7 @@ export function usePaywallModal() {
   }
 
   const pendingTierLabel = pendingTier
-    ? (PLAN_LABEL[pendingTier] ?? pendingTier)
+    ? getPlanLabel(pendingTier, locale)
     : null;
 
   function retryLoadPlans() {

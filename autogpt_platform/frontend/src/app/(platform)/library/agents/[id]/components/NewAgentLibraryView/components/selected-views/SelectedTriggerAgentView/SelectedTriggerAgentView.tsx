@@ -28,7 +28,7 @@ export function SelectedTriggerAgentView({
   onClearSelectedRun,
   banner,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { data, isLoading, error } = useGetV2ListTriggerAgents(agent.id, {
     query: { select: okData },
   });
@@ -60,7 +60,7 @@ export function SelectedTriggerAgentView({
         ? queryError.message
         : queryError != null
           ? String(queryError)
-          : "Failed to load trigger data";
+          : t("Failed to load trigger data", "无法加载触发器数据");
     return <ErrorCard responseError={{ message }} context="trigger workflow" />;
   }
 
@@ -94,13 +94,14 @@ export function SelectedTriggerAgentView({
                   <Text variant="body">{triggerAgent.description}</Text>
                 ) : (
                   <Text variant="body" tone="muted">
-                    No description.
+                    {t("No description.", "暂无描述。")}
                   </Text>
                 )}
                 <Text variant="small" tone="muted">
-                  Trigger workflows run on a schedule and execute this workflow
-                  when their conditions are met. Edit them in the builder to
-                  change what they do.
+                  {t(
+                    "Trigger workflows run on a schedule and execute this workflow when their conditions are met. Edit them in the builder to change what they do.",
+                    "触发工作流按计划运行，并在满足条件时执行此工作流。你可以在构建器中编辑其行为。",
+                  )}
                 </Text>
               </div>
             </RunDetailCard>
@@ -111,11 +112,10 @@ export function SelectedTriggerAgentView({
                   {schedule.graph_version !== triggerAgent.graph_version && (
                     <div className="rounded-md bg-warning-surface px-3 py-2">
                       <Text variant="small" tone="warning">
-                        This schedule is running version{" "}
-                        {schedule.graph_version} of the trigger workflow, but
-                        the latest version is {triggerAgent.graph_version}. Ask
-                        your expert to recreate the schedule to pick up your
-                        latest edits.
+                        {t(
+                          `This schedule is running version ${schedule.graph_version} of the trigger workflow, but the latest version is ${triggerAgent.graph_version}. Ask your expert to recreate the schedule to pick up your latest edits.`,
+                          `此计划运行的是触发工作流的版本 ${schedule.graph_version}，最新版本为 ${triggerAgent.graph_version}。请让专家重新创建计划，以应用最新修改。`,
+                        )}
                       </Text>
                     </div>
                   )}
@@ -125,7 +125,7 @@ export function SelectedTriggerAgentView({
                     </Text>
                     <div className="flex items-center gap-3">
                       <Text variant="body" as="span">
-                        {humanizeCronExpression(schedule.cron)}
+                        {humanizeCronExpression(schedule.cron, locale)}
                       </Text>{" "}
                       <Text variant="body" as="span" tone="muted">
                         &middot;
@@ -133,6 +133,7 @@ export function SelectedTriggerAgentView({
                       <Text variant="body" as="span" tone="muted">
                         {getTimezoneDisplayName(
                           displayTimezone || schedule.timezone || "UTC",
+                          locale,
                         )}
                       </Text>
                     </div>
@@ -154,6 +155,7 @@ export function SelectedTriggerAgentView({
                             minute: "2-digit",
                             hour12: false,
                           },
+                          locale,
                         )}
                       </Text>{" "}
                       <Text variant="body" as="span" tone="muted">
@@ -162,6 +164,7 @@ export function SelectedTriggerAgentView({
                       <Text variant="body" as="span" tone="muted">
                         {getTimezoneDisplayName(
                           displayTimezone || schedule.timezone || "UTC",
+                          locale,
                         )}
                       </Text>
                     </div>

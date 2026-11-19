@@ -6,12 +6,24 @@ import {
 import { Icon } from "@/components/atoms/Icon/Icon";
 import type { Receipt } from "../useApprovalQueue";
 import { HeadlineText } from "./ApprovalHeadline";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   receipt: Receipt;
 }
 
 export function ReceiptLine({ receipt }: Props) {
+  const { t } = useTranslation();
+  const translated: Record<string, string> = {
+    Approved: "已批准",
+    Released: "已放行",
+    Rejected: "已拒绝",
+    "Kept out": "已屏蔽",
+    "Already answered": "已答复",
+    "Answered elsewhere": "已在别处答复",
+    Expired: "已过期",
+    "Not run": "未执行",
+  };
   const [icon, tone] =
     receipt.text === "Approved" || receipt.text === "Released"
       ? [Tick02Icon, "text-success"]
@@ -24,7 +36,9 @@ export function ReceiptLine({ receipt }: Props) {
       <span className="min-w-0 truncate">
         <HeadlineText item={receipt.item} />
       </span>
-      <span className="shrink-0 text-foreground-subtle">· {receipt.text}</span>
+      <span className="shrink-0 text-foreground-subtle">
+        · {t(receipt.text, translated[receipt.text] ?? receipt.text)}
+      </span>
     </li>
   );
 }

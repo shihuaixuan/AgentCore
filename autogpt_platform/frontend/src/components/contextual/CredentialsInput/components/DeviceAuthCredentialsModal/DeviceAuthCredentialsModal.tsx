@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { DeviceAuthConnectButton } from "@/components/contextual/DeviceAuth/DeviceAuthConnectButton";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
@@ -26,9 +29,10 @@ export function DeviceAuthCredentialsModal({
   providerName,
   onCredentialsCreate,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <Dialog
-      title={`Connect ${providerName}`}
+      title={t(`Connect ${providerName}`, `连接 ${providerName}`)}
       controlled={{
         isOpen: open,
         set: (isOpen) => {

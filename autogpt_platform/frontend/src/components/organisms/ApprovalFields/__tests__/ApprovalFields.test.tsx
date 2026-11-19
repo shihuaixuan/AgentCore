@@ -1,6 +1,43 @@
 import { expect, test } from "vitest";
 import { render, screen } from "@/tests/integrations/test-utils";
 import { ApprovalFields } from "../ApprovalFields";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
+import { ReferenceValue } from "../components/ReferenceValue";
+
+test.each([
+  ["en", "+2 more"],
+  ["zh-CN", "还有 2 项"],
+] as const)(
+  "keeps the reference overflow count readable in %s",
+  (locale, expected) => {
+    render(
+      <LanguageProvider initialLocale={locale}>
+        <ReferenceValue refs={[]} total={2} />
+      </LanguageProvider>,
+    );
+    expect(screen.getByText(expected)).toBeDefined();
+  },
+);
+
+test.each([
+  ["seconds", 90, "1 分钟 30 秒"],
+  ["cron", "0 9 * * *", "每天 09:00"],
+  ["cron", "Keep original invalid cron", "Keep original invalid cron"],
+])(
+  "localizes %s presentation while preserving caller labels",
+  (format, value, expected) => {
+    render(
+      <LanguageProvider>
+        <ApprovalFields
+          fields={[{ key: "when", label: "Original label", format }]}
+          values={{ when: value }}
+        />
+      </LanguageProvider>,
+    );
+    expect(screen.getByText("Original label")).toBeDefined();
+    expect(screen.getByText(expected)).toBeDefined();
+  },
+);
 
 test.each([
   ["seconds", 59, "59 seconds"],

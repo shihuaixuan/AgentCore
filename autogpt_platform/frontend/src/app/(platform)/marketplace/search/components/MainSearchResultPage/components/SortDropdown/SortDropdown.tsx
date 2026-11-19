@@ -13,10 +13,10 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 import { useState } from "react";
 
 const SORT_OPTIONS = [
-  { label: "Most Runs", value: "runs" },
-  { label: "Highest Rated", value: "rating" },
-  { label: "Name (A-Z)", value: "name" },
-  { label: "Recently Updated", value: "updated_at" },
+  { label: "Most Runs", chinese: "运行次数最多", value: "runs" },
+  { label: "Highest Rated", chinese: "评分最高", value: "rating" },
+  { label: "Name (A-Z)", chinese: "名称（A-Z）", value: "name" },
+  { label: "Recently Updated", chinese: "最近更新", value: "updated_at" },
 ];
 
 interface Props {
@@ -43,7 +43,7 @@ export function SortDropdown({ onSort }: Props) {
             {t("Sort by", "排序方式")}
           </Text>
           <Text variant="large" as="span" tone="emphasis">
-            {selected.label}
+            {t(selected.label, selected.chinese)}
           </Text>
           <Icon aria-hidden icon={ArrowDown01Icon} className="h-4 w-4" />
         </button>
@@ -63,7 +63,7 @@ export function SortDropdown({ onSort }: Props) {
                 as="span"
                 tone={isSelected ? "emphasis" : "secondary"}
               >
-                {option.label}
+                {t(option.label, option.chinese)}
               </Text>
             </DropdownMenuItem>
           );

@@ -72,19 +72,23 @@ export function formatDuration(seconds: number) {
 }
 
 // Unit label for each tracking type — what the rate input represents.
-export function rateUnitLabel(trackingType: string | null | undefined): string {
+export function rateUnitLabel(
+  trackingType: string | null | undefined,
+  locale = "en",
+): string {
+  const chinese = locale === "zh-CN";
   switch (trackingType) {
     case "tokens":
-      return "$/1K tokens";
+      return chinese ? "$/1K 令牌" : "$/1K tokens";
     case "characters":
-      return "$/1K chars";
+      return chinese ? "$/1K 字符" : "$/1K chars";
     case "items":
-      return "$/item";
+      return chinese ? "$/项" : "$/item";
     case "sandbox_seconds":
     case "walltime_seconds":
-      return "$/second";
+      return chinese ? "$/秒" : "$/second";
     case "per_run":
-      return "$/run";
+      return chinese ? "$/次运行" : "$/run";
     default:
       return "";
   }
@@ -189,7 +193,8 @@ export function estimateCostForRow(
   return Math.round(rate * amount * MICRODOLLARS_PER_USD);
 }
 
-export function trackingValue(row: ProviderCostSummary) {
+export function trackingValue(row: ProviderCostSummary, locale = "en") {
+  const chinese = locale === "zh-CN";
   const tt = row.tracking_type || "per_run";
   if (tt === "cost_usd") return formatMicrodollars(row.total_cost_microdollars);
   if (tt === "tokens") {
@@ -197,17 +202,19 @@ export function trackingValue(row: ProviderCostSummary) {
     const cacheRead = row.total_cache_read_tokens ?? 0;
     const cacheWrite = row.total_cache_creation_tokens ?? 0;
     if (cacheRead > 0 || cacheWrite > 0) {
-      return `${formatTokens(tokens)} tokens (+${formatTokens(cacheRead)}r/${formatTokens(cacheWrite)}w cached)`;
+      return chinese
+        ? `${formatTokens(tokens)} 令牌（缓存：读 ${formatTokens(cacheRead)} / 写 ${formatTokens(cacheWrite)}）`
+        : `${formatTokens(tokens)} tokens (+${formatTokens(cacheRead)}r/${formatTokens(cacheWrite)}w cached)`;
     }
-    return `${formatTokens(tokens)} tokens`;
+    return `${formatTokens(tokens)} ${chinese ? "令牌" : "tokens"}`;
   }
   if (tt === "sandbox_seconds" || tt === "walltime_seconds")
     return formatDuration(row.total_duration_seconds || 0);
   if (tt === "characters")
-    return `${formatTokens(Math.round(row.total_tracking_amount || 0))} chars`;
+    return `${formatTokens(Math.round(row.total_tracking_amount || 0))} ${chinese ? "字符" : "chars"}`;
   if (tt === "items")
-    return `${Math.round(row.total_tracking_amount || 0).toLocaleString()} items`;
-  return `${row.request_count.toLocaleString()} runs`;
+    return `${Math.round(row.total_tracking_amount || 0).toLocaleString()} ${chinese ? "项" : "items"}`;
+  return `${row.request_count.toLocaleString()} ${chinese ? "次运行" : "runs"}`;
 }
 
 // URL holds UTC ISO; datetime-local inputs need local "YYYY-MM-DDTHH:mm".

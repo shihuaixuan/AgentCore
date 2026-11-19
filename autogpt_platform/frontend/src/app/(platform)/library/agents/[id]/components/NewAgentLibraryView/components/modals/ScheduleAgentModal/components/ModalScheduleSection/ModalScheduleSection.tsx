@@ -36,12 +36,12 @@ export function ModalScheduleSection({
 
   const validateNow = useCallback(
     (partial: { scheduleName?: string }) => {
-      const fieldErrors = validateSchedule({ scheduleName, ...partial });
+      const fieldErrors = validateSchedule({ scheduleName, ...partial }, t);
       setErrors(fieldErrors);
       if (onValidityChange)
         onValidityChange(Object.keys(fieldErrors).length === 0);
     },
-    [scheduleName, onValidityChange],
+    [scheduleName, onValidityChange, t],
   );
 
   return (
@@ -63,8 +63,10 @@ export function ModalScheduleSection({
       {recommendedScheduleCron && (
         <div className="mb-4 rounded-md bg-info-surface p-3 text-info-foreground">
           <Text variant="body" tone="inherit">
-            💡 This workflow has a recommended schedule that has been pre-filled
-            below. You can modify it as needed.
+            {t(
+              "💡 This workflow has a recommended schedule that has been pre-filled below. You can modify it as needed.",
+              "💡 已为此工作流预填推荐计划，你可以按需修改。",
+            )}
           </Text>
         </div>
       )}

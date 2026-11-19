@@ -11,12 +11,9 @@ import {
   getGetV1GetUserTimezoneQueryKey,
 } from "@/app/api/__generated__/endpoints/auth/auth";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
-const formSchema = z.object({
-  timezone: z.string().min(1, "Please select a timezone"),
-});
-
-type FormData = z.infer<typeof formSchema>;
+type FormData = { timezone: string };
 
 type UseTimezoneFormProps = {
   user: User;
@@ -24,9 +21,13 @@ type UseTimezoneFormProps = {
 };
 
 export const useTimezoneForm = ({ currentTimezone }: UseTimezoneFormProps) => {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const formSchema = z.object({
+    timezone: z.string().min(1, t("Please select a timezone", "请选择时区")),
+  });
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -50,14 +51,20 @@ export const useTimezoneForm = ({ currentTimezone }: UseTimezoneFormProps) => {
       });
 
       toast({
-        title: "Success",
-        description: "Your timezone has been updated successfully.",
+        title: t("Success", "成功"),
+        description: t(
+          "Your timezone has been updated successfully.",
+          "你的时区已更新。",
+        ),
         variant: "success",
       });
     } catch {
       toast({
-        title: "Error",
-        description: "Failed to update timezone. Please try again.",
+        title: t("Error", "错误"),
+        description: t(
+          "Failed to update timezone. Please try again.",
+          "更新时区失败，请重试。",
+        ),
         variant: "destructive",
       });
     } finally {

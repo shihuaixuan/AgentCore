@@ -2,6 +2,7 @@
 
 import { useGetV1ListProviders } from "@/app/api/__generated__/endpoints/integrations/integrations";
 import { Button } from "@/components/atoms/Button/Button";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { isAnswered } from "../../tools/clarifying-questions";
 import { ConnectionsSection } from "./ConnectionsSection";
 import { InputsSection } from "./InputsSection";
@@ -40,6 +41,7 @@ export function ChainActionCard({
   isReady,
   onProceed,
 }: Props) {
+  const { t } = useTranslation();
   const providersQuery = useGetV1ListProviders({
     query: {
       select: (response) => (response.status === 200 ? response.data : []),
@@ -89,7 +91,7 @@ export function ChainActionCard({
           disabled={!isReady}
           onClick={onProceed}
         >
-          Proceed
+          {t("Proceed", "继续")}
         </Button>
       )}
     </div>

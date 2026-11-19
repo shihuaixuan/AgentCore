@@ -78,7 +78,7 @@ export const NodeDataRenderer = ({ nodeId }: { nodeId: string }) => {
                     <div key={key} className="flex flex-col gap-2">
                       <div className="flex items-center gap-2">
                         <Text variant="small-semibold" tone="secondary">
-                          Pin:
+                          {t("Pin:", "端口：")}
                         </Text>
                         <Text variant="small" tone="body">
                           {beautifyString(key)}
@@ -86,7 +86,7 @@ export const NodeDataRenderer = ({ nodeId }: { nodeId: string }) => {
                       </div>
                       <div className="w-full space-y-2">
                         <Text variant="small-semibold" tone="secondary">
-                          Data:
+                          {t("Data:", "数据：")}
                         </Text>
                         <div className="relative space-y-2">
                           {value.slice(0, 3).map((item, index) => (

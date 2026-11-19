@@ -16,6 +16,7 @@ import { useEdgeStore } from "@/app/(platform)/build/stores/edgeStore";
 import { ANY_OF_FLAG } from "../../constants";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 function getDiscriminatorPropName(schema: any): string | undefined {
   if (!schema?.discriminator) return undefined;
@@ -44,6 +45,7 @@ function DiscriminatedUnionField({
   discriminatorProp,
   ...props
 }: DiscriminatedUnionFieldProps) {
+  const { t } = useTranslation();
   const { schema, registry, formData, onChange, name } = props;
   const { fields, schemaUtils, formContext } = registry;
   const { SchemaField } = fields;
@@ -63,7 +65,10 @@ function DiscriminatedUnionField({
     const discValue = (variant.properties?.[discriminatorProp] as any)?.const;
     return {
       value: index,
-      label: variant.title || discValue || `Option ${index + 1}`,
+      label:
+        variant.title ||
+        discValue ||
+        t(`Option ${index + 1}`, `选项 ${index + 1}`),
       discriminatorValue: discValue,
     };
   });
@@ -211,7 +216,11 @@ function DiscriminatedUnionField({
         "-ml-1 h-[22px] w-fit gap-1 px-1 pl-2 text-caption font-medium",
       )}
       autofocus={props.autofocus}
-      label={schema.title ? `${schema.title} — variant` : "Variant selector"}
+      label={
+        schema.title
+          ? t(`${schema.title} — variant`, `${schema.title} — 变体`)
+          : t("Variant selector", "变体选择器")
+      }
       hideLabel={true}
       readonly={props.readonly}
     />

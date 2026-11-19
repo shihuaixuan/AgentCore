@@ -12,9 +12,10 @@ import { okData } from "@/app/api/helpers";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { ARTIFACTS_LIST_QUERY_KEY } from "./useArtifactsPage";
+import type { Locale } from "@/lib/i18n/locale";
 
 export function useArtifactsFolders() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -97,12 +98,20 @@ export function useArtifactsFolders() {
       onSuccess: (_, variables) => {
         invalidate();
         const count = variables.data.file_ids.length;
-        toast({ title: count === 1 ? "File moved" : `${count} files moved` });
+        toast({
+          title: t(
+            count === 1 ? "File moved" : `${count} files moved`,
+            `已移动 ${count} 个文件`,
+          ),
+        });
       },
       onError: (_, variables) => {
         const count = variables.data.file_ids.length;
         toast({
-          title: count === 1 ? "Failed to move file" : "Failed to move files",
+          title: t(
+            count === 1 ? "Failed to move file" : "Failed to move files",
+            "无法移动文件",
+          ),
           variant: "destructive",
         });
       },
@@ -141,7 +150,7 @@ export function useArtifactsFolders() {
           // The name the 409 message needs is not in the request body —
           // sending it would rename the folder — so the toast lives here.
           toast({
-            title: describeFolderMoveError(error, args.name),
+            title: describeFolderMoveError(error, args.name, locale),
             variant: "destructive",
           });
           throw error;
@@ -157,9 +166,19 @@ export function useArtifactsFolders() {
   };
 }
 
-export function describeFolderMoveError(error: unknown, name: string): string {
+export function describeFolderMoveError(
+  error: unknown,
+  name: string,
+  locale: Locale = "en",
+): string {
   const status = error instanceof ApiError ? error.status : null;
-  if (status === 409) return `A folder named “${name}” is already there`;
-  if (status === 400) return "A folder can't be moved into itself";
-  return "Failed to move folder";
+  if (status === 409)
+    return locale === "zh-CN"
+      ? `目标位置已存在名为“${name}”的文件夹`
+      : `A folder named “${name}” is already there`;
+  if (status === 400)
+    return locale === "zh-CN"
+      ? "不能将文件夹移入自身"
+      : "A folder can't be moved into itself";
+  return locale === "zh-CN" ? "无法移动文件夹" : "Failed to move folder";
 }

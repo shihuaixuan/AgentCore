@@ -1,6 +1,4 @@
 "use client";
-import { DISPLAY_LABELS } from "./display-labels";
-
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Button } from "@/components/atoms/Button/Button";
@@ -25,10 +23,14 @@ interface Props {
 const QUESTION =
   "How likely are you to recommend AutoGPT to a friend or colleague?";
 
-function followUpFor(score: number) {
-  if (score >= 9) return "What do you like most?";
-  if (score >= 7) return "What would make it a 10?";
-  return "What's the main thing we should fix?";
+function followUpFor(
+  score: number,
+  t: (english: string, chinese: string) => string,
+) {
+  if (score >= 9) return t("What do you like most?", "你最喜欢什么？");
+  if (score >= 7)
+    return t("What would make it a 10?", "怎样才能让你打 10 分？");
+  return t("What's the main thing we should fix?", "你最希望我们改进什么？");
 }
 
 export function NpsCard({
@@ -63,7 +65,7 @@ export function NpsCard({
 
   return (
     <PromptCard
-      title={t(QUESTION, DISPLAY_LABELS[QUESTION] ?? QUESTION)}
+      title={t(QUESTION, "你有多大可能向朋友或同事推荐 AutoGPT？")}
       onClose={close}
     >
       {sent ? (
@@ -72,7 +74,10 @@ export function NpsCard({
         <div className="flex flex-col gap-3">
           <div
             role="group"
-            aria-label={`${QUESTION} From 0 (not at all likely) to 10 (extremely likely)`}
+            aria-label={t(
+              `${QUESTION} From 0 (not at all likely) to 10 (extremely likely)`,
+              "你有多大可能向朋友或同事推荐 AutoGPT？ 从 0（完全不可能）到 10（非常可能）",
+            )}
             className="grid grid-cols-6 gap-1 sm:flex"
           >
             {SCORES.map((value) => (
@@ -101,20 +106,14 @@ export function NpsCard({
           {score !== null ? (
             <>
               <Text variant="body-medium" tone="primary">
-                {t(
-                  followUpFor(score),
-                  DISPLAY_LABELS[followUpFor(score)] ?? followUpFor(score),
-                )}
+                {followUpFor(score, t)}
               </Text>
               <Textarea
                 maxLength={MAX_FEEDBACK_NOTE_CHARS}
                 rows={3}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                aria-label={t(
-                  followUpFor(score),
-                  DISPLAY_LABELS[followUpFor(score)] ?? followUpFor(score),
-                )}
+                aria-label={followUpFor(score, t)}
                 placeholder={t("Optional", "选填")}
                 className="resize-none"
               />

@@ -3,6 +3,7 @@ import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/Autopilo
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { getExpertRoleLabel } from "@/services/experts/expert-role-label";
 import type { TaskOwner } from "../helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const AVATAR_SIZE = 28;
 
@@ -22,6 +23,7 @@ export function OwnerAvatar({ owner }: { owner: TaskOwner }) {
 
 // "{Name}, {role}" for an expert's task; "Otto" in the accent for his own.
 export function OwnerLabel({ owner }: { owner: TaskOwner }) {
+  const { locale } = useTranslation();
   if (owner.kind === "otto")
     return (
       // Text has no accent tone, so the role classes go on the span.
@@ -29,7 +31,9 @@ export function OwnerLabel({ owner }: { owner: TaskOwner }) {
         Otto
       </span>
     );
-  const role = owner.expert.role ? getExpertRoleLabel(owner.expert.role) : null;
+  const role = owner.expert.role
+    ? getExpertRoleLabel(owner.expert.role, locale)
+    : null;
   return (
     <Text
       variant="small"

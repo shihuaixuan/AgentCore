@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useUsageActions } from "@/services/usageExperience/useUsageActions";
 
@@ -36,6 +37,7 @@ export function useLivePausedCard({
   assistantName,
   onFollow,
 }: Args) {
+  const { locale } = useTranslation();
   const usage = useUsageActions();
   const { experience } = usage;
   // Set when "Keep going" was refused because the account ran out meanwhile.
@@ -81,8 +83,14 @@ export function useLivePausedCard({
   return {
     shown,
     now,
-    title: pauseTitle(shown),
-    body: pauseBody({ pause: shown, name: assistantName, budgetBack, now }),
+    title: pauseTitle(shown, locale),
+    body: pauseBody({
+      pause: shown,
+      name: assistantName,
+      budgetBack,
+      now,
+      locale,
+    }),
     primary: primaryAction({ pause: shown, budgetBack, resume }),
     canStop: shown.reason === "task" || shown.reason === "steps",
     canUpgrade:

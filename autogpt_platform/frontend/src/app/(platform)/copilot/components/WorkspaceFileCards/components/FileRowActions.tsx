@@ -5,6 +5,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { isUploadedFile } from "../../ContextPanel/components/FilesTab/helpers";
 import type { SessionFile } from "../../ContextPanel/components/FilesTab/useSessionFiles";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   file: SessionFile;
@@ -16,6 +17,7 @@ interface Props {
  *  row reads as plain text until you reach for it. Touch devices never hover,
  *  so there they stay visible. */
 export function FileRowActions({ file, onDownload, onRequestDelete }: Props) {
+  const { t } = useTranslation();
   const { item } = file;
   const canDelete = !isUploadedFile(item);
 
@@ -27,7 +29,7 @@ export function FileRowActions({ file, onDownload, onRequestDelete }: Props) {
         shape="soft"
         withTooltip={false}
         onClick={() => onDownload(file)}
-        aria-label={`Download ${item.name}`}
+        aria-label={t(`Download ${item.name}`, `下载 ${item.name}`)}
       >
         <Icon icon={Download01Icon} size={14} />
       </Button>
@@ -38,7 +40,7 @@ export function FileRowActions({ file, onDownload, onRequestDelete }: Props) {
           shape="soft"
           withTooltip={false}
           onClick={() => onRequestDelete(file)}
-          aria-label={`Delete ${item.name}`}
+          aria-label={t(`Delete ${item.name}`, `删除 ${item.name}`)}
         >
           <Icon icon={Delete02Icon} size={14} />
         </Button>

@@ -215,7 +215,7 @@ export function useAgentRunModal(
       },
       onError: (error: any) => {
         toast({
-          title: "❌ Failed to setup trigger",
+          title: t("❌ Failed to setup trigger", "❌ 无法设置触发器"),
           description:
             error.message ||
             t("An unexpected error occurred.", "发生意外错误。"),
@@ -311,8 +311,11 @@ export function useAgentRunModal(
     );
 
     toast({
-      title: "⚠️ Missing required inputs",
-      description: `Please provide: ${allMissingFields.map((k) => `"${k}"`).join(", ")}`,
+      title: t("⚠️ Missing required inputs", "⚠️ 缺少必填输入"),
+      description: t(
+        `Please provide: ${allMissingFields.map((field) => `"${field}"`).join(", ")}`,
+        `请提供：${allMissingFields.map((field) => `"${field}"`).join(", ")}`,
+      ),
       variant: "destructive",
     });
   }, [
@@ -321,6 +324,7 @@ export function useAgentRunModal(
     credentialsRequired,
     allCredentialsAreSet,
     missingCredentials,
+    t,
   ]);
 
   // Action handlers
@@ -336,7 +340,7 @@ export function useAgentRunModal(
     ) {
       if (!presetName.trim()) {
         toast({
-          title: "⚠️ Trigger name required",
+          title: t("⚠️ Trigger name required", "⚠️ 请填写触发器名称"),
           description: t(
             "Please provide a name for your trigger.",
             "请填写触发器名称。",

@@ -1,4 +1,7 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   spent: number;
@@ -12,6 +15,7 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 // One full lap is the check-in amount; spend past it laps the ring again.
 export function SpendRing({ spent, threshold, children }: Props) {
+  const { t } = useTranslation();
   const ratio = threshold > 0 ? spent / threshold : 1;
   const base = Math.min(ratio, 1) * CIRCUMFERENCE;
   const extra = Math.min(Math.max(ratio - 1, 0), 1) * CIRCUMFERENCE;
@@ -19,7 +23,10 @@ export function SpendRing({ spent, threshold, children }: Props) {
   return (
     <div
       role="img"
-      aria-label={`${spent} of ${threshold} credits`}
+      aria-label={t(
+        `${spent} of ${threshold} credits`,
+        `已使用 ${spent} 积分，额度为 ${threshold} 积分`,
+      )}
       className="relative grid size-11 shrink-0 place-items-center"
     >
       <svg

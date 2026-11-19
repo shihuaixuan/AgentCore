@@ -53,8 +53,8 @@ export function ExpertComputerSection({ expertId, expertName }: Props) {
     return (
       <ErrorCard
         textSize="body-md"
-        context="this expert's computer"
-        hint="We could not load the sandbox status."
+        context={t("this expert's computer", "此专家的计算机")}
+        hint={t("We could not load the sandbox status.", "无法加载沙箱状态。")}
         onRetry={() => refetch()}
       />
     );
@@ -65,18 +65,24 @@ export function ExpertComputerSection({ expertId, expertName }: Props) {
   const resources = formatResources(box);
   const mounts = Object.entries(computer.mounts ?? {});
 
-  const status = running ? "Running" : box ? "Suspended" : t("None", "无");
+  const status = running
+    ? t("Running", "运行中")
+    : box
+      ? t("Suspended", "已挂起")
+      : t("None", "无");
 
   return (
     <section className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <Text variant="large-medium">{`${expertName}'s computer`}</Text>
+          <Text variant="large-medium">
+            {t(`${expertName}'s computer`, `${expertName} 的计算机`)}
+          </Text>
           <Text variant="small" tone="muted" className="mt-1 max-w-prose">
-            One persistent cloud machine only {expertName} uses: the shell it
-            runs commands in and, when needed, its screen. It is suspended
-            between turns and costs nothing while suspended; installed tools and
-            files stay put.
+            {t(
+              `One persistent cloud machine only ${expertName} uses: the shell it runs commands in and, when needed, its screen. It is suspended between turns and costs nothing while suspended; installed tools and files stay put.`,
+              `仅供 ${expertName} 使用的持久化云计算机，可运行命令，并在需要时使用桌面。轮次之间会挂起且不产生费用，已安装的工具和文件会保留。`,
+            )}
           </Text>
         </div>
       </div>
@@ -84,7 +90,10 @@ export function ExpertComputerSection({ expertId, expertName }: Props) {
       {!computer.e2b_active ? (
         <div className="rounded-xl bg-warning-surface px-4 py-2.5 ring-1 ring-warning-border ring-inset">
           <Text variant="small" tone="warning">
-            Cloud sandboxes are not configured on this deployment.
+            {t(
+              "Cloud sandboxes are not configured on this deployment.",
+              "此部署尚未配置云沙箱。",
+            )}
           </Text>
         </div>
       ) : null}
@@ -150,7 +159,7 @@ export function ExpertComputerSection({ expertId, expertName }: Props) {
               tone="disabled"
               className="relative max-w-md"
             >
-              {formatScreen(computer)}
+              {formatScreen(computer, t)}
             </Text>
             <Button
               variant="secondary"
@@ -160,7 +169,7 @@ export function ExpertComputerSection({ expertId, expertName }: Props) {
               disabled={!computer.e2b_active}
               onClick={openDesktop}
             >
-              {desktopActionLabel(computer)}
+              {desktopActionLabel(computer, t)}
             </Button>
           </div>
         )}
@@ -169,20 +178,23 @@ export function ExpertComputerSection({ expertId, expertName }: Props) {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <DetailTile icon={ComputerTerminalIcon} label={t("Machine", "机器")}>
           {box
-            ? formatSandboxState(box)
-            : "Created on the first message that runs a command."}
+            ? formatSandboxState(box, t)
+            : t(
+                "Created on the first message that runs a command.",
+                "首次执行命令时创建。",
+              )}
         </DetailTile>
         <DetailTile icon={CpuIcon} label={t("Resources", "资源")}>
           {resources
-            ? `${resources}${box?.mounts_attached === false ? " · no volumes attached" : ""}`
-            : "Assigned when the machine is created."}
+            ? `${resources}${box?.mounts_attached === false ? t(" · no volumes attached", " · 未挂载存储卷") : ""}`
+            : t("Assigned when the machine is created.", "创建计算机时分配。")}
         </DetailTile>
       </div>
 
       {mounts.length > 0 ? (
         <div className="rounded-2xl bg-surface p-4 smooth-shadow-ring-sm">
           <Text variant="small-medium" tone="body">
-            Volumes
+            {t("Volumes", "存储卷")}
           </Text>
           <ul className="mt-2 divide-y divide-separator">
             {mounts.map(([path, name]) => (
@@ -195,7 +207,7 @@ export function ExpertComputerSection({ expertId, expertName }: Props) {
                     {path}
                   </Text>
                   <Text variant="small" tone="muted">
-                    {describeMount(path, computer)}{" "}
+                    {describeMount(path, computer, t)}{" "}
                     <Text variant="small-mono-tight" as="span" tone="subtle">
                       {name}
                     </Text>
@@ -212,9 +224,10 @@ export function ExpertComputerSection({ expertId, expertName }: Props) {
           <Icon icon={SecurityIcon} size={16} />
         </span>
         <Text variant="small" tone="secondary">
-          {expertName} has full access to this machine, so anything signed in on
-          its desktop is visible to the AI. Do not sign into personal accounts
-          there.
+          {t(
+            `${expertName} has full access to this machine, so anything signed in on its desktop is visible to the AI. Do not sign into personal accounts there.`,
+            `${expertName} 可完全访问此计算机，因此 AI 能看到桌面上已登录的所有内容。请勿在此登录个人账户。`,
+          )}
         </Text>
       </div>
     </section>

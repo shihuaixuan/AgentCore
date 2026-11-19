@@ -77,7 +77,7 @@ export function FeatureRequestList({ results }: ResultsProps) {
 }
 
 export function ScheduleList({ schedules }: SchedulesProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   return (
     <div className={RESULT_GRID}>
       {schedules.map((schedule, i) => {
@@ -102,7 +102,7 @@ export function ScheduleList({ schedules }: SchedulesProps) {
               {next && (
                 <p className="flex items-center gap-1 text-caption text-foreground-tertiary">
                   {recurring && <Icon icon={RepeatIcon} size={11} />}
-                  {formatWhen(next)}
+                  {formatWhen(next, locale)}
                 </p>
               )}
             </div>
@@ -121,7 +121,7 @@ export function ScheduleList({ schedules }: SchedulesProps) {
 }
 
 export function ScheduleCreatedCard({ output }: OutputProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const next = str(output, "next_run_time");
   return (
     <div className={`${CARD} ${HALF} flex items-center gap-2.5 p-2.5`}>
@@ -141,7 +141,7 @@ export function ScheduleCreatedCard({ output }: OutputProps) {
             {output.is_recurring === true && (
               <Icon icon={RepeatIcon} size={11} />
             )}
-            {formatWhen(next)}
+            {formatWhen(next, locale)}
           </p>
         )}
       </div>

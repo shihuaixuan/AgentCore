@@ -45,7 +45,7 @@ export function SelectedTriggerActions({
     mutation: {
       onSuccess: async () => {
         toast({
-          title: "Trigger deleted",
+          title: t("Trigger deleted", "触发器已删除"),
         });
         const queryKey = getGetV2ListPresetsQueryKey({
           graph_id: agent.graph_id,

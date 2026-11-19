@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Avatar,
   AvatarFallback,
@@ -11,6 +13,7 @@ import type { CSSProperties } from "react";
 import { getManagedAvatar, resolveExpertAvatarUrl } from "./helpers";
 
 import { ManagedExpertImage } from "./components/ManagedExpertImage";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   name: string | null;
@@ -35,13 +38,14 @@ export function ExpertAvatar({
   className,
   backgroundColor,
 }: Props) {
+  const { t } = useTranslation();
   const src = resolveExpertAvatarUrl(avatarUrl);
   const managed = getManagedAvatar(src, size);
   if (managed) {
     return (
       <ManagedExpertImage
         key={`${managed.base}:${size}`}
-        name={name ?? "Expert"}
+        name={name ?? t("Expert", "专家")}
         base={managed.base}
         pixels={managed.pixels}
         pngMaxPixels={managed.pngMaxPixels}
@@ -77,7 +81,7 @@ export function ExpertAvatar({
       >
         <AvatarImage
           src={src}
-          alt={name ?? "Expert"}
+          alt={name ?? t("Expert", "专家")}
           width={size}
           height={size}
           data-slot="expert-avatar-image"

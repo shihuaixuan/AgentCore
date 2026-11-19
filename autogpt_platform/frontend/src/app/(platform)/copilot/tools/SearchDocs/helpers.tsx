@@ -104,49 +104,66 @@ export function isErrorOutput(output: DocsToolOutput): output is ErrorResponse {
 export function getDocsToolTitle(
   toolType: DocsToolType,
   output: DocsToolOutput,
+  t = (english: string, _chinese: string) => english,
 ): string {
   if (toolType === "tool-search_docs") {
-    if (isDocSearchResultsOutput(output)) return "Documentation results";
-    if (isNoResultsOutput(output)) return "No documentation found";
-    return "Documentation search error";
+    if (isDocSearchResultsOutput(output))
+      return t("Documentation results", "文档搜索结果");
+    if (isNoResultsOutput(output))
+      return t("No documentation found", "未找到文档");
+    return t("Documentation search error", "搜索文档时出错");
   }
 
-  if (isDocPageOutput(output)) return "Documentation page";
-  if (isNoResultsOutput(output)) return "No documentation found";
-  return "Documentation page error";
+  if (isDocPageOutput(output)) return t("Documentation page", "文档页面");
+  if (isNoResultsOutput(output))
+    return t("No documentation found", "未找到文档");
+  return t("Documentation page error", "文档页面出错");
 }
 
-export function getAnimationText(part: {
-  type: DocsToolType;
-  state: ToolUIPart["state"];
-  input?: unknown;
-  output?: unknown;
-}): string {
+export function getAnimationText(
+  part: {
+    type: DocsToolType;
+    state: ToolUIPart["state"];
+    input?: unknown;
+    output?: unknown;
+  },
+  t = (english: string, _chinese: string) => english,
+): string {
   switch (part.type) {
     case "tool-search_docs": {
       const query = (part.input as SearchDocsInput | undefined)?.query?.trim();
-      const queryText = query ? ` for "${query}"` : "";
+      const queryText = query ? t(` for "${query}"`, `：“${query}”`) : "";
 
       switch (part.state) {
         case "input-streaming":
         case "input-available":
-          return `Searching documentation${queryText}`;
+          return t("Searching documentation", "正在搜索文档") + queryText;
         case "output-available": {
           const output = parseOutput(part.output);
-          if (!output) return `Searching documentation${queryText}`;
+          if (!output)
+            return t("Searching documentation", "正在搜索文档") + queryText;
           if (isDocSearchResultsOutput(output)) {
             const count = output.count ?? output.results.length;
-            return `Found ${count} result${count === 1 ? "" : "s"}${queryText}`;
+            return (
+              t(
+                `Found ${count} result${count === 1 ? "" : "s"}`,
+                `找到 ${count} 条结果`,
+              ) + queryText
+            );
           }
           if (isNoResultsOutput(output)) {
-            return `No results found${queryText}`;
+            return t("No results found", "未找到结果") + queryText;
           }
-          return `Error searching documentation${queryText}`;
+          return (
+            t("Error searching documentation", "搜索文档时出错") + queryText
+          );
         }
         case "output-error":
-          return `Error searching documentation${queryText}`;
+          return (
+            t("Error searching documentation", "搜索文档时出错") + queryText
+          );
         default:
-          return "Searching documentation";
+          return t("Searching documentation", "正在搜索文档");
       }
     }
     case "tool-get_doc_page": {
@@ -156,23 +173,32 @@ export function getAnimationText(part: {
       switch (part.state) {
         case "input-streaming":
         case "input-available":
-          return `Loading documentation page${pathText}`;
+          return t(
+            `Loading documentation page${pathText}`,
+            `正在加载文档页面${pathText}`,
+          );
         case "output-available": {
           const output = parseOutput(part.output);
-          if (!output) return `Loading documentation page${pathText}`;
-          if (isDocPageOutput(output)) return `Loaded "${output.title}"`;
-          if (isNoResultsOutput(output)) return "Documentation page not found";
-          return "Error loading documentation page";
+          if (!output)
+            return t(
+              `Loading documentation page${pathText}`,
+              `正在加载文档页面${pathText}`,
+            );
+          if (isDocPageOutput(output))
+            return t(`Loaded "${output.title}"`, `已加载“${output.title}”`);
+          if (isNoResultsOutput(output))
+            return t("Documentation page not found", "未找到文档页面");
+          return t("Error loading documentation page", "加载文档页面时出错");
         }
         case "output-error":
-          return "Error loading documentation page";
+          return t("Error loading documentation page", "加载文档页面时出错");
         default:
-          return "Loading documentation page";
+          return t("Loading documentation page", "正在加载文档页面");
       }
     }
   }
 
-  return "Processing";
+  return t("Processing", "正在处理");
 }
 
 export function ToolIcon({

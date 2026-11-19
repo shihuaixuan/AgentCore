@@ -27,13 +27,19 @@ export function ReasonFields({
   duration,
   onDurationChange,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const end = getBanEnd(duration);
   const durationOptions = BAN_DURATIONS.map(({ value, label }) => ({
     value,
     label: t(
       label,
-      { Permanent: "永久", "1 hour": "1 小时", "1 day": "1 天", "7 days": "7 天", "30 days": "30 天" }[label] ?? label,
+      {
+        Permanent: "永久",
+        "1 hour": "1 小时",
+        "1 day": "1 天",
+        "7 days": "7 天",
+        "30 days": "30 天",
+      }[label] ?? label,
     ),
   }));
 
@@ -61,7 +67,8 @@ export function ReasonFields({
         />
         <Text variant="small" tone="muted">
           {end
-            ? t("Ends", "结束时间") + ` ${formatDateTime(end)}（${formatTimeUntil(end)}）`
+            ? t("Ends", "结束时间") +
+              ` ${formatDateTime(end, locale)}（${formatTimeUntil(end, undefined, locale)}）`
             : t("Doesn't end on its own.", "不会自动结束。")}
         </Text>
       </div>

@@ -3,6 +3,8 @@
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { LibraryAgentPreset } from "@/app/api/__generated__/models/libraryAgentPreset";
 import { formatDistanceToNow } from "date-fns";
+import { zhCN } from "date-fns/locale";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { IconWrapper } from "./IconWrapper";
 import { SidebarItemCard } from "./SidebarItemCard";
 import { TriggerActionsDropdown } from "./TriggerActionsDropdown";
@@ -24,6 +26,7 @@ export function TriggerListItem({
   onClick,
   onDeleted,
 }: Props) {
+  const { locale } = useTranslation();
   return (
     <SidebarItemCard
       icon={
@@ -32,7 +35,10 @@ export function TriggerListItem({
         </IconWrapper>
       }
       title={trigger.name}
-      description={formatDistanceToNow(trigger.updated_at, { addSuffix: true })}
+      description={formatDistanceToNow(trigger.updated_at, {
+        addSuffix: true,
+        locale: locale === "zh-CN" ? zhCN : undefined,
+      })}
       onClick={onClick}
       selected={selected}
       actions={

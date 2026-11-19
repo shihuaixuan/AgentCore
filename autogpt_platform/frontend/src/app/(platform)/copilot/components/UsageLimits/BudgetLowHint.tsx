@@ -4,6 +4,7 @@ import type { UsageSnapshot } from "@/services/usageExperience/useUsageExperienc
 import { cn } from "@/lib/utils";
 import { BudgetRing } from "./BudgetRing";
 import { useTipMoment } from "@/app/(platform)/components/ContextualTips/useTipMoment";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   usage: UsageSnapshot;
@@ -17,6 +18,7 @@ const WINDOW_LABEL = {
 } as const;
 
 export function BudgetLowHint({ usage, className }: Props) {
+  const { t } = useTranslation();
   const { budget, experience } = usage;
   // The window running low, or nothing while the budget is fine.
   const lowWindow = budget.state === "low" ? budget.window : null;
@@ -33,15 +35,28 @@ export function BudgetLowHint({ usage, className }: Props) {
   if (percent === null) return null;
   return (
     <div
-      aria-label="Budget running low"
+      aria-label={t("Budget running low", "额度即将用尽")}
       className={cn(
         "mx-auto mt-2 flex w-full items-center gap-2 px-3 text-left",
         className,
       )}
     >
-      <BudgetRing label={WINDOW_LABEL[lowWindow]} percent={percent} />
+      <BudgetRing
+        label={t(
+          WINDOW_LABEL[lowWindow],
+          lowWindow === "daily"
+            ? "今日"
+            : lowWindow === "weekly"
+              ? "本周"
+              : "试用额度",
+        )}
+        percent={percent}
+      />
       <Text tone="muted" variant="small-tight">
-        {budgetLowHint(lowWindow, percent)}
+        {t(
+          budgetLowHint(lowWindow, percent),
+          `${lowWindow === "trial" ? "试用额度" : lowWindow === "weekly" ? "本周额度" : "今日额度"}约剩余 ${Math.max(1, Math.round(100 - percent))}%。长任务可能会在执行中暂停。`,
+        )}
       </Text>
     </div>
   );

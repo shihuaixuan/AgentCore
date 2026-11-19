@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -113,6 +114,11 @@ function MarkdownVideoImage({ src, alt }: MarkdownVideoImageProps) {
 }
 
 function renderVideoEmbed(url: string): React.ReactNode {
+  return <MarkdownVideoEmbed url={url} />;
+}
+
+function MarkdownVideoEmbed({ url }: { url: string }) {
+  const { t } = useTranslation();
   if (getYouTubeVideoId(url)) {
     return (
       <div className="my-4">
@@ -141,7 +147,10 @@ function renderVideoEmbed(url: string): React.ReactNode {
           preload="metadata"
         >
           <source src={embedUrl} />
-          Your browser does not support the video tag.
+          {t(
+            "Your browser does not support the video tag.",
+            "您的浏览器不支持视频播放。",
+          )}
         </video>
       </div>
     );
@@ -152,7 +161,7 @@ function renderVideoEmbed(url: string): React.ReactNode {
       <div className="relative aspect-video">
         <iframe
           src={embedUrl}
-          title="Embedded video player"
+          title={t("Embedded video player", "嵌入式视频播放器")}
           className="absolute top-0 left-0 h-full w-full rounded-lg shadow-md"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen

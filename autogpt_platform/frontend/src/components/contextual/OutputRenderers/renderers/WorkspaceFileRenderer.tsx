@@ -1,4 +1,5 @@
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { type ReactNode, useState } from "react";
 import {
   OutputRenderer,
@@ -50,14 +51,18 @@ function canRenderWorkspaceFile(value: unknown): boolean {
   return isWorkspaceURI(value);
 }
 
-function getFileTypeLabel(mimeType: string | null): string {
-  if (!mimeType) return "File";
+function getFileTypeLabel(
+  mimeType: string | null,
+  t: (english: string, chinese: string) => string,
+): string {
+  if (!mimeType) return t("File", "文件");
   const sub = mimeType.split("/")[1];
-  if (!sub) return "File";
-  return `${sub.toUpperCase()} file`;
+  if (!sub) return t("File", "文件");
+  return t(`${sub.toUpperCase()} file`, `${sub.toUpperCase()} 文件`);
 }
 
 function WorkspaceImage({ src, alt }: { src: string; alt: string }) {
+  const { t } = useTranslation();
   const [loaded, setLoaded] = useState(false);
 
   return (
@@ -68,7 +73,7 @@ function WorkspaceImage({ src, alt }: { src: string; alt: string }) {
       {/* eslint-disable-next-line @next/next/no-img-element -- remote URL from any host, which next/image would need configured */}
       <img
         src={src}
-        alt={alt}
+        alt={alt || t("Image", "图片")}
         className={`h-auto max-w-full rounded-md border border-border-base ${loaded ? "opacity-100" : "min-h-40 opacity-0"}`}
         loading="lazy"
         onLoad={() => setLoaded(true)}
@@ -79,6 +84,7 @@ function WorkspaceImage({ src, alt }: { src: string; alt: string }) {
 }
 
 function WorkspaceVideo({ src, mimeType }: { src: string; mimeType: string }) {
+  const { t } = useTranslation();
   const [loaded, setLoaded] = useState(false);
 
   return (
@@ -94,13 +100,17 @@ function WorkspaceVideo({ src, mimeType }: { src: string; mimeType: string }) {
         onError={() => setLoaded(true)}
       >
         <source src={src} type={mimeType} />
-        Your browser does not support the video tag.
+        {t(
+          "Your browser does not support the video tag.",
+          "您的浏览器不支持视频播放。",
+        )}
       </video>
     </div>
   );
 }
 
 function WorkspaceAudio({ src, mimeType }: { src: string; mimeType: string }) {
+  const { t } = useTranslation();
   const [loaded, setLoaded] = useState(false);
 
   return (
@@ -116,7 +126,10 @@ function WorkspaceAudio({ src, mimeType }: { src: string; mimeType: string }) {
         onError={() => setLoaded(true)}
       >
         <source src={src} type={mimeType} />
-        Your browser does not support the audio tag.
+        {t(
+          "Your browser does not support the audio tag.",
+          "您的浏览器不支持音频播放。",
+        )}
       </audio>
     </div>
   );
@@ -126,6 +139,17 @@ function renderWorkspaceFile(
   value: unknown,
   metadata?: OutputMetadata,
 ): ReactNode {
+  return <WorkspaceFilePreview value={value} metadata={metadata} />;
+}
+
+function WorkspaceFilePreview({
+  value,
+  metadata,
+}: {
+  value: unknown;
+  metadata?: OutputMetadata;
+}) {
+  const { t } = useTranslation();
   const uri = parseWorkspaceURI(String(value));
   if (!uri) return null;
 
@@ -133,9 +157,7 @@ function renderWorkspaceFile(
   const mimeType = uri.mimeType || metadata?.mimeType || null;
 
   if (mimeType && imageMimeTypes.includes(mimeType)) {
-    return (
-      <WorkspaceImage src={downloadURL} alt={metadata?.filename || "Image"} />
-    );
+    return <WorkspaceImage src={downloadURL} alt={metadata?.filename || ""} />;
   }
 
   if (mimeType && videoMimeTypes.includes(mimeType)) {
@@ -147,7 +169,7 @@ function renderWorkspaceFile(
   }
 
   // Generic file card with icon and download link
-  const label = getFileTypeLabel(mimeType);
+  const label = getFileTypeLabel(mimeType, t);
   return (
     <div className="flex items-center gap-3 rounded-lg border border-border-base bg-surface-muted p-3">
       <Icon
@@ -169,6 +191,7 @@ function renderWorkspaceFile(
       <a
         href={downloadURL}
         download
+        aria-label={t("Download file", "下载文件")}
         className="flex-shrink-0 rounded-md p-1.5 text-foreground-tertiary transition-colors hover:bg-surface-active hover:text-foreground-body"
       >
         <Icon icon={Download04Icon} size={18} />

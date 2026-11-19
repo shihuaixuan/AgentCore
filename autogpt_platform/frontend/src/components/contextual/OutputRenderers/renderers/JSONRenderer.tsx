@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   OutputRenderer,
   OutputMetadata,
@@ -96,6 +97,7 @@ export const jsonRenderer: OutputRenderer = {
 };
 
 function JSONViewer({ data }: { data: any }) {
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   const toggleCollapse = (key: string) => {
@@ -142,7 +144,7 @@ function JSONViewer({ data }: { data: any }) {
               <Icon icon={ArrowDown01Icon} className="size-3" />
             )}
             <span className="ml-1 text-foreground-tertiary">
-              Array({itemCount})
+              {t(`Array(${itemCount})`, `数组（${itemCount}）`)}
             </span>
           </button>
           {!isCollapsed && (
@@ -180,7 +182,9 @@ function JSONViewer({ data }: { data: any }) {
             ) : (
               <Icon icon={ArrowDown01Icon} className="size-3" />
             )}
-            <span className="ml-1 text-foreground-tertiary">Object</span>
+            <span className="ml-1 text-foreground-tertiary">
+              {t("Object", "对象")}
+            </span>
           </button>
           {!isCollapsed && (
             <div className="mt-1 ml-4">

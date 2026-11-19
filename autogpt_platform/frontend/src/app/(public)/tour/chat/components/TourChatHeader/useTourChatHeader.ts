@@ -2,12 +2,14 @@
 
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { useRef, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { trackTourCtaClick } from "../../tracking";
 import { buildTourShareUrl, copyTextToClipboard } from "./helpers";
 
 const COPIED_RESET_MS = 2000;
 
 export function useTourChatHeader() {
+  const { t } = useTranslation();
   const [isCopied, setIsCopied] = useState(false);
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
@@ -17,7 +19,7 @@ export function useTourChatHeader() {
     const copied = await copyTextToClipboard(buildTourShareUrl());
     if (!copied) {
       toast({
-        title: "Couldn't copy the link",
+        title: t("Couldn't copy the link", "无法复制链接"),
         description: buildTourShareUrl(),
         variant: "destructive",
       });

@@ -20,7 +20,10 @@ export function ScopeCard({ scopeExpertID, experts, onSelect }: Props) {
           {t("Memory scope", "记忆范围")}
         </Text>
         <Text variant="small" as="span" tone="muted">
-          Choose whose memory you&apos;re looking at. Experts keep their own.
+          {t(
+            "Choose whose memory you're looking at. Experts keep their own.",
+            "选择要查看谁的记忆。每位专家都有自己的记忆。",
+          )}
         </Text>
       </div>
       <div className="w-full sm:w-[280px]">

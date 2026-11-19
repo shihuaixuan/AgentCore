@@ -116,7 +116,7 @@
       "reason": "A standalone HTML page the OAuth popup shows: it has no access to the app's stylesheet."
     },
     {
-      "files": "src/app/(public)/tour/chat/script/completionArtifacts.ts",
+      "files": "src/app/(public)/tour/chat/script/completionArtifacts{,.zh-CN}.ts",
       "reason": "The tour's scripted sample documents: their support-ticket numbers (#4821, #4822, ...) read as hex, and none is a colour."
     }
   ]

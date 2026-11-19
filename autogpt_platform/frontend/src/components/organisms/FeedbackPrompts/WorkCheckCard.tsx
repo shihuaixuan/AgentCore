@@ -101,8 +101,11 @@ export function WorkCheckCard({
         <div className="flex flex-1 flex-col gap-0.5">
           <Text variant="body-medium" tone="primary">
             {rating && rating !== "great"
-              ? FOLLOW_UPS[rating]
-              : `How did ${name} do?`}
+              ? t(
+                  FOLLOW_UPS[rating],
+                  DISPLAY_LABELS[FOLLOW_UPS[rating]] ?? FOLLOW_UPS[rating],
+                )
+              : t(`How did ${name} do?`, `${name} 做得怎么样？`)}
           </Text>
           <Text variant="small" tone="muted">
             {note}
@@ -141,7 +144,10 @@ export function WorkCheckCard({
       ) : null}
       {rating === "great" ? (
         <ThanksLine withChangelog={false}>
-          {`Glad to hear it. We'll pass that on to ${name}.`}
+          {t(
+            `Glad to hear it. We'll pass that on to ${name}.`,
+            `很高兴听到这个消息。我们会转告 ${name}。`,
+          )}
         </ThanksLine>
       ) : null}
       {rating === "bad" || rating === "okay" ? (
@@ -152,7 +158,10 @@ export function WorkCheckCard({
             DISPLAY_LABELS[FOLLOW_UPS[rating]] ?? FOLLOW_UPS[rating],
           )}
           size="compact"
-          thanks="Thanks. The team reads every one of these."
+          thanks={t(
+            "Thanks. The team reads every one of these.",
+            "谢谢。团队会认真阅读每一条反馈。",
+          )}
           initialSent={initialSent}
           onReason={onReason}
           onSubmit={onSubmit}

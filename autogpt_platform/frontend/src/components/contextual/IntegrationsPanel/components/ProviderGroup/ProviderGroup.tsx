@@ -11,6 +11,7 @@ import {
 } from "@/components/molecules/Accordion/Accordion";
 import type { ProviderGroupView } from "../../helpers";
 import { CredentialRow } from "../CredentialRow/CredentialRow";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   provider: ProviderGroupView;
@@ -68,6 +69,7 @@ export function ProviderGroup({
 }
 
 function ProviderAvatar({ provider }: { provider: ProviderGroupView }) {
+  const { t } = useTranslation();
   const [broken, setBroken] = useState(false);
   const src = provider.logoUrl ?? integrationIconSrc(provider.id);
 
@@ -86,7 +88,7 @@ function ProviderAvatar({ provider }: { provider: ProviderGroupView }) {
   return (
     <Image
       src={src}
-      alt={`${provider.name} logo`}
+      alt={t(`${provider.name} logo`, `${provider.name} 标志`)}
       width={24}
       height={24}
       onError={() => setBroken(true)}

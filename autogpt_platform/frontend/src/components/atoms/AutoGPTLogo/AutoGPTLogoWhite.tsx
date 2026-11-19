@@ -1,4 +1,7 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props extends React.SVGProps<SVGSVGElement> {
   hideText?: boolean;
@@ -9,13 +12,14 @@ export function AutoGPTLogoWhite({
   className,
   ...props
 }: Props) {
+  const { t } = useTranslation();
   return (
     <svg
       data-slot="autogpt-logo"
       viewBox={hideText ? "63 0 57 54" : "0 0 119 54"}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="AutoGPT Logo"
+      aria-label={t("AutoGPT Logo", "AutoGPT 标志")}
       className={cn(
         "text-action-foreground",
         className ?? "h-[3.375rem] w-auto",

@@ -1,6 +1,7 @@
 "use client";
 
 import type { ToolUIPart } from "ai";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { MorphingTextAnimation } from "../../components/MorphingTextAnimation/MorphingTextAnimation";
 import {
@@ -46,15 +47,16 @@ function truncate(text: string, maxChars: number): string {
 }
 
 export function SearchFeatureRequestsTool({ part }: Props) {
+  const { t } = useTranslation();
   const output = getFeatureRequestOutput(part);
-  const text = getAnimationText(part);
+  const text = getAnimationText(part, t);
   const isStreaming =
     part.state === "input-streaming" || part.state === "input-available";
   const isError =
     part.state === "output-error" || (!!output && isErrorOutput(output));
 
   const normalized = output
-    ? { title: getAccordionTitle(part.type, output) }
+    ? { title: getAccordionTitle(part.type, output, t) }
     : null;
 
   const isOutputAvailable = part.state === "output-available" && !!output;
@@ -76,7 +78,10 @@ export function SearchFeatureRequestsTool({ part }: Props) {
 
   const accordionDescription =
     hasExpandableContent && searchOutput
-      ? `Found ${searchOutput.count} result${searchOutput.count === 1 ? "" : "s"} for "${searchOutput.query}"`
+      ? t(
+          `Found ${searchOutput.count} result${searchOutput.count === 1 ? "" : "s"} for "${searchOutput.query}"`,
+          `找到 ${searchOutput.count} 条结果，搜索：“${searchOutput.query}”`,
+        )
       : hasExpandableContent && (noResultsOutput || errorOutput)
         ? ((noResultsOutput ?? errorOutput)?.message ?? null)
         : null;
@@ -145,15 +150,16 @@ export function SearchFeatureRequestsTool({ part }: Props) {
 }
 
 export function CreateFeatureRequestTool({ part }: Props) {
+  const { t } = useTranslation();
   const output = getFeatureRequestOutput(part);
-  const text = getAnimationText(part);
+  const text = getAnimationText(part, t);
   const isStreaming =
     part.state === "input-streaming" || part.state === "input-available";
   const isError =
     part.state === "output-error" || (!!output && isErrorOutput(output));
 
   const normalized = output
-    ? { title: getAccordionTitle(part.type, output) }
+    ? { title: getAccordionTitle(part.type, output, t) }
     : null;
 
   const isOutputAvailable = part.state === "output-available" && !!output;
@@ -200,7 +206,9 @@ export function CreateFeatureRequestTool({ part }: Props) {
               </ContentCardHeader>
               <div className="mt-2 flex items-center gap-2">
                 <ContentBadge>
-                  {createdOutput.is_new_issue ? "New" : "Existing"}
+                  {createdOutput.is_new_issue
+                    ? t("New", "新建")
+                    : t("Existing", "已有")}
                 </ContentBadge>
               </div>
               <ContentMessage>{createdOutput.message}</ContentMessage>

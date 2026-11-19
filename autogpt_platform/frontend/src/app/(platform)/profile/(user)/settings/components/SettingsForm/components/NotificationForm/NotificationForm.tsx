@@ -1,6 +1,7 @@
 "use client";
 
 import { FormProvider } from "react-hook-form";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   FormControl,
   FormField,
@@ -23,13 +24,14 @@ type NotificationFormProps = {
 };
 
 const BRIEFING_OPTIONS = [
-  { value: "DAILY", label: "Daily" },
-  { value: "WEEKLY", label: "Weekly" },
-  { value: "MONTHLY", label: "Monthly" },
-  { value: "OFF", label: "Off" },
+  { value: "DAILY", label: "Daily", chineseLabel: "每天" },
+  { value: "WEEKLY", label: "Weekly", chineseLabel: "每周" },
+  { value: "MONTHLY", label: "Monthly", chineseLabel: "每月" },
+  { value: "OFF", label: "Off", chineseLabel: "关闭" },
 ];
 
 export function NotificationForm({ preferences, user }: NotificationFormProps) {
+  const { t } = useTranslation();
   const { form, onSubmit, onCancel, isLoading } = useNotificationForm({
     preferences,
     user,
@@ -38,11 +40,13 @@ export function NotificationForm({ preferences, user }: NotificationFormProps) {
   return (
     <div>
       <Text variant="h3" size="large-semibold">
-        Notifications
+        {t("Notifications", "通知")}
       </Text>
       <Text variant="body" tone="muted" className="mt-2">
-        Billing and account messages are always sent — they are about your
-        account, not a promotion.
+        {t(
+          "Billing and account messages are always sent — they are about your account, not a promotion.",
+          "账单和账户消息始终会发送——这些是账户相关消息，而非推广。",
+        )}
       </Text>
       <FormProvider {...form}>
         <form
@@ -57,20 +61,25 @@ export function NotificationForm({ preferences, user }: NotificationFormProps) {
                 <FormItem className="flex flex-col">
                   <div className="mb-2 space-y-0.5">
                     <Text variant="h4" size="body-medium">
-                      Briefing
+                      {t("Briefing", "简报")}
                     </Text>
                     <Text variant="body">
-                      What your workflows got done, at around 07:30 your time.
-                      Never sent when nothing ran.
+                      {t(
+                        "What your workflows got done, at around 07:30 your time. Never sent when nothing ran.",
+                        "在当地时间约 07:30 汇总工作流完成的工作。没有运行记录时不会发送。",
+                      )}
                     </Text>
                   </div>
                   <FormControl>
                     <Select
                       id="briefing-frequency"
-                      label="Briefing frequency"
+                      label={t("Briefing frequency", "简报频率")}
                       hideLabel
                       value={field.value}
-                      options={BRIEFING_OPTIONS}
+                      options={BRIEFING_OPTIONS.map((option) => ({
+                        value: option.value,
+                        label: t(option.label, option.chineseLabel),
+                      }))}
                       onValueChange={(value) =>
                         field.onChange(
                           value as NotificationFormValues["briefingFrequency"],
@@ -89,16 +98,18 @@ export function NotificationForm({ preferences, user }: NotificationFormProps) {
                 <FormItem className="flex flex-row items-center justify-between">
                   <div className="space-y-0.5">
                     <Text variant="h4" size="body-medium">
-                      Alerts
+                      {t("Alerts", "提醒")}
                     </Text>
                     <Text variant="body">
-                      Only when something is waiting on you — never for a
-                      successful run. At most two a day.
+                      {t(
+                        "Only when something is waiting on you — never for a successful run. At most two a day.",
+                        "仅在有事项等待你处理时提醒，运行成功时不会提醒。每天最多两次。",
+                      )}
                     </Text>
                   </div>
                   <FormControl>
                     <Switch
-                      aria-label="Alerts"
+                      aria-label={t("Alerts", "提醒")}
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
@@ -114,16 +125,18 @@ export function NotificationForm({ preferences, user }: NotificationFormProps) {
                 <FormItem className="flex flex-row items-center justify-between">
                   <div className="space-y-0.5">
                     <Text variant="h4" size="body-medium">
-                      Marketplace reviews
+                      {t("Marketplace reviews", "市场评价")}
                     </Text>
                     <Text variant="body">
-                      When a workflow you submitted is approved or needs
-                      changes.
+                      {t(
+                        "When a workflow you submitted is approved or needs changes.",
+                        "当你提交的工作流通过审核或需要修改时通知。",
+                      )}
                     </Text>
                   </div>
                   <FormControl>
                     <Switch
-                      aria-label="Marketplace reviews"
+                      aria-label={t("Marketplace reviews", "市场评价")}
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
@@ -142,7 +155,7 @@ export function NotificationForm({ preferences, user }: NotificationFormProps) {
               disabled={isLoading}
               className="min-w-[10rem]"
             >
-              Cancel
+              {t("Cancel", "取消")}
             </Button>
             <Button
               type="submit"
@@ -150,7 +163,9 @@ export function NotificationForm({ preferences, user }: NotificationFormProps) {
               className="min-w-[10rem]"
               loading={isLoading}
             >
-              {isLoading ? "Saving..." : "Save preferences"}
+              {isLoading
+                ? t("Saving...", "正在保存…")
+                : t("Save preferences", "保存偏好")}
             </Button>
           </div>
         </form>

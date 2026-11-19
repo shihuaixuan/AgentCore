@@ -12,6 +12,7 @@ import {
   Loading03Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 // Re-export generated step type for consumers that need it.
 export type DecompositionStep = DecompositionStepModel;
@@ -90,24 +91,30 @@ export function isErrorOutput(
   return !isDecompositionOutput(output);
 }
 
-export function getAnimationText(part: {
-  state: ToolUIPart["state"];
-  output?: unknown;
-}): string {
+export function getAnimationText(
+  part: {
+    state: ToolUIPart["state"];
+    output?: unknown;
+  },
+  t = (english: string, _chinese: string) => english,
+): string {
   switch (part.state) {
     case "input-streaming":
     case "input-available":
-      return "Analyzing your goal...";
+      return t("Analyzing your goal...", "正在分析你的目标…");
     case "output-available": {
       const output = parseOutput(part.output);
       if (output && isDecompositionOutput(output))
-        return `Plan ready (${output.step_count} steps)`;
-      return "Analyzing your goal...";
+        return t(
+          `Plan ready (${output.step_count} steps)`,
+          `计划已就绪（${output.step_count} 个步骤）`,
+        );
+      return t("Analyzing your goal...", "正在分析你的目标…");
     }
     case "output-error":
-      return "Error analyzing goal";
+      return t("Error analyzing goal", "分析目标时出错");
     default:
-      return "Analyzing your goal...";
+      return t("Analyzing your goal...", "正在分析你的目标…");
   }
 }
 
@@ -132,6 +139,7 @@ export function AccordionIcon() {
 }
 
 export function StepStatusIcon({ status }: { status: string }) {
+  const { t } = useTranslation();
   switch (status) {
     case "completed":
       return (
@@ -139,7 +147,7 @@ export function StepStatusIcon({ status }: { status: string }) {
           icon={CheckmarkCircle02Icon}
           size={18}
           tone="success"
-          aria-label="completed"
+          aria-label={t("completed", "已完成")}
         />
       );
     case "in_progress":
@@ -149,7 +157,7 @@ export function StepStatusIcon({ status }: { status: string }) {
           size={18}
           spin
           tone="info"
-          aria-label="in progress"
+          aria-label={t("in progress", "进行中")}
         />
       );
     case "failed":
@@ -158,7 +166,7 @@ export function StepStatusIcon({ status }: { status: string }) {
           icon={CancelCircleIcon}
           size={18}
           tone="error"
-          aria-label="failed"
+          aria-label={t("failed", "失败")}
         />
       );
     default:
@@ -167,7 +175,7 @@ export function StepStatusIcon({ status }: { status: string }) {
           icon={CircleDashedIcon}
           size={18}
           tone="subtle"
-          aria-label="pending"
+          aria-label={t("pending", "待处理")}
         />
       );
   }

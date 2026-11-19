@@ -51,7 +51,7 @@ export function TaskActionsDropdown({ agent, run, onDeleted }: Props) {
     try {
       await deleteRun({ graphExecId: run.id });
 
-      toast({ title: "Task deleted" });
+      toast({ title: t("Task deleted", "任务已删除") });
 
       await queryClient.refetchQueries({
         queryKey: getGetV1ListGraphExecutionsQueryKey(agent.graph_id),
@@ -61,7 +61,7 @@ export function TaskActionsDropdown({ agent, run, onDeleted }: Props) {
       onDeleted?.();
     } catch (error: unknown) {
       toast({
-        title: "Failed to delete task",
+        title: t("Failed to delete task", "无法删除任务"),
         description:
           error instanceof Error
             ? error.message
@@ -83,7 +83,7 @@ export function TaskActionsDropdown({ agent, run, onDeleted }: Props) {
 
       if (res.status === 200) {
         toast({
-          title: "Template created",
+          title: t("Template created", "模板已创建"),
         });
 
         queryClient.invalidateQueries({
@@ -96,7 +96,7 @@ export function TaskActionsDropdown({ agent, run, onDeleted }: Props) {
       }
     } catch (error: unknown) {
       toast({
-        title: "Failed to create template",
+        title: t("Failed to create template", "无法创建模板"),
         description:
           error instanceof Error
             ? error.message

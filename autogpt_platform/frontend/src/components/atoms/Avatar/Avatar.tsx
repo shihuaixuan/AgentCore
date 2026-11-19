@@ -12,6 +12,7 @@ import BoringAvatar from "boring-avatars";
 import Image, { ImageProps } from "next/image";
 import { isLocalStoreMediaUrl } from "@/lib/store-media";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type AvatarContextValue = {
   isLoaded: boolean;
@@ -100,6 +101,7 @@ export function AvatarImage({
   unoptimized,
   ...rest
 }: AvatarImageProps): React.JSX.Element | null {
+  const { t } = useTranslation();
   const { setIsLoaded, setHasImage, hasImage } = useAvatarContext();
 
   const normalizedSrc = typeof src === "string" ? src.trim() : src;
@@ -133,7 +135,7 @@ export function AvatarImage({
       <img
         data-slot="avatar-image"
         src={normalizedSrc}
-        alt={alt ?? "Avatar image"}
+        alt={alt ?? t("Avatar image", "头像图片")}
         className={cn("h-full w-full object-cover", className)}
         width={computedWidth}
         height={computedHeight}
@@ -157,7 +159,7 @@ export function AvatarImage({
       data-slot="avatar-image"
       {...rest}
       src={normalizedSrc}
-      alt={alt ?? "Avatar image"}
+      alt={alt ?? t("Avatar image", "头像图片")}
       className={cn("h-full w-full object-cover", className)}
       width={fill ? undefined : computedWidth}
       height={fill ? undefined : computedHeight}

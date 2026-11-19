@@ -14,6 +14,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { useImageFallback } from "@/hooks/useImageFallback";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   title?: string;
@@ -40,6 +41,7 @@ export const MarketplaceAgentBlock: MarketplaceAgentBlockComponent = ({
   slug,
   ...rest
 }) => {
+  const { t } = useTranslation();
   const { showImage, handleImageError } = useImageFallback(image_url);
 
   return (
@@ -58,7 +60,7 @@ export const MarketplaceAgentBlock: MarketplaceAgentBlockComponent = ({
           <Image
             src={image_url}
             unoptimized={isLocalStoreMediaUrl(image_url)}
-            alt="integration-icon"
+            alt={t("integration-icon", "工作流预览图")}
             fill
             sizes="5.625rem"
             className="w-full object-contain group-disabled:opacity-50"
@@ -84,7 +86,7 @@ export const MarketplaceAgentBlock: MarketplaceAgentBlockComponent = ({
             tone={rest.disabled ? "subtle" : "muted"}
             className="truncate"
           >
-            By {creator_name}
+            {t("By", "作者：")} {creator_name}
           </Text>
 
           <Text variant="body-medium-tight" as="span" tone="subtle">
@@ -97,7 +99,7 @@ export const MarketplaceAgentBlock: MarketplaceAgentBlockComponent = ({
             tone={rest.disabled ? "subtle" : "muted"}
             className="truncate"
           >
-            {number_of_runs} runs
+            {t(`${number_of_runs} runs`, `${number_of_runs} 次运行`)}
           </Text>
           <Text variant="body-medium-tight" as="span" tone="subtle">
             •
@@ -112,7 +114,7 @@ export const MarketplaceAgentBlock: MarketplaceAgentBlockComponent = ({
               as="span"
               tone="info-strong"
             >
-              Workflow page
+              {t("Workflow page", "工作流页面")}
             </Text>
             <Icon
               icon={LinkSquare01Icon}

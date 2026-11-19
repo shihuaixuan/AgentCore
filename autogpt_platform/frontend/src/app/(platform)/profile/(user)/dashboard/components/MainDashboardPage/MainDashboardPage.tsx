@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useMainDashboardPage } from "./useMainDashboardPage";
 import { Separator } from "@/components/atoms/Separator/Separator";
 import { AgentTable } from "../AgentTable/AgentTable";
@@ -10,6 +13,7 @@ import { SubmissionsLoading } from "./components/SubmissionsLoading";
 import { Text } from "@/components/atoms/Text/Text";
 
 export const MainDashboardPage = () => {
+  const { t } = useTranslation();
   const {
     onDeleteSubmission,
     onViewSubmission,
@@ -32,15 +36,17 @@ export const MainDashboardPage = () => {
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-6">
           <Text variant="h1" size="h3">
-            Workflow dashboard
+            {t("Workflow dashboard", "工作流面板")}
           </Text>
           <div className="space-y-2">
             <Text variant="h2" size="large-medium" tone="primary">
-              Submit a New Workflow
+              {t("Submit a New Workflow", "提交新工作流")}
             </Text>
             <Text variant="body" size="small">
-              Select from the list of workflows you currently have, or upload
-              from your local machine.
+              {t(
+                "Select from the list of workflows you currently have, or upload from your local machine.",
+                "从已有工作流中选择，或从本机上传。",
+              )}
             </Text>
           </div>
         </div>
@@ -53,7 +59,7 @@ export const MainDashboardPage = () => {
               size="small"
               onClick={onOpenSubmitModal}
             >
-              Submit workflow
+              {t("Submit workflow", "提交工作流")}
             </Button>
           }
         />
@@ -64,7 +70,7 @@ export const MainDashboardPage = () => {
       {/* Agents Section */}
       <div>
         <Text variant="h2" size="large-medium" tone="primary" className="mb-4">
-          Your uploaded workflows
+          {t("Your uploaded workflows", "你上传的工作流")}
         </Text>
 
         {error ? (

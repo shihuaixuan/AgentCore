@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { UIDataTypes, UIMessage, UITools } from "ai";
 import { useState } from "react";
 import { getLiveTurnEndAnnouncement } from "./helpers";
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function TurnEndAnnouncer({ isBusy, isSettled, messages }: Props) {
+  const { locale } = useTranslation();
   const lastReply = messages.findLast(
     (message) => message.role === "assistant",
   );
@@ -42,7 +44,9 @@ export function TurnEndAnnouncer({ isBusy, isSettled, messages }: Props) {
 
   return (
     <div aria-live="polite" className="sr-only">
-      {endedLive && isSettled ? getLiveTurnEndAnnouncement(messages) : ""}
+      {endedLive && isSettled
+        ? getLiveTurnEndAnnouncement(messages, locale)
+        : ""}
     </div>
   );
 }

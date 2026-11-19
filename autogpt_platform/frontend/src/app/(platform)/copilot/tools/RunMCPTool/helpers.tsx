@@ -171,11 +171,14 @@ function getArgPreview(args: Record<string, unknown> | undefined): string {
  * Return the human-readable status line shown next to the MCP tool spinner.
  * Transitions through: connecting → discovering / calling → result summary.
  */
-export function getAnimationText(part: {
-  state: ToolUIPart["state"];
-  input?: unknown;
-  output?: unknown;
-}): string {
+export function getAnimationText(
+  part: {
+    state: ToolUIPart["state"];
+    input?: unknown;
+    output?: unknown;
+  },
+  t = (english: string, _chinese: string) => english,
+): string {
   const input = part.input as RunMCPToolInput | undefined;
   const host = input?.server_url ? serverHost(input.server_url) : "";
   const toolName = input?.tool_name?.trim();
@@ -185,25 +188,41 @@ export function getAnimationText(part: {
   switch (part.state) {
     case "input-streaming":
     case "input-available": {
-      if (!toolName) return `Connecting to ${service || "integration"}…`;
+      if (!toolName)
+        return t(
+          `Connecting to ${service || "integration"}…`,
+          `正在连接${service || "集成"}…`,
+        );
       const argPreview = getArgPreview(input?.tool_arguments);
-      return `Calling ${toolName}${argPreview ? `(${argPreview})` : ""}${service ? ` on ${service}` : ""}`;
+      return t(
+        `Calling ${toolName}${argPreview ? `(${argPreview})` : ""}${service ? ` on ${service}` : ""}`,
+        `正在调用 ${toolName}${argPreview ? `(${argPreview})` : ""}${service ? `，服务：${service}` : ""}`,
+      );
     }
     case "output-available": {
       const output = getRunMCPToolOutput(part);
-      if (!output) return "Connecting…";
+      if (!output) return t("Connecting…", "正在连接…");
       if (isSetupRequirementsOutput(output))
-        return `Connect ${output.setup_info.agent_name}`;
+        return t(
+          `Connect ${output.setup_info.agent_name}`,
+          `连接 ${output.setup_info.agent_name}`,
+        );
       if (isMCPToolOutput(output))
-        return `Ran ${output.tool_name}${service ? ` on ${service}` : ""}`;
+        return t(
+          `Ran ${output.tool_name}${service ? ` on ${service}` : ""}`,
+          `已运行 ${output.tool_name}${service ? `，服务：${service}` : ""}`,
+        );
       if (isDiscoveryOutput(output))
-        return `Connected to ${serviceNameFromHost(serverHost(output.server_url))}`;
-      return "Connection error";
+        return t(
+          `Connected to ${serviceNameFromHost(serverHost(output.server_url))}`,
+          `已连接 ${serviceNameFromHost(serverHost(output.server_url))}`,
+        );
+      return t("Connection error", "连接错误");
     }
     case "output-error":
-      return "Connection error";
+      return t("Connection error", "连接错误");
     default:
-      return "Connecting…";
+      return t("Connecting…", "正在连接…");
   }
 }
 

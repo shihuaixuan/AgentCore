@@ -6,6 +6,7 @@ import { classifyArtifact } from "../../../../ArtifactPanel/helpers";
 import { formatFileSize, formatFileTimestamp } from "../../FilesTab/helpers";
 import type { SessionFile } from "../../FilesTab/useSessionFiles";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   file: SessionFile;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function ArtifactMiniCard({ file, onOpen, onDownload }: Props) {
+  const { t, locale } = useTranslation();
   const { item } = file;
   const fileIcon = classifyArtifact(item.mime_type ?? null, item.name).icon;
 
@@ -42,14 +44,14 @@ export function ArtifactMiniCard({ file, onOpen, onDownload }: Props) {
             className="truncate"
           >
             {formatFileSize(item.size_bytes ?? 0)} ·{" "}
-            {formatFileTimestamp(item.created_at)}
+            {formatFileTimestamp(item.created_at, locale)}
           </Text>
         </span>
       </button>
       <button
         type="button"
         onClick={() => onDownload(file)}
-        aria-label={`Download ${item.name}`}
+        aria-label={t(`Download ${item.name}`, `下载 ${item.name}`)}
         className="shrink-0 rounded-full p-1 text-foreground-disabled opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100 hover:text-foreground-secondary focus-visible:opacity-100 motion-reduce:transition-none [@media(hover:none)]:opacity-100"
       >
         <Icon icon={Download04Icon} size={16} />

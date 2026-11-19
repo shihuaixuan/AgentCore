@@ -164,7 +164,7 @@ export const useSaveGraph = ({
           graphData.credentials_input_schema,
           graphData.output_schema,
         );
-        notifySkippedWebhookPresets(toast, result.skipped_webhook_presets);
+        notifySkippedWebhookPresets(toast, result.skipped_webhook_presets, t);
         return graphData;
       } else {
         const data: Graph = {

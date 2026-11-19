@@ -32,7 +32,10 @@ export function YearlyPicker({
     if (values.length === months.length) onChange([]);
     else onChange(months.map((m) => m.value));
   }
-  const items = months.map((m) => ({ value: String(m.value), label: m.label }));
+  const items = months.map((month) => ({
+    value: String(month.value),
+    label: t(month.label, `${month.value}月`),
+  }));
   const selected = values.map((v) => String(v));
 
   return (
@@ -47,7 +50,7 @@ export function YearlyPicker({
           onClick={toggleAll}
         >
           {values.length === months.length
-            ? "Deselect All"
+            ? t("Deselect All", "取消全选")
             : t("Select All", "全选")}
         </button>
       </div>

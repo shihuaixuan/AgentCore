@@ -60,7 +60,7 @@ export function MemoryChatPanel({
             <div className="flex items-center gap-2 text-brand">
               <Icon icon={BrainIcon} size={18} />
               <span className="text-body font-semibold text-foreground-emphasis">
-                {scopeName}&apos;s memory
+                {t(`${scopeName}'s memory`, `${scopeName} 的记忆`)}
               </span>
             </div>
             <Button

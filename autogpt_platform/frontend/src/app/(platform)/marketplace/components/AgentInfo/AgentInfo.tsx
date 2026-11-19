@@ -20,6 +20,7 @@ import { InstallOnExpertButton } from "../InstallOnExpertButton/InstallOnExpertB
 import { useAgentInfo } from "./useAgentInfo";
 import { PlusSignIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface AgentInfoProps {
   user: User | null;
@@ -54,6 +55,7 @@ export const AgentInfo = ({
   creatorSlug,
   agentSlug,
 }: AgentInfoProps) => {
+  const { t, locale } = useTranslation();
   const {
     handleDownload,
     isDownloadingAgent,
@@ -104,17 +106,17 @@ export const AgentInfo = ({
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Text variant="body-semibold" tone="primary">
-              Version {versionInfo.version}.0
+              {t("Version", "版本")} {versionInfo.version}.0
             </Text>
             {versionInfo.isCurrentVersion && (
               <span className="rounded bg-info/20 px-1.5 py-0.5 text-caption font-medium text-info-foreground">
-                Current
+                {t("Current", "当前版本")}
               </span>
             )}
           </div>
           {changelogEntry && (
             <Text variant="small" tone="muted">
-              {new Date(changelogEntry.date).toLocaleDateString("en-US", {
+              {new Date(changelogEntry.date).toLocaleDateString(locale, {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
@@ -151,11 +153,14 @@ export const AgentInfo = ({
           >
             <Avatar className="h-7 w-7 shrink-0">
               {creatorAvatar && (
-                <AvatarImage src={creatorAvatar} alt={`${creator} avatar`} />
+                <AvatarImage
+                  src={creatorAvatar}
+                  alt={t(`${creator} avatar`, `${creator} 的头像`)}
+                />
               )}
               <AvatarFallback size={28}>{creator}</AvatarFallback>
             </Avatar>
-            <Text variant="body">by</Text>
+            <Text variant="body">{t("by", "作者")}</Text>
             <Link
               href={`/marketplace/creator/${encodeURIComponent(creatorSlug ?? creator)}`}
               className="font-medium hover:underline"
@@ -199,10 +204,10 @@ export const AgentInfo = ({
                 }
               >
                 {isAddingAgentToLibrary
-                  ? "Adding..."
+                  ? t("Adding...", "正在添加...")
                   : isAgentAddedToLibrary
-                    ? "See runs"
-                    : "Add to library"}
+                    ? t("See runs", "查看运行记录")
+                    : t("Add to library", "添加到库")}
               </Button>
             )}
             <InstallOnExpertButton
@@ -214,7 +219,10 @@ export const AgentInfo = ({
           <div className="mt-3 flex w-full items-center justify-between gap-2">
             <div className="flex items-center gap-0">
               <Text variant="body" tone="muted">
-                Want to use this workflow locally?
+                {t(
+                  "Want to use this workflow locally?",
+                  "想在本地使用此工作流？",
+                )}
               </Text>
               <Button
                 variant="ghost"
@@ -229,14 +237,19 @@ export const AgentInfo = ({
                   tone="inherit"
                   decoration="underline"
                 >
-                  {isDownloadingAgent ? "Downloading..." : "Download here"}
+                  {isDownloadingAgent
+                    ? t("Downloading...", "正在下载...")
+                    : t("Download here", "在此下载")}
                 </Text>
               </Button>
             </div>
             <Text variant="body" className="shrink-0 whitespace-nowrap">
               {runs === 0
-                ? "No runs"
-                : `${runs.toLocaleString()} run${runs > 1 ? "s" : ""}`}
+                ? t("No runs", "暂无运行记录")
+                : t(
+                    `${runs.toLocaleString(locale)} run${runs > 1 ? "s" : ""}`,
+                    `${runs.toLocaleString(locale)} 次运行`,
+                  )}
             </Text>
           </div>
         </div>
@@ -247,7 +260,7 @@ export const AgentInfo = ({
           {/* Description Section */}
           <div className="mb-4 w-full">
             <Text variant="h4" as="h5" className="mb-1.5">
-              Description
+              {t("Description", "描述")}
             </Text>
             <Text
               variant="body"
@@ -262,7 +275,7 @@ export const AgentInfo = ({
           {/* Categories */}
           <div className="mb-4 flex w-full flex-col gap-1.5 sm:gap-2 md:px-2">
             <Text variant="h4" as="h5" className="mb-1.5">
-              Categories
+              {t("Categories", "分类")}
             </Text>
             {categories.filter((c) => c.trim()).length > 0 ? (
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -281,7 +294,7 @@ export const AgentInfo = ({
               </div>
             ) : (
               <Text variant="body" tone="subtle">
-                None
+                {t("None", "无")}
               </Text>
             )}
           </div>
@@ -290,11 +303,11 @@ export const AgentInfo = ({
           <div className="flex w-full flex-col gap-1.5 sm:gap-2 md:px-2">
             <div className="flex items-baseline justify-start">
               <Text variant="h4" as="h5">
-                Version
+                {t("Version", "版本")}
               </Text>
               {allVersions.length > 0 && (
                 <Dialog
-                  title="Changelog"
+                  title={t("Changelog", "更新日志")}
                   styling={{
                     maxWidth: "30rem",
                   }}
@@ -307,7 +320,7 @@ export const AgentInfo = ({
                       // oxlint-disable-next-line design-system/no-restyle -- a purple ghost link's hover; no Button variant is brand
                       className="hover:text-brand-hover"
                     >
-                      (Changelog)
+                      {t("(Changelog)", "（更新日志）")}
                     </Button>
                   </Dialog.Trigger>
                   <Dialog.Content>
@@ -323,7 +336,8 @@ export const AgentInfo = ({
                 {version}.0
               </Text>
               <Text variant="body" tone="secondary">
-                Last updated {formatTimeAgo(lastUpdated)}
+                {t("Last updated", "最近更新")}{" "}
+                {formatTimeAgo(lastUpdated, locale)}
               </Text>
             </div>
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/Button/Button";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Input } from "@/components/atoms/Input/Input";
 import { cn } from "@/lib/utils";
 import { bubbleClassFor } from "../ColorStep/helpers";
@@ -19,6 +20,7 @@ export function NameStep({
   color,
   onSubmit,
 }: Props) {
+  const { t } = useTranslation();
   const { custom, setCustom, trimmed, submitCustom } = useNameStep({
     onSubmit,
   });
@@ -30,7 +32,7 @@ export function NameStep({
     <div className="flex flex-col items-end gap-4">
       <div
         role="group"
-        aria-label="Suggested names"
+        aria-label={t("Suggested names", "推荐姓名")}
         className="flex flex-wrap justify-end gap-2.5"
       >
         {chips.map((chip) => (
@@ -56,19 +58,19 @@ export function NameStep({
           aria-hidden
           className="mr-4 text-caption font-medium tracking-caps text-foreground-tertiary uppercase"
         >
-          or
+          {t("or", "或")}
         </span>
       )}
       {selectedName ? null : (
         <form onSubmit={submitCustom} className="flex items-center gap-2">
           <Input
             id="raise-name"
-            label="Or type your own"
+            label={t("Or type your own", "或输入自定义姓名")}
             hideLabel
             size="small"
             value={custom}
             onChange={(event) => setCustom(event.target.value)}
-            placeholder="Type a name…"
+            placeholder={t("Type a name…", "输入姓名…")}
             maxLength={100}
             wrapperClassName="mb-0 w-full max-w-[16rem] [&_input]:h-[2.625rem] [&_input]:py-3"
           />
@@ -80,7 +82,7 @@ export function NameStep({
             shape="rounded"
             className="h-[2.625rem]"
           >
-            Name me
+            {t("Name me", "为我命名")}
           </Button>
         </form>
       )}

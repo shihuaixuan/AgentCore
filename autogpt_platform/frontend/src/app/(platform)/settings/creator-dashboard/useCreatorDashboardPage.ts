@@ -14,6 +14,7 @@ import type { StoreSubmissionsResponse } from "@/app/api/__generated__/models/st
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { getQueryClient } from "@/lib/react-query/queryClient";
 import { useAuth } from "@/lib/auth/hooks/useAuth";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { PublishState } from "@/components/contextual/PublishAgentModal/usePublishAgentModal";
 
 import {
@@ -33,6 +34,7 @@ interface EditState {
 }
 
 export function useCreatorDashboardPage() {
+  const { locale } = useTranslation();
   const queryClient = getQueryClient();
   const { user } = useAuth();
 
@@ -182,7 +184,7 @@ export function useCreatorDashboardPage() {
       return;
     }
     setPublishState({ isOpen: false, step: "select", submissionData: null });
-    onEditSubmission(buildEditPayload(submission));
+    onEditSubmission(buildEditPayload(submission, locale));
   }
 
   function onEditClose() {

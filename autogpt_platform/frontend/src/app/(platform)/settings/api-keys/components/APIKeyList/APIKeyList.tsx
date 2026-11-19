@@ -11,6 +11,7 @@ import { APIKeyRow } from "../APIKeyRow/APIKeyRow";
 import { APIKeySelectionBar } from "../APIKeySelectionBar/APIKeySelectionBar";
 import { DeleteAPIKeyDialog } from "../DeleteAPIKeyDialog/DeleteAPIKeyDialog";
 import { useAPIKeyListView } from "./useAPIKeyListView";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const LIST_CONTAINER_VARIANTS: Variants = {
   hidden: {},
@@ -29,6 +30,7 @@ const LIST_ITEM_VARIANTS: Variants = {
 };
 
 export function APIKeyList() {
+  const { t } = useTranslation();
   const {
     keys,
     isLoading,
@@ -49,7 +51,7 @@ export function APIKeyList() {
     const message = error instanceof Error ? error.message : undefined;
     return (
       <ErrorCard
-        context="API keys"
+        context={t("API keys", "API 密钥")}
         responseError={message ? { message } : undefined}
         onRetry={() => {
           refetch();

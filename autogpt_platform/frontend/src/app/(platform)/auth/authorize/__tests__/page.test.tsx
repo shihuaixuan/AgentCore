@@ -7,6 +7,7 @@ import {
 import { server } from "@/mocks/mock-server";
 import { fireEvent, render, screen } from "@/tests/integrations/test-utils";
 import AuthorizePage from "../page";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const mockUseSearchParams = vi.hoisted(() => vi.fn());
 
@@ -52,6 +53,28 @@ afterEach(() => {
 });
 
 describe("AuthorizePage", () => {
+  test("localizes permissions and actions without changing app identity or OAuth fields", async () => {
+    openWith(REGISTERED);
+    server.use(
+      getGetOauthGetOauthAppInfoMockHandler200(() => ({
+        name: "My English OAuth App",
+        scopes: ["IDENTITY"],
+      })),
+    );
+    render(
+      <LanguageProvider>
+        <AuthorizePage />
+      </LanguageProvider>,
+    );
+    expect(await screen.findByText("My English OAuth App")).toBeDefined();
+    expect(screen.getByText("查看你的用户 ID、电子邮箱和时区")).toBeDefined();
+    expect(screen.getByRole("button", { name: "授权" })).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "拒绝" }));
+    expect(new URL(window.location.href).searchParams.get("error")).toBe(
+      "access_denied",
+    );
+  });
+
   test("offers no way back to a redirect_uri the app did not register", async () => {
     openWith("https://evil.example/collect");
     server.use(getGetOauthGetOauthAppInfoMockHandler400());

@@ -25,6 +25,7 @@ import { getSelectOptions } from "./helpers";
 import { useRunAgentInputs } from "./useRunAgentInputs";
 import { Cancel01Icon, PlusSignIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 /**
  * A generic prop structure for the TypeBasedInput.
@@ -53,6 +54,7 @@ export function RunAgentInputs({
   readOnly = false,
   ...props
 }: Props & React.HTMLAttributes<HTMLElement>) {
+  const { t } = useTranslation();
   const { handleUploadFile, uploadProgress } = useRunAgentInputs();
 
   // Options and keys come from the schema the type was judged by: an optional
@@ -75,11 +77,11 @@ export function RunAgentInputs({
       innerInputElement = (
         <DSInput
           id={`${baseId}-number`}
-          label={schema.title ?? placeholder ?? "Number"}
+          label={schema.title ?? placeholder ?? t("Number", "数字")}
           hideLabel
           type="number"
           value={value ?? ""}
-          placeholder={placeholder || "Enter number"}
+          placeholder={placeholder || t("Enter number", "请输入数字")}
           onChange={(e) => {
             const v = (e.target as HTMLInputElement).value;
             if (!v || v.trim() === "") {
@@ -98,12 +100,12 @@ export function RunAgentInputs({
       innerInputElement = (
         <DSInput
           id={`${baseId}-textarea`}
-          label={schema.title ?? placeholder ?? "Text"}
+          label={schema.title ?? placeholder ?? t("Text", "文本")}
           hideLabel
           type="textarea"
           rows={3}
           value={value ?? ""}
-          placeholder={placeholder || "Enter text"}
+          placeholder={placeholder || t("Enter text", "请输入文本")}
           onChange={(e) => onChange((e.target as HTMLInputElement).value)}
           {...props}
         />
@@ -131,7 +133,8 @@ export function RunAgentInputs({
       innerInputElement = (
         <>
           <span className="text-body text-foreground-tertiary">
-            {placeholder || (value ? "Enabled" : "Disabled")}
+            {placeholder ||
+              (value ? t("Enabled", "已启用") : t("Disabled", "已禁用"))}
           </span>
           <Switch
             className="ml-auto"
@@ -165,7 +168,7 @@ export function RunAgentInputs({
       innerInputElement = (
         <DSInput
           id={`${baseId}-date`}
-          label={schema.title ?? placeholder ?? "Date"}
+          label={schema.title ?? placeholder ?? t("Date", "日期")}
           hideLabel
           type="date"
           value={dateValue ? format(dateValue, "yyyy-MM-dd") : ""}
@@ -177,7 +180,7 @@ export function RunAgentInputs({
               onChange(new Date(y, m - 1, d));
             }
           }}
-          placeholder={placeholder || "Pick a date"}
+          placeholder={placeholder || t("Pick a date", "选择日期")}
           {...props}
         />
       );
@@ -194,12 +197,14 @@ export function RunAgentInputs({
       innerInputElement = (
         <DSInput
           id={`${baseId}-datetime`}
-          label={schema.title ?? placeholder ?? "Date time"}
+          label={schema.title ?? placeholder ?? t("Date time", "日期和时间")}
           hideLabel
           type="datetime-local"
           value={value ?? ""}
           onChange={(e) => onChange((e.target as HTMLInputElement).value)}
-          placeholder={placeholder || "Enter date and time"}
+          placeholder={
+            placeholder || t("Enter date and time", "请输入日期和时间")
+          }
           {...props}
         />
       );
@@ -222,11 +227,11 @@ export function RunAgentInputs({
       innerInputElement = (
         <DSSelect
           id={`${baseId}-select`}
-          label={schema.title ?? placeholder ?? "Select"}
+          label={schema.title ?? placeholder ?? t("Select", "选择")}
           hideLabel
           value={value ?? ""}
           onValueChange={(val: string) => onChange(val)}
-          placeholder={placeholder || "Select an option"}
+          placeholder={placeholder || t("Select an option", "请选择选项")}
           options={selectOptions.map((opt) => ({
             value: opt,
             label: String(opt),
@@ -301,12 +306,14 @@ export function RunAgentInputs({
             <table className="w-full text-body">
               <thead>
                 <tr className="bg-surface-muted">
-                  {headers.map((header) => (
+                  {headers.map((header, columnIndex) => (
                     <th
                       key={header}
                       className="px-3 py-2 text-left font-medium"
                     >
-                      {header}
+                      {tableSchema.items?.properties
+                        ? header
+                        : t(header, `列 ${columnIndex + 1}`)}
                     </th>
                   ))}
                   <th className="w-10 px-3 py-2"></th>
@@ -324,7 +331,10 @@ export function RunAgentInputs({
                             updateRow(rowIndex, header, e.target.value)
                           }
                           className="w-full rounded border px-2 py-1"
-                          placeholder={`Enter ${header}`}
+                          placeholder={t(
+                            `Enter ${header}`,
+                            `请输入${tableSchema.items?.properties ? header : `列 ${headers.indexOf(header) + 1}`}`,
+                          )}
                         />
                       </td>
                     ))}
@@ -353,7 +363,7 @@ export function RunAgentInputs({
             className="w-full"
           >
             <Icon icon={PlusSignIcon} className="mr-2 h-4 w-4" />
-            Add Row
+            {t("Add Row", "添加行")}
           </Button>
         </div>
       );
@@ -365,12 +375,12 @@ export function RunAgentInputs({
       innerInputElement = (
         <DSInput
           id={`${baseId}-text`}
-          label={schema.title ?? placeholder ?? "Text"}
+          label={schema.title ?? placeholder ?? t("Text", "文本")}
           hideLabel
           type="text"
           value={value ?? ""}
           onChange={(e) => onChange((e.target as HTMLInputElement).value)}
-          placeholder={placeholder || "Enter text"}
+          placeholder={placeholder || t("Enter text", "请输入文本")}
           {...props}
         />
       );

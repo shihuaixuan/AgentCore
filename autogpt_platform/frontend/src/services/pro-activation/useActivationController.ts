@@ -12,8 +12,10 @@ import { useActivationReadiness } from "./useActivationReadiness";
 import { pendingConsent, storeConsent } from "./storage";
 import { isCheckoutReturn, safeReturnTo } from "./helpers";
 import { useActivationRecovery } from "./useActivationRecovery";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function useActivationController() {
+  const { t } = useTranslation();
   const userID = useAuthStore((state) => state.user?.id);
   const searchParams = useSearchParams();
   const [attempt, setAttempt] = useState<ActivationResponse | null>(null);
@@ -140,7 +142,10 @@ export function useActivationController() {
       }
     } catch {
       setError(
-        "We couldn’t load your upgrade details. Please try again before confirming payment.",
+        t(
+          "We couldn’t load your upgrade details. Please try again before confirming payment.",
+          "无法加载升级详情，请重试后再确认付款。",
+        ),
       );
     } finally {
       inFlight.current = false;
@@ -178,11 +183,19 @@ export function useActivationController() {
           if (userID) storeConsent(userID, null);
           setRetryConsent(false);
           setNeedsNewTerms(true);
-          setError("Review the current terms before confirming this upgrade.");
+          setError(
+            t(
+              "Review the current terms before confirming this upgrade.",
+              "请先查看当前条款，再确认此次升级。",
+            ),
+          );
         }
       } catch {
         setError(
-          "We couldn’t confirm the payment status. Check the existing payment before trying again.",
+          t(
+            "We couldn’t confirm the payment status. Check the existing payment before trying again.",
+            "无法确认付款状态。请先检查现有付款，再重试。",
+          ),
         );
       }
     } finally {
@@ -198,7 +211,12 @@ export function useActivationController() {
     try {
       accept(await retrieveActivation(id));
     } catch {
-      setError("We couldn’t check your payment yet. Please try again.");
+      setError(
+        t(
+          "We couldn’t check your payment yet. Please try again.",
+          "暂时无法查询付款状态，请重试。",
+        ),
+      );
     } finally {
       inFlight.current = false;
       setBusy(false);
@@ -213,7 +231,12 @@ export function useActivationController() {
     consent.current = null;
     if (userID) storeConsent(userID, null);
     setRetryConsent(false);
-    setError("We couldn’t find a payment in progress. You can start again.");
+    setError(
+      t(
+        "We couldn’t find a payment in progress. You can start again.",
+        "未找到正在进行的付款，你可以重新开始。",
+      ),
+    );
   }
 
   useActivationRecovery({

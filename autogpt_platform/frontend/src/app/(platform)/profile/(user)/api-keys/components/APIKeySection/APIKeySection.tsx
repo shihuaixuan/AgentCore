@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { MoreVerticalIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -23,6 +24,7 @@ import {
 import { useAPISection } from "./useAPISection";
 
 export function APIKeysSection() {
+  const { t, locale } = useTranslation();
   const { apiKeys, isLoading, isDeleting, handleRevokeKey } = useAPISection();
 
   return (
@@ -37,11 +39,11 @@ export function APIKeysSection() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>API Key</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Last Used</TableHead>
+                <TableHead>{t("Name", "名称")}</TableHead>
+                <TableHead>{t("API Key", "API 密钥")}</TableHead>
+                <TableHead>{t("Status", "状态")}</TableHead>
+                <TableHead>{t("Created", "创建时间")}</TableHead>
+                <TableHead>{t("Last Used", "上次使用")}</TableHead>
                 <TableHead></TableHead>
               </TableRow>
             </TableHeader>
@@ -69,16 +71,20 @@ export function APIKeysSection() {
                             "border-error-hover bg-error-surface text-error-foreground"
                       }
                     >
-                      {key.status}
+                      {key.status === "ACTIVE"
+                        ? t("ACTIVE", "有效")
+                        : key.status === "REVOKED"
+                          ? t("REVOKED", "已撤销")
+                          : key.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {new Date(key.created_at).toLocaleDateString()}
+                    {new Date(key.created_at).toLocaleDateString(locale)}
                   </TableCell>
                   <TableCell>
                     {key.last_used_at
-                      ? new Date(key.last_used_at).toLocaleDateString()
-                      : "Never"}
+                      ? new Date(key.last_used_at).toLocaleDateString(locale)
+                      : t("Never", "从未使用")}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
@@ -100,7 +106,9 @@ export function APIKeysSection() {
                           onClick={() => handleRevokeKey(key.id)}
                           disabled={isDeleting}
                         >
-                          <span className="text-error">Revoke</span>
+                          <span className="text-error">
+                            {t("Revoke", "撤销")}
+                          </span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

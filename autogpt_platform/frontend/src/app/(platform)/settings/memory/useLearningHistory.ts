@@ -12,6 +12,8 @@ import { toast } from "@/components/molecules/Toast/use-toast";
 import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getLearningLabel } from "@/services/skill-learning/helpers";
 
 export const HISTORY_LIMIT = 30;
 
@@ -55,6 +57,7 @@ export function readOpenRecordFromUrl(): OpenLearningRecord | null {
 }
 
 export function useLearningHistory(scopeExpertID: string | null) {
+  const { t, locale } = useTranslation();
   const enabled = Boolean(useGetFlag(Flag.DREAM_SKILL_LEARNING_ENABLED));
   const queryClient = useQueryClient();
   const [origin, setOrigin] = useState("all");
@@ -82,7 +85,9 @@ export function useLearningHistory(scopeExpertID: string | null) {
         onSuccess: (res) => {
           const data = okData(res);
           toast({
-            title: data?.status_label ?? "Decision recorded",
+            title: data?.status_label
+              ? getLearningLabel(data.status_label, locale)
+              : t("Decision recorded", "已记录决策"),
             description: data?.reason || undefined,
           });
           queryClient.invalidateQueries({
@@ -94,7 +99,7 @@ export function useLearningHistory(scopeExpertID: string | null) {
         },
         onError: () =>
           toast({
-            title: "Could not record the decision",
+            title: t("Could not record the decision", "无法记录决策"),
             variant: "destructive",
           }),
       },

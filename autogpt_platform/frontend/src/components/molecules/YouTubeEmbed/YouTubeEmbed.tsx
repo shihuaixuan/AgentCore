@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { YoutubeIcon } from "@hugeicons/core-free-icons";
 import { getNoticeText } from "./helpers";
 import { useYouTubeEmbed } from "./useYouTubeEmbed";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   /** Any YouTube link; one that names no single video only gets a link out. */
@@ -18,11 +19,9 @@ interface Props {
 // YouTube sets advertising cookies (Cookiebot's Marketing category) as soon as
 // its player loads, so the iframe waits for that consent. Nothing else here
 // requests anything from YouTube.
-export function YouTubeEmbed({
-  url,
-  title = "YouTube video",
-  className,
-}: Props) {
+export function YouTubeEmbed({ url, title, className }: Props) {
+  const { locale, t } = useTranslation();
+  const videoTitle = title ?? t("YouTube video", "YouTube 视频");
   const {
     videoId,
     embedUrl,
@@ -41,7 +40,7 @@ export function YouTubeEmbed({
         data-slot="youtube-embed"
         className={cn("h-full w-full", className)}
         src={embedUrl}
-        title={title}
+        title={videoTitle}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
         sandbox="allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox"
@@ -52,7 +51,7 @@ export function YouTubeEmbed({
   return (
     <div
       role="group"
-      aria-label={title}
+      aria-label={videoTitle}
       data-slot="youtube-embed"
       className={cn(
         "flex h-full w-full flex-col items-center justify-center gap-3 overflow-auto bg-surface-hover p-4 text-center",
@@ -71,7 +70,7 @@ export function YouTubeEmbed({
         data-slot="youtube-embed-notice"
         className="max-w-sm"
       >
-        {getNoticeText({ hasVideoId: videoId !== null, canAllowHere })}
+        {getNoticeText({ hasVideoId: videoId !== null, canAllowHere, locale })}
       </Text>
       <div
         data-slot="youtube-embed-actions"
@@ -88,7 +87,7 @@ export function YouTubeEmbed({
             leadingIcon={YoutubeIcon}
             data-slot="youtube-embed-watch"
           >
-            Watch on YouTube
+            {t("Watch on YouTube", "在 YouTube 上观看")}
           </Button>
         )}
         {canLoadOnce && (
@@ -98,7 +97,7 @@ export function YouTubeEmbed({
             onClick={loadVideo}
             data-slot="youtube-embed-load"
           >
-            Load video
+            {t("Load video", "加载视频")}
           </Button>
         )}
         {canAllowHere && (
@@ -109,7 +108,7 @@ export function YouTubeEmbed({
             onClick={openSettings}
             data-slot="youtube-embed-settings"
           >
-            Cookie settings
+            {t("Cookie settings", "Cookie 设置")}
           </Button>
         )}
       </div>

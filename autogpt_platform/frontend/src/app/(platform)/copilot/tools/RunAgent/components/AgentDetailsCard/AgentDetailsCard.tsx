@@ -7,12 +7,14 @@ import { useEffect, useState } from "react";
 import { useCopilotChatActions } from "../../../../components/CopilotChatActionsProvider/useCopilotChatActions";
 import { ContentMessage } from "../../../../components/ToolAccordion/AccordionContent";
 import { buildInputSchema, extractDefaults, isFormValid } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   output: AgentDetailsResponse;
 }
 
 export function AgentDetailsCard({ output }: Props) {
+  const { t } = useTranslation();
   const { onSend } = useCopilotChatActions();
   const schema = buildInputSchema(output.agent.inputs);
 
@@ -58,8 +60,10 @@ export function AgentDetailsCard({ output }: Props) {
     // redundant and, once setup has succeeded, a stale backward-pointing CTA.
     return (
       <ContentMessage>
-        This workflow runs on a webhook trigger, so it can&apos;t be run or
-        scheduled directly — it&apos;s activated by setting up its trigger.
+        {t(
+          "This workflow runs on a webhook trigger, so it can't be run or scheduled directly — it's activated by setting up its trigger.",
+          "此工作流由 Webhook 触发，无法直接运行或安排计划，需设置触发器后激活。",
+        )}
       </ContentMessage>
     );
   }
@@ -68,7 +72,10 @@ export function AgentDetailsCard({ output }: Props) {
     return (
       <div className="grid gap-2">
         <ContentMessage>
-          This workflow has no configurable inputs.
+          {t(
+            "This workflow has no configurable inputs.",
+            "此工作流没有可配置的输入。",
+          )}
         </ContentMessage>
         <div className="flex gap-2 pt-2">
           <Button
@@ -80,7 +87,7 @@ export function AgentDetailsCard({ output }: Props) {
               )
             }
           >
-            Proceed
+            {t("Proceed", "继续")}
           </Button>
         </div>
       </div>
@@ -90,7 +97,10 @@ export function AgentDetailsCard({ output }: Props) {
   return (
     <div className="grid gap-2">
       <ContentMessage>
-        Review the inputs below and press Proceed to run.
+        {t(
+          "Review the inputs below and press Proceed to run.",
+          "检查下方输入，然后点击“继续”运行。",
+        )}
       </ContentMessage>
 
       <div className="mt-2 rounded-2xl border bg-canvas p-3 pt-4">
@@ -116,7 +126,7 @@ export function AgentDetailsCard({ output }: Props) {
           disabled={!valid}
           onClick={handleProceed}
         >
-          Proceed
+          {t("Proceed", "继续")}
         </Button>
       </div>
     </div>

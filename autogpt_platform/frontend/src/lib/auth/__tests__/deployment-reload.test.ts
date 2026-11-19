@@ -1,9 +1,16 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import type { ReactElement } from "react";
+import { createElement, type ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const toast = vi.hoisted(() => vi.fn());
 vi.mock("@/components/molecules/Toast/use-toast", () => ({ toast }));
+vi.mock("@/lib/i18n/LanguageProvider", async () =>
+  vi.importActual("@/lib/i18n/LanguageProvider"),
+);
+vi.mock("@/services/environment", () => ({
+  environment: { isServerSide: () => false },
+}));
 
 const nativeSessionStorage = Object.getOwnPropertyDescriptor(
   window,
@@ -47,11 +54,9 @@ describe("reloading onto a new deployment", () => {
     expect(await loadPageAndHitDeploySkew(reload)).toBe(false);
 
     expect(reload).toHaveBeenCalledTimes(1);
-    expect(toast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: "A new version of AutoGPT is available",
-      }),
-    );
+    const [{ title }] = toast.mock.calls.at(-1) as [{ title: ReactElement }];
+    render(createElement(LanguageProvider, null, title));
+    expect(screen.getByText("AutoGPT 有新版本可用")).toBeDefined();
   });
 
   it("asks with a button that refreshes the page", async () => {
@@ -59,7 +64,7 @@ describe("reloading onto a new deployment", () => {
 
     await loadPageAndHitDeploySkew(reload);
     await loadPageAndHitDeploySkew(reload);
-    const [{ action }] = toast.mock.calls[0] as [{ action: ReactElement }];
+    const [{ action }] = toast.mock.calls.at(-1) as [{ action: ReactElement }];
     render(action);
     fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
 

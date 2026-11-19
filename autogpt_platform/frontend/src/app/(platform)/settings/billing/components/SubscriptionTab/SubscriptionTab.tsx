@@ -1,6 +1,7 @@
 "use client";
 
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { TrialCard } from "@/components/organisms/TrialCard/TrialCard";
 import { TrialCheckoutConfirmation } from "@/components/organisms/TrialCard/TrialCheckoutConfirmation";
 import { PaymentRecoveryCard } from "@/components/organisms/UsageExperience/PaymentRecoveryCard";
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function SubscriptionTab({ isPlanCheckoutReturn = false }: Props) {
+  const { t } = useTranslation();
   const {
     showPlan,
     showTrialCard,
@@ -35,13 +37,16 @@ export function SubscriptionTab({ isPlanCheckoutReturn = false }: Props) {
         {paymentFailed ? (
           <PaymentRecoveryCard
             payment={payment}
-            fallback="Update your payment method below to continue. Your chats, workflows and results are saved."
+            fallback={t(
+              "Update your payment method below to continue. Your chats, workflows and results are saved.",
+              "请在下方更新支付方式以继续。你的聊天、工作流和结果均已保存。",
+            )}
           />
         ) : null}
         {showTrialCard ? <TrialCard /> : null}
         {isConfirmingPlan ? (
           <Text variant="small" tone="secondary" role="status" className="mx-4">
-            Finishing your new plan…
+            {t("Finishing your new plan…", "正在完成新套餐设置…")}
           </Text>
         ) : null}
         {planChoicesOffer ? (

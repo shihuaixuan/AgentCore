@@ -22,7 +22,7 @@ export function useCronSchedulerDialog({
   credentials: ScheduleCreationRequest["credentials"];
   defaultCronExpression?: string;
 }) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [cronExpression, setCronExpression] = useState<string>("");
@@ -36,7 +36,7 @@ export function useCronSchedulerDialog({
   });
 
   const userTimezone = useUserTimezone();
-  const timezoneDisplay = getTimezoneDisplayName(userTimezone || "UTC");
+  const timezoneDisplay = getTimezoneDisplayName(userTimezone || "UTC", locale);
 
   const { mutateAsync: createSchedule, isPending: isCreatingSchedule } =
     usePostV1CreateExecutionSchedule({

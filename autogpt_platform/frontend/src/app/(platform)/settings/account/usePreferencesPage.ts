@@ -17,6 +17,7 @@ import type { UpdateTimezoneRequestTimezone } from "@/app/api/__generated__/mode
 import { okData } from "@/app/api/helpers";
 import { toast } from "@/components/molecules/Toast/use-toast";
 import { useAuth } from "@/lib/auth/hooks/useAuth";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import {
   detectBrowserTimezone,
@@ -37,6 +38,7 @@ const DEFAULT_SETTINGS: NotificationSettings = {
 };
 
 export function usePreferencesPage() {
+  const { t, locale } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   // The Briefing footer's volume knob links here with
@@ -174,20 +176,26 @@ export function usePreferencesPage() {
       applyFooterChoice(footerChoice, footerToken, chosen)
         .then(() => {
           toast({
-            title: describeFooterChoice(footerChoice),
+            title: describeFooterChoice(footerChoice, locale),
             variant: "success",
           });
         })
         .catch(() => {
           // Leave the choice in the form so the reader can still hit Save.
           toast({
-            title: "Couldn't update your email frequency",
-            description: "Your choice is selected below — press Save to retry.",
+            title: t(
+              "Couldn't update your email frequency",
+              "无法更新邮件频率",
+            ),
+            description: t(
+              "Your choice is selected below — press Save to retry.",
+              "你的选择已在下方选中，请点击保存以重试。",
+            ),
             variant: "destructive",
           });
         });
     },
-    [footerChoice, footerToken, initialSettings, pathname, router],
+    [footerChoice, footerToken, initialSettings, pathname, router, locale, t],
   );
 
   const dirty = isFormDirty(savedState, formState);
@@ -249,9 +257,9 @@ export function usePreferencesPage() {
         setSavedState((prev) => ({ ...prev, timezone: persistedTimezone }));
         timezoneSaved = true;
       } catch (err) {
-        failures.push(
-          `Time zone: ${err instanceof Error ? err.message : "unknown error"}`,
-        );
+        const message =
+          err instanceof Error ? err.message : t("unknown error", "未知错误");
+        failures.push(t(`Time zone: ${message}`, `时区：${message}`));
       }
     }
 
@@ -260,25 +268,28 @@ export function usePreferencesPage() {
         await applyNotificationSettings(snapshot.notifications);
         notificationsSaved = true;
       } catch (err) {
-        failures.push(
-          `Notifications: ${err instanceof Error ? err.message : "unknown error"}`,
-        );
+        const message =
+          err instanceof Error ? err.message : t("unknown error", "未知错误");
+        failures.push(t(`Notifications: ${message}`, `通知：${message}`));
       }
     }
 
     setIsSaving(false);
 
     if (failures.length === 0) {
-      toast({ title: "Preferences saved", variant: "success" });
+      toast({
+        title: t("Preferences saved", "偏好设置已保存"),
+        variant: "success",
+      });
     } else if (timezoneSaved || notificationsSaved) {
       toast({
-        title: "Preferences partially saved",
+        title: t("Preferences partially saved", "偏好设置已部分保存"),
         description: failures.join("; "),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Couldn't save preferences",
+        title: t("Couldn't save preferences", "无法保存偏好设置"),
         description: failures.join("; "),
         variant: "destructive",
       });

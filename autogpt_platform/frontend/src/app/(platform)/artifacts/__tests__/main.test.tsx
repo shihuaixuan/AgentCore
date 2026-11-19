@@ -371,7 +371,7 @@ describe("ArtifactsPage - new menu", () => {
     });
 
     await waitFor(() =>
-      expect(uploadFileDirectMock).toHaveBeenCalledWith(file),
+      expect(uploadFileDirectMock).toHaveBeenCalledWith(file, undefined, "en"),
     );
     await waitFor(() => expect(listCalls).toBeGreaterThan(1));
   });

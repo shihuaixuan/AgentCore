@@ -4,6 +4,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Folder01Icon } from "@hugeicons/core-free-icons";
 import { useCopilotUIStore } from "../../store";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   className?: string;
@@ -12,6 +13,7 @@ interface Props {
 // Sits next to the sidebar toggle in the chrome's inset header and mirrors
 // SidebarTrigger's ghost styling (no border, no shadow).
 export function WorkspaceFilesTrigger({ className }: Props) {
+  const { t } = useTranslation();
   const toggleContextPanelTab = useCopilotUIStore(
     (s) => s.toggleContextPanelTab,
   );
@@ -22,7 +24,7 @@ export function WorkspaceFilesTrigger({ className }: Props) {
       size="compact-icon"
       className={className}
       onClick={() => toggleContextPanelTab("files")}
-      aria-label="Open workspace files"
+      aria-label={t("Open workspace files", "打开工作区文件")}
     >
       <Icon icon={Folder01Icon} className="!size-5" />
     </Button>

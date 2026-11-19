@@ -34,14 +34,18 @@ export function SpendByAgentList({ rollups, agentLookup, totalCents }: Props) {
           {t("Spend by workflow", "按工作流统计支出")}
         </Text>
         <Text variant="small" tone="subtle">
-          % of monthly spend
+          {t("% of monthly spend", "占本月支出的比例")}
         </Text>
       </div>
       <ul className="flex flex-col gap-4">
         {visible.map((rollup) => {
           const agent = agentLookup.get(rollup.graph_id);
           const label =
-            agent?.name ?? `Workflow ${rollup.graph_id.slice(0, 8)}`;
+            agent?.name ??
+            t(
+              `Workflow ${rollup.graph_id.slice(0, 8)}`,
+              `工作流 ${rollup.graph_id.slice(0, 8)}`,
+            );
           const share = totalCents > 0 ? rollup.cost_cents / totalCents : 0;
           const sharePct = Math.round(share * 100);
           const widthPct = Math.max(2, sharePct);
@@ -66,9 +70,15 @@ export function SpendByAgentList({ rollups, agentLookup, totalCents }: Props) {
                       tone="subtle"
                       className="ml-2"
                     >
-                      {rollup.run_count} run{rollup.run_count === 1 ? "" : "s"}
+                      {t(
+                        `${rollup.run_count} run${rollup.run_count === 1 ? "" : "s"}`,
+                        `${rollup.run_count} 次运行`,
+                      )}
                       {avgPerRun > 0 &&
-                        ` · avg ${formatCents(Math.round(avgPerRun))}`}
+                        t(
+                          ` · avg ${formatCents(Math.round(avgPerRun))}`,
+                          ` · 平均 ${formatCents(Math.round(avgPerRun))}`,
+                        )}
                     </Text>
                   </Text>
                 </div>
@@ -113,7 +123,12 @@ export function SpendByAgentList({ rollups, agentLookup, totalCents }: Props) {
             size="small"
             onClick={() => setShowAll(!showAll)}
           >
-            {showAll ? "Collapse" : `Show all (${billable.length})`}
+            {showAll
+              ? t("Collapse", "收起")
+              : t(
+                  `Show all (${billable.length})`,
+                  `显示全部（${billable.length}）`,
+                )}
           </Button>
         </div>
       )}

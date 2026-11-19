@@ -108,8 +108,10 @@ export function useLibraryUploadAgentDialog(options?: {
 
       toast({
         title: t("Invalid Workflow File", "无效的工作流文件"),
-        description:
+        description: t(
           "Please upload a valid agent.json file that has been previously exported from the AutoGPT platform. The file must contain the required fields: name, description, nodes, and links.",
+          "请上传之前从 AutoGPT 平台导出的有效 agent.json 文件，必须包含 name、description、nodes 和 links 字段。",
+        ),
         duration: 5000,
         variant: "destructive",
       });
@@ -117,11 +119,13 @@ export function useLibraryUploadAgentDialog(options?: {
       form.resetField("agentFile");
       setAgentObject(null);
     }
-  }, [agentFileValue, form, toast]);
+  }, [agentFileValue, form, toast, t]);
 
   async function onSubmit(values: z.infer<typeof uploadAgentFormSchema>) {
     if (!agentObject) {
-      form.setError("root", { message: "No workflow object to save" });
+      form.setError("root", {
+        message: t("No workflow object to save", "没有可保存的工作流对象"),
+      });
       return;
     }
 

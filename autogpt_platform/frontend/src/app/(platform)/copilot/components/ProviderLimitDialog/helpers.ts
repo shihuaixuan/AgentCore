@@ -1,4 +1,5 @@
 import type { AIConnectionOffer } from "@/app/api/__generated__/models/aIConnectionOffer";
+import type { Locale } from "@/lib/i18n/locale";
 import type { ChangeSessionConnectionRequestLlmAuthProvider } from "@/app/api/__generated__/models/changeSessionConnectionRequestLlmAuthProvider";
 
 import type { ProviderFailure } from "../../providerFailure";
@@ -65,14 +66,24 @@ function isTheOneThatFailed(
  * Only when the provider actually reported a reset time. An invented one is
  * worse than silence, because people plan around it.
  */
-export function formatResetHint(resetsAt: number | null): string | null {
+export function formatResetHint(
+  resetsAt: number | null,
+  locale: Locale = "en",
+): string | null {
   if (resetsAt === null) return null;
   const seconds = resetsAt - Math.floor(Date.now() / 1000);
   if (seconds <= 0) return null;
-  if (seconds < 90) return "It resets in under a minute.";
+  if (seconds < 90)
+    return locale === "zh-CN"
+      ? "将在一分钟内重置。"
+      : "It resets in under a minute.";
   const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `It resets in about ${minutes} minutes.`;
+  if (minutes < 60)
+    return locale === "zh-CN"
+      ? `约 ${minutes} 分钟后重置。`
+      : `It resets in about ${minutes} minutes.`;
   const hours = Math.round(minutes / 60);
+  if (locale === "zh-CN") return `约 ${hours} 小时后重置。`;
   return hours === 1
     ? "It resets in about an hour."
     : `It resets in about ${hours} hours.`;

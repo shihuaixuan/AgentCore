@@ -4,6 +4,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type Props = {
   nodeId: string;
@@ -16,6 +17,7 @@ export function NodeAdvancedToggle({
   isLastSection,
   hasAdvancedFields = true,
 }: Props) {
+  const { t } = useTranslation();
   const showAdvanced = useNodeStore(
     (state) => state.nodeAdvancedStates[nodeId] || false,
   );
@@ -42,7 +44,7 @@ export function NodeAdvancedToggle({
           as="span"
           className="flex items-center gap-2"
         >
-          Advanced{" "}
+          {t("Advanced", "高级选项")}{" "}
           <Icon
             icon={ArrowDown01Icon}
             size={16}

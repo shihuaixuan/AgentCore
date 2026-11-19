@@ -13,8 +13,10 @@ import { invalidateExpertGrantQueries } from "@/services/experts/invalidate-expe
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { attachCustomConnections, isConnectionEnabled } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function useExpertIntegrationsSection(expertId: string) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isConnecting, setIsConnecting] = useState(false);
@@ -39,7 +41,9 @@ export function useExpertIntegrationsSection(expertId: string) {
     query: {
       select: (response) => {
         if (response.status !== 200)
-          throw new Error("Could not load custom connectors.");
+          throw new Error(
+            t("Could not load custom connectors.", "无法加载自定义连接器。"),
+          );
         return response.data;
       },
     },
@@ -69,7 +73,10 @@ export function useExpertIntegrationsSection(expertId: string) {
     mutation: {
       onSuccess: invalidate,
       onError: () =>
-        toast({ title: "Could not add integration", variant: "destructive" }),
+        toast({
+          title: t("Could not add integration", "无法添加集成"),
+          variant: "destructive",
+        }),
     },
   });
 
@@ -78,7 +85,7 @@ export function useExpertIntegrationsSection(expertId: string) {
       onSuccess: invalidate,
       onError: () =>
         toast({
-          title: "Could not remove integration",
+          title: t("Could not remove integration", "无法移除集成"),
           variant: "destructive",
         }),
     },

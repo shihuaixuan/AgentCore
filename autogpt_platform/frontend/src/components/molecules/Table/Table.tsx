@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import {
   Table as BaseTable,
@@ -15,6 +17,7 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
 import { useTable, RowData } from "./useTable";
 import { formatColumnTitle, formatPlaceholder } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export interface TableProps {
   columns: string[];
@@ -33,10 +36,11 @@ export function Table({
   onChange,
   allowAddRow = true,
   allowDeleteRow = true,
-  addRowLabel = "Add row",
+  addRowLabel,
   className,
   readOnly = false,
 }: TableProps) {
+  const { t } = useTranslation();
   const { rows, handleAddRow, handleDeleteRow, handleCellChange } = useTable({
     columns,
     defaultValues,
@@ -104,7 +108,10 @@ export function Table({
                         onChange={(e) =>
                           handleCellChange(rowIndex, column, e.target.value)
                         }
-                        placeholder={formatPlaceholder(column)}
+                        placeholder={t(
+                          formatPlaceholder(column),
+                          `输入 ${column}`,
+                        )}
                         size="small"
                         wrapperClassName="mb-0"
                         data-slot="table-cell-input"
@@ -118,7 +125,7 @@ export function Table({
                       variant="icon"
                       size="icon"
                       onClick={() => handleDeleteRow(rowIndex)}
-                      aria-label="Delete row"
+                      aria-label={t("Delete row", "删除行")}
                       data-slot="table-delete-row"
                       tone="subtle"
                       className="hover:text-error"
@@ -156,7 +163,7 @@ export function Table({
                     }
                     className="w-fit"
                   >
-                    {addRowLabel}
+                    {addRowLabel ?? t("Add row", "添加行")}
                   </Button>
                 </TableCell>
               </TableRow>

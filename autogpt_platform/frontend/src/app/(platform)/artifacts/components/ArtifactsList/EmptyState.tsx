@@ -7,6 +7,7 @@ import { PlusSignIcon, Upload03Icon } from "@hugeicons/core-free-icons";
 import { motion, useReducedMotion } from "framer-motion";
 import { useNewMenu } from "../NewMenu/useNewMenu";
 import type { EmptyStateContent } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const EASE_OUT_QUINT = [0.22, 1, 0.36, 1] as const;
 
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function EmptyState({ content, compact = false }: Props) {
+  const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const { fileInputRef, isUploading, openFilePicker, handleFilesSelected } =
     useNewMenu(content.uploadFolderId);
@@ -82,7 +84,9 @@ export function EmptyState({ content, compact = false }: Props) {
                 disabled={isUploading}
                 leftIcon={<Icon icon={Upload03Icon} className="h-4 w-4" />}
               >
-                {isUploading ? "Uploading…" : "Upload a file"}
+                {isUploading
+                  ? t("Uploading…", "正在上传…")
+                  : t("Upload a file", "上传文件")}
               </Button>
               <input
                 ref={fileInputRef}

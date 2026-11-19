@@ -1,6 +1,7 @@
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Table01Icon } from "@hugeicons/core-free-icons";
 import type { PreviewTable } from "../../helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   tables: PreviewTable[];
@@ -21,7 +22,10 @@ export function ChangePreview({ tables }: Props) {
 }
 
 function TablePreview({ table }: { table: PreviewTable }) {
-  const label = table.name ? `Fields in ${table.name}` : "New fields";
+  const { t } = useTranslation();
+  const label = table.name
+    ? t(`Fields in ${table.name}`, `${table.name} 中的字段`)
+    : t("New fields", "新增字段");
   return (
     <section className="overflow-hidden rounded-xl border border-border-base">
       {table.name && (
@@ -40,7 +44,10 @@ function TablePreview({ table }: { table: PreviewTable }) {
               {table.name}
             </span>
             <span className="ms-auto shrink-0 text-foreground-tertiary">
-              {fieldCount(table.fields.length)}
+              {t(
+                fieldCount(table.fields.length),
+                `${table.fields.length} 个字段`,
+              )}
             </span>
           </div>
           {table.description && (

@@ -47,7 +47,10 @@ export function BotCard({ platform }: Props) {
         <div className="flex items-center gap-3">
           <Image
             src={`/integrations/${platform.icon}`}
-            alt={`${platform.display_name} icon`}
+            alt={t(
+              `${platform.display_name} icon`,
+              `${platform.display_name} 图标`,
+            )}
             width={32}
             height={32}
             className="rounded-md"

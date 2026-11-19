@@ -13,6 +13,7 @@ import { IntegrationLogo } from "@/components/molecules/IntegrationLogo/Integrat
 import { cn } from "@/lib/utils";
 import { useCopilotUIStore, type ContextPanelExpert } from "../../../../store";
 import { useExpertIntegrations } from "./useExpertIntegrations";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const VISIBLE_LOGOS = 2;
 
@@ -28,6 +29,7 @@ interface Props {
  *  plug icon stands in so the panel's add actions stay one click away.
  *  Clicking opens the integrations tab of the side panel. */
 export function IntegrationsToggle({ expert, className, size = "md" }: Props) {
+  const { t } = useTranslation();
   const isLarge = size === "lg";
   const { integrations } = useExpertIntegrations(expert.id);
   const toggleIntegrationsPanel = useCopilotUIStore(
@@ -51,7 +53,9 @@ export function IntegrationsToggle({ expert, className, size = "md" }: Props) {
             type="button"
             onClick={() => toggleIntegrationsPanel(expert)}
             aria-label={
-              isActive ? "Hide integrations" : `${expert.name}'s integrations`
+              isActive
+                ? t("Hide integrations", "隐藏集成")
+                : t(`${expert.name}'s integrations`, `${expert.name} 的集成`)
             }
             aria-pressed={isActive}
             data-testid="expert-integrations-empty"
@@ -70,7 +74,9 @@ export function IntegrationsToggle({ expert, className, size = "md" }: Props) {
           </button>
         </TooltipTrigger>
         <TooltipContent side="bottom">
-          {isActive ? "Hide integrations" : "Integrations"}
+          {isActive
+            ? t("Hide integrations", "隐藏集成")
+            : t("Integrations", "集成")}
         </TooltipContent>
       </Tooltip>
     );
@@ -88,8 +94,11 @@ export function IntegrationsToggle({ expert, className, size = "md" }: Props) {
         onClick={() => toggleIntegrationsPanel(expert)}
         aria-label={
           isActive
-            ? "Hide integrations"
-            : `${expert.name}'s integrations: ${allNames}`
+            ? t("Hide integrations", "隐藏集成")
+            : t(
+                `${expert.name}'s integrations: ${allNames}`,
+                `${expert.name} 的集成：${allNames}`,
+              )
         }
         aria-pressed={isActive}
         data-testid="expert-integrations"

@@ -36,7 +36,7 @@ interface Props {
 }
 
 export function SkillPage({ slug }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const {
     skill,
     isLoggedIn,
@@ -149,25 +149,31 @@ export function SkillPage({ slug }: Props) {
               ) : null}
               <AvatarFallback>{skill.creator ?? "AutoGPT"}</AvatarFallback>
             </Avatar>
-            by {skill.creator ?? "AutoGPT"}
+            {t("by", "作者")} {skill.creator ?? "AutoGPT"}
           </span>
           <span aria-hidden>·</span>
           <span>
             {skill.install_count === 0
               ? t("New", "新建")
-              : `${skill.install_count.toLocaleString()} installed`}
+              : t(
+                  `${skill.install_count.toLocaleString()} installed`,
+                  `已安装 ${skill.install_count.toLocaleString()} 次`,
+                )}
           </span>
           {skill.updated_at ? (
             <>
               <span aria-hidden>·</span>
-              <span>Updated {formatTimeAgo(String(skill.updated_at))}</span>
+              <span>
+                {t("Updated", "更新于")}{" "}
+                {formatTimeAgo(String(skill.updated_at), locale)}
+              </span>
             </>
           ) : null}
           {skill.source_repo ? (
             <>
               <span aria-hidden>·</span>
               <span>
-                From{" "}
+                {t("From", "来源")}{" "}
                 {skill.source_url ? (
                   <a
                     href={skill.source_url}
@@ -186,7 +192,9 @@ export function SkillPage({ slug }: Props) {
           {skill.license ? (
             <>
               <span aria-hidden>·</span>
-              <span>License: {skill.license}</span>
+              <span>
+                {t("License:", "许可证：")} {skill.license}
+              </span>
             </>
           ) : null}
           {providers.length > 0 ? (
@@ -195,7 +203,7 @@ export function SkillPage({ slug }: Props) {
               <span className="inline-flex items-center gap-1.5">
                 {t("Works with", "适用服务")}
                 <IntegrationLogo provider={providers[0]} size={14} alt="" />
-                {formatProviderList(providers)}
+                {formatProviderList(providers, locale)}
               </span>
             </>
           ) : null}
@@ -284,8 +292,14 @@ export function SkillPage({ slug }: Props) {
         preferMcp
         open={isConnectOpen}
         onOpenChange={setIsConnectOpen}
-        title={`Connect ${formatProviderList(providers)}`}
-        description={`${title}'s steps use ${formatProviderList(providers)}.`}
+        title={t(
+          `Connect ${formatProviderList(providers, locale)}`,
+          `连接 ${formatProviderList(providers, locale)}`,
+        )}
+        description={t(
+          `${title}'s steps use ${formatProviderList(providers, locale)}.`,
+          `${title} 的步骤使用 ${formatProviderList(providers, locale)}。`,
+        )}
         onConnected={handleConnected}
       />
     </main>
@@ -331,9 +345,9 @@ function SkillPageSkeleton() {
   );
 }
 
-function formatProviderList(providers: string[]): string {
+function formatProviderList(providers: string[], locale: string): string {
   const names = providers.map(formatProviderName).filter(Boolean);
-  return new Intl.ListFormat("en", {
+  return new Intl.ListFormat(locale, {
     style: "long",
     type: "conjunction",
   }).format(names);

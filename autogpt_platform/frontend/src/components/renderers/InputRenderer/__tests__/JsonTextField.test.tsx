@@ -9,6 +9,9 @@ import { render } from "@/tests/integrations/test-utils";
 import { expectTypingKept } from "@/tests/integrations/typing";
 
 import { FormRenderer } from "../FormRenderer";
+import Form from "../registry";
+import { customValidator } from "../utils/custom-validator";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 interface RowsData {
   rows: Record<string, unknown>[];
@@ -62,6 +65,46 @@ function getJsonField() {
 }
 
 describe("JsonTextField", () => {
+  it.each([
+    ["string", "请输入 JSON 值…", '"Original value"'],
+    ["array", '["item1", "item2"] 或 [{"key": "value"}]', '["Original value"]'],
+    ["object", '{"key": "value"}', '{"key": "Original value"}'],
+  ] as const)(
+    "localizes the %s placeholder in the field and expanded editor while preserving JSON",
+    async (type, placeholder, value) => {
+      render(
+        <LanguageProvider>
+          <Form
+            schema={{
+              type: "object",
+              properties: { payload: { type, title: "Raw title" } },
+            }}
+            uiSchema={{ payload: { "ui:field": "custom/json_text_field" } }}
+            validator={customValidator}
+            formContext={{
+              nodeId: "localized-json",
+              showHandles: false,
+              uiType: BlockUIType.STANDARD,
+            }}
+          />
+        </LanguageProvider>,
+      );
+      const field = screen.getByPlaceholderText(
+        placeholder,
+      ) as HTMLTextAreaElement;
+      fireEvent.change(field, { target: { value } });
+      expect(field.value).toBe(value);
+      fireEvent.click(screen.getByRole("button", { name: "展开 JSON 输入框" }));
+      const dialog = await screen.findByRole("dialog", {
+        name: "编辑 Raw title",
+      });
+      expect(within(dialog).getByPlaceholderText(placeholder)).toHaveProperty(
+        "value",
+        value,
+      );
+    },
+  );
+
   it("keeps the JSON as typed instead of reformatting it", async () => {
     render(<RowsForm rows={[{}]} />);
 

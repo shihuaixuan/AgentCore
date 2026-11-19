@@ -8,6 +8,8 @@ import {
 import { PostV1CompleteOnboardingStepStep } from "@/app/api/__generated__/models/postV1CompleteOnboardingStepStep";
 import { resolveResponse } from "@/app/api/helpers";
 import { useToast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { useStableCallback } from "@/hooks/useStableCallback";
 import { useOnboardingTimezoneDetection } from "@/hooks/useOnboardingTimezoneDetection";
 import { getAuthDeepLink, withAuthTracking } from "@/lib/auth-redirect";
 import {
@@ -132,6 +134,14 @@ export default function OnboardingProvider({
   const isMounted = useRef(true);
   const pendingUpdatesRef = useRef<Set<Promise<void>>>(new Set());
   const { toast } = useToast();
+  const { t: translate } = useTranslation();
+  const t = useStableCallback(translate);
+  const notifyInitializationFailed = useStableCallback(() => {
+    toast({
+      title: t("Failed to initialize onboarding", "初始化新手引导失败"),
+      variant: "destructive",
+    });
+  });
 
   const api = useBackendAPI();
   const pathname = usePathname();
@@ -379,10 +389,7 @@ export default function OnboardingProvider({
 
         console.error("Failed to initialize onboarding:", error);
 
-        toast({
-          title: "Failed to initialize onboarding",
-          variant: "destructive",
-        });
+        notifyInitializationFailed();
 
         hasInitialized.current = false; // Allow retry on next render
       }
@@ -401,6 +408,8 @@ export default function OnboardingProvider({
     initRetry,
     userID,
     setCompletion,
+    notifyInitializationFailed,
+    fetchOnboarding,
   ]);
 
   const handleOnboardingNotification = useCallback(
@@ -450,7 +459,7 @@ export default function OnboardingProvider({
           console.error("Failed to update user onboarding:", error);
 
           toast({
-            title: "Failed to update user onboarding",
+            title: t("Failed to update user onboarding", "更新新手引导失败"),
             variant: "destructive",
           });
         }
@@ -462,7 +471,7 @@ export default function OnboardingProvider({
         pendingUpdatesRef.current.delete(updatePromise);
       });
     },
-    [toast, isLoggedIn, fetchOnboarding, api, setState],
+    [toast, isLoggedIn, fetchOnboarding, api, setState, t],
   );
 
   const completeStep = useCallback(
@@ -481,7 +490,7 @@ export default function OnboardingProvider({
           }
 
           toast({
-            title: "Failed to complete onboarding step",
+            title: t("Failed to complete onboarding step", "完成引导步骤失败"),
             variant: "destructive",
           });
         }
@@ -492,7 +501,7 @@ export default function OnboardingProvider({
         pendingUpdatesRef.current.delete(completionPromise);
       });
     },
-    [isLoggedIn, state?.completedSteps, fetchOnboarding, toast],
+    [isLoggedIn, state?.completedSteps, fetchOnboarding, toast, t],
   );
 
   const value = useMemo(

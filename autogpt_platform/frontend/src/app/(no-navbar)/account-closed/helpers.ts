@@ -1,6 +1,7 @@
 import type { AccountDeletionResponseStatus } from "@/app/api/__generated__/models/accountDeletionResponseStatus";
 import { formatShortDate } from "@/app/(platform)/settings/billing/helpers";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
+import type { Locale } from "@/lib/i18n/locale";
 
 const FALLBACK_ERROR = "We couldn't keep your account. Try again.";
 
@@ -53,18 +54,24 @@ export function getPageView({
 
 export function getEraseDateLabel(
   eraseAfter: Date | string | null | undefined,
+  locale: Locale = "en",
 ) {
-  return eraseAfter ? formatShortDate(eraseAfter) : null;
+  return eraseAfter ? formatShortDate(eraseAfter, locale) : null;
 }
 
 export function isTooLateError(error: unknown) {
   return error instanceof ApiError && error.status === 409;
 }
 
-export function getKeepErrorMessage(error: unknown): string {
+export function getKeepErrorMessage(
+  error: unknown,
+  locale: Locale = "en",
+): string {
   return error instanceof ApiError && error.message
     ? error.message
-    : FALLBACK_ERROR;
+    : locale === "zh-CN"
+      ? "无法保留你的账户，请重试。"
+      : FALLBACK_ERROR;
 }
 
 interface WaitArgs {

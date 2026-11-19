@@ -24,9 +24,11 @@ import { login as loginAction } from "./actions";
 import { getPostLoginPath, getSignInErrorNotice } from "./helpers";
 import { isTeamEmail } from "@/lib/auth/team-email";
 import { clearImpersonationEverywhere } from "@/lib/impersonation";
+import { useAuthPageTranslation } from "../useAuthPageTranslation";
 
 export function useLoginPage() {
   const { t } = useTranslation();
+  const { translateMessage } = useAuthPageTranslation();
   useCaptureMarketingPrompt();
 
   const { user, isUserLoading, isLoggedIn } = useAuth();
@@ -168,7 +170,7 @@ export function useLoginPage() {
       toast({
         title:
           error instanceof Error
-            ? error.message
+            ? translateMessage(error.message)
             : t("Unexpected error during login", "登录时发生意外错误"),
         variant: "destructive",
       });
@@ -178,12 +180,15 @@ export function useLoginPage() {
     }
   }
 
+  const displayFeedback =
+    feedback ??
+    signInErrorNotice ??
+    (isWaitlisted ? null : getSocialSignInError(microsoftErrorCode));
+
   return {
     form,
     feedback:
-      feedback ??
-      signInErrorNotice ??
-      (isWaitlisted ? null : getSocialSignInError(microsoftErrorCode)),
+      displayFeedback === null ? null : translateMessage(displayFeedback),
     nextUrl: safeNext,
     verificationEmail,
     verificationNotice,

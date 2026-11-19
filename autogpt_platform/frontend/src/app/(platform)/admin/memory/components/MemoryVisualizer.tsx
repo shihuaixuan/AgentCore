@@ -175,11 +175,15 @@ function MemoryScopeView({ expertID }: MemoryScopeViewProps) {
             </div>
           ) : graph.error || scopeMismatchError ? (
             <div className="p-6 text-body text-error-foreground">
-              {t("Failed to load graph:", "无法加载图谱：")} {String(graph.error ?? scopeMismatchError)}
+              {t("Failed to load graph:", "无法加载图谱：")}{" "}
+              {String(graph.error ?? scopeMismatchError)}
             </div>
           ) : nodes.length === 0 ? (
             <div className="flex h-[70vh] flex-col items-center justify-center text-body text-foreground-tertiary">
-              {t("No memory yet. Start a chat session to populate it.", "暂无记忆。开始一次对话以填充记忆。")}
+              {t(
+                "No memory yet. Start a chat session to populate it.",
+                "暂无记忆。开始一次对话以填充记忆。",
+              )}
             </div>
           ) : (
             <GraphCanvas
@@ -351,7 +355,10 @@ function ControlBar({
         {t("Episodes (noisy)", "事件（含噪声）")}
       </label>
       <span className="ml-auto text-caption text-foreground-tertiary">
-        {nodeCount} nodes · {edgeCount} edges
+        {t(
+          `${nodeCount} nodes · ${edgeCount} edges`,
+          `${nodeCount} 个节点 · ${edgeCount} 条关系`,
+        )}
         {truncated && (
           <span className="ml-2 rounded bg-warning-surface px-2 py-0.5 text-warning-foreground">
             {t("truncated", "已截断")}
@@ -359,15 +366,17 @@ function ControlBar({
         )}
         {!readOnly && rebuildActive && rebuildStatus && (
           <span className="ml-2">
-            rebuild: {jobStateSummary(rebuildStatus)}
+            {t("rebuild:", "重建：")} {jobStateSummary(rebuildStatus)}
           </span>
         )}
         {!readOnly && dreamActive && dreamStatus && (
-          <span className="ml-2">dream: {jobStateSummary(dreamStatus)}</span>
+          <span className="ml-2">
+            {t("dream:", "记忆整理：")} {jobStateSummary(dreamStatus)}
+          </span>
         )}
         {!readOnly && nightlyActive && nightlyStatus && (
           <span className="ml-2">
-            nightly: {jobStateSummary(nightlyStatus)}
+            {t("nightly:", "夜间批处理：")} {jobStateSummary(nightlyStatus)}
           </span>
         )}
       </span>
@@ -506,7 +515,7 @@ function DreamResultPanel({ result, onDismiss }: DreamResultPanelProps) {
     <div className="space-y-2" data-testid="dream-result-panel">
       <div className="flex items-center justify-between gap-2">
         <Text variant="small-medium" as="span" tone="body">
-          {t("Last dream pass", "最近一次记忆整理")} {" "}
+          {t("Last dream pass", "最近一次记忆整理")}{" "}
           <span className="font-mono text-foreground-tertiary">
             {result.passID}
           </span>

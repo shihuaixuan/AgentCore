@@ -35,9 +35,9 @@ const SPEND_REVIEW_MARKER = "expert-spend:";
 export function PendingReviewsList({
   reviews,
   onReviewComplete,
-  emptyMessage = "No pending reviews",
+  emptyMessage,
 }: PendingReviewsListProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [reviewDataMap, setReviewDataMap] = useState<Record<string, string>>(
     () => {
       const initialData: Record<string, string> = {};
@@ -158,7 +158,10 @@ export function PendingReviewsList({
             if (approved) {
               toast({
                 title: t("Invalid JSON", "JSON 格式无效"),
-                description: `Please fix the JSON format in review for node ${review.node_exec_id}: ${error instanceof Error ? error.message : t("Invalid syntax", "语法无效")}`,
+                description: t(
+                  `Please fix the JSON format in review for node ${review.node_exec_id}: ${error instanceof Error ? error.message : "Invalid syntax"}`,
+                  `请修正节点 ${review.node_exec_id} 审核项中的 JSON 格式：${error instanceof Error ? error.message : "语法无效"}`,
+                ),
                 variant: "destructive",
               });
               setPendingAction(null);
@@ -202,10 +205,14 @@ export function PendingReviewsList({
             if (res.data.error) result.errors.push(res.data.error);
             continue;
           }
-          failures.push("Unexpected response from server");
+          failures.push(
+            t("Unexpected response from server", "服务器返回了意外响应"),
+          );
         } catch (error) {
           failures.push(
-            error instanceof Error ? error.message : "An error occurred",
+            error instanceof Error
+              ? error.message
+              : t("An error occurred", "发生错误"),
           );
         }
         failedReviews += batch.items.length;
@@ -221,13 +228,19 @@ export function PendingReviewsList({
       } else if (failures.length > 0 || result.failed_count > 0) {
         toast({
           title: t("Reviews partially processed", "部分审核项已处理"),
-          description: `${succeeded} succeeded, ${result.failed_count + failedReviews} failed. ${[...result.errors, ...new Set(failures)].join(" ") || t("Some reviews could not be processed.", "部分审核项未能处理。")}`,
+          description: t(
+            `${succeeded} succeeded, ${result.failed_count + failedReviews} failed. ${[...result.errors, ...new Set(failures)].join(" ") || "Some reviews could not be processed."}`,
+            `${succeeded} 项成功，${result.failed_count + failedReviews} 项失败。${[...result.errors, ...new Set(failures)].join(" ") || "部分审核项未能处理。"}`,
+          ),
           variant: "destructive",
         });
       } else {
         toast({
           title: t("Reviews processed successfully", "审核项已成功处理"),
-          description: `${result.approved_count} approved, ${result.rejected_count} rejected`,
+          description: t(
+            `${result.approved_count} approved, ${result.rejected_count} rejected`,
+            `已批准 ${result.approved_count} 项，已拒绝 ${result.rejected_count} 项`,
+          ),
           variant: "default",
         });
       }
@@ -245,7 +258,7 @@ export function PendingReviewsList({
       >
         <Icon icon={Clock01Icon} size={48} tone="muted" className="mb-4" />
         <Text variant="h4" tone="muted">
-          {emptyMessage}
+          {emptyMessage ?? t("No pending reviews", "暂无待审核项")}
         </Text>
         <Text variant="body" tone="muted" className="mt-2 max-w-md">
           {t(
@@ -301,7 +314,7 @@ export function PendingReviewsList({
               </Text>
             </AttentionCard.Row>
             <Text variant="large" tone="body">
-              {waitingOnLine(reviewGroups)}
+              {waitingOnLine(reviewGroups, locale)}
             </Text>
           </div>
 
@@ -358,13 +371,22 @@ export function PendingReviewsList({
                           (!firstReview?.action && !isGateReview(nodeId))) && (
                           <Text variant="small" tone="muted">
                             {workflowName
-                              ? `In workflow “${workflowName}”`
-                              : `Node #${getShortenedNodeId(nodeId)}`}
+                              ? t(
+                                  `In workflow “${workflowName}”`,
+                                  `位于工作流“${workflowName}”中`,
+                                )
+                              : t(
+                                  `Node #${getShortenedNodeId(nodeId)}`,
+                                  `节点 #${getShortenedNodeId(nodeId)}`,
+                                )}
                           </Text>
                         )}
                       </div>
                       <AttentionCard.Count data-slot="pending-reviews-list-group-count">
-                        {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
+                        {t(
+                          `${reviewCount} ${reviewCount === 1 ? "review" : "reviews"}`,
+                          `${reviewCount} 项审核`,
+                        )}
                       </AttentionCard.Count>
                     </button>
                   </AttentionCard.Row>
@@ -420,7 +442,10 @@ export function PendingReviewsList({
                         >
                           {reviewCount === 1
                             ? t("Approve", "批准")
-                            : `Approve ${reviewCount} reviews`}
+                            : t(
+                                `Approve ${reviewCount} reviews`,
+                                `批准 ${reviewCount} 项审核`,
+                              )}
                         </Button>
                         <Button
                           onClick={() => processGroup(nodeId, false)}
@@ -431,7 +456,10 @@ export function PendingReviewsList({
                         >
                           {reviewCount === 1
                             ? t("Reject", "拒绝")
-                            : `Reject ${reviewCount} reviews`}
+                            : t(
+                                `Reject ${reviewCount} reviews`,
+                                `拒绝 ${reviewCount} 项审核`,
+                              )}
                         </Button>
                       </AttentionCard.Actions>
                     </div>

@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/locale";
+
 export interface TierInfo {
   key: string;
   label: string;
@@ -36,25 +38,38 @@ export const TIER_ORDER = [
   "ENTERPRISE",
 ];
 
-export function formatCost(cents: number, _tierKey: string): string {
-  if (cents === 0) return "Free";
-  return `$${(cents / 100).toFixed(2)}/mo`;
+export function formatCost(
+  cents: number,
+  _tierKey: string,
+  locale: Locale = "en",
+): string {
+  if (cents === 0) return locale === "zh-CN" ? "免费" : "Free";
+  return `$${(cents / 100).toFixed(2)}/${locale === "zh-CN" ? "月" : "mo"}`;
 }
 
-export function getTierLabel(tierKey: string): string {
-  if (tierKey === "NO_TIER") return "No subscription";
+export function getTierLabel(tierKey: string, locale: Locale = "en"): string {
+  if (tierKey === "NO_TIER")
+    return locale === "zh-CN" ? "无订阅" : "No subscription";
+  if (locale === "zh-CN") {
+    if (tierKey === "BASIC") return "基础版";
+    if (tierKey === "BUSINESS") return "团队版";
+    if (tierKey === "ENTERPRISE") return "企业版";
+  }
   return (
     TIERS.find((t) => t.key === tierKey)?.label ??
     tierKey.charAt(0) + tierKey.slice(1).toLowerCase()
   );
 }
 
-export function formatPendingDate(value: Date | string): string {
+export function formatPendingDate(
+  value: Date | string,
+  locale: Locale = "en",
+): string {
   const date = value instanceof Date ? value : new Date(value);
   // Pin to en-US so SSR and CSR produce the same string — passing `undefined`
   // picks up the server's locale during prerender and the browser's locale on
   // hydration, which triggers a React hydration mismatch warning.
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString(locale === "zh-CN" ? "zh-CN" : "en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -68,6 +83,7 @@ export function formatPendingDate(value: Date | string): string {
 export function formatRelativeMultiplier(
   tierKey: string,
   tierMultipliers: Record<string, number>,
+  locale: Locale = "en",
 ): string | null {
   const mine = tierMultipliers[tierKey];
   if (mine === undefined || mine <= 0) return null;
@@ -79,5 +95,5 @@ export function formatRelativeMultiplier(
   // in the last bits (e.g. 5.0 vs 5.0000000001) still collapse to the same
   // displayed ratio, so treat "1.0" as baseline regardless of raw values.
   if (label === "1.0") return null;
-  return `${label}x rate limits`;
+  return locale === "zh-CN" ? `${label} 倍速率上限` : `${label}x rate limits`;
 }

@@ -2,6 +2,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import type { ApprovalItem } from "../helpers";
 import type { CardStatus } from "./ApprovalCard/ApprovalCard";
 import { ApprovalHeadline } from "./ApprovalHeadline";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   item: ApprovalItem;
@@ -21,6 +22,7 @@ export function CompactApprovalLine({
   onApprove,
   onReject,
 }: Props) {
+  const { t } = useTranslation();
   const busy = status !== "idle";
   return (
     <div className="flex items-center gap-3 px-4 py-2">
@@ -41,7 +43,7 @@ export function CompactApprovalLine({
             disabled={busy}
             onClick={onApprove}
           >
-            Approve
+            {t("Approve", "批准")}
           </Button>
           <Button
             size="xs"
@@ -51,7 +53,7 @@ export function CompactApprovalLine({
             disabled={busy}
             onClick={onReject}
           >
-            Reject
+            {t("Reject", "拒绝")}
           </Button>
         </div>
       ) : (
@@ -62,7 +64,7 @@ export function CompactApprovalLine({
           className="shrink-0"
           onClick={onOpen}
         >
-          Review
+          {t("Review", "审核")}
         </Button>
       )}
     </div>

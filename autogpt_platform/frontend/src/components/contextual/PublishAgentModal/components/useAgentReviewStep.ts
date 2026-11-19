@@ -97,7 +97,7 @@ export function useAgentReviewStep({
 }: Args) {
   const pathname = usePathname();
   const isDashboardPage = pathname.includes("/settings/creator-dashboard");
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const hero = getHeroContent(status, isDashboardPage, t);
   const shouldReduceMotion = useReducedMotion();
 
@@ -119,6 +119,7 @@ export function useAgentReviewStep({
       runCount,
     },
     t,
+    locale,
   );
 
   return {

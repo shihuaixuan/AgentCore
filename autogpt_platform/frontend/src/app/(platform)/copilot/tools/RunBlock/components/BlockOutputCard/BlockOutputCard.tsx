@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/atoms/Button/Button";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { BlockOutputResponse } from "@/app/api/__generated__/models/blockOutputResponse";
 import {
   globalRegistry,
@@ -49,6 +50,7 @@ function OutputKeySection({
   outputKey: string;
   items: unknown[];
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const hasMoreItems = items.length > COLLAPSED_LIMIT;
   const visibleItems = expanded ? items : items.slice(0, COLLAPSED_LIMIT);
@@ -58,7 +60,10 @@ function OutputKeySection({
       <div className="flex items-center justify-between gap-2">
         <ContentCardTitle size="small">{outputKey}</ContentCardTitle>
         <ContentBadge>
-          {items.length} item{items.length === 1 ? "" : "s"}
+          {t(
+            `${items.length} item${items.length === 1 ? "" : "s"}`,
+            `${items.length} 项`,
+          )}
         </ContentBadge>
       </div>
       <div className="mt-2">
@@ -73,7 +78,12 @@ function OutputKeySection({
           className="mt-1 h-auto px-0 py-0.5 text-caption-sm leading-inherit"
           onClick={() => setExpanded((prev) => !prev)}
         >
-          {expanded ? "Show less" : `Show all ${items.length} items`}
+          {expanded
+            ? t("Show less", "收起")
+            : t(
+                `Show all ${items.length} items`,
+                `显示全部 ${items.length} 项`,
+              )}
         </Button>
       )}
     </ContentCard>
@@ -81,12 +91,18 @@ function OutputKeySection({
 }
 
 export function BlockOutputCard({ output }: Props) {
+  const { t } = useTranslation();
   return (
     <ContentGrid>
       {output.is_dry_run && (
         <div className="flex items-center gap-1.5 rounded-md border border-warning-border bg-warning-surface px-2.5 py-1.5 text-caption font-medium text-warning-foreground">
           <span>⚡</span>
-          <span>Simulated — no real execution occurred</span>
+          <span>
+            {t(
+              "Simulated — no real execution occurred",
+              "模拟结果 — 未实际执行",
+            )}
+          </span>
         </div>
       )}
       <ContentMessage>{output.message}</ContentMessage>

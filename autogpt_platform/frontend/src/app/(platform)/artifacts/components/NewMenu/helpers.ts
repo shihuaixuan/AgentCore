@@ -1,5 +1,6 @@
 import { bulkMoveWorkspaceFiles } from "@/app/api/__generated__/endpoints/workspace/workspace";
 import { uploadFileDirect } from "@/lib/direct-upload";
+import type { Locale } from "@/lib/i18n/locale";
 
 export interface UploadOutcome {
   uploaded: number;
@@ -14,16 +15,22 @@ export interface UploadOutcome {
 export async function uploadFiles(
   files: File[],
   folderId: string | null,
+  locale: Locale = "en",
 ): Promise<UploadOutcome> {
   const outcome: UploadOutcome = { uploaded: 0, leftAtRoot: [], failed: [] };
   for (const file of files) {
     let fileId: string;
     try {
-      fileId = (await uploadFileDirect(file)).file_id;
+      fileId = (await uploadFileDirect(file, undefined, locale)).file_id;
     } catch (error) {
       outcome.failed.push({
         name: file.name,
-        message: error instanceof Error ? error.message : "Please try again.",
+        message:
+          error instanceof Error
+            ? error.message
+            : locale === "zh-CN"
+              ? "请重试。"
+              : "Please try again.",
       });
       continue;
     }

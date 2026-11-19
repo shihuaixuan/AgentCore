@@ -89,18 +89,24 @@ export function useSkillPage(slug: string) {
           queryClient.invalidateQueries({
             queryKey: getGetExpertQueryKey(expert.id),
           });
-          toast({ title: `Installed on ${expert.name}`, variant: "success" });
+          toast({
+            title: t(`Installed on ${expert.name}`, `已为 ${expert.name} 安装`),
+            variant: "success",
+          });
         },
         onError: (error, variables) => {
           const status = (error as { status?: number }).status;
           const expert = findExpert(variables.params?.expert_id);
           toast({
             title: expert
-              ? `Couldn't add this skill to ${expert.name}`
-              : "Couldn't add this skill",
+              ? t(
+                  `Couldn't add this skill to ${expert.name}`,
+                  `无法为 ${expert.name} 添加此技能`,
+                )
+              : t("Couldn't add this skill", "无法添加此技能"),
             description:
               status === 401
-                ? "Sign in and try again."
+                ? t("Sign in and try again.", "请登录后重试。")
                 : error instanceof Error
                   ? error.message
                   : t("Please try again.", "请重试。"),

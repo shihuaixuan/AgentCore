@@ -1,6 +1,7 @@
 "use client";
 
 import type { RaiseAttachmentDraft } from "../../helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AttachmentStep } from "../KitStep/AttachmentStep";
 
 interface Props {
@@ -22,17 +23,34 @@ export function MarketplaceStep({
   onSubmit,
   onSkip,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <AttachmentStep
       color={color}
       submitted={submitted}
       isSubmitting={isSubmitting}
       scope="marketplace"
-      searchLabel="Search marketplace and library workflows"
-      searchPlaceholder="Search marketplace and library workflows…"
-      emptyQueryHint="Search to add marketplace or library workflows."
-      emptyResultsHint="No matching workflows."
-      primaryLabel={isFinal ? `Bring ${name || "them"} to life` : "That's it"}
+      searchLabel={t(
+        "Search marketplace and library workflows",
+        "搜索市场和库中的工作流",
+      )}
+      searchPlaceholder={t(
+        "Search marketplace and library workflows…",
+        "搜索市场和库中的工作流…",
+      )}
+      emptyQueryHint={t(
+        "Search to add marketplace or library workflows.",
+        "搜索并添加市场或库中的工作流。",
+      )}
+      emptyResultsHint={t("No matching workflows.", "没有匹配的工作流。")}
+      primaryLabel={
+        isFinal
+          ? t(
+              `Bring ${name || "them"} to life`,
+              `创建${name ? ` ${name}` : "专家"}`,
+            )
+          : t("That's it", "就这样")
+      }
       onSubmit={onSubmit}
       onSkip={onSkip}
     />

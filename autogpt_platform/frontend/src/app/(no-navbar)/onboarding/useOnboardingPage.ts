@@ -1,5 +1,6 @@
 import { postV1CompleteOnboardingStep } from "@/app/api/__generated__/endpoints/onboarding/onboarding";
 import { useAuth } from "@/lib/auth/hooks/useAuth";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { trackAdsConversion } from "@/services/analytics/google-ads";
 import { trackTrialCheckoutAbandoned } from "@/services/analytics/monetization-analytics";
 import { environment } from "@/services/environment";
@@ -14,6 +15,7 @@ import { useOnboardingProfile } from "./useOnboardingProfile";
 import { useWizardProgress } from "./useWizardProgress";
 
 export function useOnboardingPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoggedIn, isUserLoading, user } = useAuth();
@@ -139,7 +141,9 @@ export function useOnboardingPage() {
     retryProgress: progress.retry,
     completionError:
       profile.error ??
-      (completionError?.userID === user?.id ? completionError?.message : null),
+      (completionError?.userID === user?.id && completionError
+        ? t(completionError.message, "无法完成账户设置。进度已保存，请重试。")
+        : null),
     handlePreparingComplete,
     isPaymentEnabled,
     // The plan's team joins once nothing is left to pay for: the trial or

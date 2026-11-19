@@ -8,6 +8,7 @@ import {
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { ExportCopilotUsageButton } from "../components/ExportCopilotUsageButton";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const toastSpy = vi.fn();
 vi.mock("@/components/molecules/Toast/use-toast", () => ({
@@ -31,6 +32,24 @@ afterEach(() => {
 });
 
 describe("ExportCopilotUsageButton", () => {
+  test("localizes the export dialog while preserving date input values", async () => {
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <ExportCopilotUsageButton />
+      </LanguageProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Copilot 用量 CSV" }));
+    const start = (await screen.findByLabelText(
+      "开始日期（UTC）",
+    )) as HTMLInputElement;
+    fireEvent.change(start, { target: { value: "2026-11-01" } });
+    expect(start.value).toBe("2026-11-01");
+    expect(screen.getByLabelText("结束日期（UTC）")).toBeDefined();
+    expect(screen.getByRole("button", { name: "下载 CSV" })).toBeDefined();
+    expect(
+      screen.getByText("时间范围最多为 90 天，最多导出 10 万行。"),
+    ).toBeDefined();
+  });
   test("renders the trigger button", () => {
     render(<ExportCopilotUsageButton />);
     expect(

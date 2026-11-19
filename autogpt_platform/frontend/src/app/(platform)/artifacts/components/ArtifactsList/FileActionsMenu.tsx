@@ -51,7 +51,7 @@ export function FileActionsMenu({ file, className }: Props) {
         <DropdownMenuTrigger asChild>
           <button
             type="button"
-            aria-label={`Actions for ${file.name}`}
+            aria-label={t(`Actions for ${file.name}`, `${file.name} 的操作`)}
             className={cn(
               "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground-tertiary transition-colors hover:bg-surface-hover hover:text-foreground-strong",
               className,
@@ -74,7 +74,9 @@ export function FileActionsMenu({ file, className }: Props) {
             ) : (
               <Icon icon={Download04Icon} size={16} className="mr-2" />
             )}
-            {isDownloading ? "Downloading…" : t("Download", "下载")}
+            {isDownloading
+              ? t("Downloading…", "正在下载…")
+              : t("Download", "下载")}
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href={goHref} data-testid="artifacts-origin-link">
@@ -121,7 +123,7 @@ export function FileActionsMenu({ file, className }: Props) {
             ) : (
               <Icon icon={Delete02Icon} size={16} className="mr-2" />
             )}
-            {isDeleting ? "Deleting…" : t("Delete", "删除")}
+            {isDeleting ? t("Deleting…", "正在删除…") : t("Delete", "删除")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

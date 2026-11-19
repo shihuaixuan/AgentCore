@@ -4,6 +4,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { Alert, AlertDescription } from "@/components/molecules/Alert/Alert";
 import { Checkbox } from "@/components/atoms/Checkbox/Checkbox";
 import type { AlsoBlockOption } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   options: AlsoBlockOption[];
@@ -22,6 +23,7 @@ export function AlsoBlockList({
   alreadyBlockedDomain,
   ownIP,
 }: Props) {
+  const { t } = useTranslation();
   const blocksOwnIP = options.some(
     (option) =>
       option.kind === "IP" && option.value === ownIP && ticked.has(option.key),
@@ -32,7 +34,7 @@ export function AlsoBlockList({
   return (
     <div className="flex flex-col gap-2">
       <Text variant="small-medium" tone="body">
-        Also block
+        {t("Also block", "同时阻止")}
       </Text>
       {options.map((option) => (
         <label
@@ -48,7 +50,7 @@ export function AlsoBlockList({
             onCheckedChange={() => onToggle(option.key)}
           />
           <Text variant="body" as="span" tone="body">
-            Block{" "}
+            {t("Block", "阻止")}{" "}
             <span className="font-medium" translate="no">
               {option.label}
             </span>{" "}
@@ -58,15 +60,17 @@ export function AlsoBlockList({
       ))}
       {alreadyBlockedDomain ? (
         <Text variant="body" tone="muted">
-          <span className="font-medium">{alreadyBlockedDomain}</span> · already
-          blocked
+          <span className="font-medium">{alreadyBlockedDomain}</span> ·{" "}
+          {t("already blocked", "已阻止")}
         </Text>
       ) : null}
       {blocksOwnIP ? (
         <Alert variant="warning">
           <AlertDescription>
-            You&apos;re signed in from {ownIP}. You&apos;d be refused at your
-            next sign-in too.
+            {t(
+              `You're signed in from ${ownIP}. You'd be refused at your next sign-in too.`,
+              `你当前正从 ${ownIP} 登录。你的下次登录也会被拒绝。`,
+            )}
           </AlertDescription>
         </Alert>
       ) : null}

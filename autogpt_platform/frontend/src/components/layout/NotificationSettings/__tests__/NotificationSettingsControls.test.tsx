@@ -8,6 +8,7 @@ import {
 } from "@/app/(platform)/copilot/store";
 import { NotificationSettingsControls } from "../NotificationSettingsControls";
 import { useNotificationSettings } from "../useNotificationSettings";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 vi.mock("@sentry/nextjs", () => ({ captureException: vi.fn() }));
 
@@ -63,6 +64,26 @@ describe("NotificationSettingsControls", () => {
   });
 
   afterEach(() => cleanup());
+
+  it("localizes the browser permission fallback without enabling notifications", async () => {
+    setPermission("default");
+    render(
+      <LanguageProvider>
+        <NotificationSettingsControls />
+      </LanguageProvider>,
+    );
+    await userEvent.click(screen.getByRole("switch", { name: "通知" }));
+    await waitFor(() =>
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "未开启通知",
+          description:
+            "浏览器未确认通知权限。请重试，或通过地址栏中的图标允许通知。",
+        }),
+      ),
+    );
+    expect(useCopilotUIStore.getState().isNotificationsEnabled).toBe(false);
+  });
 
   it("turns notifications back off — the switch is not one-way", async () => {
     setPermission("granted");

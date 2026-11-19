@@ -1,15 +1,18 @@
 "use client";
 
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+
 import { cn } from "@/lib/utils";
 import { MAX_SEARCH_RESULTS } from "./helpers";
 
 // Mirrors KitResultRow's geometry so results drop straight into the
 // skeleton's footprint — no reflow when the query resolves.
 export function KitSearchSkeleton() {
+  const { t } = useTranslation();
   return (
     <div
       role="status"
-      aria-label="Searching"
+      aria-label={t("Searching", "正在搜索")}
       className="w-full max-w-[42rem] overflow-hidden rounded-2xl border border-border-base bg-canvas duration-200 animate-in fade-in motion-reduce:animate-none"
     >
       {Array.from({ length: MAX_SEARCH_RESULTS }, (_, index) => (

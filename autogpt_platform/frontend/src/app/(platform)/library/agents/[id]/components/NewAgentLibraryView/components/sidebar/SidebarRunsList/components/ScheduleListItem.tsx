@@ -3,6 +3,8 @@
 import { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { formatDistanceToNow } from "date-fns";
+import { zhCN } from "date-fns/locale";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { IconWrapper } from "./IconWrapper";
 import { ScheduleActionsDropdown } from "./ScheduleActionsDropdown";
 import { SidebarItemCard } from "./SidebarItemCard";
@@ -26,13 +28,15 @@ export function ScheduleListItem({
   onDeleted,
   onRunCreated,
 }: Props) {
+  const { locale } = useTranslation();
   return (
     <SidebarItemCard
       title={schedule.name}
       description={formatDistanceToNow(schedule.next_run_time, {
         addSuffix: true,
+        locale: locale === "zh-CN" ? zhCN : undefined,
       })}
-      descriptionTitle={new Date(schedule.next_run_time).toString()}
+      descriptionTitle={new Date(schedule.next_run_time).toLocaleString(locale)}
       onClick={onClick}
       selected={selected}
       icon={

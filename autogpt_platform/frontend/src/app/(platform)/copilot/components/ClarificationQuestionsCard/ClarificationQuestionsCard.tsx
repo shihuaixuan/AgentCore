@@ -12,6 +12,7 @@ import {
   CheckmarkCircle02Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   questions: ClarifyingQuestion[];
@@ -32,6 +33,7 @@ export function ClarificationQuestionsCard({
   isAnswered = false,
   className,
 }: Props) {
+  const { t } = useTranslation();
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const lastSessionIdRef = useRef<string | undefined>(undefined);
@@ -121,10 +123,10 @@ export function ClarificationQuestionsCard({
           <div className="flex min-w-0 flex-1 flex-col">
             <Card className="p-4">
               <Text tone="primary" variant="h4" className="mb-1">
-                Answers submitted
+                {t("Answers submitted", "回答已提交")}
               </Text>
               <Text tone="secondary" variant="small">
-                Processing your responses...
+                {t("Processing your responses...", "正在处理你的回答…")}
               </Text>
             </Card>
           </div>
@@ -147,7 +149,7 @@ export function ClarificationQuestionsCard({
               <div className="flex gap-3">
                 <Icon icon={Chatting01Icon} className="size-6" />
                 <Text tone="primary" variant="h4" className="mb-1">
-                  I need more information
+                  {t("I need more information", "需要更多信息")}
                 </Text>
               </div>
               <Text tone="secondary" variant="body">
@@ -198,7 +200,7 @@ export function ClarificationQuestionsCard({
                             italic
                             className="mb-2"
                           >
-                            Example: {q.example}
+                            {t(`Example: ${q.example}`, `示例：${q.example}`)}
                           </Text>
                         )}
                         <Input
@@ -206,7 +208,7 @@ export function ClarificationQuestionsCard({
                           id={`clarification-${q.keyword}-${index}`}
                           label={q.question}
                           hideLabel
-                          placeholder="Your answer..."
+                          placeholder={t("Your answer...", "请输入你的回答…")}
                           rows={2}
                           value={answers[q.keyword] || ""}
                           onChange={(e) =>
@@ -227,11 +229,11 @@ export function ClarificationQuestionsCard({
                 className="w-auto flex-1"
                 variant="primary"
               >
-                Submit Answers
+                {t("Submit Answers", "提交回答")}
               </Button>
               {onCancel && (
                 <Button onClick={onCancel} variant="outline">
-                  Cancel
+                  {t("Cancel", "取消")}
                 </Button>
               )}
             </div>

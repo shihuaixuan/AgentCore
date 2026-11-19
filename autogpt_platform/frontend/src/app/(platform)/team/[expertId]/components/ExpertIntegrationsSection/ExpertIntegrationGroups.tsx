@@ -36,6 +36,22 @@ const CONNECTION_LABELS: Record<string, string> = {
   device_code: "Connected via device auth",
 };
 
+const TYPE_LABELS_ZH: Record<string, string> = {
+  api_key: "API 密钥",
+  oauth2: "OAuth",
+  user_password: "用户名和密码",
+  host_scoped: "主机",
+  device_code: "设备授权",
+};
+
+const CONNECTION_LABELS_ZH: Record<string, string> = {
+  api_key: "已配置 API 密钥",
+  oauth2: "已通过 OAuth 连接",
+  user_password: "已设置用户名和密码",
+  host_scoped: "已配置主机",
+  device_code: "已通过设备授权连接",
+};
+
 const CONTAINER_VARIANTS: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
@@ -88,6 +104,7 @@ export function ExpertIntegrationGroups({
   isRemoving,
   onRemove,
 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const groups = groupExpertIntegrations(integrations);
 
@@ -123,7 +140,7 @@ export function ExpertIntegrationGroups({
                   <span className="inline-flex shrink-0 overflow-hidden rounded-full bg-surface">
                     <IntegrationLogo
                       provider={group.icon}
-                      alt={`${group.name} logo`}
+                      alt={t(`${group.name} logo`, `${group.name} 标志`)}
                       size={20}
                     />
                   </span>
@@ -180,7 +197,10 @@ function ExpertIntegrationRow({ integration, isRemoving, onRemove }: RowProps) {
           <span className="inline-flex items-center justify-center rounded-md bg-surface-hover px-1.5 py-0.5 font-sans text-caption leading-4 text-foreground-secondary">
             {integration.customConnections
               ? t("Custom MCP", "自定义 MCP")
-              : (TYPE_LABELS[integration.type] ?? integration.type)}
+              : t(
+                  TYPE_LABELS[integration.type] ?? integration.type,
+                  TYPE_LABELS_ZH[integration.type] ?? integration.type,
+                )}
           </span>
         </div>
         {integration.customConnections ? (
@@ -189,7 +209,10 @@ function ExpertIntegrationRow({ integration, isRemoving, onRemove }: RowProps) {
           />
         ) : (
           <Text variant="body-md" as="span" tone="muted">
-            {CONNECTION_LABELS[integration.type] ?? "Configured"}
+            {t(
+              CONNECTION_LABELS[integration.type] ?? "Configured",
+              CONNECTION_LABELS_ZH[integration.type] ?? "已配置",
+            )}
           </Text>
         )}
       </div>
@@ -207,7 +230,7 @@ function ExpertIntegrationRow({ integration, isRemoving, onRemove }: RowProps) {
           onClick={onRemove}
           disabled={isRemoving}
           aria-busy={isRemoving}
-          aria-label={`Remove ${name}`}
+          aria-label={t(`Remove ${name}`, `移除 ${name}`)}
           className="inline-flex size-7 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-surface-hover hover:text-error focus-visible:ring-1 focus-visible:ring-foreground-subtle focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isRemoving ? (

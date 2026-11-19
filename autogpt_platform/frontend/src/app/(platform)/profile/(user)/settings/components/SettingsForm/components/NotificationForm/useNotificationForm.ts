@@ -7,6 +7,7 @@ import { useToast } from "@/components/molecules/Toast/use-toast";
 import { NotificationPreference } from "@/app/api/__generated__/models/notificationPreference";
 import type { User } from "@/lib/auth/types";
 import { usePostV1UpdateNotificationPreferences } from "@/app/api/__generated__/endpoints/auth/auth";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 // The volume knob from the Briefing footer, not a checkbox list. Billing and
 // account messages are service mail and are deliberately absent — they are
@@ -37,6 +38,7 @@ export function useNotificationForm({
   preferences: NotificationPreference;
   user: User;
 }) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const defaultValues = createNotificationDefaultValues(preferences);
 
@@ -49,11 +51,14 @@ export function useNotificationForm({
     mutation: {
       onError: (error) => {
         toast({
-          title: "Error updating notifications",
+          title: t("Error updating notifications", "更新通知设置时出错"),
           description:
             error instanceof Error
               ? error.message
-              : "Failed to update notification preferences",
+              : t(
+                  "Failed to update notification preferences",
+                  "更新通知偏好设置失败",
+                ),
           variant: "destructive",
         });
       },
@@ -72,13 +77,18 @@ export function useNotificationForm({
       });
 
       toast({
-        title: "Successfully updated notification preferences",
+        title: t(
+          "Successfully updated notification preferences",
+          "通知偏好设置已更新",
+        ),
       });
     } catch (error) {
       toast({
-        title: "Error updating notifications",
+        title: t("Error updating notifications", "更新通知设置时出错"),
         description:
-          error instanceof Error ? error.message : "Something went wrong",
+          error instanceof Error
+            ? error.message
+            : t("Something went wrong", "出现了问题"),
         variant: "destructive",
       });
     }

@@ -7,6 +7,7 @@ import { okData } from "@/app/api/helpers";
 import { isInternalToolOutput } from "@/app/(platform)/copilot/components/ContextPanel/components/FilesTab/helpers";
 import { isHiddenWorkspaceFile } from "@/lib/workspace-files";
 import { getChartDays, getWindowStat } from "./helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export const RECENT_CONVERSATIONS_LIMIT = 5;
 const OUTPUTS_LIMIT = 200;
@@ -15,6 +16,7 @@ export function useExpertOverview(
   expertId: string,
   activity: ExpertActivity | null,
 ) {
+  const { locale } = useTranslation();
   const sessionsQuery = useGetV2ListSessions(
     { expert_id: expertId, limit: RECENT_CONVERSATIONS_LIMIT },
     { query: { select: okData } },
@@ -30,7 +32,7 @@ export function useExpertOverview(
   );
 
   return {
-    chartDays: getChartDays(days),
+    chartDays: getChartDays(days, locale),
     hasActivity: days.some((day) => day.sessions > 0 || day.runs > 0),
     conversations: getWindowStat(days, "sessions"),
     runs: getWindowStat(days, "runs"),

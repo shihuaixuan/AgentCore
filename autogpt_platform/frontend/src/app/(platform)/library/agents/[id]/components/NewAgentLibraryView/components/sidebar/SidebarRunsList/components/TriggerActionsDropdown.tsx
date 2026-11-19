@@ -42,7 +42,7 @@ export function TriggerActionsDropdown({ agent, trigger, onDeleted }: Props) {
       await deletePreset({ presetId: trigger.id });
 
       toast({
-        title: "Trigger deleted",
+        title: t("Trigger deleted", "触发器已删除"),
       });
 
       queryClient.invalidateQueries({

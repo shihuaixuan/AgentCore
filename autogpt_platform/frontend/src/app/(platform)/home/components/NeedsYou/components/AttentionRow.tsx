@@ -102,7 +102,12 @@ export function AttentionRow({ item, isProcessing, onDecision }: Props) {
         />
       </div>
       <span className="sr-only" aria-live="polite">
-        {confirmDecline ? `Press again to decline ${item.title}` : ""}
+        {confirmDecline
+          ? t(
+              `Press again to decline ${item.title}`,
+              `再次点击以拒绝 ${item.title}`,
+            )
+          : ""}
       </span>
     </article>
   );

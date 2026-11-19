@@ -1,4 +1,5 @@
 import { Button } from "@/components/atoms/Button/Button";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { MaxUpgradeSummary } from "./MaxUpgradeSummary";
@@ -9,12 +10,13 @@ interface Props {
 }
 
 export function MaxUpgradeReview({ review }: Props) {
+  const { t } = useTranslation();
   return (
     <div aria-live="polite">
       {review.isLoading && (
         <div className="space-y-3">
           <Text variant="small" tone="secondary">
-            Reviewing your charge…
+            {t("Reviewing your charge…", "正在核对费用…")}
           </Text>
           <Skeleton className="h-48 rounded-2xl" />
         </div>
@@ -29,7 +31,7 @@ export function MaxUpgradeReview({ review }: Props) {
             {review.error}
           </Text>
           <Button variant="secondary" size="small" onClick={review.retry}>
-            Retry review
+            {t("Retry review", "重新核对")}
           </Button>
         </div>
       )}

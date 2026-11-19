@@ -1,5 +1,6 @@
 "use client";
 import type { ToolUIPart } from "ai";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { MorphingTextAnimation } from "../../components/MorphingTextAnimation/MorphingTextAnimation";
 import { ToolAccordion } from "../../components/ToolAccordion/ToolAccordion";
 import { MCPSetupCard } from "./components/MCPSetupCard/MCPSetupCard";
@@ -35,7 +36,8 @@ interface Props {
 }
 
 export function RunMCPToolComponent({ part }: Props) {
-  const text = getAnimationText(part);
+  const { t } = useTranslation();
+  const text = getAnimationText(part, t);
   const isStreaming =
     part.state === "input-streaming" || part.state === "input-available";
 
@@ -72,15 +74,21 @@ export function RunMCPToolComponent({ part }: Props) {
       <div className="flex items-center gap-2 text-body text-foreground-tertiary">
         <ToolIcon isStreaming={isStreaming} isError={isError} />
         <MorphingTextAnimation
-          text={isCorrupted ? "Tool result could not be displayed" : text}
+          text={
+            isCorrupted
+              ? t("Tool result could not be displayed", "无法显示工具结果")
+              : text
+          }
           className={isError ? "text-error" : undefined}
         />
       </div>
 
       {isCorrupted && (
         <Text variant="body-tight" tone="error" className="mt-1">
-          The result data arrived corrupted, so any sign-in or setup card it
-          contained can&apos;t be shown. Ask your expert to retry this step.
+          {t(
+            "The result data arrived corrupted, so any sign-in or setup card it contained can't be shown. Ask your expert to retry this step.",
+            "收到的结果数据已损坏，无法显示其中的登录或设置卡片。请让你的专家重试此步骤。",
+          )}
         </Text>
       )}
 
@@ -109,7 +117,10 @@ export function RunMCPToolComponent({ part }: Props) {
         <ToolAccordion
           icon={<Icon icon={PlugSocketIcon} size={32} />}
           title={mcpToolOutput.tool_name}
-          description={`from ${serverHost(mcpToolOutput.server_url)}`}
+          description={t(
+            `from ${serverHost(mcpToolOutput.server_url)}`,
+            `来自 ${serverHost(mcpToolOutput.server_url)}`,
+          )}
         >
           <MCPToolOutputCard output={mcpToolOutput} />
         </ToolAccordion>

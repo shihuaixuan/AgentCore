@@ -3,7 +3,10 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Icon } from "@/components/atoms/Icon/Icon";
-import { skillDetailHref } from "@/services/skill-learning/helpers";
+import {
+  getLearningLabel,
+  skillDetailHref,
+} from "@/services/skill-learning/helpers";
 import { BookBookmarkIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { CARD, HALF } from "./ResultCards";
@@ -15,11 +18,14 @@ interface Props {
 }
 
 export function SkillLoadedCard({ output }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const name = str(output, "name");
   const version = output.version;
   if (!name || typeof version !== "number") return null;
-  const origin = str(output, "origin_label") ?? t("Saved", "已保存");
+  const origin = getLearningLabel(
+    str(output, "origin_label") ?? t("Saved", "已保存"),
+    locale,
+  );
   const href = skillDetailHref({
     expertId: str(output, "expert_id"),
     skillName: name,

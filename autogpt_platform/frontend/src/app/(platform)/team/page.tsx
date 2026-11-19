@@ -3,6 +3,7 @@
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { InstallWorkflowPicker } from "@/components/molecules/InstallWorkflowPicker/InstallWorkflowPicker";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 import { EmptyTeamState } from "./components/EmptyTeamState";
 import { ExpertChatDrawer } from "./components/ExpertChatDrawer/ExpertChatDrawer";
@@ -19,6 +20,7 @@ const MAIN_CLASS =
   "mx-auto min-h-screen w-full max-w-[1180px] space-y-5 px-4 pb-16 pt-6 duration-500 sm:px-8 md:px-12 animate-in fade-in slide-in-from-bottom-2 fill-mode-both motion-reduce:animate-none";
 
 export default function TeamPage() {
+  const { t } = useTranslation();
   const {
     hiredExperts,
     schedulesForExpert,
@@ -62,8 +64,11 @@ export default function TeamPage() {
 
         {isError ? (
           <ErrorCard
-            context="your team"
-            hint="We could not load your hired experts."
+            context={t("your team", "你的团队")}
+            hint={t(
+              "We could not load your hired experts.",
+              "无法加载你已聘请的专家。",
+            )}
             onRetry={() => refetch()}
           />
         ) : null}

@@ -53,8 +53,10 @@ export function PodBoard({
             {openGroup.pod.name}
           </Text>
           <Text variant="small" tone="muted">
-            {openGroup.experts.length}{" "}
-            {openGroup.experts.length === 1 ? "expert" : "experts"}
+            {t(
+              `${openGroup.experts.length} ${openGroup.experts.length === 1 ? "expert" : "experts"}`,
+              `${openGroup.experts.length} 位专家`,
+            )}
           </Text>
         </div>
         {openGroup.experts.length > 0 ? (
@@ -144,7 +146,10 @@ function PodFolder({ name, experts, onOpen }: PodFolderProps) {
             {name}
           </Text>
           <Text variant="small" tone="muted">
-            {experts.length} {experts.length === 1 ? "expert" : "experts"}
+            {t(
+              `${experts.length} ${experts.length === 1 ? "expert" : "experts"}`,
+              `${experts.length} 位专家`,
+            )}
           </Text>
         </div>
       </div>

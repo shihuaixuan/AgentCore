@@ -3,7 +3,8 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { APIKeyPermission } from "@/app/api/__generated__/models/aPIKeyPermission";
 import { Text } from "@/components/atoms/Text/Text";
 
-import { PERMISSION_GROUPS } from "../schema";
+import { humanizePermission, PERMISSION_GROUPS } from "../schema";
+import { getScopeDescription } from "@/lib/api-key-scopes";
 import { CheckmarkSquare02Icon, SquareIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 
@@ -52,6 +53,12 @@ interface GroupProps {
 }
 
 function PermissionGroup({ group, value, onToggle }: GroupProps) {
+  const { t, locale } = useTranslation();
+  const groupLabels = {
+    v2: "API v2",
+    both: "API v1 和 v2",
+    v1: "仅 API v1（2027-02-01 停止支持）",
+  };
   const headingID = `api-key-scopes-${group.version}`;
 
   return (
@@ -61,7 +68,7 @@ function PermissionGroup({ group, value, onToggle }: GroupProps) {
       className="flex flex-col gap-1"
     >
       <Text id={headingID} variant="small-medium" as="span" tone="secondary">
-        {group.label}
+        {t(group.label, groupLabels[group.version])}
       </Text>
       {group.options.map((option) => {
         const checked = value.includes(option.value);
@@ -85,7 +92,7 @@ function PermissionGroup({ group, value, onToggle }: GroupProps) {
             />
             <span className="flex min-w-0 flex-col">
               <Text id={labelID} variant="body" as="span" tone="body">
-                {option.label}
+                {humanizePermission(option.value, locale)}
               </Text>
               <Text
                 id={`${labelID}-description`}
@@ -93,7 +100,7 @@ function PermissionGroup({ group, value, onToggle }: GroupProps) {
                 as="span"
                 tone="secondary"
               >
-                {option.description}
+                {getScopeDescription(option.value, locale)}
               </Text>
             </span>
           </button>

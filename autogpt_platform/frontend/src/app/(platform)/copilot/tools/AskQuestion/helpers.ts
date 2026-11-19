@@ -62,20 +62,25 @@ export function isErrorOutput(
   return output.type === "error" || "error" in output;
 }
 
-export function getAnimationText(part: ToolUIPart): string {
+export function getAnimationText(
+  part: ToolUIPart,
+  t = (english: string, _chinese: string) => english,
+): string {
   switch (part.state) {
     case "input-streaming":
     case "input-available":
-      return "Asking question...";
+      return t("Asking question...", "正在提问…");
     case "output-available": {
       const output = parseOutput(part.output);
-      if (output && isClarificationOutput(output)) return "Needs your input";
-      if (output && isErrorOutput(output)) return "Failed to ask question";
-      return "Asking question...";
+      if (output && isClarificationOutput(output))
+        return t("Needs your input", "需要你的回答");
+      if (output && isErrorOutput(output))
+        return t("Failed to ask question", "提问失败");
+      return t("Asking question...", "正在提问…");
     }
     case "output-error":
-      return "Failed to ask question";
+      return t("Failed to ask question", "提问失败");
     default:
-      return "Asking question...";
+      return t("Asking question...", "正在提问…");
   }
 }

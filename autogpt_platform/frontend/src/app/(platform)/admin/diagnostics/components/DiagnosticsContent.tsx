@@ -65,9 +65,14 @@ export function DiagnosticsContent() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-heading font-bold">{t("System Diagnostics", "系统诊断")}</h1>
+          <h1 className="text-heading font-bold">
+            {t("System Diagnostics", "系统诊断")}
+          </h1>
           <p className="text-foreground-tertiary">
-            {t("Monitor execution and agent system health", "监控执行情况和工作流系统健康状态")}
+            {t(
+              "Monitor execution and agent system health",
+              "监控执行情况和工作流系统健康状态",
+            )}
           </p>
         </div>
         <Button
@@ -100,7 +105,8 @@ export function DiagnosticsContent() {
                 detail={
                   <>
                     {executionData.orphaned_running} {t("running", "运行中")}，{" "}
-                    {executionData.orphaned_queued} {t("queued", "排队中")}（{">"}24h）
+                    {executionData.orphaned_queued} {t("queued", "排队中")}（
+                    {">"}24h）
                   </>
                 }
                 hint={t("Click to view →", "点击查看 →")}
@@ -113,12 +119,10 @@ export function DiagnosticsContent() {
                 tone="error"
                 title={t("Failed Executions (24h)", "失败执行（24 小时）")}
                 value={executionData.failed_count_24h}
-                detail={
-                  <>
-                    {executionData.failed_count_1h} {t("in last hour", "过去一小时")}（
-                    {executionData.failure_rate_24h.toFixed(1)}/hr）
-                  </>
-                }
+                detail={t(
+                  `${executionData.failed_count_1h} in last hour (${executionData.failure_rate_24h.toFixed(1)}/hr)`,
+                  `过去一小时 ${executionData.failed_count_1h} 次（${executionData.failure_rate_24h.toFixed(1)} 次/小时）`,
+                )}
                 hint={t("Click to view →", "点击查看 →")}
                 onClick={() => setActiveTab("failed")}
               />
@@ -134,7 +138,7 @@ export function DiagnosticsContent() {
                     {t("Running", "运行时间")} {">"}24h（{t("oldest", "最早")}：{" "}
                     {executionData.oldest_running_hours
                       ? `${Math.floor(executionData.oldest_running_hours)}h`
-                : t("N/A", "无")}
+                      : t("N/A", "无")}
                     ）
                   </>
                 }
@@ -165,7 +169,10 @@ export function DiagnosticsContent() {
               executionData.invalid_running_without_start > 0) && (
               <DiagnosticAlertCard
                 tone="pink"
-                title={t("Invalid States (Data Corruption)", "无效状态（数据损坏）")}
+                title={t(
+                  "Invalid States (Data Corruption)",
+                  "无效状态（数据损坏）",
+                )}
                 value={
                   executionData.invalid_queued_with_start +
                   executionData.invalid_running_without_start
@@ -214,7 +221,10 @@ export function DiagnosticsContent() {
                     </p>
                     {executionData.stuck_queued_1h > 0 && (
                       <p className="text-caption text-orange-foreground">
-                        {executionData.stuck_queued_1h} stuck {">"}1h
+                        {t(
+                          `${executionData.stuck_queued_1h} stuck >1h`,
+                          `${executionData.stuck_queued_1h} 个已卡住超过 1 小时`,
+                        )}
                       </p>
                     )}
                   </div>
@@ -230,7 +240,9 @@ export function DiagnosticsContent() {
                     </Text>
                     <p className="text-heading font-bold">
                       {executionData.queued_executions_rabbitmq === -1 ? (
-                        <span className="text-lead text-error">{t("Error", "错误")}</span>
+                        <span className="text-lead text-error">
+                          {t("Error", "错误")}
+                        </span>
                       ) : (
                         executionData.queued_executions_rabbitmq
                       )}
@@ -261,7 +273,9 @@ export function DiagnosticsContent() {
                 </div>
               </div>
             ) : (
-              <p className="text-foreground-tertiary">{t("No data available", "暂无数据")}</p>
+              <p className="text-foreground-tertiary">
+                {t("No data available", "暂无数据")}
+              </p>
             )}
           </CardContent>
         </Card>
@@ -270,7 +284,10 @@ export function DiagnosticsContent() {
           <CardHeader>
             <CardTitle>{t("System Throughput", "系统吞吐量")}</CardTitle>
             <CardDescription>
-              {t("Execution completion and processing rates", "执行完成和处理速率")}
+              {t(
+                "Execution completion and processing rates",
+                "执行完成和处理速率",
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -285,7 +302,8 @@ export function DiagnosticsContent() {
                       {executionData.completed_24h}
                     </p>
                     <Text variant="small-tight" tone="secondary">
-                      {executionData.completed_1h} {t("in last hour", "过去一小时")}
+                      {executionData.completed_1h}{" "}
+                      {t("in last hour", "过去一小时")}
                     </Text>
                   </div>
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/30">
@@ -317,7 +335,9 @@ export function DiagnosticsContent() {
                     </Text>
                     <p className="text-heading font-bold">
                       {executionData.cancel_queue_depth === -1 ? (
-                        <span className="text-lead text-error">{t("Error", "错误")}</span>
+                        <span className="text-lead text-error">
+                          {t("Error", "错误")}
+                        </span>
                       ) : (
                         executionData.cancel_queue_depth
                       )}
@@ -334,7 +354,9 @@ export function DiagnosticsContent() {
                 </div>
               </div>
             ) : (
-              <p className="text-foreground-tertiary">{t("No data available", "暂无数据")}</p>
+              <p className="text-foreground-tertiary">
+                {t("No data available", "暂无数据")}
+              </p>
             )}
           </CardContent>
         </Card>
@@ -377,7 +399,8 @@ export function DiagnosticsContent() {
                       {scheduleData.total_runs_next_hour}
                     </p>
                     <Text variant="small-tight" tone="secondary">
-                      {t("from", "来自")} {scheduleData.schedules_next_hour} {t("schedule(s)", "个计划任务")}
+                      {t("from", "来自")} {scheduleData.schedules_next_hour}{" "}
+                      {t("schedule(s)", "个计划任务")}
                     </Text>
                   </div>
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-info/20">
@@ -394,7 +417,8 @@ export function DiagnosticsContent() {
                       {scheduleData.total_runs_next_24h}
                     </p>
                     <Text variant="small-tight" tone="secondary">
-                      {t("from", "来自")} {scheduleData.schedules_next_24h} {t("schedule(s)", "个计划任务")}
+                      {t("from", "来自")} {scheduleData.schedules_next_24h}{" "}
+                      {t("schedule(s)", "个计划任务")}
                     </Text>
                   </div>
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/30">
@@ -408,7 +432,9 @@ export function DiagnosticsContent() {
                 </div>
               </div>
             ) : (
-              <p className="text-foreground-tertiary">{t("No data available", "暂无数据")}</p>
+              <p className="text-foreground-tertiary">
+                {t("No data available", "暂无数据")}
+              </p>
             )}
           </CardContent>
         </Card>
@@ -418,61 +444,92 @@ export function DiagnosticsContent() {
         <CardHeader>
           <CardTitle>{t("Diagnostic Information", "诊断信息")}</CardTitle>
           <CardDescription>
-            {t("Understanding metrics and tabs for on-call diagnostics", "了解值班诊断所需的指标和选项卡")}
+            {t(
+              "Understanding metrics and tabs for on-call diagnostics",
+              "了解值班诊断所需的指标和选项卡",
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3 text-body">
             <div>
               <p className="font-semibold text-warning-foreground">
-                🟠 Orphaned Executions:
+                {t("🟠 Orphaned Executions:", "🟠 孤立执行：")}
               </p>
-            <p className="text-foreground-secondary">
-              {t("Executions >24h old in database but not actually running in executor. Usually from executor restarts/crashes. Safe to cleanup (marks as FAILED in DB).", "数据库中超过 24 小时但实际未在执行器运行的执行，通常由执行器重启或崩溃造成。可以安全清理（会在数据库中标记为 FAILED）。")}
-            </p>
+              <p className="text-foreground-secondary">
+                {t(
+                  "Executions >24h old in database but not actually running in executor. Usually from executor restarts/crashes. Safe to cleanup (marks as FAILED in DB).",
+                  "数据库中超过 24 小时但实际未在执行器运行的执行，通常由执行器重启或崩溃造成。可以安全清理（会在数据库中标记为 FAILED）。",
+                )}
+              </p>
             </div>
             <div>
               <p className="font-semibold text-info-foreground">
-                🔵 Stuck Queued Executions:
+                {t("🔵 Stuck Queued Executions:", "🔵 排队卡住的执行：")}
               </p>
               <p className="text-foreground-secondary">
-                {t("QUEUED >1h but never started. Not in RabbitMQ queue. Can cleanup (safe) or requeue (⚠️ costs credits - only if temporary issue like RabbitMQ purge).", "已 QUEUED 超过 1 小时但从未开始，也不在 RabbitMQ 队列中。可以清理（安全），或重新入队（⚠️ 会消耗额度，仅适用于 RabbitMQ 清空等临时问题）。")}
+                {t(
+                  "QUEUED >1h but never started. Not in RabbitMQ queue. Can cleanup (safe) or requeue (⚠️ costs credits - only if temporary issue like RabbitMQ purge).",
+                  "已 QUEUED 超过 1 小时但从未开始，也不在 RabbitMQ 队列中。可以清理（安全），或重新入队（⚠️ 会消耗额度，仅适用于 RabbitMQ 清空等临时问题）。",
+                )}
               </p>
             </div>
             <div>
               <p className="font-semibold text-yellow-foreground">
-                🟡 Long-Running Executions:
+                {t("🟡 Long-Running Executions:", "🟡 长时间运行的执行：")}
               </p>
               <p className="text-foreground-secondary">
-                {t("RUNNING status >24h. May be legitimately long jobs or stuck. Review before stopping. Sends cancel signal to executor.", "RUNNING 状态超过 24 小时，可能是正常的长任务，也可能已卡住。停止前请先检查；停止会向执行器发送取消信号。")}
+                {t(
+                  "RUNNING status >24h. May be legitimately long jobs or stuck. Review before stopping. Sends cancel signal to executor.",
+                  "RUNNING 状态超过 24 小时，可能是正常的长任务，也可能已卡住。停止前请先检查；停止会向执行器发送取消信号。",
+                )}
               </p>
             </div>
             <div>
               <p className="font-semibold text-error-foreground">
-                🔴 Failed Executions:
+                {t("🔴 Failed Executions:", "🔴 失败的执行：")}
               </p>
               <p className="text-foreground-secondary">
-                {t("Executions that failed in last 24h. View error messages to identify patterns. Spike in failures indicates system issues.", "过去 24 小时内失败的执行。查看错误消息以识别规律；失败数激增通常表示系统存在问题。")}
+                {t(
+                  "Executions that failed in last 24h. View error messages to identify patterns. Spike in failures indicates system issues.",
+                  "过去 24 小时内失败的执行。查看错误消息以识别规律；失败数激增通常表示系统存在问题。",
+                )}
               </p>
             </div>
             <div>
               <p className="font-semibold text-pink-foreground">
-                🩷 Invalid States (Data Corruption):
+                {t(
+                  "🩷 Invalid States (Data Corruption):",
+                  "🩷 无效状态（数据损坏）：",
+                )}
               </p>
               <p className="text-foreground-secondary">
-                {t("Executions in impossible states (QUEUED with startedAt, RUNNING without startedAt). Indicates DB corruption, race conditions, or crashes. Each requires manual investigation - no bulk actions provided.", "执行处于不可能的状态（QUEUED 却有 startedAt，或 RUNNING 却没有 startedAt），表示数据库损坏、竞态条件或崩溃。每条都需要人工调查，不提供批量操作。")}
+                {t(
+                  "Executions in impossible states (QUEUED with startedAt, RUNNING without startedAt). Indicates DB corruption, race conditions, or crashes. Each requires manual investigation - no bulk actions provided.",
+                  "执行处于不可能的状态（QUEUED 却有 startedAt，或 RUNNING 却没有 startedAt），表示数据库损坏、竞态条件或崩溃。每条都需要人工调查，不提供批量操作。",
+                )}
               </p>
             </div>
             <div>
-              <p className="font-semibold">Throughput Metrics:</p>
+              <p className="font-semibold">
+                {t("Throughput Metrics:", "吞吐量指标：")}
+              </p>
               <p className="text-foreground-secondary">
-                {t("Completions per hour shows system productivity. Declining throughput indicates performance degradation or executor issues.", "每小时完成数反映系统生产力。吞吐量下降表示性能下降或执行器存在问题。")}
+                {t(
+                  "Completions per hour shows system productivity. Declining throughput indicates performance degradation or executor issues.",
+                  "每小时完成数反映系统生产力。吞吐量下降表示性能下降或执行器存在问题。",
+                )}
               </p>
             </div>
             <div>
-              <p className="font-semibold">Queue Health:</p>
+              <p className="font-semibold">
+                {t("Queue Health:", "队列健康状况：")}
+              </p>
               <p className="text-foreground-secondary">
-                {t("RabbitMQ depths should be low (<100). High queues indicate executor can't keep up. Cancel queue backlog indicates executor processing issues.", "RabbitMQ 队列深度应保持较低（<100）。队列过高表示执行器处理不过来；取消队列积压表示执行器处理存在问题。")}
+                {t(
+                  "RabbitMQ depths should be low (<100). High queues indicate executor can't keep up. Cancel queue backlog indicates executor processing issues.",
+                  "RabbitMQ 队列深度应保持较低（<100）。队列过高表示执行器处理不过来；取消队列积压表示执行器处理存在问题。",
+                )}
               </p>
             </div>
           </div>

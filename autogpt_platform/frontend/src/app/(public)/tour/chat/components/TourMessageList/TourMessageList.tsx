@@ -15,6 +15,7 @@ import { TourAgentCard } from "../TourAgentCard/TourAgentCard";
 import { TourArtifactCard } from "../TourArtifactCard/TourArtifactCard";
 import { TourPlanCard } from "../TourPlanCard/TourPlanCard";
 import { TourStreamingText } from "./TourStreamingText";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 // Mirrors the real copilot's MessageContent overrides (purple user bubble,
 // 1rem text) so the tour chat reads exactly like the product.
@@ -34,6 +35,7 @@ interface Props {
 }
 
 export function TourMessageList({ messages, isStreaming, footer }: Props) {
+  const { t } = useTranslation();
   const last = messages[messages.length - 1];
   const showThinking =
     isStreaming && last?.role === "assistant" && last.parts.length === 0;
@@ -70,12 +72,14 @@ export function TourMessageList({ messages, isStreaming, footer }: Props) {
           <ThinkingIndicator
             active
             elapsedSeconds={0}
-            statusMessage="Thinking…"
+            statusMessage={t("Thinking…", "思考中…")}
           />
         )}
         {footer}
       </ConversationContent>
-      <ConversationScrollButton />
+      <ConversationScrollButton
+        aria-label={t("Scroll to bottom", "滚动到底部")}
+      />
     </Conversation>
   );
 }

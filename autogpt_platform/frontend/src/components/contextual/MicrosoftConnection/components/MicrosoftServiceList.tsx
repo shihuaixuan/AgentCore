@@ -5,8 +5,8 @@ import type { MicrosoftAccessCheck } from "@/app/api/__generated__/models/micros
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import {
-  MICROSOFT_SERVICE_PURPOSES,
-  MICROSOFT_STATUS_LABELS,
+  getMicrosoftServicePurpose,
+  getMicrosoftStatusLabel,
 } from "@/lib/microsoft-setup";
 import { canAllow } from "../helpers";
 
@@ -26,14 +26,20 @@ export function MicrosoftServiceList({
   browserAvailable,
   onAllow,
 }: Props) {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   if (!check) {
     if (refused && !checking) return null;
     return (
       <Text variant="small" tone="muted" role="status">
         {checking
-          ? "Checking what this account can use…"
-          : "Couldn't check this account. Try again in a moment."}
+          ? t(
+              "Checking what this account can use…",
+              "正在检查此账号可使用的服务…",
+            )
+          : t(
+              "Couldn't check this account. Try again in a moment.",
+              "无法检查此账号，请稍后重试。",
+            )}
       </Text>
     );
   }
@@ -52,17 +58,17 @@ export function MicrosoftServiceList({
           <div className="flex min-w-0 flex-col">
             <Text variant="body-medium">{item.name}</Text>
             <Text variant="small" tone="muted">
-              {MICROSOFT_SERVICE_PURPOSES[item.service]}
+              {getMicrosoftServicePurpose(item.service, locale)}
             </Text>
             <Text variant="small" tone="body">
-              {MICROSOFT_STATUS_LABELS[item.status]}
+              {getMicrosoftStatusLabel(item.status, locale)}
             </Text>
           </div>
           {browserAvailable && canAllow(item) ? (
             <Button
               size="small"
               variant="secondary"
-              aria-label={`Allow ${item.name}`}
+              aria-label={t(`Allow ${item.name}`, `允许 ${item.name}`)}
               onClick={() => onAllow(item.scopes ?? [])}
             >
               {t("Allow", "允许")}

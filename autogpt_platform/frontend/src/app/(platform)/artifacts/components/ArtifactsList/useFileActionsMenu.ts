@@ -45,7 +45,7 @@ export function useFileActionsMenu(file: WorkspaceFileItem) {
       await downloadFileBlob(file.id, file.name);
     } catch (error) {
       toast({
-        title: "Failed to download file",
+        title: t("Failed to download file", "无法下载文件"),
         description:
           error instanceof Error
             ? error.message
@@ -59,7 +59,9 @@ export function useFileActionsMenu(file: WorkspaceFileItem) {
 
   async function handleDelete() {
     if (isDeleting) return;
-    const confirmed = window.confirm(`Delete "${file.name}"?`);
+    const confirmed = window.confirm(
+      t(`Delete "${file.name}"?`, `删除“${file.name}”？`),
+    );
     if (!confirmed) return;
     try {
       await deleteFile({ fileId: file.id });
@@ -72,7 +74,7 @@ export function useFileActionsMenu(file: WorkspaceFileItem) {
     goLabel:
       origin.kind === "session"
         ? t("Open chat", "打开聊天")
-        : "Open in Builder",
+        : t("Open in Builder", "在构建器中打开"),
     goHref: origin.href,
     isMoveOpen,
     setIsMoveOpen,

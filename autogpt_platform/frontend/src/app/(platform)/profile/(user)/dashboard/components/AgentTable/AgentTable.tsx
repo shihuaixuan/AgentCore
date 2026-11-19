@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AgentTableCard } from "../AgentTableCard/AgentTableCard";
 import { StoreSubmission } from "@/app/api/__generated__/models/storeSubmission";
 import { AgentTableRow } from "../AgentTableRow/AgentTableRow";
@@ -24,6 +25,7 @@ export const AgentTable: React.FC<AgentTableProps> = ({
   onDeleteSubmission,
   onEditSubmission,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="w-full" data-testid="agent-table">
       {/* Table header - Hide on mobile */}
@@ -32,19 +34,19 @@ export const AgentTable: React.FC<AgentTableProps> = ({
         <div className="flex items-center px-4 py-2">
           <div className="grid w-full grid-cols-[minmax(400px,1fr)_180px_140px_100px_100px_40px] items-center gap-4">
             <div className="text-body font-medium text-foreground-emphasis">
-              Workflow info
+              {t("Workflow info", "工作流信息")}
             </div>
             <div className="text-body font-medium text-foreground-emphasis">
-              Date submitted
+              {t("Date submitted", "提交日期")}
             </div>
             <div className="text-body font-medium text-foreground-emphasis">
-              Status
+              {t("Status", "状态")}
             </div>
             <div className="text-right text-body font-medium text-foreground-emphasis">
-              Runs
+              {t("Runs", "运行次数")}
             </div>
             <div className="text-right text-body font-medium text-foreground-emphasis">
-              Reviews
+              {t("Reviews", "评价")}
             </div>
             <div></div>
           </div>
@@ -74,7 +76,10 @@ export const AgentTable: React.FC<AgentTableProps> = ({
         </div>
       ) : (
         <div className="py-4 text-center font-sans text-body-lg text-foreground-secondary">
-          No workflows available. Create your first workflow to get started!
+          {t(
+            "No workflows available. Create your first workflow to get started!",
+            "暂无工作流。创建你的第一个工作流即可开始！",
+          )}
         </div>
       )}
     </div>

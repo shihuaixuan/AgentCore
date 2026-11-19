@@ -10,8 +10,10 @@ import {
 } from "@/app/api/__generated__/endpoints/chat/chat";
 import type { AtResetTurn } from "@/app/api/__generated__/models/atResetTurn";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { toastSendFailure } from "../../helpers/sendFailureToast";
+import { useManagedChatModels } from "../../useManagedChatModels";
 import { describeSendFailure } from "../ChatInput/helpers";
 import { useChatDraftAccess } from "../ChatInput/useChatDraft";
 import {
@@ -19,7 +21,6 @@ import {
   isJoinedSendTooLong,
   readHolds,
   returnToDraft,
-  SCHEDULE_FAILED_TITLE,
   SEND_SETTLE_MS,
   sendAtResetFailureTitle,
   SentNowError,
@@ -32,7 +33,6 @@ import {
   startSendRead,
 } from "./sendChanges";
 import { useAtResetJobs } from "./useAtResetJobs";
-import { useManagedChatModels } from "../../useManagedChatModels";
 
 interface Args {
   sessionId: string | null;
@@ -53,6 +53,7 @@ function findSend(jobs: AtResetTurn[]) {
 
 export function useScheduledSend({ sessionId, onSendNow, inputId }: Args) {
   const { modelID } = useManagedChatModels();
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const { jobs, writeJobs } = useAtResetJobs(sessionId);
   const draft = useChatDraftAccess(
@@ -95,8 +96,12 @@ export function useScheduledSend({ sessionId, onSendNow, inputId }: Args) {
 
   function toastChangeFailure(error: unknown) {
     toast({
-      title: "Couldn’t change your scheduled message",
-      description: describeSendFailure(error, "it still sends at the reset"),
+      title: t("Couldn’t change your scheduled message", "无法更改定时消息"),
+      description: describeSendFailure(
+        error,
+        t("it still sends at the reset", "消息仍将在额度重置时发送"),
+        locale,
+      ),
       variant: "destructive",
     });
   }
@@ -104,7 +109,8 @@ export function useScheduledSend({ sessionId, onSendNow, inputId }: Args) {
   /** `onAnswered` hears as soon as the server answers, before a send it
    *  says to make now instead streams its reply. */
   async function schedule(message: string, onAnswered?: () => void) {
-    if (!sessionId) throw new Error("This chat isn’t ready yet");
+    if (!sessionId)
+      throw new Error(t("This chat isn’t ready yet", "此对话尚未准备好"));
     // A chat sends one message at the reset; the server adds this one to
     // any already waiting and answers with the joined message.
     try {
@@ -125,7 +131,12 @@ export function useScheduledSend({ sessionId, onSendNow, inputId }: Args) {
       await writeJobs((all) => [...all.filter((j) => j.kind !== "send"), job]);
     } catch (error) {
       if (isJoinedSendTooLong(error)) {
-        throw new Error("Too long to add to the message already waiting");
+        throw new Error(
+          t(
+            "Too long to add to the message already waiting",
+            "内容过长，无法追加到等待发送的消息",
+          ),
+        );
       }
       const refusal = atResetRefusal(error);
       if (!refusal) throw error;
@@ -141,8 +152,8 @@ export function useScheduledSend({ sessionId, onSendNow, inputId }: Args) {
       }
       throw new Error(
         refusal === "no_reset"
-          ? "Your budget doesn’t reset on its own"
-          : "Your budget is already back",
+          ? t("Your budget doesn’t reset on its own", "你的额度不会自动重置")
+          : t("Your budget is already back", "你的额度已经恢复"),
       );
     }
   }
@@ -155,9 +166,13 @@ export function useScheduledSend({ sessionId, onSendNow, inputId }: Args) {
     } catch (error) {
       draft.write((current) => returnToDraft(current, message));
       toastSendFailure({
-        title: sendAtResetFailureTitle(error),
+        title: sendAtResetFailureTitle(error, locale),
         error,
-        recovery: "your message is back in the composer",
+        recovery: t(
+          "your message is back in the composer",
+          "你的消息已返回输入框",
+        ),
+        locale,
       });
     }
   }
@@ -185,7 +200,9 @@ export function useScheduledSend({ sessionId, onSendNow, inputId }: Args) {
     }
     // Nor with a copy that can predate a message this page added meanwhile.
     if (read.canHaveMissedAChange) {
-      toastChangeFailure(new Error("It changed just now"));
+      toastChangeFailure(
+        new Error(t("It changed just now", "消息刚刚发生了更改")),
+      );
       return;
     }
     const { send } = read;
@@ -226,11 +243,17 @@ export function useScheduledSend({ sessionId, onSendNow, inputId }: Args) {
     const unread = "error" in read;
     toastSendFailure({
       title: unread
-        ? "Couldn’t check your scheduled message"
-        : SCHEDULE_FAILED_TITLE,
+        ? t("Couldn’t check your scheduled message", "无法查看你的定时消息")
+        : sendAtResetFailureTitle(undefined, locale),
       // Sent again, a message the server may hold would be joined on twice.
-      error: unread ? new Error("It may already be set to send") : undefined,
-      recovery: "your message is back in the composer",
+      error: unread
+        ? new Error(t("It may already be set to send", "消息可能已安排发送"))
+        : undefined,
+      recovery: t(
+        "your message is back in the composer",
+        "你的消息已返回输入框",
+      ),
+      locale,
     });
   }
 

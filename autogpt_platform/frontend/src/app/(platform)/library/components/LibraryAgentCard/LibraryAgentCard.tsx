@@ -88,7 +88,10 @@ export function LibraryAgentCard({
           <div className="relative flex items-center gap-3 pt-3 pr-4 pl-2">
             <StatusBadge status={statusInfo.status} />
             <Text variant="small" tone="subtle">
-              {statusInfo.totalRuns} tasks
+              {t(
+                `${statusInfo.totalRuns} tasks`,
+                `${statusInfo.totalRuns} 个任务`,
+              )}
             </Text>
           </div>
         </NextLink>
@@ -122,7 +125,7 @@ export function LibraryAgentCard({
               <Image
                 src={image_url}
                 unoptimized={isLocalStoreMediaUrl(image_url)}
-                alt={`${name} preview image`}
+                alt={t(`${name} preview image`, `${name} 预览图`)}
                 width={107}
                 height={58}
                 className="flex-shrink-0 rounded-small object-cover"

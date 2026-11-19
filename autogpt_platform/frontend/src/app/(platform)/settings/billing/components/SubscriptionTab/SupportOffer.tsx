@@ -4,6 +4,7 @@ import { Message01Icon, SparklesIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function SupportOffer({
   eyebrow,
@@ -20,9 +21,14 @@ export function SupportOffer({
   href: string;
   ready?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <section
-      aria-label={ready ? "Your plan is ready" : "Plan support"}
+      aria-label={
+        ready
+          ? t("Your plan is ready", "你的套餐已就绪")
+          : t("Plan support", "套餐支持")
+      }
       className="flex h-full flex-col rounded-2xl border border-border-base bg-surface-muted/60 p-6"
     >
       <div className="flex items-center gap-2.5">

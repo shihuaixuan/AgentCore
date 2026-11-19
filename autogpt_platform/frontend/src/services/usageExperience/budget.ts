@@ -97,12 +97,12 @@ export function budgetLowHint(window: BudgetWindow, percentUsed: number) {
 export function formatResetClock(date: Date) {
   // Some ICU versions put a narrow no-break space before AM/PM.
   return date
-    .toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
+    .toLocaleTimeString("en", { hour: "numeric", minute: "2-digit" })
     .replace(/ /g, " ");
 }
 
 export function formatWeekday(date: Date) {
-  return date.toLocaleDateString(undefined, { weekday: "long" });
+  return date.toLocaleDateString("en", { weekday: "long" });
 }
 
 export function formatCountdown(

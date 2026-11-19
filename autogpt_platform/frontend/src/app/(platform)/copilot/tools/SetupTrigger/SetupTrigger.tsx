@@ -19,6 +19,7 @@ import {
 } from "./helpers";
 import { Copy01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   part: {
@@ -30,7 +31,8 @@ interface Props {
 }
 
 export function SetupTriggerTool({ part }: Props) {
-  const text = getAnimationText(part);
+  const { t } = useTranslation();
+  const text = getAnimationText(part, t);
   const isStreaming =
     part.state === "input-streaming" || part.state === "input-available";
 
@@ -75,7 +77,7 @@ export function SetupTriggerTool({ part }: Props) {
           <SetupRequirementsCard
             output={setupRequirementsOutput}
             inputsMode="trigger"
-            credentialsLabel="Account"
+            credentialsLabel={t("Account", "账户")}
           />
         </div>
       )}
@@ -102,6 +104,7 @@ export function SetupTriggerTool({ part }: Props) {
 }
 
 function TriggerSetupSuccessCard({ output }: { output: TriggerSetupOutput }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -128,7 +131,11 @@ function TriggerSetupSuccessCard({ output }: { output: TriggerSetupOutput }) {
             variant="ghost"
             size="small"
             onClick={handleCopy}
-            aria-label={copied ? "Copied" : "Copy webhook URL"}
+            aria-label={
+              copied
+                ? t("Copied", "已复制")
+                : t("Copy webhook URL", "复制 Webhook URL")
+            }
           >
             {copied ? (
               <Icon icon={Tick02Icon} size={14} />

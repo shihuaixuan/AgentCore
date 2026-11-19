@@ -13,6 +13,7 @@ import { PencilEdit02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { motion, useReducedMotion } from "framer-motion";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { RenameFileDialog } from "../../RenameFileDialog/RenameFileDialog";
 import { useFileDrag } from "../../WorkspaceFolders/useFileDrag";
 import { ExpertBadge } from "../ExpertBadge";
@@ -52,9 +53,13 @@ export function FileRow({
   selectedIds,
   onToggleSelect,
 }: Props) {
+  const { t, locale } = useTranslation();
   const reduceMotion = useReducedMotion();
   const dragIds = isSelected ? selectedIds : [file.id];
-  const dragLabel = dragIds.length > 1 ? `${dragIds.length} files` : file.name;
+  const dragLabel =
+    dragIds.length > 1
+      ? t(`${dragIds.length} files`, `${dragIds.length} 个文件`)
+      : file.name;
   const { handleDragStart, handleDragEnd } = useFileDrag(dragIds, dragLabel);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
 
@@ -83,7 +88,7 @@ export function FileRow({
       <div className="flex min-w-0 items-center gap-1 justify-self-start">
         <button
           type="button"
-          aria-label={`Select ${file.name}`}
+          aria-label={t(`Select ${file.name}`, `选择 ${file.name}`)}
           aria-pressed={isSelected}
           className="group/select relative my-2.5 mr-3 shrink-0 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-foreground-subtle"
           onClick={(e) => {
@@ -127,7 +132,7 @@ export function FileRow({
             {/* aria-label keeps Radix from mirroring the whole card into its
               visually-hidden tooltip copy (which would fetch previews twice). */}
             <TooltipContent
-              aria-label={`Preview of ${file.name}`}
+              aria-label={t(`Preview of ${file.name}`, `${file.name} 的预览`)}
               side="right"
               align="center"
               sideOffset={16}
@@ -141,7 +146,7 @@ export function FileRow({
         </Tooltip>
         <button
           type="button"
-          aria-label={`Rename ${file.name}`}
+          aria-label={t(`Rename ${file.name}`, `重命名 ${file.name}`)}
           className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-foreground-subtle opacity-0 transition-opacity group-hover:opacity-100 hover:bg-surface-hover hover:text-foreground-strong focus-visible:opacity-100"
           onClick={(e) => {
             e.stopPropagation();
@@ -157,9 +162,9 @@ export function FileRow({
         as="span"
         tone="muted"
         className="hidden truncate sm:block"
-        title={formatFullDate(file.created_at)}
+        title={formatFullDate(file.created_at, locale)}
       >
-        {formatDayLabel(file.created_at)}
+        {formatDayLabel(file.created_at, locale)}
       </Text>
       <Text
         variant="body"

@@ -15,6 +15,8 @@ import { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecu
 import { CopilotSkillInfo } from "@/app/api/__generated__/models/copilotSkillInfo";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { formatDistanceToNow } from "date-fns";
+import { zhCN } from "date-fns/locale";
+import type { Locale } from "@/lib/i18n/locale";
 
 /** Section headings sit outside the cards, so they need the cards' own content
  *  inset (1px border-box padding + p-4, matching AutopilotCard's p-5) to line
@@ -150,11 +152,17 @@ export function groupExpertsByPods(
   };
 }
 
-export function getLastRunLabel(expert: Expert) {
+export function getLastRunLabel(expert: Expert, locale: Locale = "en") {
   if (!expert.last_run_at) return null;
   const when = formatDistanceToNow(new Date(expert.last_run_at), {
     addSuffix: true,
+    locale: locale === "zh-CN" ? zhCN : undefined,
   });
+  if (locale === "zh-CN") {
+    if (expert.last_run_status === "COMPLETED") return `上次运行成功：${when}`;
+    if (expert.last_run_status === "FAILED") return `上次运行失败：${when}`;
+    return `上次运行：${when}`;
+  }
   if (expert.last_run_status === "COMPLETED")
     return `Last run succeeded ${when}`;
   if (expert.last_run_status === "FAILED") return `Last run failed ${when}`;

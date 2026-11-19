@@ -1,7 +1,7 @@
 {
-  "name": "AutoGPT Platform",
+  "name": "AutoGPT 平台",
   "short_name": "AutoGPT",
-  "description": "Your one stop shop to creating AI Agents",
+  "description": "一站式创建 AI 专家、构建工作流并自动完成任务",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#04062e",

@@ -29,23 +29,23 @@ export function ExpertSummaryCard({
   isActivityLoading,
   isActivityError,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const activityDays = activity ? getYearActivityDays(activity.days) : null;
   const visibleActivityDays = activityDays
     ? getThreeMonthActivityDays(activityDays)
     : null;
   const summary = visibleActivityDays
-    ? getActivitySummary(visibleActivityDays)
+    ? getActivitySummary(visibleActivityDays, locale)
     : null;
   const streak = activityDays ? getActivityStreak(activityDays) : null;
 
   return (
     <aside
-      aria-label={`${expert.name} at a glance`}
+      aria-label={t(`${expert.name} at a glance`, `${expert.name} 概览`)}
       className="flex flex-col gap-4 self-start"
     >
       <section
-        aria-label={`${expert.name} activity`}
+        aria-label={t(`${expert.name} activity`, `${expert.name} 的活动`)}
         className="flex flex-col gap-2 rounded-2xl bg-surface p-4 smooth-shadow-ring-sm"
       >
         <div className="flex items-center justify-between gap-2">
@@ -74,14 +74,17 @@ export function ExpertSummaryCard({
       </section>
 
       <section
-        aria-label={`${expert.name} activity streak`}
+        aria-label={t(
+          `${expert.name} activity streak`,
+          `${expert.name} 的连续活跃天数`,
+        )}
         className="flex flex-col rounded-2xl bg-surface p-4 smooth-shadow-ring-sm"
       >
         {isActivityLoading ? (
           <Skeleton className="h-16 w-full rounded-lg" />
         ) : isActivityError ? (
           <Text variant="small" tone="muted">
-            Streak unavailable
+            {t("Streak unavailable", "连续活跃数据不可用")}
           </Text>
         ) : (
           <div className="flex items-center justify-center gap-3 text-center">
@@ -93,7 +96,7 @@ export function ExpertSummaryCard({
                 {streak ?? 0}
               </Text>
               <Text variant="body-md" tone="muted">
-                day streak
+                {t("day streak", "天连续活跃")}
               </Text>
             </div>
           </div>
@@ -108,6 +111,7 @@ interface ActivityStatusProps {
 }
 
 function ActivityStatus({ isActive }: ActivityStatusProps) {
+  const { t } = useTranslation();
   return (
     <span className="flex items-center gap-1.5">
       <span
@@ -118,7 +122,9 @@ function ActivityStatus({ isActive }: ActivityStatusProps) {
         )}
       />
       <Text variant="small" tone="muted">
-        {isActive ? "Active this week" : "Quiet lately"}
+        {isActive
+          ? t("Active this week", "本周活跃")
+          : t("Quiet lately", "近期较少活动")}
       </Text>
     </span>
   );

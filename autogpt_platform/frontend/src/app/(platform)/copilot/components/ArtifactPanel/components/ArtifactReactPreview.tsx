@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ArtifactSkeleton } from "./ArtifactSkeleton";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   buildReactArtifactSrcDoc,
   collectPreviewStyles,
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function ArtifactReactPreview({ source, title }: Props) {
+  const { t } = useTranslation();
   const [srcDoc, setSrcDoc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,20 +37,20 @@ export function ArtifactReactPreview({ source, title }: Props) {
         setError(
           nextError instanceof Error
             ? nextError.message
-            : "Failed to build artifact preview",
+            : t("Failed to build artifact preview", "构建产物预览失败"),
         );
       });
 
     return () => {
       cancelled = true;
     };
-  }, [source, title]);
+  }, [source, title, t]);
 
   if (error) {
     return (
       <div className="flex flex-col gap-2 p-4">
         <p className="text-body font-medium text-error-foreground">
-          Failed to render React preview
+          {t("Failed to render React preview", "无法渲染 React 预览")}
         </p>
         <pre className="rounded-md bg-error-surface p-3 font-mono text-caption break-words whitespace-pre-wrap text-error-foreground">
           {error}
@@ -66,7 +68,7 @@ export function ArtifactReactPreview({ source, title }: Props) {
       sandbox="allow-scripts"
       srcDoc={srcDoc}
       className="h-full w-full border-0"
-      title={`${title} preview`}
+      title={t(`${title} preview`, `${title} 预览`)}
     />
   );
 }

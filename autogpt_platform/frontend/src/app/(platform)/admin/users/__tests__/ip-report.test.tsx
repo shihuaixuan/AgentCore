@@ -10,6 +10,7 @@ import { http, HttpResponse } from "msw";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminUsersView } from "../components/AdminUsersView/AdminUsersView";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const mockToast = vi.hoisted(() => vi.fn());
 vi.mock("@/components/molecules/Toast/use-toast", () => ({
@@ -150,6 +151,28 @@ beforeEach(() => {
 });
 
 describe("Ban all", () => {
+  it("localizes bulk ban and block controls without changing account identifiers", async () => {
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <NuqsTestingAdapter hasMemory searchParams={`?user=${ALEX.id}`}>
+          <AdminUsersView />
+        </NuqsTestingAdapter>
+      </LanguageProvider>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "全部封禁…" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("封禁 2 个账户？")).toBeDefined();
+    expect(
+      within(dialog).getByRole("checkbox", {
+        name: "封禁 sam@example.com",
+        checked: true,
+      }),
+    ).toBeDefined();
+    expect(within(dialog).getByText("不包含你自己的账户。")).toBeDefined();
+    expect(within(dialog).getByText("同时阻止")).toBeDefined();
+    expect(within(dialog).getByText("203.0.113.7")).toBeDefined();
+    expect(within(dialog).getByRole("button", { name: "取消" })).toBeDefined();
+  });
   it("ticks the accounts on this account's addresses but not those on its domain alone, and bans exactly the ticked ones", async () => {
     const bans = mockBanAccounts();
     renderPage(`?user=${ALEX.id}`);

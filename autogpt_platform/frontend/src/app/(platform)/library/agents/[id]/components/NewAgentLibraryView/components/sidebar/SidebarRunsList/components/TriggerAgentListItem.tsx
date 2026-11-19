@@ -2,6 +2,8 @@
 
 import type { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { formatDistanceToNow } from "date-fns";
+import { zhCN } from "date-fns/locale";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { IconWrapper } from "./IconWrapper";
 import { SidebarItemCard } from "./SidebarItemCard";
 import { TriggerAgentActionsDropdown } from "./TriggerAgentActionsDropdown";
@@ -23,6 +25,7 @@ export function TriggerAgentListItem({
   onClick,
   onDeleted,
 }: Props) {
+  const { t, locale } = useTranslation();
   return (
     <SidebarItemCard
       icon={
@@ -31,9 +34,13 @@ export function TriggerAgentListItem({
         </IconWrapper>
       }
       title={triggerAgent.name}
-      description={`Updated ${formatDistanceToNow(triggerAgent.updated_at, {
-        addSuffix: true,
-      })}`}
+      description={`${t("Updated", "更新于")} ${formatDistanceToNow(
+        triggerAgent.updated_at,
+        {
+          addSuffix: true,
+          locale: locale === "zh-CN" ? zhCN : undefined,
+        },
+      )}`}
       onClick={onClick}
       selected={selected}
       actions={

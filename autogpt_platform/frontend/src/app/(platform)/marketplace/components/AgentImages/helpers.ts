@@ -14,12 +14,17 @@ type Thumbnail =
 export function getThumbnail(
   image: string,
   hasAdvertisingConsent: boolean,
+  translate: (english: string, chinese: string) => string = (english) =>
+    english,
 ): Thumbnail {
   if (isValidVideoUrl(image)) {
     const videoId = getYouTubeVideoId(image);
     if (!videoId) return { kind: "video" };
     if (!hasAdvertisingConsent) {
-      return { kind: "youtube", label: "YouTube video" };
+      return {
+        kind: "youtube",
+        label: translate("YouTube video", "YouTube 视频"),
+      };
     }
     return {
       kind: "image",
@@ -27,7 +32,10 @@ export function getThumbnail(
     };
   }
   if (isYouTubeImageUrl(image) && !hasAdvertisingConsent) {
-    return { kind: "youtube", label: "Image from YouTube" };
+    return {
+      kind: "youtube",
+      label: translate("Image from YouTube", "来自 YouTube 的图片"),
+    };
   }
   return { kind: "image", src: image };
 }

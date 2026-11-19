@@ -1,5 +1,6 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   rejectAll: {
@@ -15,13 +16,16 @@ interface Props {
 }
 
 export function QueueFooter({ rejectAll, onContinue, busy }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap items-center gap-2 border-t border-separator bg-surface-muted/60 px-4 py-2 text-body">
       {rejectAll?.confirming ? (
         <>
           <span role="alert" className="text-foreground-body">
-            Reject all {rejectAll.count}? {AUTOPILOT_NAME} will be told none of
-            them ran.
+            {t(
+              `Reject all ${rejectAll.count}? ${AUTOPILOT_NAME} will be told none of them ran.`,
+              `拒绝全部 ${rejectAll.count} 项？将告知 ${AUTOPILOT_NAME} 这些操作均未执行。`,
+            )}
           </span>
           <Button
             size="xs"
@@ -30,7 +34,7 @@ export function QueueFooter({ rejectAll, onContinue, busy }: Props) {
             disabled={busy}
             onClick={rejectAll.onConfirm}
           >
-            Reject all
+            {t("Reject all", "全部拒绝")}
           </Button>
           <Button
             size="xs"
@@ -38,7 +42,7 @@ export function QueueFooter({ rejectAll, onContinue, busy }: Props) {
             shape="pill"
             onClick={rejectAll.onCancel}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
         </>
       ) : rejectAll ? (
@@ -48,7 +52,10 @@ export function QueueFooter({ rejectAll, onContinue, busy }: Props) {
           disabled={busy}
           onClick={rejectAll.onAsk}
         >
-          Reject all {rejectAll.count}…
+          {t(
+            `Reject all ${rejectAll.count}…`,
+            `拒绝全部 ${rejectAll.count} 项…`,
+          )}
         </Button>
       ) : null}
       {onContinue && !rejectAll?.confirming && (
@@ -60,7 +67,7 @@ export function QueueFooter({ rejectAll, onContinue, busy }: Props) {
           disabled={busy}
           onClick={onContinue}
         >
-          Close and continue
+          {t("Close and continue", "关闭并继续")}
         </Button>
       )}
     </div>

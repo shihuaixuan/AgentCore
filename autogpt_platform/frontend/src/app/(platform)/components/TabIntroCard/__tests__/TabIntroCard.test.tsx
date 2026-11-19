@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TabIntroCard } from "../TabIntroCard";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const onDismiss = vi.fn();
 const onCta = vi.fn();
@@ -38,6 +39,18 @@ beforeEach(() => {
 });
 
 describe("TabIntroCard", () => {
+  it("localizes dismissal without rewriting caller-provided copy", async () => {
+    render(<LanguageProvider>{card()}</LanguageProvider>);
+
+    expect(
+      await screen.findByRole("dialog", { name: "Your mission control." }),
+    ).toBeDefined();
+    expect(screen.getByText("Everything in one place.")).toBeDefined();
+    expect(screen.getByRole("button", { name: "See my agents" })).toBeDefined();
+    await userEvent.click(screen.getByRole("button", { name: "知道了" }));
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+  });
+
   it("renders the copy with one way forward and one way out", async () => {
     renderCard();
 

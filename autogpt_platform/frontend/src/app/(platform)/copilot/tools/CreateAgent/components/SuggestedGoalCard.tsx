@@ -4,6 +4,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { ArrowRight02Icon, BulbIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   message: string;
@@ -20,6 +21,7 @@ export function SuggestedGoalCard({
   goalType,
   onUseSuggestedGoal,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="rounded-xl border border-warning-border bg-warning-surface/50 p-4">
       <div className="flex items-start gap-3">
@@ -28,8 +30,8 @@ export function SuggestedGoalCard({
           <div>
             <Text variant="body-medium" tone="primary">
               {goalType === "unachievable"
-                ? "Goal cannot be accomplished"
-                : "Goal needs more detail"}
+                ? t("Goal cannot be accomplished", "无法完成此目标")
+                : t("Goal needs more detail", "目标需要更多细节")}
             </Text>
             <Text tone="secondary" variant="small">
               {reason || message}
@@ -43,7 +45,7 @@ export function SuggestedGoalCard({
               weight="semibold"
               className="mb-1"
             >
-              Suggested alternative:
+              {t("Suggested alternative:", "建议的替代目标：")}
             </Text>
             <Text tone="primary" variant="body-medium">
               {suggestedGoal}
@@ -55,7 +57,8 @@ export function SuggestedGoalCard({
             variant="primary"
           >
             <span className="inline-flex items-center gap-1.5">
-              Use this goal <Icon icon={ArrowRight02Icon} size={14} />
+              {t("Use this goal", "使用此目标")}{" "}
+              <Icon icon={ArrowRight02Icon} size={14} />
             </span>
           </Button>
         </div>

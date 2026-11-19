@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 import {
   Clock01Icon,
   DollarSignIcon,
@@ -23,7 +24,7 @@ interface Props {
 
 export function WorthDoingPanel({ offer, endsAt }: Props) {
   const { t, locale } = useTranslation();
-  const planStart = describePlanStart(endsAt);
+  const planStart = describePlanStart(endsAt, locale);
   const resumeNote = planStart
     ? ` Resume your trial instead and your plan starts ${planStart}.`
     : "";
@@ -96,9 +97,9 @@ export function WorthDoingPanel({ offer, endsAt }: Props) {
   );
 }
 
-function describePlanStart(endsAt: Props["endsAt"]) {
+function describePlanStart(endsAt: Props["endsAt"], locale: Locale) {
   if (!endsAt) return null;
   const left = describeTrialTimeLeft(endsAt);
   if (left.kind === "ended") return null;
-  return left.kind === "days" ? formatTrialEndDate(endsAt) : left.kind;
+  return left.kind === "days" ? formatTrialEndDate(endsAt, locale) : left.kind;
 }

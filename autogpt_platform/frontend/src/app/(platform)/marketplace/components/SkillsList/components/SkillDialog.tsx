@@ -36,7 +36,7 @@ export function SkillDialog({ slug, onClose }: Props) {
   return (
     <>
       <Dialog
-        title={skill?.title ?? "Skill"}
+        title={skill?.title ?? t("Skill", "技能")}
         styling={{ width: "760px" }}
         controlled={{
           isOpen: true,

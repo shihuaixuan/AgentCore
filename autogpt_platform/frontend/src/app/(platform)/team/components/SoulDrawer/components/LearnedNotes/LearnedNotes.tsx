@@ -65,7 +65,7 @@ function NotesList({
   forgettingUuid,
   onForget,
 }: NotesListProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   return (
     <>
       <Text variant="small" tone="muted">
@@ -85,7 +85,7 @@ function NotesList({
                 {fact.fact || `${fact.source} → ${fact.target}`}
               </Text>
               <Text variant="small" as="span" tone="subtle">
-                {formatWhen(fact.created_at)}
+                {formatWhen(fact.created_at, locale)}
               </Text>
             </div>
             <Button

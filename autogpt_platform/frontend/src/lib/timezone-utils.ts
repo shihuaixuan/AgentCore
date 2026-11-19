@@ -13,6 +13,7 @@ export function formatInTimezone(
   date: string | Date | null | undefined,
   timezone: string,
   options?: Intl.DateTimeFormatOptions,
+  locale: Locale = "en",
 ): string {
   let timestamp: number;
   try {
@@ -20,11 +21,11 @@ export function formatInTimezone(
       typeof date === "string" ? new Date(date) : date,
     );
   } catch {
-    return "Not scheduled";
+    return locale === "zh-CN" ? "未安排" : "Not scheduled";
   }
 
   if (Number.isNaN(timestamp)) {
-    return "Not scheduled";
+    return locale === "zh-CN" ? "未安排" : "Not scheduled";
   }
 
   const defaultOptions: Intl.DateTimeFormatOptions = {
@@ -37,14 +38,17 @@ export function formatInTimezone(
   };
 
   try {
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(locale === "zh-CN" ? "zh-CN" : "en-US", {
       ...defaultOptions,
       timeZone: timezone === "not-set" ? undefined : timezone,
     }).format(timestamp);
   } catch {
     // Fallback to local timezone if invalid timezone
     console.warn(`Invalid timezone "${timezone}", using local timezone`);
-    return new Intl.DateTimeFormat("en-US", defaultOptions).format(timestamp);
+    return new Intl.DateTimeFormat(
+      locale === "zh-CN" ? "zh-CN" : "en-US",
+      defaultOptions,
+    ).format(timestamp);
   }
 }
 
@@ -82,18 +86,24 @@ export function getTimezoneAbbreviation(timezone: string): string {
 export function formatScheduleTime(
   nextRunTime: string | Date,
   displayTimezone: string = "UTC",
+  locale: Locale = "en",
 ): string {
   const date =
     typeof nextRunTime === "string" ? new Date(nextRunTime) : nextRunTime;
 
   // Use provided timezone for display, fallback to UTC
-  const formatted = formatInTimezone(date, displayTimezone, {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZoneName: "short",
-  });
+  const formatted = formatInTimezone(
+    date,
+    displayTimezone,
+    {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short",
+    },
+    locale,
+  );
 
   return formatted;
 }
@@ -103,9 +113,12 @@ export function formatScheduleTime(
  * @param timezone - IANA timezone identifier
  * @returns Human-readable name
  */
-export function getTimezoneDisplayName(timezone: string): string {
+export function getTimezoneDisplayName(
+  timezone: string,
+  locale: Locale = "en",
+): string {
   if (timezone === "not-set") {
-    return "Not set";
+    return locale === "zh-CN" ? "未设置" : "Not set";
   }
 
   if (timezone === "UTC") {
@@ -147,3 +160,4 @@ export function getTimezoneGmtOffset(timezone: string): string {
     return "";
   }
 }
+import type { Locale } from "@/lib/i18n/locale";

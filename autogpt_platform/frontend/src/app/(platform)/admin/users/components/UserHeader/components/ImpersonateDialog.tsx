@@ -37,8 +37,10 @@ export function ImpersonateDialog({
       </Dialog.Trigger>
       <Dialog.Content>
         <Text variant="body" tone="secondary">
-          You&apos;ll see and act as this user across the whole platform until
-          {t("you stop. A notice goes to the audit channel first, then this page reloads.", "停止模拟登录后操作即结束。系统会先向审计频道发送通知，然后重新加载此页面。")}
+          {t(
+            "You'll see and act as this user across the whole platform until you stop. A notice goes to the audit channel first, then this page reloads.",
+            "在你停止模拟登录之前，你将以此用户的身份查看和操作整个平台。系统会先向审计频道发送通知，然后重新加载此页面。",
+          )}
           {currentImpersonationID
             ? ` ${t("This ends your current impersonation of", "这会结束当前对该用户的模拟登录：")} ${currentImpersonationID}.`
             : null}

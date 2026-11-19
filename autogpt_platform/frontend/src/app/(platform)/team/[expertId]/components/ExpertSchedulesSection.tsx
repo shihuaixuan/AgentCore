@@ -107,7 +107,10 @@ export function ExpertSchedulesSection({
             </span>,
           ]}
           title={t("No schedules yet", "暂无计划")}
-          description={`Put a workflow on a schedule and ${expertName} runs it for you, on time, every time.`}
+          description={t(
+            `Put a workflow on a schedule and ${expertName} runs it for you, on time, every time.`,
+            `为工作流设置计划后，${expertName} 就会按时为你运行。`,
+          )}
         >
           {expertId && workflows ? (
             <Button

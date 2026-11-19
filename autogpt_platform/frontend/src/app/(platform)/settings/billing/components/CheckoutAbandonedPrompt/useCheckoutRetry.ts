@@ -1,11 +1,13 @@
 import { useUpdateSubscriptionTier } from "@/app/api/__generated__/endpoints/credits/credits";
 import { toast } from "@/components/molecules/Toast/use-toast";
 import { useCheckoutRedirect } from "@/hooks/useCheckoutRedirect";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getCheckoutReturnURLs } from "../SubscriptionTab/helpers";
 import type { AbandonedPlan } from "./helpers";
 
 // Opens the checkout the person left again, for someone whose card failed.
 export function useCheckoutRetry(plan: AbandonedPlan | null) {
+  const { t } = useTranslation();
   const { mutateAsync: updateTier, isPending } = useUpdateSubscriptionTier();
   const checkoutRedirect = useCheckoutRedirect();
 
@@ -28,8 +30,11 @@ export function useCheckoutRetry(plan: AbandonedPlan | null) {
       checkoutRedirect.markRedirecting();
     } catch {
       toast({
-        title: "Couldn't open checkout",
-        description: "Pick your plan again below to retry.",
+        title: t("Couldn't open checkout", "无法打开结账页面"),
+        description: t(
+          "Pick your plan again below to retry.",
+          "请在下方重新选择套餐以重试。",
+        ),
         variant: "destructive",
       });
     }

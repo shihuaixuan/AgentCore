@@ -35,17 +35,20 @@ import type { UIDataTypes, UIMessage, UITools } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { textMessage, type ChatTarget } from "./helpers";
 import { recoverUnsentMessage, useExpertChatSend } from "./useExpertChatSend";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 
 type UiMessages = UIMessage<unknown, UIDataTypes, UITools>[];
 
 class SessionStartingError extends Error {}
 
-function notifyStartFailed(error: unknown) {
+function notifyStartFailed(error: unknown, locale: Locale = "en") {
   toast({
     variant: "destructive",
-    title: "Could not start the chat",
+    title: locale === "zh-CN" ? "无法启动聊天" : "Could not start the chat",
     description: describeChatError(
       error instanceof Error ? error : new Error(String(error)),
+      locale,
     ).title,
   });
 }
@@ -84,6 +87,9 @@ export function useExpertChatDrawer({
   threadKey,
   seedPrompt,
 }: Args) {
+  const { t, locale } = useTranslation();
+  const localeRef = useRef(locale);
+  localeRef.current = locale;
   const expertId = target?.expertId ?? null;
   const userId = useAuthStore((state) => state.user?.id) ?? null;
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -168,7 +174,9 @@ export function useExpertChatDrawer({
         .then(() => sendQueuedInNewThreadRef.current());
       return;
     }
-    void startKickoffRef.current(userId, expertId).catch(notifyStartFailed);
+    void startKickoffRef
+      .current(userId, expertId)
+      .catch((error: unknown) => notifyStartFailed(error, localeRef.current));
   }, [
     expertId,
     kickoffCheckQuery.data,
@@ -313,7 +321,7 @@ export function useExpertChatDrawer({
     setSeedToSend(null);
     void startSessionRef
       .current(textMessage(seedToSend))
-      .catch(notifyStartFailed);
+      .catch((error: unknown) => notifyStartFailed(error, localeRef.current));
   }, [seedToSend]);
 
   useEffect(() => {
@@ -321,9 +329,9 @@ export function useExpertChatDrawer({
     const pending = pendingPromptRef.current;
     pendingPromptRef.current = null;
     void send(sessionId, pending).catch((err: unknown) =>
-      recoverUnsentMessage(pending, err),
+      recoverUnsentMessage(pending, err, locale),
     );
-  }, [sessionId, send]);
+  }, [sessionId, send, locale]);
 
   function startNewThread() {
     setSuppressOnboarding(false);
@@ -436,7 +444,9 @@ export function useExpertChatDrawer({
       );
       if (generation !== generationRef.current) return false;
       if (response.status !== 200) {
-        throw new Error("Failed to create expert chat session");
+        throw new Error(
+          t("Failed to create expert chat session", "无法创建专家聊天会话"),
+        );
       }
       pendingPromptRef.current = firstMessage;
       setSuppressOnboarding(true);
@@ -480,7 +490,7 @@ export function useExpertChatDrawer({
     }
     if (hasAttachments(message)) {
       void send(sessionId, message).catch((err: unknown) =>
-        recoverUnsentMessage(message, err),
+        recoverUnsentMessage(message, err, locale),
       );
       return;
     }
@@ -495,7 +505,7 @@ export function useExpertChatDrawer({
           err.name === "QueueFollowUpNotActiveError"
         ) {
           void send(sessionId, message).catch((sendErr: unknown) =>
-            recoverUnsentMessage(message, sendErr),
+            recoverUnsentMessage(message, sendErr, locale),
           );
           return;
         }
@@ -506,7 +516,7 @@ export function useExpertChatDrawer({
       return;
     }
     void send(sessionId, message).catch((err: unknown) =>
-      recoverUnsentMessage(message, err),
+      recoverUnsentMessage(message, err, locale),
     );
   }
 
@@ -539,7 +549,8 @@ export function useExpertChatDrawer({
     try {
       await onSend(message);
     } catch (err) {
-      if (!(err instanceof SessionStartingError)) notifyStartFailed(err);
+      if (!(err instanceof SessionStartingError))
+        notifyStartFailed(err, locale);
       throw err;
     }
   }

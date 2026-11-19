@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { useCheckoutRedirect } from "@/hooks/useCheckoutRedirect";
+import { useStableCallback } from "@/hooks/useStableCallback";
 import useCredits from "@/hooks/useCredits";
 import { useBackendAPI } from "@/lib/autogpt-server-api/context";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -29,6 +31,7 @@ import {
 } from "@/components/molecules/Table/components/TablePrimitives";
 
 function CoPilotUsageSection() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { data: usage, isSuccess } = useGetV2GetCopilotUsage({
     query: {
@@ -44,19 +47,19 @@ function CoPilotUsageSection() {
   return (
     <div className="my-6 space-y-4">
       <Text variant="lead-medium" as="h3" tone="inherit">
-        Expert Usage & Storage
+        {t("Expert Usage & Storage", "专家用量与存储")}
       </Text>
       <div className="flex flex-col gap-3 rounded-lg border border-border-base p-4">
         {usage.daily && (
           <UsageBar
-            label="Today"
+            label={t("Today", "今天")}
             percentUsed={usage.daily.percent_used}
             resetsAt={usage.daily.resets_at}
           />
         )}
         {usage.weekly && (
           <UsageBar
-            label="This week"
+            label={t("This week", "本周")}
             percentUsed={usage.weekly.percent_used}
             resetsAt={usage.weekly.resets_at}
           />
@@ -69,13 +72,14 @@ function CoPilotUsageSection() {
         className="w-full"
         onClick={() => router.push("/copilot")}
       >
-        Open Otto
+        {t("Open Otto", "打开 Otto")}
       </Button>
     </div>
   );
 }
 
 export default function CreditsPage() {
+  const { t, locale } = useTranslation();
   const api = useBackendAPI();
   const {
     requestTopUp,
@@ -96,6 +100,9 @@ export default function CreditsPage() {
   const topupStatus = searchParams.get("topup") as "success" | "cancel" | null;
   const { toast } = useToast();
   const toastOnFail = useToastOnFail();
+  const notifyCheckoutFailure = useStableCallback((error: unknown) => {
+    toastOnFail(t("fulfill checkout", "完成结账"))(error);
+  });
   const checkoutRedirect = useCheckoutRedirect();
   const [isRequestingTopUp, setIsRequestingTopUp] = useState(false);
 
@@ -114,24 +121,29 @@ export default function CreditsPage() {
       .then((amount) => {
         if (amount > 0) {
           toast({
-            title: "Refund approved! 🎉",
-            description: `Your refund has been automatically processed. Based on your remaining balance, the amount of ${formatCredits(amount)} will be credited to your account.`,
+            title: t("Refund approved! 🎉", "退款已批准！🎉"),
+            description: t(
+              `Your refund has been automatically processed. Based on your remaining balance, the amount of ${formatCredits(amount)} will be credited to your account.`,
+              `退款已自动处理。根据剩余余额，${formatCredits(amount)} 将退还至你的账户。`,
+            ),
           });
         } else {
           toast({
-            title: "Refund Request Received",
-            description:
+            title: t("Refund Request Received", "已收到退款申请"),
+            description: t(
               "We have received your refund request. A member of our team will review it and reach out via email shortly.",
+              "我们已收到你的退款申请。团队成员将审核并尽快通过电子邮件联系你。",
+            ),
           });
         }
       })
-      .catch(toastOnFail("refund transaction"));
+      .catch(toastOnFail(t("refund transaction", "申请交易退款")));
 
   useEffect(() => {
     if (api && topupStatus === "success") {
-      api.fulfillCheckout().catch(toastOnFail("fulfill checkout"));
+      api.fulfillCheckout().catch(notifyCheckoutFailure);
     }
-  }, [api, topupStatus, toastOnFail]);
+  }, [api, topupStatus, notifyCheckoutFailure]);
 
   const openBillingPortal = () =>
     api
@@ -139,7 +151,7 @@ export default function CreditsPage() {
       .then((portal) => {
         router.push(portal.url);
       })
-      .catch(toastOnFail("open billing portal"));
+      .catch(toastOnFail(t("open billing portal", "打开账单门户")));
 
   const submitTopUp = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -150,7 +162,7 @@ export default function CreditsPage() {
     setIsRequestingTopUp(true);
     requestTopUp(amount)
       .then(() => checkoutRedirect.markRedirecting())
-      .catch(toastOnFail("request top-up"))
+      .catch(toastOnFail(t("request top-up", "申请充值")))
       .finally(() => setIsRequestingTopUp(false));
   };
 
@@ -162,15 +174,17 @@ export default function CreditsPage() {
     const threshold = parseInt(formData.get("threshold") as string) * 100;
     updateAutoTopUpConfig(amount, threshold)
       .then(() => {
-        toast({ title: "Auto top-up config updated! 🎉" });
+        toast({
+          title: t("Auto top-up config updated! 🎉", "自动充值设置已更新！🎉"),
+        });
       })
-      .catch(toastOnFail("update auto top-up config"));
+      .catch(toastOnFail(t("update auto top-up config", "更新自动充值设置")));
   };
 
   return (
     <div className="w-full px-4 sm:px-8 md:min-w-[800px]">
       <h1 className="mb-6 text-heading leading-inherit font-normal text-foreground-strong sm:mb-8 sm:text-title sm:leading-inherit">
-        Billing
+        {t("Billing", "账单")}
       </h1>
 
       {/* Subscription Tier */}
@@ -182,19 +196,24 @@ export default function CreditsPage() {
         {/* Top-up Form */}
         <div className="space-y-4">
           <Text variant="lead-medium" as="h3" tone="inherit">
-            Top-up Credits
+            {t("Top-up Credits", "充值积分")}
           </Text>
 
           <p className="mb-6 text-foreground-secondary">
             {topupStatus === "success" && (
               <span className="text-success">
-                Your payment was successful. Your credits will be updated
-                shortly. Try refreshing the page in case it is not updated.
+                {t(
+                  "Your payment was successful. Your credits will be updated shortly. Try refreshing the page in case it is not updated.",
+                  "支付成功，积分即将更新。若尚未更新，请尝试刷新页面。",
+                )}
               </span>
             )}
             {topupStatus === "cancel" && (
               <span className="text-error">
-                Payment failed. Your payment method has not been charged.
+                {t(
+                  "Payment failed. Your payment method has not been charged.",
+                  "支付失败，未从你的支付方式扣款。",
+                )}
               </span>
             )}
           </p>
@@ -205,13 +224,16 @@ export default function CreditsPage() {
                 htmlFor="topUpAmount"
                 className="mb-1 block text-foreground-body"
               >
-                Top-up amount (USD), minimum $5:
+                {t(
+                  "Top-up amount (USD), minimum $5:",
+                  "充值金额（USD），最低 $5：",
+                )}
               </label>
               <input
                 type="number"
                 id="topUpAmount"
                 name="topUpAmount"
-                placeholder="Enter top-up amount"
+                placeholder={t("Enter top-up amount", "输入充值金额")}
                 min="5"
                 step="1"
                 defaultValue={5}
@@ -227,14 +249,14 @@ export default function CreditsPage() {
               className="w-full"
               disabled={isRequestingTopUp || checkoutRedirect.isRedirecting}
             >
-              Top-up
+              {t("Top-up", "充值")}
             </Button>
           </form>
 
           {/* Auto Top-up Form */}
           <form onSubmit={submitAutoTopUpConfig} className="my-6 space-y-4">
             <Text variant="lead-medium" as="h3" tone="inherit">
-              Automatic Refill Settings
+              {t("Automatic Refill Settings", "自动充值设置")}
             </Text>
 
             <div>
@@ -242,7 +264,10 @@ export default function CreditsPage() {
                 htmlFor="threshold"
                 className="mb-1 block text-foreground-body"
               >
-                When my balance goes below this amount:
+                {t(
+                  "When my balance goes below this amount:",
+                  "当余额低于以下金额时：",
+                )}
               </label>
               <input
                 type="number"
@@ -253,7 +278,10 @@ export default function CreditsPage() {
                     ? autoTopUpConfig.threshold / 100
                     : ""
                 }
-                placeholder="Refill threshold, minimum $5"
+                placeholder={t(
+                  "Refill threshold, minimum $5",
+                  "充值阈值，最低 $5",
+                )}
                 min="5"
                 step="1"
                 className="w-full rounded-md border border-border-base px-4 py-2"
@@ -266,7 +294,10 @@ export default function CreditsPage() {
                 htmlFor="autoTopUpAmount"
                 className="mb-1 block text-foreground-body"
               >
-                Automatically refill my balance with this amount:
+                {t(
+                  "Automatically refill my balance with this amount:",
+                  "自动向余额充值以下金额：",
+                )}
               </label>
               <input
                 type="number"
@@ -275,7 +306,10 @@ export default function CreditsPage() {
                 defaultValue={
                   autoTopUpConfig?.amount ? autoTopUpConfig.amount / 100 : ""
                 }
-                placeholder="Refill amount, minimum $5"
+                placeholder={t(
+                  "Refill amount, minimum $5",
+                  "充值金额，最低 $5",
+                )}
                 min="5"
                 step="1"
                 className="w-full rounded-md border border-border-base px-4 py-2"
@@ -284,10 +318,16 @@ export default function CreditsPage() {
             </div>
 
             <Text variant="body-tight" tone="inherit">
-              <b>Note:</b> For your safety, we will top up your balance{" "}
-              <b>at most once</b> per workflow execution to prevent unintended
-              excessive charges. Therefore, ensure that the automatic top-up
-              amount is sufficient for your workflow&apos;s operation.
+              <b>{t("Note:", "注意：")}</b>{" "}
+              {t(
+                "For your safety, we will top up your balance",
+                "为保障安全，每次工作流运行期间，余额自动充值",
+              )}{" "}
+              <b>{t("at most once", "最多一次")}</b>{" "}
+              {t(
+                "per workflow execution to prevent unintended excessive charges. Therefore, ensure that the automatic top-up amount is sufficient for your workflow's operation.",
+                "，以避免意外产生过多费用。因此，请确保自动充值金额足以支持工作流运行。",
+              )}
             </Text>
 
             {autoTopUpConfig?.amount ? (
@@ -298,7 +338,7 @@ export default function CreditsPage() {
                   type="submit"
                   className="w-full"
                 >
-                  Save Changes
+                  {t("Save Changes", "保存更改")}
                 </Button>
                 <Button
                   className="w-full"
@@ -306,11 +346,16 @@ export default function CreditsPage() {
                   size="compact"
                   onClick={() =>
                     updateAutoTopUpConfig(0, 0).then(() => {
-                      toast({ title: "Auto top-up config disabled! 🎉" });
+                      toast({
+                        title: t(
+                          "Auto top-up config disabled! 🎉",
+                          "自动充值已停用！🎉",
+                        ),
+                      });
                     })
                   }
                 >
-                  Disable Auto-Refill
+                  {t("Disable Auto-Refill", "停用自动充值")}
                 </Button>
               </>
             ) : (
@@ -320,7 +365,7 @@ export default function CreditsPage() {
                 type="submit"
                 className="w-full"
               >
-                Enable Auto-Refill
+                {t("Enable Auto-Refill", "启用自动充值")}
               </Button>
             )}
           </form>
@@ -333,11 +378,13 @@ export default function CreditsPage() {
           {/* Payment Portal */}
 
           <Text variant="lead-medium" as="h3" tone="inherit">
-            Manage Your Payment Methods
+            {t("Manage Your Payment Methods", "管理支付方式")}
           </Text>
           <p className="text-foreground-secondary">
-            You can manage your cards and see your payment history in the
-            billing portal.
+            {t(
+              "You can manage your cards and see your payment history in the billing portal.",
+              "你可以在账单门户中管理银行卡并查看支付记录。",
+            )}
           </p>
           <Button
             variant="compact-primary"
@@ -346,16 +393,18 @@ export default function CreditsPage() {
             className="w-full"
             onClick={() => openBillingPortal()}
           >
-            Open Portal
+            {t("Open Portal", "打开账单门户")}
           </Button>
 
           {/* Transaction History */}
 
           <Text variant="lead-medium" as="h3" tone="inherit">
-            Transaction History
+            {t("Transaction History", "交易记录")}
           </Text>
           {transactionHistory.transactions.length === 0 && (
-            <p className="text-foreground-secondary">No transactions found.</p>
+            <p className="text-foreground-secondary">
+              {t("No transactions found.", "未找到交易记录。")}
+            </p>
           )}
           <Table
             className={
@@ -364,9 +413,9 @@ export default function CreditsPage() {
           >
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Amount</TableHead>
+                <TableHead>{t("Date", "日期")}</TableHead>
+                <TableHead>{t("Description", "描述")}</TableHead>
+                <TableHead>{t("Amount", "金额")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -374,7 +423,7 @@ export default function CreditsPage() {
                 <TableRow key={i}>
                   <TableCell>
                     {new Date(transaction.transaction_time).toLocaleString(
-                      undefined,
+                      locale,
                       {
                         month: "short",
                         day: "numeric",
@@ -407,38 +456,35 @@ export default function CreditsPage() {
               className="w-full"
               onClick={() => fetchTransactionHistory()}
             >
-              Load More
+              {t("Load More", "加载更多")}
             </Button>
           )}
 
           {refundRequests.length > 0 && (
             <>
               <Text variant="lead-medium" as="h3" tone="inherit">
-                Your Refund Requests
+                {t("Your Refund Requests", "你的退款申请")}
               </Text>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Last Updated</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Comment</TableHead>
+                    <TableHead>{t("Last Updated", "上次更新")}</TableHead>
+                    <TableHead>{t("Amount", "金额")}</TableHead>
+                    <TableHead>{t("Status", "状态")}</TableHead>
+                    <TableHead>{t("Comment", "备注")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {refundRequests.map((request, i) => (
                     <TableRow key={i}>
                       <TableCell>
-                        {new Date(request.updated_at).toLocaleString(
-                          undefined,
-                          {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                            hour: "numeric",
-                            minute: "numeric",
-                          },
-                        )}
+                        {new Date(request.updated_at).toLocaleString(locale, {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "numeric",
+                          minute: "numeric",
+                        })}
                       </TableCell>
                       <TableCell>{formatCredits(request.amount)}</TableCell>
                       <TableCell>{request.status}</TableCell>
@@ -456,7 +502,7 @@ export default function CreditsPage() {
             onClick={() => openRefundModal()}
             className="w-full"
           >
-            Request Refund
+            {t("Request Refund", "申请退款")}
           </Button>
           <RefundModal
             isOpen={isRefundModalOpen}

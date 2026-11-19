@@ -315,7 +315,10 @@ export function useCredentialsInput({
         setOAuthPopupBlocked(true);
         toast({
           title: t("Popup blocked", "弹出窗口被阻止"),
-          description: OAUTH_ERROR_POPUP_BLOCKED,
+          description: t(
+            OAUTH_ERROR_POPUP_BLOCKED,
+            "弹出窗口被阻止，已改为在新标签页中打开。",
+          ),
         });
       }
 
@@ -368,7 +371,13 @@ export function useCredentialsInput({
       // A superseded flow must not surface its errors over the newer flow.
       if (flowId !== oauthFlowIdRef.current) return;
       if (
-        toastIfPlanRequired(error, "Connecting a service needs an active plan")
+        toastIfPlanRequired(
+          error,
+          t(
+            "Connecting a service needs an active plan",
+            "连接服务需要有效套餐",
+          ),
+        )
       )
         return;
       const message = error instanceof Error ? error.message : String(error);
@@ -510,7 +519,7 @@ export function useCredentialsInput({
           ? error.message
           : t("Something went wrong", "出现错误");
       toast({
-        title: "Failed to delete credential",
+        title: t("Failed to delete credential", "删除凭据失败"),
         description: message,
         variant: "destructive",
       });

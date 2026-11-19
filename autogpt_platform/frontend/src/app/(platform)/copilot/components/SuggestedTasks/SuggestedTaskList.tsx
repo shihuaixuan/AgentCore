@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { ArrowDown01Icon, ArrowUp01Icon } from "@hugeicons/core-free-icons";
 import { AnimatePresence } from "framer-motion";
 import { useId } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { ExpertIdentity, ExpertIdentityMap } from "../../useExpertMap";
 import { TaskRow } from "./components/TaskRow";
 import {
@@ -53,6 +54,7 @@ export function SuggestedTaskList({
   onRemove,
   className,
 }: Props) {
+  const { t } = useTranslation();
   const { top, more, hasActedOnTop } = splitTasks(tasks);
   const isMoreOpen = moreChoice ?? hasActedOnTop;
   const moreID = useId();
@@ -105,7 +107,7 @@ export function SuggestedTaskList({
     >
       <ol
         {...tourTarget("first-tasks")}
-        aria-label="Your first tasks"
+        aria-label={t("Your first tasks", "你的首批任务")}
         className="divide-y divide-separator"
       >
         {renderRows(top, true)}
@@ -120,7 +122,10 @@ export function SuggestedTaskList({
             className="flex min-h-[3.25rem] w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-150 outline-none hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset"
           >
             <Text variant="body-medium" as="span" tone="secondary">
-              {more.length} more {more.length === 1 ? "task" : "tasks"}
+              {t(
+                `${more.length} more ${more.length === 1 ? "task" : "tasks"}`,
+                `还有 ${more.length} 个任务`,
+              )}
             </Text>
             <Icon
               icon={isMoreOpen ? ArrowUp01Icon : ArrowDown01Icon}
@@ -132,7 +137,7 @@ export function SuggestedTaskList({
           <ol
             id={moreID}
             hidden={!isMoreOpen}
-            aria-label="More tasks"
+            aria-label={t("More tasks", "更多任务")}
             className="divide-y divide-separator border-t border-separator"
           >
             {isMoreOpen ? renderRows(more, false) : null}
@@ -140,7 +145,12 @@ export function SuggestedTaskList({
         </div>
       ) : null}
       <p role="status" className="sr-only">
-        {sendingTask ? `Starting: ${sendingTask.title}` : ""}
+        {sendingTask
+          ? t(
+              `Starting: ${sendingTask.title}`,
+              `正在启动：${sendingTask.title}`,
+            )
+          : ""}
       </p>
     </div>
   );

@@ -69,7 +69,8 @@ export function ExpertSkillListItem({
             {entry.name}
           </Text>
           <Text variant="small" tone="muted" className="line-clamp-2">
-            {details?.description ?? "Skill details unavailable."}
+            {details?.description ??
+              t("Skill details unavailable.", "技能详情不可用。")}
           </Text>
           {learning ? (
             <Text
@@ -117,7 +118,10 @@ export function ExpertSkillListItem({
             size="icon-sm"
             leadingIcon={WorkHistoryIcon}
             onClick={learning.onDetails}
-            aria-label={`Learning details for ${entry.name}`}
+            aria-label={t(
+              `Learning details for ${entry.name}`,
+              `${entry.name} 的学习详情`,
+            )}
             tone="muted"
           />
         ) : null}
@@ -139,7 +143,7 @@ export function ExpertSkillListItem({
             leadingIcon={Delete02Icon}
             disabled={isSaving}
             onClick={() => onRemove(entry.name)}
-            aria-label={`Remove ${entry.name}`}
+            aria-label={t(`Remove ${entry.name}`, `移除 ${entry.name}`)}
             tone="muted"
             // oxlint-disable-next-line design-system/no-restyle -- ghost-danger turns #EF4444 on hover; this remove action turns the darker error-foreground red
             className="hover:text-error-foreground"

@@ -1,5 +1,6 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { useIsBillingEnabled } from "@/hooks/useIsBillingEnabled";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import {
   describeChatError,
@@ -12,7 +13,8 @@ interface Props {
 }
 
 export function ChatErrorBanner({ error }: Props) {
-  const guidance = describeChatError(error);
+  const { t, locale } = useTranslation();
+  const guidance = describeChatError(error, locale);
   const isBillingEnabled = useIsBillingEnabled();
   // Without billing (most self-hosted installs) there are no plans to pick
   // and /settings/billing is a 404, so point at whoever runs the server.
@@ -20,7 +22,10 @@ export function ChatErrorBanner({ error }: Props) {
   const { title } = guidance;
   const action = noPlans ? null : guidance.action;
   const note = noPlans
-    ? "Ask whoever runs this server to set one up."
+    ? t(
+        "Ask whoever runs this server to set one up.",
+        "请联系服务器管理员设置套餐。",
+      )
     : guidance.note;
   return (
     <div
@@ -46,18 +51,16 @@ export function ChatErrorBanner({ error }: Props) {
           size="small"
           className="mt-3"
         >
-          {ACTION_LABELS[action]}
+          {action === "sign-in"
+            ? t("Sign in", "登录")
+            : action === "new-chat"
+              ? t("Start a new chat", "开始新对话")
+              : t("See plans", "查看套餐")}
         </Button>
       ) : null}
     </div>
   );
 }
-
-const ACTION_LABELS: Record<ChatErrorAction, string> = {
-  "sign-in": "Sign in",
-  "new-chat": "Start a new chat",
-  plans: "See plans",
-};
 
 function hrefFor(action: ChatErrorAction) {
   if (action === "new-chat") return "/copilot";

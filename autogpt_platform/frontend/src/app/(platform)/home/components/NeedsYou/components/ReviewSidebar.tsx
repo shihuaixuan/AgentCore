@@ -31,7 +31,11 @@ export function ReviewSidebar({ carousel, sheet = false }: Props) {
   const { t } = useTranslation();
   return (
     <nav
-      aria-label={sheet ? "All held calls" : "Held calls"}
+      aria-label={
+        sheet
+          ? t("All held calls", "所有待审核调用")
+          : t("Held calls", "待审核调用")
+      }
       className="flex min-h-0 w-full flex-col"
     >
       <div className="flex items-baseline gap-2 px-4 pt-4 pb-2">
@@ -39,7 +43,10 @@ export function ReviewSidebar({ carousel, sheet = false }: Props) {
           {t("To review", "待审核")}
         </Text>
         <Text variant="small" as="span" tone="secondary" tabular>
-          {carousel.left} of {carousel.total} left
+          {t(
+            `${carousel.left} of ${carousel.total} left`,
+            `共 ${carousel.total} 项，剩余 ${carousel.left} 项`,
+          )}
         </Text>
       </div>
       <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-2">
@@ -87,7 +94,7 @@ export function ReviewSidebar({ carousel, sheet = false }: Props) {
                 </span>
                 {carousel.isNew(item.id) ? (
                   <span className="shrink-0 rounded bg-info-surface px-1.5 text-caption font-medium text-info-foreground">
-                    new
+                    {t("new", "新增")}
                   </span>
                 ) : null}
               </button>
@@ -97,7 +104,9 @@ export function ReviewSidebar({ carousel, sheet = false }: Props) {
       </ul>
       <div className="border-t border-separator px-4 py-3">
         <Text variant="small" tone="secondary">
-          {sheet ? "Tap an item to jump to it" : "← → move · Esc close"}
+          {sheet
+            ? t("Tap an item to jump to it", "点击条目以跳转")
+            : t("← → move · Esc close", "← → 切换 · Esc 关闭")}
         </Text>
       </div>
     </nav>

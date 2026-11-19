@@ -4,11 +4,13 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { PauseIcon, PlayIcon, RefreshIcon } from "@hugeicons/core-free-icons";
 import { useId } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useWorkflowsMovedWalkthrough } from "./useWorkflowsMovedWalkthrough";
 
 type Player = ReturnType<typeof useWorkflowsMovedWalkthrough>;
 
 export function WorkflowsMovedWalkthrough() {
+  const { t } = useTranslation();
   const player = useWorkflowsMovedWalkthrough();
   const descriptionID = useId();
 
@@ -18,10 +20,10 @@ export function WorkflowsMovedWalkthrough() {
       className="overflow-hidden rounded-2xl border border-border-base bg-surface-muted"
     >
       <p id={descriptionID} className="sr-only">
-        In the sidebar, open Team. Select Otto, then select the Workflows tab to
-        find your existing workflows. Select a workflow name to see its details.
-        Choose Setup your task to review the inputs and start or schedule a run.
-        This video has no sound.
+        {t(
+          "In the sidebar, open Team. Select Otto, then select the Workflows tab to find your existing workflows. Select a workflow name to see its details. Choose Setup your task to review the inputs and start or schedule a run. This video has no sound.",
+          "在侧边栏打开“团队”，选择 Otto，再选择“工作流”标签页，即可找到现有工作流。选择工作流名称查看详情。选择“设置任务”以检查输入，并立即运行或安排定时运行。此视频没有声音。",
+        )}
       </p>
       {player.playback === "failed" ? (
         <div className="flex aspect-video items-center justify-center px-8">
@@ -31,8 +33,10 @@ export function WorkflowsMovedWalkthrough() {
             tabIndex={-1}
             className="max-w-sm text-center text-body leading-relaxed text-foreground-secondary outline-none"
           >
-            The walkthrough couldn&apos;t load. Open Team, select Otto, then
-            choose Workflows.
+            {t(
+              "The walkthrough couldn't load. Open Team, select Otto, then choose Workflows.",
+              "无法加载演示。请打开“团队”，选择 Otto，再选择“工作流”。",
+            )}
           </p>
         </div>
       ) : (
@@ -42,7 +46,7 @@ export function WorkflowsMovedWalkthrough() {
               ref={player.videoRef}
               src="/videos/workflows-moved.mp4"
               poster="/videos/workflows-moved-poster.webp"
-              aria-label="How to find your workflows"
+              aria-label={t("How to find your workflows", "如何找到工作流")}
               aria-describedby={descriptionID}
               className="block aspect-video w-full bg-surface-hover object-contain"
               muted
@@ -63,8 +67,10 @@ export function WorkflowsMovedWalkthrough() {
               role="status"
               className="border-t border-border-base px-4 py-3 text-caption leading-relaxed text-foreground-secondary"
             >
-              The video couldn&apos;t start. Try playing it again, or open Team,
-              select Otto, then choose Workflows.
+              {t(
+                "The video couldn't start. Try playing it again, or open Team, select Otto, then choose Workflows.",
+                "视频无法开始播放。请重试，或打开“团队”，选择 Otto，再选择“工作流”。",
+              )}
             </p>
           )}
         </>
@@ -74,9 +80,11 @@ export function WorkflowsMovedWalkthrough() {
 }
 
 function WalkthroughControl({ player }: { player: Player }) {
+  const { t } = useTranslation();
   const isPlaying = player.playback === "playing";
   const hasEnded = player.playback === "ended";
   const action = isPlaying ? "Pause" : hasEnded ? "Replay" : "Play";
+  const chineseAction = isPlaying ? "暂停" : hasEnded ? "重播" : "播放";
   const icon = isPlaying ? PauseIcon : hasEnded ? RefreshIcon : PlayIcon;
 
   return (
@@ -90,16 +98,18 @@ function WalkthroughControl({ player }: { player: Player }) {
       <div className="flex min-h-14 items-center border-t border-border-base/80 bg-surface px-4 py-2">
         <div className={player.hasStarted ? "pr-24" : undefined}>
           <p className="text-body font-medium text-foreground-body">
-            See where they live
+            {t("See where they live", "查看工作流的新位置")}
           </p>
           <p className="mt-0.5 text-caption text-foreground-tertiary">
             {player.durationLabel && (
               <>
-                <span aria-label="Video duration">{player.durationLabel}</span>
+                <span aria-label={t("Video duration", "视频时长")}>
+                  {player.durationLabel}
+                </span>
                 <span aria-hidden> · </span>
               </>
             )}
-            No sound needed
+            {t("No sound needed", "无需声音")}
           </p>
         </div>
       </div>
@@ -108,7 +118,7 @@ function WalkthroughControl({ player }: { player: Player }) {
         variant={player.hasStarted ? "secondary" : "primary"}
         size={player.hasStarted ? "small" : "icon"}
         withTooltip={false}
-        aria-label={`${action} walkthrough`}
+        aria-label={t(`${action} walkthrough`, `${chineseAction}演示`)}
         aria-busy={player.isStarting}
         onClick={player.togglePlayback}
         className={
@@ -119,7 +129,7 @@ function WalkthroughControl({ player }: { player: Player }) {
       >
         <Icon icon={icon} size={player.hasStarted ? 14 : 26} aria-hidden />
         <span className={player.hasStarted ? undefined : "sr-only"}>
-          {action}
+          {t(action, chineseAction)}
         </span>
       </Button>
     </>

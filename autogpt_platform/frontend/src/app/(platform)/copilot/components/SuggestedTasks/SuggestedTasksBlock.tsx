@@ -46,7 +46,7 @@ export function SuggestedTasksBlock({
   return (
     <section
       className={cn("w-full text-left", className)}
-      aria-label="Suggested first tasks"
+      aria-label={t("Suggested first tasks", "建议的初始任务")}
     >
       <div className="mb-2 flex items-center justify-between px-1">
         <Text variant="eyebrow">
@@ -65,8 +65,11 @@ export function SuggestedTasksBlock({
           className="hover:text-foreground-body"
         >
           {isOpen
-            ? "Hide"
-            : `${count} ${count === 1 ? "task" : "tasks"} · Show`}
+            ? t("Hide", "隐藏")
+            : t(
+                `${count} ${count === 1 ? "task" : "tasks"} · Show`,
+                `${count} 个任务 · 显示`,
+              )}
           <Icon icon={isOpen ? ArrowUp01Icon : ArrowDown01Icon} size={14} />
         </Button>
       </div>

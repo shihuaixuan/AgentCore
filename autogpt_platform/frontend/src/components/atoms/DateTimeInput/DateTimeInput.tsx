@@ -12,6 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/molecules/Popover/Popover";
 import { Calendar } from "@/components/atoms/Calendar/Calendar";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 function toLocalISODateTimeString(d: Date) {
   const year = d.getFullYear();
@@ -69,6 +70,7 @@ export const DateTimeInput = ({
   "aria-labelledby": ariaLabelledBy,
   "aria-describedby": ariaDescribedBy,
 }: DateTimeInputProps) => {
+  const { locale, t } = useTranslation();
   const selected = React.useMemo(() => parseISODateTimeString(value), [value]);
   const [open, setOpen] = React.useState(false);
   const [timeValue, setTimeValue] = React.useState("");
@@ -118,17 +120,17 @@ export const DateTimeInput = ({
   };
 
   const buttonText = selected
-    ? selected.toLocaleDateString(undefined, {
+    ? selected.toLocaleDateString(locale === "zh-CN" ? locale : undefined, {
         year: "numeric",
         month: "short",
         day: "numeric",
       }) +
       " " +
-      selected.toLocaleTimeString(undefined, {
+      selected.toLocaleTimeString(locale === "zh-CN" ? locale : undefined, {
         hour: "2-digit",
         minute: "2-digit",
       })
-    : placeholder || "Pick date and time";
+    : placeholder || t("Pick date and time", "选择日期和时间");
 
   const isDisabled = disabled || readonly;
 
@@ -235,7 +237,7 @@ export const DateTimeInput = ({
                 htmlFor={timeInputId}
                 className="mb-2 block text-body leading-5 font-medium text-foreground-body"
               >
-                Time
+                {t("Time", "时间")}
               </label>
               <input
                 data-slot="date-time-input-time-control"
@@ -245,7 +247,7 @@ export const DateTimeInput = ({
                 onChange={(e) => handleTimeChange(e.target.value)}
                 className={timeInputStyles}
                 disabled={isDisabled}
-                placeholder="HH:MM"
+                placeholder={t("HH:MM", "时:分")}
               />
             </div>
           </div>

@@ -18,6 +18,7 @@ import {
   FolderOpenIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type TreeViewElement = {
   id: string;
@@ -374,6 +375,7 @@ const CollapseButton = forwardRef<
     ref,
   ) => {
     const { expandedItems, setExpandedItems } = useTree();
+    const { t } = useTranslation();
 
     const expendAllTree = useCallback((elements: TreeViewElement[]) => {
       const expandTree = (element: TreeViewElement) => {
@@ -413,7 +415,7 @@ const CollapseButton = forwardRef<
       >
         {children}
         <span data-slot="file-tree-collapse-button-label" className="sr-only">
-          Toggle
+          {t("Toggle", "切换展开状态")}
         </span>
       </Button>
     );

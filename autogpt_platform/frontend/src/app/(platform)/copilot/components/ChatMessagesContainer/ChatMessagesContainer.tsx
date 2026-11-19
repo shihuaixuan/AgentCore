@@ -167,6 +167,7 @@ export function LoadMoreSentinel({
   messageCount: number;
   onLoadMore: () => void;
 }) {
+  const { t } = useTranslation();
   const sentinelRef = useRef<HTMLDivElement>(null);
   const onLoadMoreRef = useRef(onLoadMore);
   useInsertionEffect(() => {
@@ -262,7 +263,7 @@ export function LoadMoreSentinel({
             size="small"
             onClick={() => captureAndLoad(false)}
           >
-            Load older messages
+            {t("Load older messages", "加载更早的消息")}
           </Button>
         )
       )}
@@ -612,10 +613,16 @@ export function ChatMessagesContainer({
                     <ThinkingIndicator
                       active
                       startedAtMs={restoreClock.startedAtMs}
-                      statusMessage={restoreStatusMessage ?? "Reconnecting…"}
+                      statusMessage={
+                        restoreStatusMessage ??
+                        t("Reconnecting…", "正在重新连接…")
+                      }
                     />
                     <span className="pl-6 text-caption text-foreground-subtle">
-                      Still syncing the latest progress.
+                      {t(
+                        "Still syncing the latest progress.",
+                        "仍在同步最新进度。",
+                      )}
                     </span>
                   </div>
                 ) : (
@@ -662,7 +669,7 @@ export function ChatMessagesContainer({
                     className="flex items-center gap-1"
                   >
                     <Icon icon={Clock01Icon} className="size-3" />
-                    Queued
+                    {t("Queued", "已加入队列")}
                   </Text>
                 </MessageContent>
               </Message>

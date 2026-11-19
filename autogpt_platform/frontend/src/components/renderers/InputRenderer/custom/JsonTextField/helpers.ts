@@ -39,14 +39,20 @@ export function parseJsonValue(value: string): unknown | undefined {
  * @param schema - The JSON schema
  * @returns Placeholder string
  */
-export function getPlaceholder(schema: RJSFSchema): string {
+export function getPlaceholder(
+  schema: RJSFSchema,
+  t: (english: string, chinese: string) => string = (english) => english,
+): string {
   if (schema.type === "array") {
-    return '["item1", "item2"] or [{"key": "value"}]';
+    return t(
+      '["item1", "item2"] or [{"key": "value"}]',
+      '["item1", "item2"] 或 [{"key": "value"}]',
+    );
   }
   if (schema.type === "object") {
     return '{"key": "value"}';
   }
-  return "Enter JSON value...";
+  return t("Enter JSON value...", "请输入 JSON 值…");
 }
 
 /**

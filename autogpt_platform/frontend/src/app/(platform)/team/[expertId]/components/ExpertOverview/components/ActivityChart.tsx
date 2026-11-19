@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { Text } from "@/components/atoms/Text/Text";
 import { SERIES_COLORS, type ChartDay } from "../helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   days: ChartDay[];
@@ -24,9 +25,10 @@ const SERIES = [
 /** Conversations and workflow runs per day, stacked: both are counts on one
  *  scale, so one axis carries them. */
 export function ActivityChart({ days }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-3">
-      <ul className="flex items-center gap-4" aria-label="Legend">
+      <ul className="flex items-center gap-4" aria-label={t("Legend", "图例")}>
         {SERIES.map((series) => (
           <li key={series.key} className="flex items-center gap-1.5">
             <span
@@ -36,7 +38,10 @@ export function ActivityChart({ days }: Props) {
               style={{ backgroundColor: SERIES_COLORS[series.key] }}
             />
             <Text variant="small" tone="secondary">
-              {series.label}
+              {t(
+                series.label,
+                series.key === "sessions" ? "对话" : "工作流运行",
+              )}
             </Text>
           </li>
         ))}
@@ -67,7 +72,7 @@ export function ActivityChart({ days }: Props) {
             <Tooltip cursor={{ fill: "#f4f4f5" }} content={<ChartTooltip />} />
             <Bar
               dataKey="sessions"
-              name="Conversations"
+              name={t("Conversations", "对话")}
               stackId="activity"
               fill={SERIES_COLORS.sessions}
               stroke="#ffffff"
@@ -76,7 +81,7 @@ export function ActivityChart({ days }: Props) {
             />
             <Bar
               dataKey="runs"
-              name="Workflow runs"
+              name={t("Workflow runs", "工作流运行")}
               stackId="activity"
               fill={SERIES_COLORS.runs}
               stroke="#ffffff"
@@ -97,6 +102,7 @@ interface TooltipProps {
 }
 
 function ChartTooltip({ active, payload }: TooltipProps) {
+  const { t } = useTranslation();
   const day = active ? payload?.[0]?.payload : null;
   if (!day) return null;
 
@@ -111,7 +117,8 @@ function ChartTooltip({ active, payload }: TooltipProps) {
             // oxlint-disable-next-line design-system/no-inline-styles -- the series colour is shared with the Recharts fill prop, which needs a literal
             style={{ backgroundColor: SERIES_COLORS[series.key] }}
           />
-          {series.label}: {day[series.key]}
+          {t(series.label, series.key === "sessions" ? "对话" : "工作流运行")}:{" "}
+          {day[series.key]}
         </p>
       ))}
     </div>

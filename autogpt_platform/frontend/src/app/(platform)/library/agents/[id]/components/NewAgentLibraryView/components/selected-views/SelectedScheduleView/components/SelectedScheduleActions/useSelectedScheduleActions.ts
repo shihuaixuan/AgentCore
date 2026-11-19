@@ -46,11 +46,11 @@ export function useSelectedScheduleActions({
       },
       onError: (error: unknown) =>
         toast({
-          title: "Failed to delete schedule",
+          title: t("Failed to delete schedule", "无法删除计划"),
           description:
             error instanceof Error
               ? error.message
-              : "An unexpected error occurred.",
+              : t("An unexpected error occurred.", "发生意外错误。"),
           variant: "destructive",
         }),
     },
@@ -67,15 +67,18 @@ export function useSelectedScheduleActions({
   async function handleRunNow() {
     if (!schedule) {
       toast({
-        title: "Schedule not loaded",
-        description: "Please wait for the schedule to load.",
+        title: t("Schedule not loaded", "计划尚未加载"),
+        description: t(
+          "Please wait for the schedule to load.",
+          "请等待计划加载完成。",
+        ),
         variant: "destructive",
       });
       return;
     }
 
     try {
-      toast({ title: "Run started" });
+      toast({ title: t("Run started", "运行已开始") });
 
       const res = await executeAgent({
         graphId: schedule.graph_id,
@@ -98,11 +101,11 @@ export function useSelectedScheduleActions({
       }
     } catch (error: unknown) {
       toast({
-        title: "Failed to start run",
+        title: t("Failed to start run", "无法开始运行"),
         description:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t("An unexpected error occurred.", "发生意外错误。"),
         variant: "destructive",
       });
     }

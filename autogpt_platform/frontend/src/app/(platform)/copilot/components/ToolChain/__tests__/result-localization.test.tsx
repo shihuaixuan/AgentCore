@@ -45,12 +45,14 @@ it("switches result labels and the secret notice without translating tool values
   );
   expect(screen.getByText("已完成")).toBeDefined();
   expect(
-    screen.getByRole("link", { name: "集成服务" }).getAttribute("href"),
-  ).toBe("/settings/integrations");
+    screen.getByRole("link", { name: "市场 → 连接器" }).getAttribute("href"),
+  ).toBe("/marketplace/connectors");
   expect(screen.getByText("Keep this English value")).toBeDefined();
   expect(screen.getByText("user supplied status")).toBeDefined();
   await user.click(screen.getByRole("button", { name: "English" }));
   expect(screen.getByText("Done")).toBeDefined();
-  expect(screen.getByRole("link", { name: "Integrations" })).toBeDefined();
+  expect(
+    screen.getByRole("link", { name: "Marketplace → Connectors" }),
+  ).toBeDefined();
   expect(screen.getByText("Keep this English value")).toBeDefined();
 });

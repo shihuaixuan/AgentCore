@@ -63,7 +63,7 @@ export function ExpertWorkflowsSection({
     <section>
       <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
         <Text variant="large-medium" tone="primary">
-          {expertName}&apos;s Workflows
+          {t(`${expertName}'s Workflows`, `${expertName} 的工作流`)}
         </Text>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           {onInstallWorkflow ? (
@@ -111,7 +111,10 @@ export function ExpertWorkflowsSection({
           title={t("No workflows yet", "暂无工作流")}
           description={
             emptyMessage ??
-            `Install a workflow to give ${expertName} something to run.`
+            t(
+              `Install a workflow to give ${expertName} something to run.`,
+              `安装工作流，让 ${expertName} 可以执行任务。`,
+            )
           }
         >
           {onInstallWorkflow ? (

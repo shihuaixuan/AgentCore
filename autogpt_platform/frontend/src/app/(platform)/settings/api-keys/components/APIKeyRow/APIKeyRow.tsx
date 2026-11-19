@@ -34,10 +34,10 @@ export function APIKeyRow({
   onToggleSelected,
   onDelete,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [infoOpen, setInfoOpen] = useState(false);
   const maskedKey = maskAPIKey(apiKey.head, apiKey.tail);
-  const lastUsedLabel = formatLastUsed(apiKey.last_used_at);
+  const lastUsedLabel = formatLastUsed(apiKey.last_used_at, locale);
 
   return (
     <div

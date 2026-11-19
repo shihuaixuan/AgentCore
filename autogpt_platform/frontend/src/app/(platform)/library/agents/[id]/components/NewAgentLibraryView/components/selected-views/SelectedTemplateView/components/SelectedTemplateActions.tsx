@@ -53,7 +53,7 @@ export function SelectedTemplateActions({
     mutation: {
       onSuccess: async () => {
         toast({
-          title: "Template deleted",
+          title: t("Template deleted", "模板已删除"),
         });
         const queryKey = getGetV2ListPresetsQueryKey({
           graph_id: agent.graph_id,

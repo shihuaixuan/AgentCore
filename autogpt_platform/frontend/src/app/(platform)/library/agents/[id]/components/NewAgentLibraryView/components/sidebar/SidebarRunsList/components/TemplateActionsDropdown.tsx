@@ -42,7 +42,7 @@ export function TemplateActionsDropdown({ agent, template, onDeleted }: Props) {
       await deletePreset({ presetId: template.id });
 
       toast({
-        title: "Template deleted",
+        title: t("Template deleted", "模板已删除"),
       });
 
       queryClient.invalidateQueries({

@@ -51,7 +51,9 @@ export function FolderFormDialog({
       controlled={{ isOpen, set: setIsOpen }}
       styling={{ maxWidth: "28rem" }}
       title={
-        mode === "create" ? t("Create folder", "创建文件夹") : "Rename folder"
+        mode === "create"
+          ? t("Create folder", "创建文件夹")
+          : t("Rename folder", "重命名文件夹")
       }
     >
       <Dialog.Content>
@@ -70,7 +72,7 @@ export function FolderFormDialog({
           />
           {location ? (
             <Text variant="small" tone="muted">
-              Inside &ldquo;{location}&rdquo;
+              {t(`Inside “${location}”`, `位于“${location}”内`)}
             </Text>
           ) : null}
           <Button

@@ -41,7 +41,7 @@ type CronSchedulerDialogProps = {
 );
 
 export function CronSchedulerDialog(props: CronSchedulerDialogProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const {
     open,
@@ -58,7 +58,7 @@ export function CronSchedulerDialog(props: CronSchedulerDialogProps) {
 
   // Get user's timezone
   const userTimezone = useUserTimezone();
-  const timezoneDisplay = getTimezoneDisplayName(userTimezone || "UTC");
+  const timezoneDisplay = getTimezoneDisplayName(userTimezone || "UTC", locale);
 
   // Reset state when dialog opens
   useEffect(() => {

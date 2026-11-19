@@ -7,8 +7,13 @@ import { Badge } from "@/components/atoms/Badge/Badge";
 import { Button } from "@/components/atoms/Button/Button";
 import { Switch } from "@/components/atoms/Switch/Switch";
 import { Text } from "@/components/atoms/Text/Text";
-import { reuseLabel, versionLabel } from "@/services/skill-learning/helpers";
+import {
+  getLearningLabel,
+  reuseLabel,
+  versionLabel,
+} from "@/services/skill-learning/helpers";
 import { formatDistanceToNow } from "date-fns";
+import { zhCN } from "date-fns/locale";
 import { OutcomeReportRequestOutcome } from "@/app/api/__generated__/models/outcomeReportRequestOutcome";
 import { SkillPolicyRequest } from "@/app/api/__generated__/models/skillPolicyRequest";
 import { SourceRemovedNotice } from "./SourceRemovedNotice";
@@ -39,7 +44,7 @@ export function SummaryView({
   onEdit,
   onReport,
 }: Props) {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const isCurrent =
     version != null && version.id === detail.current_version?.id;
   const badgeState = version && !isCurrent ? version.state : detail.state;
@@ -58,13 +63,16 @@ export function SummaryView({
           data-slot="skill-learning-sheet-summary-state"
           data-testid="version-state"
         >
-          <Badge variant={stateVariant(badgeState)}>{badgeLabel}</Badge>
+          <Badge variant={stateVariant(badgeState)}>
+            {getLearningLabel(badgeLabel, locale)}
+          </Badge>
         </span>
         {version ? (
           <Text variant="small" tone="muted" as="span">
-            {versionLabel(version)} ·{" "}
+            {versionLabel(version, locale)} ·{" "}
             {formatDistanceToNow(new Date(version.created_at), {
               addSuffix: true,
+              locale: locale === "zh-CN" ? zhCN : undefined,
             })}
             {isCurrent ? "" : t(" · not the current version", " · 非当前版本")}
           </Text>
@@ -74,7 +82,7 @@ export function SummaryView({
         <Text variant="small" tone="muted">
           {t(
             `Skill now: ${detail.state_label}. The controls below apply to the skill as a whole, not to this historical version.`,
-            `技能当前状态：${detail.state_label}。下方控制项适用于整个技能，而非此历史版本。`,
+            `技能当前状态：${getLearningLabel(detail.state_label, locale)}。下方控制项适用于整个技能，而非此历史版本。`,
           )}
         </Text>
       ) : null}
@@ -113,7 +121,7 @@ export function SummaryView({
                   tone="secondary"
                   data-testid="reuse-label"
                 >
-                  {reuseLabel(version)}
+                  {reuseLabel(version, locale)}
                 </Text>
               </li>
             </ul>

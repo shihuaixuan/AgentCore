@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useId } from "react";
 import { lowerFirst } from "./helpers";
 import { useRunLessOftenDialog } from "./useRunLessOftenDialog";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   scheduleKey: string;
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function RunLessOftenDialog({ scheduleKey, isOpen, setIsOpen }: Props) {
+  const { t } = useTranslation();
   const dialog = useRunLessOftenDialog({
     scheduleKey,
     isOpen,
@@ -31,8 +33,11 @@ export function RunLessOftenDialog({ scheduleKey, isOpen, setIsOpen }: Props) {
       styling={{ maxWidth: "28rem" }}
       title={
         dialog.cadence
-          ? `Run “${dialog.cadence.title}” less often`
-          : "Run less often"
+          ? t(
+              `Run “${dialog.cadence.title}” less often`,
+              `降低“${dialog.cadence.title}”的运行频率`,
+            )
+          : t("Run less often", "降低运行频率")
       }
     >
       <Dialog.Content>
@@ -47,8 +52,13 @@ export function RunLessOftenDialog({ scheduleKey, isOpen, setIsOpen }: Props) {
           </Text>
         ) : dialog.isError || !dialog.cadence ? (
           <ErrorCard
-            responseError={{ message: "Couldn't load how often it runs." }}
-            context="its schedule"
+            responseError={{
+              message: t(
+                "Couldn't load how often it runs.",
+                "无法加载运行频率。",
+              ),
+            }}
+            context={t("its schedule", "运行计划")}
           />
         ) : (
           <CadenceChoices
@@ -64,7 +74,7 @@ export function RunLessOftenDialog({ scheduleKey, isOpen, setIsOpen }: Props) {
             size="small"
             onClick={() => setIsOpen(false)}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           {canChoose ? (
             <Button
@@ -75,7 +85,7 @@ export function RunLessOftenDialog({ scheduleKey, isOpen, setIsOpen }: Props) {
               loading={dialog.isSaving}
               onClick={dialog.save}
             >
-              Save
+              {t("Save", "保存")}
             </Button>
           ) : null}
         </Dialog.Footer>
@@ -91,25 +101,36 @@ interface ChoicesProps {
 }
 
 function CadenceChoices({ cadence, selected, onSelect }: ChoicesProps) {
+  const { t } = useTranslation();
   const groupName = useId();
 
   if (cadence.options.length === 0) {
     return (
       <Text tone="secondary" variant="body">
-        “{cadence.title}” already runs once a week or less, so there is nothing
-        less often to switch it to.
+        {t(
+          `“${cadence.title}” already runs once a week or less, so there is nothing less often to switch it to.`,
+          `“${cadence.title}”已每周运行一次或更少，无法再降低频率。`,
+        )}
       </Text>
     );
   }
   return (
     <div className="flex flex-col gap-3">
       <Text tone="secondary" variant="body">
-        {cadence.current ? `It runs ${lowerFirst(cadence.current)} now. ` : ""}
-        Fewer runs use less of your allowance. Times are in {cadence.timezone}.
+        {cadence.current
+          ? t(
+              `It runs ${lowerFirst(cadence.current)} now. `,
+              `当前运行计划：${cadence.current}。`,
+            )
+          : ""}
+        {t(
+          `Fewer runs use less of your allowance. Times are in ${cadence.timezone}.`,
+          `减少运行次数可节省额度。时间使用 ${cadence.timezone} 时区。`,
+        )}
       </Text>
       <div
         role="radiogroup"
-        aria-label="How often it runs"
+        aria-label={t("How often it runs", "运行频率")}
         className="flex flex-col gap-2"
       >
         {cadence.options.map((option) => (

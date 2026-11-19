@@ -14,6 +14,7 @@ import { applyHeldOutcome } from "../heldRow";
 import { toChainRow } from "../helpers";
 import { ToolChain } from "../ToolChain";
 import { useHeldAnswersStore } from "../../ApprovalQueue/heldAnswersStore";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 afterEach(() => {
   useHeldAnswersStore.setState({ answers: {} });
@@ -33,6 +34,24 @@ const HELD: MessagePart = {
     object: "Q3 reports",
   },
 } as MessagePart;
+
+test("keeps held outcomes and tool labels in Chinese without rewriting input values", () => {
+  const row = toChainRow(HELD, 0)!;
+  const done = applyHeldOutcome(
+    row,
+    new Map([["call-7", { outcome: "approved", output: {} }]]),
+    {},
+    "zh-CN",
+  );
+  expect(done.text).toBe('已创建文件夹 "Q3 reports"');
+  expect(row.input).toEqual({ name: "Q3 reports" });
+  render(
+    <LanguageProvider>
+      <ChainRowView row={done} isLast />
+    </LanguageProvider>,
+  );
+  expect(screen.getByText("已批准")).toBeDefined();
+});
 
 function chain(outcomes: Map<string, HeldOutcome>) {
   return (

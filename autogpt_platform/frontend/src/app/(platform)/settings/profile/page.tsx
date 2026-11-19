@@ -36,7 +36,7 @@ export default function SettingsProfilePage() {
   if (isError) {
     return (
       <ErrorCard
-        context="profile"
+        context={t("profile", "个人资料")}
         responseError={error ? { detail: error.detail } : undefined}
         onRetry={() => {
           void refetch();

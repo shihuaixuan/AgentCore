@@ -2,6 +2,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import type { CSSProperties } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   fluidSize,
   isLead,
@@ -12,12 +13,24 @@ import {
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
+const ROLE_COPY: Record<string, string> = {
+  "Head of AI": "AI 负责人",
+  Marketing: "市场营销",
+  Sales: "销售",
+  Finance: "财务",
+  Research: "研究",
+  Support: "客户支持",
+  Operations: "运营",
+  Security: "安全",
+};
+
 interface Props {
   member: TeamMember;
   animate: boolean;
 }
 
 export function TeamNode({ member, animate }: Props) {
+  const { t } = useTranslation();
   const lead = isLead(member);
   const position = {
     "--x": stagePercent(member.x),
@@ -79,7 +92,7 @@ export function TeamNode({ member, animate }: Props) {
             tone={lead ? "accent" : "secondary"}
             className="block whitespace-nowrap"
           >
-            {member.role}
+            {t(member.role, ROLE_COPY[member.role] ?? member.role)}
           </Text>
         </span>
       </motion.div>

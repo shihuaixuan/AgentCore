@@ -28,8 +28,7 @@ export function ReferenceValue({ refs, total }: Props) {
           className="text-foreground-tertiary"
         >
           {" "}
-          +{more}
-          {t("more", "更多")}
+          {t(`+${more} more`, `还有 ${more} 项`)}
         </span>
       )}
     </span>

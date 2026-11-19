@@ -13,6 +13,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { createIconComponent } from "@/components/atoms/Icon/Icon";
 import { z } from "zod";
+import type { Locale } from "@/lib/i18n/locale";
 
 export const fallbackIcon = createIconComponent(Key01Icon);
 const globeIcon = createIconComponent(Globe02Icon);
@@ -386,17 +387,22 @@ export function isValidServer(server: string) {
   return port >= 1 && port <= 65535;
 }
 
-export function getInvalidServerMessage(provider: string) {
+export function getInvalidServerMessage(
+  provider: string,
+  locale: Locale = "en",
+) {
   const { host, port } = SERVER_EXAMPLES[provider] ?? SERVER_EXAMPLES.smtp;
-  return `Enter a valid server, like ${host} or ${host}:${port} (port 1-65535)`;
+  return locale === "zh-CN"
+    ? `请输入有效的服务器地址，例如 ${host} 或 ${host}:${port}（端口范围为 1-65535）`
+    : `Enter a valid server, like ${host} or ${host}:${port} (port 1-65535)`;
 }
 
-export function getServerFieldSchema(provider: string) {
+export function getServerFieldSchema(provider: string, locale: Locale = "en") {
   return z
     .string()
     .trim()
-    .min(1, "Server is required")
-    .refine(isValidServer, getInvalidServerMessage(provider));
+    .min(1, locale === "zh-CN" ? "请输入服务器地址" : "Server is required")
+    .refine(isValidServer, getInvalidServerMessage(provider, locale));
 }
 
 export function buildServerScope(scheme: string, server: string) {

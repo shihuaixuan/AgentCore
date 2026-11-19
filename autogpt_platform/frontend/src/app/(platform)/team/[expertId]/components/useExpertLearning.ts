@@ -11,6 +11,7 @@ import { useToast } from "@/components/molecules/Toast/use-toast";
 import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const HISTORY_LIMIT = 50;
 
@@ -24,6 +25,7 @@ export function useExpertLearning(
   initialSkill: string | null,
   initialVersionId: string | null,
 ) {
+  const { t } = useTranslation();
   const enabled = Boolean(useGetFlag(Flag.DREAM_SKILL_LEARNING_ENABLED));
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -63,15 +65,27 @@ export function useExpertLearning(
           });
           toast({
             title: variables.data.learning_paused
-              ? `Learning paused for ${expert.name}`
-              : `Learning resumed for ${expert.name}`,
+              ? t(
+                  `Learning paused for ${expert.name}`,
+                  `已暂停 ${expert.name} 的学习`,
+                )
+              : t(
+                  `Learning resumed for ${expert.name}`,
+                  `已恢复 ${expert.name} 的学习`,
+                ),
             description: variables.data.learning_paused
-              ? "Existing skills stay in use; no new automatic changes."
+              ? t(
+                  "Existing skills stay in use; no new automatic changes.",
+                  "现有技能仍可使用，不再自动产生新变更。",
+                )
               : undefined,
           });
         },
         onError: () =>
-          toast({ title: "Could not update learning", variant: "destructive" }),
+          toast({
+            title: t("Could not update learning", "无法更新学习设置"),
+            variant: "destructive",
+          }),
       },
     });
 

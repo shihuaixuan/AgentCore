@@ -6,6 +6,7 @@ import { server } from "@/mocks/mock-server";
 import { ProActivationProvider } from "../ProActivationProvider";
 import { useProActivation } from "../useProActivation";
 import { quote } from "./fixtures";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
@@ -59,21 +60,40 @@ function Subject() {
     </>
   );
 }
-function mount() {
+function mount(chinese = false) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   return render(
     <QueryClientProvider client={client}>
-      <ProActivationProvider>
-        <Subject />
-      </ProActivationProvider>
+      {chinese ? (
+        <LanguageProvider>
+          <ProActivationProvider>
+            <Subject />
+          </ProActivationProvider>
+        </LanguageProvider>
+      ) : (
+        <ProActivationProvider>
+          <Subject />
+        </ProActivationProvider>
+      )}
     </QueryClientProvider>,
   );
 }
 const base = "*/api/proxy/api/credits/pro-activation";
 const confirm = vi.fn();
 const preview = vi.fn();
+
+it("shows a Chinese recovery error when upgrade details cannot be loaded", async () => {
+  server.use(
+    http.post(`${base}/preview`, () => new HttpResponse(null, { status: 503 })),
+  );
+  mount(true);
+  fireEvent.click(screen.getByRole("button", { name: "Upgrade" }));
+  expect(
+    await screen.findByText("无法加载升级详情，请重试后再确认付款。"),
+  ).toBeDefined();
+});
 
 beforeEach(() => {
   sessionStorage.clear();

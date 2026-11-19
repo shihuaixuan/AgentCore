@@ -1,7 +1,9 @@
 import type { StoreListingWithVersionsAdminView } from "@/app/api/__generated__/models/storeListingWithVersionsAdminView";
 import type { StoreSubmissionAdminView } from "@/app/api/__generated__/models/storeSubmissionAdminView";
 import { SubmissionStatus } from "@/app/api/__generated__/models/submissionStatus";
-import { render, screen } from "@/tests/integrations/test-utils";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
+import { fireEvent, render, screen } from "@/tests/integrations/test-utils";
 import { describe, expect, test, vi } from "vitest";
 import { ExpandableRow } from "../components/ExpandleRow";
 
@@ -36,7 +38,7 @@ function submission(status: SubmissionStatus): StoreSubmissionAdminView {
   };
 }
 
-function renderRow(status: SubmissionStatus) {
+function renderRow(status: SubmissionStatus, locale?: Locale) {
   const latestVersion = submission(status);
   const listing: StoreListingWithVersionsAdminView = {
     listing_id: "listing-1",
@@ -46,12 +48,19 @@ function renderRow(status: SubmissionStatus) {
     latest_version: latestVersion,
     versions: [latestVersion],
   };
-  render(
+  const row = (
     <table>
       <tbody>
         <ExpandableRow listing={listing} latestVersion={latestVersion} />
       </tbody>
-    </table>,
+    </table>
+  );
+  render(
+    locale ? (
+      <LanguageProvider initialLocale={locale}>{row}</LanguageProvider>
+    ) : (
+      row
+    ),
   );
 }
 
@@ -74,5 +83,29 @@ describe("ExpandableRow status badge", () => {
   test("shows a submission that was never sent for review as Draft", () => {
     renderRow(SubmissionStatus.DRAFT);
     expect(screen.getByText("Draft")).toBeDefined();
+  });
+
+  test.each([
+    { status: SubmissionStatus.PENDING, label: "待处理" },
+    { status: SubmissionStatus.APPROVED, label: "已通过" },
+    { status: SubmissionStatus.REJECTED, label: "已拒绝" },
+    { status: SubmissionStatus.DRAFT, label: "草稿" },
+  ])(
+    "localizes $status in the Chinese summary and history",
+    ({ status, label }) => {
+      renderRow(status, "zh-CN");
+      expect(screen.getByText(label)).toBeDefined();
+      fireEvent.click(screen.getByText("Weekly report"));
+      expect(screen.getByText("版本历史")).toBeDefined();
+      expect(screen.getAllByText(label)).toHaveLength(2);
+      expect(screen.getAllByText("Weekly report")).toHaveLength(2);
+    },
+  );
+
+  test("keeps English in expanded history without a language provider", () => {
+    renderRow(SubmissionStatus.DRAFT);
+    fireEvent.click(screen.getByText("Weekly report"));
+    expect(screen.getByText("Version History")).toBeDefined();
+    expect(screen.getAllByText("Draft")).toHaveLength(2);
   });
 });

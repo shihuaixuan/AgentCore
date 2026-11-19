@@ -1,6 +1,7 @@
 "use client";
 
 import { useMountEffect } from "@/hooks/useMountEffect";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getNextTourScenario } from "../../script/tourScenarios";
 import { useTourStore } from "../../tourStore";
 import { trackTourCtaClick } from "../../tracking";
@@ -11,6 +12,7 @@ import { useTourScenarioSelection } from "../../useTourScenarioSelection";
 const IDLE_NUDGE_DELAY_MS = 4000;
 
 export function useTourEndCard() {
+  const { locale } = useTranslation();
   const activeScenarioId = useTourStore((s) => s.activeScenarioId);
   const watchedScenarioIds = useTourStore((s) => s.watchedScenarioIds);
   const showNudge = useTourStore((s) => s.showNudge);
@@ -19,6 +21,7 @@ export function useTourEndCard() {
   const nextScenario = getNextTourScenario(
     activeScenarioId,
     watchedScenarioIds,
+    locale,
   );
 
   // The card only mounts once the demo completes, so idle time starts here.

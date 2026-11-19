@@ -1,6 +1,7 @@
 import { useGetV2AdminReadSkillSubmissionFile } from "@/app/api/__generated__/endpoints/admin/admin";
 import { useGetV2ReadMarketplaceSkillFile } from "@/app/api/__generated__/endpoints/store/store";
 import { okData } from "@/app/api/helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export type SkillPackageSource =
   | { kind: "listing"; slug: string }
@@ -12,6 +13,7 @@ interface Args {
 }
 
 export function useSkillFileViewer({ source, path }: Args) {
+  const { t } = useTranslation();
   const isListing = source.kind === "listing";
   // Both are declared and one is enabled: a listing reads the approved
   // version, a submission goes through the admin route that can see a
@@ -35,13 +37,24 @@ export function useSkillFileViewer({ source, path }: Args) {
     // A refusal is a state to render, not a failure to hide: only the
     // endpoint knows whether a file is one this viewer can serve.
     unavailable: query.isError
-      ? describeRefusal((query.error as { status?: number } | null)?.status)
+      ? describeRefusal((query.error as { status?: number } | null)?.status, t)
       : null,
   };
 }
 
-function describeRefusal(status: number | undefined): string {
-  if (status === 413) return "This file is too large to preview here.";
-  if (status === 415) return "This file isn't text, so it can't be previewed.";
-  return "Couldn't load this file.";
+function describeRefusal(
+  status: number | undefined,
+  t: (english: string, chinese: string) => string,
+): string {
+  if (status === 413)
+    return t(
+      "This file is too large to preview here.",
+      "文件过大，无法在此预览。",
+    );
+  if (status === 415)
+    return t(
+      "This file isn't text, so it can't be previewed.",
+      "此文件不是文本文件，无法预览。",
+    );
+  return t("Couldn't load this file.", "无法加载此文件。");
 }

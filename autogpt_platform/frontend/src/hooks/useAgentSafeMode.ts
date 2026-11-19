@@ -10,6 +10,7 @@ import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { okData } from "@/app/api/helpers";
 import { useQueryClient } from "@tanstack/react-query";
 import { Graph } from "@/lib/autogpt-server-api/types";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 function getGraphId(graph: GraphModel | LibraryAgent | Graph): string {
   if ("graph_id" in graph) return graph.graph_id || "";
@@ -39,6 +40,7 @@ function isLibraryAgent(
 }
 
 export function useAgentSafeMode(graph: GraphModel | LibraryAgent | Graph) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -117,17 +119,27 @@ export function useAgentSafeMode(graph: GraphModel | LibraryAgent | Graph) {
       queryClient.invalidateQueries({ queryKey: ["v2", "executions"] });
 
       toast({
-        title: `HITL safe mode ${newSafeMode ? "enabled" : "disabled"}`,
+        title: t(
+          `HITL safe mode ${newSafeMode ? "enabled" : "disabled"}`,
+          `人工审核安全模式${newSafeMode ? "已启用" : "已关闭"}`,
+        ),
         description: newSafeMode
-          ? "Human-in-the-loop blocks will require manual review"
-          : "Human-in-the-loop blocks will proceed automatically",
+          ? t(
+              "Human-in-the-loop blocks will require manual review",
+              "人工参与模块需要手动审核",
+            )
+          : t(
+              "Human-in-the-loop blocks will proceed automatically",
+              "人工参与模块将自动继续执行",
+            ),
         duration: 2000,
       });
     } catch (error) {
-      handleToggleError(error, isAgent, toast);
+      handleToggleError(error, isAgent, toast, t);
     }
   }, [
     currentHITLSafeMode,
+    t,
     graphId,
     isAgent,
     graph.id,
@@ -162,17 +174,27 @@ export function useAgentSafeMode(graph: GraphModel | LibraryAgent | Graph) {
       queryClient.invalidateQueries({ queryKey: ["v2", "executions"] });
 
       toast({
-        title: `Sensitive action safe mode ${newSafeMode ? "enabled" : "disabled"}`,
+        title: t(
+          `Sensitive action safe mode ${newSafeMode ? "enabled" : "disabled"}`,
+          `敏感操作安全模式${newSafeMode ? "已启用" : "已关闭"}`,
+        ),
         description: newSafeMode
-          ? "Sensitive action blocks will require manual review"
-          : "Sensitive action blocks will proceed automatically",
+          ? t(
+              "Sensitive action blocks will require manual review",
+              "敏感操作模块需要手动审核",
+            )
+          : t(
+              "Sensitive action blocks will proceed automatically",
+              "敏感操作模块将自动继续执行",
+            ),
         duration: 2000,
       });
     } catch (error) {
-      handleToggleError(error, isAgent, toast);
+      handleToggleError(error, isAgent, toast, t);
     }
   }, [
     currentSensitiveActionSafeMode,
+    t,
     graphId,
     isAgent,
     graph.id,
@@ -209,6 +231,7 @@ function handleToggleError(
   error: unknown,
   isAgent: boolean,
   toast: ReturnType<typeof useToast>["toast"],
+  t: ReturnType<typeof useTranslation>["t"],
 ) {
   const isNotFoundError =
     error instanceof Error &&
@@ -216,18 +239,20 @@ function handleToggleError(
 
   if (!isAgent && isNotFoundError) {
     toast({
-      title: "Safe mode not available",
-      description:
+      title: t("Safe mode not available", "安全模式暂不可用"),
+      description: t(
         "To configure safe mode, please save this workflow to your library first.",
+        "请先将此工作流保存到资源库，再配置安全模式。",
+      ),
       variant: "destructive",
     });
   } else {
     toast({
-      title: "Failed to update safe mode",
+      title: t("Failed to update safe mode", "更新安全模式失败"),
       description:
         error instanceof Error
           ? error.message
-          : "An unexpected error occurred.",
+          : t("An unexpected error occurred.", "发生了意外错误。"),
       variant: "destructive",
     });
   }

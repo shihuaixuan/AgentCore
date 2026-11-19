@@ -3,6 +3,7 @@ import { toast } from "@/components/molecules/Toast/use-toast";
 import { useStableCallback } from "@/hooks/useStableCallback";
 import { useAuth } from "@/lib/auth/hooks/useAuth";
 import { isValidUUID } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { trackBrainDump } from "@/services/onboarding/brain-dump-analytics";
 import {
   peekGreetingDone,
@@ -237,6 +238,21 @@ function useCopilotPageChat(
   session: CopilotPageSession,
   stream: CopilotPageStream,
 ) {
+  const { t, locale } = useTranslation();
+  const reportHeldFollowUp = useStableCallback(() => {
+    toast({
+      title: t("Follow-up not sent", "后续消息未发送"),
+      description: t(
+        "You left the chat before it could go out. It's back in the composer.",
+        "你在消息发出前离开了对话。消息已返回输入框。",
+      ),
+    });
+  });
+  const recoverDeferredSend = useStableCallback(
+    (text: string, error: unknown) => {
+      recoverFailedDeferredSend(text, [], error, locale);
+    },
+  );
   const {
     user,
     isUserLoading,
@@ -347,12 +363,8 @@ function useCopilotPageChat(
     const leftBehind = takeHeldFollowUps(sessionId);
     if (leftBehind.length === 0) return;
     setInitialPrompt(leftBehind.join("\n\n"));
-    toast({
-      title: "Follow-up not sent",
-      description:
-        "You left the chat before it could go out. It's back in the composer.",
-    });
-  }, [sessionId, setInitialPrompt]);
+    reportHeldFollowUp();
+  }, [sessionId, setInitialPrompt, reportHeldFollowUp]);
 
   // Combine paginated messages with current page messages, merging consecutive
   // assistant UIMessages at the page boundary so reasoning + response parts
@@ -454,9 +466,11 @@ function useCopilotPageChat(
     while (sessionId && !claimTurn()) {
       if (hasAttachments) {
         toast({
-          title: "Please wait to attach files",
-          description:
+          title: t("Please wait to attach files", "请稍后再添加文件"),
+          description: t(
             "File attachments can't be queued until the current response finishes.",
+            "当前回复结束前，无法将文件附件加入发送队列。",
+          ),
           variant: "destructive",
         });
         return;
@@ -475,7 +489,7 @@ function useCopilotPageChat(
       // the composer's enqueue path is waiting on this, and holding it for
       // the entire turn would lock Enter and the queue button again.
       void result.catch((err: unknown) =>
-        recoverFailedDeferredSend(trimmed, [], err),
+        recoverDeferredSend(trimmed, err),
       );
       return;
     }

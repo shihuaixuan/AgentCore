@@ -42,14 +42,16 @@ describe("legacy /profile layout", () => {
     (path) => {
       usePathnameMock.mockReturnValue(path);
 
-      const { getByText, getAllByText } = render(
+      const { getByText, getAllByRole } = render(
         <Layout>
           <p>legacy page</p>
         </Layout>,
       );
 
       expect(getByText("legacy page")).toBeDefined();
-      expect(getAllByText("Integrations").length).toBeGreaterThan(0);
+      for (const link of getAllByRole("link", { name: "OAuth Apps" })) {
+        expect(link.getAttribute("href")).toBe("/profile/oauth-apps");
+      }
     },
   );
 });

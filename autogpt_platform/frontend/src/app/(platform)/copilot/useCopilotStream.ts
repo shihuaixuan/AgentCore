@@ -3,6 +3,7 @@ import {
   getGetV2GetSessionQueryKey,
 } from "@/app/api/__generated__/endpoints/chat/chat";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useMountEffect } from "@/hooks/useMountEffect";
 import { useChat } from "@ai-sdk/react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -125,6 +126,7 @@ export function useCopilotStream({
   refetchSession,
   copilotModel,
 }: UseCopilotStreamArgs) {
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const setInitialPrompt = useCopilotUIStore((s) => s.setInitialPrompt);
   const [rateLimitMessage, setRateLimitMessage] = useState<string | null>(null);
@@ -332,6 +334,7 @@ export function useCopilotStream({
       let keepSendMemory = false;
       handleStreamError({
         error,
+        locale,
         providerFailure: failureForThisTurn,
         onRateLimit: (message, limitFailure, origin) => {
           keepSendMemory = true;
@@ -428,6 +431,7 @@ export function useCopilotStream({
     setInitialPrompt,
     setMessages,
     userId,
+    locale,
   ]);
 
   // Flipped to ``true`` the first time the user actually hits Send on this
@@ -594,8 +598,11 @@ export function useCopilotStream({
       // the user may have clicked send against a still-enabled input. Tell
       // them their message wasn't dropped silently.
       toast({
-        title: "Reconnecting",
-        description: "Wait for the connection to resume before sending.",
+        title: t("Reconnecting", "正在重新连接"),
+        description: t(
+          "Wait for the connection to resume before sending.",
+          "请等待连接恢复后再发送。",
+        ),
       });
       return;
     }

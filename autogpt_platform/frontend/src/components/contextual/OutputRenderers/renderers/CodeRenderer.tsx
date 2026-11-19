@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   SHIKI_THEMES,
   type BundledLanguage,
@@ -117,6 +118,7 @@ function HighlightedCodeBlock({
   filename?: string;
   language?: string;
 }) {
+  const { t } = useTranslation();
   const [highlighted, setHighlighted] = useState<HighlightedCodeState | null>(
     null,
   );
@@ -173,7 +175,7 @@ function HighlightedCodeBlock({
     <div className="overflow-hidden rounded-lg border border-action-hover bg-foreground-base shadow-sm">
       <div className="flex items-center justify-between border-b border-action bg-action-hover px-3 py-2">
         <span className="truncate font-mono text-caption text-foreground-subtle">
-          {filename || "code"}
+          {filename || t("code", "代码")}
         </span>
         <span className="rounded bg-action px-2 py-0.5 font-mono text-caption-sm leading-inherit tracking-wide text-foreground-disabled uppercase">
           {supportedLanguage}

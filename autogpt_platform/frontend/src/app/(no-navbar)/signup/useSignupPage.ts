@@ -20,9 +20,11 @@ import z from "zod";
 import { signup as signupAction } from "./actions";
 import { isTeamEmail } from "@/lib/auth/team-email";
 import { clearImpersonationEverywhere } from "@/lib/impersonation";
+import { useAuthPageTranslation } from "../useAuthPageTranslation";
 
 export function useSignupPage() {
   const { t } = useTranslation();
+  const { translateMessage } = useAuthPageTranslation();
   useCaptureMarketingPrompt();
 
   const { user, isUserLoading, isLoggedIn } = useAuth();
@@ -138,7 +140,7 @@ export function useSignupPage() {
       toast({
         title:
           error instanceof Error
-            ? error.message
+            ? translateMessage(error.message)
             : t("Failed to start OAuth flow", "无法启动第三方登录"),
         variant: "destructive",
       });
@@ -190,7 +192,9 @@ export function useSignupPage() {
         }
 
         toast({
-          title: result.error || t("Signup failed", "注册失败"),
+          title: translateMessage(
+            result.error || t("Signup failed", "注册失败"),
+          ),
           variant: "destructive",
         });
         setIsSigningUp(false);
@@ -217,7 +221,7 @@ export function useSignupPage() {
       toast({
         title:
           error instanceof Error
-            ? error.message
+            ? translateMessage(error.message)
             : t("Unexpected error during signup", "注册时发生意外错误"),
         variant: "destructive",
       });

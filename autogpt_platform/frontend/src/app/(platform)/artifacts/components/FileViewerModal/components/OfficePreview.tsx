@@ -4,6 +4,7 @@ import type { WorkspaceFileItem } from "@/app/api/__generated__/models/workspace
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { PREVIEW_IMAGE_WIDTH } from "../../ArtifactsList/ArtifactsTable/FilePreviewCard";
 import {
   getFilePreviewUrl,
@@ -19,6 +20,7 @@ interface Props {
 // The preview endpoint returns the thumbnail embedded in the office file
 // (first slide or page), and 415s when there is none.
 export function OfficePreview({ file, downloadUrl }: Props) {
+  const { t } = useTranslation();
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -52,8 +54,14 @@ export function OfficePreview({ file, downloadUrl }: Props) {
           downloadUrl={downloadUrl}
           message={
             isPresentation
-              ? "Showing the first slide. Download to open the full presentation."
-              : "Showing the first page. Download to open the full file."
+              ? t(
+                  "Showing the first slide. Download to open the full presentation.",
+                  "当前显示第一张幻灯片。下载后可查看完整演示文稿。",
+                )
+              : t(
+                  "Showing the first page. Download to open the full file.",
+                  "当前显示第一页。下载后可查看完整文件。",
+                )
           }
         />
       </div>

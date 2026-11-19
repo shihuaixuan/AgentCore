@@ -232,7 +232,7 @@ export function ConnectCredentialDialog({
                   onClick={handleUseExisting}
                 >
                   {existing?.isPending
-                    ? "Granting…"
+                    ? t("Granting…", "正在授权…")
                     : isUpdating
                       ? t("Update this account", "更新此账户")
                       : isChoosing
@@ -250,7 +250,9 @@ export function ConnectCredentialDialog({
                   loading={isConnecting}
                   onClick={handleContinue}
                 >
-                  {isConnecting ? "Connecting…" : t("Continue", "继续")}
+                  {isConnecting
+                    ? t("Connecting…", "正在连接…")
+                    : t("Continue", "继续")}
                 </Button>
               )
             )}

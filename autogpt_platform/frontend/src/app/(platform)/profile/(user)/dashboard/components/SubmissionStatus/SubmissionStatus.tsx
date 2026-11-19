@@ -1,4 +1,7 @@
+"use client";
+
 import { SubmissionStatus as Status } from "@/app/api/__generated__/models/submissionStatus";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
 
@@ -8,27 +11,36 @@ interface Props {
 
 const statusConfig: Record<
   Status,
-  { fill: string; dot: string; label: string }
+  { fill: string; dot: string; label: string; chineseLabel: string }
 > = {
-  [Status.DRAFT]: { fill: "bg-info-surface", dot: "bg-info", label: "Draft" },
+  [Status.DRAFT]: {
+    fill: "bg-info-surface",
+    dot: "bg-info",
+    label: "Draft",
+    chineseLabel: "草稿",
+  },
   [Status.PENDING]: {
     fill: "bg-warning-surface",
     dot: "bg-warning",
     label: "Awaiting review",
+    chineseLabel: "等待审核",
   },
   [Status.APPROVED]: {
     fill: "bg-success-surface",
     dot: "bg-success",
     label: "Approved",
+    chineseLabel: "已通过",
   },
   [Status.REJECTED]: {
     fill: "bg-error-surface",
     dot: "bg-error",
     label: "Rejected",
+    chineseLabel: "已拒绝",
   },
 };
 
 export function SubmissionStatus({ status }: Props) {
+  const { t } = useTranslation();
   const config = statusConfig[status] ?? statusConfig[Status.PENDING];
 
   return (
@@ -40,7 +52,7 @@ export function SubmissionStatus({ status }: Props) {
     >
       <div className={cn("h-3 w-3 rounded-full", config.dot)} />
       <Text variant="body-tight" as="div" tone="secondary">
-        {config.label}
+        {t(config.label, config.chineseLabel)}
       </Text>
     </div>
   );

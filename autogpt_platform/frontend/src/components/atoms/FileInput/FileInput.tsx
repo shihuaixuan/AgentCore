@@ -119,7 +119,7 @@ interface Base64ModeProps extends BaseProps {
 type Props = UploadModeProps | Base64ModeProps;
 
 export function FileInput(props: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const {
     value,
     onChange,
@@ -191,21 +191,18 @@ export function FileInput(props: Props) {
         return getFileLabel(
           obj.name,
           typeof obj.type === "string" ? obj.type : "",
+          locale,
         );
       }
       if (typeof obj.type === "string") {
-        const mimeParts = obj.type.split("/");
-        if (mimeParts.length > 1) {
-          return `${mimeParts[1].toUpperCase()} file`;
-        }
-        return `${obj.type} file`;
+        return getFileLabel("", obj.type, locale);
       }
-      return "File";
+      return t("File", "文件");
     }
 
     // Handle string values (workspace URIs, data URIs, or file paths)
     if (typeof val !== "string") {
-      return "File";
+      return t("File", "文件");
     }
 
     const wsURI = parseWorkspaceURI(val);
@@ -213,30 +210,22 @@ export function FileInput(props: Props) {
       if (wsURI.mimeType) {
         const parts = wsURI.mimeType.split("/");
         if (parts.length > 1) {
-          return `${parts[1].toUpperCase()} file`;
+          return getFileLabel("", wsURI.mimeType, locale);
         }
-        return "File";
+        return t("File", "文件");
       }
-      return "Uploaded file";
+      return t("Uploaded file", "已上传的文件");
     }
 
     if (val.startsWith("data:")) {
       const matches = val.match(/^data:([^;]+);/);
       if (matches?.[1]) {
-        const mimeParts = matches[1].split("/");
-        if (mimeParts.length > 1) {
-          return `${mimeParts[1].toUpperCase()} file`;
-        }
-        return `${matches[1]} file`;
+        return getFileLabel("", matches[1], locale);
       }
     } else {
-      const pathParts = val.split(".");
-      if (pathParts.length > 1) {
-        const ext = pathParts.pop();
-        if (ext) return `${ext.toUpperCase()} file`;
-      }
+      return getFileLabel(val, undefined, locale);
     }
-    return "File";
+    return t("File", "文件");
   }
 
   function processFileBase64(file: File) {
@@ -268,7 +257,7 @@ export function FileInput(props: Props) {
     }
 
     if (!onUploadFile) {
-      setUploadError("Upload handler not provided");
+      setUploadError(t("Upload handler not provided", "未配置文件上传功能"));
       return;
     }
 
@@ -395,7 +384,7 @@ export function FileInput(props: Props) {
                   className="truncate"
                 >
                   {fileInfo
-                    ? getFileLabel(fileInfo.name, fileInfo.content_type)
+                    ? getFileLabel(fileInfo.name, fileInfo.content_type, locale)
                     : getFileLabelFromValue(value)}
                 </Text>
                 {fileInfo && (
@@ -413,8 +402,12 @@ export function FileInput(props: Props) {
                   value={value}
                   title={
                     fileInfo
-                      ? getFileLabel(fileInfo.name, fileInfo.content_type)
-                      : "Preview"
+                      ? getFileLabel(
+                          fileInfo.name,
+                          fileInfo.content_type,
+                          locale,
+                        )
+                      : t("Preview", "预览")
                   }
                   contentType={fileInfo?.content_type}
                 />
@@ -540,7 +533,11 @@ export function FileInput(props: Props) {
                     className="font-normal text-foreground-base"
                   >
                     {fileInfo
-                      ? getFileLabel(fileInfo.name, fileInfo.content_type)
+                      ? getFileLabel(
+                          fileInfo.name,
+                          fileInfo.content_type,
+                          locale,
+                        )
                       : getFileLabelFromValue(value)}
                   </span>
                   <span data-slot="file-input-file-size">
@@ -557,8 +554,12 @@ export function FileInput(props: Props) {
                     value={value}
                     title={
                       fileInfo
-                        ? getFileLabel(fileInfo.name, fileInfo.content_type)
-                        : "Preview"
+                        ? getFileLabel(
+                            fileInfo.name,
+                            fileInfo.content_type,
+                            locale,
+                          )
+                        : t("Preview", "预览")
                     }
                     contentType={fileInfo?.content_type}
                   />

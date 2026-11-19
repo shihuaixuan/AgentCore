@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { usePreviewSubscriptionUpgrade } from "@/app/api/__generated__/endpoints/credits/credits";
 import type { SubscriptionUpgradePreview } from "@/app/api/__generated__/models/subscriptionUpgradePreview";
 import { useAuthStore } from "@/lib/auth/hooks/useAuthStore";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface ReviewState {
   userID: string;
@@ -14,6 +15,7 @@ export function useTierUpgradePreview(
   enabled: boolean,
   billingCycle: "monthly" | "yearly",
 ) {
+  const { t } = useTranslation();
   const { mutateAsync } = usePreviewSubscriptionUpgrade();
   const userID = useAuthStore((state) => state.user?.id);
   const [state, setState] = useState<ReviewState>();
@@ -35,8 +37,10 @@ export function useTierUpgradePreview(
         if (response.data.expires_at * 1000 <= Date.now()) {
           setState({
             ...owner,
-            error:
+            error: t(
               "This review expired. Review the charge again before paying.",
+              "本次费用核对已过期。请重新核对后再付款。",
+            ),
           });
           return;
         }
@@ -46,13 +50,16 @@ export function useTierUpgradePreview(
         if (current && useAuthStore.getState().user?.id === userID)
           setState({
             ...owner,
-            error: "We couldn’t load your charge. Try again before upgrading.",
+            error: t(
+              "We couldn’t load your charge. Try again before upgrading.",
+              "无法加载本次费用。请重试后再升级。",
+            ),
           });
       });
     return () => {
       current = false;
     };
-  }, [enabled, userID, billingCycle, attempt, mutateAsync]);
+  }, [enabled, userID, billingCycle, attempt, mutateAsync, t]);
 
   useEffect(() => {
     if (!preview) return;
@@ -63,8 +70,10 @@ export function useTierUpgradePreview(
             ? {
                 ...value,
                 preview: undefined,
-                error:
+                error: t(
                   "This review expired. Review the charge again before paying.",
+                  "本次费用核对已过期。请重新核对后再付款。",
+                ),
               }
             : value,
         );
@@ -72,7 +81,7 @@ export function useTierUpgradePreview(
       Math.max(0, preview.expires_at * 1000 - Date.now()),
     );
     return () => clearTimeout(timer);
-  }, [preview]);
+  }, [preview, t]);
 
   return {
     required: enabled,
@@ -81,7 +90,10 @@ export function useTierUpgradePreview(
     isLoading: enabled && !preview && !error,
     retry: () => setAttempt((value) => value + 1),
     invalidate: (
-      message = "Your billing details changed. Review the updated charge before paying.",
+      message = t(
+        "Your billing details changed. Review the updated charge before paying.",
+        "你的账单信息已更改。请核对更新后的费用再付款。",
+      ),
     ) => {
       setState((value) =>
         value

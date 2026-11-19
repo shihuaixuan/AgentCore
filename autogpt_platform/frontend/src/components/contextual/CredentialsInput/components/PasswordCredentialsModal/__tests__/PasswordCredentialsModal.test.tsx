@@ -9,6 +9,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { BlockIOCredentialsSubSchema } from "@/lib/autogpt-server-api/types";
 
 import { PasswordCredentialsModal } from "../PasswordCredentialsModal";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 
 vi.mock("@/hooks/useCredentials", () => ({ default: vi.fn() }));
 
@@ -23,7 +25,11 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function renderModal(provider: string, providerName: string) {
+function renderModal(
+  provider: string,
+  providerName: string,
+  locale: Locale = "en",
+) {
   const createUserPasswordCredentials = vi.fn().mockResolvedValue({
     id: "cred-1",
     title: "Mine",
@@ -43,12 +49,14 @@ function renderModal(provider: string, providerName: string) {
     credentials_types: ["user_password"],
   } as unknown as BlockIOCredentialsSubSchema;
   render(
-    <PasswordCredentialsModal
-      schema={schema}
-      open
-      onClose={vi.fn()}
-      onCredentialsCreate={onCredentialsCreate}
-    />,
+    <LanguageProvider initialLocale={locale}>
+      <PasswordCredentialsModal
+        schema={schema}
+        open
+        onClose={vi.fn()}
+        onCredentialsCreate={onCredentialsCreate}
+      />
+    </LanguageProvider>,
   );
   return { createUserPasswordCredentials, onCredentialsCreate };
 }
@@ -81,6 +89,26 @@ async function saveAndExpectRefused(
 }
 
 describe("PasswordCredentialsModal for a login sent to a server the workflow names", () => {
+  it("uses the selected locale for server validation in the credential modal", async () => {
+    const { createUserPasswordCredentials } = renderModal(
+      "smtp",
+      "SMTP",
+      "zh-CN",
+    );
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText("用户名"), "Original-user");
+    await user.type(
+      screen.getByLabelText("密码", { selector: "input" }),
+      "Original-password",
+    );
+    await user.type(screen.getByLabelText("名称"), "Original-name");
+    await user.click(
+      screen.getByRole("button", { name: "保存并使用此登录凭据" }),
+    );
+    expect(await screen.findByText("请输入服务器地址")).toBeDefined();
+    expect(createUserPasswordCredentials).not.toHaveBeenCalled();
+  });
+
   it("requires the server for an SMTP login", async () => {
     const { createUserPasswordCredentials } = renderModal("smtp", "SMTP");
     const user = userEvent.setup();

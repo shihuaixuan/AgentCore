@@ -5,6 +5,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { executionSharePath } from "@/lib/share/routes";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   ContentCard,
   ContentCardDescription,
@@ -19,24 +20,29 @@ interface Props {
   error?: string | null;
 }
 
-export function titleForStatus(status: string | undefined): string {
+export function titleForStatus(
+  status: string | undefined,
+  t = (english: string, _chinese: string) => english,
+): string {
   // Normalise whatever the backend sent (QUEUED/RUNNING/COMPLETED/FAILED/
   // STOPPED/TERMINATED/TIMED_OUT/INCOMPLETE/CANCELLED …). The card is
   // reused for both truly-just-queued runs and for sync-completed runs
   // (run_agent with wait_for_result) — "Execution started" is wrong for
   // the latter.
   const s = (status ?? "").toUpperCase();
-  if (s === "COMPLETED") return "Execution completed";
-  if (s === "FAILED") return "Execution failed";
+  if (s === "COMPLETED") return t("Execution completed", "执行已完成");
+  if (s === "FAILED") return t("Execution failed", "执行失败");
   if (s === "STOPPED" || s === "TERMINATED" || s === "CANCELLED")
-    return "Execution stopped";
-  if (s === "TIMED_OUT" || s === "INCOMPLETE") return "Execution incomplete";
-  if (s === "RUNNING") return "Execution running";
-  if (s === "SCHEDULED") return "Execution scheduled";
-  return "Execution started";
+    return t("Execution stopped", "执行已停止");
+  if (s === "TIMED_OUT" || s === "INCOMPLETE")
+    return t("Execution incomplete", "执行未完成");
+  if (s === "RUNNING") return t("Execution running", "正在执行");
+  if (s === "SCHEDULED") return t("Execution scheduled", "执行已安排");
+  return t("Execution started", "执行已启动");
 }
 
 export function ExecutionStartedCard({ output, error }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
   // In the builder panel the run_agent effect already drops the exec_id
   // onto the URL so the builder's in-place execution UI opens — the
@@ -60,7 +66,7 @@ export function ExecutionStartedCard({ output, error }: Props) {
   return (
     <ContentGrid>
       <ContentCard>
-        <ContentCardTitle>{titleForStatus(output.status)}</ContentCardTitle>
+        <ContentCardTitle>{titleForStatus(output.status, t)}</ContentCardTitle>
         <ContentCardSubtitle>{output.execution_id}</ContentCardSubtitle>
         {output.message && (
           <ContentCardDescription>{output.message}</ContentCardDescription>
@@ -76,7 +82,7 @@ export function ExecutionStartedCard({ output, error }: Props) {
             className="mt-3"
             onClick={() => router.push(href)}
           >
-            View Execution
+            {t("View Execution", "查看执行记录")}
           </Button>
         )}
       </ContentCard>

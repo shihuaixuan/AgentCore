@@ -10,6 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/molecules/Popover/Popover";
 import { Calendar } from "@/components/atoms/Calendar/Calendar";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 function toLocalISODateString(d: Date) {
   const year = d.getFullYear();
@@ -63,6 +64,7 @@ export const DateInput = ({
   "aria-labelledby": ariaLabelledBy,
   "aria-describedby": ariaDescribedBy,
 }: DateInputProps) => {
+  const { t, locale } = useTranslation();
   const selected = React.useMemo(() => parseISODateString(value), [value]);
   const [open, setOpen] = React.useState(false);
 
@@ -72,13 +74,13 @@ export const DateInput = ({
   };
 
   const buttonText =
-    selected?.toLocaleDateString(undefined, {
+    selected?.toLocaleDateString(locale === "zh-CN" ? locale : undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
     }) ||
     placeholder ||
-    "Pick a date";
+    t("Pick a date", "选择日期");
 
   const isDisabled = disabled || readonly;
 

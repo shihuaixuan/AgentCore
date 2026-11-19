@@ -23,7 +23,7 @@ export function TrialTimeLeft({ endsAt }: Props) {
         )}
       </>
     );
-  const left = describeTrialTimeLeft(endsAt);
+  const left = describeTrialTimeLeft(endsAt, new Date(), locale);
   if (left.kind === "ended")
     return <>{t("Your trial access has ended.", "你的试用权限已到期。")}</>;
   if (left.kind !== "days")
@@ -37,9 +37,11 @@ export function TrialTimeLeft({ endsAt }: Props) {
     );
   return (
     <>
+      {t("You still have ", "你仍有 ")}
+      <strong>{t(formatTrialDays(left.days), `${left.days} 天`)}</strong>
       {t(
-        `You still have ${formatTrialDays(left.days)} of full access, until ${formatTrialEnd(endsAt)}. Nothing changes until then.`,
-        `你仍有 ${left.days} 天完整使用权限，将于 ${formatTrialEnd(endsAt, locale)} 到期，期间不会有任何变化。`,
+        ` of full access, until ${formatTrialEnd(endsAt)}. Nothing changes until then.`,
+        `完整使用权限，将于 ${formatTrialEnd(endsAt, locale)} 到期，期间不会有任何变化。`,
       )}
     </>
   );

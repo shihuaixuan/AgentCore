@@ -10,7 +10,8 @@ import { toastIfPlanRequired } from "@/components/contextual/PaywallToast/helper
 import * as Sentry from "@sentry/nextjs";
 import type { UIDataTypes, UIMessage, UITools } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MEMORY_CHAT_PROMPTS, type MemoryChatSeed } from "../../helpers";
+import { getMemoryChatPrompt, type MemoryChatSeed } from "../../helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type UiMessages = UIMessage<unknown, UIDataTypes, UITools>[];
 
@@ -25,6 +26,7 @@ interface Args {
  * prompt ("summary" or "forget") as its first message.
  */
 export function useMemoryChatPanel({ scopeExpertID }: Args) {
+  const { t, locale } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [startError, setStartError] = useState(false);
@@ -128,14 +130,24 @@ export function useMemoryChatPanel({ scopeExpertID }: Args) {
         scopeExpertID ? { data: { expert_id: scopeExpertID } } : { data: null },
       )) as unknown as { status: number; data?: { id?: string } };
       if (response.status !== 200 || !response.data?.id) {
-        throw new Error("Failed to create memory chat session");
+        throw new Error(
+          t("Failed to create memory chat session", "无法创建记忆对话"),
+        );
       }
       if (generation !== scopeGenRef.current) return;
-      pendingPromptRef.current = MEMORY_CHAT_PROMPTS[lastSeedRef.current];
+      pendingPromptRef.current = getMemoryChatPrompt(
+        lastSeedRef.current,
+        locale,
+      );
       setSessionId(response.data.id);
     } catch (err) {
       if (generation !== scopeGenRef.current) return;
-      if (toastIfPlanRequired(err, "The memory chat needs an active plan")) {
+      if (
+        toastIfPlanRequired(
+          err,
+          t("The memory chat needs an active plan", "记忆对话需要有效套餐"),
+        )
+      ) {
         setIsOpen(false);
         return;
       }

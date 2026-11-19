@@ -5,8 +5,10 @@ import {
 } from "@/app/api/__generated__/endpoints/admin/admin";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function useAdminSkillSubmissions() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -20,9 +22,11 @@ export function useAdminSkillSubmissions() {
         }),
       onError: (error) =>
         toast({
-          title: "Couldn't record that review",
+          title: t("Couldn't record that review", "无法保存审核结果"),
           description:
-            error instanceof Error ? error.message : "Please try again.",
+            error instanceof Error
+              ? error.message
+              : t("Please try again.", "请重试。"),
           variant: "destructive",
         }),
     },

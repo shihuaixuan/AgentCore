@@ -9,15 +9,19 @@ interface Props {
 }
 
 export function BannedAlert({ user }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const until = user.banExpires
-    ? `until ${formatDateTime(user.banExpires)} (${formatTimeUntil(user.banExpires)})`
+    ? t(
+        `until ${formatDateTime(user.banExpires, locale)} (${formatTimeUntil(user.banExpires, undefined, locale)})`,
+        `至 ${formatDateTime(user.banExpires, locale)}（${formatTimeUntil(user.banExpires, undefined, locale)}）`,
+      )
     : t("permanently", "永久");
 
   return (
     <Alert variant="error" icon={BannedIcon}>
       <AlertDescription className="break-words">
-        <strong className="font-medium">{t("Banned", "已封禁")}</strong> · {until}
+        <strong className="font-medium">{t("Banned", "已封禁")}</strong> ·{" "}
+        {until}
         {user.banReason ? <> · &ldquo;{user.banReason}&rdquo;</> : null}
       </AlertDescription>
     </Alert>

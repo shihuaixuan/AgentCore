@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useGetV2GetSpecificBlocks } from "@/app/api/__generated__/endpoints/default/default";
 import {
   useGetV1GetExecutionDetails,
@@ -39,6 +40,7 @@ const POLL_INTERVAL_MS = 1_000;
 const RECONCILE_INTERVAL_MS = 10_000;
 
 export const useFlow = () => {
+  const { t } = useTranslation();
   const { isReadOnly } = useIsReadOnlyGraph();
   const { toast } = useToast();
   const router = useRouter();
@@ -122,10 +124,10 @@ export const useFlow = () => {
   // and risk an empty save over the real flowID.
   useEffect(() => {
     if (!flowID || !isGraphError) return;
-    const { title, description } = getGraphLoadErrorToast(graphError);
+    const { title, description } = getGraphLoadErrorToast(graphError, t);
     toast({ title, description, variant: "destructive" });
     router.push("/library");
-  }, [flowID, isGraphError, graphError, toast, router]);
+  }, [flowID, isGraphError, graphError, toast, router, t]);
 
   const nodes = graph?.nodes;
   const blockIds = nodes

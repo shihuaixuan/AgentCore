@@ -3,6 +3,7 @@
 import type { AccountIPReport } from "@/app/api/__generated__/models/accountIPReport";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   type AdminUser,
   type BanDuration,
@@ -13,7 +14,7 @@ import {
 import { useAccessBlocks } from "../../../useAccessBlocks";
 import { type BanAccountResult, useBanAccounts } from "../../../useBanAccounts";
 import {
-  BAN_SENTENCE,
+  getBanSentence,
   getBanTargets,
   hasFailedBans,
   mergeBanResults,
@@ -33,6 +34,7 @@ interface Args {
 }
 
 export function useBanAllDialog({ user, report, signedInUserId }: Args) {
+  const { t, locale } = useTranslation();
   const { toast } = useToast();
   const { banAccounts, isBanning } = useBanAccounts();
   const { createBlock, isCreating } = useAccessBlocks();
@@ -58,7 +60,16 @@ export function useBanAllDialog({ user, report, signedInUserId }: Args) {
     (option) => blocksTicked.has(option.key) && !blocksDone.has(option.key),
   );
   const isBlockOnly = toBan.length === 0 && toBlock.length > 0;
-  const blockSummary = describeBlocks(toBlock);
+  const addressCount = toBlock.filter((option) => option.kind === "IP").length;
+  const blockSummary = t(
+    describeBlocks(toBlock),
+    [
+      addressCount > 0 ? `${addressCount} 个地址` : null,
+      toBlock.find((option) => option.kind === "EMAIL_DOMAIN")?.label ?? null,
+    ]
+      .filter(Boolean)
+      .join("和"),
+  );
 
   function handleOpenChange(open: boolean) {
     setIsOpen(open);
@@ -89,7 +100,7 @@ export function useBanAllDialog({ user, report, signedInUserId }: Args) {
         });
         blocked.add(option.key);
       } catch (error) {
-        errors.push(`${option.label}: ${getErrorMessage(error)}`);
+        errors.push(`${option.label}: ${getErrorMessage(error, locale)}`);
       }
     }
     setBlocksDone(blocked);
@@ -103,8 +114,8 @@ export function useBanAllDialog({ user, report, signedInUserId }: Args) {
         banResults = await banAccounts({ userIds: toBan, reason, duration });
       } catch (error) {
         toast({
-          title: "Couldn't ban the accounts",
-          description: getErrorMessage(error),
+          title: t("Couldn't ban the accounts", "无法封禁这些账户"),
+          description: getErrorMessage(error, locale),
           variant: "destructive",
         });
         return;
@@ -114,12 +125,12 @@ export function useBanAllDialog({ user, report, signedInUserId }: Args) {
     setResults(merged);
     const blocks = await blockTicked();
     if (failed > 0) {
-      toast(partialBanFailure(total, failed, blocks.errors));
+      toast(partialBanFailure(total, failed, blocks.errors, locale));
       return;
     }
     if (blocks.errors.length > 0) {
       toast({
-        title: "Couldn't block every address",
+        title: t("Couldn't block every address", "未能阻止所有地址"),
         description: blocks.errors.join(" "),
         variant: "destructive",
       });
@@ -127,14 +138,25 @@ export function useBanAllDialog({ user, report, signedInUserId }: Args) {
     }
     setIsOpen(false);
     if (total === 0) {
-      toast({ title: `Blocked ${blockSummary}`, variant: "success" });
+      toast({
+        title: t(`Blocked ${blockSummary}`, `已阻止 ${blockSummary}`),
+        variant: "success",
+      });
       return;
     }
-    const bans = `Banned ${pluralize(total, "account")}`;
+    const bans = t(
+      `Banned ${pluralize(total, "account")}`,
+      `已封禁 ${total} 个账户`,
+    );
     toast({
       title:
-        blocks.blocked > 0 ? `${bans} and blocked ${blocks.blocked}` : bans,
-      description: BAN_SENTENCE,
+        blocks.blocked > 0
+          ? t(
+              `${bans} and blocked ${blocks.blocked}`,
+              `${bans}，并阻止 ${blocks.blocked} 项`,
+            )
+          : bans,
+      description: getBanSentence(locale),
       variant: "success",
     });
   }

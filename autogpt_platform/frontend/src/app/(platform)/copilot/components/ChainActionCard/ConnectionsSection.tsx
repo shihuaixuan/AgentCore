@@ -7,6 +7,7 @@ import { ConnectorRow } from "./ConnectorRow";
 import { McpConnectorRow } from "./McpConnectorRow";
 import type { ConnectorRow as Row, McpConnectorRequest } from "./helpers";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   rows: Row[];
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function ConnectionsSection({ rows, mcp }: Props) {
+  const { t } = useTranslation();
   const { openModal } = useCopilotModal();
   const mcpRows = mcp.filter(
     (request, i) =>
@@ -33,18 +35,25 @@ export function ConnectionsSection({ rows, mcp }: Props) {
         <Icon icon={PlugSocketIcon} size={18} tone="subtle" />
         <div className="min-w-0 flex-1">
           <Text variant="large-medium-tight" as="h3" tone="primary">
-            {remaining.length ? "Connect your apps" : "Your apps are connected"}
+            {remaining.length
+              ? t("Connect your apps", "连接你的应用")
+              : t("Your apps are connected", "你的应用已连接")}
           </Text>
           <Text variant="body-tight" tone="muted" className="mt-1">
-            Choose the accounts Otto should use.
+            {t(
+              "Choose the accounts Otto should use.",
+              "选择供 Otto 使用的账户。",
+            )}
           </Text>
         </div>
         <span
           role="status"
           className="shrink-0 rounded-full border border-separator px-2.5 py-1 text-caption text-foreground-tertiary"
         >
-          {rows.length + mcpRows.length - remaining.length} of{" "}
-          {rows.length + mcpRows.length} ready
+          {t(
+            `${rows.length + mcpRows.length - remaining.length} of ${rows.length + mcpRows.length} ready`,
+            `${rows.length + mcpRows.length - remaining.length} / ${rows.length + mcpRows.length} 已就绪`,
+          )}
         </span>
       </div>
       {rows.map((row) => (
@@ -56,24 +65,33 @@ export function ConnectionsSection({ rows, mcp }: Props) {
       {remaining.length > 0 && rows.length + mcpRows.length > 1 && (
         <div className="border-t border-separator px-4 py-2.5">
           <Text variant="body-tight" as="span" tone="muted">
-            Still to connect: {remaining.join(", ")}
+            {t(
+              `Still to connect: ${remaining.join(", ")}`,
+              `尚待连接：${remaining.join("、")}`,
+            )}
           </Text>
         </div>
       )}
       <div className="space-y-2 border-t border-separator bg-surface-muted px-4 py-3">
         <Text variant="body-tight" tone="muted">
           {remaining.length
-            ? "Once these apps are connected, Otto will continue."
-            : "Connections are ready. Otto can continue setting up your workflow."}
+            ? t(
+                "Once these apps are connected, Otto will continue.",
+                "连接这些应用后，Otto 将继续处理。",
+              )
+            : t(
+                "Connections are ready. Otto can continue setting up your workflow.",
+                "连接已就绪，Otto 可以继续配置你的工作流。",
+              )}
         </Text>
         <Text variant="body-tight" as="span" tone="muted">
-          Looking for something else?{" "}
+          {t("Looking for something else?", "需要其他应用？")}{" "}
           <button
             type="button"
             onClick={() => openModal("integrations")}
             className="font-medium text-foreground-strong underline underline-offset-2"
           >
-            Browse all connectors
+            {t("Browse all connectors", "浏览所有连接器")}
           </button>
         </Text>
       </div>

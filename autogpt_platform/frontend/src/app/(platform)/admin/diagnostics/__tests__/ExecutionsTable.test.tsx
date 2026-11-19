@@ -7,6 +7,7 @@ import {
 } from "@/tests/integrations/test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ExecutionsTable } from "../components/ExecutionsTable";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const mockRunningQuery = vi.fn();
 const mockOrphanedQuery = vi.fn();
@@ -139,6 +140,22 @@ afterEach(() => {
 });
 
 describe("ExecutionsTable", () => {
+  it("localizes Chinese filters, headers and pagination without translating raw execution names and statuses", () => {
+    setupDefaultMocks();
+    mockRunningQuery.mockReturnValue(withExecutions([sampleExecution], 25));
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <ExecutionsTable diagnosticsData={diagnosticsData} />
+      </LanguageProvider>,
+    );
+    expect(screen.getByRole("tab", { name: "孤立执行 (3)" })).toBeDefined();
+    expect(screen.getByRole("columnheader", { name: "状态" })).toBeDefined();
+    expect(screen.getByText("第 1 / 3 页")).toBeDefined();
+    expect(screen.getByText("Test Agent")).toBeDefined();
+    expect(screen.getByText("RUNNING")).toBeDefined();
+    expect(screen.getByTitle("点击复制完整执行 ID")).toBeDefined();
+  });
+
   it("shows empty state when no executions", () => {
     setupDefaultMocks();
     mockRunningQuery.mockReturnValue(withExecutions([], 0));

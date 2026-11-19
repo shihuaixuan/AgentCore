@@ -2,6 +2,7 @@ import React from "react";
 import { getGetV2GetChatShareStateMockHandler200 } from "@/app/api/__generated__/endpoints/chat/chat.msw";
 import type { ChatShareStateResponse } from "@/app/api/__generated__/models/chatShareStateResponse";
 import { server } from "@/mocks/mock-server";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { getUsageExperience } from "@/services/usageExperience/helpers";
 import {
   act,
@@ -115,14 +116,17 @@ vi.mock("@/app/(platform)/copilot/components/ChatInput/ChatInput", () => ({
   ChatInput: ({
     disabled,
     sendDisabled,
+    placeholder,
   }: {
     disabled?: boolean;
     sendDisabled?: boolean;
+    placeholder?: string;
   }) => (
     <input
       data-testid="chat-input"
       disabled={disabled}
       data-send-disabled={String(!!sendDisabled)}
+      placeholder={placeholder}
     />
   ),
 }));
@@ -242,6 +246,63 @@ describe("ChatContainer", () => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
     vi.useRealTimers();
+  });
+
+  it("keeps composer placeholders in English without a language provider", () => {
+    const { rerender } = render(<ChatContainer {...baseProps} />);
+
+    expect(
+      screen.getByPlaceholderText("What else can I help with?"),
+    ).toBeDefined();
+
+    mockIsUsageLimitReached.mockReturnValue(true);
+    rerender(<ChatContainer {...baseProps} {...sendAtResetProps} />);
+
+    expect(
+      screen.getByPlaceholderText(
+        "Write now, and it sends when your budget resets…",
+      ),
+    ).toBeDefined();
+  });
+
+  it("localizes the parent composer placeholder in Chinese", () => {
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <ChatContainer {...baseProps} />
+      </LanguageProvider>,
+    );
+
+    expect(
+      screen.getByPlaceholderText("还有什么我可以帮您的吗？"),
+    ).toBeDefined();
+  });
+
+  it("localizes Send at reset and its streaming fallback without changing the draft", () => {
+    mockIsUsageLimitReached.mockReturnValue(true);
+    const { rerender } = render(
+      <LanguageProvider initialLocale="zh-CN">
+        <ChatContainer {...baseProps} {...sendAtResetProps} />
+      </LanguageProvider>,
+    );
+    const input = screen.getByPlaceholderText("现在编写，额度重置后自动发送…");
+    fireEvent.change(input, {
+      target: { value: "Keep this draft in English" },
+    });
+
+    rerender(
+      <LanguageProvider initialLocale="zh-CN">
+        <ChatContainer
+          {...baseProps}
+          {...sendAtResetProps}
+          status="streaming"
+        />
+      </LanguageProvider>,
+    );
+
+    expect(screen.getByPlaceholderText("还有什么我可以帮您的吗？")).toBe(input);
+    expect((input as HTMLInputElement).value).toBe(
+      "Keep this draft in English",
+    );
   });
 
   // Radix opens a tooltip on a timer and arms its Escape handler a render

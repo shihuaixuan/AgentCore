@@ -1,5 +1,9 @@
 import { AgentExecutionStatus } from "@/app/api/__generated__/models/agentExecutionStatus";
 import type { GraphExecutionMeta } from "@/app/api/__generated__/models/graphExecutionMeta";
+import {
+  englishDisplayText,
+  type DisplayTranslate,
+} from "../helpers/translation";
 
 export const SEVENTY_TWO_HOURS_MS = 72 * 60 * 60 * 1000;
 
@@ -41,27 +45,38 @@ export function endedAfter(exec: GraphExecutionMeta, cutoff: number): boolean {
 export function runningMessage(
   status: string,
   startedAt?: string | Date | null,
+  t: DisplayTranslate = englishDisplayText,
 ): string {
-  if (status === AgentExecutionStatus.QUEUED) return "Queued for execution";
-  if (status === AgentExecutionStatus.REVIEW) return "Awaiting review";
-  if (!startedAt) return "Currently executing";
+  if (status === AgentExecutionStatus.QUEUED)
+    return t("Queued for execution", "排队等待执行");
+  if (status === AgentExecutionStatus.REVIEW)
+    return t("Awaiting review", "等待审核");
+  if (!startedAt) return t("Currently executing", "正在执行");
   const ms =
     Date.now() -
     (startedAt instanceof Date
       ? startedAt.getTime()
       : new Date(startedAt).getTime());
-  return `Running for ${formatRelativeDuration(ms)}`;
+  return t(
+    `Running for ${formatRelativeDuration(ms)}`,
+    `已运行 ${formatRelativeDuration(ms, t)}`,
+  );
 }
 
-export function formatRelativeDuration(ms: number): string {
+export function formatRelativeDuration(
+  ms: number,
+  t: DisplayTranslate = englishDisplayText,
+): string {
   const seconds = Math.floor(ms / 1000);
-  if (seconds < 60) return "a few seconds";
+  if (seconds < 60) return t("a few seconds", "几秒");
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 60) return t(`${minutes}m`, `${minutes} 分钟`);
   const hours = Math.floor(minutes / 60);
   const remainingMin = minutes % 60;
   if (hours < 24)
-    return remainingMin > 0 ? `${hours}h ${remainingMin}m` : `${hours}h`;
+    return remainingMin > 0
+      ? t(`${hours}h ${remainingMin}m`, `${hours} 小时 ${remainingMin} 分钟`)
+      : t(`${hours}h`, `${hours} 小时`);
   const days = Math.floor(hours / 24);
-  return `${days}d ${hours % 24}h`;
+  return t(`${days}d ${hours % 24}h`, `${days} 天 ${hours % 24} 小时`);
 }

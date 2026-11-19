@@ -17,8 +17,10 @@ import { PausedSchedulesNotice } from "./components/PausedSchedulesNotice";
 import { PaywallPlanChoices } from "./components/PaywallPlanChoices";
 import { PaywallHeader } from "./components/PaywallHeader";
 import { usePaywallModal } from "./usePaywallModal";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function PaywallModal() {
+  const { t } = useTranslation();
   const {
     isLoading,
     plans,
@@ -47,7 +49,11 @@ export function PaywallModal() {
   return (
     <Dialog
       variant="compact"
-      title={recovery.paymentFailed ? "Your plan" : "Choose your plan"}
+      title={
+        recovery.paymentFailed
+          ? t("Your plan", "你的套餐")
+          : t("Choose your plan", "选择套餐")
+      }
       styling={{
         maxWidth: trialOffer && !recovery.paymentFailed ? "1120px" : "700px",
       }}
@@ -72,7 +78,7 @@ export function PaywallModal() {
               onClick={handleLogout}
               leftIcon={<Icon icon={Logout03Icon} size={16} />}
             >
-              Log out
+              {t("Log out", "退出登录")}
             </Button>
             {canDeleteAccount ? <DeleteAccountButton /> : null}
           </div>
@@ -80,7 +86,10 @@ export function PaywallModal() {
             <>
               <PaymentRecoveryCard
                 payment={recovery.payment}
-                fallback="Update your payment method in billing to continue. Your chats, workflows and results are saved."
+                fallback={t(
+                  "Update your payment method in billing to continue. Your chats, workflows and results are saved.",
+                  "请前往账单设置更新付款方式以继续使用。你的对话、工作流和成果均已保存。",
+                )}
               />
               <PausedSchedulesNotice count={pausedWorkflowSchedules} />
             </>
@@ -99,8 +108,10 @@ export function PaywallModal() {
                 ) : plans.length === 0 ? (
                   <div className="flex flex-col items-center gap-3">
                     <p className="text-center text-body text-foreground-tertiary">
-                      Subscriptions are temporarily unavailable. Please try
-                      again shortly.
+                      {t(
+                        "Subscriptions are temporarily unavailable. Please try again shortly.",
+                        "订阅服务暂不可用，请稍后重试。",
+                      )}
                     </p>
                     <Button
                       variant="secondary"
@@ -108,7 +119,7 @@ export function PaywallModal() {
                       onClick={retryLoadPlans}
                       loading={isRetryingPlans}
                     >
-                      Retry
+                      {t("Retry", "重试")}
                     </Button>
                   </div>
                 ) : !trialOffer ? (
@@ -156,7 +167,7 @@ export function PaywallModal() {
           )}
         </div>
         <Button variant="ghost" className="mt-3 w-full" onClick={handleClose}>
-          Back to billing
+          {t("Back to billing", "返回账单")}
         </Button>
       </Dialog.Content>
       {pendingTier && pendingTierLabel ? (
@@ -166,9 +177,18 @@ export function PaywallModal() {
             if (!open) cancelPendingTier();
           }}
           targetTierLabel={pendingTierLabel}
-          title={`Switch to ${pendingTierLabel}?`}
-          confirmLabel={`Switch to ${pendingTierLabel}`}
-          body="Your current Stripe subscription will be modified — you may be charged or refunded the prorated difference. Continue?"
+          title={t(
+            `Switch to ${pendingTierLabel}?`,
+            `切换至 ${pendingTierLabel}？`,
+          )}
+          confirmLabel={t(
+            `Switch to ${pendingTierLabel}`,
+            `切换至 ${pendingTierLabel}`,
+          )}
+          body={t(
+            "Your current Stripe subscription will be modified — you may be charged or refunded the prorated difference. Continue?",
+            "这将修改你当前的 Stripe 订阅，并可能按剩余时间补收或退还差价。是否继续？",
+          )}
           isSaving={isPending}
           onConfirm={() => {
             void confirmPendingTier();

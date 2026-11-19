@@ -1,4 +1,6 @@
 import type { ToolUIPart } from "ai";
+import type { Locale } from "@/lib/i18n/locale";
+import { getChineseAnimationText } from "./localizedAnimationText";
 
 /* ------------------------------------------------------------------ */
 /*  Sub-agent tool name constants                                      */
@@ -226,10 +228,20 @@ function _isDeepWebSearch(part: ToolUIPart): boolean {
 export function getAnimationText(
   part: ToolUIPart,
   category: ToolCategory,
+  locale: Locale = "en",
 ): string {
   const toolName = extractToolName(part);
   const summary = getInputSummary(toolName, part.input);
   const shortSummary = summary ? truncate(summary, 60) : null;
+  if (locale === "zh-CN") {
+    return getChineseAnimationText(
+      part,
+      category,
+      toolName,
+      summary,
+      shortSummary,
+    );
+  }
 
   switch (part.state) {
     case "input-streaming":

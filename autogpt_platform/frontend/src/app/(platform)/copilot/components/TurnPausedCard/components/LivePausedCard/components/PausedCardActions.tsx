@@ -7,6 +7,7 @@ import { Text } from "@/components/atoms/Text/Text";
 
 import { resetAt, resumeLabel } from "../../../helpers";
 import type { useLivePausedCard } from "../useLivePausedCard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   card: ReturnType<typeof useLivePausedCard>;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function PausedCardActions({ card, onStop }: Props) {
+  const { t, locale } = useTranslation();
   const { keep, resume, chatGpt } = card;
   // Continue on ChatGPT picks the task up too, once it has switched, so the
   // spinner follows the button that started it.
@@ -32,7 +34,10 @@ export function PausedCardActions({ card, onStop }: Props) {
         <div className="flex items-center gap-1.5 pr-1">
           <Icon icon={Clock01Icon} size={14} tone="brand" />
           <Text tone="body" variant="small-medium">
-            Resumes {resetAt(resume.resumesAt, card.now)}
+            {t(
+              `Resumes ${resetAt(resume.resumesAt, card.now)}`,
+              `将于 ${resetAt(resume.resumesAt, card.now, locale)} 恢复`,
+            )}
           </Text>
           <Button
             variant="link"
@@ -41,7 +46,7 @@ export function PausedCardActions({ card, onStop }: Props) {
             disabled={isBusy}
             className="ml-1"
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
         </div>
       )}
@@ -52,7 +57,7 @@ export function PausedCardActions({ card, onStop }: Props) {
           loading={resume.isScheduling}
           disabled={isBusy}
         >
-          {resumeLabel(card.shown.resets_at, card.now)}
+          {resumeLabel(card.shown.resets_at, card.now, locale)}
         </Button>
       )}
       {card.primary === "keep_going" && (
@@ -65,7 +70,7 @@ export function PausedCardActions({ card, onStop }: Props) {
           loading={keep.isContinuing && pickUpVia === "keep_going"}
           disabled={isBusy}
         >
-          Keep going
+          {t("Keep going", "继续执行")}
         </Button>
       )}
       {card.chatGptName && (
@@ -82,12 +87,15 @@ export function PausedCardActions({ card, onStop }: Props) {
           }
           disabled={isBusy}
         >
-          Continue on {card.chatGptName}
+          {t(
+            `Continue on ${card.chatGptName}`,
+            `使用 ${card.chatGptName} 继续`,
+          )}
         </Button>
       )}
       {card.canStop && (
         <Button size="small" variant="ghost" onClick={onStop} disabled={isBusy}>
-          Stop here
+          {t("Stop here", "到此停止")}
         </Button>
       )}
       {card.canUpgrade && (
@@ -101,7 +109,7 @@ export function PausedCardActions({ card, onStop }: Props) {
           disabled={isBusy || card.isUpgradeDisabled}
           rightIcon={<Icon icon={ArrowRight02Icon} size={14} />}
         >
-          Upgrade
+          {t("Upgrade", "升级")}
         </Button>
       )}
     </div>

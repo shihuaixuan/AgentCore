@@ -2,6 +2,7 @@
 
 import { useGetV1ListStripeInvoices } from "@/app/api/__generated__/endpoints/credits/credits";
 import type { InvoiceListItem } from "@/app/api/__generated__/models/invoiceListItem";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { formatCents, formatShortDate } from "../../../helpers";
 
@@ -17,6 +18,7 @@ export interface InvoiceRow {
 }
 
 export function useInvoicesCard() {
+  const { t, locale } = useTranslation();
   const { data, isLoading, isError, refetch } = useGetV1ListStripeInvoices(
     { limit: 24 },
     {
@@ -29,8 +31,8 @@ export function useInvoicesCard() {
   const invoices: InvoiceRow[] = (data ?? []).map((invoice, idx) => ({
     id: invoice.id,
     number: invoice.number ?? `#${idx + 1}`,
-    date: formatShortDate(invoice.created_at),
-    description: invoice.description ?? "Invoice",
+    date: formatShortDate(invoice.created_at, locale),
+    description: invoice.description ?? t("Invoice", "发票"),
     amount: formatCents(invoice.total_cents),
     status: invoice.status,
     hostedUrl: invoice.hosted_invoice_url ?? null,

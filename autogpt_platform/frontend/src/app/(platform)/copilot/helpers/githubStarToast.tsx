@@ -5,6 +5,7 @@ import { Key, storage } from "@/services/storage/local-storage";
 import type { UIMessage } from "ai";
 import { toast as sonnerToast } from "sonner";
 import { isKickoffMessage } from "../expertKickoff";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const GITHUB_REPO_URL = "https://github.com/Significant-Gravitas/AutoGPT";
 const GITHUB_STAR_TOAST_KEY = "github-star";
@@ -39,8 +40,8 @@ export function countAnswerTowardStarToast(turn: FinishedTurn) {
   storage.set(Key.GITHUB_STAR_PROMPT_COUNT, String(answered));
   if (answered < ANSWERS_BEFORE_STAR_TOAST) return;
   toast({
-    title: "Enjoying AutoGPT?",
-    description: "A star on GitHub helps more people find the project.",
+    title: <StarToastTitle />,
+    description: <StarToastDescription />,
     duration: GITHUB_STAR_TOAST_DURATION_MS,
     replaceKey: GITHUB_STAR_TOAST_KEY,
     action: <StarOnGitHubButton />,
@@ -53,6 +54,7 @@ export function resetStarToastCounts() {
 }
 
 function StarOnGitHubButton() {
+  const { t } = useTranslation();
   return (
     <Button
       as="NextLink"
@@ -63,8 +65,23 @@ function StarOnGitHubButton() {
       variant="secondary"
       onClick={() => sonnerToast.dismiss(GITHUB_STAR_TOAST_KEY)}
     >
-      Star on GitHub
-      <span className="sr-only"> (opens in a new tab)</span>
+      {t("Star on GitHub", "在 GitHub 上点亮 Star")}
+      <span className="sr-only">
+        {t(" (opens in a new tab)", "（在新标签页中打开）")}
+      </span>
     </Button>
+  );
+}
+
+function StarToastTitle() {
+  const { t } = useTranslation();
+  return t("Enjoying AutoGPT?", "喜欢 AutoGPT 吗？");
+}
+
+function StarToastDescription() {
+  const { t } = useTranslation();
+  return t(
+    "A star on GitHub helps more people find the project.",
+    "在 GitHub 上点亮 Star，让更多人发现这个项目。",
   );
 }

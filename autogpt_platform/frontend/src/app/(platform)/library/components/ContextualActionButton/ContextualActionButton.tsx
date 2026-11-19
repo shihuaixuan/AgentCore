@@ -9,6 +9,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   status: AgentStatus;
@@ -23,6 +24,14 @@ export function ContextualActionButton({
   executionID,
   className,
 }: Props) {
+  const { t } = useTranslation();
+  const labels: Record<AgentStatus, string> = {
+    error: "查看错误",
+    listening: "重新连接",
+    running: "实时查看",
+    idle: "查看",
+    scheduled: "查看",
+  };
   const router = useRouter();
 
   const config = ACTION_CONFIG[status];
@@ -48,7 +57,7 @@ export function ContextualActionButton({
       )}
     >
       <Icon icon={config.icon} size={12} className="shrink-0" />
-      {config.label}
+      {t(config.label, labels[status])}
     </button>
   );
 }

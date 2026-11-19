@@ -330,7 +330,7 @@ async def generate_and_deliver_briefing(user_id: str) -> BriefingResult:
         content=render_briefing_markdown(content),
         message_id=message_id,
         metadata={"kind": "morning_briefing", "briefing_id": record.id},
-        title=f"Morning briefing — {briefing_date.isoformat()}",
+        title=f"晨间简报 — {briefing_date.isoformat()}",
     )
     await client.mark_briefing_delivered(user_id, record.id)
     emit_funnel_event(

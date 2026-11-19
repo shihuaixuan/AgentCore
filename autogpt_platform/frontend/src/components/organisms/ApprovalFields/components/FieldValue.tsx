@@ -23,7 +23,7 @@ interface Props {
 }
 
 export function FieldValue({ name, value, clipped, format }: Props) {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const kind = fieldKind(name, value);
   const shortened = clipped ? (
     <span
@@ -33,7 +33,7 @@ export function FieldValue({ name, value, clipped, format }: Props) {
       {t("(shortened)", "（已缩短）")}
     </span>
   ) : null;
-  const formatted = formattedText(format, value);
+  const formatted = formattedText(format, value, locale);
   if (formatted)
     return <span data-slot="field-value-formatted">{formatted}</span>;
 
@@ -153,7 +153,10 @@ function LongText({ text, shortened }: LongTextProps) {
       {!open && (
         <Button variant="link" size="inline" onClick={() => setOpen(true)}>
           {lineCount(text) > CLAMP_LINES
-            ? `Show all ${lineCount(text)} lines`
+            ? t(
+                `Show all ${lineCount(text)} lines`,
+                `显示全部 ${lineCount(text)} 行`,
+              )
             : t("Show all", "显示全部")}
         </Button>
       )}

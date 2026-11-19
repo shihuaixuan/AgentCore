@@ -14,6 +14,8 @@ import * as Sentry from "@sentry/nextjs";
 import type { ChatStatus } from "ai";
 import { useRef, useState } from "react";
 import { useNextCommit } from "./useNextCommit";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 
 interface Args {
   sessionId: string | null;
@@ -39,6 +41,7 @@ export function useExpertChatSend({
   sendMessage,
   stop,
 }: Args) {
+  const { locale } = useTranslation();
   const [heldMessage, setHeldMessage] = useState<OutgoingMessage | null>(null);
   const sessionIdRef = useRef(sessionId);
   sessionIdRef.current = sessionId;
@@ -94,13 +97,13 @@ export function useExpertChatSend({
    *  uploads outlived its own thread goes back to the composer instead. */
   function isStillShown(targetSessionId: string, message: OutgoingMessage) {
     if (sessionIdRef.current === targetSessionId) return true;
-    returnToComposer(message, "new-task");
+    returnToComposer(message, "new-task", locale);
     return false;
   }
 
   function wasNotStopped(stopCount: number, message: OutgoingMessage) {
     if (stopCountRef.current === stopCount) return true;
-    returnToComposer(message, "stopped");
+    returnToComposer(message, "stopped", locale);
     return false;
   }
 
@@ -151,29 +154,49 @@ const UNSENT_BECAUSE = {
 function returnToComposer(
   message: OutgoingMessage,
   reason: keyof typeof UNSENT_BECAUSE,
+  locale: Locale = "en",
 ) {
   if (message.text) useCopilotUIStore.getState().restoreDraft(message.text);
+  const explanation =
+    reason === "new-task"
+      ? "消息发送前，你开始了新任务。"
+      : "消息发送前，你停止了回复。";
   toast({
-    title: "Message not sent",
-    description: message.text
-      ? `${UNSENT_BECAUSE[reason]} Its text is back in the composer; attach the files again.`
-      : `${UNSENT_BECAUSE[reason]} Attach the files again to send them.`,
+    title: locale === "zh-CN" ? "消息未发送" : "Message not sent",
+    description:
+      locale === "zh-CN"
+        ? message.text
+          ? `${explanation}消息文本已返回输入框；请重新添加文件。`
+          : `${explanation}请重新添加文件后再发送。`
+        : message.text
+          ? `${UNSENT_BECAUSE[reason]} Its text is back in the composer; attach the files again.`
+          : `${UNSENT_BECAUSE[reason]} Attach the files again to send them.`,
   });
 }
 
 /** For a send whose caller has already moved on. A kickoff prompt is ours,
  *  not the user's, so there is nothing to hand back for it. */
-export function recoverUnsentMessage(message: OutgoingMessage, error: unknown) {
+export function recoverUnsentMessage(
+  message: OutgoingMessage,
+  error: unknown,
+  locale: Locale = "en",
+) {
   if (message.metadata) {
     Sentry.captureException(error);
     return;
   }
   if (message.text) useCopilotUIStore.getState().restoreDraft(message.text);
   toastSendFailure({
-    title: "Couldn't send message",
+    title: locale === "zh-CN" ? "无法发送消息" : "Couldn't send message",
     error,
-    recovery: message.text
-      ? "your message is back in the composer"
-      : "your files were not sent",
+    locale,
+    recovery:
+      locale === "zh-CN"
+        ? message.text
+          ? "你的消息已返回输入框"
+          : "你的文件尚未发送"
+        : message.text
+          ? "your message is back in the composer"
+          : "your files were not sent",
   });
 }

@@ -23,8 +23,10 @@ export function useScheduleDetailHeader(
       },
       onError: (error: any) =>
         toast({
-          title: "Failed to delete schedule",
-          description: error?.message || "An unexpected error occurred.",
+          title: t("Failed to delete schedule", "无法删除计划"),
+          description:
+            error?.message ||
+            t("An unexpected error occurred.", "发生意外错误。"),
           variant: "destructive",
         }),
     },

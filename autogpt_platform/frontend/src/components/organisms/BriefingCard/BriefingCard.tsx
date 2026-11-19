@@ -27,7 +27,7 @@ interface Props {
 // needs-attention list on the home page. They stay in the thread markdown,
 // where there is no such list.
 export function BriefingCard({ briefing, className }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { run_items } = briefing.content;
   const {
     listRef,
@@ -62,7 +62,7 @@ export function BriefingCard({ briefing, className }: Props) {
           variant="body"
           className="bg-gradient-to-r from-accent-strong to-brand-hover bg-clip-text text-transparent"
         >
-          {formatBriefingDate(briefing.briefing_date)}
+          {formatBriefingDate(briefing.briefing_date, locale)}
         </Text>
       </div>
 
@@ -126,7 +126,10 @@ export function BriefingCard({ briefing, className }: Props) {
             <Text variant="small-medium" tone="inherit">
               {isShowingAll
                 ? t("Show less", "收起")
-                : `Show all results (${run_items.length})`}
+                : t(
+                    `Show all results (${run_items.length})`,
+                    `显示全部结果（${run_items.length}）`,
+                  )}
             </Text>
             <Icon
               icon={ArrowDown01Icon}

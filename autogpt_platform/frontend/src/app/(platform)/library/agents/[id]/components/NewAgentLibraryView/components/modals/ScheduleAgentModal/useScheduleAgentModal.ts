@@ -22,7 +22,10 @@ export function useScheduleAgentModal(
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const defaultScheduleName = useMemo(() => `Run ${agent.name}`, [agent.name]);
+  const defaultScheduleName = useMemo(
+    () => t(`Run ${agent.name}`, `运行 ${agent.name}`),
+    [agent.name, t],
+  );
   const [scheduleName, setScheduleName] = useState(defaultScheduleName);
   const [cronExpression, setCronExpression] = useState(
     agent.recommended_schedule_cron || "0 9 * * 1",
@@ -45,8 +48,10 @@ export function useScheduleAgentModal(
       },
       onError: (error: any) => {
         toast({
-          title: "❌ Failed to create schedule",
-          description: error.message || "An unexpected error occurred.",
+          title: t("❌ Failed to create schedule", "❌ 无法创建计划"),
+          description:
+            error.message ||
+            t("An unexpected error occurred.", "发生意外错误。"),
           variant: "destructive",
         });
       },
@@ -57,14 +62,16 @@ export function useScheduleAgentModal(
     (scheduleName: string, cronExpression: string) => {
       if (!scheduleName.trim()) {
         toast({
-          title: "⚠️ Schedule name required",
+          title: t("⚠️ Schedule name required", "⚠️ 请填写计划名称"),
           description: t(
             "Please provide a name for your schedule.",
             "请填写计划名称。",
           ),
           variant: "destructive",
         });
-        return Promise.reject(new Error("Schedule name required"));
+        return Promise.reject(
+          new Error(t("Schedule name required", "请填写计划名称")),
+        );
       }
 
       return new Promise<void>((resolve, reject) => {
@@ -93,6 +100,7 @@ export function useScheduleAgentModal(
       inputCredentials,
       createScheduleMutation,
       toast,
+      t,
     ],
   );
 

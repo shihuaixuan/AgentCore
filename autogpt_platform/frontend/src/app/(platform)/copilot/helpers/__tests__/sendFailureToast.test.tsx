@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SentNowError } from "../../components/SendAtReset/helpers";
 import { ReportedSendError } from "../reportedSendError";
 import { toastSendFailure } from "../sendFailureToast";
+import { CopilotAuthError } from "../../helpers";
 
 vi.mock("@/components/molecules/Toast/use-toast", () => ({ toast: vi.fn() }));
 
@@ -34,6 +35,55 @@ describe("a send Send at reset made at once", () => {
 
     expect(vi.mocked(toast).mock.calls[0][0]).toMatchObject({
       title: "Sending needs an active plan",
+    });
+  });
+
+  it("localizes the app-owned authentication error in send recovery", () => {
+    toastSendFailure({
+      title: "无法发送消息",
+      error: new CopilotAuthError(),
+      recovery: "你的消息已返回输入框",
+      locale: "zh-CN",
+    });
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: "身份验证失败，请重新登录 — 你的消息已返回输入框。",
+      }),
+    );
+  });
+
+  it("localizes plan failures when a Chinese locale is provided", () => {
+    toastSendFailure({
+      title: "发送失败",
+      recovery: "你的消息已返回输入框",
+      error: new ApiError("Payment required", 402, {}),
+      locale: "zh-CN",
+    });
+
+    expect(vi.mocked(toast).mock.calls[0][0]).toMatchObject({
+      title: "发送消息需要有效套餐",
+    });
+  });
+
+  it("localizes fallback recovery without rewriting raw server errors", () => {
+    toastSendFailure({
+      title: "发送失败",
+      recovery: "你的消息已返回输入框",
+      error: null,
+      locale: "zh-CN",
+    });
+    expect(vi.mocked(toast).mock.calls[0][0]).toMatchObject({
+      description: "你的消息已返回输入框。请重试。",
+    });
+
+    toastSendFailure({
+      title: "发送失败",
+      recovery: "你的消息已返回输入框",
+      error: new Error("Original server error"),
+      locale: "zh-CN",
+    });
+    expect(vi.mocked(toast).mock.calls[1][0]).toMatchObject({
+      description: "Original server error — 你的消息已返回输入框。",
     });
   });
 });

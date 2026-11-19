@@ -1,4 +1,5 @@
 import type { NotificationPreference } from "@/app/api/__generated__/models/notificationPreference";
+import type { Locale } from "@/lib/i18n/locale";
 
 export const EASE_OUT = [0.16, 1, 0.3, 1] as const;
 
@@ -166,19 +167,32 @@ export function findTimezoneLabel(value: string): string {
  * than prompts — the whole point of the volume knob is that one click is the
  * entire interaction.
  */
-export function describeFooterChoice(value: string | null): string {
+export function describeFooterChoice(
+  value: string | null,
+  locale: Locale = "en",
+): string {
   switch (value) {
     case "daily":
-      return "You'll get a briefing every day";
+      return locale === "zh-CN"
+        ? "你将每天收到简报"
+        : "You'll get a briefing every day";
     case "weekly":
-      return "You'll get a briefing every week";
+      return locale === "zh-CN"
+        ? "你将每周收到简报"
+        : "You'll get a briefing every week";
     case "monthly":
-      return "You'll get a briefing every month";
+      return locale === "zh-CN"
+        ? "你将每月收到简报"
+        : "You'll get a briefing every month";
     case "alerts":
-      return "Briefings paused — you'll still get alerts";
+      return locale === "zh-CN"
+        ? "简报已暂停，你仍会收到提醒"
+        : "Briefings paused — you'll still get alerts";
     case "off":
-      return "Briefings and alerts paused";
+      return locale === "zh-CN"
+        ? "简报和提醒已暂停"
+        : "Briefings and alerts paused";
     default:
-      return "Preferences updated";
+      return locale === "zh-CN" ? "偏好设置已更新" : "Preferences updated";
   }
 }

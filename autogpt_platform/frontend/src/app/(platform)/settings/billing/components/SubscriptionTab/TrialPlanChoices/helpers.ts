@@ -2,6 +2,7 @@ import type { SubscriptionStatusResponse } from "@/app/api/__generated__/models/
 import type { SubscriptionTierRequest } from "@/app/api/__generated__/models/subscriptionTierRequest";
 import type { TrialOfferResponse } from "@/app/api/__generated__/models/trialOfferResponse";
 import type { TrialStatusResponse } from "@/app/api/__generated__/models/trialStatusResponse";
+import type { Locale } from "@/lib/i18n/locale";
 import {
   formatPlanAmount,
   formatWholeMoney,
@@ -29,19 +30,26 @@ export function getCancelPendingOffer(trial: TrialStatusResponse | undefined) {
   return trial.cancel_at_period_end ? trial.offer : null;
 }
 
-export function getOwnPlanChoice(offer: TrialOfferResponse): PlanChoiceDetails {
+export function getOwnPlanChoice(
+  offer: TrialOfferResponse,
+  locale: Locale = "en",
+): PlanChoiceDetails {
   return {
     tier: offer.tier,
     label: trialPlanLabels[offer.tier],
     amount: formatPlanAmount(offer),
     cadence: getCadence(offer),
-    description: "Starts today. Your trial ends and the plan takes over.",
+    description:
+      locale === "zh-CN"
+        ? "今天生效。试用将结束并切换至该套餐。"
+        : "Starts today. Your trial ends and the plan takes over.",
   };
 }
 
 export function getUpgradePlanChoice(
   offer: TrialOfferResponse,
   subscription: SubscriptionStatusResponse,
+  locale: Locale = "en",
 ): PlanChoiceDetails | null {
   const tier = getNextSelfServeTier(offer.tier);
   if (!tier) return null;
@@ -61,12 +69,18 @@ export function getUpgradePlanChoice(
       offer.tier,
       tier,
       subscription.tier_multipliers,
+      locale,
     ),
   };
 }
 
-export function formatChoicePrice(plan: PlanChoiceDetails) {
-  return `${plan.amount} / ${plan.cadence}`;
+export function formatChoicePrice(
+  plan: PlanChoiceDetails,
+  locale: Locale = "en",
+) {
+  const cadence =
+    locale === "zh-CN" ? (plan.cadence === "year" ? "年" : "月") : plan.cadence;
+  return `${plan.amount} / ${cadence}`;
 }
 
 export function findPlanChoice(
@@ -81,16 +95,25 @@ export function findPlanChoice(
 export function describePlanResult(
   plan: PlanChoiceDetails,
   tier: SubscriptionStatusResponse["tier"] | undefined,
+  locale: Locale = "en",
 ) {
   if (tier === plan.tier)
     return {
-      title: `You're on ${plan.label}`,
-      description: "Your trial has ended and your plan starts today.",
+      title:
+        locale === "zh-CN"
+          ? `你已开始使用 ${plan.label}`
+          : `You're on ${plan.label}`,
+      description:
+        locale === "zh-CN"
+          ? "你的试用已结束，套餐从今天开始生效。"
+          : "Your trial has ended and your plan starts today.",
     };
   return {
-    title: "Payment received",
+    title: locale === "zh-CN" ? "已收到付款" : "Payment received",
     description:
-      "Your plan is still being set up. This page updates when it's ready.",
+      locale === "zh-CN"
+        ? "你的套餐仍在设置中，就绪后此页面会自动更新。"
+        : "Your plan is still being set up. This page updates when it's ready.",
   };
 }
 
@@ -121,13 +144,18 @@ function describeUpgrade(
   own: PlanTier,
   upgrade: PlanTier,
   multipliers: Record<string, number> | undefined,
+  locale: Locale,
 ) {
   const ownLabel = trialPlanLabels[own];
   const ratio = (multipliers?.[upgrade] ?? 0) / (multipliers?.[own] ?? 0);
   if (!Number.isFinite(ratio) || ratio <= 1)
-    return `More usage than ${ownLabel} for people who run a lot.`;
+    return locale === "zh-CN"
+      ? `比 ${ownLabel} 提供更多用量，适合高频使用者。`
+      : `More usage than ${ownLabel} for people who run a lot.`;
   const multiple = String(Math.round(ratio * 10) / 10);
-  return `${multiple}x the usage of ${ownLabel} for people who run a lot.`;
+  return locale === "zh-CN"
+    ? `用量为 ${ownLabel} 的 ${multiple} 倍，适合高频使用者。`
+    : `${multiple}x the usage of ${ownLabel} for people who run a lot.`;
 }
 
 function getCadence(offer: TrialOfferResponse) {

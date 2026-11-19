@@ -45,7 +45,7 @@ export function useRemoveTriggerAgent({
     useDeleteV2DeleteLibraryAgent({
       mutation: {
         onSuccess: async () => {
-          toast({ title: "Trigger removed" });
+          toast({ title: t("Trigger removed", "触发器已移除") });
           queryClient.invalidateQueries({
             queryKey: getGetV2ListTriggerAgentsQueryKey(parentAgent.id),
           });

@@ -59,12 +59,14 @@ export function MoveToFolderDialog({
       <Dialog.Content>
         <div className="flex flex-col gap-1">
           <Text variant="small" tone="muted" className="mb-1">
-            {t("Move", "移动")} {subject} to:
+            {t(`Move ${subject} to:`, `将 ${subject} 移动到：`)}
           </Text>
           {rows.length === 0 ? (
             <div className="flex h-20 items-center justify-center">
               <Text variant="small" tone="subtle">
-                {folders.length === 0 ? "No folders yet" : "No other folders"}
+                {folders.length === 0
+                  ? t("No folders yet", "暂无文件夹")
+                  : t("No other folders", "没有其他文件夹")}
               </Text>
             </div>
           ) : (

@@ -78,7 +78,9 @@ export function ServiceKeyForm({ provider, service, onConnected }: Props) {
         loading={isPending}
         disabled={!key.trim() || isPending}
       >
-        {isPending ? "Connecting…" : t("Save and connect", "保存并连接")}
+        {isPending
+          ? t("Connecting…", "连接中…")
+          : t("Save and connect", "保存并连接")}
       </Button>
     </form>
   );

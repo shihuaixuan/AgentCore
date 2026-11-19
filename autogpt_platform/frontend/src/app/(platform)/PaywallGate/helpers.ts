@@ -39,8 +39,11 @@ export function consumePaywallCheckoutCancel() {
   }
 }
 
-export function pausedSchedulesText(count: number) {
+export function pausedSchedulesText(count: number, locale: Locale = "en") {
+  if (locale === "zh-CN")
+    return `你的 ${count} 个定时工作流已暂停，订阅后即可恢复。`;
   return count === 1
     ? "Your scheduled workflow is paused until you subscribe."
     : `Your ${count} scheduled workflows are paused until you subscribe.`;
 }
+import type { Locale } from "@/lib/i18n/locale";

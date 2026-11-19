@@ -76,26 +76,47 @@ export function isErrorOutput(
   return output.type === ResponseType.error || "error" in output;
 }
 
-export function getAnimationText(part: {
-  state: ToolUIPart["state"];
-  input?: unknown;
-  output?: unknown;
-}): string {
+export function getAnimationText(
+  part: {
+    state: ToolUIPart["state"];
+    input?: unknown;
+    output?: unknown;
+  },
+  t = (english: string, _chinese: string) => english,
+): string {
   switch (part.state) {
     case "input-streaming":
     case "input-available":
-      return "Editing workflow, this might take a minute";
+      return t(
+        "Editing workflow, this might take a minute",
+        "正在编辑工作流，可能需要一分钟",
+      );
     case "output-available": {
       const output = parseOutput(part.output);
-      if (!output) return "Editing workflow, this might take a minute";
-      if (isAgentSavedOutput(output)) return `Saved "${output.agent_name}"`;
-      if (isAgentPreviewOutput(output)) return `Preview "${output.agent_name}"`;
-      return "Error editing workflow";
+      if (!output)
+        return t(
+          "Editing workflow, this might take a minute",
+          "正在编辑工作流，可能需要一分钟",
+        );
+      if (isAgentSavedOutput(output))
+        return t(
+          `Saved "${output.agent_name}"`,
+          `已保存“${output.agent_name}”`,
+        );
+      if (isAgentPreviewOutput(output))
+        return t(
+          `Preview "${output.agent_name}"`,
+          `预览“${output.agent_name}”`,
+        );
+      return t("Error editing workflow", "编辑工作流时出错");
     }
     case "output-error":
-      return "Error editing workflow";
+      return t("Error editing workflow", "编辑工作流时出错");
     default:
-      return "Editing workflow, this might take a minute";
+      return t(
+        "Editing workflow, this might take a minute",
+        "正在编辑工作流，可能需要一分钟",
+      );
   }
 }
 

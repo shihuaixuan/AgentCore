@@ -43,14 +43,14 @@ export function MonthlyPicker({
           className="h-[2.25rem] rounded-full border border-foreground-body px-4 py-2 text-body leading-4 font-medium text-foreground-base hover:bg-surface-hover"
           onClick={customize}
         >
-          Customize
+          {t("Customize", "自定义")}
         </button>
         <button
           type="button"
           className="h-[2.25rem] rounded-full border border-foreground-body px-4 py-2 text-body leading-4 font-medium text-foreground-base hover:bg-surface-hover"
           onClick={() => onChange([15])}
         >
-          15th
+          {t("15th", "15日")}
         </button>
         <button
           type="button"

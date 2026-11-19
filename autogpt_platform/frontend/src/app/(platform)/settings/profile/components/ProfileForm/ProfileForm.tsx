@@ -39,48 +39,60 @@ const EASE_OUT = [0.16, 1, 0.3, 1] as const;
 
 interface MarkdownAction {
   label: string;
+  chineseLabel: string;
   icon: ReactNode;
   before: string;
   after: string;
   placeholder: string;
+  chinesePlaceholder: string;
   block?: boolean;
 }
 
 const ACTIONS: ReadonlyArray<MarkdownAction> = [
   {
     label: "Bold",
+    chineseLabel: "粗体",
     icon: <Icon icon={TextBoldIcon} size={16} />,
     before: "**",
     after: "**",
     placeholder: "bold text",
+    chinesePlaceholder: "粗体文本",
   },
   {
     label: "Italic",
+    chineseLabel: "斜体",
     icon: <Icon icon={TextItalicIcon} size={16} />,
     before: "*",
     after: "*",
     placeholder: "italic text",
+    chinesePlaceholder: "斜体文本",
   },
   {
     label: "Strikethrough",
+    chineseLabel: "删除线",
     icon: <Icon icon={TextStrikethroughIcon} size={16} />,
     before: "~~",
     after: "~~",
     placeholder: "strikethrough",
+    chinesePlaceholder: "删除线文本",
   },
   {
     label: "Link",
+    chineseLabel: "链接",
     icon: <Icon icon={Link01Icon} size={16} />,
     before: "[",
     after: "](https://)",
     placeholder: "link text",
+    chinesePlaceholder: "链接文本",
   },
   {
     label: "Bulleted list",
+    chineseLabel: "项目符号列表",
     icon: <Icon icon={LeftToRightListBulletIcon} size={16} />,
     before: "- ",
     after: "",
     placeholder: "list item",
+    chinesePlaceholder: "列表项",
     block: true,
   },
 ];
@@ -127,7 +139,8 @@ export function ProfileForm({ formState, errors, onChange }: Props) {
         cursorEnd = end + action.before.length;
       }
     } else {
-      const insertText = selected || action.placeholder;
+      const insertText =
+        selected || t(action.placeholder, action.chinesePlaceholder);
       newValue =
         value.substring(0, start) +
         action.before +
@@ -171,7 +184,10 @@ export function ProfileForm({ formState, errors, onChange }: Props) {
           tabular
           motion="colors"
         >
-          {Math.max(remaining, 0)} left
+          {t(
+            `${Math.max(remaining, 0)} left`,
+            `剩余 ${Math.max(remaining, 0)} 个字符`,
+          )}
         </Text>
       </div>
       <div className="flex items-center gap-1 px-2">
@@ -186,8 +202,8 @@ export function ProfileForm({ formState, errors, onChange }: Props) {
             <button
               key={action.label}
               type="button"
-              aria-label={action.label}
-              title={action.label}
+              aria-label={t(action.label, action.chineseLabel)}
+              title={t(action.label, action.chineseLabel)}
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => applyAction(action)}
               disabled={isPreview}
@@ -208,7 +224,7 @@ export function ProfileForm({ formState, errors, onChange }: Props) {
           ) : (
             <Icon icon={EyeIcon} size={14} />
           )}
-          {isPreview ? t("Edit", "编辑") : "Preview"}
+          {isPreview ? t("Edit", "编辑") : t("Preview", "预览")}
         </button>
       </div>
       {isPreview ? (

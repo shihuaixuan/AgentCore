@@ -9,6 +9,7 @@ import type { ArtifactRef } from "../../../store";
 import { useCopilotUIStore } from "../../../store";
 import { ArtifactCard } from "../../ArtifactCard/ArtifactCard";
 import { LocalFileImage } from "../../LocalFileImage/LocalFileImage";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 // A fixed size, not the image's own width, so the frame doesn't move while
 // the sent image downloads or when it replaces the pending one.
@@ -23,6 +24,7 @@ interface Props {
 
 /** An image the user sent, shown as a picture that opens in the side panel. */
 export function MessageImageThumbnail({ artifact, readOnly }: Props) {
+  const { t } = useTranslation();
   const openArtifact = useCopilotUIStore((s) => s.openArtifact);
   const [failed, setFailed] = useState(false);
 
@@ -32,7 +34,7 @@ export function MessageImageThumbnail({ artifact, readOnly }: Props) {
     <button
       type="button"
       onClick={() => openArtifact(artifact)}
-      aria-label={`Open ${artifact.title}`}
+      aria-label={t(`Open ${artifact.title}`, `打开 ${artifact.title}`)}
       className={cn(
         FRAME,
         "transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-foreground-subtle focus-visible:outline-none",

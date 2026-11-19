@@ -4,6 +4,7 @@ import {
 } from "@/app/api/__generated__/endpoints/trials/trials.msw";
 import { TopUpForm } from "@/components/layout/TopUpPrompt/TopUpForm/TopUpForm";
 import { TrialCard } from "@/components/organisms/TrialCard/TrialCard";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import {
   setTrialUser,
   trialResponse,
@@ -1080,21 +1081,32 @@ describe("AutoRefillCard", () => {
     ).toBeDefined();
   });
 
-  it("renders the configured state when auto top-up has values", async () => {
-    server.use(
-      jsonHandler("get", "/api/credits/auto-top-up", {
-        amount: 2000,
-        threshold: 500,
-      }),
-    );
+  it.each([
+    {
+      locale: "en",
+      description: "Refills $20 when balance drops below $5.",
+    },
+    { locale: "zh-CN", description: "余额低于 $5 时自动充值 $20。" },
+  ] as const)(
+    "renders configured USD amounts with $locale copy",
+    async ({ locale, description }) => {
+      server.use(
+        jsonHandler("get", "/api/credits/auto-top-up", {
+          amount: 2000,
+          threshold: 500,
+        }),
+      );
 
-    render(<AutoRefillCard />);
+      render(
+        <LanguageProvider initialLocale={locale}>
+          <AutoRefillCard />
+        </LanguageProvider>,
+      );
 
-    // Configured copy includes the dollar amounts.
-    expect(
-      await screen.findByText(/Refills \$20 when balance drops below \$5/i),
-    ).toBeDefined();
-  });
+      // Configured copy includes the dollar amounts.
+      expect(await screen.findByText(description)).toBeDefined();
+    },
+  );
 });
 
 describe("UsageCard", () => {

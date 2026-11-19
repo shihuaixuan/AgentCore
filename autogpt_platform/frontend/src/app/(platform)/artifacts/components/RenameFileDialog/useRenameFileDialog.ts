@@ -11,7 +11,7 @@ export function useRenameFileDialog(
   file: WorkspaceFileItem,
   onRenamed: () => void,
 ) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [name, setName] = useState(file.name);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -36,7 +36,7 @@ export function useRenameFileDialog(
   });
 
   const trimmed = name.trim();
-  const validationError = validateFileName(trimmed);
+  const validationError = validateFileName(trimmed, locale);
   const isUnchanged = trimmed === file.name;
   const canSubmit = validationError === null && !isUnchanged && !isPending;
 

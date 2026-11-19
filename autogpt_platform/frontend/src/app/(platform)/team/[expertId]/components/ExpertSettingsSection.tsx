@@ -47,7 +47,7 @@ export function ExpertSettingsSection({ expert, onFire }: Props) {
 
   return (
     <section
-      aria-label={`Fire ${expert.name}`}
+      aria-label={t(`Fire ${expert.name}`, `解聘 ${expert.name}`)}
       className="overflow-hidden rounded-2xl bg-surface smooth-shadow-ring-sm"
     >
       <div className="flex items-start gap-3 border-b border-error/10 bg-error-surface/60 px-5 py-4">
@@ -56,11 +56,13 @@ export function ExpertSettingsSection({ expert, onFire }: Props) {
         </span>
         <div className="min-w-0">
           <Text variant="large-medium" tone="primary">
-            Fire {expert.name}
+            {t(`Fire ${expert.name}`, `解聘 ${expert.name}`)}
           </Text>
           <Text variant="body-md" tone="secondary" className="mt-0.5">
-            {expert.name} leaves your team and stops working for you. Here is
-            what that means for what you have set up.
+            {t(
+              `${expert.name} leaves your team and stops working for you. Here is what that means for what you have set up.`,
+              `${expert.name} 将离开团队并停止为你工作。以下是对现有设置的影响。`,
+            )}
           </Text>
         </div>
       </div>
@@ -69,15 +71,27 @@ export function ExpertSettingsSection({ expert, onFire }: Props) {
         <Consequence
           icon={Calendar03Icon}
           tone={pauseItems.length > 0 || isPreviewError ? "warn" : "neutral"}
-          tag={pauseItems.length > 0 ? "Pauses" : undefined}
+          tag={pauseItems.length > 0 ? t("Pauses", "暂停") : undefined}
           title={
             isPreviewLoading
-              ? "Checking schedules and triggers…"
+              ? t(
+                  "Checking schedules and triggers…",
+                  "正在检查计划任务和触发器…",
+                )
               : isPreviewError
-                ? "Couldn't check which schedules and triggers would pause"
+                ? t(
+                    "Couldn't check which schedules and triggers would pause",
+                    "无法检查哪些计划任务和触发器将被暂停",
+                  )
                 : pauseItems.length > 0
-                  ? `${plural(pauseItems.length, "automation")} will pause`
-                  : "No schedules or triggers to pause"
+                  ? t(
+                      `${plural(pauseItems.length, "automation")} will pause`,
+                      `${pauseItems.length} 项自动任务将被暂停`,
+                    )
+                  : t(
+                      "No schedules or triggers to pause",
+                      "没有需要暂停的计划任务或触发器",
+                    )
           }
         >
           {isPreviewError ? (
@@ -111,7 +125,10 @@ export function ExpertSettingsSection({ expert, onFire }: Props) {
               {hiddenPauseCount > 0 ? (
                 <span className="flex px-1 py-0.5">
                   <Text variant="small-tight" as="span" tone="muted">
-                    +{hiddenPauseCount} more
+                    {t(
+                      `+${hiddenPauseCount} more`,
+                      `另有 ${hiddenPauseCount} 项`,
+                    )}
                   </Text>
                 </span>
               ) : null}
@@ -120,30 +137,45 @@ export function ExpertSettingsSection({ expert, onFire }: Props) {
         </Consequence>
         <Consequence
           icon={WorkflowSquare01Icon}
-          tag="Kept"
+          tag={t("Kept", "保留")}
           title={
             workflowCount > 0
-              ? `${plural(workflowCount, "workflow")} stay in your library`
-              : "Installed workflows stay in your library"
+              ? t(
+                  `${plural(workflowCount, "workflow")} stay in your library`,
+                  `${workflowCount} 个工作流将保留在你的库中`,
+                )
+              : t(
+                  "Installed workflows stay in your library",
+                  "已安装的工作流将保留在你的库中",
+                )
           }
         />
         <Consequence
           icon={Folder01Icon}
-          tag="Kept"
+          tag={t("Kept", "保留")}
           title={
             fileCount > 0
-              ? `${hasMoreFiles ? `${fileCount}+ files` : plural(fileCount, "file")} from its chats ${fileCount === 1 && !hasMoreFiles ? "stays" : "stay"} in your workspace`
-              : "Files from its chats stay in your workspace"
+              ? t(
+                  `${hasMoreFiles ? `${fileCount}+ files` : plural(fileCount, "file")} from its chats ${fileCount === 1 && !hasMoreFiles ? "stays" : "stay"} in your workspace`,
+                  `其聊天中的 ${fileCount}${hasMoreFiles ? "+" : ""} 个文件将保留在你的工作区中`,
+                )
+              : t(
+                  "Files from its chats stay in your workspace",
+                  "其聊天中的文件将保留在你的工作区中",
+                )
           }
         />
         <Consequence
           icon={BubbleChatIcon}
-          tag="Kept"
+          tag={t("Kept", "保留")}
           title={t("Chat history stays, read-only", "聊天记录会保留，变为只读")}
         />
         <Consequence
           icon={Store01Icon}
-          title={`You can hire ${expert.name} again anytime from the marketplace`}
+          title={t(
+            `You can hire ${expert.name} again anytime from the marketplace`,
+            `你可以随时从市场重新聘请 ${expert.name}`,
+          )}
         />
       </ul>
 
@@ -155,7 +187,7 @@ export function ExpertSettingsSection({ expert, onFire }: Props) {
           onClick={onFire}
           data-testid="expert-fire-button"
         >
-          Fire {expert.name}
+          {t(`Fire ${expert.name}`, `解聘 ${expert.name}`)}
         </Button>
       </div>
     </section>

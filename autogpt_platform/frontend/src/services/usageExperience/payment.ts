@@ -16,7 +16,7 @@ export function formatPaymentDue(
   const plan = formatTierLabel(payment.plan) ?? "Your plan";
   const date = formatTrialDate(payment.startsOn);
   if (locale === "zh-CN") {
-    const planLabel = formatTierLabel(payment.plan) ?? "你的套餐";
+    const planLabel = formatTierLabel(payment.plan, locale) ?? "你的套餐";
     const startDate = payment.startsOn ? new Date(payment.startsOn) : null;
     const start =
       startDate && Number.isFinite(startDate.getTime())

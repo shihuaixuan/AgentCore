@@ -2,6 +2,7 @@
 
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
@@ -34,19 +35,24 @@ export function OnboardingFooter({
   onSkip,
   onNext,
 }: Props) {
+  const { t } = useTranslation();
   const isEnabled = isReady && !isSending;
-  const label = isReview ? "Send" : isNextReview ? "Review" : "Next";
-  const ariaLabel = isReview
-    ? "Send answers"
+  const label = isReview
+    ? t("Send", "发送")
     : isNextReview
-      ? "Review answers"
-      : "Next question";
+      ? t("Review", "检查")
+      : t("Next", "下一步");
+  const ariaLabel = isReview
+    ? t("Send answers", "发送回答")
+    : isNextReview
+      ? t("Review answers", "检查回答")
+      : t("Next question", "下一个问题");
 
   return (
     <div className="[container-type:inline-size] flex items-center justify-between gap-2 px-4 pt-4 pb-4 sm:px-5">
       <button
         type="button"
-        aria-label="Previous question"
+        aria-label={t("Previous question", "上一个问题")}
         aria-keyshortcuts="Backspace"
         disabled={!canGoBack}
         onClick={onBack}
@@ -62,7 +68,7 @@ export function OnboardingFooter({
           disabled={isSending}
           className="flex h-8 items-center gap-2 rounded-md border border-border-base bg-surface px-3.5 text-body font-medium whitespace-nowrap text-foreground-body transition-colors outline-none focus-visible:ring-2 focus-visible:ring-foreground-subtle enabled:hover:border-border-strong enabled:hover:bg-surface-muted disabled:opacity-50 [@media(hover:none)]:h-11"
         >
-          Skip questions
+          {t("Skip questions", "跳过问题")}
           <kbd aria-hidden="true" className={KEY_HINT}>
             Esc
           </kbd>

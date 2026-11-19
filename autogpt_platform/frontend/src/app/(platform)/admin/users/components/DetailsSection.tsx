@@ -18,7 +18,7 @@ interface Props {
 }
 
 export function DetailsSection({ user }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { toast } = useToast();
   const { data: rateLimit, isError: planFailed } = useGetV2GetUserRateLimit(
     { user_id: user.id },
@@ -75,7 +75,9 @@ export function DetailsSection({ user }: Props) {
             )}
           </span>
         </Row>
-        <Row label={t("Role", "角色")}>{user.role === "admin" ? t("Admin", "管理员") : t("User", "用户")}</Row>
+        <Row label={t("Role", "角色")}>
+          {user.role === "admin" ? t("Admin", "管理员") : t("User", "用户")}
+        </Row>
         <Row label={t("Plan", "套餐")}>
           {rateLimit
             ? getPlanName(rateLimit.tier)
@@ -83,12 +85,15 @@ export function DetailsSection({ user }: Props) {
               ? t("Couldn't load", "加载失败")
               : "—"}
         </Row>
-        <Row label={t("Joined", "注册时间")}>{formatDate(user.createdAt)}</Row>
+        <Row label={t("Joined", "注册时间")}>
+          {formatDate(user.createdAt, locale)}
+        </Row>
         <Row label={t("Status", "状态")}>
           {user.banned ? (
             <span className="text-error-foreground">
               {user.banExpires
-                ? t("Banned until", "封禁至") + ` ${formatDate(user.banExpires)}`
+                ? t("Banned until", "封禁至") +
+                  ` ${formatDate(user.banExpires, locale)}`
                 : t("Banned permanently", "永久封禁")}
             </span>
           ) : (

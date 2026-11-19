@@ -46,8 +46,8 @@ export function InvoicesCard({ index = 0 }: Props) {
   if (isError) {
     return (
       <ErrorCard
-        context="invoices"
-        hint="We couldn't load your invoices."
+        context={t("invoices", "发票")}
+        hint={t("We couldn't load your invoices.", "无法加载你的发票。")}
         onRetry={() => void refetch()}
       />
     );
@@ -125,7 +125,18 @@ export function InvoicesCard({ index = 0 }: Props) {
                         variant={STATUS_VARIANT[invoice.status] ?? "info"}
                         size="small"
                       >
-                        {invoice.status}
+                        {t(
+                          invoice.status,
+                          (
+                            {
+                              paid: "已支付",
+                              open: "待支付",
+                              draft: "草稿",
+                              uncollectible: "无法收款",
+                              void: "已作废",
+                            } as Record<string, string>
+                          )[invoice.status] ?? invoice.status,
+                        )}
                       </Badge>
                     </td>
                     <td className="px-2 py-4 text-right sm:px-4">

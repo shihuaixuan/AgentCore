@@ -1,5 +1,7 @@
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import { formatDistanceToNow } from "date-fns";
+import { zhCN } from "date-fns/locale";
+import type { Locale } from "@/lib/i18n/locale";
 
 export const RECENT_FACTS_LIMIT = 6;
 
@@ -15,6 +17,16 @@ export const MEMORY_CHAT_PROMPTS = {
 
 export type MemoryChatSeed = keyof typeof MEMORY_CHAT_PROMPTS;
 
+export function getMemoryChatPrompt(
+  seed: MemoryChatSeed,
+  locale: Locale = "en",
+) {
+  if (locale !== "zh-CN") return MEMORY_CHAT_PROMPTS[seed];
+  return seed === "summary"
+    ? "请总结你记住的所有关于我的信息"
+    : "我希望你忘记部分记忆。请先询问我要忘记什么，搜索相关记忆并展示找到的内容，只有在我确认后才删除。";
+}
+
 export function getActiveExperts(experts: Expert[] | undefined) {
   return (experts ?? []).filter((expert) => !expert.is_archived);
 }
@@ -22,10 +34,11 @@ export function getActiveExperts(experts: Expert[] | undefined) {
 export function getScopeName(
   scopeExpertID: string | null,
   experts: Expert[] | undefined,
+  locale: Locale = "en",
 ) {
   if (!scopeExpertID) return "Otto";
   const expert = experts?.find((e) => e.id === scopeExpertID);
-  return expert?.name ?? "this expert";
+  return expert?.name ?? (locale === "zh-CN" ? "这位专家" : "this expert");
 }
 
 /** Panel identity for a learning record: the Expert, or the personal scope. */
@@ -44,11 +57,17 @@ export function learningSheetScope(
   };
 }
 
-export function formatWhen(createdAt: string | null | undefined) {
+export function formatWhen(
+  createdAt: string | null | undefined,
+  locale: Locale = "en",
+) {
   if (!createdAt) return "";
   const parsed = new Date(createdAt);
   if (Number.isNaN(parsed.getTime())) return "";
-  return formatDistanceToNow(parsed, { addSuffix: true });
+  return formatDistanceToNow(parsed, {
+    addSuffix: true,
+    locale: locale === "zh-CN" ? zhCN : undefined,
+  });
 }
 
 /** The Soul drawer links here with ?expert=<id>. An id the caller no longer

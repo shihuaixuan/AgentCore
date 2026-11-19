@@ -6,31 +6,33 @@ import {
 } from "../../../tokenDevtool/tokenMath";
 import { BREAKDOWN_COLORS } from "../helpers";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   breakdown: ContextBreakdown;
 }
 
 export function BreakdownSection({ breakdown }: Props) {
+  const { t } = useTranslation();
   const rows = [
     {
-      label: "system + tools + skills",
+      label: t("system + tools + skills", "系统 + 工具 + 技能"),
       tokens: BASE_CONTEXT_ESTIMATE,
       color: BREAKDOWN_COLORS.system,
-      note: "fixed est.",
+      note: t("fixed est.", "固定估算"),
     },
     {
-      label: "your messages",
+      label: t("your messages", "你的消息"),
       tokens: breakdown.userTokens,
       color: BREAKDOWN_COLORS.user,
     },
     {
-      label: "assistant replies",
+      label: t("assistant replies", "助手回复"),
       tokens: breakdown.assistantTokens,
       color: BREAKDOWN_COLORS.assistant,
     },
     {
-      label: "tool calls + results",
+      label: t("tool calls + results", "工具调用 + 结果"),
       tokens: breakdown.toolTokens,
       color: BREAKDOWN_COLORS.tools,
     },

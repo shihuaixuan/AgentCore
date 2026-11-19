@@ -16,6 +16,10 @@ import {
 } from "@/app/api/__generated__/endpoints/workspace/workspace";
 import type { QueryClient } from "@tanstack/react-query";
 import { ARTIFACTS_LIST_QUERY_KEY } from "../../useArtifactsPage";
+import type { Locale } from "@/lib/i18n/locale";
+
+type Translate = (english: string, chinese: string) => string;
+const englishText: Translate = (english) => english;
 
 export type FileOrigin =
   | { kind: "session"; sessionId: string; href: string }
@@ -86,20 +90,26 @@ export function formatFileSize(bytes: number): string {
   return `${formatted} ${BYTE_UNITS[exp]}`;
 }
 
-export function formatRelativeDate(input: string | Date): string {
+export function formatRelativeDate(
+  input: string | Date,
+  locale: Locale = "en",
+): string {
   const date = input instanceof Date ? input : new Date(input);
   if (Number.isNaN(date.getTime())) return "—";
 
   const diffMs = Date.now() - date.getTime();
   const diffMin = Math.floor(diffMs / 60_000);
-  if (diffMin < 1) return "just now";
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 1) return locale === "zh-CN" ? "刚刚" : "just now";
+  if (diffMin < 60)
+    return locale === "zh-CN" ? `${diffMin} 分钟前` : `${diffMin}m ago`;
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
+  if (diffHr < 24)
+    return locale === "zh-CN" ? `${diffHr} 小时前` : `${diffHr}h ago`;
   const diffDay = Math.floor(diffHr / 24);
-  if (diffDay < 7) return `${diffDay}d ago`;
+  if (diffDay < 7)
+    return locale === "zh-CN" ? `${diffDay} 天前` : `${diffDay}d ago`;
 
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     year:
@@ -179,10 +189,10 @@ function getOfficeDocKind(
   return null;
 }
 
-const OFFICE_LABEL: Record<OfficeDocKind, string> = {
-  presentation: "Presentation",
-  document: "Document",
-  spreadsheet: "Spreadsheet",
+const OFFICE_LABEL: Record<OfficeDocKind, [string, string]> = {
+  presentation: ["Presentation", "演示文稿"],
+  document: ["Document", "文档"],
+  spreadsheet: ["Spreadsheet", "电子表格"],
 };
 
 const OFFICE_ICON: Record<OfficeDocKind, IconSvgElement> = {
@@ -194,22 +204,24 @@ const OFFICE_ICON: Record<OfficeDocKind, IconSvgElement> = {
 export function getFileTypeLabel(
   mimeType: string | undefined,
   fileName?: string,
+  t: Translate = englishText,
 ): string {
-  if (isCodeFile(fileName)) return "Code";
+  if (isCodeFile(fileName)) return t("Code", "代码");
   const mt = (mimeType ?? "").toLowerCase();
   const officeKind = getOfficeDocKind(mt, (fileName ?? "").toLowerCase());
-  if (officeKind) return OFFICE_LABEL[officeKind];
-  if (mt.startsWith("image/")) return "Image";
-  if (mt.startsWith("video/")) return "Video";
-  if (mt.startsWith("audio/")) return "Audio";
-  if (mt.includes("pdf")) return "PDF document";
-  if (mt.includes("html") || mt.includes("xhtml")) return "Web page";
-  if (mt.includes("csv")) return "Spreadsheet";
-  if (mt.includes("spreadsheet") || mt.includes("excel")) return "Spreadsheet";
-  if (mt.includes("json")) return "JSON data";
+  if (officeKind) return t(...OFFICE_LABEL[officeKind]);
+  if (mt.startsWith("image/")) return t("Image", "图片");
+  if (mt.startsWith("video/")) return t("Video", "视频");
+  if (mt.startsWith("audio/")) return t("Audio", "音频");
+  if (mt.includes("pdf")) return t("PDF document", "PDF 文档");
+  if (mt.includes("html") || mt.includes("xhtml")) return t("Web page", "网页");
+  if (mt.includes("csv")) return t("Spreadsheet", "电子表格");
+  if (mt.includes("spreadsheet") || mt.includes("excel"))
+    return t("Spreadsheet", "电子表格");
+  if (mt.includes("json")) return t("JSON data", "JSON 数据");
   if (mt.includes("markdown")) return "Markdown";
-  if (mt.includes("text")) return "Document";
-  return "Generated file";
+  if (mt.includes("text")) return t("Document", "文档");
+  return t("Generated file", "生成的文件");
 }
 
 export function getFileTypeIcon(
@@ -334,7 +346,10 @@ export function getPreviewKind(
   return "none";
 }
 
-export function formatDayLabel(input: string | Date): string {
+export function formatDayLabel(
+  input: string | Date,
+  locale: Locale = "en",
+): string {
   const date = input instanceof Date ? input : new Date(input);
   if (Number.isNaN(date.getTime())) return "—";
 
@@ -350,20 +365,23 @@ export function formatDayLabel(input: string | Date): string {
     date.getDate(),
   ).getTime();
   const dayDiff = Math.round((startOfToday - startOfDay) / 86_400_000);
-  if (dayDiff === 0) return "Today";
-  if (dayDiff === 1) return "Yesterday";
+  if (dayDiff === 0) return locale === "zh-CN" ? "今天" : "Today";
+  if (dayDiff === 1) return locale === "zh-CN" ? "昨天" : "Yesterday";
 
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     year: date.getFullYear() === now.getFullYear() ? undefined : "numeric",
   });
 }
 
-export function formatFullDate(input: string | Date): string {
+export function formatFullDate(
+  input: string | Date,
+  locale: Locale = "en",
+): string {
   const date = input instanceof Date ? input : new Date(input);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   });
@@ -374,28 +392,35 @@ export function hasImageThumbnail(kind: PreviewKind): boolean {
   return kind === "image" || kind === "pdf" || kind === "office";
 }
 
-export function getEmptyMessage(opts: {
-  hasSearchTerm: boolean;
-  isInFolder: boolean;
-  /** Child folders are listed above the empty files area. */
-  hasFolders: boolean;
-  hasExpertFilter?: boolean;
-  expertName?: string | null;
-}): string {
-  if (opts.hasSearchTerm) return "No files match your search";
+export function getEmptyMessage(
+  opts: {
+    hasSearchTerm: boolean;
+    isInFolder: boolean;
+    /** Child folders are listed above the empty files area. */
+    hasFolders: boolean;
+    hasExpertFilter?: boolean;
+    expertName?: string | null;
+  },
+  t: Translate = englishText,
+): string {
+  if (opts.hasSearchTerm)
+    return t("No files match your search", "没有与搜索条件匹配的文件");
   if (opts.hasExpertFilter) {
     // "yet" is only true of a workspace with nowhere else to look; anywhere
     // with folders or inside one, the files may simply be elsewhere.
     if (!opts.isInFolder && !opts.hasFolders)
-      return "No files from this expert yet";
-    return `No files from ${opts.expertName ?? "this expert"} here`;
+      return t("No files from this expert yet", "此专家暂无文件");
+    return t(
+      `No files from ${opts.expertName ?? "this expert"} here`,
+      `此处没有来自 ${opts.expertName ?? "此专家"} 的文件`,
+    );
   }
   if (opts.isInFolder)
     return opts.hasFolders
-      ? "No files directly in this folder"
-      : "This folder is empty";
-  if (opts.hasFolders) return "No files at the root yet";
-  return "No files yet";
+      ? t("No files directly in this folder", "此文件夹下没有直接存放的文件")
+      : t("This folder is empty", "此文件夹为空");
+  if (opts.hasFolders) return t("No files at the root yet", "根目录暂无文件");
+  return t("No files yet", "暂无文件");
 }
 
 export interface EmptyStateContent {
@@ -407,62 +432,84 @@ export interface EmptyStateContent {
   chatLabel: string;
 }
 
-export function getEmptyState(opts: {
-  hasSearchTerm: boolean;
-  isInFolder: boolean;
-  hasFolders: boolean;
-  folderId: string | null;
-  expert: { id: string; name: string | null } | null;
-}): EmptyStateContent {
-  const title = getEmptyMessage({
-    hasSearchTerm: opts.hasSearchTerm,
-    isInFolder: opts.isInFolder,
-    hasFolders: opts.hasFolders,
-    hasExpertFilter: opts.expert !== null,
-    expertName: opts.expert?.name,
-  });
+export function getEmptyState(
+  opts: {
+    hasSearchTerm: boolean;
+    isInFolder: boolean;
+    hasFolders: boolean;
+    folderId: string | null;
+    expert: { id: string; name: string | null } | null;
+  },
+  t: Translate = englishText,
+): EmptyStateContent {
+  const title = getEmptyMessage(
+    {
+      hasSearchTerm: opts.hasSearchTerm,
+      isInFolder: opts.isInFolder,
+      hasFolders: opts.hasFolders,
+      hasExpertFilter: opts.expert !== null,
+      expertName: opts.expert?.name,
+    },
+    t,
+  );
   const base: EmptyStateContent = {
     title,
     description: "",
     showUpload: false,
     uploadFolderId: opts.folderId,
     chatHref: null,
-    chatLabel: "Start a task",
+    chatLabel: t("Start a task", "开始任务"),
   };
   if (opts.hasSearchTerm) {
     return {
       ...base,
-      description: "Try another name, or clear the search to see everything.",
+      description: t(
+        "Try another name, or clear the search to see everything.",
+        "尝试其他名称，或清除搜索以查看全部内容。",
+      ),
     };
   }
   if (opts.expert) {
     const name = opts.expert.name;
     return {
       ...base,
-      description: `Files ${name ?? "this expert"} creates while working on a task will show up here.`,
+      description: t(
+        `Files ${name ?? "this expert"} creates while working on a task will show up here.`,
+        `${name ?? "此专家"} 执行任务时创建的文件会显示在这里。`,
+      ),
       chatHref: name
         ? `/copilot?expertId=${encodeURIComponent(opts.expert.id)}`
         : null,
-      chatLabel: name ? `Chat with ${name}` : base.chatLabel,
+      chatLabel: name
+        ? t(`Chat with ${name}`, `与 ${name} 聊天`)
+        : base.chatLabel,
     };
   }
   if (opts.isInFolder) {
     return {
       ...base,
-      description: "Upload a file here, or drag one in from the list.",
+      description: t(
+        "Upload a file here, or drag one in from the list.",
+        "在此上传文件，或从列表中拖入文件。",
+      ),
       showUpload: true,
     };
   }
   if (opts.hasFolders) {
     return {
       ...base,
-      description: "Your files live inside the folders above.",
+      description: t(
+        "Your files live inside the folders above.",
+        "你的文件位于上方的文件夹中。",
+      ),
     };
   }
   return {
     ...base,
-    description:
+    description: t(
       "Files your team generates and files you upload will show up here.",
+      "团队生成的文件和你上传的文件会显示在这里。",
+    ),
     showUpload: true,
     chatHref: "/copilot",
   };

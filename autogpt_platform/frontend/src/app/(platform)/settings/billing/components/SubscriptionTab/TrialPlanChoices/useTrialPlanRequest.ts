@@ -29,7 +29,7 @@ export interface PaymentPage {
 }
 
 export function useTrialPlanRequest(offer: TrialOfferResponse) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const userID = useAuthStore((state) => state.user?.id);
   const queryClient = useQueryClient();
   const { mutateAsync: updateTier } = useUpdateSubscriptionTier();
@@ -54,8 +54,11 @@ export function useTrialPlanRequest(offer: TrialOfferResponse) {
       // change, charged without the confirmation this page shows.
       if (!(await isStillOnTrial())) {
         toast({
-          title: "Your plan changed",
-          description: "Review your current plan below.",
+          title: t("Your plan changed", "你的套餐已更改"),
+          description: t(
+            "Review your current plan below.",
+            "请在下方查看当前套餐。",
+          ),
         });
         await refreshBilling();
         return;
@@ -71,14 +74,14 @@ export function useTrialPlanRequest(offer: TrialOfferResponse) {
         setPaymentPage({ ownerID: requestUserID, plan, url: data.url });
         return;
       }
-      toast(describePlanResult(plan, data?.tier));
+      toast(describePlanResult(plan, data?.tier, locale));
       await refreshBilling();
     } catch (error) {
       if (useAuthStore.getState().user?.id !== requestUserID) return;
       // A toast, not an inline alert: the refresh below usually unmounts these
       // choices (the trial was resumed or ended elsewhere).
       toast({
-        title: `Unable to start ${plan.label}`,
+        title: t(`Unable to start ${plan.label}`, `无法开始使用 ${plan.label}`),
         description:
           error instanceof Error
             ? error.message

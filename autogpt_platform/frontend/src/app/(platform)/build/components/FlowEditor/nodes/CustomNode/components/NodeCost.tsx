@@ -8,6 +8,8 @@ import { useNodeStore } from "@/app/(platform)/build/stores/nodeStore";
 import { useShallow } from "zustand/react/shallow";
 import { Coins02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { DisplayTranslate } from "../../../../../helpers/translation";
 
 type CostDisplay =
   | { kind: "free" }
@@ -26,27 +28,52 @@ function formatUsd(value: number): string {
   return `$${value.toFixed(2)}`;
 }
 
-function tokenRateTooltip(d: {
-  input: number;
-  output: number;
-  cacheRead: number | null;
-  cacheCreation: number | null;
-}): string {
+function tokenRateTooltip(
+  rate: {
+    input: number;
+    output: number;
+    cacheRead: number | null;
+    cacheCreation: number | null;
+  },
+  t: DisplayTranslate,
+): string {
   const parts = [
-    `Input: ${formatUsd(d.input)} / 1M tokens`,
-    `Output: ${formatUsd(d.output)} / 1M tokens`,
+    t(
+      `Input: ${formatUsd(rate.input)} / 1M tokens`,
+      `输入：${formatUsd(rate.input)} / 百万 token`,
+    ),
+    t(
+      `Output: ${formatUsd(rate.output)} / 1M tokens`,
+      `输出：${formatUsd(rate.output)} / 百万 token`,
+    ),
   ];
-  if (d.cacheRead != null)
-    parts.push(`Cached input: ${formatUsd(d.cacheRead)} / 1M tokens`);
-  if (d.cacheCreation != null)
-    parts.push(`Cache write: ${formatUsd(d.cacheCreation)} / 1M tokens`);
-  parts.push("Final charge scales with real usage (1.5× margin applied).");
+  if (rate.cacheRead != null)
+    parts.push(
+      t(
+        `Cached input: ${formatUsd(rate.cacheRead)} / 1M tokens`,
+        `缓存读取：${formatUsd(rate.cacheRead)} / 百万 token`,
+      ),
+    );
+  if (rate.cacheCreation != null)
+    parts.push(
+      t(
+        `Cache write: ${formatUsd(rate.cacheCreation)} / 1M tokens`,
+        `缓存写入：${formatUsd(rate.cacheCreation)} / 百万 token`,
+      ),
+    );
+  parts.push(
+    t(
+      "Final charge scales with real usage (1.5× margin applied).",
+      "最终费用按实际用量计算（按 1.5× 系数加价）。",
+    ),
+  );
   return parts.join(" · ");
 }
 
 function getDisplay(
   blockCost: BlockCost,
   formatCredits: (n: number | null) => string,
+  t: DisplayTranslate,
 ): CostDisplay {
   // Token-rate pair takes precedence regardless of cost_type so that
   // OpenRouter (COST_USD)-billed models show the same "$X / $Y per 1M"
@@ -78,27 +105,36 @@ function getDisplay(
 
   switch (blockCost.cost_type) {
     case BlockCostType.run:
-      return { kind: "fixed", amountText, suffix: "/run" };
+      return { kind: "fixed", amountText, suffix: t("/run", "/次运行") };
     case BlockCostType.byte:
-      return { kind: "per-unit", amountText, suffix: "/byte" };
+      return { kind: "per-unit", amountText, suffix: t("/byte", "/字节") };
     case BlockCostType.second:
       return {
         kind: "per-unit",
         amountText,
-        suffix: divisor && divisor > 1 ? `/ ${divisor}s` : "/sec",
+        suffix:
+          divisor && divisor > 1
+            ? t(`/ ${divisor}s`, `/ ${divisor} 秒`)
+            : t("/sec", "/秒"),
       };
     case BlockCostType.items:
       return {
         kind: "per-unit",
         amountText,
-        suffix: divisor && divisor > 1 ? `/ ${divisor} items` : "/item",
+        suffix:
+          divisor && divisor > 1
+            ? t(`/ ${divisor} items`, `/ ${divisor} 项`)
+            : t("/item", "/项"),
       };
     case BlockCostType.tokens:
       return {
         kind: "fixed",
         amountText,
-        suffix: "/run",
-        note: "Pre-flight flat estimate — per-token rate not in our catalog yet.",
+        suffix: t("/run", "/次运行"),
+        note: t(
+          "Pre-flight flat estimate — per-token rate not in our catalog yet.",
+          "运行前的固定费用预估，目录中尚无每 token 费率。",
+        ),
       };
     default:
       return { kind: "fixed", amountText, suffix: `/${blockCost.cost_type}` };
@@ -112,6 +148,7 @@ export const NodeCost = ({
   blockCosts: BlockCost[];
   nodeId: string;
 }) => {
+  const { t } = useTranslation();
   const { formatCredits } = useCredits();
   const isBillingEnabled = useIsBillingEnabled();
   const hardcodedValues = useNodeStore(
@@ -126,13 +163,13 @@ export const NodeCost = ({
 
   if (!isBillingEnabled || !blockCost) return null;
 
-  const display = getDisplay(blockCost, formatCredits);
+  const display = getDisplay(blockCost, formatCredits, t);
 
   if (display.kind === "free") {
     return (
       <div className="mr-3 flex items-center gap-1">
         <Icon icon={Coins02Icon} className="h-3 w-3" />
-        <Text variant="small-medium">Free</Text>
+        <Text variant="small-medium">{t("Free", "免费")}</Text>
       </div>
     );
   }
@@ -141,13 +178,16 @@ export const NodeCost = ({
     return (
       <div
         className="mr-3 flex items-center gap-1"
-        title={tokenRateTooltip(display)}
+        title={tokenRateTooltip(display, t)}
       >
         <Icon icon={Coins02Icon} className="h-3 w-3" />
         <Text variant="small-medium">
-          {`${formatUsd(display.input)} in / ${formatUsd(display.output)} out`}
+          {t(
+            `${formatUsd(display.input)} in / ${formatUsd(display.output)} out`,
+            `${formatUsd(display.input)} 输入 / ${formatUsd(display.output)} 输出`,
+          )}
         </Text>
-        <Text variant="small">{" per 1M tokens"}</Text>
+        <Text variant="small">{t(" per 1M tokens", "每百万 token")}</Text>
       </div>
     );
   }
@@ -156,10 +196,13 @@ export const NodeCost = ({
     return (
       <div
         className="mr-3 flex items-center gap-1"
-        title="Pay-as-you-go pricing. Final charge matches the provider's per-token rate plus a 1.5× margin."
+        title={t(
+          "Pay-as-you-go pricing. Final charge matches the provider's per-token rate plus a 1.5× margin.",
+          "按量付费，最终费用按供应商的每 token 费率及 1.5× 加价系数计算。",
+        )}
       >
         <Icon icon={Coins02Icon} className="h-3 w-3" />
-        <Text variant="small">Pay-as-you-go</Text>
+        <Text variant="small">{t("Pay-as-you-go", "按量付费")}</Text>
       </div>
     );
   }

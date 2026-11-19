@@ -18,13 +18,20 @@ export function AdminSkillSubmissions() {
   } = useAdminSkillSubmissions();
 
   if (isLoading) {
-    return <div className="py-6 text-center">{t("Loading skill submissions…", "正在加载技能提交…")}</div>;
+    return (
+      <div className="py-6 text-center">
+        {t("Loading skill submissions…", "正在加载技能提交…")}
+      </div>
+    );
   }
 
   if (isUnavailable) {
     return (
       <Text variant="body" tone="muted">
-        {t("Skill submissions are unavailable right now.", "技能提交暂时不可用。")}
+        {t(
+          "Skill submissions are unavailable right now.",
+          "技能提交暂时不可用。",
+        )}
       </Text>
     );
   }
@@ -32,7 +39,10 @@ export function AdminSkillSubmissions() {
   if (submissions.length === 0) {
     return (
       <Text variant="body" tone="muted">
-        {t("No skill submissions are waiting for review.", "没有等待审核的技能提交。")}
+        {t(
+          "No skill submissions are waiting for review.",
+          "没有等待审核的技能提交。",
+        )}
       </Text>
     );
   }
@@ -57,7 +67,10 @@ export function AdminSkillSubmissions() {
             <Text variant="small" className="!mt-1" tone="subtle">
               /{submission.slug} · {submission.categories.join(", ")}
               {submission.required_providers.length > 0
-                ? ` · works with ${submission.required_providers.join(", ")}`
+                ? t(
+                    ` · works with ${submission.required_providers.join(", ")}`,
+                    ` · 适用服务：${submission.required_providers.join("、")}`,
+                  )
                 : ""}
             </Text>
           </div>

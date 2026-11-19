@@ -33,13 +33,14 @@ export function ErrorCard({
   isOurProblem = true,
   responseError,
   httpError,
-  context = "data",
+  context,
   hint,
   onRetry,
   className = "",
   textSize = "body",
 }: ErrorCardProps) {
-  const { locale } = useTranslation();
+  const { locale, t } = useTranslation();
+  const displayContext = context ?? t("data", "数据");
   if (isSuccess && !responseError && !httpError) {
     return null;
   }
@@ -63,7 +64,7 @@ export function ErrorCard({
         <ErrorHeader />
         <ErrorMessage
           errorMessage={errorMessage}
-          context={context}
+          context={displayContext}
           hint={hint}
           textSize={textSize}
         />
@@ -72,7 +73,7 @@ export function ErrorCard({
             onRetry={onRetry}
             responseError={responseError}
             httpError={httpError}
-            context={context}
+            context={displayContext}
             textSize={textSize}
           />
         )}

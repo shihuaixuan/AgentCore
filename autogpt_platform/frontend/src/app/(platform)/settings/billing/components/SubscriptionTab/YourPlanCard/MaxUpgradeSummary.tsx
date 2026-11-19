@@ -13,21 +13,23 @@ export function formatUpgradeAmount(amount: number, currency: string) {
   return formatAmount(amount, currency);
 }
 
-function dateLabel(timestamp: number) {
-  return new Date(timestamp * 1000).toLocaleDateString(undefined, {
+function dateLabel(timestamp: number, locale: string) {
+  return new Date(timestamp * 1000).toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
   });
 }
 
 export function MaxUpgradeSummary({ preview }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const date = (timestamp: number) => dateLabel(timestamp, locale);
   const amount = (cents: number) =>
     formatUpgradeAmount(cents, preview.currency);
-  const unit = preview.billing_cycle === "yearly" ? "year" : "month";
+  const unit =
+    preview.billing_cycle === "yearly" ? t("year", "年") : t("month", "月");
   const recurringTax = preview.recurring_tax_included
-    ? "including tax"
-    : "plus applicable tax";
+    ? t("including tax", "含税")
+    : t("plus applicable tax", "不含适用税费");
   return (
     <div className="overflow-hidden rounded-2xl border border-border-base">
       <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border-base bg-surface-muted px-5 py-4">
@@ -51,18 +53,25 @@ export function MaxUpgradeSummary({ preview }: Props) {
             label={
               line.proration
                 ? line.amount < 0
-                  ? "Unused Pro time"
-                  : `Max, ${dateLabel(line.period_start)} to ${dateLabel(line.period_end)}`
+                  ? t("Unused Pro time", "Pro 未使用的时段")
+                  : t(
+                      `Max, ${date(line.period_start)} to ${date(line.period_end)}`,
+                      `Max，${date(line.period_start)} 至 ${date(line.period_end)}`,
+                    )
                 : line.description
             }
             value={amount(line.amount)}
           />
         ))}
         <SummaryRow
-          label={preview.tax_included ? "Tax (included)" : "Tax"}
+          label={
+            preview.tax_included
+              ? t("Tax (included)", "税费（已含）")
+              : t("Tax", "税费")
+          }
           value={
             preview.tax_amount == null
-              ? "See invoice"
+              ? t("See invoice", "详见账单")
               : amount(preview.tax_amount)
           }
         />
@@ -81,9 +90,10 @@ export function MaxUpgradeSummary({ preview }: Props) {
         </div>
         <div className="pt-2">
           <Text variant="small-loose" tone="secondary">
-            Next renewal: {dateLabel(preview.period_end)}. Max’s regular price
-            is {amount(preview.recurring_amount)} {recurringTax} per {unit},
-            before any applicable discounts or account credits.
+            {t(
+              `Next renewal: ${date(preview.period_end)}. Max’s regular price is ${amount(preview.recurring_amount)} ${recurringTax} per ${unit}, before any applicable discounts or account credits.`,
+              `下次续费：${date(preview.period_end)}。Max 的标准价格为每${unit} ${amount(preview.recurring_amount)}（${recurringTax}），尚未扣除适用折扣或账户余额。`,
+            )}
           </Text>
         </div>
       </div>

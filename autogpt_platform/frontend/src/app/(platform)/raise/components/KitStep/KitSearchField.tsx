@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Input } from "@/components/atoms/Input/Input";
 import {
   Cancel01Icon,
@@ -26,6 +27,7 @@ export function KitSearchField({
   isSearching,
   onChange,
 }: Props) {
+  const { t } = useTranslation();
   return (
     // The Input atom wraps itself in two positioned divs that follow these
     // adornments in the DOM, so without z-10 the opaque field paints over them.
@@ -63,7 +65,7 @@ export function KitSearchField({
         <button
           type="button"
           onClick={() => onChange("")}
-          aria-label="Clear search"
+          aria-label={t("Clear search", "清除搜索")}
           className="absolute top-1/2 right-2.5 z-10 grid size-7 -translate-y-1/2 place-items-center rounded-full text-foreground-tertiary transition-colors duration-200 hover:bg-surface-hover hover:text-foreground-base"
         >
           <Icon icon={Cancel01Icon} size={14} aria-hidden />

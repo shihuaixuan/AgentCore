@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/Button/Button";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Input } from "@/components/atoms/Input/Input";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ export function JobTitleStep({
   onSubmit,
   onSkip,
 }: Props) {
+  const { t } = useTranslation();
   const { custom, setCustom, trimmed, submitCustom } = useJobTitleStep({
     onSubmit,
   });
@@ -37,7 +39,7 @@ export function JobTitleStep({
         )}
       >
         <Icon icon={Forward02Icon} size={16} aria-hidden />
-        Skipped
+        {t("Skipped", "已跳过")}
       </div>
     );
   }
@@ -49,7 +51,7 @@ export function JobTitleStep({
       {chips.length > 0 ? (
         <div
           role="group"
-          aria-label="Suggested job titles"
+          aria-label={t("Suggested job titles", "推荐职位")}
           className="flex flex-wrap justify-end gap-2.5"
         >
           {chips.map((chip) => (
@@ -76,7 +78,7 @@ export function JobTitleStep({
           aria-hidden
           className="mr-4 text-caption font-medium tracking-caps text-foreground-tertiary uppercase"
         >
-          or
+          {t("or", "或")}
         </span>
       )}
       {selectedTitle ? null : (
@@ -86,12 +88,12 @@ export function JobTitleStep({
         >
           <Input
             id="raise-job-title"
-            label="Job title"
+            label={t("Job title", "职位")}
             hideLabel
             size="small"
             value={custom}
             onChange={(event) => setCustom(event.target.value)}
-            placeholder="Type a job title…"
+            placeholder={t("Type a job title…", "输入职位…")}
             maxLength={JOB_TITLE_MAX_LENGTH}
             wrapperClassName="mb-0 w-full max-w-[16rem] [&_input]:h-[2.625rem] [&_input]:py-3"
           />
@@ -103,7 +105,7 @@ export function JobTitleStep({
             shape="rounded"
             className="h-[2.625rem]"
           >
-            Add title
+            {t("Add title", "添加职位")}
           </Button>
           <Button
             type="button"
@@ -113,7 +115,7 @@ export function JobTitleStep({
             shape="rounded"
             className="h-[2.625rem]"
           >
-            Skip
+            {t("Skip", "跳过")}
           </Button>
         </form>
       )}

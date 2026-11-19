@@ -23,17 +23,14 @@ export function PlanProgressCard({ progress }: Props) {
       className="flex min-h-[5.375rem] flex-col justify-center gap-1.5 rounded-2xl border border-border-base bg-surface px-3.5 py-2.5"
     >
       {getProgressSteps(progress).map((step) => (
-        <li
-          key={translateCopy(step.label)}
-          className="flex items-center gap-2.5"
-        >
+        <li key={step.label} className="flex items-center gap-2.5">
           <ChecklistMark key={step.state} state={step.state} />
           <Text
             variant={step.state === "active" ? "body-medium" : "body"}
             as="span"
             tone={step.state === "pending" ? "muted" : undefined}
           >
-            {step.label}
+            {translateCopy(step.label)}
           </Text>
         </li>
       ))}

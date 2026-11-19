@@ -12,6 +12,7 @@ import {
 } from "@/app/api/__generated__/endpoints/chat/chat";
 import type { AIConnectionOffer } from "@/app/api/__generated__/models/aIConnectionOffer";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { ProviderFailure } from "../../providerFailure";
 import { alternativeConnection, formatResetHint } from "./helpers";
@@ -32,6 +33,7 @@ export function useProviderLimitDialog({
   onDismiss,
   eligible,
 }: Args) {
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const managedChat = useContext(ManagedModelChatContext);
 
@@ -81,9 +83,11 @@ export function useProviderLimitDialog({
         onError: () => {
           toast({
             variant: "destructive",
-            title: "Could not switch connection",
-            description:
+            title: t("Could not switch connection", "无法切换连接"),
+            description: t(
               "This chat is still on the connection it was. Try again, or pick one in Settings.",
+              "此对话仍使用原来的连接。请重试，或在设置中选择连接。",
+            ),
           });
         },
       },
@@ -108,7 +112,7 @@ export function useProviderLimitDialog({
 
   // Relative to the clock, so read on every render rather than cached.
   const resetHint = useReadEveryRender(() =>
-    formatResetHint(failure?.resetsAt ?? null),
+    formatResetHint(failure?.resetsAt ?? null, locale),
   );
 
   return {

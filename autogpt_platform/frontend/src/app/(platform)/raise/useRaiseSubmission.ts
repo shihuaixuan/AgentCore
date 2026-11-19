@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { roleFor } from "./components/CategoryStep/helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   failedAttachmentMessage,
   toRaiseAttachments,
@@ -19,6 +20,7 @@ import {
 } from "./helpers";
 
 export function useRaiseSubmission() {
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   const router = useRouter();
   const { mutateAsync: createRaisedExpert, isPending } =
@@ -50,10 +52,14 @@ export function useRaiseSubmission() {
       const result = response.data as RaiseResult;
       if (result.failed_attachments?.length) {
         toast({
-          title: `Created ${draft.name || "your expert"}, but some tools didn't attach`,
+          title: t(
+            `Created ${draft.name || "your expert"}, but some tools didn't attach`,
+            `已创建 ${draft.name || "你的专家"}，但部分工具未能添加`,
+          ),
           description: failedAttachmentMessage(
             result.failed_attachments,
             kit.attachments,
+            locale,
           ),
         });
       }
@@ -71,38 +77,52 @@ export function useRaiseSubmission() {
     } catch (error) {
       submitLatch.current = false;
       setIsLocked(false);
-      reportFailure(error, draft.name);
+      reportFailure(error, draft.name, t);
     }
   }
 
   return { finish, isSubmitting: isPending || isLocked };
 }
 
-function reportFailure(error: unknown, name: string) {
+function reportFailure(
+  error: unknown,
+  name: string,
+  translate: (english: string, chinese: string) => string,
+) {
   if (error instanceof ApiError && error.status === 409) {
     if (getExpertLimitCode(error.response) === "raised_expert_lifetime_limit") {
       toast({
-        title: "Expert creation limit reached",
-        description:
+        title: translate("Expert creation limit reached", "已达到专家创建上限"),
+        description: translate(
           "This account has reached its lifetime limit for created Experts. Contact support if you need more capacity.",
+          "此账户已达到累计创建专家的上限。如需增加额度，请联系支持。",
+        ),
         variant: "destructive",
       });
       return;
     }
     toast({
-      title: "Your team is full",
-      description:
+      title: translate("Your team is full", "你的团队已满"),
+      description: translate(
         "You've reached the limit of active experts. Archive one from your team page to create another.",
+        "已达到活跃专家数量上限。请在团队页面归档一位专家后再创建。",
+      ),
       variant: "destructive",
     });
     return;
   }
   toast({
-    title: `Couldn't create ${name || "your expert"}`,
+    title: translate(
+      `Couldn't create ${name || "your expert"}`,
+      `无法创建 ${name || "你的专家"}`,
+    ),
     description:
       error instanceof ApiError && [400, 422, 503].includes(error.status)
         ? error.message
-        : "Something went wrong. Please try again.",
+        : translate(
+            "Something went wrong. Please try again.",
+            "出现错误，请重试。",
+          ),
     variant: "destructive",
   });
 }

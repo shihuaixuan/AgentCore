@@ -4,6 +4,7 @@ import type { UIMessage } from "ai";
 import { useEffect, useInsertionEffect, useRef, useState } from "react";
 
 import { useToast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { isMicrophonePermissionDenied } from "@/lib/microphone";
 import { trackVoiceMode } from "@/services/copilot/voice-mode-analytics";
 
@@ -75,13 +76,14 @@ export function useVoiceMode({
   silenceTimeoutMs = SILENCE_TIMEOUT_MS,
   onSend,
 }: Args) {
+  const { t, locale } = useTranslation();
   const isReplyInFlight = isStreaming || isReconnecting || isFinishProbing;
   const [state, setState] = useState<VoiceState>("off");
   const { toast } = useToast();
 
-  const inputs = useRef({ sessionId, onSend, silenceTimeoutMs });
+  const inputs = useRef({ sessionId, onSend, silenceTimeoutMs, locale, t });
   useInsertionEffect(() => {
-    inputs.current = { sessionId, onSend, silenceTimeoutMs };
+    inputs.current = { sessionId, onSend, silenceTimeoutMs, locale, t };
   });
 
   const stateRef = useRef<VoiceState>("off");
@@ -140,9 +142,11 @@ export function useVoiceMode({
   function report(error: unknown) {
     console.error("[Voice mode]", error);
     toast({
-      title: "Voice mode",
+      title: inputs.current.t("Voice mode", "语音模式"),
       description:
-        error instanceof Error ? error.message : "Something went wrong.",
+        error instanceof Error
+          ? error.message
+          : inputs.current.t("Something went wrong.", "发生了错误。"),
       variant: "destructive",
     });
   }
@@ -235,7 +239,13 @@ export function useVoiceMode({
   function player(): SpeechPlayer {
     if (!playerRef.current) {
       playerRef.current = createSpeechPlayer({
-        synthesize: (text) => synthesizeSpeech(text, inputs.current.sessionId),
+        getLocale: () => inputs.current.locale,
+        synthesize: (text) =>
+          synthesizeSpeech(
+            text,
+            inputs.current.sessionId,
+            inputs.current.locale,
+          ),
         onIdle: () => {
           if (replyDone.current) dispatch({ type: "REPLY_DONE" });
         },
@@ -355,7 +365,7 @@ export function useVoiceMode({
 
     let transcript = "";
     try {
-      transcript = await transcribeUtterance(wav);
+      transcript = await transcribeUtterance(wav, inputs.current.locale);
     } catch (error) {
       // A session the user has already left owns none of this: writing the
       // failure back here would resurrect the old recording under the next
@@ -371,7 +381,7 @@ export function useVoiceMode({
         message:
           error instanceof Error && error.message
             ? error.message
-            : "Transcription failed",
+            : inputs.current.t("Transcription failed", "转写失败"),
       });
       // The mic comes back, but its 8-second silence close must not: that
       // would take the recording with it before the user has read the error.
@@ -566,7 +576,7 @@ export function useVoiceMode({
     state,
     isActive: state !== "off",
     isStarting,
-    statusLabel: describeVoiceState(state),
+    statusLabel: describeVoiceState(state, locale),
     toggle,
     failure,
     retryFailedUtterance,

@@ -11,6 +11,7 @@ import {
   toAdminUser,
 } from "./helpers";
 import { getAdminUserLookupQueryKey } from "./useAdminUserLookup";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface BanArgs {
   reason: string;
@@ -18,6 +19,7 @@ interface BanArgs {
 }
 
 export function useUserBan(user: AdminUser) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -33,29 +35,34 @@ export function useUserBan(user: AdminUser) {
   const ban = useMutation({
     mutationFn: async ({ reason, duration }: BanArgs) => {
       const banReason = reason.trim();
-      if (!banReason) throw new Error("Give a reason for the ban.");
+      if (!banReason)
+        throw new Error(t("Give a reason for the ban.", "请填写封禁原因。"));
       const { data, error } = await authClient.admin.banUser({
         userId: user.id,
         banReason,
         banExpiresIn: getBanDurationSeconds(duration),
       });
       if (error || !data) {
-        throw new Error(error?.message || "Failed to ban the user");
+        throw new Error(
+          error?.message || t("Failed to ban the user", "无法封禁该用户"),
+        );
       }
       return toAdminUser(data.user);
     },
     onSuccess: (updated) => {
       storeUpdatedUser(updated);
       toast({
-        title: `Banned ${updated.email}`,
-        description:
+        title: t(`Banned ${updated.email}`, `已封禁 ${updated.email}`),
+        description: t(
           "Their sessions are signed out. Tokens they hold or get in the next 5 minutes work for up to an hour, and their API keys, schedules and triggers keep running.",
+          "其会话已退出。现有令牌及未来 5 分钟内获取的令牌仍可能有效长达一小时；API 密钥、计划和触发器仍会继续运行。",
+        ),
         variant: "success",
       });
     },
     onError: (error) => {
       toast({
-        title: "Couldn't ban the user",
+        title: t("Couldn't ban the user", "无法封禁该用户"),
         description: error.message,
         variant: "destructive",
       });
@@ -68,17 +75,23 @@ export function useUserBan(user: AdminUser) {
         userId: user.id,
       });
       if (error || !data) {
-        throw new Error(error?.message || "Failed to unban the user");
+        throw new Error(
+          error?.message ||
+            t("Failed to unban the user", "无法解除该用户的封禁"),
+        );
       }
       return toAdminUser(data.user);
     },
     onSuccess: (updated) => {
       storeUpdatedUser(updated);
-      toast({ title: `Unbanned ${updated.email}`, variant: "success" });
+      toast({
+        title: t(`Unbanned ${updated.email}`, `已解除 ${updated.email} 的封禁`),
+        variant: "success",
+      });
     },
     onError: (error) => {
       toast({
-        title: "Couldn't unban the user",
+        title: t("Couldn't unban the user", "无法解除该用户的封禁"),
         description: error.message,
         variant: "destructive",
       });

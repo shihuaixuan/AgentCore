@@ -1,4 +1,5 @@
 import type { ToolUIPart } from "ai";
+import type { Locale } from "@/lib/i18n/locale";
 import { getBlockDisplayName } from "../../helpers/toolDisplay";
 import type { MessagePart } from "../ChatMessagesContainer/helpers";
 import { EXPERT_ONBOARDING_PART_TYPE } from "../ExpertOnboardingCard/helpers";
@@ -18,6 +19,7 @@ import { type ChainCategory, getCatalogLabel } from "./toolCatalog";
 import type { HeldRowInfo } from "./heldRow";
 import { heldAskText, heldToolName } from "./heldRow";
 import { asObject, integrationIconSrc } from "./resultHelpers";
+import { getCategorySummary } from "./chainSummary";
 
 export type ChainRowState = "running" | "done" | "error";
 
@@ -110,7 +112,12 @@ const BLOCK_ACTION_TOOLS = new Set([
   "resume_capability",
 ]);
 
-function actionLabel(toolName: string, tool: ToolUIPart): string | null {
+function actionLabel(
+  toolName: string,
+  tool: ToolUIPart,
+  locale: Locale,
+): string | null {
+  const chinese = locale === "zh-CN";
   const output = tool.output;
   const data = asObject(output);
   if (!data) return null;
@@ -127,23 +134,34 @@ function actionLabel(toolName: string, tool: ToolUIPart): string | null {
       ? getBlockDisplayName(tool.title, output)
       : setup?.agent_name;
     return typeof name === "string" && name.trim()
-      ? `Connect ${name.trim()} to continue`
-      : "Complete setup to continue";
+      ? chinese
+        ? `连接 ${name.trim()} 以继续`
+        : `Connect ${name.trim()} to continue`
+      : chinese
+        ? "完成设置以继续"
+        : "Complete setup to continue";
   }
   if (data.type === "review_required") {
     const name = isBlock
       ? getBlockDisplayName(tool.title, output)
       : data.block_name;
     return typeof name === "string" && name.trim()
-      ? `Review ${name.trim()}`
-      : "Review this action";
+      ? chinese
+        ? `审核 ${name.trim()}`
+        : `Review ${name.trim()}`
+      : chinese
+        ? "审核此操作"
+        : "Review this action";
   }
   if (data.type === "approval_required")
-    return heldAskText(data, heldToolName(data, toolName));
-  if (data.type === "suggested_goal") return "Review the suggested goal";
+    return heldAskText(data, heldToolName(data, toolName), locale);
+  if (data.type === "suggested_goal")
+    return chinese ? "审核建议的目标" : "Review the suggested goal";
   return typeof data.message === "string" && data.message.trim()
     ? data.message.trim()
-    : "Action required";
+    : chinese
+      ? "需要你采取操作"
+      : "Action required";
 }
 
 /** Setup-requirements rows whose card registers with the chain and renders
@@ -240,19 +258,24 @@ function narrationText(part: MessagePart): string | null {
 function getRowCatalogLabel(
   row: ChainRow,
   context: { displayName: unknown; output: unknown },
+  locale: Locale,
 ) {
   const target = capabilityTargetRow(row);
   const viaDispatch =
     target.tool && target !== row && asObject(target.input)?.connect !== true
-      ? getCatalogLabel(target.tool, target.input, row.state, context)
+      ? getCatalogLabel(target.tool, target.input, row.state, context, locale)
       : null;
   return (
     viaDispatch ??
-    getCatalogLabel(row.tool ?? "", row.input, row.state, context)
+    getCatalogLabel(row.tool ?? "", row.input, row.state, context, locale)
   );
 }
 
-export function toChainRow(part: MessagePart, index: number): ChainRow | null {
+export function toChainRow(
+  part: MessagePart,
+  index: number,
+  locale: Locale = "en",
+): ChainRow | null {
   const narration = narrationText(part);
   if (narration !== null) {
     return {
@@ -272,7 +295,14 @@ export function toChainRow(part: MessagePart, index: number): ChainRow | null {
     return {
       key: `reasoning-${index}`,
       category: "reasoning",
-      text: isStreaming ? "Thinking…" : "Thought",
+      text:
+        locale === "zh-CN"
+          ? isStreaming
+            ? "正在思考…"
+            : "思考过程"
+          : isStreaming
+            ? "Thinking…"
+            : "Thought",
       state: isStreaming ? "running" : "done",
       reasoningText:
         "text" in part && typeof part.text === "string" ? part.text : undefined,
@@ -300,7 +330,7 @@ export function toChainRow(part: MessagePart, index: number): ChainRow | null {
       : tool;
 
     const providerIconSrc = getProviderIconSrc(stableTool);
-    const requiredActionLabel = actionLabel(toolName, tool);
+    const requiredActionLabel = actionLabel(toolName, tool, locale);
 
     const data = {
       tool: toolName,
@@ -311,6 +341,7 @@ export function toChainRow(part: MessagePart, index: number): ChainRow | null {
     const catalogLabel = getRowCatalogLabel(
       { key: tool.toolCallId, category: "other", text: "", state, ...data },
       { displayName: tool.title, output: tool.output },
+      locale,
     );
     if (catalogLabel) {
       return {
@@ -329,7 +360,7 @@ export function toChainRow(part: MessagePart, index: number): ChainRow | null {
     return {
       key: tool.toolCallId,
       category,
-      text: getAnimationText(stableTool, category),
+      text: getAnimationText(stableTool, category, locale),
       state,
       detail,
       providerIconSrc,
@@ -340,46 +371,12 @@ export function toChainRow(part: MessagePart, index: number): ChainRow | null {
   return null;
 }
 
-const CATEGORY_SUMMARY: Record<ChainRow["category"], string> = {
-  reasoning: "thought it through",
-  bash: "ran commands",
-  web: "searched the web",
-  browser: "browsed the web",
-  "file-read": "read files",
-  "file-write": "wrote files",
-  "file-delete": "deleted files",
-  "file-list": "listed files",
-  search: "searched files",
-  edit: "edited files",
-  todo: "updated tasks",
-  compaction: "summarized context",
-  agent: "delegated work",
-  "agent-build": "built workflows",
-  plan: "planned the approach",
-  block: "ran blocks",
-  memory: "managed memory",
-  folder: "organized folders",
-  schedule: "managed schedules",
-  trigger: "managed triggers",
-  preset: "managed presets",
-  chat: "posted updates",
-  mcp: "used MCP tools",
-  docs: "read the docs",
-  skill: "used skills",
-  integration: "connected integrations",
-  feature: "handled feature requests",
-  question: "asked you questions",
-  team: "changed the team",
-  info: "checked your account",
-  narration: "",
-  other: "used tools",
-};
-
 // Streaming → live label of the running row; settled → verb-chain like
 // "Updated tasks, searched the web, ran commands".
 export function getChainHeading(
   rows: ChainRow[],
   isStreaming: boolean,
+  locale: Locale = "en",
 ): string {
   if (isStreaming) {
     const running = rows.findLast((r) => r.state === "running");
@@ -396,14 +393,16 @@ export function getChainHeading(
   const seenPhrases = new Set<string>();
   for (const row of rows) {
     if (row.category === "narration") continue;
-    const phrase = CATEGORY_SUMMARY[row.category];
+    const phrase = getCategorySummary(row.category, locale);
     if (!seenPhrases.has(phrase)) {
       seenPhrases.add(phrase);
       phrases.push(phrase);
     }
     if (phrases.length === 3) break;
   }
-  const joined = phrases.join(", ") || "Working…";
+  const joined =
+    phrases.join(locale === "zh-CN" ? "，" : ", ") ||
+    (locale === "zh-CN" ? "处理中…" : "Working…");
   return joined.charAt(0).toUpperCase() + joined.slice(1);
 }
 

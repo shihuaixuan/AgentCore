@@ -3,8 +3,10 @@
 import { useMemo } from "react";
 import { useGetV1ListExecutionSchedulesForAGraph } from "@/app/api/__generated__/endpoints/schedules/schedules";
 import { okData } from "@/app/api/helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function useSelectedScheduleView(graphId: string, scheduleId: string) {
+  const { t } = useTranslation();
   const schedulesQuery = useGetV1ListExecutionSchedulesForAGraph(graphId, {
     query: {
       enabled: !!graphId,
@@ -19,7 +21,7 @@ export function useSelectedScheduleView(graphId: string, scheduleId: string) {
 
   const httpError =
     schedulesQuery.isSuccess && !schedule
-      ? { status: 404, statusText: "Not found" }
+      ? { status: 404, statusText: t("Not found", "未找到") }
       : undefined;
 
   return {

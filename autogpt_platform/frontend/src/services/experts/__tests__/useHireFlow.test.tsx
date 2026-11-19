@@ -11,6 +11,7 @@ import { act, renderHook, screen, waitFor } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
 import { type ReactNode, useState } from "react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const captureMock = vi.hoisted(() => vi.fn());
 const pushMock = vi.hoisted(() => vi.fn());
@@ -98,6 +99,26 @@ afterEach(() => {
 });
 
 describe("useHireFlow", () => {
+  test("localizes the hire notification without translating the expert name", async () => {
+    function ChineseWrapper({ children }: Props) {
+      return (
+        <LanguageProvider>
+          <Wrapper>{children}</Wrapper>
+        </LanguageProvider>
+      );
+    }
+    const { result } = renderHook(
+      () => useHireFlow({ ...mariaTemplate, voice_samples: [] }),
+      { wrapper: ChineseWrapper },
+    );
+    await act(async () => {
+      await result.current.hire();
+    });
+    expect(await screen.findByText("Maria 已加入你的团队")).toBeDefined();
+    expect(
+      screen.getByRole("link", { name: "查看团队" }).getAttribute("href"),
+    ).toBe("/team");
+  });
   beforeEach(() => {
     captureMock.mockReset();
     pushMock.mockReset();

@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { useEffect, useInsertionEffect, useRef, useState } from "react";
 import { PANEL_RESERVED_WIDTH } from "../store";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   /** CSS selector for the panel element this handle resizes (e.g. "[data-artifact-panel]"). */
@@ -49,6 +50,7 @@ export function PanelResizeHandle({
   reservedWidth = PANEL_RESERVED_WIDTH,
   onResizingChange,
 }: Props) {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const startXRef = useRef(0);
   const startWidthRef = useRef(0);
@@ -156,7 +158,7 @@ export function PanelResizeHandle({
     <div
       role="separator"
       aria-orientation="vertical"
-      aria-label="Resize panel"
+      aria-label={t("Resize panel", "调整面板大小")}
       className="group absolute top-0 left-0 z-10 flex h-full w-3 -translate-x-1/2 cursor-col-resize touch-none items-stretch justify-center"
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}

@@ -1,5 +1,6 @@
 import { ExpertActivityDay } from "@/app/api/__generated__/models/expertActivityDay";
 import { format, subDays } from "date-fns";
+import type { Locale } from "@/lib/i18n/locale";
 
 export const DAYS_PER_WEEK = 7;
 const DAYS_PER_MONTH = 30;
@@ -70,7 +71,18 @@ function pluralize(count: number, noun: string) {
   return `${count} ${noun}${count === 1 ? "" : "s"}`;
 }
 
-export function describeActivityDay(day: ExpertActivityDay) {
+export function describeActivityDay(
+  day: ExpertActivityDay,
+  locale: Locale = "en",
+) {
+  if (locale === "zh-CN") {
+    const when = format(parseDayKey(toDayKey(day.day)), "M月d日");
+    const parts = [
+      day.sessions > 0 ? `${day.sessions.toLocaleString(locale)} 次会话` : null,
+      day.runs > 0 ? `${day.runs.toLocaleString(locale)} 次运行` : null,
+    ].filter(Boolean);
+    return parts.length > 0 ? `${when}：${parts.join("、")}` : `${when}无活动`;
+  }
   const when = format(parseDayKey(toDayKey(day.day)), "MMM d");
   const parts = [
     day.sessions > 0 ? pluralize(day.sessions, "session") : null,
@@ -83,7 +95,10 @@ export function describeActivityDay(day: ExpertActivityDay) {
 
 /** Cells in column-major order for a Sunday-first week grid: blank leading
  *  cells pad the first column so every column starts on a Sunday. */
-export function getActivityCells(days: ExpertActivityDay[]): ActivityCell[] {
+export function getActivityCells(
+  days: ExpertActivityDay[],
+  locale: Locale = "en",
+): ActivityCell[] {
   if (days.length === 0) return [];
   const max = Math.max(...days.map(getActivityTotal));
   const leadingBlanks = parseDayKey(toDayKey(days[0].day)).getDay();
@@ -97,12 +112,15 @@ export function getActivityCells(days: ExpertActivityDay[]): ActivityCell[] {
     ...days.map((day) => ({
       key: toDayKey(day.day),
       level: getActivityLevel(getActivityTotal(day), max),
-      label: describeActivityDay(day),
+      label: describeActivityDay(day, locale),
     })),
   ];
 }
 
-export function getActivitySummary(days: ExpertActivityDay[]) {
+export function getActivitySummary(
+  days: ExpertActivityDay[],
+  locale: Locale = "en",
+) {
   const recent = days.slice(-RECENT_WINDOW_DAYS);
   const sessions = days.reduce((total, day) => total + day.sessions, 0);
   const runs = days.reduce((total, day) => total + day.runs, 0);
@@ -110,14 +128,25 @@ export function getActivitySummary(days: ExpertActivityDay[]) {
   return {
     isActive: recent.some((day) => getActivityTotal(day) > 0),
     rangeLabel:
-      days.length >= DAYS_PER_YEAR
-        ? "last year"
-        : days.length >= THREE_MONTH_DAYS
-          ? "last 3 months"
-          : days.length >= DAYS_PER_MONTH
-            ? "last month"
-            : `last ${weeks} weeks`,
-    totalsLabel: `${pluralize(sessions, "session")} · ${pluralize(runs, "run")}`,
+      locale === "zh-CN"
+        ? days.length >= DAYS_PER_YEAR
+          ? "最近一年"
+          : days.length >= THREE_MONTH_DAYS
+            ? "最近 3 个月"
+            : days.length >= DAYS_PER_MONTH
+              ? "最近一个月"
+              : `最近 ${weeks} 周`
+        : days.length >= DAYS_PER_YEAR
+          ? "last year"
+          : days.length >= THREE_MONTH_DAYS
+            ? "last 3 months"
+            : days.length >= DAYS_PER_MONTH
+              ? "last month"
+              : `last ${weeks} weeks`,
+    totalsLabel:
+      locale === "zh-CN"
+        ? `${sessions.toLocaleString(locale)} 次会话 · ${runs.toLocaleString(locale)} 次运行`
+        : `${pluralize(sessions, "session")} · ${pluralize(runs, "run")}`,
   };
 }
 

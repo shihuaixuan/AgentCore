@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { PLATFORM_OPTIONS } from "./helpers";
 
@@ -14,6 +17,7 @@ interface Props {
 }
 
 export function PlatformBadge({ platform }: Props) {
+  const { t } = useTranslation();
   if (!platform) return null;
   const key = platform.toUpperCase();
   const label = PLATFORM_LABELS[key] ?? platform;
@@ -22,7 +26,7 @@ export function PlatformBadge({ platform }: Props) {
     <span className="inline-flex items-center gap-2 whitespace-nowrap">
       <Image
         src={`/integrations/${key.toLowerCase()}.png`}
-        alt={`${label} icon`}
+        alt={t(`${label} icon`, `${label} 图标`)}
         width={16}
         height={16}
         className="rounded-sm"

@@ -30,7 +30,10 @@ export function RelatedAccountsSection({ user }: Props) {
   return (
     <AdminSection
       title={t("Related accounts", "关联账户")}
-      description={t("Other accounts that signed in from the same addresses or use the same email domain.", "曾从相同地址登录或使用相同邮箱域名的其他账户。")}
+      description={t(
+        "Other accounts that signed in from the same addresses or use the same email domain.",
+        "曾从相同地址登录或使用相同邮箱域名的其他账户。",
+      )}
     >
       {isLoading ? (
         <ReportLoading />
@@ -45,7 +48,9 @@ export function RelatedAccountsSection({ user }: Props) {
           <DomainLine report={report} signedInUserId={signedInUser?.id} />
           {report.related.length === 0 ? (
             <Text variant="small" tone="muted">
-              {t(...(getNoRelatedMessage(report).split("|") as [string, string]))}
+              {t(
+                ...(getNoRelatedMessage(report).split("|") as [string, string]),
+              )}
             </Text>
           ) : (
             <>
@@ -64,17 +69,18 @@ export function RelatedAccountsSection({ user }: Props) {
                     size="small"
                     onClick={() => setShowAll(true)}
                   >
-                    {t("Show", "再显示")} {report.related.length - SHOWN_AT_FIRST} {t("more", "个")}
+                    {t("Show", "再显示")}{" "}
+                    {report.related.length - SHOWN_AT_FIRST} {t("more", "个")}
                   </Button>
                 </div>
               ) : null}
               <div className="flex flex-col items-end gap-2 border-t border-border-base pt-3">
                 {report.related_total > report.related.length ? (
                   <Text variant="small" tone="muted">
-                    Showing {report.related.length.toLocaleString("en-GB")} of{" "}
-                    {report.related_total.toLocaleString("en-GB")}. Ban all
-                    covers these {report.related.length.toLocaleString("en-GB")}
-                    .
+                    {t(
+                      `Showing ${report.related.length.toLocaleString("en-GB")} of ${report.related_total.toLocaleString("en-GB")}. Ban all covers these ${report.related.length.toLocaleString("en-GB")}.`,
+                      `显示 ${report.related_total.toLocaleString("zh-CN")} 个中的 ${report.related.length.toLocaleString("zh-CN")} 个账户。“全部封禁”仅涵盖这些账户。`,
+                    )}
                   </Text>
                 ) : null}
                 <BanAllDialog

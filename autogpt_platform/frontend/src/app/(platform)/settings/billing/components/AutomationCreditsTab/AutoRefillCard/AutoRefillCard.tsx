@@ -50,8 +50,8 @@ export function AutoRefillCard({ index = 0 }: Props) {
           <Text variant="body" as="span" tone="muted">
             {isEnabled && config
               ? t(
-                  `Refills ${(config.amount / 100).toFixed(0)} when balance drops below ${(config.threshold / 100).toFixed(0)}.`,
-                  `余额低于 ${(config.threshold / 100).toFixed(0)} 时自动充值 ${(config.amount / 100).toFixed(0)}。`,
+                  `Refills $${(config.amount / 100).toFixed(0)} when balance drops below $${(config.threshold / 100).toFixed(0)}.`,
+                  `余额低于 $${(config.threshold / 100).toFixed(0)} 时自动充值 $${(config.amount / 100).toFixed(0)}。`,
                 )
               : t(
                   "Top up automatically when your balance gets low.",

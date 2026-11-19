@@ -6,6 +6,7 @@ import { okData } from "@/app/api/helpers";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import type { BlockCostEstimatesResponse } from "@/app/api/__generated__/models/blockCostEstimatesResponse";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   dateInputToUtcIso,
   dateInputToUtcIsoEnd,
@@ -14,6 +15,7 @@ import {
 } from "../helpers";
 
 export function useBlockCostEstimates() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [start, setStart] = useState(defaultStartDate);
   const [end, setEnd] = useState(defaultEndDate);
@@ -31,8 +33,11 @@ export function useBlockCostEstimates() {
   async function fetchEstimates() {
     if (!start || !end) {
       toast({
-        title: "Pick a date range",
-        description: "Both start and end dates are required.",
+        title: t("Pick a date range", "请选择日期范围"),
+        description: t(
+          "Both start and end dates are required.",
+          "开始和结束日期均为必填项。",
+        ),
         variant: "destructive",
       });
       return;
@@ -43,8 +48,11 @@ export function useBlockCostEstimates() {
       const endIso = dateInputToUtcIsoEnd(end);
       if (!startIso || !endIso) {
         toast({
-          title: "Invalid date range",
-          description: "Could not parse the selected start/end as UTC.",
+          title: t("Invalid date range", "日期范围无效"),
+          description: t(
+            "Could not parse the selected start/end as UTC.",
+            "无法将所选开始和结束时间解析为 UTC。",
+          ),
           variant: "destructive",
         });
         return;
@@ -58,16 +66,22 @@ export function useBlockCostEstimates() {
       const payload = okData(response);
       if (!payload) {
         toast({
-          title: "Aggregation failed",
-          description: "Unexpected response shape from the export endpoint.",
+          title: t("Aggregation failed", "汇总失败"),
+          description: t(
+            "Unexpected response shape from the export endpoint.",
+            "导出接口返回了非预期的数据结构。",
+          ),
           variant: "destructive",
         });
         return;
       }
       setData(payload);
       toast({
-        title: "Aggregation complete",
-        description: `${payload.total_rows} dynamic-cost blocks aggregated.`,
+        title: t("Aggregation complete", "汇总完成"),
+        description: t(
+          `${payload.total_rows} dynamic-cost blocks aggregated.`,
+          `已汇总 ${payload.total_rows} 个动态成本模块。`,
+        ),
       });
     } catch (err) {
       if (err instanceof ApiError) {
@@ -75,14 +89,18 @@ export function useBlockCostEstimates() {
           (err.response as { detail?: string } | undefined)?.detail ??
           err.message;
         toast({
-          title: err.status === 400 ? "Window too large" : "Aggregation failed",
+          title:
+            err.status === 400
+              ? t("Window too large", "时间范围过大")
+              : t("Aggregation failed", "汇总失败"),
           description: detail,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Aggregation failed",
-          description: err instanceof Error ? err.message : "Unknown error",
+          title: t("Aggregation failed", "汇总失败"),
+          description:
+            err instanceof Error ? err.message : t("Unknown error", "未知错误"),
           variant: "destructive",
         });
       }

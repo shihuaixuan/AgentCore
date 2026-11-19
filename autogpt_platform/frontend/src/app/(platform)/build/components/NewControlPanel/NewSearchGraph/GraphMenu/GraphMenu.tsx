@@ -20,8 +20,10 @@ import { GraphSearchContent } from "../GraphMenuContent/GraphContent";
 import { useGraphMenu } from "./useGraphMenu";
 import { Search01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function GraphSearchMenu() {
+  const { t } = useTranslation();
   const nodes = useNodeStore((state) => state.nodes);
   const { graphSearchOpen, setGraphSearchOpen } = useControlPanelStore();
   const reactFlow = useReactFlow();
@@ -70,7 +72,7 @@ export function GraphSearchMenu() {
           </PopoverTrigger>
         </TooltipTrigger>
         <TooltipContent side="right">
-          Search Workflow ({isMac ? "Cmd" : "Ctrl"}+F)
+          {t("Search Workflow", "搜索工作流")} ({isMac ? "Cmd" : "Ctrl"}+F)
         </TooltipContent>
       </Tooltip>
 

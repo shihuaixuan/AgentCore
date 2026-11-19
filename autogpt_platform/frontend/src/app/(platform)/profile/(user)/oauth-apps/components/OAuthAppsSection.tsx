@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Badge } from "@/components/atoms/Badge/Badge";
 import { useOAuthApps } from "./useOAuthApps";
@@ -13,6 +14,7 @@ import {
 import { Icon } from "@/components/atoms/Icon/Icon";
 
 export function OAuthAppsSection() {
+  const { t, locale } = useTranslation();
   const {
     oauthApps,
     isLoading,
@@ -47,11 +49,16 @@ export function OAuthAppsSection() {
   if (oauthApps.length === 0) {
     return (
       <div className="py-8 text-center text-foreground-tertiary">
-        <p>You don&apos;t have any OAuth applications.</p>
+        <p>
+          {t("You don't have any OAuth applications.", "你还没有 OAuth 应用。")}
+        </p>
         <p className="mt-2 text-body">
-          OAuth applications can currently <strong>not</strong> be registered
-          via the API. Contact the system administrator to request an OAuth app
-          registration.
+          {t("OAuth applications can currently", "目前")}{" "}
+          <strong>{t("not", "无法")}</strong>{" "}
+          {t(
+            "be registered via the API. Contact the system administrator to request an OAuth app registration.",
+            "通过 API 注册 OAuth 应用。请联系系统管理员申请注册。",
+          )}
         </p>
       </div>
     );
@@ -72,7 +79,7 @@ export function OAuthAppsSection() {
                 // eslint-disable-next-line @next/next/no-img-element -- the logo URL can be on any host
                 <img
                   src={app.logo_url}
-                  alt={`${app.name} logo`}
+                  alt={t(`${app.name} logo`, `${app.name} 标志`)}
                   className="h-full w-full object-cover"
                 />
               ) : (
@@ -86,7 +93,9 @@ export function OAuthAppsSection() {
                   className="ml-2"
                   variant={app.is_active ? "success" : "error"}
                 >
-                  {app.is_active ? "Active" : "Disabled"}
+                  {app.is_active
+                    ? t("Active", "已启用")
+                    : t("Disabled", "已禁用")}
                 </Badge>
               </div>
               {app.description && (
@@ -100,7 +109,7 @@ export function OAuthAppsSection() {
           {/* Client ID */}
           <div>
             <span className="text-caption font-medium text-foreground-tertiary">
-              Client ID
+              {t("Client ID", "客户端 ID")}
             </span>
             <code
               data-testid="oauth-app-client-id"
@@ -113,7 +122,8 @@ export function OAuthAppsSection() {
           {/* Footer: Created date and Actions */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4">
             <span className="text-caption text-foreground-tertiary">
-              Created {new Date(app.created_at).toLocaleDateString()}
+              {t("Created", "创建于")}{" "}
+              {new Date(app.created_at).toLocaleDateString(locale)}
             </span>
             <div className="flex items-center gap-3">
               <Button
@@ -123,7 +133,7 @@ export function OAuthAppsSection() {
                 loading={updatingAppId === app.id}
                 leftIcon={<Icon icon={PowerIcon} className="h-4 w-4" />}
               >
-                {app.is_active ? "Disable" : "Enable"}
+                {app.is_active ? t("Disable", "禁用") : t("Enable", "启用")}
               </Button>
               <input
                 type="file"
@@ -141,7 +151,9 @@ export function OAuthAppsSection() {
                 loading={uploadingAppId === app.id}
                 leftIcon={<Icon icon={Upload01Icon} className="h-4 w-4" />}
               >
-                {app.logo_url ? "Change " : "Upload "}Logo
+                {app.logo_url
+                  ? t("Change Logo", "更换标志")
+                  : t("Upload Logo", "上传标志")}
               </Button>
             </div>
           </div>

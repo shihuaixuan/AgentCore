@@ -1,5 +1,6 @@
 import { postV2CancelSessionTask } from "@/app/api/__generated__/endpoints/chat/chat";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { UIMessage } from "ai";
 import { resolveInProgressTools } from "./helpers";
 
@@ -40,6 +41,7 @@ export function useCopilotStop({
   isUserStoppingRef,
   setIsUserStopping,
 }: UseCopilotStopArgs) {
+  const { t } = useTranslation();
   async function stop() {
     isUserStoppingRef.current = true;
     setIsUserStopping(true);
@@ -48,27 +50,38 @@ export function useCopilotStop({
     if (!sessionId) return;
     try {
       const res = await postV2CancelSessionTask(sessionId);
-      if (
-        res.status === 200 &&
-        "reason" in res.data &&
-        res.data.reason === "cancel_published_not_confirmed"
-      ) {
+      if (isCancellationPending(res)) {
         toast({
-          title: "Stop may take a moment",
-          description:
+          title: t("Stop may take a moment", "停止任务可能需要一点时间"),
+          description: t(
             "The cancel was sent but not yet confirmed. The task should stop shortly.",
+            "已发送取消请求，但尚未确认。任务应会很快停止。",
+          ),
         });
       }
     } catch {
       toast({
-        title: "Could not stop the task",
-        description: "The task may still be running in the background.",
+        title: t("Could not stop the task", "无法停止任务"),
+        description: t(
+          "The task may still be running in the background.",
+          "任务可能仍在后台运行。",
+        ),
         variant: "destructive",
       });
     }
   }
 
   return stop;
+}
+
+function isCancellationPending(
+  res: Awaited<ReturnType<typeof postV2CancelSessionTask>>,
+) {
+  return (
+    res.status === 200 &&
+    "reason" in res.data &&
+    res.data.reason === "cancel_published_not_confirmed"
+  );
 }
 
 /**

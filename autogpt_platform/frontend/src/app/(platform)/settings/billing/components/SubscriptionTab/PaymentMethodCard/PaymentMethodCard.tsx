@@ -40,7 +40,10 @@ export function PaymentMethodCard({ index = 0 }: Props) {
               {t("Manage payment method", "管理支付方式")}
             </Text>
             <Text variant="small" as="span" tone="muted">
-              Open the Stripe portal to update your card or download invoices.
+              {t(
+                "Open the Stripe portal to update your card or download invoices.",
+                "打开 Stripe 门户以更新银行卡或下载发票。",
+              )}
             </Text>
           </div>
         </div>

@@ -13,6 +13,12 @@ describe("maskAPIKey", () => {
 });
 
 describe("formatLastUsed", () => {
+  test("localizes missing and relative usage dates", () => {
+    expect(formatLastUsed(null, "zh-CN")).toBe("从未使用");
+    expect(formatLastUsed(new Date(Date.now() - 300_000), "zh-CN")).toBe(
+      "上次使用：5 分钟前",
+    );
+  });
   test("returns 'Never used' when last used is null", () => {
     expect(formatLastUsed(null)).toBe("Never used");
   });

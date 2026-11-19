@@ -7,9 +7,11 @@ import { APIKeyPermission } from "@/app/api/__generated__/models/aPIKeyPermissio
 import { CreateAPIKeyResponse } from "@/app/api/__generated__/models/createAPIKeyResponse";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { getQueryClient } from "@/lib/react-query/queryClient";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useState } from "react";
 
 export const useAPIkeysModals = () => {
+  const { t } = useTranslation();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isKeyDialogOpen, setIsKeyDialogOpen] = useState(false);
   const [keyState, setKeyState] = useState({
@@ -49,8 +51,11 @@ export const useAPIkeysModals = () => {
       setIsKeyDialogOpen(true);
     } catch {
       toast({
-        title: "Error",
-        description: "Failed to create AutoGPT Platform API key",
+        title: t("Error", "错误"),
+        description: t(
+          "Failed to create AutoGPT Platform API key",
+          "创建 AutoGPT 平台 API 密钥失败",
+        ),
         variant: "destructive",
       });
     }
@@ -59,8 +64,11 @@ export const useAPIkeysModals = () => {
   const handleCopyKey = () => {
     navigator.clipboard.writeText(keyState.newApiKey);
     toast({
-      title: "Copied",
-      description: "AutoGPT Platform API key copied to clipboard",
+      title: t("Copied", "已复制"),
+      description: t(
+        "AutoGPT Platform API key copied to clipboard",
+        "AutoGPT 平台 API 密钥已复制到剪贴板",
+      ),
     });
   };
 

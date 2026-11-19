@@ -3,6 +3,7 @@
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { isKey } from "@/lib/keyboard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import type { MultiAnswer } from "../../tools/clarifying-questions";
 import {
@@ -33,6 +34,7 @@ export const QuestionMultiAnswerField = forwardRef<
   { options, value, labelId, autoFocus, onChange, onSubmit },
   ref,
 ) {
+  const { t } = useTranslation();
   const listRef = useRef<QuestionCheckboxListHandle>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   // The ticks and the typed text arrive in separate slots and stay that way:
@@ -98,7 +100,7 @@ export const QuestionMultiAnswerField = forwardRef<
             e.preventDefault();
             onSubmit();
           }}
-          placeholder="Add your own answer"
+          placeholder={t("Add your own answer", "添加你的答案")}
           className="resize-none rounded-2xl bg-surface-muted px-4 py-3 text-body-lg leading-relaxed text-foreground-emphasis ring-1 ring-separator transition-shadow placeholder:text-foreground-subtle focus:ring-border-strong focus:outline-none"
         />
       ) : (
@@ -111,7 +113,7 @@ export const QuestionMultiAnswerField = forwardRef<
           className="flex items-center gap-2.5 rounded-2xl border border-dashed border-border-base px-4 py-3 text-left text-body-lg text-foreground-tertiary transition-colors hover:border-border-strong hover:text-foreground-body"
         >
           <Icon icon={PencilEdit02Icon} size={16} className="shrink-0" />
-          Type something…
+          {t("Type something…", "输入其他内容…")}
         </button>
       )}
     </div>

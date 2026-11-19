@@ -44,7 +44,7 @@ export function SelectionBar({
     >
       <div className="flex items-center gap-3">
         <Text variant="body-medium" as="span" tone="primary">
-          {count} selected
+          {t(`${count} selected`, `已选择 ${count} 项`)}
         </Text>
         {count < totalCount ? (
           <button
@@ -79,7 +79,7 @@ export function SelectionBar({
           data-testid="artifacts-selection-delete"
         >
           <Icon icon={Delete02Icon} size={14} />
-          {isDeleting ? "Deleting…" : t("Delete", "删除")}
+          {isDeleting ? t("Deleting…", "正在删除…") : t("Delete", "删除")}
         </Button>
         <button
           type="button"

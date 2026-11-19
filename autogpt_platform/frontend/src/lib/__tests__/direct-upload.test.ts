@@ -187,6 +187,20 @@ describe("uploadOAuthAppLogoDirect", () => {
 });
 
 describe("uploadFileDirect (workspace)", () => {
+  it("localizes generated size errors and leaves backend errors unchanged", async () => {
+    mockFetchOnce({ ok: false, status: 413, statusText: "Payload Too Large" });
+    await expect(
+      uploadFileDirect(makeFile(10), undefined, "zh-CN"),
+    ).rejects.toThrow("文件过大，请选择较小的文件。");
+    mockFetchOnce({
+      ok: false,
+      status: 400,
+      text: () => JSON.stringify({ detail: "Raw provider message" }),
+    });
+    await expect(
+      uploadFileDirect(makeFile(10), undefined, "zh-CN"),
+    ).rejects.toThrow("Raw provider message");
+  });
   it("hits the workspace endpoint with overwrite and session params", async () => {
     const fetchMock = mockFetchOnce({
       ok: true,

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Text } from "@/components/atoms/Text/Text";
 import { NotificationSettingsControls } from "@/components/layout/NotificationSettings/NotificationSettingsControls";
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function BrowserNotificationsCard({ index = 0 }: Props) {
+  const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   return (
@@ -28,13 +30,15 @@ export function BrowserNotificationsCard({ index = 0 }: Props) {
       <div className="flex h-fit flex-col gap-4 rounded-large border border-border-base bg-surface px-4 py-3 shadow-message-table">
         <div className="flex flex-col gap-1">
           <Text variant="body-medium" as="span">
-            Browser
+            {t("Browser", "浏览器")}
           </Text>
           {/* Unlike the email settings above, these live in this browser's
               local storage — they don't follow the account to another device. */}
           <Text variant="small" as="span" tone="muted">
-            Set per device. Turning these on here won&apos;t carry over to your
-            phone or another browser.
+            {t(
+              "Set per device. Turning these on here won't carry over to your phone or another browser.",
+              "按设备设置。在此处开启不会同步到手机或其他浏览器。",
+            )}
           </Text>
         </div>
 

@@ -251,8 +251,11 @@ export function SubSessionCard({
         {elapsed !== null && (
           <span className="shrink-0 text-caption-sm leading-inherit text-foreground-subtle">
             {elapsed >= 60
-              ? `${Math.floor(elapsed / 60)}m ${Math.round(elapsed % 60)}s`
-              : `${Math.round(elapsed)}s`}
+              ? t(
+                  `${Math.floor(elapsed / 60)}m ${Math.round(elapsed % 60)}s`,
+                  `${Math.floor(elapsed / 60)} 分 ${Math.round(elapsed % 60)} 秒`,
+                )
+              : t(`${Math.round(elapsed)}s`, `${Math.round(elapsed)} 秒`)}
           </span>
         )}
         {status && <StatusPill status={status} />}

@@ -16,21 +16,21 @@ export interface UsageWindowView {
 }
 
 export function useAutopilotUsageCard() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { experience, usage, trial, isLoading, isError, retry } =
     useUsageExperience();
   const today: UsageWindowView | null = usage?.daily
     ? {
         label: t("Today", "今天"),
         percent: usage.daily.percent_used,
-        ...formatRelativeReset(usage.daily.resets_at),
+        ...formatRelativeReset(usage.daily.resets_at, locale),
       }
     : null;
   const week: UsageWindowView | null = usage?.weekly
     ? {
         label: t("This week", "本周"),
         percent: usage.weekly.percent_used,
-        ...formatRelativeReset(usage.weekly.resets_at),
+        ...formatRelativeReset(usage.weekly.resets_at, locale),
       }
     : null;
   const showTrialWindow =
@@ -41,8 +41,8 @@ export function useAutopilotUsageCard() {
       ? {
           label: t("Trial usage", "试用用量"),
           percent: experience.trialPercent,
-          prefix: "Trial ends",
-          value: formatShortDate(trial?.ends_at),
+          prefix: t("Trial ends", "试用结束"),
+          value: formatShortDate(trial?.ends_at, locale),
         }
       : null;
   const featured = showTrialWindow
@@ -54,7 +54,15 @@ export function useAutopilotUsageCard() {
   const status =
     USAGE_STATUS[getUsageStatus(getFeaturedUsagePercent(experience, usage))];
   return {
-    status,
+    status: {
+      ...status,
+      label: t(
+        status.label,
+        { reached: "额度已用尽", low: "额度即将用尽", plenty: "剩余额度充足" }[
+          getUsageStatus(getFeaturedUsagePercent(experience, usage))
+        ],
+      ),
+    },
     featured,
     secondary,
     today,

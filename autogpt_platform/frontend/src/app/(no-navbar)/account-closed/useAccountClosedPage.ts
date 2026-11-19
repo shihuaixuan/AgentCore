@@ -4,6 +4,7 @@ import {
 } from "@/app/api/__generated__/endpoints/account/account";
 import { getV1GetUserTimezone } from "@/app/api/__generated__/endpoints/auth/auth";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -16,6 +17,7 @@ import {
 } from "./helpers";
 
 export function useAccountClosedPage() {
+  const { locale } = useTranslation();
   const router = useRouter();
   const [keptAt, setKeptAt] = useState<number | null>(null);
   const [isTooLate, setIsTooLate] = useState(false);
@@ -90,7 +92,10 @@ export function useAccountClosedPage() {
         setIsTooLate(true);
         return;
       }
-      toast({ title: getKeepErrorMessage(error), variant: "destructive" });
+      toast({
+        title: getKeepErrorMessage(error, locale),
+        variant: "destructive",
+      });
       return;
     }
     setKeptAt(Date.now());
@@ -109,7 +114,7 @@ export function useAccountClosedPage() {
 
   return {
     view,
-    eraseDate: getEraseDateLabel(status.data?.erase_after),
+    eraseDate: getEraseDateLabel(status.data?.erase_after, locale),
     isReady,
     isKeeping: isPending,
     isLeaving,

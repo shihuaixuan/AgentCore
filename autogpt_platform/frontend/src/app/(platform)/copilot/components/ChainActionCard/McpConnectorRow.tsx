@@ -19,6 +19,7 @@ import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
 import { useId, useState } from "react";
 import type { McpConnectorRequest } from "./helpers";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 function hostOf(serverUrl: string): string | null {
   try {
@@ -32,6 +33,7 @@ function hostOf(serverUrl: string): string | null {
  *  ConnectorRow but connects through the MCP OAuth/token flow the hidden
  *  MCPSetupCard drives via the request callbacks. */
 export function McpConnectorRow({ request }: { request: McpConnectorRequest }) {
+  const { t } = useTranslation();
   const hintId = useId();
   const errorId = useId();
   const [token, setToken] = useState("");
@@ -50,7 +52,7 @@ export function McpConnectorRow({ request }: { request: McpConnectorRequest }) {
     .toLowerCase();
 
   function submitCredential() {
-    const message = validateMCPAuthCredential(token, authScheme);
+    const message = validateMCPAuthCredential(token, authScheme, t);
     setValidationError(message);
     if (message) return;
 
@@ -89,7 +91,7 @@ export function McpConnectorRow({ request }: { request: McpConnectorRequest }) {
         {request.connected ? (
           <span className="flex shrink-0 items-center gap-1.5 text-body font-medium text-foreground-tertiary">
             <Icon icon={CheckmarkCircle02Icon} size={16} />
-            Connected
+            {t("Connected", "已连接")}
           </span>
         ) : request.grantable ? (
           <Button
@@ -99,7 +101,9 @@ export function McpConnectorRow({ request }: { request: McpConnectorRequest }) {
             disabled={request.granting || request.loading}
             onClick={request.onGrant}
           >
-            {request.granting ? "Granting…" : "Grant access"}
+            {request.granting
+              ? t("Granting…", "正在授权…")
+              : t("Grant access", "授予访问权限")}
           </Button>
         ) : (
           <Button
@@ -109,7 +113,9 @@ export function McpConnectorRow({ request }: { request: McpConnectorRequest }) {
             disabled={request.loading}
             onClick={request.onConnect}
           >
-            {request.loading ? "Connecting…" : "Connect"}
+            {request.loading
+              ? t("Connecting…", "正在连接…")
+              : t("Connect", "连接")}
           </Button>
         )}
       </div>
@@ -132,7 +138,7 @@ export function McpConnectorRow({ request }: { request: McpConnectorRequest }) {
             selectClassName="rounded-xl bg-surface-muted px-3 py-2 text-body text-foreground-emphasis ring-1 ring-separator"
           />
           <Text variant="small-tight" tone="muted" id={hintId}>
-            {mcpAuthTokenHint(authScheme)}
+            {mcpAuthTokenHint(authScheme, t)}
           </Text>
           <div className="flex gap-2">
             <input
@@ -140,8 +146,11 @@ export function McpConnectorRow({ request }: { request: McpConnectorRequest }) {
               aria-describedby={
                 validationError ? `${hintId} ${errorId}` : hintId
               }
-              aria-label={`${mcpAuthTokenLabel(authScheme)} for ${request.service}`}
-              placeholder={mcpAuthTokenPlaceholder(authScheme)}
+              aria-label={t(
+                `${mcpAuthTokenLabel(authScheme)} for ${request.service}`,
+                `${request.service} 的${mcpAuthTokenLabel(authScheme, t)}`,
+              )}
+              placeholder={mcpAuthTokenPlaceholder(authScheme, t)}
               value={token}
               onChange={(e) => {
                 const nextToken = e.target.value;
@@ -163,7 +172,7 @@ export function McpConnectorRow({ request }: { request: McpConnectorRequest }) {
               disabled={request.loading || !token.trim()}
               onClick={submitCredential}
             >
-              Use Token
+              {t("Use Token", "使用令牌")}
             </Button>
           </div>
           {validationError && (

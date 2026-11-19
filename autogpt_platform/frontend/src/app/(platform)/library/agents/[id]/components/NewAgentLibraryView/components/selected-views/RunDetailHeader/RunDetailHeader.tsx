@@ -5,6 +5,7 @@ import { GraphExecution } from "@/app/api/__generated__/models/graphExecution";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { Text } from "@/components/atoms/Text/Text";
 import { formatDistanceToNow, formatDistanceStrict } from "date-fns";
+import { zhCN } from "date-fns/locale";
 import { AGENT_LIBRARY_SECTION_PADDING_X } from "../../../helpers";
 import { RunStatusBadge } from "../SelectedRunView/components/RunStatusBadge";
 import { FlaskConicalIcon, TimeScheduleIcon } from "@hugeicons/core-free-icons";
@@ -21,7 +22,8 @@ type Props = {
 };
 
 export function RunDetailHeader({ agent, run, scheduleRecurrence }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const dateLocale = locale === "zh-CN" ? zhCN : undefined;
   const isBillingEnabled = useIsBillingEnabled();
   return (
     <div className={AGENT_LIBRARY_SECTION_PADDING_X}>
@@ -39,7 +41,7 @@ export function RunDetailHeader({ agent, run, scheduleRecurrence }: Props) {
                     <div className="inline-flex items-center gap-1 rounded-md bg-warning-surface p-1 text-warning-foreground">
                       <Icon icon={FlaskConicalIcon} size={16} />
                       <Text variant="small-medium" tone="warning">
-                        Simulated
+                        {t("Simulated", "模拟运行")}
                       </Text>
                     </div>
                   )}
@@ -58,20 +60,23 @@ export function RunDetailHeader({ agent, run, scheduleRecurrence }: Props) {
           {run ? (
             <div className="mt-1 flex flex-wrap items-center gap-2 gap-y-1 text-foreground-subtle">
               <Text variant="small" tone="muted">
-                Started{" "}
+                {t("Started", "开始于")}{" "}
                 {run.started_at
-                  ? formatDistanceToNow(run.started_at, { addSuffix: true })
+                  ? formatDistanceToNow(run.started_at, {
+                      addSuffix: true,
+                      locale: dateLocale,
+                    })
                   : "—"}
               </Text>
               <span className="mx-1 inline-block text-border-base">|</span>
               <Text variant="small" tone="muted">
-                Version: {run.graph_version}
+                {t("Version:", "版本：")} {run.graph_version}
               </Text>
               {run.stats?.node_exec_count !== undefined && (
                 <>
                   <span className="mx-1 inline-block text-border-base">|</span>
                   <Text variant="small" tone="muted">
-                    Steps: {run.stats.node_exec_count}
+                    {t("Steps:", "步骤数：")} {run.stats.node_exec_count}
                   </Text>
                 </>
               )}
@@ -79,8 +84,10 @@ export function RunDetailHeader({ agent, run, scheduleRecurrence }: Props) {
                 <>
                   <span className="mx-1 inline-block text-border-base">|</span>
                   <Text variant="small" tone="muted">
-                    Duration:{" "}
-                    {formatDistanceStrict(0, run.stats.duration * 1000)}
+                    {t("Duration:", "耗时：")}{" "}
+                    {formatDistanceStrict(0, run.stats.duration * 1000, {
+                      locale: dateLocale,
+                    })}
                   </Text>
                 </>
               )}
@@ -88,7 +95,7 @@ export function RunDetailHeader({ agent, run, scheduleRecurrence }: Props) {
                 <>
                   <span className="mx-1 inline-block text-border-base">|</span>
                   <Text variant="small" tone="muted">
-                    Cost: ${(run.stats.cost / 100).toFixed(2)}
+                    {t("Cost:", "费用：")} ${(run.stats.cost / 100).toFixed(2)}
                   </Text>
                 </>
               )}

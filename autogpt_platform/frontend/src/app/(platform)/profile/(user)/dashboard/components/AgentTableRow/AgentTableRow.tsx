@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { isLocalStoreMediaUrl } from "@/lib/store-media";
 import { Text } from "@/components/atoms/Text/Text";
 
@@ -39,6 +40,7 @@ export const AgentTableRow = ({
   onDeleteSubmission,
   onEditSubmission,
 }: AgentTableRowProps) => {
+  const { t, locale } = useTranslation();
   const { handleView, handleDelete, handleEdit } = useAgentTableRow({
     storeAgentSubmission,
     onViewSubmission,
@@ -110,7 +112,7 @@ export const AgentTableRow = ({
 
         {/* Date column */}
         <div className="text-body text-foreground-secondary">
-          {submitted_at && submitted_at.toLocaleDateString()}
+          {submitted_at && submitted_at.toLocaleDateString(locale)}
         </div>
 
         {/* Status column */}
@@ -120,7 +122,7 @@ export const AgentTableRow = ({
 
         {/* Runs column */}
         <div className="text-right text-body text-foreground-secondary">
-          {run_count?.toLocaleString() ?? "0"}
+          {run_count?.toLocaleString(locale) ?? "0"}
         </div>
 
         {/* Reviews column */}
@@ -134,7 +136,7 @@ export const AgentTableRow = ({
             </div>
           ) : (
             <span className="text-body text-foreground-secondary">
-              No reviews
+              {t("No reviews", "暂无评价")}
             </span>
           )}
         </div>
@@ -155,7 +157,7 @@ export const AgentTableRow = ({
                   className="flex cursor-pointer items-center rounded-md px-3 py-2 hover:bg-surface-hover"
                 >
                   <Icon icon={PencilIcon} className="mr-2 h-4 w-4" />
-                  <span>Edit</span>
+                  <span>{t("Edit", "编辑")}</span>
                 </DropdownMenu.Item>
               ) : (
                 <DropdownMenu.Item
@@ -163,7 +165,7 @@ export const AgentTableRow = ({
                   className="flex cursor-pointer items-center rounded-md px-3 py-2 hover:bg-surface-hover"
                 >
                   <Icon icon={EyeIcon} className="mr-2 h-4 w-4" />
-                  <span>View</span>
+                  <span>{t("View", "查看")}</span>
                 </DropdownMenu.Item>
               )}
               {canModify && (
@@ -174,7 +176,7 @@ export const AgentTableRow = ({
                     className="flex cursor-pointer items-center rounded-md px-3 py-2 text-error hover:bg-surface-hover"
                   >
                     <Icon icon={Delete02Icon} className="mr-2 h-4 w-4" />
-                    <span>Delete</span>
+                    <span>{t("Delete", "删除")}</span>
                   </DropdownMenu.Item>
                 </>
               )}

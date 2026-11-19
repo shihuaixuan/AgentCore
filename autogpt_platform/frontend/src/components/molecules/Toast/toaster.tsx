@@ -1,6 +1,7 @@
 "use client";
 
 import { Toaster as SonnerToaster } from "sonner";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 // `!` beats Sonner's own styles. The status colours sit behind a
 // `[data-type=…]` selector, which Sonner sets on the toast, so they outrank
@@ -17,12 +18,17 @@ const toastClassNames = {
 };
 
 export function Toaster() {
+  const { t } = useTranslation();
   return (
     <SonnerToaster
       position="bottom-center"
+      containerAriaLabel={t("Notifications", "通知")}
       richColors
       closeButton
-      toastOptions={{ classNames: toastClassNames }}
+      toastOptions={{
+        classNames: toastClassNames,
+        closeButtonAriaLabel: t("Close toast", "关闭通知"),
+      }}
       icons={{
         success: null,
         error: null,

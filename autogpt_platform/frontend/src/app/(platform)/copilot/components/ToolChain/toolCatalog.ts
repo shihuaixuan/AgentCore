@@ -1,3 +1,4 @@
+import type { Locale } from "@/lib/i18n/locale";
 import { isEmptyResult } from "./resultHelpers";
 import { AGENT_TOOL_CATALOG } from "./toolCatalog.agent";
 import { PLATFORM_TOOL_CATALOG } from "./toolCatalog.platform";
@@ -7,6 +8,7 @@ import type {
   ToolInput,
   ToolMeta,
 } from "./toolCatalog.shared";
+import { TOOL_CATALOG_ZH } from "./toolCatalog.zh";
 
 export type { ChainCategory } from "./toolCatalog.shared";
 
@@ -20,6 +22,7 @@ export function getCatalogLabel(
   input: unknown,
   state: "running" | "done" | "error",
   context: ToolDisplayContext = {},
+  locale: Locale = "en",
 ): { category: ChainCategory; text: string; emptyResult?: true } | null {
   const meta = COPILOT_TOOL_CATALOG[toolName];
   if (!meta) return null;
@@ -31,13 +34,20 @@ export function getCatalogLabel(
   const suffix = subject ? ` ${subject}` : "";
   const emptyResult =
     state === "done" && !!meta.empty && isEmptyResult(context.output);
+  const translations: Readonly<Record<string, string>> =
+    locale === "zh-CN" ? TOOL_CATALOG_ZH : {};
+  const running = translations[meta.running] ?? meta.running;
+  const done = translations[meta.done] ?? meta.done;
+  const empty = meta.empty && (translations[meta.empty] ?? meta.empty);
   const text =
     state === "running"
-      ? `${meta.running}${suffix}…`
+      ? `${running}${suffix}…`
       : state === "error"
-        ? `Failed while ${meta.running.charAt(0).toLowerCase()}${meta.running.slice(1)}${suffix}`
+        ? locale === "zh-CN"
+          ? `执行失败：${running}${suffix}`
+          : `Failed while ${running.charAt(0).toLowerCase()}${running.slice(1)}${suffix}`
         : emptyResult
-          ? `${meta.done}${suffix} – ${meta.empty}`
-          : `${meta.done}${suffix}`;
+          ? `${done}${suffix} – ${empty}`
+          : `${done}${suffix}`;
   return { category: meta.category, text, ...(emptyResult && { emptyResult }) };
 }

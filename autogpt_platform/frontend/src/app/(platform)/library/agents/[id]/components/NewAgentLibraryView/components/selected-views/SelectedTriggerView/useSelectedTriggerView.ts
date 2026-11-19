@@ -73,7 +73,9 @@ export function useSelectedTriggerView({ triggerId, graphId }: Args) {
       onError: (error: any) => {
         toast({
           title: t("Failed to update trigger", "无法更新触发器"),
-          description: error.message || "An unexpected error occurred.",
+          description:
+            error.message ||
+            t("An unexpected error occurred.", "发生意外错误。"),
           variant: "destructive",
         });
       },
@@ -145,7 +147,7 @@ export function useSelectedTriggerView({ triggerId, graphId }: Args) {
 
   const httpError =
     query.isSuccess && !query.data
-      ? { status: 404, statusText: "Not found" }
+      ? { status: 404, statusText: t("Not found", "未找到") }
       : undefined;
 
   useEffect(() => {

@@ -27,6 +27,38 @@ describe("getTypeDisplayInfo", () => {
       "!text-foreground-tertiary",
     );
   });
+
+  it.each([
+    [{ type: "string" }, "文本"],
+    [{ type: "number" }, "数字"],
+    [{ type: "integer" }, "整数"],
+    [{ type: "boolean" }, "布尔值"],
+    [{ type: "array" }, "列表"],
+    [{ type: "object" }, "对象"],
+    [{ type: "null" }, "空值"],
+    [{}, "任意类型"],
+    [{ type: "array", format: "table" }, "表格"],
+    [{ type: "string", format: "date" }, "日期"],
+    [{ type: "string", format: "time" }, "时间"],
+    [{ type: "string", format: "date-time" }, "日期时间"],
+    [{ type: "string", format: "file" }, "文件"],
+    [{ type: "string", format: "short-text" }, "文本"],
+    [{ type: "string", format: "long-text" }, "文本"],
+    [{ type: "mystery" }, "mystery"],
+    [{ type: "date" }, "date"],
+    [{ type: "list" }, "list"],
+  ])(
+    "localizes type labels without changing schemas or colour roles",
+    (schema, label) => {
+      const original = structuredClone(schema);
+      const english = getTypeDisplayInfo(schema);
+      expect(getTypeDisplayInfo(schema, "zh-CN")).toEqual({
+        ...english,
+        displayType: label,
+      });
+      expect(schema).toEqual(original);
+    },
+  );
 });
 
 describe("getEdgeColorFromOutputType", () => {

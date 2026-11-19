@@ -38,7 +38,7 @@ const EMPTY_FORM: ProfileFormState = {
 };
 
 export function useProfilePage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const logoutInProgress = isLogoutInProgress();
@@ -114,7 +114,10 @@ export function useProfilePage() {
     [profileQuery.data],
   );
 
-  const validation = useMemo(() => validateForm(formState), [formState]);
+  const validation = useMemo(
+    () => validateForm(formState, locale),
+    [formState, locale],
+  );
   const dirty = useMemo(
     () => isFormDirty(pristineState, formState),
     [pristineState, formState],
@@ -159,21 +162,33 @@ export function useProfilePage() {
 
   async function uploadAvatar(file: File): Promise<string | null> {
     if (
-      isFileTooLarge({ file, maxSizeMB: SUBMISSION_MEDIA_MAX_SIZE_MB, toast })
+      isFileTooLarge({
+        file,
+        maxSizeMB: SUBMISSION_MEDIA_MAX_SIZE_MB,
+        toast,
+        locale,
+      })
     )
       return null;
 
     setIsUploadingAvatar(true);
     try {
-      const url = (await uploadSubmissionMediaDirect(file)).trim();
+      const url = (
+        await uploadSubmissionMediaDirect(file, "submission", locale)
+      ).trim();
       if (!url) return null;
       patchField("avatar_url", url);
       return url;
     } catch (err) {
-      if (toastIfPlanRequired(err, "Uploading a photo needs an active plan"))
+      if (
+        toastIfPlanRequired(
+          err,
+          t("Uploading a photo needs an active plan", "上传照片需要有效套餐"),
+        )
+      )
         return null;
       toast({
-        title: "Failed to upload photo",
+        title: t("Failed to upload photo", "照片上传失败"),
         description: err instanceof Error ? err.message : undefined,
         variant: "destructive",
       });

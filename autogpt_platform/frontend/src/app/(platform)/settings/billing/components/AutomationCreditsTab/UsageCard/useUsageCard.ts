@@ -2,6 +2,7 @@
 
 import { useGetV1GetCreditHistory } from "@/app/api/__generated__/endpoints/credits/credits";
 import type { TransactionHistory } from "@/app/api/__generated__/models/transactionHistory";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export interface DailyUsageRow {
   day: string;
@@ -24,6 +25,7 @@ function toLocalDateKey(date: Date) {
 }
 
 export function useUsageCard() {
+  const { locale } = useTranslation();
   const { data, isLoading } = useGetV1GetCreditHistory(
     { transaction_count_limit: 200 },
     {
@@ -45,8 +47,8 @@ export function useUsageCard() {
   for (let i = WINDOW_DAYS - 1; i >= 0; i--) {
     const d = new Date(today.getTime() - i * DAY_MS);
     buckets.set(toLocalDateKey(d), {
-      day: d.toLocaleDateString(undefined, { weekday: "short" }),
-      date: d.toLocaleDateString(undefined, {
+      day: d.toLocaleDateString(locale, { weekday: "short" }),
+      date: d.toLocaleDateString(locale, {
         month: "short",
         day: "numeric",
       }),

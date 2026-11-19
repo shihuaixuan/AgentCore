@@ -52,23 +52,34 @@ export function formatCents(cents: number): string {
   return CURRENCY_FORMATTER.format(cents / 100);
 }
 
-export function formatRelativeReset(target: Date | string | undefined | null): {
+export function formatRelativeReset(
+  target: Date | string | undefined | null,
+  locale: Locale = "en",
+): {
   prefix: string;
   value: string;
 } {
-  if (!target) return { prefix: "Resets", value: "—" };
+  const prefix = locale === "zh-CN" ? "重置时间" : "Resets";
+  if (!target) return { prefix, value: "—" };
   const date = target instanceof Date ? target : new Date(target);
-  if (Number.isNaN(date.getTime())) return { prefix: "Resets", value: "—" };
+  if (Number.isNaN(date.getTime())) return { prefix, value: "—" };
   const diff = date.getTime() - Date.now();
-  if (diff <= 0) return { prefix: "Resets", value: "soon" };
+  if (diff <= 0)
+    return { prefix, value: locale === "zh-CN" ? "即将重置" : "soon" };
   const hours = Math.floor(diff / (1000 * 60 * 60));
   if (hours < 24) {
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return { prefix: "Resets in", value: `${hours}h ${minutes}m` };
+    return {
+      prefix: locale === "zh-CN" ? "距离重置" : "Resets in",
+      value:
+        locale === "zh-CN"
+          ? `${hours} 小时 ${minutes} 分钟`
+          : `${hours}h ${minutes}m`,
+    };
   }
   return {
-    prefix: "Resets",
-    value: date.toLocaleString(undefined, {
+    prefix,
+    value: date.toLocaleString(locale, {
       weekday: "short",
       hour: "numeric",
       minute: "2-digit",
@@ -79,13 +90,15 @@ export function formatRelativeReset(target: Date | string | undefined | null): {
 
 export function formatShortDate(
   value: Date | string | number | undefined | null,
+  locale: Locale = "en",
 ): string {
   if (value === undefined || value === null || value === "") return "—";
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 }
+import type { Locale } from "@/lib/i18n/locale";

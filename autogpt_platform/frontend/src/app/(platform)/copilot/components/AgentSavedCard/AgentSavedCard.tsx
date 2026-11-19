@@ -7,6 +7,7 @@ import sparklesImg from "./assets/sparkles.png";
 import { useCopilotChatActions } from "../CopilotChatActionsProvider/useCopilotChatActions";
 import { BookOpen01Icon, PencilIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   agentName: string;
@@ -21,6 +22,7 @@ export function AgentSavedCard({
   libraryAgentLink,
   agentPageLink,
 }: Props) {
+  const { t } = useTranslation();
   // On the in-builder chat panel the user is already looking at the agent
   // and the panel auto-switches the URL to the new version — the two
   // "Open in …" CTAs here would open the same agent in a second tab,
@@ -33,13 +35,14 @@ export function AgentSavedCard({
       <div className="flex items-baseline gap-2">
         <Image
           src={sparklesImg}
-          alt="sparkles"
+          alt={t("sparkles", "闪光")}
           width={24}
           height={24}
           className="relative top-1"
         />
         <Text variant="large-medium" className="mb-2 leading-inherit">
-          Workflow <span className="text-brand">{agentName}</span> {message}
+          {t("Workflow", "工作流")}{" "}
+          <span className="text-brand">{agentName}</span> {message}
         </Text>
       </div>
       {!hideNavButtons && (
@@ -52,7 +55,7 @@ export function AgentSavedCard({
             rel="noopener noreferrer"
           >
             <Icon icon={BookOpen01Icon} size={14} />
-            Open in library
+            {t("Open in library", "在工作流库中打开")}
           </Button>
           <Button
             as="NextLink"
@@ -63,7 +66,7 @@ export function AgentSavedCard({
             rel="noopener noreferrer"
           >
             <Icon icon={PencilIcon} size={14} />
-            Open in builder
+            {t("Open in builder", "在构建器中打开")}
           </Button>
         </div>
       )}

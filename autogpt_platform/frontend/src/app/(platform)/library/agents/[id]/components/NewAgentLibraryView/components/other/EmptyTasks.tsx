@@ -38,7 +38,7 @@ export function EmptyTasks({
   onTriggerSetup,
   onScheduleCreated,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -59,12 +59,12 @@ export function EmptyTasks({
         queryKey: getGetV2ListLibraryAgentsQueryKey(),
       });
 
-      toast({ title: "Workflow deleted" });
+      toast({ title: t("Workflow deleted", "工作流已删除") });
       setShowDeleteDialog(false);
       router.push("/library");
     } catch (error: unknown) {
       toast({
-        title: "Failed to delete workflow",
+        title: t("Failed to delete workflow", "无法删除工作流"),
         description:
           error instanceof Error
             ? error.message
@@ -86,21 +86,24 @@ export function EmptyTasks({
       if (res.status === 200) {
         const filename = `${agent.name}_v${agent.graph_version}.json`;
         exportAsJSONFile(res.data as any, filename);
-        toast({ title: "Workflow exported" });
+        toast({ title: t("Workflow exported", "工作流已导出") });
       } else {
-        toast({ title: "Failed to export workflow", variant: "destructive" });
+        toast({
+          title: t("Failed to export workflow", "无法导出工作流"),
+          variant: "destructive",
+        });
       }
     } catch (e: any) {
       toast({
-        title: "Failed to export workflow",
+        title: t("Failed to export workflow", "无法导出工作流"),
         description: e?.message,
         variant: "destructive",
       });
     }
   }
   const isPublished = Boolean(agent.marketplace_listing);
-  const createdAt = formatDate(agent.created_at);
-  const updatedAt = formatDate(agent.updated_at);
+  const createdAt = formatDate(agent.created_at, locale);
+  const updatedAt = formatDate(agent.updated_at, locale);
   const isUpdated = updatedAt !== createdAt;
 
   return (
@@ -117,7 +120,7 @@ export function EmptyTasks({
                   // oxlint-disable-next-line design-system/no-restyle -- no heading variant keeps the parent line height; h4 alone would move the empty state by 9px
                   className="text-center leading-inherit"
                 >
-                  Ready to get started?
+                  {t("Ready to get started?", "准备好开始了吗？")}
                 </Text>
                 <Text variant="large" className="text-center">
                   {t(
@@ -134,7 +137,7 @@ export function EmptyTasks({
                   size="large"
                   className="inline-flex w-[19.75rem]"
                 >
-                  Setup your task
+                  {t("Setup your task", "设置任务")}
                 </Button>
               }
               agent={agent}
@@ -154,7 +157,7 @@ export function EmptyTasks({
           <Text variant="h4">{agent.name}</Text>
           {isPublished ? (
             <Text variant="body">
-              by {agent.marketplace_listing?.creator.name}
+              {t("by", "作者：")} {agent.marketplace_listing?.creator.name}
             </Text>
           ) : null}
         </div>
@@ -165,7 +168,10 @@ export function EmptyTasks({
           className="-mt-4 text-foreground-body"
         >
           {agent.description ||
-            `This workflow is not yet published. Once it is published, You can publish your workflow by clicking the "Publish" button in the workflow editor.`}
+            t(
+              `This workflow is not yet published. Once it is published, You can publish your workflow by clicking the "Publish" button in the workflow editor.`,
+              "此工作流尚未发布。你可以在工作流编辑器中点击“发布”按钮来发布工作流。",
+            )}
         </ShowMoreText>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-20">

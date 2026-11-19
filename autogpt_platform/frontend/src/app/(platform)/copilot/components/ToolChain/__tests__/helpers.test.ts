@@ -390,6 +390,75 @@ describe("toChainRow provider icons", () => {
 });
 
 describe("getChainHeading", () => {
+  it("summarizes distinct categories in Chinese without rewriting source data", () => {
+    const rows: ChainRow[] = [
+      { key: "1", category: "reasoning", text: "Thought", state: "done" },
+      { key: "2", category: "schedule", text: "Checked", state: "done" },
+      { key: "3", category: "schedule", text: "Saved", state: "done" },
+    ];
+    expect(getChainHeading(rows, false, "zh-CN")).toBe(
+      "已完成思考，已管理定时任务",
+    );
+    expect(getChainHeading([], false, "zh-CN")).toBe("处理中…");
+    expect(rows[0].text).toBe("Thought");
+  });
+
+  it("keeps raw error details in Chinese mode", () => {
+    const rows: ChainRow[] = [
+      {
+        key: "error",
+        category: "bash",
+        text: "Failed",
+        state: "error",
+        detail: "Permission denied: /tmp/MyFile.txt",
+      },
+    ];
+    expect(getChainHeading(rows, false, "zh-CN")).toBe(rows[0].detail);
+  });
+
+  it("localizes action templates without translating workflow names", () => {
+    const setup = toChainRow(
+      toolPart(
+        "run_agent",
+        {},
+        {
+          type: "setup_requirements",
+          setup_info: { agent_name: "My English workflow" },
+        },
+      ),
+      0,
+      "zh-CN",
+    );
+    expect(setup?.text).toBe("连接 My English workflow 以继续");
+    const review = toChainRow(
+      toolPart(
+        "run_block",
+        {},
+        { type: "review_required", block_name: "Send Web Request" },
+      ),
+      1,
+      "zh-CN",
+    );
+    expect(review?.text).toBe("审核 Send Web Request");
+  });
+
+  it("localizes reasoning and catalog rows while preserving their content", () => {
+    const reasoning = toChainRow(
+      {
+        type: "reasoning",
+        text: "Original thought",
+        state: "streaming",
+      } as MessagePart,
+      0,
+      "zh-CN",
+    );
+    expect(reasoning?.text).toBe("正在思考…");
+    expect(reasoning?.reasoningText).toBe("Original thought");
+    const schedule = toChainRow(toolPart("list_schedules"), 1, "zh-CN");
+    expect(schedule?.text).toBe("已检查你的定时任务");
+    expect(getChainHeading([reasoning!], true, "zh-CN")).toBe("正在思考…");
+  });
+
   it("uses the last running row while streaming", () => {
     const rows: ChainRow[] = [
       {

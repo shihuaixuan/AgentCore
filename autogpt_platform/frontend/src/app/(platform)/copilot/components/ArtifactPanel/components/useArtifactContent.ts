@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 import type { ArtifactRef } from "../../../store";
 import type { ArtifactClassification } from "../helpers";
 import { validatePDFBlob } from "./validatePDFBlob";
@@ -64,8 +66,14 @@ function getArtifactErrorMessage(body: unknown): string | null {
   return null;
 }
 
-async function parseArtifactFetchError(response: Response): Promise<string> {
-  const prefix = `Failed to fetch: ${response.status}`;
+async function parseArtifactFetchError(
+  response: Response,
+  locale: Locale,
+): Promise<string> {
+  const prefix =
+    locale === "zh-CN"
+      ? `获取文件失败：${response.status}`
+      : `Failed to fetch: ${response.status}`;
   const contentType =
     response.headers?.get?.("content-type")?.toLowerCase() ?? "";
 
@@ -91,7 +99,10 @@ async function parseArtifactFetchError(response: Response): Promise<string> {
   return prefix;
 }
 
-async function fetchArtifactResponse(url: string): Promise<Response> {
+async function fetchArtifactResponse(
+  url: string,
+  locale: Locale,
+): Promise<Response> {
   for (let attempt = 0; attempt <= CONTENT_FETCH_MAX_RETRIES; attempt++) {
     try {
       const response = await fetch(url);
@@ -101,21 +112,27 @@ async function fetchArtifactResponse(url: string): Promise<Response> {
         !isTransientArtifactFetchStatus(response.status) ||
         attempt === CONTENT_FETCH_MAX_RETRIES
       ) {
-        throw new ArtifactFetchError(await parseArtifactFetchError(response));
+        throw new ArtifactFetchError(
+          await parseArtifactFetchError(response, locale),
+        );
       }
     } catch (error) {
       if (error instanceof ArtifactFetchError) throw error;
       if (attempt === CONTENT_FETCH_MAX_RETRIES) {
         throw error instanceof Error
           ? error
-          : new Error("Failed to fetch artifact");
+          : new Error(
+              locale === "zh-CN" ? "获取产物失败" : "Failed to fetch artifact",
+            );
       }
     }
 
     await sleep(CONTENT_FETCH_RETRY_DELAY_MS);
   }
 
-  throw new Error("Failed to fetch artifact");
+  throw new Error(
+    locale === "zh-CN" ? "获取产物失败" : "Failed to fetch artifact",
+  );
 }
 
 export function getCachedArtifactContent(id: string): string | undefined {
@@ -134,6 +151,7 @@ export function useArtifactContent(
   artifact: ArtifactRef,
   classification: ArtifactClassification,
 ) {
+  const { locale } = useTranslation();
   const [content, setContent] = useState<string | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -204,10 +222,10 @@ export function useArtifactContent(
       shownDocumentIdRef.current = null;
       setContent(null);
       setPdfUrl(null);
-      fetchArtifactResponse(artifact.sourceUrl)
+      fetchArtifactResponse(artifact.sourceUrl, locale)
         .then((res) => res.blob())
         .then(async (blob) => {
-          const pdfBlob = await validatePDFBlob(blob);
+          const pdfBlob = await validatePDFBlob(blob, locale);
           objectUrl = URL.createObjectURL(pdfBlob);
           if (cancelled) {
             URL.revokeObjectURL(objectUrl);
@@ -244,7 +262,7 @@ export function useArtifactContent(
         cancelled = true;
       };
     }
-    fetchArtifactResponse(artifact.sourceUrl)
+    fetchArtifactResponse(artifact.sourceUrl, locale)
       .then((res) => res.text())
       .then((text) => {
         if (!cancelled) {
@@ -276,6 +294,7 @@ export function useArtifactContent(
     artifact.documentId,
     classification.type,
     retryNonce,
+    locale,
   ]);
 
   return { content, pdfUrl, isLoading, error, scrollRef, retry };

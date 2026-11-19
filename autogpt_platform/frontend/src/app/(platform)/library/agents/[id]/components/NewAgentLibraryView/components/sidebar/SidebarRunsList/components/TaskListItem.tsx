@@ -24,6 +24,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { RelativeTime } from "@/components/atoms/RelativeTime/RelativeTime";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const PENDING_COLORS =
   "border-warning-surface bg-warning-surface text-yellow-foreground";
@@ -89,6 +90,7 @@ export function TaskListItem({
   onClick,
   onDeleted,
 }: Props) {
+  const { t, locale } = useTranslation();
   const withErrors = isCompletedWithErrors(run);
   const icon = run.is_dry_run ? (
     <IconWrapper className="border-warning-surface bg-warning-surface text-warning-foreground">
@@ -108,18 +110,28 @@ export function TaskListItem({
   return (
     <SidebarItemCard
       icon={icon}
-      title={run.is_dry_run ? `${title} (Simulated)` : title}
+      title={
+        run.is_dry_run
+          ? t(`${title} (Simulated)`, `${title}（模拟运行）`)
+          : title
+      }
       description={
         withErrors ? (
           <>
-            {describeFailedSteps(getFailedStepCount(run))} · {startedAgo}
+            {t(
+              describeFailedSteps(getFailedStepCount(run)),
+              `${getFailedStepCount(run)} 个步骤失败`,
+            )}{" "}
+            · {startedAgo}
           </>
         ) : (
           startedAgo
         )
       }
       descriptionTitle={
-        run.started_at ? new Date(run.started_at).toString() : undefined
+        run.started_at
+          ? new Date(run.started_at).toLocaleString(locale)
+          : undefined
       }
       onClick={onClick}
       selected={selected}

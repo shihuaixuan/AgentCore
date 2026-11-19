@@ -19,6 +19,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import LogoutPage from "../page";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 beforeEach(() => {
   mockLogOut.mockReset();
@@ -27,6 +28,26 @@ beforeEach(() => {
 });
 
 describe("LogoutPage", () => {
+  test("localizes failed sign-out without treating it as a successful logout", async () => {
+    mockLogOut.mockRejectedValue(new TypeError("Failed to fetch"));
+    render(
+      <LanguageProvider>
+        <LogoutPage />
+      </LanguageProvider>,
+    );
+    await waitFor(() =>
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "无法退出登录",
+          description: "请检查网络连接后重试。",
+          variant: "destructive",
+        }),
+      ),
+    );
+    expect(mockReplace).toHaveBeenCalledWith("/");
+    expect(mockReplace).not.toHaveBeenCalledWith("/login");
+  });
+
   test("goes to the login page once the sign-out has gone through", async () => {
     mockLogOut.mockResolvedValue(undefined);
 

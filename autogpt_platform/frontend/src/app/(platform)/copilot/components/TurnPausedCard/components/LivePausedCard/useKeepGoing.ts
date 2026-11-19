@@ -7,6 +7,7 @@ import {
   usePostV2ContinueSession,
 } from "@/app/api/__generated__/endpoints/chat/chat";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useManagedChatModels } from "../../../../useManagedChatModels";
 import { useCopilotUIStore } from "../../../../store";
@@ -21,6 +22,7 @@ interface Args {
 }
 
 export function useKeepGoing({ sessionId, onFollow, onOutOfBudget }: Args) {
+  const { t, locale } = useTranslation();
   const queryClient = useQueryClient();
   // The composer's model choice, as a message sent now would carry it.
   const { modelID } = useManagedChatModels();
@@ -35,7 +37,7 @@ export function useKeepGoing({ sessionId, onFollow, onOutOfBudget }: Args) {
       });
       onFollow();
     } catch (error) {
-      const outcome = continueOutcome(error);
+      const outcome = continueOutcome(error, locale);
       if (outcome.kind === "running") {
         onFollow();
         return;
@@ -48,7 +50,7 @@ export function useKeepGoing({ sessionId, onFollow, onOutOfBudget }: Args) {
         return;
       }
       toast({
-        title: "Couldn't pick this back up",
+        title: t("Couldn't pick this back up", "无法恢复此任务"),
         description: outcome.description,
         variant: "destructive",
       });

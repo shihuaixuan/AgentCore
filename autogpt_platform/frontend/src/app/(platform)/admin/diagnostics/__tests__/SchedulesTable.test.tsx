@@ -7,6 +7,7 @@ import {
 } from "@/tests/integrations/test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SchedulesTable } from "../components/SchedulesTable";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const mockAllSchedulesQuery = vi.fn();
 const mockOrphanedSchedulesQuery = vi.fn();
@@ -75,6 +76,31 @@ afterEach(() => {
 });
 
 describe("SchedulesTable", () => {
+  it("localizes Chinese filters, pagination and confirmation while retaining schedule data", async () => {
+    setupDefaultMocks();
+    mockAllSchedulesQuery.mockReturnValue(
+      withSchedules([{ ...sampleSchedule, cron: null }], 25),
+    );
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <SchedulesTable diagnosticsData={diagnosticsData} />
+      </LanguageProvider>,
+    );
+    expect(screen.getByRole("tab", { name: "孤立计划任务 (3)" })).toBeDefined();
+    expect(screen.getByText("第 1 / 3 页")).toBeDefined();
+    expect(screen.getByText("不适用")).toBeDefined();
+    expect(screen.getByText("Daily Agent Run")).toBeDefined();
+    expect(screen.getByText("My Agent")).toBeDefined();
+    fireEvent.click(screen.getAllByRole("checkbox")[1]);
+    fireEvent.click(screen.getByRole("button", { name: "删除所选 (1)" }));
+    expect(
+      await screen.findByText("确定要删除选中的 1 个计划任务吗？", {
+        exact: false,
+      }),
+    ).toBeDefined();
+    expect(screen.getByRole("button", { name: "取消" })).toBeDefined();
+  });
+
   it("shows empty state when no schedules", () => {
     setupDefaultMocks();
     mockAllSchedulesQuery.mockReturnValue(withSchedules([], 0));

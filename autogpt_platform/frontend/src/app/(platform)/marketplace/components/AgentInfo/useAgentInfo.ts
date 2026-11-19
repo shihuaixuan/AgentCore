@@ -9,12 +9,14 @@ import { useGetV2DownloadAgentFile } from "@/app/api/__generated__/endpoints/sto
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { agentGraphExportFilename, exportAsJSONFile } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface UseAgentInfoProps {
   storeListingVersionId: string;
 }
 
 export const useAgentInfo = ({ storeListingVersionId }: UseAgentInfoProps) => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -55,16 +57,19 @@ export const useAgentInfo = ({ storeListingVersionId }: UseAgentInfoProps) => {
       router.push(`/library/agents/${data.id}`);
 
       toast({
-        title: "Workflow Added",
-        description: "Redirecting to your library...",
+        title: t("Workflow Added", "工作流已添加"),
+        description: t("Redirecting to your library...", "正在跳转到你的库..."),
         duration: 2000,
       });
     } catch (error) {
       Sentry.captureException(error);
 
       toast({
-        title: "Error",
-        description: "Failed to add workflow to library. Please try again.",
+        title: t("Error", "错误"),
+        description: t(
+          "Failed to add workflow to library. Please try again.",
+          "无法将工作流添加到库，请重试。",
+        ),
         variant: "destructive",
       });
     }
@@ -80,14 +85,20 @@ export const useAgentInfo = ({ storeListingVersionId }: UseAgentInfoProps) => {
       );
 
       toast({
-        title: "Download Complete",
-        description: "Your workflow has been successfully downloaded.",
+        title: t("Download Complete", "下载完成"),
+        description: t(
+          "Your workflow has been successfully downloaded.",
+          "你的工作流已成功下载。",
+        ),
       });
     } catch (error) {
       Sentry.captureException(error);
       toast({
-        title: "Error",
-        description: "Failed to download workflow. Please try again.",
+        title: t("Error", "错误"),
+        description: t(
+          "Failed to download workflow. Please try again.",
+          "无法下载工作流，请重试。",
+        ),
         variant: "destructive",
       });
     }

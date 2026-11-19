@@ -24,7 +24,7 @@ export function BotsList() {
     return (
       <div className="flex w-full flex-col gap-3 px-4">
         <ErrorCard
-          context="bots"
+          context={t("bots", "机器人")}
           responseError={
             error instanceof Error ? { message: error.message } : undefined
           }

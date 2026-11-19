@@ -5,6 +5,7 @@ import {
   useResumeScheduledChat,
 } from "@/app/api/__generated__/endpoints/schedules/schedules";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { invalidateAllScheduleQueries } from "@/services/schedules/invalidate-schedules";
 import * as Sentry from "@sentry/nextjs";
@@ -17,6 +18,7 @@ interface Args {
 }
 
 export function useScheduledChatNoticeCard({ scheduleKey, sessionID }: Args) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [connectProvider, setConnectProvider] = useState<string | null>(null);
   const [resumed, setResumed] = useState(false);
@@ -45,22 +47,26 @@ export function useScheduledChatNoticeCard({ scheduleKey, sessionID }: Args) {
         setResumed(true);
         refresh();
         toast({
-          title: "Resumed",
-          description: "It runs again at its next scheduled time.",
+          title: t("Resumed", "已恢复"),
+          description: t(
+            "It runs again at its next scheduled time.",
+            "将在下次计划时间再次运行。",
+          ),
         });
       },
       onError: (error) => {
         if (error instanceof ApiError && error.status === 404) {
           setResumed(true);
           refresh();
-          if (!quietRef.current) toast({ title: "Already running" });
+          if (!quietRef.current)
+            toast({ title: t("Already running", "已在运行") });
           return;
         }
         Sentry.captureException(error);
         toast({
           variant: "destructive",
-          title: "Couldn't resume this scheduled chat",
-          description: "Please try again.",
+          title: t("Couldn't resume this scheduled chat", "无法恢复此定时对话"),
+          description: t("Please try again.", "请重试。"),
         });
       },
     },

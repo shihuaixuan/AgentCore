@@ -8,6 +8,16 @@ import { CategoryKey } from "./types";
 
 export const BlockMenuFilters = () => {
   const { t } = useTranslation();
+  const categoryLabels: Record<CategoryKey, string> = {
+    blocks: "模块",
+    integrations: "集成",
+    marketplace_agents: "市场工作流",
+    my_agents: "我的工作流",
+  };
+  const localizedCategories = categories.map((category) => ({
+    ...category,
+    name: t(category.name, categoryLabels[category.key]),
+  }));
   const {
     filters,
     addFilter,
@@ -46,7 +56,7 @@ export const BlockMenuFilters = () => {
 
   return (
     <div className="flex flex-wrap gap-2">
-      <FilterSheet categories={categories} />
+      <FilterSheet categories={localizedCategories} />
       {creators.length > 0 &&
         creators.map((creator) => (
           <FilterChip
@@ -59,7 +69,7 @@ export const BlockMenuFilters = () => {
             onClick={() => handleCreatorClick(creator)}
           />
         ))}
-      {categories.map((category) => (
+      {localizedCategories.map((category) => (
         <FilterChip
           key={category.key}
           name={category.name}

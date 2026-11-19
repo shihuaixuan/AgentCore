@@ -14,6 +14,7 @@ import {
   useAppSidebarToggle,
 } from "@/components/layout/AppSidebar/components/AppSidebarTrigger/AppSidebarTrigger";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { ExpertIdentity } from "../../../useExpertMap";
 import { ExpertAvatar } from "./ExpertAvatar/ExpertAvatar";
 
@@ -52,13 +53,14 @@ export function ThreadHeader({
   isResolvingExpertIdentity = false,
   floatingControls,
 }: Props) {
+  const { t, locale } = useTranslation();
   // While the roster loads, the chip shows a quiet placeholder rather than
   // Otto's identity, which would be wrong for an expert session.
   const isResolving = isResolvingExpertIdentity && !expertIdentity;
   const name = expertIdentity?.name ?? "Otto";
-  const role = expertIdentity?.role ?? DEFAULT_EXPERT_ROLE;
+  const role = expertIdentity?.role ?? t(DEFAULT_EXPERT_ROLE, "AI 负责人");
   const jobTitle = expertIdentity?.jobTitle;
-  const roleLabel = jobTitle || getExpertRoleLabel(role);
+  const roleLabel = jobTitle || getExpertRoleLabel(role, locale);
   const hasSidebar = Boolean(useAppSidebarToggle());
   const hasSidebarButton = floatingControls === "newLayout" && hasSidebar;
 
@@ -87,7 +89,9 @@ export function ThreadHeader({
                 <div
                   tabIndex={0}
                   aria-label={
-                    isResolving ? "Loading expert" : `${name} — ${roleLabel}`
+                    isResolving
+                      ? t("Loading expert", "正在加载专家")
+                      : `${name} — ${roleLabel}`
                   }
                   className={cn(
                     "flex min-w-0 items-center gap-2 rounded-full whitespace-nowrap",

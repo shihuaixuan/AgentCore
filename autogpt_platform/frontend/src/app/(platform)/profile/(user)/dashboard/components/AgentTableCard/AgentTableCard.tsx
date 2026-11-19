@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { isLocalStoreMediaUrl } from "@/lib/store-media";
 import {
   MoreVerticalGlyph,
@@ -21,6 +22,7 @@ export const AgentTableCard = ({
   storeAgentSubmission,
   onViewSubmission,
 }: AgentTableCardProps) => {
+  const { t, locale } = useTranslation();
   const onView = () => {
     onViewSubmission(storeAgentSubmission);
   };
@@ -70,11 +72,12 @@ export const AgentTableCard = ({
         </div>
         <button
           onClick={onView}
+          aria-label={t(`View ${agentName}`, `查看 ${agentName}`)}
           className="h-fit rounded-full p-1 text-foreground-emphasis hover:bg-surface-hover"
         >
           <Icon
             icon={MoreVerticalGlyph}
-            aria-label="Icon"
+            aria-hidden
             viewBox="0 0 20 20"
             strokeWidth={1.5}
             className="h-5 w-5"
@@ -85,16 +88,23 @@ export const AgentTableCard = ({
       <div className="mt-4 flex flex-wrap gap-4">
         <SubmissionStatus status={status} />
         <div className="text-body text-foreground-secondary">
-          {submitted_at && submitted_at.toLocaleDateString()}
+          {submitted_at && submitted_at.toLocaleDateString(locale)}
         </div>
         <div className="text-body text-foreground-secondary">
-          {(run_count ?? 0).toLocaleString()} runs
+          {t(
+            `${(run_count ?? 0).toLocaleString(locale)} runs`,
+            `${(run_count ?? 0).toLocaleString(locale)} 次运行`,
+          )}
         </div>
         <div className="flex items-center gap-1 text-foreground-emphasis">
           <span className="text-body font-medium text-foreground-emphasis">
             {(rating ?? 0).toFixed(1)}
           </span>
-          <Icon icon={StarFilledGlyph} aria-label="Icon" className="h-4 w-4" />
+          <Icon
+            icon={StarFilledGlyph}
+            aria-label={t("Rating", "评分")}
+            className="h-4 w-4"
+          />
         </div>
       </div>
     </div>

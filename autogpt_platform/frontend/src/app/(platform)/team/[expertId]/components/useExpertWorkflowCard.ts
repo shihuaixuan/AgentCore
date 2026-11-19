@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { workflowNeedsSetup } from "../../helpers";
 import { getWorkflowCredentialProviders } from "./WorkflowCredentialStack";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 const STATUS = {
   "needs-setup": {
@@ -49,8 +50,9 @@ export function useExpertWorkflowCard({
   libraryAgent,
   expertId,
 }: Args) {
+  const { t } = useTranslation();
   const router = useRouter();
-  const name = workflow.name ?? "Unnamed workflow";
+  const name = workflow.name ?? t("Unnamed workflow", "未命名工作流");
   const needsSetup = workflowNeedsSetup(workflow);
   const libraryHref = workflow.library_agent_id
     ? `/library/agents/${workflow.library_agent_id}`
@@ -75,13 +77,22 @@ export function useExpertWorkflowCard({
       : isTriggerWorkflow
         ? "trigger"
         : "manual";
+  const statusLabels = {
+    "needs-setup": "需要设置",
+    scheduled: "已计划",
+    trigger: "触发运行",
+    manual: "手动",
+  };
 
   return {
     name,
     needsSetup,
     runCount: libraryAgent?.execution_count,
     isTriggerWorkflow,
-    status: STATUS[statusKind],
+    status: {
+      ...STATUS[statusKind],
+      label: t(STATUS[statusKind].label, statusLabels[statusKind]),
+    },
     credentialProviders: getWorkflowCredentialProviders(
       libraryAgent,
       workflow.chain ?? [],

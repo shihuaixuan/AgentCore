@@ -22,12 +22,14 @@ export function APIKeysHeader({ onCreate }: Props) {
           {t("AutoGPT API Keys", "AutoGPT API 密钥")}
         </Text>
         <Text variant="body" tone="body" className="mt-4 max-w-[600px]">
-          Manage API keys that let external tools access your AutoGPT account.
-          See the{" "}
+          {t(
+            "Manage API keys that let external tools access your AutoGPT account. See the",
+            "管理允许外部工具访问 AutoGPT 账户的 API 密钥。请参阅",
+          )}{" "}
           <Link href={API_DOCS_URL} isExternal variant="secondary">
             {t("API docs", "API 文档")}
           </Link>{" "}
-          to get started.
+          {t("to get started.", "以开始使用。")}
         </Text>
       </div>
 

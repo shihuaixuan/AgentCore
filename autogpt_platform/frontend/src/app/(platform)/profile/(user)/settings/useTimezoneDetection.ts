@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { usePostV1UpdateUserTimezone } from "@/app/api/__generated__/endpoints/auth/auth";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 /**
  * Hook to automatically detect and set user's timezone if it's not set
@@ -9,6 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
  * @returns Object with detection status and manual trigger function
  */
 export const useTimezoneDetection = (currentTimezone?: string) => {
+  const { t } = useTranslation();
   const updateTimezone = usePostV1UpdateUserTimezone();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -39,8 +41,11 @@ export const useTimezoneDetection = (currentTimezone?: string) => {
 
       // Show success notification
       toast({
-        title: "Timezone detected",
-        description: `We've set your timezone to ${browserTimezone}. You can change this in settings.`,
+        title: t("Timezone detected", "已检测到时区"),
+        description: t(
+          `We've set your timezone to ${browserTimezone}. You can change this in settings.`,
+          `已将你的时区设为 ${browserTimezone}。你可以在设置中更改。`,
+        ),
         variant: "success",
       });
 
@@ -50,7 +55,7 @@ export const useTimezoneDetection = (currentTimezone?: string) => {
       // Silent failure - don't show error toast for auto-detection
       // User can still manually set timezone in settings
     }
-  }, [updateTimezone, queryClient, toast]);
+  }, [updateTimezone, queryClient, toast, t]);
 
   useEffect(() => {
     // Only proceed if timezone is "not-set" and we haven't already attempted detection

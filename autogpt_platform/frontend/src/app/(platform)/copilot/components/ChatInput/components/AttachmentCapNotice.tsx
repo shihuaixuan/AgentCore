@@ -5,6 +5,7 @@ import { MAX_ATTACHMENTS } from "../../../helpers/workspaceAttachments";
 import { cn } from "@/lib/utils";
 import { Alert02Icon } from "@hugeicons/core-free-icons";
 import { AttentionCard } from "@/components/organisms/AttentionCard/AttentionCard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   /** How many attachments the cap turned away on the last attach. */
@@ -22,6 +23,7 @@ export function AttachmentCapNotice({
   onDismiss,
   className,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <AttentionCard.Root
       variant="warning"
@@ -35,12 +37,17 @@ export function AttachmentCapNotice({
         </AttentionCard.Icon>
         <AttentionCard.Content asChild>
           <span>
-            Up to {MAX_ATTACHMENTS} attachments per message — {refusedCount} not
-            added
+            {t(
+              `Up to ${MAX_ATTACHMENTS} attachments per message — ${refusedCount} not added`,
+              `每条消息最多 ${MAX_ATTACHMENTS} 个附件 — ${refusedCount} 个未添加`,
+            )}
           </span>
         </AttentionCard.Content>
         <AttentionCard.Dismiss
-          aria-label="Dismiss attachment limit notice"
+          aria-label={t(
+            "Dismiss attachment limit notice",
+            "关闭附件数量限制提示",
+          )}
           onClick={onDismiss}
         />
       </AttentionCard.Row>

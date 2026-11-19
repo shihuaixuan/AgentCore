@@ -8,6 +8,7 @@ import { ConfirmUserLinkResponse } from "@/app/api/__generated__/models/confirmU
 import { LinkType } from "@/app/api/__generated__/models/linkType";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import { useAuth } from "@/lib/auth/hooks/useAuth";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useParams, useSearchParams } from "next/navigation";
 import {
   getLoginRedirect,
@@ -33,6 +34,7 @@ interface ViewData {
 }
 
 export function usePlatformLinkingPage() {
+  const { t } = useTranslation();
   const params = useParams();
   const searchParams = useSearchParams();
   const rawToken = (params.token as string | undefined) ?? "";
@@ -93,8 +95,11 @@ export function usePlatformLinkingPage() {
       // The sign-out never reached the server: this account is still
       // signed in, so don't send the user on as if it weren't.
       toast({
-        title: "Couldn't sign you out",
-        description: "Check your connection and try again.",
+        title: t("Couldn't sign you out", "无法退出登录"),
+        description: t(
+          "Check your connection and try again.",
+          "请检查网络连接后重试。",
+        ),
         variant: "destructive",
       });
       return;

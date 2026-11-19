@@ -10,8 +10,10 @@ import { DefaultStateType } from "../types";
 import { SearchHistoryChip } from "../SearchHistoryChip";
 import { HorizontalScroll } from "../HorizontalScroll";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export const SuggestionContent = () => {
+  const { t } = useTranslation();
   const { setIntegration, setDefaultState, setSearchQuery, setSearchId } =
     useBlockMenuStore(
       useShallow((state) => ({
@@ -33,8 +35,9 @@ export const SuggestionContent = () => {
           responseError={error || undefined}
           httpError={{
             status: data?.status,
-            statusText: "Request failed",
-            message: (error?.detail as string) || "An error occurred",
+            statusText: t("Request failed", "请求失败"),
+            message:
+              (error?.detail as string) || t("An error occurred", "发生错误"),
           }}
           context="block menu"
           onRetry={() => refetch()}
@@ -50,7 +53,7 @@ export const SuggestionContent = () => {
         {hasRecentSearches && (
           <div className="space-y-2.5 px-4">
             <Text variant="body-medium" tone="emphasis">
-              Recent searches
+              {t("Recent searches", "最近搜索")}
             </Text>
             <HorizontalScroll
               wrapperClassName="-mx-8"
@@ -64,7 +67,9 @@ export const SuggestionContent = () => {
                 ? suggestions.recent_searches.map((entry, index) => (
                     <SearchHistoryChip
                       key={entry.search_id || `${entry.search_query}-${index}`}
-                      content={entry.search_query || "Untitled search"}
+                      content={
+                        entry.search_query || t("Untitled search", "未命名搜索")
+                      }
                       onClick={() => {
                         setSearchQuery(entry.search_query || "");
                         setSearchId(entry.search_id || undefined);
@@ -85,7 +90,7 @@ export const SuggestionContent = () => {
         {/* Integrations */}
         <div className="space-y-2.5 px-4">
           <Text variant="body-medium" tone="emphasis">
-            Integrations
+            {t("Integrations", "集成")}
           </Text>
           <div className="grid grid-cols-3 grid-rows-2 gap-2">
             {!isLoading && suggestions
@@ -113,7 +118,7 @@ export const SuggestionContent = () => {
         {/* Top blocks */}
         <div className="space-y-2.5 px-4">
           <Text variant="body-medium" tone="emphasis">
-            Top blocks
+            {t("Top blocks", "热门模块")}
           </Text>
           <div className="space-y-2">
             {!isLoading && suggestions

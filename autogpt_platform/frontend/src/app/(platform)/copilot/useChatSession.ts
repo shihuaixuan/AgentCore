@@ -15,6 +15,8 @@ import {
 } from "./helpers/copilotLlmAuth";
 import { toast } from "@/components/molecules/Toast/use-toast";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 import {
   takeExpertThreadSource,
   trackExpertThreadCreated,
@@ -96,9 +98,14 @@ function createSessionData(
   return sessionData;
 }
 
-function createdSessionId(response: postV2CreateSessionResponse) {
+function createdSessionId(
+  response: postV2CreateSessionResponse,
+  locale: Locale = "en",
+) {
   if (response.status !== 200 || !response.data?.id) {
-    const error = new Error("Failed to create session");
+    const error = new Error(
+      locale === "zh-CN" ? "创建对话失败" : "Failed to create session",
+    );
     Sentry.captureException(error, {
       extra: { status: response.status },
     });
@@ -113,6 +120,7 @@ export function useChatSession({
   expertId = null,
   adoptLatestExpertThread = true,
 }: UseChatSessionOptions = {}) {
+  const { t, locale } = useTranslation();
   const [sessionId, setSessionId] = useQueryState("sessionId", parseAsString);
   const queryClient = useQueryClient();
   const copilotLlmAuth = useCopilotUIStore((state) => state.copilotLlmAuth);
@@ -354,7 +362,7 @@ export function useChatSession({
           options,
         }),
       });
-      const newSessionId = createdSessionId(response);
+      const newSessionId = createdSessionId(response, locale);
       pendingCreateRef.current = null;
       useCopilotStreamStore
         .getState()
@@ -376,7 +384,8 @@ export function useChatSession({
       if (
         !isPaywallError(error) &&
         !(
-          error instanceof Error && error.message === "Failed to create session"
+          error instanceof Error &&
+          error.message === t("Failed to create session", "创建对话失败")
         )
       ) {
         Sentry.captureException(error);
@@ -396,23 +405,38 @@ export function useChatSession({
     const resolved = resolveCopilotLLMAuthSelection(available, copilotLlmAuth);
     const title =
       available === undefined
-        ? "Could not check AI connections"
+        ? t("Could not check AI connections", "无法检查 AI 连接")
         : getAvailableLLMTransports(available).length === 0
-          ? "No AI connection is set up"
+          ? t("No AI connection is set up", "尚未设置 AI 连接")
           : !resolved
-            ? "Choose an AI connection"
+            ? t("Choose an AI connection", "请选择 AI 连接")
             : null;
     if (title || !resolved) {
-      const message = title ?? "Choose an AI connection";
-      toast({ variant: "destructive", title: message });
-      throw new ReportedSendError(message);
+      const message = title ?? t("Choose an AI connection", "请选择 AI 连接");
+      toast({
+        variant: "destructive",
+        title: message,
+        description: t(
+          "Refresh the page and try again.",
+          "请刷新页面后重试。",
+        ),
+      });
+      throw new ReportedSendError(
+        locale === "zh-CN" ? "无法加载 AI 连接" : message,
+      );
     }
     if (!copilotLlmAuth) return {};
     if (
       copilotLlmAuth.authProvider !== "platform" &&
       resolved.authProvider === "platform"
     ) {
-      toast({ title: "AI connections changed" });
+      toast({
+        title: t("AI connections changed", "AI 连接已更改"),
+        description: t(
+          "The next task will use the available connection when it starts.",
+          "下一个任务启动时将使用可用的连接。",
+        ),
+      });
     }
     return resolved.authProvider === "platform"
       ? { llm_auth_provider: "platform" }

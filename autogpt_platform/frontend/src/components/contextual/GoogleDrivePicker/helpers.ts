@@ -1,5 +1,6 @@
 import { BlockIOCredentialsSubSchema } from "@/lib/autogpt-server-api";
 import { loadScript } from "@/services/scripts/scripts";
+import type { Locale } from "@/lib/i18n/locale";
 
 export async function loadGoogleAPIPicker(): Promise<void> {
   validateWindow();
@@ -110,11 +111,14 @@ function validateWindow() {
   }
 }
 
-export function getCredentialsSchema(scopes: string[]) {
+export function getCredentialsSchema(scopes: string[], locale: Locale = "en") {
   return {
     type: "object",
     title: "Google Drive",
-    description: "Google OAuth needed to access Google Drive",
+    description:
+      locale === "zh-CN"
+        ? "访问 Google Drive 需要 Google OAuth 授权"
+        : "Google OAuth needed to access Google Drive",
     properties: {},
     required: [],
     credentials_provider: ["google"],

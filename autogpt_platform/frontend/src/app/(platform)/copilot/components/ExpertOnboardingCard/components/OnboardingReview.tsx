@@ -5,6 +5,7 @@ import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import type { QuestionAnswer } from "../../../tools/clarifying-questions";
 import { getAnswerSummary, type ExpertOnboardingStep } from "../helpers";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   steps: ExpertOnboardingStep[];
@@ -16,13 +17,14 @@ interface Props {
 /** The step before Send: every answer on one screen, each a way back to its
  *  question, since sending is the one move the user can't take back. */
 export function OnboardingReview({ steps, answers, labelId, onEdit }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4">
       <span
         id={labelId}
         className="text-body-lg leading-snug font-medium text-foreground-strong sm:text-lead"
       >
-        Check your answers
+        {t("Check your answers", "检查你的回答")}
       </span>
       <ul aria-labelledby={labelId} className="flex flex-col gap-2">
         {steps.map((step, index) => (
@@ -33,12 +35,15 @@ export function OnboardingReview({ steps, answers, labelId, onEdit }: Props) {
               className="group flex w-full items-start gap-3 rounded-md bg-surface-muted px-3 py-2.5 text-left ring-1 ring-separator transition-colors outline-none hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-foreground-subtle focus-visible:ring-offset-1 [@media(hover:none)]:min-h-11"
             >
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="sr-only">Change your answer to </span>
+                <span className="sr-only">
+                  {t("Change your answer to ", "修改以下问题的回答：")}
+                </span>
                 <Text variant="body-tight" as="span" tone="muted">
                   {step.question}
                 </Text>
                 <span className="text-body-lg break-words text-foreground-strong sm:text-body-md">
-                  {getAnswerSummary(answers[step.keyword]) || "No answer yet"}
+                  {getAnswerSummary(answers[step.keyword]) ||
+                    t("No answer yet", "尚未回答")}
                 </span>
               </span>
               <Icon

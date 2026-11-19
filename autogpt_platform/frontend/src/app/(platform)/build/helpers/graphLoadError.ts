@@ -1,4 +1,5 @@
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
+import { englishDisplayText, type DisplayTranslate } from "./translation";
 
 /** A 4xx won't heal on retry — fail fast instead of stalling ~7s in backoff. */
 export function retryUnlessClientError(
@@ -11,7 +12,10 @@ export function retryUnlessClientError(
   );
 }
 
-export function getGraphLoadErrorToast(error: unknown): {
+export function getGraphLoadErrorToast(
+  error: unknown,
+  t: DisplayTranslate = englishDisplayText,
+): {
   title: string;
   description: string;
 } {
@@ -19,13 +23,16 @@ export function getGraphLoadErrorToast(error: unknown): {
   const description =
     error instanceof Error && error.message
       ? error.message
-      : "An unexpected error occurred.";
+      : t("An unexpected error occurred.", "发生意外错误。");
 
   if (status === 404) {
-    return { title: "Workflow not found", description };
+    return { title: t("Workflow not found", "未找到工作流"), description };
   }
   if (status === 401 || status === 403) {
-    return { title: "Not authorized to view this workflow", description };
+    return {
+      title: t("Not authorized to view this workflow", "无权查看此工作流"),
+      description,
+    };
   }
-  return { title: "Failed to load workflow", description };
+  return { title: t("Failed to load workflow", "无法加载工作流"), description };
 }

@@ -395,8 +395,10 @@ function PaginationBar({
   return (
     <div className="flex flex-col items-center justify-between gap-3 pt-1 pb-3 text-foreground-tertiary sm:flex-row">
       <Text variant="small" tone="muted">
-        {start}–{end} {t("of", "共")}
-        {totalItems}
+        {t(
+          `${start}–${end} of ${totalItems}`,
+          `第 ${start}–${end} 项，共 ${totalItems} 项`,
+        )}
       </Text>
       <div className="flex items-center gap-2">
         <button

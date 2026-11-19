@@ -25,6 +25,7 @@ import {
 } from "../helpers";
 import { Download04Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 type TypeFilter = "ALL" | CreditTransactionType;
 
@@ -39,6 +40,16 @@ const TYPE_OPTIONS: { value: TypeFilter; label: string }[] = [
 ];
 
 export function ExportCreditTransactionsButton() {
+  const { t } = useTranslation();
+  const typeLabels: Record<TypeFilter, string> = {
+    ALL: "全部类型",
+    TOP_UP: "充值",
+    USAGE: "使用",
+    GRANT: "赠送",
+    REFUND: "退款",
+    CARD_CHECK: "银行卡验证",
+    SUBSCRIPTION: "订阅",
+  };
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [start, setStart] = useState(defaultStartDate);
@@ -60,8 +71,11 @@ export function ExportCreditTransactionsButton() {
   async function handleExport() {
     if (!start || !end) {
       toast({
-        title: "Pick a date range",
-        description: "Both start and end dates are required.",
+        title: t("Pick a date range", "选择日期范围"),
+        description: t(
+          "Both start and end dates are required.",
+          "开始日期和结束日期均为必填项。",
+        ),
         variant: "destructive",
       });
       return;
@@ -85,8 +99,11 @@ export function ExportCreditTransactionsButton() {
       const data = okData(response);
       if (!data) {
         toast({
-          title: "Export failed",
-          description: "Unexpected response shape from the export endpoint.",
+          title: t("Export failed", "导出失败"),
+          description: t(
+            "Unexpected response shape from the export endpoint.",
+            "导出接口返回的数据格式异常。",
+          ),
           variant: "destructive",
         });
         return;
@@ -94,8 +111,11 @@ export function ExportCreditTransactionsButton() {
       const csv = buildCreditTransactionsCsv(data.transactions);
       downloadCsv(csv, `credit_transactions_${start}_${end}.csv`);
       toast({
-        title: "Export ready",
-        description: `${data.total_rows} transactions downloaded.`,
+        title: t("Export ready", "导出完成"),
+        description: t(
+          `${data.total_rows} transactions downloaded.`,
+          `已下载 ${data.total_rows} 笔交易。`,
+        ),
       });
       setOpen(false);
     } catch (err) {
@@ -106,14 +126,18 @@ export function ExportCreditTransactionsButton() {
           (err.response as { detail?: string } | undefined)?.detail ??
           err.message;
         toast({
-          title: err.status === 400 ? "Window too large" : "Export failed",
+          title:
+            err.status === 400
+              ? t("Window too large", "时间范围过大")
+              : t("Export failed", "导出失败"),
           description: detail,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Export failed",
-          description: err instanceof Error ? err.message : "Unknown error",
+          title: t("Export failed", "导出失败"),
+          description:
+            err instanceof Error ? err.message : t("Unknown error", "未知错误"),
           variant: "destructive",
         });
       }
@@ -124,7 +148,7 @@ export function ExportCreditTransactionsButton() {
 
   return (
     <Dialog
-      title="Export credit transactions"
+      title={t("Export credit transactions", "导出积分交易")}
       styling={{ maxWidth: "30rem" }}
       controlled={{ isOpen: open, set: setOpen }}
     >
@@ -134,7 +158,7 @@ export function ExportCreditTransactionsButton() {
           size="small"
           leftIcon={<Icon icon={Download04Icon} />}
         >
-          Export CSV
+          {t("Export CSV", "导出 CSV")}
         </Button>
       </Dialog.Trigger>
       <Dialog.Content>
@@ -142,7 +166,7 @@ export function ExportCreditTransactionsButton() {
           <div className="flex gap-3">
             <div className="flex flex-1 flex-col gap-1">
               <label htmlFor="credit-export-start" className="text-body">
-                Start date (UTC)
+                {t("Start date (UTC)", "开始日期（UTC）")}
               </label>
               <input
                 id="credit-export-start"
@@ -154,7 +178,7 @@ export function ExportCreditTransactionsButton() {
             </div>
             <div className="flex flex-1 flex-col gap-1">
               <label htmlFor="credit-export-end" className="text-body">
-                End date (UTC)
+                {t("End date (UTC)", "结束日期（UTC）")}
               </label>
               <input
                 id="credit-export-end"
@@ -167,7 +191,7 @@ export function ExportCreditTransactionsButton() {
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-body" htmlFor="credit-export-type">
-              Transaction type
+              {t("Transaction type", "交易类型")}
             </label>
             <Select
               value={typeFilter}
@@ -179,7 +203,7 @@ export function ExportCreditTransactionsButton() {
               <SelectContent>
                 {TYPE_OPTIONS.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
+                    {t(opt.label, typeLabels[opt.value])}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -187,20 +211,25 @@ export function ExportCreditTransactionsButton() {
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-body" htmlFor="credit-export-user-id">
-              User ID (optional)
+              {t("User ID (optional)", "用户 ID（可选）")}
             </label>
             <input
               id="credit-export-user-id"
               type="text"
-              placeholder="Filter by a single user ID"
+              placeholder={t(
+                "Filter by a single user ID",
+                "按单个用户 ID 筛选",
+              )}
               className="rounded border px-3 py-1.5 text-body"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
             />
           </div>
           <p className="text-caption text-foreground-tertiary">
-            Window is capped at 90 days and 100k rows. Narrow the range if the
-            backend returns a 400.
+            {t(
+              "Window is capped at 90 days and 100k rows. Narrow the range if the backend returns a 400.",
+              "时间范围最多为 90 天，最多导出 10 万行。如果后端返回 400，请缩小范围。",
+            )}
           </p>
         </div>
         <Dialog.Footer>
@@ -210,7 +239,7 @@ export function ExportCreditTransactionsButton() {
             onClick={() => setOpen(false)}
             disabled={exporting}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button
             variant="primary"
@@ -218,7 +247,7 @@ export function ExportCreditTransactionsButton() {
             onClick={handleExport}
             loading={exporting}
           >
-            Download CSV
+            {t("Download CSV", "下载 CSV")}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

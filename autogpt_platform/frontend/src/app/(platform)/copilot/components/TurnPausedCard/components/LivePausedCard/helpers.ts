@@ -1,4 +1,5 @@
 import type { AIConnectionOffer } from "@/app/api/__generated__/models/aIConnectionOffer";
+import type { Locale } from "@/lib/i18n/locale";
 
 import {
   parseProviderFailure,
@@ -69,13 +70,18 @@ export type ContinueOutcome =
   | { kind: "out_of_budget"; resetsAt: string | null }
   | { kind: "failed"; description: string };
 
-export function continueOutcome(error: unknown): ContinueOutcome {
+export function continueOutcome(
+  error: unknown,
+  locale: Locale = "en",
+): ContinueOutcome {
   const failure = apiFailureOf(error);
   if (failure?.status === 409 && failure.detail === "unsupported_connection") {
     return {
       kind: "failed",
       description:
-        "This chat now runs on Microsoft 365 Copilot, which can't pick up a paused task. Switch its connection back to keep going.",
+        locale === "zh-CN"
+          ? "此对话当前使用 Microsoft 365 Copilot，无法恢复暂停的任务。请切换回原来的连接以继续。"
+          : "This chat now runs on Microsoft 365 Copilot, which can't pick up a paused task. Switch its connection back to keep going.",
     };
   }
   // One turn per chat: the one already running is the one to follow.
@@ -92,20 +98,32 @@ export function continueOutcome(error: unknown): ContinueOutcome {
     };
   }
   if (failure?.status === 402) {
-    return { kind: "failed", description: "Choose a plan to keep going." };
+    return {
+      kind: "failed",
+      description:
+        locale === "zh-CN"
+          ? "请选择套餐以继续。"
+          : "Choose a plan to keep going.",
+    };
   }
   // The running-turn cap explains itself.
   if (failure?.status === 429 && typeof failure.detail === "string") {
     return { kind: "failed", description: failure.detail };
   }
-  return { kind: "failed", description: "Try again in a moment." };
+  return {
+    kind: "failed",
+    description: locale === "zh-CN" ? "请稍后重试。" : "Try again in a moment.",
+  };
 }
 
 export type AtResetOutcome =
   | { kind: "budget_back" }
   | { kind: "failed"; title: string; description: string };
 
-export function atResetOutcome(error: unknown): AtResetOutcome {
+export function atResetOutcome(
+  error: unknown,
+  locale: Locale = "en",
+): AtResetOutcome {
   const failure = apiFailureOf(error);
   if (failure?.status === 409 && failure.detail === "not_out_of_budget") {
     return { kind: "budget_back" };
@@ -113,17 +131,25 @@ export function atResetOutcome(error: unknown): AtResetOutcome {
   if (failure?.status === 409 && failure.detail === "no_reset") {
     return {
       kind: "failed",
-      title: "This allowance doesn't reset",
-      description: "Upgrade to keep going.",
+      title:
+        locale === "zh-CN"
+          ? "此额度不会自动重置"
+          : "This allowance doesn't reset",
+      description:
+        locale === "zh-CN" ? "升级套餐以继续。" : "Upgrade to keep going.",
     };
   }
   return {
     kind: "failed",
     title:
       failure?.status === 503
-        ? "Couldn't check your budget"
-        : "Couldn't set the resume",
-    description: "Try again in a moment.",
+        ? locale === "zh-CN"
+          ? "无法查看你的额度"
+          : "Couldn't check your budget"
+        : locale === "zh-CN"
+          ? "无法设置恢复时间"
+          : "Couldn't set the resume",
+    description: locale === "zh-CN" ? "请稍后重试。" : "Try again in a moment.",
   };
 }
 

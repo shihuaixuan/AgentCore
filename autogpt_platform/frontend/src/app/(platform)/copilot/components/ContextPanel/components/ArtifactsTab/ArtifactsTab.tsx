@@ -11,6 +11,7 @@ import { fileItemToArtifactRef } from "../FilesTab/helpers";
 import type { SessionFile } from "../FilesTab/useSessionFiles";
 import { useSessionFiles } from "../FilesTab/useSessionFiles";
 import { ArtifactMiniCard } from "./components/ArtifactMiniCard";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 // The panel previews what this chat produced; /artifacts stays one click away
 // for the workspace-wide library.
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function ArtifactsTab({ sessionId }: Props) {
+  const { t } = useTranslation();
   const openArtifact = useCopilotUIStore((s) => s.openArtifact);
   const { uploaded, deliverables, isLoading, isError } =
     useSessionFiles(sessionId);
@@ -28,7 +30,10 @@ export function ArtifactsTab({ sessionId }: Props) {
 
   function handleDownload(file: SessionFile) {
     downloadArtifact(fileItemToArtifactRef(file.item)).catch(() =>
-      toast({ title: "Download failed", variant: "destructive" }),
+      toast({
+        title: t("Download failed", "下载失败"),
+        variant: "destructive",
+      }),
     );
   }
 
@@ -47,8 +52,10 @@ export function ArtifactsTab({ sessionId }: Props) {
       <div className="p-3">
         <ErrorCard
           isSuccess={false}
-          context="artifacts"
-          responseError={{ message: "Failed to load artifacts." }}
+          context={t("artifacts", "产物")}
+          responseError={{
+            message: t("Failed to load artifacts.", "加载产物失败。"),
+          }}
         />
       </div>
     );
@@ -64,8 +71,11 @@ export function ArtifactsTab({ sessionId }: Props) {
           className="max-w-[17rem] text-center"
         >
           {files.length === 0
-            ? "Nothing to preview yet."
-            : "Pick an artifact from this chat to preview it here."}
+            ? t("Nothing to preview yet.", "暂无可预览的内容。")
+            : t(
+                "Pick an artifact from this chat to preview it here.",
+                "选择此对话中的产物，即可在这里预览。",
+              )}
         </Text>
         <Button
           as="NextLink"
@@ -73,7 +83,7 @@ export function ArtifactsTab({ sessionId }: Props) {
           variant="secondary"
           size="small"
         >
-          Open artifacts
+          {t("Open artifacts", "打开产物")}
         </Button>
       </div>
       {files.length > 0 && (

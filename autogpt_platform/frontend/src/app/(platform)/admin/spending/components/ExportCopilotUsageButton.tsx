@@ -17,8 +17,10 @@ import {
 } from "../helpers";
 import { ChartLineIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function ExportCopilotUsageButton() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [start, setStart] = useState(defaultStartDate);
@@ -38,8 +40,11 @@ export function ExportCopilotUsageButton() {
   async function handleExport() {
     if (!start || !end) {
       toast({
-        title: "Pick a date range",
-        description: "Both start and end dates are required.",
+        title: t("Pick a date range", "选择日期范围"),
+        description: t(
+          "Both start and end dates are required.",
+          "开始日期和结束日期均为必填项。",
+        ),
         variant: "destructive",
       });
       return;
@@ -58,8 +63,11 @@ export function ExportCopilotUsageButton() {
       const data = okData(response);
       if (!data) {
         toast({
-          title: "Export failed",
-          description: "Unexpected response shape from the export endpoint.",
+          title: t("Export failed", "导出失败"),
+          description: t(
+            "Unexpected response shape from the export endpoint.",
+            "导出接口返回的数据格式异常。",
+          ),
           variant: "destructive",
         });
         return;
@@ -67,8 +75,11 @@ export function ExportCopilotUsageButton() {
       const csv = buildCopilotUsageCsv(data.rows);
       downloadCsv(csv, `copilot_weekly_usage_${start}_${end}.csv`);
       toast({
-        title: "Export ready",
-        description: `${data.total_rows} (user, week) rows downloaded.`,
+        title: t("Export ready", "导出完成"),
+        description: t(
+          `${data.total_rows} (user, week) rows downloaded.`,
+          `已下载 ${data.total_rows} 行（用户、周）数据。`,
+        ),
       });
       setOpen(false);
     } catch (err) {
@@ -79,14 +90,18 @@ export function ExportCopilotUsageButton() {
           (err.response as { detail?: string } | undefined)?.detail ??
           err.message;
         toast({
-          title: err.status === 400 ? "Window too large" : "Export failed",
+          title:
+            err.status === 400
+              ? t("Window too large", "时间范围过大")
+              : t("Export failed", "导出失败"),
           description: detail,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Export failed",
-          description: err instanceof Error ? err.message : "Unknown error",
+          title: t("Export failed", "导出失败"),
+          description:
+            err instanceof Error ? err.message : t("Unknown error", "未知错误"),
           variant: "destructive",
         });
       }
@@ -97,7 +112,7 @@ export function ExportCopilotUsageButton() {
 
   return (
     <Dialog
-      title="Export copilot weekly usage"
+      title={t("Export copilot weekly usage", "导出 Copilot 每周用量")}
       styling={{ maxWidth: "30rem" }}
       controlled={{ isOpen: open, set: setOpen }}
     >
@@ -107,19 +122,21 @@ export function ExportCopilotUsageButton() {
           size="small"
           leftIcon={<Icon icon={ChartLineIcon} />}
         >
-          Copilot Usage CSV
+          {t("Copilot Usage CSV", "Copilot 用量 CSV")}
         </Button>
       </Dialog.Trigger>
       <Dialog.Content>
         <div className="flex flex-col gap-4">
           <p className="text-body text-foreground-tertiary">
-            Aggregates copilot:* spend by user and ISO week and joins each row
-            against the user&apos;s tier-derived weekly limit.
+            {t(
+              "Aggregates copilot:* spend by user and ISO week and joins each row against the user's tier-derived weekly limit.",
+              "按用户和 ISO 周汇总 copilot:* 消费，并将每行与用户订阅方案对应的每周限额关联。",
+            )}
           </p>
           <div className="flex gap-3">
             <div className="flex flex-1 flex-col gap-1">
               <label htmlFor="copilot-export-start" className="text-body">
-                Start date (UTC)
+                {t("Start date (UTC)", "开始日期（UTC）")}
               </label>
               <input
                 id="copilot-export-start"
@@ -131,7 +148,7 @@ export function ExportCopilotUsageButton() {
             </div>
             <div className="flex flex-1 flex-col gap-1">
               <label htmlFor="copilot-export-end" className="text-body">
-                End date (UTC)
+                {t("End date (UTC)", "结束日期（UTC）")}
               </label>
               <input
                 id="copilot-export-end"
@@ -143,7 +160,10 @@ export function ExportCopilotUsageButton() {
             </div>
           </div>
           <p className="text-caption text-foreground-tertiary">
-            Window is capped at 90 days and 100k rows.
+            {t(
+              "Window is capped at 90 days and 100k rows.",
+              "时间范围最多为 90 天，最多导出 10 万行。",
+            )}
           </p>
         </div>
         <Dialog.Footer>
@@ -153,7 +173,7 @@ export function ExportCopilotUsageButton() {
             onClick={() => setOpen(false)}
             disabled={exporting}
           >
-            Cancel
+            {t("Cancel", "取消")}
           </Button>
           <Button
             variant="primary"
@@ -161,7 +181,7 @@ export function ExportCopilotUsageButton() {
             onClick={handleExport}
             loading={exporting}
           >
-            Download CSV
+            {t("Download CSV", "下载 CSV")}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

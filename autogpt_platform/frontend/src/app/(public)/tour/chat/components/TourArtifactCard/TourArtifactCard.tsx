@@ -1,18 +1,25 @@
+"use client";
+
 import { Text } from "@/components/atoms/Text/Text";
 import type { TourArtifact } from "../../script/types";
 import { ArrowRight02Icon, Mail02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   artifact: TourArtifact;
 }
 
 export function TourArtifactCard({ artifact }: Props) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-2.5 rounded-xl border border-border-base/70 bg-surface p-4 shadow-sm">
       <div className="flex items-center gap-1.5 text-body text-foreground-tertiary">
         <Icon icon={Mail02Icon} className="size-4 shrink-0" />
-        <span>Artifact · {artifact.caption}</span>
+        <span>
+          {t("Artifact", "产物")} · {artifact.caption}
+        </span>
       </div>
 
       <Text variant="large-medium" tone="primary">

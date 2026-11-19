@@ -1,6 +1,7 @@
 import { getWebSocketToken } from "@/lib/auth/actions";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { environment } from "@/services/environment";
+import type { Locale } from "@/lib/i18n/locale";
 
 interface WorkspaceUploadResponse {
   file_id: string;
@@ -32,13 +33,20 @@ const UPLOAD_TIMEOUT_MS = 5 * 60 * 1000;
  * Returns a user-facing message when a file exceeds `maxSizeMB`, or null when
  * it is within the limit. Lets callers reject oversized files before uploading.
  */
-export function getFileSizeError(file: File, maxSizeMB: number): string | null {
+export function getFileSizeError(
+  file: File,
+  maxSizeMB: number,
+  locale: Locale = "en",
+): string | null {
   if (file.size <= maxSizeMB * BYTES_PER_MB) return null;
   const sizeMB = (file.size / BYTES_PER_MB).toFixed(1);
+  if (locale === "zh-CN")
+    return `文件过大（${sizeMB} MB）。最大允许 ${maxSizeMB} MB，请选择较小的文件。`;
   return `File is too large (${sizeMB}MB). Maximum size is ${maxSizeMB}MB — please choose a smaller file.`;
 }
 
 interface FileSizeGuardArgs {
+  locale?: Locale;
   file: File;
   maxSizeMB: number;
   toast: (options: {
@@ -52,11 +60,12 @@ export function isFileTooLarge({
   file,
   maxSizeMB,
   toast,
+  locale = "en",
 }: FileSizeGuardArgs): boolean {
-  const error = getFileSizeError(file, maxSizeMB);
+  const error = getFileSizeError(file, maxSizeMB, locale);
   if (!error) return false;
   toast({
-    title: "File too large",
+    title: locale === "zh-CN" ? "文件过大" : "File too large",
     description: error,
     variant: "destructive",
   });
@@ -67,16 +76,22 @@ interface DirectUploadArgs {
   path: string;
   file: File;
   searchParams?: Record<string, string>;
+  locale?: Locale;
 }
 
 async function postFileToBackend({
   path,
   file,
   searchParams,
+  locale = "en",
 }: DirectUploadArgs): Promise<Response> {
   const { token, error: tokenError } = await getWebSocketToken();
   if (tokenError || !token) {
-    throw new Error("Authentication error — please sign in again.");
+    throw new Error(
+      locale === "zh-CN"
+        ? "身份验证失败，请重新登录。"
+        : "Authentication error — please sign in again.",
+    );
   }
 
   const baseURL = new URL(environment.getAGPTServerBaseUrl());
@@ -100,16 +115,18 @@ async function postFileToBackend({
 }
 
 // Keeps the status, so a caller can tell a missing plan (402) from a failure.
-async function uploadError(res: Response): Promise<ApiError> {
-  return new ApiError(await readUploadError(res), res.status, null);
+async function uploadError(res: Response, locale: Locale): Promise<ApiError> {
+  return new ApiError(await readUploadError(res, locale), res.status, null);
 }
 
-async function readUploadError(res: Response): Promise<string> {
+async function readUploadError(res: Response, locale: Locale): Promise<string> {
   // A proxy/ingress in front of the backend may still reject an oversized body
   // with a 413 whose payload isn't backend JSON — surface a clear size message
   // instead of a bare "HTTP 413".
   if (res.status === 413) {
-    return "File is too large. Please choose a smaller file.";
+    return locale === "zh-CN"
+      ? "文件过大，请选择较小的文件。"
+      : "File is too large. Please choose a smaller file.";
   }
   const text = await res.text();
   try {
@@ -126,22 +143,29 @@ async function readUploadError(res: Response): Promise<string> {
     // Response body wasn't JSON — surface the raw text so it reaches the toast.
     if (text) return text;
   }
-  return res.statusText || `Upload failed (HTTP ${res.status})`;
+  return (
+    res.statusText ||
+    (locale === "zh-CN"
+      ? `上传失败（HTTP ${res.status}）`
+      : `Upload failed (HTTP ${res.status})`)
+  );
 }
 
 export async function uploadFileDirect(
   file: File,
   sessionID?: string,
+  locale: Locale = "en",
 ): Promise<WorkspaceUploadResponse> {
   const res = await postFileToBackend({
     path: "/api/workspace/files/upload",
     file,
+    locale,
     searchParams: {
       overwrite: "true",
       ...(sessionID ? { session_id: sessionID } : {}),
     },
   });
-  if (!res.ok) throw await uploadError(res);
+  if (!res.ok) throw await uploadError(res, locale);
   return res.json();
 }
 
@@ -152,13 +176,15 @@ export async function uploadFileDirect(
 export async function uploadSubmissionMediaDirect(
   file: File,
   purpose: "submission" | "expert-avatar" = "submission",
+  locale: Locale = "en",
 ): Promise<string> {
   const res = await postFileToBackend({
     path: "/api/store/submissions/media",
     file,
+    locale,
     searchParams: purpose === "expert-avatar" ? { purpose } : undefined,
   });
-  if (!res.ok) throw await uploadError(res);
+  if (!res.ok) throw await uploadError(res, locale);
   // The endpoint returns the URL as a JSON string.
   const url = (await res.json()) as unknown;
   return typeof url === "string" ? url : String(url);
@@ -168,10 +194,12 @@ export async function uploadSubmissionMediaDirect(
 export async function uploadOAuthAppLogoDirect(
   appId: string,
   file: File,
+  locale: Locale = "en",
 ): Promise<void> {
   const res = await postFileToBackend({
     path: `/api/oauth/apps/${encodeURIComponent(appId)}/logo/upload`,
     file,
+    locale,
   });
-  if (!res.ok) throw await uploadError(res);
+  if (!res.ok) throw await uploadError(res, locale);
 }

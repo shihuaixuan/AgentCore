@@ -4,6 +4,8 @@ import { SessionKey } from "@/services/storage/session-storage";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { User } from "../../types";
+import { render, screen } from "@testing-library/react";
+import type { ReactElement } from "react";
 
 // Only the server actions are faked; the store, auth helpers, impersonation
 // state and header builder run as shipped.
@@ -185,11 +187,11 @@ describe("a deploy skew the reload didn't fix", () => {
 
     expect(actions.validateSession).toHaveBeenCalledTimes(7);
     expect(reload).not.toHaveBeenCalled();
-    expect(toast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: "A new version of AutoGPT is available",
-      }),
-    );
+    const [{ title }] = toast.mock.calls.at(-1) as [{ title: ReactElement }];
+    render(title);
+    expect(
+      screen.getByText("A new version of AutoGPT is available"),
+    ).toBeDefined();
     expect(useAuthStore.getState().user).toBe(admin);
   });
 });

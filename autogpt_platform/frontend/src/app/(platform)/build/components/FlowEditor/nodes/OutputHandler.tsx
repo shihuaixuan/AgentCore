@@ -27,6 +27,7 @@ import {
   InformationCircleIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   outputSchema: RJSFSchema;
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export function OutputHandler({ outputSchema, nodeId, uiType }: Props) {
+  const { t, locale } = useTranslation();
   const isOutputConnected = useEdgeStore((state) => state.isOutputConnected);
   const sourceHandles = useEdgeStore(
     useShallow((state) =>
@@ -126,7 +128,7 @@ export function OutputHandler({ outputSchema, nodeId, uiType }: Props) {
 
       const { displayType, colorClass } =
         // oxlint-disable-next-line design-system/require-static-classes -- getTypeDisplayInfo returns whole, static class strings
-        getTypeDisplayInfo(fieldSchema);
+        getTypeDisplayInfo(fieldSchema, locale);
       const isExpanded =
         Object.hasOwn(expandedObjects, fullKey) && expandedObjects[fullKey];
 
@@ -144,7 +146,9 @@ export function OutputHandler({ outputSchema, nodeId, uiType }: Props) {
               <button
                 onClick={() => toggleObjectExpanded(fullKey)}
                 className="flex items-center text-foreground-tertiary hover:text-foreground-body"
-                aria-label={isExpanded ? "Collapse" : "Expand"}
+                aria-label={
+                  isExpanded ? t("Collapse", "收起") : t("Expand", "展开")
+                }
               >
                 {isExpanded ? (
                   <Icon icon={ArrowDown01Icon} size={12} />
@@ -159,7 +163,7 @@ export function OutputHandler({ outputSchema, nodeId, uiType }: Props) {
                   <TooltipTrigger asChild>
                     <span
                       className="ml-1.5 cursor-pointer"
-                      aria-label="info"
+                      aria-label={t("info", "说明")}
                       tabIndex={0}
                     >
                       <Icon icon={InformationCircleIcon} />
@@ -215,7 +219,7 @@ export function OutputHandler({ outputSchema, nodeId, uiType }: Props) {
           tone="body"
           className="flex items-center gap-2"
         >
-          Output{" "}
+          {t("Output", "输出")}{" "}
           <Icon
             icon={ArrowDown01Icon}
             size={16}

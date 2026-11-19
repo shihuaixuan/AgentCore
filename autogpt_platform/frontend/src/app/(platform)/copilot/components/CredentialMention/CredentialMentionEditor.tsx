@@ -21,6 +21,7 @@ import {
   setEditorCaret,
 } from "./editorHelpers";
 import { useCredentialMentionEditor } from "./useCredentialMentionEditor";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   id?: string;
@@ -64,6 +65,7 @@ export function CredentialMentionEditor({
   placeholder,
   className,
 }: Props) {
+  const { t } = useTranslation();
   const fallbackId = useId();
   const inputId = id ?? fallbackId;
   const rich = parseCredentialMentions(value).some(
@@ -153,7 +155,7 @@ export function CredentialMentionEditor({
     return (
       <PromptInputTextarea
         id={inputId}
-        aria-label="Chat message input"
+        aria-label={t("Chat message input", "聊天消息输入框")}
         value={value}
         onChange={handleTextareaChange}
         onKeyDown={onKeyDown}
@@ -174,7 +176,7 @@ export function CredentialMentionEditor({
         ref={attachEditor}
         id={inputId}
         role="textbox"
-        aria-label="Chat message input"
+        aria-label={t("Chat message input", "聊天消息输入框")}
         aria-multiline="true"
         aria-disabled={disabled}
         data-slot="input-group-control"

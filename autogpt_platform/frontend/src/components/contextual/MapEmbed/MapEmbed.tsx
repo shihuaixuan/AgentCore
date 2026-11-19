@@ -2,6 +2,7 @@ import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner
 import { Text } from "@/components/atoms/Text/Text";
 import { googleMapsPinUrl, type MapData } from "./helpers";
 import { useMapEmbed } from "./useMapEmbed";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   data: MapData;
@@ -32,6 +33,7 @@ function PinLinks({ data }: Props) {
 }
 
 export function MapEmbed({ data }: Props) {
+  const { t } = useTranslation();
   const { containerRef, status } = useMapEmbed(data.pins);
 
   return (
@@ -51,7 +53,7 @@ export function MapEmbed({ data }: Props) {
           <div
             ref={containerRef}
             className="h-full w-full"
-            aria-label={data.title ?? "Map"}
+            aria-label={data.title ?? t("Map", "地图")}
           />
           {status === "loading" ? (
             <div className="absolute inset-0 flex items-center justify-center text-foreground-tertiary">

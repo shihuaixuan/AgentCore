@@ -36,7 +36,7 @@ export function SetupNeeded() {
           <Icon icon={Alert01Icon} size={14} aria-hidden />
         </span>
         <Text variant="small-medium" as="h2" tone="body">
-          Setup needed ({items.length})
+          {t(`Setup needed (${items.length})`, `需要设置（${items.length}）`)}
         </Text>
       </div>
       <ul

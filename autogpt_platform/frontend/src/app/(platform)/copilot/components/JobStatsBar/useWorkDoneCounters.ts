@@ -1,3 +1,4 @@
+import type { Locale } from "@/lib/i18n/locale";
 import type { UIDataTypes, UIMessage, UITools } from "ai";
 import { TOOL_PART_PREFIX } from "./constants";
 
@@ -13,6 +14,15 @@ const TOOL_TO_CATEGORY: Record<string, string> = {
 };
 
 const MAX_COUNTERS = 3;
+
+const CHINESE_CATEGORY_LABELS: Record<string, string> = {
+  search: "次搜索",
+  "workflow run": "次工作流运行",
+  action: "次操作",
+  "workflow created": "个已创建的工作流",
+  "workflow edited": "个已编辑的工作流",
+  "workflow scheduled": "个已安排的工作流",
+};
 
 function pluralize(label: string, count: number): string {
   if (count === 1) return label;
@@ -42,6 +52,7 @@ export interface WorkDoneCounter {
 
 export function getWorkDoneCounters(
   messages: UIMessage<unknown, UIDataTypes, UITools>[],
+  locale: Locale = "en",
 ) {
   const categoryCounts = new Map<string, number>();
 
@@ -62,7 +73,10 @@ export function getWorkDoneCounters(
   const counters: WorkDoneCounter[] = Array.from(categoryCounts.entries())
     .map(function toCounter([category, count]) {
       return {
-        label: pluralize(category, count),
+        label:
+          locale === "zh-CN"
+            ? (CHINESE_CATEGORY_LABELS[category] ?? category)
+            : pluralize(category, count),
         count,
         category,
       };

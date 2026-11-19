@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { HomeAttentionItem } from "@/app/api/__generated__/models/homeAttentionItem";
 import { useAttentionDecisions } from "./useAttentionDecisions";
 import { useHeldReview } from "./useHeldReview";
@@ -20,6 +21,15 @@ const FILTER_LABELS: Partial<Record<AttentionFilter, string>> = {
 };
 
 export function useNeedsYou({ items }: Args) {
+  const { t } = useTranslation();
+  const translatedLabels: Record<AttentionFilter, string> = {
+    all: "全部",
+    approval: "待批准",
+    setup: "待设置",
+    paused: "已暂停",
+    credits: "积分",
+    question: "问题",
+  };
   const { pendingIDs, decide } = useAttentionDecisions();
   const held = useHeldReview({ items });
   const carousel = useReviewCarousel({ rows: held.rows, held });
@@ -42,7 +52,10 @@ export function useNeedsYou({ items }: Args) {
     visibleRows,
     pendingCount: held.pendingCount,
     filterOptions: (["all", ...filterKinds] as AttentionFilter[]).map(
-      (value) => ({ value, label: FILTER_LABELS[value] ?? value }),
+      (value) => ({
+        value,
+        label: t(FILTER_LABELS[value] ?? value, translatedLabels[value]),
+      }),
     ),
     hasFilters: filterKinds.length > 1,
     selectedKind,

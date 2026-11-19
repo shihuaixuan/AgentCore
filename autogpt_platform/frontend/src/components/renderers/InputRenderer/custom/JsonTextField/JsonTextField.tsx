@@ -71,7 +71,7 @@ export const JsonTextField = (props: FieldProps) => {
     path: fieldPathId?.path,
   });
 
-  const placeholder = getPlaceholder(schema);
+  const placeholder = getPlaceholder(schema, t);
   const title = schema.title || name || t("JSON Value", "JSON 值");
   const domId = getFieldDomId(fieldId, registry.formContext);
   const fieldAccessibility = useFieldAccessibilityContext(fieldId);

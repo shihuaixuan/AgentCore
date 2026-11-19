@@ -1,3 +1,5 @@
+"use client";
+
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
 import { Fragment } from "react";
@@ -8,6 +10,7 @@ import {
   Clock01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   agent: TourAgent;
@@ -16,6 +19,8 @@ interface Props {
 }
 
 export function TourAgentCard({ agent, runCompleted }: Props) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border-base/70 bg-surface p-4 shadow-sm">
       <div className="flex items-center justify-between gap-3">
@@ -33,7 +38,7 @@ export function TourAgentCard({ agent, runCompleted }: Props) {
           {runCompleted ? (
             <>
               <Icon icon={CheckmarkCircle02Icon} className="size-4 shrink-0" />
-              Run completed
+              {t("Run completed", "运行完成")}
             </>
           ) : (
             <>
@@ -46,7 +51,7 @@ export function TourAgentCard({ agent, runCompleted }: Props) {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
                 <span className="relative inline-flex size-2 rounded-full bg-success" />
               </span>
-              Running
+              {t("Running", "运行中")}
             </>
           )}
         </span>
@@ -54,7 +59,10 @@ export function TourAgentCard({ agent, runCompleted }: Props) {
 
       <div className="flex items-center gap-1.5 text-body text-foreground-secondary">
         <Icon icon={Clock01Icon} className="size-4 shrink-0" />
-        <span>{agent.schedule} · created from your sentence</span>
+        <span>
+          {agent.schedule} ·{" "}
+          {t("created from your sentence", "根据你的一句话创建")}
+        </span>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

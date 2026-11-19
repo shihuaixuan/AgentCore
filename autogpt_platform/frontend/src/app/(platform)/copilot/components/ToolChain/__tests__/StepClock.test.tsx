@@ -8,6 +8,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChainRowView } from "../ChainRowView";
 import { useNoteRunningSteps } from "../StepClock";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import type { ChainRow } from "../helpers";
 
 vi.mock("../SwapText", () => ({
@@ -39,6 +40,17 @@ function row(overrides: Partial<ChainRow> = {}): ChainRow {
 }
 
 describe("ChainRowView - step clock", () => {
+  it("localizes the step duration in Chinese", () => {
+    render(
+      <LanguageProvider>
+        <ChainRowView row={row()} isLast />
+      </LanguageProvider>,
+    );
+    advanceSeconds(22);
+    expect(screen.getByText("22秒")).toBeDefined();
+    expect(screen.queryByText("22s")).toBeNull();
+  });
+
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(NOW);

@@ -52,8 +52,11 @@ export function BalanceCard({ index = 0 }: Props) {
   if (isError || balanceCents === null) {
     return (
       <ErrorCard
-        context="balance"
-        hint="We couldn't load your credit balance."
+        context={t("balance", "余额")}
+        hint={t(
+          "We couldn't load your credit balance.",
+          "无法加载你的积分余额。",
+        )}
         onRetry={() => void refetch()}
       />
     );
@@ -65,7 +68,13 @@ export function BalanceCard({ index = 0 }: Props) {
         <Text variant="body-medium" as="span">
           {t("Automation credits", "自动化额度")}
         </Text>
-        <InformationTooltip description={BALANCE_EXPLAINER} iconSize={22} />
+        <InformationTooltip
+          description={t(
+            BALANCE_EXPLAINER,
+            "自动化积分是用于自动化运行的平台积分。它们不是现金，不能提现，也不能抵扣订阅费用。",
+          )}
+          iconSize={22}
+        />
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-large border border-border-base bg-surface p-5 shadow-message-table">
@@ -85,7 +94,10 @@ export function BalanceCard({ index = 0 }: Props) {
           <Dialog.Content>
             <div className="flex flex-col gap-3">
               <Text variant="small" as="span" tone="muted">
-                We&apos;ll redirect you to Stripe to complete your purchase.
+                {t(
+                  "We'll redirect you to Stripe to complete your purchase.",
+                  "即将跳转至 Stripe 完成购买。",
+                )}
               </Text>
               <Input
                 id="addcredits-amount"
