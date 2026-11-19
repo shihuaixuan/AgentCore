@@ -1,25 +1,14 @@
 "use client";
 
-import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
-import { ExpertIdentityDetails } from "@/components/molecules/ExpertIdentityDetails/ExpertIdentityDetails";
-import { getExpertRoleLabel } from "@/services/experts/expert-role-label";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/atoms/Tooltip/BaseTooltip";
+import { Icon } from "@/components/atoms/Icon/Icon";
+import { Text } from "@/components/atoms/Text/Text";
 import {
   AppSidebarTrigger,
   useAppSidebarToggle,
 } from "@/components/layout/AppSidebar/components/AppSidebarTrigger/AppSidebarTrigger";
-import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import type { ExpertIdentity } from "../../../useExpertMap";
-import { ExpertAvatar } from "./ExpertAvatar/ExpertAvatar";
-
-// Otto's product-facing title when a session carries no expert identity.
-const DEFAULT_EXPERT_ROLE = "Head of AI";
+import { cn } from "@/lib/utils";
+import { BubbleChatIcon } from "@hugeicons/core-free-icons";
 
 export type FloatingControls = "newLayout";
 
@@ -34,9 +23,7 @@ const chipButtonClassName =
   "size-9 shrink-0 rounded-full hover:bg-surface-hover";
 
 interface Props {
-  expertIdentity?: ExpertIdentity | null;
-  /** The roster has not settled yet for an expert-scoped session. */
-  isResolvingExpertIdentity?: boolean;
+  title?: string | null;
   /** Which layout floats its controls over the chat's top-left corner on
    *  small viewports; the chip lines up with them. */
   floatingControls?: FloatingControls;
@@ -44,23 +31,10 @@ interface Props {
 
 /** Floats as a translucent chip pinned to the pane's top-left gutter — the
  *  zero-height wrapper keeps it out of the flex flow so messages scroll
- *  underneath. An expert session wears the expert's identity and every other
- *  session is Otto's, so the thread is never anonymous. The identity is a
- *  passive label; the expert's integrations live in the top-right controls.
+ *  underneath.
  *  In the new layout on phones the chip also carries the sidebar button. */
-export function ThreadHeader({
-  expertIdentity,
-  isResolvingExpertIdentity = false,
-  floatingControls,
-}: Props) {
-  const { t, locale } = useTranslation();
-  // While the roster loads, the chip shows a quiet placeholder rather than
-  // Otto's identity, which would be wrong for an expert session.
-  const isResolving = isResolvingExpertIdentity && !expertIdentity;
-  const name = expertIdentity?.name ?? "Otto";
-  const role = expertIdentity?.role ?? t(DEFAULT_EXPERT_ROLE, "AI 负责人");
-  const jobTitle = expertIdentity?.jobTitle;
-  const roleLabel = jobTitle || getExpertRoleLabel(role, locale);
+export function ThreadHeader({ title, floatingControls }: Props) {
+  const { t } = useTranslation();
   const hasSidebar = Boolean(useAppSidebarToggle());
   const hasSidebarButton = floatingControls === "newLayout" && hasSidebar;
 
@@ -74,7 +48,7 @@ export function ThreadHeader({
       >
         <div
           className={cn(
-            "pointer-events-auto flex min-w-0 items-center gap-1 rounded-full border border-border-base/70 bg-surface/75 py-1 pr-5 pl-1.5 shadow-sm backdrop-blur-md max-lg:shadow-md",
+            "pointer-events-auto flex min-h-11 min-w-0 items-center gap-2 rounded-full border border-border-base/70 bg-surface/75 px-3 py-1 shadow-sm backdrop-blur-md max-lg:shadow-md",
             hasSidebarButton && "max-md:pl-1",
           )}
         >
@@ -83,49 +57,15 @@ export function ThreadHeader({
               className={cn(chipButtonClassName, "md:hidden")}
             />
           )}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div
-                  tabIndex={0}
-                  aria-label={
-                    isResolving
-                      ? t("Loading expert", "正在加载专家")
-                      : `${name} — ${roleLabel}`
-                  }
-                  className={cn(
-                    "flex min-w-0 items-center gap-2 rounded-full whitespace-nowrap",
-                    hasSidebarButton && "max-md:ml-1.5",
-                  )}
-                >
-                  <ExpertAvatar
-                    name={name}
-                    avatarUrl={expertIdentity?.avatarUrl ?? null}
-                    color={expertIdentity?.color}
-                    isAutopilot={!expertIdentity && !isResolving}
-                    isLoading={isResolving}
-                    size="md"
-                  />
-                  {isResolving ? (
-                    <Skeleton className="h-3.5 w-16 rounded" />
-                  ) : (
-                    <span className="max-w-[10rem] min-w-0">
-                      <ExpertIdentityDetails
-                        isOtto={!expertIdentity}
-                        name={name}
-                        role={role}
-                        jobTitle={jobTitle}
-                        size="compact"
-                      />
-                    </span>
-                  )}
-                </div>
-              </TooltipTrigger>
-              {isResolving ? null : (
-                <TooltipContent side="bottom">{roleLabel}</TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
+          <Icon icon={BubbleChatIcon} size={18} tone="secondary" aria-hidden />
+          <Text
+            variant="small-tight"
+            as="span"
+            weight="semibold"
+            className="max-w-64 truncate"
+          >
+            {title || t("Conversation", "对话")}
+          </Text>
         </div>
       </div>
     </div>

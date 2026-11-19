@@ -1,6 +1,7 @@
 import type { UIMessage } from "ai";
 
 import { deduplicateMessages } from "../helpers";
+import { replyAuthorKey } from "./replyRecipient";
 
 /**
  * Strip replayed leading text from assistant messages.
@@ -31,7 +32,8 @@ import { deduplicateMessages } from "../helpers";
 export function stripReplayPrefix(raw: UIMessage[]): UIMessage[] {
   const deduped = withoutSeededCopies(deduplicateMessages(raw));
   const texts = deduped.map(concatText);
-  const matches = reuseReplayMatches(texts);
+  const authors = deduped.map(replyAuthorKey);
+  const matches = reuseReplayMatches(texts, authors);
   const out: UIMessage[] = [];
 
   for (let i = 0; i < deduped.length; i++) {
@@ -41,7 +43,7 @@ export function stripReplayPrefix(raw: UIMessage[]): UIMessage[] {
       continue;
     }
 
-    const match = (matches[i] ??= findLongestReplay(texts, i));
+    const match = (matches[i] ??= findLongestReplay(texts, authors, i));
     if (match.drop) continue;
     if (match.stripLen === 0) {
       out.push(msg);
@@ -66,7 +68,11 @@ export function stripReplayPrefix(raw: UIMessage[]): UIMessage[] {
 function withoutSeededCopies(messages: UIMessage[]): UIMessage[] {
   const kept = messages.flatMap((message, i) => {
     const previous = messages[i - 1];
-    if (message.role !== "assistant" || previous?.role !== "assistant") {
+    if (
+      message.role !== "assistant" ||
+      previous?.role !== "assistant" ||
+      replyAuthorKey(message) !== replyAuthorKey(previous)
+    ) {
       return [message];
     }
     const seeded = previous.parts;
@@ -104,8 +110,9 @@ interface ReplayMatch {
 
 let previousReplayScan: {
   texts: string[];
+  authors: (string | null)[];
   matches: (ReplayMatch | undefined)[];
-} = { texts: [], matches: [] };
+} = { texts: [], authors: [], matches: [] };
 
 /**
  * The replay match of message `i` depends only on `texts[0..i]`. While a reply
@@ -114,13 +121,22 @@ let previousReplayScan: {
  * of re-running the pairwise scan over the whole conversation. The returned
  * array is filled in by the caller and kept for the next call.
  */
-function reuseReplayMatches(texts: string[]): (ReplayMatch | undefined)[] {
+function reuseReplayMatches(
+  texts: string[],
+  authors: (string | null)[],
+): (ReplayMatch | undefined)[] {
   const previous = previousReplayScan;
   const limit = Math.min(texts.length, previous.texts.length);
   let shared = 0;
-  while (shared < limit && texts[shared] === previous.texts[shared]) shared++;
+  while (
+    shared < limit &&
+    texts[shared] === previous.texts[shared] &&
+    authors[shared] === previous.authors[shared]
+  ) {
+    shared++;
+  }
   const matches = previous.matches.slice(0, shared);
-  previousReplayScan = { texts, matches };
+  previousReplayScan = { texts, authors, matches };
   return matches;
 }
 
@@ -135,13 +151,17 @@ function concatText(msg: UIMessage): string {
  * or `{ stripLen }` with the number of leading text chars to strip (0 =
  * keep as-is).
  */
-function findLongestReplay(texts: string[], i: number): ReplayMatch {
+function findLongestReplay(
+  texts: string[],
+  authors: (string | null)[],
+  i: number,
+): ReplayMatch {
   const myText = texts[i];
   let stripLen = 0;
 
   for (let j = 0; j < i; j++) {
     const earlier = texts[j];
-    if (!earlier) continue;
+    if (!earlier || authors[j] !== authors[i]) continue;
 
     if (myText.startsWith(earlier)) {
       // Case 1 + 2: earlier is a leading prefix of current.

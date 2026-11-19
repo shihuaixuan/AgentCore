@@ -32,6 +32,7 @@ interface SessionSeed {
   title: string;
   updated_at: string;
   is_pinned?: boolean;
+  expert_id?: string;
 }
 
 function makeSession(seed: SessionSeed) {
@@ -42,6 +43,7 @@ function makeSession(seed: SessionSeed) {
     is_pinned: seed.is_pinned ?? false,
     created_at: seed.updated_at,
     updated_at: seed.updated_at,
+    expert_id: seed.expert_id,
   };
 }
 
@@ -77,14 +79,15 @@ describe("RecentChats — empty + loading", () => {
   });
 });
 
-describe("RecentChats — grouped list", () => {
-  it("keeps chats from different dates together under Otto", async () => {
+describe("RecentChats — conversation list", () => {
+  it("lists ordinary and expert chats together without grouping", async () => {
     const sessions = [
       makeSession({ id: "a", title: "Today chat", updated_at: TODAY }),
       makeSession({
         id: "b",
         title: "Yesterday chat",
         updated_at: YESTERDAY,
+        expert_id: "expert-maria",
       }),
     ];
     server.use(
@@ -93,11 +96,8 @@ describe("RecentChats — grouped list", () => {
     renderRecentChats();
 
     expect(await screen.findByText("Today chat")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Otto chats" })).toBeDefined();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Load all Otto chats" }),
-    );
     expect(await screen.findByText("Yesterday chat")).toBeDefined();
+    expect(screen.queryByRole("button", { name: "Otto chats" })).toBeNull();
     expect(screen.queryByText("Today")).toBeNull();
     expect(screen.queryByText("Yesterday")).toBeNull();
   });
@@ -114,7 +114,7 @@ describe("RecentChats — pinned split", () => {
     makeSession({ id: "loose", title: "Loose chat", updated_at: TODAY }),
   ];
 
-  it("lifts pinned sessions out of the expert groups", async () => {
+  it("separates pinned sessions from other chats", async () => {
     mockEnabledFlags.add("chat-pinning");
     server.use(
       getGetV2ListSessionsMockHandler200({
@@ -130,15 +130,12 @@ describe("RecentChats — pinned split", () => {
     if (!pinnedGroup) throw new Error("pinned group not found");
     expect(within(pinnedGroup).getByText("Pinned chat")).toBeDefined();
 
-    const ottoGroup = screen
-      .getByRole("button", { name: "Otto chats" })
-      .closest("div")?.parentElement;
-    if (!ottoGroup) throw new Error("Otto group not found");
-    expect(within(ottoGroup).getByText("Loose chat")).toBeDefined();
-    expect(within(ottoGroup).queryByText("Pinned chat")).toBeNull();
+    expect(screen.getByText("Loose chat")).toBeDefined();
+    expect(within(pinnedGroup).queryByText("Loose chat")).toBeNull();
+    expect(screen.getAllByText("Pinned chat")).toHaveLength(1);
   });
 
-  it("keeps pinned sessions in their expert group when the pinning flag is off", async () => {
+  it("keeps pinned sessions in the chat list when the pinning flag is off", async () => {
     server.use(
       getGetV2ListSessionsMockHandler200({
         sessions: pinnedAndDated,
@@ -149,11 +146,7 @@ describe("RecentChats — pinned split", () => {
 
     await screen.findByText("Pinned chat");
     expect(screen.queryByText("Pinned")).toBeNull();
-    const ottoGroup = screen
-      .getByRole("button", { name: "Otto chats" })
-      .closest("div")?.parentElement;
-    if (!ottoGroup) throw new Error("Otto group not found");
-    expect(within(ottoGroup).getByText("Pinned chat")).toBeDefined();
+    expect(screen.getByText("Loose chat")).toBeDefined();
   });
 });
 
@@ -188,9 +181,6 @@ describe("RecentChats — load more", () => {
     const loadMore = await screen.findByRole("button", { name: /load more/i });
     fireEvent.click(loadMore);
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Load all Otto chats" }),
-    );
     expect(await screen.findByText("Page 1")).toBeDefined();
     expect(seenOffsets).toContain("1");
   });

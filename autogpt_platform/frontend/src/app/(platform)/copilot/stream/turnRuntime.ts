@@ -8,6 +8,11 @@ import { v4 as uuidv4 } from "uuid";
 
 import { streamRequestBody } from "../copilotStreamTransport";
 import {
+  isRecipientSendRefusal,
+  RecipientSendRefusedError,
+  type TurnRecipient,
+} from "../turnRecipient";
+import {
   CopilotAuthError,
   getCopilotAuthHeaders,
   isEngineSwitchPart,
@@ -283,24 +288,37 @@ export class TurnRuntime {
   // ── The five named operations ─────────────────────────────────────────
 
   /** POST a new turn: the prompt shows at once, and the turn follows it. */
-  async send(input: SendInput, model: ChatModelChoice | undefined) {
+  async send(
+    input: SendInput,
+    model: ChatModelChoice | undefined,
+    recipient?: TurnRecipient,
+  ) {
     if (this.isPostPending()) return;
+    const message = userMessage(`local:${uuidv4({})}`, input);
+    const body = streamRequestBody(this.sessionId, message, model, recipient);
     this.stopped = false;
     this.suppressAttach = false;
     this.queueDeclined = false;
     this.error = null;
     this.providerFailure = null;
-    const message = userMessage(`local:${uuidv4({})}`, input);
     this.claimTail(this.nextSequence());
     this.segments.push(userSegment(message, "sent"));
     this.emitNow();
-    const body = streamRequestBody(this.sessionId, message, model);
-    await this.open("post", null, this.streamUrl(), {
+    const end = await this.open("post", null, this.streamUrl(), {
       method: "POST",
       body: JSON.stringify(body),
       extraHeaders: { "Content-Type": "application/json" },
       prompt: message.id,
     });
+    if (
+      recipient &&
+      end.kind === "refused" &&
+      isRecipientSendRefusal(end.status)
+    ) {
+      this.dropUnsentUserRow();
+      this.emitNow();
+      throw new RecipientSendRefusedError(refusalText(end));
+    }
   }
 
   /** Stop following the turn: abort, mark it stopped, and let the persisted marker reconcile into it. */
@@ -516,6 +534,7 @@ export class TurnRuntime {
           : { kind: "failed", error };
     }
     this.onEnd(conn, end);
+    return end;
   }
 
   // The token action answers "no token" for a sign-out and for a failed lookup

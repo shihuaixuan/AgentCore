@@ -1,3 +1,4 @@
+import { getGetV2GetSessionQueryKey } from "@/app/api/__generated__/endpoints/chat/chat";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import {
@@ -53,6 +54,11 @@ export function useSessionTitlePoll({
       if (hasTitle || attempts >= TITLE_POLL_MAX_ATTEMPTS) {
         clearInterval(titlePollRef.current);
         titlePollRef.current = undefined;
+        if (hasTitle) {
+          void queryClient.invalidateQueries({
+            queryKey: getGetV2GetSessionQueryKey(sid),
+          });
+        }
         return;
       }
       attempts += 1;

@@ -6,6 +6,7 @@ import type { ChatStatus, UIMessage } from "ai";
 import { deleteV2DisconnectSessionStream } from "@/app/api/__generated__/endpoints/chat/chat";
 import { TOOL_PART_PREFIX } from "./components/JobStatsBar/constants";
 import { parseSpecialMarkers } from "./helpers/messageMarkers";
+import { replyAuthorKey } from "./helpers/replyRecipient";
 import { WORKSPACE_FOLDER_PART_TYPE } from "./helpers/workspaceAttachments";
 import { TURN_PAUSED_PART_TYPE } from "./turnPause";
 
@@ -463,8 +464,12 @@ export function deduplicateMessages(messages: UIMessage[]): UIMessage[] {
           seenInTurn = new Set<string>();
           seenFingerprintsByTurn.set(lastUserMsgID, seenInTurn);
         }
-        if (seenInTurn.has(contentFingerprint)) return false;
-        seenInTurn.add(contentFingerprint);
+        const fingerprint = JSON.stringify([
+          replyAuthorKey(msg),
+          contentFingerprint,
+        ]);
+        if (seenInTurn.has(fingerprint)) return false;
+        seenInTurn.add(fingerprint);
       }
     }
 

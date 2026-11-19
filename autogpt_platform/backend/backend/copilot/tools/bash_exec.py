@@ -287,6 +287,9 @@ class BashExecTool(BaseTool):
         is empty.
         """
         session_id = session.session_id if session else None
+        sandbox_session_id = (
+            (session.recipient_workspace_id or session.session_id) if session else None
+        )
 
         command = command.strip()
         timeout = int(timeout)
@@ -325,8 +328,8 @@ class BashExecTool(BaseTool):
                 user_id,
                 required_scopes=requested_scopes(session),
                 owner=(
-                    SandboxOwner.for_session(session.session_id, session.expert_id)
-                    if session
+                    SandboxOwner.for_session(sandbox_session_id, session.expert_id)
+                    if session and sandbox_session_id
                     else None
                 ),
             )
@@ -339,7 +342,7 @@ class BashExecTool(BaseTool):
                 session_id=session_id,
             ).from_outside()
 
-        workspace = get_workspace_dir(session_id or "default")
+        workspace = get_workspace_dir(sandbox_session_id or "default")
 
         stdout, stderr, exit_code, timed_out = await run_sandboxed(
             command=["bash", "-c", command],

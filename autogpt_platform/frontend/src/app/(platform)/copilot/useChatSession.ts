@@ -416,10 +416,7 @@ export function useChatSession({
       toast({
         variant: "destructive",
         title: message,
-        description: t(
-          "Refresh the page and try again.",
-          "请刷新页面后重试。",
-        ),
+        description: t("Refresh the page and try again.", "请刷新页面后重试。"),
       });
       throw new ReportedSendError(
         locale === "zh-CN" ? "无法加载 AI 连接" : message,
@@ -510,6 +507,9 @@ export function useChatSession({
     sessionQuery.data?.status === 200
       ? (sessionQuery.data.data.metadata?.autopilot_mode ?? null)
       : null;
+  const supportsTurnRecipient =
+    sessionQuery.data?.status === 200 &&
+    sessionQuery.data.data.supports_turn_recipient === true;
 
   const sessionSentFrom =
     sessionQuery.data?.status === 200
@@ -517,6 +517,8 @@ export function useChatSession({
       : null;
 
   return {
+    sessionTitle:
+      sessionQuery.data?.status === 200 ? sessionQuery.data.data.title : null,
     sessionId,
     setSessionId,
     /** The session GET as last fetched; null while a fetch is in flight. */
@@ -525,6 +527,7 @@ export function useChatSession({
     sessionLlmCredentialId,
     chatLlmAuthProvider,
     sessionExpertId,
+    supportsTurnRecipient,
     isAdoptingExpertSession,
     hydratedMessages,
     rawSessionMessages,

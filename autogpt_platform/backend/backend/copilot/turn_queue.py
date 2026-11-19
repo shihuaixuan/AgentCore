@@ -86,6 +86,7 @@ from backend.copilot.trial_cost_context import (
     capture_cost_context,
     restore_cost_context,
 )
+from backend.copilot.turn_recipient import TURN_RECIPIENT_ADAPTER, TurnRecipient
 from backend.copilot.usage_state import LimitWindow
 from backend.data.db_accessors import chat_db
 from backend.data.user import is_user_refused
@@ -171,6 +172,7 @@ async def try_enqueue_turn(
     file_ids: list[str] | None = None,
     model: str | None = None,
     managed_model_id: str | None = None,
+    recipient: TurnRecipient | None = None,
     llm_auth_provider: CopilotLlmAuthProvider = "platform",
     llm_credential_id: str | None = None,
     permissions: Mapping[str, Any] | None = None,
@@ -200,11 +202,13 @@ async def try_enqueue_turn(
         file_ids=file_ids,
         model=model,
         **({"managed_model_id": managed_model_id} if managed_model_id else {}),
+        **({"recipient": recipient} if recipient is not None else {}),
         llm_auth_provider=llm_auth_provider,
         llm_credential_id=llm_credential_id,
         permissions=permissions,
         request_arrival_at=request_arrival_at,
         envelope=envelope,
+        only_if_idle=recipient is not None,
         impersonated=impersonated,
     )
 
@@ -221,6 +225,7 @@ async def enqueue_turn(
     file_ids: list[str] | None = None,
     model: str | None = None,
     managed_model_id: str | None = None,
+    recipient: TurnRecipient | None = None,
     llm_auth_provider: CopilotLlmAuthProvider = "platform",
     llm_credential_id: str | None = None,
     permissions: Mapping[str, Any] | None = None,
@@ -259,6 +264,8 @@ async def enqueue_turn(
         metadata["model"] = model
     if managed_model_id is not None:
         metadata["managed_model_id"] = managed_model_id
+    if recipient is not None:
+        metadata["turn_recipient"] = recipient.model_dump()
     metadata["llm_auth_provider"] = llm_auth_provider
     if llm_credential_id is not None:
         metadata["llm_credential_id"] = llm_credential_id
@@ -566,6 +573,11 @@ async def _promote_head(user_id: str) -> bool | None:
         # Missing legacy attribution must not be guessed from today's plan or
         # the completing turn's context. Keep such work queued for recovery.
         cost_context = TrialCostContext.model_validate(metadata.get("cost_context"))
+        recipient = (
+            TURN_RECIPIENT_ADAPTER.validate_python(metadata["turn_recipient"])
+            if "turn_recipient" in metadata
+            else None
+        )
         with restore_cost_context(user_id, cost_context):
             await dispatch_turn(
                 slot,
@@ -589,6 +601,7 @@ async def _promote_head(user_id: str) -> bool | None:
                     else {}
                 ),
                 llm_auth_provider=head.metadata.llm_auth_provider,
+                **({"recipient": recipient} if recipient is not None else {}),
                 llm_credential_id=head.metadata.llm_credential_id,
                 permissions=_promotion_permissions(head, metadata, spawned=spawned),
                 request_arrival_at=float(metadata.get("request_arrival_at") or 0.0),

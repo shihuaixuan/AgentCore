@@ -7,9 +7,10 @@ import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { newRecipientChatHref } from "../../../expertSessionQuery";
 import { ExpertAvatar } from "../../ChatMessagesContainer/components/ExpertAvatar/ExpertAvatar";
-import type {
-  RecipientOption,
-  RecipientPickerConfig,
+import {
+  OTTO_RECIPIENT_OPTION,
+  type RecipientOption,
+  type RecipientPickerConfig,
 } from "./recipientOptions";
 
 interface Props extends RecipientPickerConfig {
@@ -20,6 +21,9 @@ interface Props extends RecipientPickerConfig {
 export function ExpertPickerOptions({
   recipient,
   options,
+  isThreadPicker,
+  isRosterPending,
+  hasRosterFailed,
   selectionBlocked,
   onSelect,
   onClose,
@@ -30,6 +34,7 @@ export function ExpertPickerOptions({
   const next =
     nextID === null ? null : options.find((option) => option.id === nextID);
   const search = query.trim().toLowerCase();
+  const matchesOtto = isThreadPicker && "otto".includes(search);
   const matching = options.filter((option) =>
     [option.name, option.role].some((text) =>
       text?.toLowerCase().includes(search),
@@ -62,6 +67,14 @@ export function ExpertPickerOptions({
         </Text>
       )}
       <div className="mt-1 max-h-64 space-y-0.5 overflow-y-auto">
+        {matchesOtto && (
+          <ExpertOption
+            option={OTTO_RECIPIENT_OPTION}
+            selected={!recipient}
+            disabled={!!selectionBlocked && !!recipient}
+            onSelect={() => select(null)}
+          />
+        )}
         {matching.map((option) => (
           <ExpertOption
             key={option.id}
@@ -71,14 +84,19 @@ export function ExpertPickerOptions({
             onSelect={() => select(option.id)}
           />
         ))}
-        {!matching.length && (
-          <Text variant="small" tone="secondary" className="m-2">
-            {t("No matching experts", "没有匹配的专家")}
-          </Text>
-        )}
+        {!matching.length &&
+          (!matchesOtto || isRosterPending || hasRosterFailed) && (
+            <Text variant="small" tone="secondary" className="m-2">
+              {isRosterPending
+                ? t("Loading experts…", "正在加载专家…")
+                : hasRosterFailed
+                  ? t("Could not load experts", "无法加载专家")
+                  : t("No matching experts", "没有匹配的专家")}
+            </Text>
+          )}
       </div>
       <div className="mt-1 border-t border-border-base pt-1">
-        {recipient && (
+        {recipient && !isThreadPicker && (
           <Button
             type="button"
             variant="ghost"
@@ -197,6 +215,7 @@ export function RecipientAvatar({ option }: { option: RecipientOption }) {
       name={option.name}
       avatarUrl={option.avatarUrl}
       color={option.color}
+      isAutopilot={option === OTTO_RECIPIENT_OPTION}
       size="sm"
     />
   );

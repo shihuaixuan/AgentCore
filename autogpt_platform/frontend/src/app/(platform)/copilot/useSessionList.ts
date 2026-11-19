@@ -1,5 +1,4 @@
 import { getV2ListSessions } from "@/app/api/__generated__/endpoints/chat/chat";
-import type { SessionSummaryResponse } from "@/app/api/__generated__/models/sessionSummaryResponse";
 import {
   type InfiniteData,
   type QueryClient,
@@ -181,34 +180,6 @@ export function removeSessionFromList(
       };
     }),
   };
-}
-
-export interface SessionGroup {
-  expertId: string | null;
-  sessions: SessionSummaryResponse[];
-}
-
-export function groupSessionsByExpert(
-  sessions: SessionSummaryResponse[],
-): SessionGroup[] {
-  const byExpert = new Map<string | null, SessionSummaryResponse[]>();
-  for (const session of sessions) {
-    const key = session.expert_id ?? null;
-    const bucket = byExpert.get(key);
-    if (bucket) {
-      bucket.push(session);
-    } else {
-      byExpert.set(key, [session]);
-    }
-  }
-  return [...byExpert.entries()]
-    .map(([expertId, grouped]) => ({ expertId, sessions: grouped }))
-    .sort((a, b) => {
-      if (a.expertId === b.expertId) return 0;
-      if (a.expertId === null) return -1;
-      if (b.expertId === null) return 1;
-      return 0;
-    });
 }
 
 function hasOlderPages(data: SessionListInfiniteData | undefined) {

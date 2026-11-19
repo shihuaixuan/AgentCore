@@ -14,6 +14,12 @@ import { isVoiceTurn } from "./voice/pendingVoiceStart";
 import { isTokenDevtoolEnabled } from "./tokenDevtool/gate";
 import { createUsageCapturingFetch } from "./tokenDevtool/usageTap";
 import {
+  isRecipientSendRefusal,
+  parseTurnRecipient,
+  RecipientSendRefusedError,
+  type TurnRecipient,
+} from "./turnRecipient";
+import {
   managedModelRequest,
   type ChatModelChoice,
 } from "./managedModelSelection";
@@ -75,7 +81,7 @@ export function createCopilotTransport({
     api: baseUrl,
     // Tee the raw SSE into the stream converter's shadow, and in dev into the
     // token devtool, which reads the `: usage {...}` comments the SDK drops.
-    fetch: keepPaywallStatus(
+    fetch: keepSendRefusal(
       createShadowFetch(
         sessionId,
         isTokenDevtoolEnabled()
@@ -83,11 +89,12 @@ export function createCopilotTransport({
           : undefined,
       ),
     ),
-    prepareSendMessagesRequest: async ({ messages }) => ({
+    prepareSendMessagesRequest: async ({ messages, body }) => ({
       body: streamRequestBody(
         sessionId,
         messages[messages.length - 1],
         copilotModelRef.current,
+        parseTurnRecipient(body?.recipient),
       ),
       headers: await getCopilotAuthHeaders(),
     }),
@@ -113,10 +120,24 @@ export function createCopilotTransport({
 // The SDK turns a non-OK response into a bare Error carrying only the body,
 // so a refusal for want of a plan would read as an unexplained failure. Keep
 // its status so the error banner can offer plans instead of "reload".
-function keepPaywallStatus(inner: typeof fetch): typeof fetch {
+function keepSendRefusal(inner: typeof fetch): typeof fetch {
   return async (input, init) => {
     const response = await inner(input, init);
-    if (response.status !== 402) return response;
+    if (response.status !== 402 && !isRecipientSendRefusal(response.status))
+      return response;
+    if (response.status !== 402) {
+      if (init?.method !== "POST" || typeof init.body !== "string")
+        return response;
+      const request = JSON.parse(init.body) as { recipient?: TurnRecipient };
+      if (!request.recipient) return response;
+      const body = await response.json().catch(() => null);
+      const detail = (body as { detail?: unknown } | null)?.detail;
+      throw new RecipientSendRefusedError(
+        typeof detail === "string"
+          ? detail
+          : "The selected recipient could not receive this message.",
+      );
+    }
     const body = await response.json().catch(() => null);
     const detail = (body as { detail?: unknown } | null)?.detail;
     throw new ApiError(
@@ -131,8 +152,17 @@ export function streamRequestBody(
   sessionId: string,
   last: UIMessage,
   model: ChatModelChoice | undefined,
+  recipient?: TurnRecipient,
 ) {
   const kickoffExpertId = getKickoffExpertIdFromMetadata(last.metadata);
+  const explicitRecipient =
+    last.role === "user" && !kickoffExpertId && recipient;
+  if (
+    explicitRecipient &&
+    !(typeof model === "object" && model.managedModelID)
+  ) {
+    throw new Error("Select a chat model before sending to a recipient.");
+  }
   // Extract file_ids from FileUIPart entries on the message
   const fileIds = last.parts
     ?.filter((p): p is FileUIPart => p.type === "file")
@@ -169,6 +199,7 @@ export function streamRequestBody(
     file_ids: fileIds && fileIds.length > 0 ? fileIds : null,
     folder_ids: folderIds && folderIds.length > 0 ? folderIds : null,
     ...managedModelRequest(model),
+    ...(explicitRecipient ? { recipient: explicitRecipient } : {}),
     // Supplying options forces uuid's
     // getRandomValues path. Unlike crypto.randomUUID,
     // getRandomValues is available on plain-HTTP LAN origins used

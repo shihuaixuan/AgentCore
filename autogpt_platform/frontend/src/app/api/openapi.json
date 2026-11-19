@@ -49234,6 +49234,10 @@
             "type": "string",
             "title": "Id"
           },
+          "title": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Title"
+          },
           "created_at": {
             "type": "string",
             "title": "Created At"
@@ -49321,6 +49325,11 @@
               }
             ],
             "title": "Expert Id"
+          },
+          "supports_turn_recipient": {
+            "type": "boolean",
+            "title": "Supports Turn Recipient",
+            "default": false
           },
           "background_outcome": {
             "anyOf": [
@@ -51909,12 +51918,53 @@
         "required": ["submissions", "pagination", "stats"],
         "title": "StoreSubmissionsResponse"
       },
+      "ExpertRecipient": {
+        "properties": {
+          "type": { "const": "expert", "type": "string", "title": "Type" },
+          "expert_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "title": "Expert Id"
+          }
+        },
+        "type": "object",
+        "required": ["type", "expert_id"],
+        "title": "ExpertRecipient"
+      },
+      "OttoRecipient": {
+        "properties": {
+          "type": { "const": "otto", "type": "string", "title": "Type" }
+        },
+        "type": "object",
+        "required": ["type"],
+        "title": "OttoRecipient"
+      },
       "StreamChatRequest": {
         "properties": {
           "message": {
             "type": "string",
             "maxLength": 64000,
             "title": "Message"
+          },
+          "recipient": {
+            "anyOf": [
+              {
+                "oneOf": [
+                  { "$ref": "#/components/schemas/OttoRecipient" },
+                  { "$ref": "#/components/schemas/ExpertRecipient" }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "otto": "#/components/schemas/OttoRecipient",
+                    "expert": "#/components/schemas/ExpertRecipient"
+                  }
+                }
+              },
+              { "type": "null" }
+            ],
+            "title": "Recipient"
           },
           "is_user_message": {
             "type": "boolean",

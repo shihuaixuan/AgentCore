@@ -24,14 +24,6 @@ vi.mock("@/services/feature-flags/use-get-flag", async (importOriginal) => {
 
 const maria = { id: "expert-maria", name: "Maria" };
 
-const mariaIdentity = {
-  ...maria,
-  avatarUrl: null,
-  role: "Marketing Strategist",
-  isArchived: false,
-  readOnlyReason: null,
-};
-
 function credential(provider: string): ExpertCredentialRef {
   return {
     credential_id: `cred-${provider}`,
@@ -162,7 +154,7 @@ describe("expert integrations in the chat controls", () => {
   it("keeps integrations and actions out of the thread chip", async () => {
     server.use(getListExpertCredentialsMockHandler([credential("linkedin")]));
 
-    render(<ThreadHeader expertIdentity={mariaIdentity} />);
+    render(<ThreadHeader title="Campaign planning" />);
 
     const header = await screen.findByTestId("expert-thread-header");
     expect(within(header).queryByRole("img", { name: "LinkedIn" })).toBeNull();

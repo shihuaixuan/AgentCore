@@ -9,7 +9,11 @@ from openai.types.chat import ChatCompletionToolParam
 from prisma.enums import APIKeyPermission
 
 from backend.copilot.ai_spans import mark_tool_failed, mark_tool_raised, tool_span
-from backend.copilot.context import args_already_bound, get_current_envelope
+from backend.copilot.context import (
+    args_already_bound,
+    get_current_envelope,
+    get_workspace_manager,
+)
 from backend.copilot.google_data_redaction import (
     GOOGLE_DATA_METADATA_KEY,
     is_google_call,
@@ -24,11 +28,10 @@ from backend.copilot.tool_image import HeldImage, parse_held_image
 from backend.copilot.trial_reads import trial_reads_fresh
 from backend.copilot.turn_tracing import tool_transaction
 from backend.data.activity_event import ActivityEventDraft
-from backend.data.db_accessors import activity_event_db, workspace_db
+from backend.data.db_accessors import activity_event_db
 from backend.data.workspace_internal import TOOL_OUTPUT_PURPOSE
 from backend.util import tracing
 from backend.util.truncate import truncate
-from backend.util.workspace import WorkspaceManager
 
 from .capability_gates import gate_denied, gate_denied_error
 from .models import (
@@ -138,8 +141,7 @@ async def _persist_and_summarize(
             outline = _outline(summarized, offsets, _DIGEST_PREVIEW_CHARS)
 
     try:
-        workspace = await workspace_db().get_or_create_workspace(user_id)
-        manager = WorkspaceManager(user_id, workspace.id, session_id)
+        manager = await get_workspace_manager(user_id, session_id)
         await manager.write_file(
             content=body.encode("utf-8"),
             filename=f"{tool_call_id}.json",

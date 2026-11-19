@@ -60,6 +60,7 @@ import { RESTORE_STALL_TIMEOUT_MS } from "./restoreConstants";
 import { useStreamActivityWatchdog } from "./useStreamActivityWatchdog";
 import { useFollowBackendTurn } from "./useFollowBackendTurn";
 import { useWakeResync } from "./useWakeResync";
+import { RecipientSendRefusedError } from "./turnRecipient";
 
 /**
  * Delay after a clean stream close before refetching the session to check
@@ -567,6 +568,8 @@ export function useCopilotStream({
   async function sendMessage(
     ...args: Parameters<typeof sdkSendMessage>
   ): ReturnType<typeof sdkSendMessage> {
+    const body = args[1]?.body;
+    const hasRecipient = !!body && "recipient" in body && !!body.recipient;
     const text = extractSendMessageText(args[0]);
     const metadata =
       args[0] && typeof args[0] === "object" && "metadata" in args[0]
@@ -593,6 +596,11 @@ export function useCopilotStream({
     });
 
     if (suppressReason === "reconnecting") {
+      if (hasRecipient) {
+        throw new RecipientSendRefusedError(
+          "Wait for the connection to resume before sending.",
+        );
+      }
       // The ref flips to ``true`` synchronously while the React state that
       // drives the UI's disabled state only updates on the next render, so
       // the user may have clicked send against a still-enabled input. Tell
@@ -606,7 +614,7 @@ export function useCopilotStream({
       });
       return;
     }
-    if (suppressReason === "duplicate") return;
+    if (suppressReason === "duplicate" && !hasRecipient) return;
 
     if (sid) {
       markCopilotChatRuntimeHealthy(sid);
@@ -623,7 +631,14 @@ export function useCopilotStream({
     if (isUserStopping) {
       setIsUserStopping(false);
     }
-    return sdkSendMessage(...args);
+    await sdkSendMessage(...args);
+    const refusal = chatRuntime?.chat.error;
+    if (hasRecipient && refusal instanceof RecipientSendRefusedError) {
+      setMessages((prev) =>
+        prev.at(-1)?.role === "user" ? prev.slice(0, -1) : prev,
+      );
+      throw refusal;
+    }
   }
 
   // Deduplicate messages continuously to prevent duplicates when resuming streams.

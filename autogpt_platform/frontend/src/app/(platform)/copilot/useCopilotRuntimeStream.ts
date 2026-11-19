@@ -35,6 +35,7 @@ import {
 } from "./providerFailure";
 import { useCopilotUIStore } from "./store";
 import type { ChatModelChoice } from "./managedModelSelection";
+import type { TurnSendOptions } from "./turnRecipient";
 import {
   createAssistantRunJoiner,
   createTailRenderer,
@@ -234,7 +235,7 @@ export function useCopilotRuntimeStream({
     ),
   );
 
-  async function sendMessage(input: SendInput) {
+  async function sendMessage(input: SendInput, options?: TurnSendOptions) {
     if (!runtime || !sessionId) return;
     const metadata = input.metadata;
     useCopilotStreamStore.getState().updateCoord(sessionId, {
@@ -243,7 +244,7 @@ export function useCopilotRuntimeStream({
       lastSubmittedKickoffAttemptToken:
         getKickoffAttemptTokenFromMetadata(metadata),
     });
-    await runtime.send(input, copilotModel);
+    await runtime.send(input, copilotModel, options?.body?.recipient);
   }
 
   const stop = useCopilotStop({

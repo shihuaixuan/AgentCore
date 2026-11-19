@@ -128,6 +128,7 @@ interface Props {
   /** When true, the submit button is hidden until there is something to send. */
   hideSubmitWhenEmpty?: boolean;
   recipientPicker?: RecipientPickerConfig;
+  recipientPickerDisabled?: boolean;
   threadRecipient?: ExpertIdentity | null;
   /** Card composer: the text always keeps its own row above the controls,
    *  instead of sharing a single pill row until it wraps. Empty state only. */
@@ -186,6 +187,7 @@ export const ChatInput = memo(function ChatInput({
   sessionId = null,
   hideSubmitWhenEmpty = false,
   recipientPicker,
+  recipientPickerDisabled = false,
   threadRecipient,
   stacked = false,
   voiceMode,
@@ -314,7 +316,10 @@ export const ChatInput = memo(function ChatInput({
     isStreaming,
     hasAttachments,
     // A scheduled send carries text only, so attachments hold it back.
-    disabled: isTextareaDisabled || (atReset ? hasAttachments : sendDisabled),
+    disabled:
+      isTextareaDisabled ||
+      (atReset ? hasAttachments : sendDisabled) ||
+      (!!recipientPicker?.isThreadPicker && isStreaming && hasAttachments),
     canSendEmpty: hasAttachments && !atReset,
     inputId,
     draftKey,
@@ -431,24 +436,41 @@ export const ChatInput = memo(function ChatInput({
   const plusButtonRef = useRef<HTMLButtonElement>(null);
   const [isRecipientPickerOpen, setIsRecipientPickerOpen] = useState(false);
   const isRecipientPickerDisabled =
-    isBusy || isSending || isStreaming || isRecording || isTranscribing;
+    recipientPickerDisabled ||
+    isBusy ||
+    isSending ||
+    isStreaming ||
+    isRecording ||
+    isTranscribing;
   if (isRecipientPickerOpen && isRecipientPickerDisabled) {
     setIsRecipientPickerOpen(false);
   }
   const recipientSelectionBlocked =
-    !hasSession &&
-    (attachments.some((attachment) => attachment.kind !== "local") ||
-      parseCredentialMentions(value).some((part) => typeof part !== "string"))
+    attachments.some((attachment) => attachment.kind !== "local") ||
+    parseCredentialMentions(value).some((part) => typeof part !== "string")
       ? t(
           "Remove workspace attachments and connection mentions before changing the expert selection.",
           "请先移除工作区附件和连接引用，再更改专家选择。",
         )
       : undefined;
-  const taskDraft = useChatDraftAccess(recipientPicker ? draftKey : undefined);
+  const taskDraft = useChatDraftAccess(
+    recipientPicker && !recipientPicker.isThreadPicker ? draftKey : undefined,
+  );
   const selectRecipient = recipientPicker?.onSelect;
 
   function handleRecipientSelect(id: string | null) {
-    if (!selectRecipient || recipientSelectionBlocked) return;
+    if (
+      !selectRecipient ||
+      recipientSelectionBlocked ||
+      isRecipientPickerDisabled
+    )
+      return;
+    if (recipientPicker?.isThreadPicker) {
+      setIsPickerOpen(false);
+      mentions.close();
+      selectRecipient(id);
+      return;
+    }
     // Only an explicit, unblocked switch carries the text. Link navigation
     // restores the destination's own draft, including only its own mentions.
     taskDraft.moveTo(newTaskDraftKey(id), value);

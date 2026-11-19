@@ -51,6 +51,8 @@ import {
 } from "../../voice/pendingVoiceStart";
 import { unlockAudio } from "../../voice/speechPlayer";
 import type { ExpertIdentity } from "../../useExpertMap";
+import type { useThreadRecipient } from "../../useThreadRecipient";
+import { parseTurnRecipient, type TurnRecipient } from "../../turnRecipient";
 import { isTokenDevtoolEnabled } from "../../tokenDevtool/gate";
 import { updateHistoryBreakdown } from "../../tokenDevtool/store";
 import { breakdownCacheKey } from "../../tokenDevtool/tokenMath";
@@ -81,6 +83,7 @@ export interface ChatContainerProps {
   status: string;
   error: Error | undefined;
   sessionId: string | null;
+  sessionTitle?: string | null;
   sessionChatStatus?: string;
   sessionSentFrom?: SentFrom | null;
   /** The approval mode stored on the session, when it has one. */
@@ -109,7 +112,16 @@ export interface ChatContainerProps {
     files?: File[],
     workspaceFiles?: WorkspaceAttachment[],
     metadata?: ExpertKickoffMetadata,
+    recipient?: TurnRecipient,
   ) => void | Promise<void>;
+  onComposerSend?: (
+    message: string,
+    files?: File[],
+    workspaceFiles?: WorkspaceAttachment[],
+  ) => Promise<void>;
+  threadRecipient?: ReturnType<typeof useThreadRecipient>;
+  hasManagedModel?: boolean;
+  isRecipientTurnSettled?: boolean;
   /** Sends a suggested task, resolving to the chat it started. */
   onStartTask?: (message: string) => Promise<string | undefined>;
   onStop: () => void;
@@ -157,6 +169,7 @@ export const ChatContainer = ({
   status,
   error,
   sessionId,
+  sessionTitle,
   sessionChatStatus,
   sessionSentFrom,
   sessionAutopilotMode = null,
@@ -172,6 +185,10 @@ export const ChatContainer = ({
   isUserStopping,
   onCreateSession,
   onSend,
+  onComposerSend,
+  threadRecipient,
+  hasManagedModel,
+  isRecipientTurnSettled,
   onStartTask,
   onStop,
   onEnqueue,
@@ -257,7 +274,14 @@ export const ChatContainer = ({
     inputId: SESSION_COMPOSER_ID,
   });
   // While a turn still runs, the limit keeps follow-ups from queueing.
-  const atReset = isStreaming ? undefined : composer.atReset;
+  const atReset =
+    isStreaming || threadRecipient?.isSwitched ? undefined : composer.atReset;
+  const isComposerSendLocked =
+    (isLimitReached && !atReset) ||
+    Boolean(
+      threadRecipient?.isSwitched &&
+        (!hasManagedModel || threadRecipient.isUnavailable),
+    );
   // Send at reset takes the paused tooltip's place. Radix reports no close
   // for a tooltip held shut, so an open recorded then would show it, unhovered,
   // once a turn starts: record none, and forget one Send at reset cut short.
@@ -308,7 +332,7 @@ export const ChatContainer = ({
     isFinishProbing,
     sessionId,
     silenceTimeoutMs,
-    onSend: guardedOnSend,
+    onSend: isTurnLocked ? NO_OP_SEND : (onComposerSend ?? guardedOnSend),
   });
   useOpenPendingOnboarding({
     expertId: expertIdentity?.id ?? null,
@@ -369,7 +393,7 @@ export const ChatContainer = ({
   );
   const handleStop = useStableCallback(onStop);
   const handleEnqueue = useStableCallback((message: string) =>
-    onEnqueue?.(message),
+    onComposerSend ? onComposerSend(message) : onEnqueue?.(message),
   );
   const handleDroppedFilesConsumed = useStableCallback(() =>
     onDroppedFilesConsumed?.(),
@@ -461,6 +485,13 @@ export const ChatContainer = ({
         const kickoffAttemptToken = lastUserMsg
           ? getKickoffAttemptToken(lastUserMsg)
           : null;
+        const metadata = lastUserMsg?.metadata;
+        const recipient =
+          metadata &&
+          typeof metadata === "object" &&
+          "turn_recipient" in metadata
+            ? parseTurnRecipient(metadata.turn_recipient)
+            : undefined;
         await guardedOnSend(
           kickoffExpertId ? stripLegacyKickoffMarker(lastText) : lastText,
           undefined,
@@ -474,6 +505,7 @@ export const ChatContainer = ({
                   : {}),
               }
             : undefined,
+          recipient,
         );
       }
     }
@@ -525,6 +557,7 @@ export const ChatContainer = ({
                 />
               </div>
               <ChatMessagesContainer
+                sessionTitle={sessionTitle}
                 messages={messages}
                 status={status}
                 error={error}
@@ -609,9 +642,13 @@ export const ChatContainer = ({
                           autoFocus={
                             getPendingOnboardingCallId(messages) === null
                           }
-                          onSend={guardedOnSend}
+                          onSend={
+                            isTurnLocked
+                              ? NO_OP_SEND
+                              : (onComposerSend ?? guardedOnSend)
+                          }
                           disabled={isInputDisabled}
-                          sendDisabled={isLimitReached && !atReset}
+                          sendDisabled={isComposerSendLocked}
                           atReset={atReset}
                           isStreaming={isStreaming}
                           isTurnStarting={status === "submitted"}
@@ -638,11 +675,36 @@ export const ChatContainer = ({
                           hasSession={!!sessionId}
                           managedModels
                           sessionId={sessionId}
-                          expertId={expertIdentity?.id ?? null}
+                          expertId={
+                            threadRecipient
+                              ? threadRecipient.expertId
+                              : (expertIdentity?.id ?? null)
+                          }
                           modeSelector={modeSelector}
-                          expertName={expertIdentity?.name ?? null}
-                          assistantName={expertIdentity?.name ?? null}
-                          threadRecipient={expertIdentity ?? null}
+                          expertName={
+                            threadRecipient
+                              ? threadRecipient.expertId
+                                ? threadRecipient.name
+                                : null
+                              : (expertIdentity?.name ?? null)
+                          }
+                          assistantName={
+                            threadRecipient?.name ??
+                            expertIdentity?.name ??
+                            null
+                          }
+                          recipientPicker={threadRecipient?.picker}
+                          recipientPickerDisabled={Boolean(
+                            threadRecipient &&
+                              (!hasManagedModel ||
+                                !isRecipientTurnSettled ||
+                                isLimitReached),
+                          )}
+                          threadRecipient={
+                            threadRecipient
+                              ? undefined
+                              : (expertIdentity ?? null)
+                          }
                           voiceMode={voiceMode}
                           voiceBar={voiceBar}
                         />

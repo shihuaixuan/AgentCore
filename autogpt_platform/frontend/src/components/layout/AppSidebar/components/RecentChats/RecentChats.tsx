@@ -3,8 +3,6 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { DeleteChatDialog } from "@/app/(platform)/copilot/components/DeleteChatDialog/DeleteChatDialog";
 import { ShareChatDialog } from "@/app/(platform)/copilot/sharing/ShareChatDialog";
-import { useExpertMap } from "@/app/(platform)/copilot/useExpertMap";
-import { groupSessionsByExpert } from "@/app/(platform)/copilot/useSessionList";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -13,11 +11,7 @@ import { SidebarMenu } from "@/components/molecules/Sidebar/Sidebar";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
 import { PinIcon } from "@hugeicons/core-free-icons";
-import { useState } from "react";
-import { ExpertChatGroup } from "./components/ExpertChatGroup/ExpertChatGroup";
-import { NewExpertGroup } from "./components/NewExpertGroup/NewExpertGroup";
 import { RecentChatItem } from "./components/RecentChatItem/RecentChatItem";
-import { getNewExpertsWithoutChats } from "./helpers";
 import { useRecentChats } from "./useRecentChats";
 
 export function RecentChats() {
@@ -25,11 +19,6 @@ export function RecentChats() {
   const chatPinningEnabled = useGetFlag(Flag.CHAT_PINNING);
 
   const isLearningEnabled = useGetFlag(Flag.DREAM_SKILL_LEARNING_ENABLED);
-  const { expertsById, activeExperts } = useExpertMap();
-  // The week a new expert keeps their entry is measured from when the list
-  // mounted: an expert who joins later counts as new, and one only ages out
-  // on a later visit.
-  const [mountedAt] = useState(() => Date.now());
   const {
     sessions,
     isLoading,
@@ -84,13 +73,7 @@ export function RecentChats() {
     );
   }
 
-  const newExperts = getNewExpertsWithoutChats(
-    activeExperts,
-    sessions,
-    mountedAt,
-  );
-
-  if (!sessions.length && !newExperts.length) {
+  if (!sessions.length) {
     return (
       <div className="px-2 py-2">
         <Text variant="body-tight" as="p" tone="muted">
@@ -133,33 +116,6 @@ export function RecentChats() {
     pinnedSessions.length > 0
       ? sessions.filter((session) => !session.is_pinned)
       : sessions;
-  const groups = groupSessionsByExpert(unpinnedSessions);
-  // Otto stays first; an expert waiting to be greeted comes next, ahead of
-  // the experts the user already talks to.
-  const ottoGroups = groups.filter((group) => !group.expertId);
-  const expertGroups = groups.filter((group) => !!group.expertId);
-
-  function renderGroup(group: (typeof groups)[number]) {
-    const expert = group.expertId ? expertsById.get(group.expertId) : null;
-    return (
-      // Keyed by expert id so each group's collapse/reveal state
-      // survives the session list's periodic refetch.
-      <ExpertChatGroup
-        key={group.expertId ?? "autopilot"}
-        label={group.expertId ? (expert?.name ?? "Expert") : "Otto"}
-        role={
-          group.expertId
-            ? expert?.jobTitle || expert?.role
-            : t("Head of AI", "AI 负责人")
-        }
-        avatarUrl={expert?.avatarUrl ?? null}
-        color={expert?.color ?? null}
-        isAutopilot={!group.expertId}
-        sessions={group.sessions}
-        renderItem={renderItem}
-      />
-    );
-  }
 
   return (
     <>
@@ -180,11 +136,9 @@ export function RecentChats() {
             <SidebarMenu>{pinnedSessions.map(renderItem)}</SidebarMenu>
           </div>
         )}
-        {ottoGroups.map(renderGroup)}
-        {newExperts.map((expert) => (
-          <NewExpertGroup key={`new-${expert.id}`} expert={expert} />
-        ))}
-        {expertGroups.map(renderGroup)}
+        {unpinnedSessions.length > 0 && (
+          <SidebarMenu>{unpinnedSessions.map(renderItem)}</SidebarMenu>
+        )}
       </div>
 
       {hasMore && (

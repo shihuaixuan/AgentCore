@@ -18,6 +18,7 @@ import { useExpertMap, type ExpertIdentity } from "../../../useExpertMap";
 import { ExpertPickerOptions, RecipientAvatar } from "./ExpertPickerOptions";
 import {
   expertRecipient,
+  OTTO_RECIPIENT_OPTION,
   recipientOptions,
   type RecipientPickerConfig,
 } from "./recipientOptions";
@@ -53,6 +54,9 @@ export function RecipientChip({
   recipient,
   options,
   onSelect,
+  isThreadPicker,
+  isRosterPending,
+  hasRosterFailed,
   isLoading,
   anchorRef,
   open,
@@ -64,6 +68,7 @@ export function RecipientChip({
   const [localOpen, setLocalOpen] = useState(false);
   const setOpen = onOpenChange ?? setLocalOpen;
   const interactedOutside = useRef(false);
+  const chip = recipient ?? (isThreadPicker ? OTTO_RECIPIENT_OPTION : null);
   if (isLoading) {
     return (
       <div
@@ -79,23 +84,23 @@ export function RecipientChip({
 
   return (
     <Popover open={!disabled && (open ?? localOpen)} onOpenChange={setOpen}>
-      {recipient ? (
+      {chip ? (
         <PopoverTrigger asChild>
           <button
             type="button"
             disabled={disabled}
             aria-label={t(
-              `Sending to ${recipient.name} — change recipient`,
-              `发送给 ${recipient.name}，更换接收者`,
+              `Sending to ${chip.name} — change recipient`,
+              `发送给 ${chip.name}，更换接收者`,
             )}
             className={cn(
               CHIP_CLASSNAME,
               "transition-colors hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-focus focus-visible:outline-none disabled:opacity-60",
             )}
           >
-            <RecipientAvatar option={recipient} />
+            <RecipientAvatar option={chip} />
             <Text as="span" variant="body-tight" className="truncate">
-              {recipient.name}
+              {chip.name}
             </Text>
             <Icon
               icon={ArrowDown01Icon}
@@ -118,7 +123,7 @@ export function RecipientChip({
         }}
         onCloseAutoFocus={(event) => {
           // Without a chip, return focus to + unless the user moved it outside.
-          if (!recipient && !interactedOutside.current && anchorRef?.current) {
+          if (!chip && !interactedOutside.current && anchorRef?.current) {
             event.preventDefault();
             anchorRef.current.focus();
           }
@@ -136,6 +141,9 @@ export function RecipientChip({
         <ExpertPickerOptions
           recipient={recipient}
           options={options}
+          isThreadPicker={isThreadPicker}
+          isRosterPending={isRosterPending}
+          hasRosterFailed={hasRosterFailed}
           selectionBlocked={selectionBlocked}
           onSelect={onSelect}
           onClose={() => setOpen(false)}

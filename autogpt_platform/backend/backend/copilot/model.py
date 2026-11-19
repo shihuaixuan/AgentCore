@@ -40,6 +40,7 @@ from backend.util.feature_flag import Flag, is_feature_enabled
 from .autopilot_mode import AutopilotMode
 from .config import ChatConfig, CopilotLlmAuthProvider
 from .duplicate_message_id import is_duplicate_chat_message_id_error
+from .turn_recipient import ReplyRecipient
 
 logger = logging.getLogger(__name__)
 config = ChatConfig()
@@ -498,6 +499,11 @@ class ChatSessionInfo(BaseModel):
 
 class ChatSession(ChatSessionInfo):
     messages: list[ChatMessage]
+    # Runtime view for a single turn. Never publish this attribution or the
+    # recipient's credentials cache as the conversation's persistent state.
+    reply_recipient: ReplyRecipient | None = Field(default=None, exclude=True)
+    recipient_override: bool = Field(default=False, exclude=True)
+    recipient_workspace_id: str | None = Field(default=None, exclude=True)
     # In-flight tool-call names for the CURRENT turn.  Not persisted to
     # DB and not serialised on the wire — ``PrivateAttr`` keeps this a
     # process-local scratch buffer that's invisible to ``model_dump`` /
@@ -854,6 +860,8 @@ def _parse_json_field(value: str | dict | list | None, default: Any = None) -> A
 
 async def cache_chat_session(session: ChatSession) -> None:
     """Cache a chat session in Redis (without persisting to the database)."""
+    if session.recipient_override:
+        return
     redis_key = _get_session_cache_key(session.session_id)
     async_redis = await get_redis_async()
     await async_redis.setex(redis_key, config.session_ttl, session.model_dump_json())
@@ -1076,9 +1084,16 @@ async def upsert_chat_session(
         # session. Prefer those cached fields so the stale turn cannot revert
         # a rename, pin, or connection switch.
         try:
-            existing_cached = await _get_session_from_cache(session.session_id)
+            existing_cached = (
+                None
+                if session.recipient_override
+                else await _get_session_from_cache(session.session_id)
+            )
             cache_it = True
-            if existing_cached:
+            if session.recipient_override:
+                await invalidate_session_cache(session.session_id)
+                cache_it = False
+            elif existing_cached:
                 updates: dict[str, Any] = {"is_pinned": existing_cached.is_pinned}
                 if existing_cached.title:
                     updates["title"] = existing_cached.title
@@ -1152,6 +1167,8 @@ async def _save_session_to_db(
         existing = await db.get_chat_session_metadata(session.session_id)
 
         if not existing:
+            if session.recipient_override:
+                raise DatabaseError("The selected recipient's chat no longer exists")
             # Create new session
             await db.create_chat_session(
                 session_id=session.session_id,
@@ -1169,12 +1186,15 @@ async def _save_session_to_db(
 
     update_kwargs: dict[str, Any] = {
         "session_id": session.session_id,
-        "credentials": session.credentials,
-        "successful_agent_runs": session.successful_agent_runs,
-        "successful_agent_schedules": session.successful_agent_schedules,
         "total_prompt_tokens": total_prompt,
         "total_completion_tokens": total_completion,
     }
+    if not session.recipient_override:
+        update_kwargs.update(
+            credentials=session.credentials,
+            successful_agent_runs=session.successful_agent_runs,
+            successful_agent_schedules=session.successful_agent_schedules,
+        )
     if persist_tenancy:
         update_kwargs.update(
             organization_id=session.organization_id,
@@ -1202,6 +1222,15 @@ async def _save_session_to_db(
     if new_messages:
         messages_data = []
         for msg in new_messages:
+            if (
+                session.reply_recipient is not None
+                and msg.role == "assistant"
+                and msg.sequence is None
+            ):
+                msg.metadata = {
+                    **(msg.metadata or {}),
+                    "reply_recipient": session.reply_recipient.model_dump(),
+                }
             messages_data.append(
                 {
                     # ``id`` is optional — when the caller supplies one

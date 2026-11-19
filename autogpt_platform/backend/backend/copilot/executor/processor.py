@@ -51,6 +51,7 @@ from backend.copilot.expert_context import (
     ExpertSessionUnavailableError,
     read_private_expert,
 )
+from backend.copilot.gate.policy import DEFAULT_MODE, strictest_mode
 from backend.copilot.limit_tracking import (
     BlockedSurface,
     executor_turn_surface,
@@ -81,12 +82,19 @@ from backend.copilot.tools.agent_browser import close_browser_daemon
 from backend.copilot.trial_cost_context import trial_cost_context
 from backend.copilot.trial_reads import SharedTrialReads, trial_reads_shared
 from backend.copilot.turn_pause import TurnPause, pause_from_part
+from backend.copilot.turn_recipient import (
+    ReplyRecipient,
+    is_personal_chat_scope,
+    recipient_expert_id,
+    turn_workspace_id,
+)
 from backend.copilot.turn_tracing import (
     MODEL_OUTPUT_CHUNKS,
     TurnTrace,
     turn_origin,
     turn_transaction,
 )
+from backend.data.db_accessors import orgs_db
 from backend.data.user import account_refusal
 from backend.executor.cluster_lock import ClusterLock
 from backend.integrations.codex.transport import CodexCredentialIntegrityError
@@ -281,6 +289,65 @@ async def _normalize_private_expert_session_tenancy(
     return await upsert_chat_session(session, persist_tenancy=True)
 
 
+async def _resolve_turn_session(
+    session: "ChatSession", entry: CoPilotExecutionEntry
+) -> "ChatSession":
+    if entry.recipient is None:
+        return session
+    expert_id = recipient_expert_id(entry.recipient)
+    if expert_id != session.expert_id:
+        if not entry.managed_model_id or not session.user_id:
+            raise ExpertSessionUnavailableError(
+                "This chat cannot change the reply recipient."
+            )
+        mode = session.metadata.autopilot_mode or DEFAULT_MODE
+        if expert_id is not None:
+            check = await _read_private_expert_check(session.user_id, expert_id)
+            scope = (check.organization_id, check.team_id)
+            remember_expert_check(session.user_id, expert_id, check)
+            if check.expert.autopilot_mode is not None:
+                mode = strictest_mode(mode, check.expert.autopilot_mode)
+        else:
+            scope = await orgs_db().get_user_default_team(session.user_id)
+        if not is_personal_chat_scope(
+            (session.organization_id, session.team_id), scope
+        ):
+            raise ExpertSessionUnavailableError(
+                "Expert switching requires your personal workspace."
+            )
+        session = session.model_copy(
+            update={
+                "expert_id": expert_id,
+                "organization_id": scope[0],
+                "team_id": scope[1],
+                "credentials": {},
+                "successful_agent_runs": {},
+                "successful_agent_schedules": {},
+                "recipient_override": True,
+                "metadata": session.metadata.model_copy(
+                    update={"autopilot_mode": mode}
+                ),
+                "recipient_workspace_id": turn_workspace_id(
+                    session.session_id, expert_id
+                ),
+            }
+        )
+    return session
+
+
+def _set_reply_recipient(session: "ChatSession") -> None:
+    if session.expert_id is None:
+        session.reply_recipient = ReplyRecipient(id=None, name="Otto")
+        return
+    check = checked_expert(session.user_id, session.expert_id)
+    if check is None:
+        raise ExpertSessionUnavailableError(EXPERT_SESSION_TEMPORARY_MESSAGE)
+    expert = check.expert
+    session.reply_recipient = ReplyRecipient(
+        id=expert.id, name=expert.name, avatar_url=expert.avatar_url
+    )
+
+
 async def _wait_for_expert_setup(session: "ChatSession") -> bool:
     """Hold a fresh hire's turn until its skills and workflows are installed,
     or give up after ``EXPERT_SETUP_WAIT_SECONDS`` and run without them.
@@ -348,7 +415,9 @@ async def _read_private_expert_check(user_id: str, expert_id: str) -> CheckedExp
 
 
 async def _closing_at_model_output(
-    stream: AsyncGenerator[StreamBaseResponse, None], trial_reads: SharedTrialReads
+    stream: AsyncGenerator[StreamBaseResponse, None],
+    trial_reads: SharedTrialReads,
+    reply_recipient: ReplyRecipient | None = None,
 ) -> AsyncGenerator[StreamBaseResponse, None]:
     """Pass the engine's stream through, closing ``trial_reads`` at its first
     model output.
@@ -359,6 +428,11 @@ async def _closing_at_model_output(
     """
     try:
         async for chunk in stream:
+            if reply_recipient is not None and isinstance(chunk, StreamStart):
+                chunk.messageMetadata = {
+                    **(chunk.messageMetadata or {}),
+                    "reply_recipient": reply_recipient.model_dump(),
+                }
             if isinstance(chunk, MODEL_OUTPUT_CHUNKS):
                 trial_reads.close()
             yield chunk
@@ -812,6 +886,7 @@ class CoPilotProcessor:
                 raise RuntimeError("codex_session_route_mismatch")
 
             session = await _normalize_private_expert_session_tenancy(session)
+            session = await _resolve_turn_session(session, entry)
             # The allowance, budget and tier checks that set up the turn share
             # one read of the trial and one of the usage state; closed at the
             # model's first output, so tools running after it read afresh.
@@ -865,6 +940,8 @@ class CoPilotProcessor:
                 # their trial, so the rest of the setup reads both again.
                 trial_reads.forget()
                 await _reauthorize_private_expert_after_setup_wait(session)
+            if entry.managed_model_id is not None:
+                _set_reply_recipient(session)
 
             if credit_turn is not None:
                 log.info(
@@ -892,6 +969,9 @@ class CoPilotProcessor:
                     managed_client=client,
                 )
                 engine = "baseline"
+            elif session.recipient_override and load_test == "scripted":
+                error_msg = "Changing recipients requires the managed chat engine."
+                return
             elif entry.llm_auth_provider == "codex":
                 from backend.integrations.codex.access import enforce_codex_access
                 from backend.integrations.codex.credential_codec import (
@@ -1090,7 +1170,9 @@ class CoPilotProcessor:
             # silent gaps (deep thinking, slow tool execution, inter-tool
             # gaps) instead of looping the generic "Thinking…" phrases.
             heartbeat_stream = wrap_stream_with_heartbeat(
-                _closing_at_model_output(raw_stream, trial_reads)
+                _closing_at_model_output(
+                    raw_stream, trial_reads, session.reply_recipient
+                )
             )
             published_stream = stream_registry.stream_and_publish(
                 session_id=entry.session_id,

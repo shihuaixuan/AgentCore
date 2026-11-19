@@ -8,6 +8,13 @@ import {
 } from "../turnPause";
 import { toolDisplayName } from "./toolDisplay";
 import { backgroundNotice } from "./backgroundSubtasks";
+import {
+  getReplyRecipient,
+  parseReplyRecipient,
+  REPLY_RECIPIENT_PART_TYPE,
+  sameReplyRecipient,
+  type ReplyRecipient,
+} from "./replyRecipient";
 import { getStandaloneBubbleMetadata } from "./standaloneMessages";
 import {
   WORKSPACE_FOLDER_PART_TYPE,
@@ -241,6 +248,8 @@ function collectConsumedToolCallIds(
 // idx-based fallback ids (``-idx-<N>``) don't match — return null so the
 // caller refuses the merge in those cases (the safer default).
 const HYDRATED_ID_SEQ_RE = /-seq-(\d+)$/;
+const firstSequenceByBubble = new WeakMap<UiMessage, number>();
+const activeTurnOpeners = new WeakSet<UiMessage>();
 
 export function extractDbSequence(uiMessage: UIMessage): number | null {
   if (typeof uiMessage.id !== "string") return null;
@@ -256,8 +265,8 @@ export function extractDbSequence(uiMessage: UIMessage): number | null {
  * consecutive assistant DB rows.  This handles the boundary between pages
  * (or between older-pages and the current/streaming page).
  *
- * The merge is gated on **DB-sequence adjacency**: extract the trailing
- * ``-seq-N`` from each id and only merge when ``firstSeq === lastSeq + 1``.
+ * The merge is gated on **DB-sequence adjacency**: the first row of the
+ * right bubble must come immediately after the last row of the left bubble.
  * Without that check, a hydration-race window (where a user/reasoning row
  * exists in the DB but has not yet been hydrated into either page) would
  * silently swallow the missing row by stitching the two surrounding
@@ -272,14 +281,11 @@ export function concatWithAssistantMerge(
   if (b.length === 0) return a;
   const last = a[a.length - 1];
   const first = b[0];
-  // Metadata-carrying bubbles (expert run posts → WorkCard) must keep their
-  // identity across page boundaries too: merging one into a plain assistant
-  // reply either drops the card or absorbs the reply into it.
   if (
     last.role !== "assistant" ||
     first.role !== "assistant" ||
-    last.metadata ||
-    first.metadata
+    activeTurnOpeners.has(first) ||
+    !canMergeAssistantRows(last, first)
   ) {
     return [...a, ...b];
   }
@@ -289,15 +295,87 @@ export function concatWithAssistantMerge(
   // refuse the merge, which is fine: the streaming consumer handles its own
   // assistant continuity inside the active turn.
   const lastSeq = extractDbSequence(last);
-  const firstSeq = extractDbSequence(first);
+  const firstSeq = firstSequenceByBubble.get(first) ?? extractDbSequence(first);
   if (lastSeq === null || firstSeq === null || firstSeq !== lastSeq + 1) {
     return [...a, ...b];
   }
-  return [
-    ...a.slice(0, -1),
-    { ...last, parts: [...last.parts, ...first.parts] },
-    ...b.slice(1),
-  ];
+  const merged: UiMessage = {
+    ...last,
+    id: first.id,
+    parts: [...last.parts, ...first.parts],
+    ...mergeAssistantMetadata(last.metadata, first.metadata),
+  };
+  firstSequenceByBubble.set(merged, firstSequenceByBubble.get(last) ?? lastSeq);
+  return [...a.slice(0, -1), merged, ...b.slice(1)];
+}
+
+function canMergeAssistantRows(previous: UiMessage, next: UiMessage): boolean {
+  if (
+    getStandaloneBubbleMetadata(previous.metadata) ||
+    getStandaloneBubbleMetadata(next.metadata)
+  ) {
+    return false;
+  }
+
+  const previousRecipient = getReplyRecipient(previous.metadata);
+  const nextRecipient = getReplyRecipient(next.metadata);
+  return (
+    sameReplyRecipient(previousRecipient, nextRecipient) ||
+    (!previousRecipient &&
+      previous.parts.every((part) => part.type === "reasoning"))
+  );
+}
+
+function mergeAssistantMetadata(
+  previous: unknown,
+  next: unknown,
+): { metadata?: Record<string, unknown> } {
+  const earlier =
+    previous && typeof previous === "object"
+      ? (previous as Record<string, unknown>)
+      : null;
+  const later =
+    next && typeof next === "object" ? (next as Record<string, unknown>) : null;
+  if (!earlier) return later ? { metadata: later } : {};
+  if (!later) return { metadata: earlier };
+  const recipient = getReplyRecipient(earlier) ?? getReplyRecipient(later);
+  return {
+    metadata: {
+      ...later,
+      ...earlier,
+      ...(recipient ? { reply_recipient: recipient } : {}),
+    },
+  };
+}
+
+function reasoningRecipients(
+  messages: SessionChatMessage[],
+  activeTurnStartMs: number,
+) {
+  const recipients = new Map<SessionChatMessage, ReplyRecipient>();
+  let nextRecipient: ReplyRecipient | null = null;
+  let nextBelongsToActiveTurn = false;
+  for (let index = messages.length - 1; index >= 0; index--) {
+    const message = messages[index];
+    const belongsToActiveTurn =
+      !!message.created_at &&
+      Date.parse(message.created_at) >= activeTurnStartMs;
+    if (message.role === "assistant") {
+      nextRecipient = getStandaloneBubbleMetadata(message.metadata)
+        ? null
+        : getReplyRecipient(message.metadata);
+      nextBelongsToActiveTurn = belongsToActiveTurn;
+    } else if (message.role === "user") {
+      nextRecipient = null;
+    } else if (
+      message.role === "reasoning" &&
+      nextRecipient &&
+      belongsToActiveTurn === nextBelongsToActiveTurn
+    ) {
+      recipients.set(message, nextRecipient);
+    }
+  }
+  return recipients;
 }
 
 /**
@@ -385,6 +463,10 @@ export function convertChatSessionMessagesToUiMessages(
   const activeTurnStartMs = options?.activeTurnStartedAt
     ? Date.parse(options.activeTurnStartedAt)
     : NaN;
+  const recipientsByReasoningRow = reasoningRecipients(
+    messages,
+    activeTurnStartMs,
+  );
   let activeTurnStartIndex: number | null = null;
 
   function startsActiveTurn(msg: SessionChatMessage): boolean {
@@ -459,15 +541,23 @@ export function convertChatSessionMessagesToUiMessages(
     // be keyed ``-seq-5``, and a cross-page assistant at seq=7 would fail
     // the ``firstSeq === lastSeq + 1`` check (7 !== 5+1) and split into two
     // bubbles instead of joining the ongoing turn.
-    // A run-post or a skipped-run note carries structured ``metadata`` the
-    // thread renders as a card. Keep it as its own bubble — never fold it
-    // into a neighbouring assistant turn (either direction), or the card
-    // loses its identity.
-    const standaloneMetadata = getStandaloneBubbleMetadata(msg.metadata);
     // The still-running turn opens its own bubble even when it follows an
     // assistant row: merging it into the completed answer above would make
     // the resume path (which replays that turn alone) drop both.
     const opensActiveTurn = uiRole === "assistant" && startsActiveTurn(msg);
+    const reasoningRecipient = recipientsByReasoningRow.get(msg);
+    const uiMessage: UiMessage = {
+      id:
+        msg.sequence != null
+          ? `${sessionId}-seq-${msg.sequence}`
+          : `${sessionId}-idx-${idx}`,
+      role: uiRole,
+      parts,
+      ...mergeAssistantMetadata(
+        msg.metadata,
+        reasoningRecipient ? { reply_recipient: reasoningRecipient } : null,
+      ),
+    };
 
     const prevUI = uiMessages[uiMessages.length - 1];
     if (
@@ -476,15 +566,15 @@ export function convertChatSessionMessagesToUiMessages(
       !opensActiveTurn &&
       prevUI &&
       prevUI.role === "assistant" &&
-      !getStandaloneBubbleMetadata(prevUI.metadata) &&
-      !standaloneMetadata
+      canMergeAssistantRows(prevUI, uiMessage)
     ) {
       prevUI.parts.push(...parts);
+      Object.assign(
+        prevUI,
+        mergeAssistantMetadata(prevUI.metadata, uiMessage.metadata),
+      );
       const oldId = prevUI.id;
-      const newId =
-        msg.sequence != null
-          ? `${sessionId}-seq-${msg.sequence}`
-          : `${sessionId}-idx-${idx}`;
+      const newId = uiMessage.id;
       if (newId !== oldId) {
         // Migrate stats over to the new id and let the old key go.
         const existingStats = stats.get(oldId);
@@ -509,19 +599,15 @@ export function convertChatSessionMessagesToUiMessages(
       return;
     }
 
-    // Fall back to the loop index when sequence is unexpectedly absent so
-    // multiple sequence-less messages don't collide on the same React key.
-    const msgId =
-      msg.sequence != null
-        ? `${sessionId}-seq-${msg.sequence}`
-        : `${sessionId}-idx-${idx}`;
-    uiMessages.push({
-      id: msgId,
-      role: uiRole,
-      parts,
-      ...(msg.metadata ? { metadata: msg.metadata } : {}),
-    });
-    if (opensActiveTurn) activeTurnStartIndex = uiMessages.length - 1;
+    const msgId = uiMessage.id;
+    uiMessages.push(uiMessage);
+    if (msg.sequence != null) {
+      firstSequenceByBubble.set(uiMessage, msg.sequence);
+    }
+    if (opensActiveTurn) {
+      activeTurnOpeners.add(uiMessage);
+      activeTurnStartIndex = uiMessages.length - 1;
+    }
 
     const patch: Partial<TurnStats> = {};
     if (msg.created_at) patch.createdAt = msg.created_at;
@@ -563,7 +649,7 @@ interface RowPartsContext {
 
 function buildRowParts(msg: SessionChatMessage, ctx: RowPartsContext) {
   // A pause marker draws the Paused card. The pause rides on the part rather
-  // than the message, because merged assistant bubbles drop row metadata.
+  // than the message, because one bubble can contain multiple pause rows.
   const pause =
     msg.role === "assistant" ? turnPauseOfMetadata(msg.metadata) : null;
   if (pause) return [pausePart(msg, pause)];
@@ -690,6 +776,7 @@ export function createTurnLogRenderer(
     };
 
     const groups = groupTurnRows(log);
+    const liveRecipient = getTurnReplyRecipient(log);
     const next = new Map<string, { deps: unknown[]; message: UiMessage }>();
     const messages = groups.map((group, index) => {
       const trailingStep = stepIsEmpty && index === groups.length - 1;
@@ -697,6 +784,9 @@ export function createTurnLogRenderer(
       const deps: unknown[] = [
         ctx.unanswered,
         trailingStep,
+        ...(group.role === "assistant"
+          ? [liveRecipient?.id, liveRecipient?.name, liveRecipient?.avatar_url]
+          : []),
         ...group.rows.flatMap((i) => [log.rows[i], streamingRows.has(i)]),
         ...rows.flatMap((row) => row.toolCalls.map((c) => outputs.get(c.id))),
         ...group.overlay,
@@ -711,6 +801,7 @@ export function createTurnLogRenderer(
               streamingRows,
               trailingStep,
               ctx,
+              liveRecipient,
             );
       next.set(group.key, { deps, message });
       return message;
@@ -718,6 +809,20 @@ export function createTurnLogRenderer(
     memo = next;
     return messages;
   };
+}
+
+function getTurnReplyRecipient(log: TurnLog): ReplyRecipient | null {
+  for (const row of log.rows) {
+    if (row.role !== "assistant") continue;
+    const saved = getReplyRecipient(row.metadata);
+    if (saved) return saved;
+  }
+  for (const part of log.overlay) {
+    if (part.type !== REPLY_RECIPIENT_PART_TYPE) continue;
+    const streamed = parseReplyRecipient(part.data);
+    if (streamed) return streamed;
+  }
+  return null;
 }
 
 /**
@@ -781,6 +886,7 @@ function groupTurnRows(log: TurnLog): TurnGroup[] {
   });
 
   for (const part of log.overlay) {
+    if (part.type === REPLY_RECIPIENT_PART_TYPE) continue;
     const from = part.anchor === 0 ? -1 : groupOfRow[part.anchor - 1];
     let target =
       from >= 0 && groups[from].role === "assistant"
@@ -806,8 +912,10 @@ function buildGroupMessage(
   streamingRows: Set<number | null>,
   trailingStep: boolean,
   ctx: RowPartsContext,
+  liveRecipient: ReplyRecipient | null,
 ): UiMessage {
   const parts: UiPart[] = [];
+  let metadata: unknown;
   let overlayIndex = 0;
   const flushOverlayBefore = (rowIndex: number) => {
     while (
@@ -820,8 +928,10 @@ function buildGroupMessage(
   };
   for (const index of group.rows) {
     flushOverlayBefore(index);
+    const row = rows[index];
+    metadata = mergeAssistantMetadata(metadata, row.metadata).metadata;
     parts.push(
-      ...buildRowParts(sessionRowOf(rows[index]), {
+      ...buildRowParts(sessionRowOf(row), {
         ...ctx,
         streaming: streamingRows.has(index),
       }),
@@ -829,12 +939,15 @@ function buildGroupMessage(
   }
   flushOverlayBefore(Infinity);
   if (trailingStep) parts.push({ type: "step-start" });
-  const metadata = group.rows.length ? rows[group.rows[0]].metadata : null;
+  const recipientMetadata =
+    group.role === "assistant" && liveRecipient
+      ? { reply_recipient: liveRecipient }
+      : null;
   return {
     id: group.key,
     role: group.role,
     parts,
-    ...(metadata ? { metadata } : {}),
+    ...mergeAssistantMetadata(metadata, recipientMetadata),
   };
 }
 

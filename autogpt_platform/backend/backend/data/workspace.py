@@ -693,6 +693,7 @@ async def resolve_attachable_workspace_files(
     *,
     session_id: str,
     expert_id: str | None,
+    recipient_workspace_id: str | None = None,
 ) -> list[UserWorkspaceFile]:
     """Resolve attachment IDs for a message sent in ``session_id``.
 
@@ -710,7 +711,7 @@ async def resolve_attachable_workspace_files(
     if expert_id is None or not files:
         return files
     scope = await resolve_expert_workspace_scope(user_id, expert_id)
-    scope = scope.with_session(session_id)
+    scope = scope.with_session(recipient_workspace_id or session_id)
     denied = [f.name for f in files if not scope.allows_path(f.path)]
     if denied:
         raise WorkspaceAccessDeniedError(

@@ -1,5 +1,6 @@
 import type { UIDataTypes, UIMessage, UITools } from "ai";
 
+import { getMessageReplyRecipient } from "../../helpers/replyRecipient";
 import {
   isBookkeepingPart,
   PENDING_DRAINED_PART_TYPE,
@@ -161,6 +162,17 @@ function splitAssistantMessageCached(message: ChatMessage): ChatMessage[] {
 
 function splitAssistantMessage(message: ChatMessage): ChatMessage[] {
   const rows: ChatMessage[] = [];
+  const recipient = getMessageReplyRecipient(message);
+  if (recipient) {
+    const metadata = message.metadata;
+    message = {
+      ...message,
+      metadata: {
+        ...(metadata && typeof metadata === "object" ? metadata : {}),
+        reply_recipient: recipient,
+      },
+    };
+  }
   let segmentParts: MessagePart[] = [];
   let segmentIndex = 0;
   let followUpIndex = 0;
