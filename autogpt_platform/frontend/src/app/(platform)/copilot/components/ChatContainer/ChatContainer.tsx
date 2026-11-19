@@ -8,6 +8,7 @@ import {
 } from "@/components/atoms/Tooltip/BaseTooltip";
 import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getDefaultAssistantTitle } from "@/services/experts/default-assistant";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { UIDataTypes, UIMessage, UITools } from "ai";
 import { LayoutGroup } from "framer-motion";
@@ -540,7 +541,9 @@ export const ChatContainer = ({
       onSend={guardedOnSend}
       onBackendTurn={onBackendTurn}
       sessionId={sessionId}
-      assistantName={threadRecipient?.name ?? expertTitle ?? "Otto"}
+      assistantName={
+        threadRecipient?.name ?? expertTitle ?? getDefaultAssistantTitle(locale)
+      }
     >
       <LayoutGroup id="copilot-2-chat-layout">
         <div

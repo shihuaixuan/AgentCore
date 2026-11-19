@@ -34,8 +34,6 @@ interface PodGroup {
   experts: Expert[];
 }
 
-export const AUTOPILOT_ROLE = "Head of AI";
-
 export function getExpertCover(
   expert: Pick<Expert, "id" | "avatar_url" | "color" | "role" | "categories">,
 ) {

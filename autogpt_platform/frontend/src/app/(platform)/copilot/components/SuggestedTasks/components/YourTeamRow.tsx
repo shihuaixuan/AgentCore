@@ -1,6 +1,9 @@
 import { Text } from "@/components/atoms/Text/Text";
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
+import {
+  DEFAULT_ASSISTANT_AVATAR_URL,
+  getDefaultAssistantTitle,
+} from "@/services/experts/default-assistant";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { useId } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
@@ -12,7 +15,7 @@ interface Props {
   experts: ExpertIdentity[];
 }
 
-// Who is on the team on the first visit: Otto and the experts the plan
+// Who is on the team on the first visit: the assistant and the experts the plan
 // hired. Read-only; the walkthrough's Team step points at the sidebar.
 export function YourTeamRow({ experts }: Props) {
   const { t, locale } = useTranslation();
@@ -29,13 +32,14 @@ export function YourTeamRow({ experts }: Props) {
         <li className="flex items-center gap-1.5 rounded-full border border-border-base bg-surface py-0.5 pr-2.5 pl-0.5">
           {/* The name beside it says who it is. */}
           <span aria-hidden className="contents">
-            <AutopilotAvatar size={AVATAR_SIZE} />
+            <ExpertAvatar
+              name={getDefaultAssistantTitle(locale)}
+              avatarUrl={DEFAULT_ASSISTANT_AVATAR_URL}
+              size={AVATAR_SIZE}
+            />
           </span>
           <Text variant="small-medium" as="span" tone="primary">
-            Otto
-          </Text>
-          <Text variant="small" as="span" tone="secondary">
-            {t("Head of AI", "AI 负责人")}
+            {getDefaultAssistantTitle(locale)}
           </Text>
         </li>
         {experts.map((expert) => (

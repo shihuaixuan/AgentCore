@@ -472,13 +472,17 @@ SidebarContent.displayName = "SidebarContent";
 
 const SidebarGroup = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div">
->(({ className, ...props }, ref) => {
+  React.ComponentProps<"div"> & { size?: "default" | "sm" }
+>(({ className, size = "default", ...props }, ref) => {
   return (
     <div
       ref={ref}
       data-sidebar="group"
-      className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
+      className={cn(
+        "relative flex w-full min-w-0 flex-col",
+        size === "sm" ? "px-2 py-1" : "p-2",
+        className,
+      )}
       {...props}
     />
   );
@@ -574,6 +578,7 @@ const sidebarMenuButtonVariants = cva(
     variants: {
       variant: {
         default: "hover:bg-surface-hover hover:text-foreground-strong",
+        navigation: "hover:bg-surface-hover hover:text-foreground-strong",
         outline:
           // oxlint-disable-next-line design-system/no-arbitrary-values -- 1px outline drawn as a shadow so the focus ring keeps ring-info
           "bg-surface shadow-[0_0_0_1px_rgb(var(--color-border-base))] hover:bg-surface-hover hover:text-foreground-strong hover:shadow-[0_0_0_1px_rgb(var(--color-surface-hover))]",
@@ -584,6 +589,13 @@ const sidebarMenuButtonVariants = cva(
         lg: "h-12 text-body leading-5 group-data-[collapsible=icon]:!p-0",
       },
     },
+    compoundVariants: [
+      {
+        variant: "navigation",
+        className:
+          "h-auto rounded-xl p-2 pl-3 font-normal data-[active=true]:font-normal group-data-[collapsible=icon]:!p-1.5 hover:!bg-surface-hover [&>svg]:size-4 group-data-[collapsible=icon]:[&>svg]:size-4.5 max-md:gap-3 max-md:py-2.5 max-md:text-body-lg max-md:[&>svg]:size-5 data-[active=true]:!bg-surface-active data-[active=true]:hover:!bg-surface-active",
+      },
+    ],
     defaultVariants: {
       variant: "default",
       size: "default",

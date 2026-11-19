@@ -11,7 +11,7 @@ describe("Otto 中文资料", () => {
       </LanguageProvider>,
     );
     expect(screen.getByText("身份")).toBeDefined();
-    expect(screen.getByText(/Otto 是团队中的通才/)).toBeDefined();
+    expect(screen.getByText(/通用办公助手与你直接沟通/)).toBeDefined();
     expect(screen.getByText("边界")).toBeDefined();
   });
 });

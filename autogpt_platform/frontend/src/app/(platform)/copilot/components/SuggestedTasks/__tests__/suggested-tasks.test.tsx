@@ -321,14 +321,16 @@ describe("Suggested first tasks on Home — who takes each task", () => {
     for (const task of [TASKS[1], TASKS[2]]) {
       const row = rowOf(task);
       expect(
-        within(row).getByRole("button", { name: startName("Otto", task) }),
+        within(row).getByRole("button", {
+          name: startName("General Office Assistant", task),
+        }),
       ).toBeDefined();
       expect(
         within(row)
-          .getByRole("img", { name: "Otto, your personal Head of AI" })
+          .getByRole("img", { name: "General Office Assistant" })
           .getAttribute("width"),
       ).toBe("28");
-      expect(within(row).getByText("Otto")).toBeDefined();
+      expect(within(row).getByText("General Office Assistant")).toBeDefined();
     }
   });
 
@@ -386,20 +388,26 @@ describe("Suggested first tasks on Home — who takes each task", () => {
     chatExperts = { "session-1": null };
     renderHome();
 
-    await screen.findByRole("button", { name: startName("Otto", TASKS[1]) });
+    await screen.findByRole("button", {
+      name: startName("General Office Assistant", TASKS[1]),
+    });
     await userEvent.click(
-      screen.getByRole("button", { name: startName("Otto", TASKS[2]) }),
+      screen.getByRole("button", {
+        name: startName("General Office Assistant", TASKS[2]),
+      }),
     );
 
     expect(
       await screen.findByText(
-        "That expert isn't on your team, so Otto has this one.",
+        "That expert isn't on your team, so your office assistant has this one.",
       ),
     ).toBeDefined();
     const started = await screen.findByRole("link", {
-      name: chatName("Otto", TASKS[2]),
+      name: chatName("General Office Assistant", TASKS[2]),
     });
-    expect(within(started).getByText("In progress with Otto")).toBeDefined();
+    expect(
+      within(started).getByText("In progress with General Office Assistant"),
+    ).toBeDefined();
     expect(events("home_suggestion_clicked")).toEqual([
       {
         position: 1,
@@ -426,12 +434,14 @@ describe("Suggested first tasks on Home — who takes each task", () => {
     const block = await findBlock();
     await userEvent.click(
       await within(block).findByRole("button", {
-        name: startName("Otto", TASKS[1]),
+        name: startName("General Office Assistant", TASKS[1]),
       }),
     );
 
     expect(
-      await screen.findByRole("link", { name: chatName("Otto", TASKS[1]) }),
+      await screen.findByRole("link", {
+        name: chatName("General Office Assistant", TASKS[1]),
+      }),
     ).toBeDefined();
     expect(onStartTask).toHaveBeenCalledExactlyOnceWith(TASKS[1].prompt);
     expect(wasAddressedToMaria).toBe(false);
@@ -497,7 +507,7 @@ describe("Suggested first tasks on Home — the approval mode", () => {
 
     await userEvent.click(
       await screen.findByRole("button", {
-        name: startName("Otto", TASKS[1]),
+        name: startName("General Office Assistant", TASKS[1]),
       }),
     );
 
@@ -573,16 +583,22 @@ describe("Suggested first tasks on Home — the rows", () => {
   it("keeps a started row listed when Home is opened again", async () => {
     const view = renderHome();
     await userEvent.click(
-      await screen.findByRole("button", { name: startName("Otto", TASKS[1]) }),
+      await screen.findByRole("button", {
+        name: startName("General Office Assistant", TASKS[1]),
+      }),
     );
-    await screen.findByRole("link", { name: chatName("Otto", TASKS[1]) });
+    await screen.findByRole("link", {
+      name: chatName("General Office Assistant", TASKS[1]),
+    });
     await waitFor(() => expect(stored[1].state).toBe("sent"));
 
     view.unmount();
     renderHome();
 
     expect(
-      await screen.findByRole("link", { name: chatName("Otto", TASKS[1]) }),
+      await screen.findByRole("link", {
+        name: chatName("General Office Assistant", TASKS[1]),
+      }),
     ).toBeDefined();
     await waitFor(() => expect(reads).toBeGreaterThanOrEqual(2));
     expect(rows().map(titleOf)).toEqual(TASKS.map((task) => task.title));
@@ -596,7 +612,9 @@ describe("Suggested first tasks on Home — the rows", () => {
 
     expect(within(rowOf(TASKS[0])).getByText(TASKS[0].why ?? "")).toBeDefined();
     expect(within(rowOf(TASKS[2])).getByText(TASKS[2].why ?? "")).toBeDefined();
-    expect(rowOf(TASKS[1]).textContent).toBe(`${TASKS[1].title}Otto`);
+    expect(rowOf(TASKS[1]).textContent).toBe(
+      `${TASKS[1].title}General Office Assistant`,
+    );
   });
 
   it("marks the open rows' buttons, and only those, as where the walkthrough starts", async () => {
@@ -607,7 +625,9 @@ describe("Suggested first tasks on Home — the rows", () => {
       name: chatName(EMAIL_TITLE, TASKS[0]),
     });
     const openButtons = [
-      await screen.findByRole("button", { name: startName("Otto", TASKS[1]) }),
+      await screen.findByRole("button", {
+        name: startName("General Office Assistant", TASKS[1]),
+      }),
       await screen.findByRole("button", {
         name: startName(SALES_TITLE, TASKS[2]),
       }),
@@ -632,7 +652,9 @@ describe("Suggested first tasks on Home — removing a task", () => {
 
     await waitFor(() =>
       expect(
-        screen.queryByRole("button", { name: startName("Otto", TASKS[1]) }),
+        screen.queryByRole("button", {
+          name: startName("General Office Assistant", TASKS[1]),
+        }),
       ).toBeNull(),
     );
     await waitFor(() =>
@@ -646,7 +668,9 @@ describe("Suggested first tasks on Home — removing a task", () => {
     await userEvent.click(screen.getByRole("button", { name: "Undo" }));
 
     expect(
-      await screen.findByRole("button", { name: startName("Otto", TASKS[1]) }),
+      await screen.findByRole("button", {
+        name: startName("General Office Assistant", TASKS[1]),
+      }),
     ).toBeDefined();
     await waitFor(() =>
       expect(writes.at(-1)).toEqual({ task_ids: ["1"], state: "open" }),
@@ -672,7 +696,9 @@ describe("Suggested first tasks on Home — removing a task", () => {
     await waitFor(() => expect(screen.queryByText("Task removed")).toBeNull());
     expect(screen.queryByRole("button", { name: "Undo" })).toBeNull();
     expect(
-      screen.queryByRole("button", { name: startName("Otto", TASKS[1]) }),
+      screen.queryByRole("button", {
+        name: startName("General Office Assistant", TASKS[1]),
+      }),
     ).toBeNull();
     expect(writes).toEqual([{ task_ids: ["1"], state: "dismissed" }]);
   });
@@ -795,7 +821,7 @@ describe("Suggested first tasks on Home — more tasks", () => {
 
     expect(
       await screen.findByRole("button", {
-        name: startName("Otto", MORE_TASKS[0]),
+        name: startName("General Office Assistant", MORE_TASKS[0]),
       }),
     ).toBeDefined();
     expect(more.getAttribute("aria-expanded")).toBe("true");
@@ -824,7 +850,7 @@ describe("Suggested first tasks on Home — more tasks", () => {
 
     expect(
       await screen.findByRole("button", {
-        name: startName("Otto", MORE_TASKS[0]),
+        name: startName("General Office Assistant", MORE_TASKS[0]),
       }),
     ).toBeDefined();
     expect(
@@ -839,13 +865,17 @@ describe("Suggested first tasks on Home — more tasks", () => {
     renderHome();
 
     await userEvent.click(
-      await screen.findByRole("button", { name: startName("Otto", TASKS[1]) }),
+      await screen.findByRole("button", {
+        name: startName("General Office Assistant", TASKS[1]),
+      }),
     );
 
-    await screen.findByRole("link", { name: chatName("Otto", TASKS[1]) });
+    await screen.findByRole("link", {
+      name: chatName("General Office Assistant", TASKS[1]),
+    });
     expect(
       await screen.findByRole("button", {
-        name: startName("Otto", MORE_TASKS[1]),
+        name: startName("General Office Assistant", MORE_TASKS[1]),
       }),
     ).toBeDefined();
     expect(
@@ -864,7 +894,7 @@ describe("Suggested first tasks on Home — more tasks", () => {
     renderHome();
 
     await screen.findByRole("button", {
-      name: startName("Otto", MORE_TASKS[0]),
+      name: startName("General Office Assistant", MORE_TASKS[0]),
     });
 
     expect(startHere()).toEqual({
@@ -945,7 +975,9 @@ describe("Suggested first tasks on Home — when to show them", () => {
       screen.queryByRole("region", { name: "Suggested first tasks" }),
     ).toBeNull();
     expect(
-      screen.queryByRole("button", { name: startName("Otto", TASKS[0]) }),
+      screen.queryByRole("button", {
+        name: startName("General Office Assistant", TASKS[0]),
+      }),
     ).toBeNull();
   });
 
@@ -961,7 +993,9 @@ describe("Suggested first tasks on Home — when to show them", () => {
     const block = await findBlock();
 
     expect(
-      within(block).getByRole("button", { name: startName("Otto", TASKS[0]) }),
+      within(block).getByRole("button", {
+        name: startName("General Office Assistant", TASKS[0]),
+      }),
     ).toBeDefined();
   });
 });
@@ -978,7 +1012,7 @@ describe("Suggested first tasks — the greeting page", () => {
         within(team)
           .getAllByRole("listitem")
           .map((chip) => chip.textContent),
-      ).toEqual(["OttoHead of AI", EMAIL_TITLE, SALES_TITLE]),
+      ).toEqual(["General Office Assistant", EMAIL_TITLE, SALES_TITLE]),
     );
 
     const list = within(card).getByRole("list", { name: "Your first tasks" });
@@ -989,7 +1023,9 @@ describe("Suggested first tasks — the greeting page", () => {
       }),
     ).toBeDefined();
     expect(
-      within(list).getByRole("button", { name: startName("Otto", TASKS[1]) }),
+      within(list).getByRole("button", {
+        name: startName("General Office Assistant", TASKS[1]),
+      }),
     ).toBeDefined();
     expect(
       within(list).getByRole("button", {
@@ -1053,11 +1089,15 @@ describe("Suggested first tasks — the greeting page", () => {
     renderHome({ onStartTask });
 
     await userEvent.click(
-      await screen.findByRole("button", { name: startName("Otto", TASKS[1]) }),
+      await screen.findByRole("button", {
+        name: startName("General Office Assistant", TASKS[1]),
+      }),
     );
 
     expect(
-      await screen.findByRole("link", { name: chatName("Otto", TASKS[1]) }),
+      await screen.findByRole("link", {
+        name: chatName("General Office Assistant", TASKS[1]),
+      }),
     ).toBeDefined();
     expect(onStartTask).toHaveBeenCalledExactlyOnceWith(TASKS[1].prompt);
     await waitFor(() =>
@@ -1087,7 +1127,9 @@ describe("Suggested first tasks — the greeting page", () => {
 
     await waitFor(() =>
       expect(
-        screen.queryByRole("button", { name: startName("Otto", TASKS[1]) }),
+        screen.queryByRole("button", {
+          name: startName("General Office Assistant", TASKS[1]),
+        }),
       ).toBeNull(),
     );
     await waitFor(() =>
@@ -1101,7 +1143,9 @@ describe("Suggested first tasks — the greeting page", () => {
     await userEvent.click(screen.getByRole("button", { name: "Undo" }));
 
     expect(
-      await screen.findByRole("button", { name: startName("Otto", TASKS[1]) }),
+      await screen.findByRole("button", {
+        name: startName("General Office Assistant", TASKS[1]),
+      }),
     ).toBeDefined();
     await waitFor(() =>
       expect(writes.at(-1)).toEqual({ task_ids: ["1"], state: "open" }),
@@ -1120,7 +1164,9 @@ describe("Suggested first tasks — the greeting page", () => {
       name: startName(SALES_TITLE, TASKS[2]),
     });
     await userEvent.click(
-      screen.getByRole("button", { name: startName("Otto", TASKS[1]) }),
+      screen.getByRole("button", {
+        name: startName("General Office Assistant", TASKS[1]),
+      }),
     );
 
     try {
@@ -1172,7 +1218,9 @@ describe("Suggested first tasks — the greeting page", () => {
     renderHome();
 
     await userEvent.click(
-      await screen.findByRole("button", { name: startName("Otto", TASKS[1]) }),
+      await screen.findByRole("button", {
+        name: startName("General Office Assistant", TASKS[1]),
+      }),
     );
 
     const sent = { task_ids: ["1"], state: "sent", session_id: "session-1" };
@@ -1181,7 +1229,9 @@ describe("Suggested first tasks — the greeting page", () => {
     });
     expect(stored[1].state).toBe("sent");
     expect(
-      screen.getByRole("link", { name: chatName("Otto", TASKS[1]) }),
+      screen.getByRole("link", {
+        name: chatName("General Office Assistant", TASKS[1]),
+      }),
     ).toBeDefined();
   });
 
@@ -1194,13 +1244,17 @@ describe("Suggested first tasks — the greeting page", () => {
     });
 
     await userEvent.click(
-      await screen.findByRole("button", { name: startName("Otto", TASKS[1]) }),
+      await screen.findByRole("button", {
+        name: startName("General Office Assistant", TASKS[1]),
+      }),
     );
 
     await screen.findByText("Could not start that task");
     expect(writes).toEqual([]);
     expect(
-      screen.getByRole("button", { name: startName("Otto", TASKS[1]) }),
+      screen.getByRole("button", {
+        name: startName("General Office Assistant", TASKS[1]),
+      }),
     ).toHaveProperty("disabled", false);
   });
 });
@@ -1246,7 +1300,7 @@ describe("Suggested first tasks — while the greeting is being written", () => 
     expect(
       await screen.findByRole(
         "button",
-        { name: startName("Otto", TASKS[1]) },
+        { name: startName("General Office Assistant", TASKS[1]) },
         { timeout: 5000 },
       ),
     ).toBeDefined();
@@ -1280,7 +1334,9 @@ describe("Suggested first tasks — keyboard and screen readers", () => {
     await screen.findByText("Task removed");
     await userEvent.click(screen.getByRole("button", { name: "Undo" }));
 
-    await screen.findByRole("button", { name: startName("Otto", TASKS[1]) });
+    await screen.findByRole("button", {
+      name: startName("General Office Assistant", TASKS[1]),
+    });
     // The toast hands focus back to where it was before the Undo.
     await waitFor(() =>
       expect(document.activeElement).toBe(
@@ -1298,7 +1354,9 @@ describe("Suggested first tasks — keyboard and screen readers", () => {
 
     await waitFor(() =>
       expect(document.activeElement).toBe(
-        screen.getByRole("button", { name: startName("Otto", TASKS[1]) }),
+        screen.getByRole("button", {
+          name: startName("General Office Assistant", TASKS[1]),
+        }),
       ),
     );
   });
@@ -1366,7 +1424,9 @@ describe("Suggested first tasks — keyboard and screen readers", () => {
     );
     await screen.findByText("Task removed");
     await userEvent.click(screen.getByRole("button", { name: "Undo" }));
-    await screen.findByRole("button", { name: startName("Otto", TASKS[1]) });
+    await screen.findByRole("button", {
+      name: startName("General Office Assistant", TASKS[1]),
+    });
 
     const more = screen.getByRole("button", { name: "2 more tasks" });
     expect(more.getAttribute("aria-expanded")).toBe("true");
@@ -1382,7 +1442,9 @@ describe("Suggested first tasks — keyboard and screen readers", () => {
       ).getAttribute("aria-expanded"),
     ).toBe("true");
     expect(
-      screen.getByRole("button", { name: startName("Otto", MORE_TASKS[0]) }),
+      screen.getByRole("button", {
+        name: startName("General Office Assistant", MORE_TASKS[0]),
+      }),
     ).toBeDefined();
   });
 
@@ -1401,7 +1463,9 @@ describe("Suggested first tasks — keyboard and screen readers", () => {
     );
     expect(
       description(
-        screen.getByRole("button", { name: startName("Otto", TASKS[1]) }),
+        screen.getByRole("button", {
+          name: startName("General Office Assistant", TASKS[1]),
+        }),
       ),
     ).toBeNull();
     expect(
@@ -1411,7 +1475,9 @@ describe("Suggested first tasks — keyboard and screen readers", () => {
     ).toBe("Two rivals changed their prices last month.");
 
     await userEvent.click(
-      screen.getByRole("button", { name: startName("Otto", TASKS[1]) }),
+      screen.getByRole("button", {
+        name: startName("General Office Assistant", TASKS[1]),
+      }),
     );
 
     try {

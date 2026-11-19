@@ -46,7 +46,7 @@ it("shows the profession and portrait in the thread menu and selects by expert I
   expect(onSelect).toHaveBeenCalledWith("expert-sam");
 });
 
-it("keeps Otto as the normal recipient when switching back from an expert", async () => {
+it("shows the default assistant when switching back from an expert", async () => {
   const onSelect = vi.fn();
   render(
     <DropdownMenu>
@@ -63,8 +63,12 @@ it("keeps Otto as the normal recipient when switching back from an expert", asyn
   );
   const user = userEvent.setup();
   await user.click(screen.getByRole("button", { name: "Experts" }));
-  const item = await screen.findByRole("menuitem", { name: /Otto/ });
-  expect(item.querySelector("img")?.getAttribute("src")).toMatch(/\/otto[/.]/);
+  const item = await screen.findByRole("menuitem", {
+    name: "General Office Assistant",
+  });
+  expect(item.querySelector("img")?.getAttribute("src")).toBe(
+    "/experts/professional/office-assistant.webp",
+  );
   await user.click(item);
   expect(onSelect).toHaveBeenCalledWith(null);
 });

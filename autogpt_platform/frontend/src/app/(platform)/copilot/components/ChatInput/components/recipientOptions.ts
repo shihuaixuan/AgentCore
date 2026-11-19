@@ -1,7 +1,10 @@
 import type { ExpertIdentity } from "../../../useExpertMap";
 import type { Locale } from "@/lib/i18n/locale";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
-import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
+import {
+  DEFAULT_ASSISTANT_AVATAR_URL,
+  getDefaultAssistantTitle,
+} from "@/services/experts/default-assistant";
 
 export interface RecipientOption {
   id: string;
@@ -24,7 +27,7 @@ export interface RecipientPickerConfig {
 
 export const OTTO_RECIPIENT_OPTION: RecipientOption = {
   id: "otto",
-  avatarUrl: null,
+  avatarUrl: DEFAULT_ASSISTANT_AVATAR_URL,
 };
 
 export function expertRecipient(expert: ExpertIdentity): RecipientOption {
@@ -39,7 +42,7 @@ export function expertRecipient(expert: ExpertIdentity): RecipientOption {
 
 export function recipientTitle(option: RecipientOption, locale: Locale) {
   return option === OTTO_RECIPIENT_OPTION
-    ? AUTOPILOT_NAME
+    ? getDefaultAssistantTitle(locale)
     : getExpertDisplayTitle(option, locale);
 }
 

@@ -28,7 +28,7 @@ export function AutopilotSkillsSection({ skills }: Props) {
     <section>
       <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
         <Text variant="large-medium" tone="primary">
-          {t("Otto's Skills", "Otto 的技能")}
+          {t("Assistant skills", "助手技能")}
         </Text>
         <ToolbarSearch
           textSize="body-md"
@@ -52,7 +52,7 @@ export function AutopilotSkillsSection({ skills }: Props) {
       ) : (
         <ul
           className="flex flex-col gap-3 pt-4"
-          aria-label={t("Otto skills", "Otto 技能")}
+          aria-label={t("Assistant skills", "助手技能")}
         >
           {visible.map((skill) => (
             <li key={skill.name}>

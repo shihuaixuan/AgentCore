@@ -813,7 +813,7 @@ describe("ChatMessagesContainer — expert identity", () => {
     );
   });
 
-  it("falls back to Otto on historical replies in plain sessions", () => {
+  it("shows the default assistant on historical replies in plain sessions", () => {
     render(
       <ChatMessagesContainer
         messages={[assistantMessage]}
@@ -826,7 +826,7 @@ describe("ChatMessagesContainer — expert identity", () => {
     const header = screen.getByTestId("expert-thread-header");
     expect(header.textContent).toContain("Conversation");
     expect(screen.getByTestId("expert-assistant-identity").textContent).toBe(
-      "Otto",
+      "General Office Assistant",
     );
   });
 });

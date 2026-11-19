@@ -10,7 +10,6 @@ import { ExpertAvatar } from "../../ChatMessagesContainer/components/ExpertAvata
 import {
   OTTO_RECIPIENT_OPTION,
   recipientChoices,
-  recipientTitle,
   type RecipientOption,
   type RecipientPickerConfig,
 } from "./recipientOptions";
@@ -33,13 +32,18 @@ export function ExpertPickerOptions({
   const { t, locale } = useTranslation();
   const [query, setQuery] = useState("");
   const [nextID, setNextID] = useState<string | null>();
-  const choices = recipientChoices(options, locale);
+  const choices = recipientChoices(
+    isThreadPicker ? [OTTO_RECIPIENT_OPTION, ...options] : options,
+    locale,
+  );
   const next =
     nextID === null ? null : choices.find(({ option }) => option.id === nextID);
   const search = query.trim().toLowerCase();
-  const matchesOtto = isThreadPicker && "otto".includes(search);
   const matching = choices.filter(({ option, label }) =>
     [label, option.role].some((text) => text?.toLowerCase().includes(search)),
+  );
+  const hasMatchingExpert = matching.some(
+    ({ option }) => option !== OTTO_RECIPIENT_OPTION,
   );
 
   function select(id: string | null) {
@@ -68,36 +72,31 @@ export function ExpertPickerOptions({
         </Text>
       )}
       <div className="mt-1 max-h-64 space-y-0.5 overflow-y-auto">
-        {matchesOtto && (
-          <ExpertOption
-            option={OTTO_RECIPIENT_OPTION}
-            title={recipientTitle(OTTO_RECIPIENT_OPTION, locale)}
-            selected={!recipient}
-            disabled={!!selectionBlocked && !!recipient}
-            onSelect={() => select(null)}
-          />
+        {matching.map(({ option, title, label }) => {
+          const id = option === OTTO_RECIPIENT_OPTION ? null : option.id;
+          const selected = id === (recipient?.id ?? null);
+          return (
+            <ExpertOption
+              key={option.id}
+              option={option}
+              title={title}
+              label={label}
+              selected={selected}
+              disabled={!!selectionBlocked && !selected}
+              onSelect={() => select(id)}
+            />
+          );
+        })}
+        {(!matching.length ||
+          (!hasMatchingExpert && (isRosterPending || hasRosterFailed))) && (
+          <Text variant="small" tone="secondary" className="m-2">
+            {isRosterPending
+              ? t("Loading experts…", "正在加载专家…")
+              : hasRosterFailed
+                ? t("Could not load experts", "无法加载专家")
+                : t("No matching experts", "没有匹配的专家")}
+          </Text>
         )}
-        {matching.map(({ option, title, label }) => (
-          <ExpertOption
-            key={option.id}
-            option={option}
-            title={title}
-            label={label}
-            selected={option.id === recipient?.id}
-            disabled={!!selectionBlocked && option.id !== recipient?.id}
-            onSelect={() => select(option.id)}
-          />
-        ))}
-        {!matching.length &&
-          (!matchesOtto || isRosterPending || hasRosterFailed) && (
-            <Text variant="small" tone="secondary" className="m-2">
-              {isRosterPending
-                ? t("Loading experts…", "正在加载专家…")
-                : hasRosterFailed
-                  ? t("Could not load experts", "无法加载专家")
-                  : t("No matching experts", "没有匹配的专家")}
-            </Text>
-          )}
       </div>
       <div className="mt-1 border-t border-border-base pt-1">
         {recipient && !isThreadPicker && (
@@ -237,7 +236,6 @@ export function RecipientAvatar({
         name={title}
         avatarUrl={option.avatarUrl}
         color={option.color}
-        isAutopilot={option === OTTO_RECIPIENT_OPTION}
         size="sm"
       />
     </span>

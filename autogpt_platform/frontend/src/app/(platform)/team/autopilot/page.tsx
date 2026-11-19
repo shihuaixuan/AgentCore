@@ -3,9 +3,9 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Text } from "@/components/atoms/Text/Text";
-import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
 import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { AUTOPILOT_HEX } from "@/components/molecules/ExpertAvatar/colors";
+import { getDefaultAssistantTitle } from "@/services/experts/default-assistant";
 import {
   TabsLine,
   TabsLineContent,
@@ -48,7 +48,8 @@ const TABS = [
 ] as const;
 
 export default function AutopilotPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = getDefaultAssistantTitle(locale);
   const { activeTab, onTabChange } = useAutopilotTab();
   const { schedules, workflows, skills, isLoading, isError, refetch } =
     useAutopilotPage();
@@ -68,7 +69,7 @@ export default function AutopilotPage() {
       <main className={MAIN_CLASS}>
         <BackToTeamLink />
         <ErrorCard
-          context={AUTOPILOT_NAME}
+          context={title}
           hint={t("We could not load your team.", "无法加载你的团队。")}
           onRetry={() => refetch()}
         />
@@ -121,7 +122,7 @@ export default function AutopilotPage() {
 
         <TabsLineContent value="workflows">
           <ExpertWorkflowsSection
-            expertName={AUTOPILOT_NAME}
+            expertName={title}
             workflows={workflows}
             coverColor={AUTOPILOT_HEX}
             emptyMessage={t(

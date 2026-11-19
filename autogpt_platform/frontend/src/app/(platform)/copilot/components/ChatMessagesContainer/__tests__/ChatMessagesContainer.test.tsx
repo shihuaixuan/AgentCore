@@ -895,7 +895,9 @@ describe("ChatMessagesContainer — queue badges on user messages", () => {
     );
     const cards = screen.getAllByTestId("sent-from-badge");
     expect(cards).toHaveLength(1);
-    expect(cards[0].textContent).toContain("Sent from Otto");
+    expect(cards[0].textContent).toContain(
+      "Sent from General Office Assistant",
+    );
   });
 
   it("does NOT fall back onto a later row when pagination stopped short of the opening row", () => {
@@ -933,7 +935,7 @@ describe("ChatMessagesContainer — queue badges on user messages", () => {
       />,
     );
     expect(screen.getByTestId("sent-from-badge").textContent).toContain(
-      "Sent from Otto",
+      "Sent from General Office Assistant",
     );
   });
 

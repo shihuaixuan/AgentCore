@@ -35,7 +35,7 @@ export function CollapsibleNavGroup({
       onOpenChange={onOpenChange}
       className="group/collapsible"
     >
-      <SidebarGroup className="py-1">
+      <SidebarGroup size="sm">
         <SidebarGroupLabel
           asChild
           className="leading-inherit text-foreground-tertiary group-data-[collapsible=icon]:hidden max-md:h-11"

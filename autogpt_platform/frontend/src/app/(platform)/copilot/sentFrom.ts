@@ -1,7 +1,7 @@
 import type { ChatSessionMetadata } from "@/app/api/__generated__/models/chatSessionMetadata";
-import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
 import type { Locale } from "@/lib/i18n/locale";
 import { isValidUUID } from "@/lib/utils";
+import { getDefaultAssistantTitle } from "@/services/experts/default-assistant";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import type { UIMessage } from "ai";
 import { extractDbSequence } from "./helpers/convertChatSessionToUiMessages";
@@ -64,7 +64,7 @@ export function getSentFromDisplayTitle(
   expert: Pick<ExpertIdentity, "jobTitle" | "role"> | undefined,
   locale: Locale,
 ): string {
-  if (!sentFrom.expertId) return AUTOPILOT_NAME;
+  if (!sentFrom.expertId) return getDefaultAssistantTitle(locale);
   return getExpertDisplayTitle(
     {
       jobTitle: sentFrom.expertJobTitle || expert?.jobTitle,

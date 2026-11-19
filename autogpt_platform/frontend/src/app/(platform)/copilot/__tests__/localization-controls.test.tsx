@@ -147,9 +147,11 @@ test("localizes suggested task controls and preserves the complete task payload"
   expect(screen.getByText("从这里开始")).toBeDefined();
   expect(screen.getByText("Keep model explanation")).toBeDefined();
   expect(screen.getByText("你的团队")).toBeDefined();
-  expect(screen.getByText("AI 负责人")).toBeDefined();
+  expect(screen.getAllByText("通用办公助手")).toHaveLength(2);
   fireEvent.click(
-    screen.getByRole("button", { name: "与 Otto 开始：Review English report" }),
+    screen.getByRole("button", {
+      name: "与 通用办公助手 开始：Review English report",
+    }),
   );
   expect(onSend).toHaveBeenCalledWith(task);
   expect(

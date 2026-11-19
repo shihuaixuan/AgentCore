@@ -2,10 +2,9 @@
 
 Two layers with different prompt weights:
 
-- ``build_expert_identity_suffix()`` → ``<expert_identity>`` (the latest Soul,
-  with precedence over the Otto base identity). Appended to the SYSTEM
-  prompt on every turn by both engines, so edits affect existing sessions
-  while the cacheable base prefix stays byte-identical.
+- ``build_expert_identity_suffix()`` → the default assistant's job title or
+  ``<expert_identity>`` (the expert's latest Soul). Appended to the SYSTEM
+  prompt on every turn by both engines while preserving the cacheable base.
 - ``build_expert_context()`` → first-user-message context blocks:
   ``<expert_workflows>`` (expert session: installed workflows the model
   should prefer ``run_agent`` on) plus ``<team_context>`` — the hired roster,
@@ -58,6 +57,12 @@ EXPERT_SESSION_MISSING_MESSAGE = (
 EXPERT_SESSION_TEMPORARY_MESSAGE = (
     "This expert is temporarily unavailable. Please try again."
 )
+DEFAULT_ASSISTANT_IDENTITY_SUFFIX = (
+    "\n\nWhen you introduce yourself to the user, use your job title: "
+    "General Office Assistant (通用办公助手 in Chinese). "
+    "Otto is an internal name; do not use it as your name in replies. "
+    "Preserve names in quoted conversation history."
+)
 _EXPERT_LOOKUP_RETRY_DELAY_SECONDS = 0.1
 
 
@@ -72,19 +77,17 @@ async def build_expert_identity_suffix(
     organization_id: str | None,
     team_id: str | None,
 ) -> str:
-    """Build the ``<expert_identity>`` system-prompt suffix for an expert
-    session.
+    """Build the system-prompt suffix for the current turn's identity.
 
-    Returns ``""`` for plain sessions, keeping the system prompt byte-identical
-    for cross-user caching. Expert-scoped sessions fail closed when their
-    identity cannot be loaded.
+    Plain sessions share a static display-title suffix for cross-user caching.
+    Expert-scoped sessions fail closed when their identity cannot be loaded.
 
     Runs on every turn, so it skips the workflow joins — only the expert's
     own job title/role/identity columns are read here. Inside a turn it reads
     nothing: the turn checked the expert before its engine started.
     """
     if expert_id is None:
-        return ""
+        return DEFAULT_ASSISTANT_IDENTITY_SUFFIX
     if not user_id:
         raise ExpertSessionUnavailableError(
             "Expert session identity is unavailable without an authenticated user."

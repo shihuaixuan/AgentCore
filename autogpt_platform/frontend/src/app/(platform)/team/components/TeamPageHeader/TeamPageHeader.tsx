@@ -3,9 +3,12 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import { Text } from "@/components/atoms/Text/Text";
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { cn } from "@/lib/utils";
+import {
+  DEFAULT_ASSISTANT_AVATAR_URL,
+  getDefaultAssistantTitle,
+} from "@/services/experts/default-assistant";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { TeamHeaderActions } from "../TeamHeaderActions";
 
@@ -14,7 +17,7 @@ interface Props {
 }
 
 const AVATAR_CLASS =
-  // oxlint-disable-next-line design-system/no-restyle -- ExpertAvatar and AutopilotAvatar have no bordered variant (src/components is P9's)
+  // oxlint-disable-next-line design-system/no-restyle -- ExpertAvatar has no bordered variant (src/components is P9's)
   "rounded-full border border-border-base ring-2 ring-surface-muted";
 
 // Same motion as the side panel's empty-state tiles: the outer two lean out
@@ -24,7 +27,7 @@ const POSITIONS = [
   "right-0 top-1 z-0 rotate-6 group-hover:translate-x-1 group-hover:rotate-12",
 ];
 
-/** Otto flanked by the first two hires, over the page title and a line on
+/** The built-in assistant flanked by the first two hires, over the page title and a line on
  *  what the team is for. */
 export function TeamPageHeader({ experts }: Props) {
   const { t, locale } = useTranslation();
@@ -52,7 +55,12 @@ export function TeamPageHeader({ experts }: Props) {
             </span>
           ))}
           <span className="absolute top-0 left-1/2 z-10 -translate-x-1/2 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 motion-reduce:transition-none">
-            <AutopilotAvatar size={52} className={AVATAR_CLASS} />
+            <ExpertAvatar
+              name={getDefaultAssistantTitle(locale)}
+              avatarUrl={DEFAULT_ASSISTANT_AVATAR_URL}
+              size={52}
+              className={AVATAR_CLASS}
+            />
           </span>
         </div>
         <div className="flex min-w-0 flex-col gap-0.5">
@@ -61,8 +69,8 @@ export function TeamPageHeader({ experts }: Props) {
           </Text>
           <Text variant="body" tone="muted">
             {t(
-              "Otto and your hired experts, ready to work.",
-              "Otto 和你聘用的专家已准备就绪。",
+              "Your office assistant and hired experts, ready to work.",
+              "通用办公助手和你聘用的专家已准备就绪。",
             )}
           </Text>
         </div>

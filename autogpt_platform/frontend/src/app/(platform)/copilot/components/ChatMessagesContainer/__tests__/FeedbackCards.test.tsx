@@ -187,7 +187,7 @@ describe("feedback cards in a chat", () => {
     vi.unstubAllGlobals();
   });
 
-  it("asks about the task under the last settled reply, as Otto by default", async () => {
+  it("asks about the task under the last settled reply, as the default assistant", async () => {
     setup();
     render(
       <ChatMessagesContainer
@@ -195,7 +195,9 @@ describe("feedback cards in a chat", () => {
         messages={[USER, reply([workCheck()])]}
       />,
     );
-    expect(await screen.findByText("How did Otto do?")).toBeDefined();
+    expect(
+      await screen.findByText("How did General Office Assistant do?"),
+    ).toBeDefined();
     expect(
       screen.getByText("Quick check-in on your first finished task"),
     ).toBeDefined();
@@ -229,7 +231,9 @@ describe("feedback cards in a chat", () => {
       </>,
     );
     await screen.findByText("Feedback state loaded");
-    expect(screen.queryByText("How did Otto do?")).toBeNull();
+    expect(
+      screen.queryByText("How did General Office Assistant do?"),
+    ).toBeNull();
   });
 
   it("goes away once the user follows up", async () => {
@@ -244,7 +248,9 @@ describe("feedback cards in a chat", () => {
       </>,
     );
     await screen.findByText("Feedback state loaded");
-    expect(screen.queryByText("How did Otto do?")).toBeNull();
+    expect(
+      screen.queryByText("How did General Office Assistant do?"),
+    ).toBeNull();
   });
 
   it("renders nothing when the backend said not to ask", async () => {
@@ -259,7 +265,9 @@ describe("feedback cards in a chat", () => {
       </>,
     );
     await screen.findByText("Feedback state loaded");
-    expect(screen.queryByText("How did Otto do?")).toBeNull();
+    expect(
+      screen.queryByText("How did General Office Assistant do?"),
+    ).toBeNull();
     expect(screen.queryByText("Help the team fix this")).toBeNull();
   });
 
@@ -271,7 +279,9 @@ describe("feedback cards in a chat", () => {
         messages={[USER, reply([workCheck(), workCheck(null)])]}
       />,
     );
-    expect(await screen.findByText("How did Otto do?")).toBeDefined();
+    expect(
+      await screen.findByText("How did General Office Assistant do?"),
+    ).toBeDefined();
   });
 
   it("shows the thanks line for an answered check after a reload", async () => {
@@ -283,7 +293,9 @@ describe("feedback cards in a chat", () => {
       />,
     );
     expect(
-      await screen.findByText(/Glad to hear it. We'll pass that on to Otto/),
+      await screen.findByText(
+        /Glad to hear it. We'll pass that on to General Office Assistant/,
+      ),
     ).toBeDefined();
   });
 
@@ -299,7 +311,9 @@ describe("feedback cards in a chat", () => {
       </>,
     );
     await screen.findByText("Feedback state loaded");
-    expect(screen.queryByText("How did Otto do?")).toBeNull();
+    expect(
+      screen.queryByText("How did General Office Assistant do?"),
+    ).toBeNull();
   });
 
   it("posts Great as the top work check score", async () => {
@@ -310,7 +324,7 @@ describe("feedback cards in a chat", () => {
         messages={[USER, reply([workCheck()])]}
       />,
     );
-    await screen.findByText("How did Otto do?");
+    await screen.findByText("How did General Office Assistant do?");
     fireEvent.click(screen.getByRole("button", { name: "Great" }));
     await waitFor(() =>
       expect(ratings).toEqual([
@@ -332,7 +346,7 @@ describe("feedback cards in a chat", () => {
         messages={[USER, reply([workCheck()])]}
       />,
     );
-    await screen.findByText("How did Otto do?");
+    await screen.findByText("How did General Office Assistant do?");
     fireEvent.click(screen.getByRole("button", { name: "Not good" }));
     fireEvent.click(
       await screen.findByRole("button", { name: "Got facts wrong" }),

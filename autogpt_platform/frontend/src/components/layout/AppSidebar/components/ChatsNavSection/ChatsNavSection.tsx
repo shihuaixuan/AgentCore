@@ -14,7 +14,6 @@ import { motion, type Variants } from "framer-motion";
 import Link from "next/link";
 import { Suspense } from "react";
 import { useJumpToRecentChats } from "../../useJumpToRecentChats";
-import { useNavItemClassName } from "../../useNavItemClassName";
 import { ChatsRailItem } from "../ChatsRailItem/ChatsRailItem";
 import { CollapsibleNavGroup } from "../CollapsibleNavGroup/CollapsibleNavGroup";
 import { RecentChats } from "../RecentChats/RecentChats";
@@ -26,7 +25,6 @@ interface Props {
 export function ChatsNavSection({ itemVariants }: Props) {
   const { t } = useTranslation();
   const newChatLabel = t("New chat", "新建对话");
-  const navItemClassName = useNavItemClassName();
   const {
     isRecentChatsOpen,
     setIsRecentChatsOpen,
@@ -36,13 +34,13 @@ export function ChatsNavSection({ itemVariants }: Props) {
 
   return (
     <motion.div variants={itemVariants} {...tourTarget("chats")}>
-      <SidebarGroup className="py-1">
+      <SidebarGroup size="sm">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               tooltip={newChatLabel}
-              className={navItemClassName}
+              variant="navigation"
             >
               <Link href="/home" aria-label={newChatLabel}>
                 <Icon icon={Add01Icon} tone="emphasis-soft" aria-hidden />

@@ -9,7 +9,6 @@ import {
   SidebarMenuItem,
 } from "@/components/molecules/Sidebar/Sidebar";
 import { BubbleChatIcon } from "@hugeicons/core-free-icons";
-import { useNavItemClassName } from "../../useNavItemClassName";
 
 interface Props {
   onClick: () => void;
@@ -17,16 +16,15 @@ interface Props {
 
 export function ChatsRailItem({ onClick }: Props) {
   const { t } = useTranslation();
-  const navItemClassName = useNavItemClassName();
 
   return (
-    <SidebarGroup className="py-1">
+    <SidebarGroup size="sm">
       <SidebarMenu className="group-data-[collapsible=icon]:gap-1">
         <SidebarMenuItem>
           <SidebarMenuButton
             tooltip={t("Chats", "对话")}
             onClick={onClick}
-            className={navItemClassName}
+            variant="navigation"
           >
             <Icon
               icon={BubbleChatIcon}

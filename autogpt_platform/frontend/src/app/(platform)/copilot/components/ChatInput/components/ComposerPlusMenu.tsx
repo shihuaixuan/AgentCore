@@ -222,10 +222,7 @@ function ComposerExtraMenuItem({
 
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger
-        disabled={item.disabled}
-        className="data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-      >
+      <DropdownMenuSubTrigger disabled={item.disabled}>
         {label}
       </DropdownMenuSubTrigger>
       <DropdownMenuPortal>

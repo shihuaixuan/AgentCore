@@ -3,6 +3,7 @@ import type { SuggestedTaskState } from "@/app/api/__generated__/models/suggeste
 import type { Locale } from "@/lib/i18n/locale";
 import { isTouchDevice } from "@/lib/platform";
 import { TOUR_TARGET_ATTRIBUTE } from "@/lib/tour-targets";
+import { getDefaultAssistantTitle } from "@/services/experts/default-assistant";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { Key, storage } from "@/services/storage/local-storage";
 import type { ExpertIdentity, ExpertIdentityMap } from "../../useExpertMap";
@@ -160,7 +161,7 @@ export function getTaskOwner(
 export function getOwnerName(owner: TaskOwner, locale: Locale = "en") {
   return owner.kind === "expert"
     ? getExpertDisplayTitle(owner.expert, locale)
-    : "Otto";
+    : getDefaultAssistantTitle(locale);
 }
 
 // Collapsing the list is a per-user UI preference, kept as the list of user

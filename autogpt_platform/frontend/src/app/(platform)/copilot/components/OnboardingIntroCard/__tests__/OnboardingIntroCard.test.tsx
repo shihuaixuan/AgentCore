@@ -134,12 +134,12 @@ describe("OnboardingIntroCard — content", () => {
     const list = screen.getByRole("list", { name: "Your first tasks" });
     expect(
       within(list).getByRole("button", {
-        name: "Start with Otto: Summarise my inbox",
+        name: "Start with General Office Assistant: Summarise my inbox",
       }),
     ).toBeDefined();
     expect(
       within(list).getByRole("button", {
-        name: "Start with Otto: Watch competitor pricing",
+        name: "Start with General Office Assistant: Watch competitor pricing",
       }),
     ).toBeDefined();
     expect(screen.getByText(FOOTER)).toBeDefined();
@@ -162,7 +162,7 @@ describe("OnboardingIntroCard — content", () => {
     expect(screen.getByText(MARIAS_TASK.why ?? "")).toBeDefined();
     expect(
       screen.getByRole("button", {
-        name: "Start with Otto: Watch competitor pricing",
+        name: "Start with General Office Assistant: Watch competitor pricing",
       }),
     ).toBeDefined();
   });
@@ -173,7 +173,9 @@ describe("OnboardingIntroCard — content", () => {
     const team = screen.getByRole("list", { name: "Your team" });
     const members = within(team).getAllByRole("listitem");
     expect(members).toHaveLength(2);
-    expect(within(members[0]).getByText("Otto")).toBeDefined();
+    expect(
+      within(members[0]).getByText("General Office Assistant"),
+    ).toBeDefined();
     expect(within(members[1]).queryByText("Maria")).toBeNull();
     expect(within(members[1]).getByText("Bookkeeper")).toBeDefined();
   });
@@ -194,7 +196,7 @@ describe("OnboardingIntroCard — picking a task", () => {
 
     await userEvent.click(
       screen.getByRole("button", {
-        name: "Start with Otto: Summarise my inbox",
+        name: "Start with General Office Assistant: Summarise my inbox",
       }),
     );
 
@@ -206,7 +208,7 @@ describe("OnboardingIntroCard — picking a task", () => {
     renderCard({ suggestions, disabled: true });
 
     const row = screen.getByRole("button", {
-      name: "Start with Otto: Summarise my inbox",
+      name: "Start with General Office Assistant: Summarise my inbox",
     });
     expect(row).toHaveProperty("disabled", true);
 

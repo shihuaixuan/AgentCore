@@ -1,8 +1,10 @@
 import type { ExpertKickoffMetadata } from "@/app/(platform)/copilot/expertKickoff";
 import type { OutgoingMessage } from "@/app/(platform)/copilot/helpers/sendWithAttachments";
 import { Expert } from "@/app/api/__generated__/models/expert";
-import { AUTOPILOT_ROLE } from "../../helpers";
-import { AUTOPILOT_AVATAR_URL } from "@/components/molecules/AutopilotAvatar/helpers";
+import {
+  DEFAULT_ASSISTANT_AVATAR_URL,
+  getDefaultAssistantTitle,
+} from "@/services/experts/default-assistant";
 
 export interface ChatTarget {
   expertId: string | null;
@@ -14,8 +16,8 @@ export interface ChatTarget {
 
 export const AUTOPILOT_CHAT_TARGET: ChatTarget = {
   expertId: null,
-  role: AUTOPILOT_ROLE,
-  avatarUrl: AUTOPILOT_AVATAR_URL,
+  role: getDefaultAssistantTitle("en"),
+  avatarUrl: DEFAULT_ASSISTANT_AVATAR_URL,
 };
 
 export function expertToChatTarget(expert: Expert): ChatTarget {

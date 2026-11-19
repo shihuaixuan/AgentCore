@@ -382,8 +382,9 @@ describe("SuggestedTasksBlock — Your team", () => {
     const members = within(team).getAllByRole("listitem");
     expect(members).toHaveLength(3);
 
-    expect(within(members[0]).getByText("Otto")).toBeDefined();
-    expect(within(members[0]).getByText("Head of AI")).toBeDefined();
+    expect(
+      within(members[0]).getByText("General Office Assistant"),
+    ).toBeDefined();
     expect(within(members[1]).queryByText("Maria")).toBeNull();
     expect(within(members[1]).getByText("Bookkeeper")).toBeDefined();
     expect(within(members[2]).getByText("AI Expert")).toBeDefined();
@@ -400,7 +401,9 @@ describe("SuggestedTasksBlock — Your team", () => {
     const team = screen.getByRole("list", { name: "Your team" });
     const members = within(team).getAllByRole("listitem");
     expect(members).toHaveLength(1);
-    expect(within(members[0]).getByText("Otto")).toBeDefined();
+    expect(
+      within(members[0]).getByText("General Office Assistant"),
+    ).toBeDefined();
   });
 
   it("leaves the team out unless asked to show it", () => {

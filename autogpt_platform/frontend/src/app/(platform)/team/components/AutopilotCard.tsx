@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -13,14 +12,18 @@ import {
 } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { AUTOPILOT_BLURB, AUTOPILOT_ROLE } from "../helpers";
+import { AUTOPILOT_BLURB } from "../helpers";
 import {
   CHIP_SHAPE,
   CHIP_SIZE,
 } from "@/app/(platform)/marketplace/components/CategoryChip/CategoryChip";
 import { categoryTagStyle } from "@/app/(platform)/marketplace/components/CategoryChip/CategoryTag";
-import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
+import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { AUTOPILOT_HEX } from "@/components/molecules/ExpertAvatar/colors";
+import {
+  DEFAULT_ASSISTANT_AVATAR_URL,
+  getDefaultAssistantTitle,
+} from "@/services/experts/default-assistant";
 import { CardStat, CardStats } from "./CardStats";
 import { ExpertCover } from "./ExpertTeamCard/components/ExpertCover";
 
@@ -39,26 +42,30 @@ export function AutopilotCard({
   workflowCount,
   onChat,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = getDefaultAssistantTitle(locale);
   return (
     <section
-      aria-label={AUTOPILOT_NAME}
+      aria-label={title}
       className="flex flex-col overflow-hidden rounded-2xl bg-surface smooth-shadow-ring-sm"
     >
       <Link
         href="/team/autopilot"
-        aria-label={t(`View ${AUTOPILOT_NAME}`, `查看 ${AUTOPILOT_NAME}`)}
+        aria-label={t(`View ${title}`, `查看 ${title}`)}
         className="flex flex-1 flex-col items-start p-2 pb-4"
       >
         <ExpertCover color={AUTOPILOT_COVER_COLOR} status="built-in" />
 
         <div className="flex w-full items-start gap-3 px-2">
-          <AutopilotAvatar
-            size={88}
-            backgroundColor={AUTOPILOT_COVER_COLOR}
-            // oxlint-disable-next-line design-system/no-restyle -- AutopilotAvatar has no bordered variant (src/components is P9's)
-            className="relative z-10 -mt-12 ml-1 rounded-full border border-border-base ring-4 ring-surface"
-          />
+          <span className="relative z-10 -mt-12 ml-1 block shrink-0">
+            <ExpertAvatar
+              name={title}
+              avatarUrl={DEFAULT_ASSISTANT_AVATAR_URL}
+              size={88}
+              // oxlint-disable-next-line design-system/no-restyle -- ExpertAvatar has no bordered variant (src/components is P9's)
+              className="rounded-full border border-border-base ring-4 ring-surface"
+            />
+          </span>
         </div>
 
         <div className="mt-2 flex w-full flex-col items-start gap-1 px-2 pl-5 text-left">
@@ -67,7 +74,7 @@ export function AutopilotCard({
             tone="primary"
             className="mb-1 w-full truncate"
           >
-            {AUTOPILOT_NAME}
+            {title}
           </Text>
           {/* Not a category, but it sits in the same row as the experts'
               topic tags and should not read as a different kind of thing. */}
@@ -77,7 +84,7 @@ export function AutopilotCard({
             style={categoryTagStyle(AUTOPILOT_COVER_COLOR)}
           >
             <Icon icon={SparklesIcon} size={12} className="shrink-0" />
-            <span className="truncate">{t(AUTOPILOT_ROLE, "AI 负责人")}</span>
+            <span className="truncate">{t("Built in", "内置")}</span>
           </span>
           <Text
             variant="body"

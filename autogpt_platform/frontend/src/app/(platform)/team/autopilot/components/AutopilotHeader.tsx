@@ -1,44 +1,38 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
-import { Tick02Icon, SparklesIcon } from "@hugeicons/core-free-icons";
-import { ExpertCover } from "../../components/ExpertTeamCard/components/ExpertCover";
-import { AUTOPILOT_ROLE } from "../../helpers";
-import {
-  AUTOPILOT_COVER_URL,
-  AUTOPILOT_NAME,
-} from "@/components/molecules/AutopilotAvatar/helpers";
+import { Text } from "@/components/atoms/Text/Text";
+import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { AUTOPILOT_HEX } from "@/components/molecules/ExpertAvatar/colors";
+import {
+  DEFAULT_ASSISTANT_AVATAR_URL,
+  getDefaultAssistantTitle,
+} from "@/services/experts/default-assistant";
+import { Tick02Icon } from "@hugeicons/core-free-icons";
+import { ExpertCover } from "../../components/ExpertTeamCard/components/ExpertCover";
 
 export function AutopilotHeader() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = getDefaultAssistantTitle(locale);
   return (
     <header>
-      <ExpertCover
-        className="h-36"
-        color={AUTOPILOT_HEX}
-        art={AUTOPILOT_COVER_URL}
-      />
+      <ExpertCover className="h-36" color={AUTOPILOT_HEX} />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <AutopilotAvatar
+        <ExpertAvatar
+          name={title}
+          avatarUrl={DEFAULT_ASSISTANT_AVATAR_URL}
           size={96}
-          transparent={false}
-          // oxlint-disable-next-line design-system/no-restyle -- AutopilotAvatar has no bordered variant (src/components is P9's)
+          // oxlint-disable-next-line design-system/no-restyle -- ExpertAvatar has no bordered variant (src/components is P9's)
           className="relative z-10 -mt-12 ml-4 rounded-full border border-border-base"
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-heading-md font-semibold tracking-heading text-foreground-strong">
-              {AUTOPILOT_NAME}
-            </h1>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border-base bg-surface-muted px-2.5 py-0.5 font-sans text-caption font-medium text-foreground-body">
-              <Icon icon={SparklesIcon} size={12} />
-              {t(AUTOPILOT_ROLE, "AI 负责人")}
-            </span>
+            <Text as="h1" variant="h3" tone="primary">
+              {title}
+            </Text>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border-base bg-surface-muted px-2.5 py-0.5 font-sans text-caption font-medium text-foreground-body">
               <Icon icon={Tick02Icon} size={12} />
 

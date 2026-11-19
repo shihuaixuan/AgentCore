@@ -2,7 +2,7 @@ import type { UIMessage } from "ai";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
+import { getDefaultAssistantTitle } from "@/services/experts/default-assistant";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import {
   expertRecipient,
@@ -106,7 +106,9 @@ export function useThreadRecipient({
       isThreadPicker: true,
     },
     expertId,
-    name: expertId ? getExpertDisplayTitle(recipient, locale) : AUTOPILOT_NAME,
+    name: expertId
+      ? getExpertDisplayTitle(recipient, locale)
+      : getDefaultAssistantTitle(locale),
     target,
     isSwitched,
     isUnavailable,

@@ -6,17 +6,10 @@ interface Props {
   name: string;
   avatarUrl: string | null;
   color?: string | null;
-  isAutopilot: boolean;
   isLoading: boolean;
 }
 
-export function ReplyAuthor({
-  name,
-  avatarUrl,
-  color,
-  isAutopilot,
-  isLoading,
-}: Props) {
+export function ReplyAuthor({ name, avatarUrl, color, isLoading }: Props) {
   return (
     <div
       data-testid="expert-assistant-identity"
@@ -27,7 +20,6 @@ export function ReplyAuthor({
           name={name}
           avatarUrl={avatarUrl}
           color={color}
-          isAutopilot={isAutopilot}
           isLoading={isLoading}
           size="sm"
         />

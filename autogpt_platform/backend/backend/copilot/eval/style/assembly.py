@@ -23,6 +23,7 @@ from backend.api.features.store.skill_catalog_checkout import catalog_checkout
 from backend.copilot.config import ChatConfig
 from backend.copilot.engine import resolve_use_sdk
 from backend.copilot.expert_context import (
+    DEFAULT_ASSISTANT_IDENTITY_SUFFIX,
     render_account_standing_work_block,
     render_expert_computer_block,
     render_expert_identity_suffix,
@@ -143,7 +144,11 @@ def chat_system_prompt(expert: Expert | None) -> str:
     """The SDK engine's system prompt for an expert session (the assembly in
     ``sdk/service.py``) with the flags such a session has on in production:
     cloud sandbox and memory. ``None`` is plain Otto."""
-    suffix = render_expert_identity_suffix(expert) if expert else ""
+    suffix = (
+        render_expert_identity_suffix(expert)
+        if expert
+        else DEFAULT_ASSISTANT_IDENTITY_SUFFIX
+    )
     return (
         CACHEABLE_SYSTEM_PROMPT
         + get_sdk_supplement(use_e2b=True, expert_session=expert is not None)

@@ -1,10 +1,6 @@
 import { memo, type ReactNode } from "react";
 import type { ToolUIPart, UIDataTypes, UIMessage, UITools } from "ai";
 import {
-  AUTOPILOT_AVATAR_URL,
-  AUTOPILOT_NAME,
-} from "@/components/molecules/AutopilotAvatar/helpers";
-import {
   Message,
   MessageContent,
 } from "@/components/organisms/Message/Message";
@@ -14,6 +10,10 @@ import {
   getReplyProfession,
 } from "../../../../helpers/replyRecipient";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import {
+  DEFAULT_ASSISTANT_AVATAR_URL,
+  getDefaultAssistantTitle,
+} from "@/services/experts/default-assistant";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import type { SentFrom } from "../../../../sentFrom";
 import { WorkCheckTool } from "../../../../tools/FeedbackPrompts/WorkCheckTool";
@@ -178,23 +178,23 @@ export const MessageRow = memo(function MessageRow({
 
   const isAssistant = message.role === "assistant";
   const recipient = getMessageReplyRecipient(message);
-  const title = recipient
-    ? recipient.id
-      ? getReplyProfession(recipient, replyExpert ?? threadExpert, locale)
-      : AUTOPILOT_NAME
-    : threadExpert
+  const isDefaultAssistant = recipient ? recipient.id === null : !threadExpert;
+  const title = recipient?.id
+    ? getReplyProfession(recipient, replyExpert ?? threadExpert, locale)
+    : !recipient && threadExpert
       ? getExpertDisplayTitle(threadExpert, locale)
-      : AUTOPILOT_NAME;
+      : getDefaultAssistantTitle(locale);
   const name =
     replyLabel &&
     replyExpert &&
     getExpertDisplayTitle(replyExpert, locale) === title
       ? replyLabel
       : title;
-  const avatarUrl = recipient
-    ? recipient.avatar_url
-    : (threadExpert?.avatarUrl ?? null);
-  const isAutopilot = recipient ? recipient.id === null : !threadExpert;
+  const avatarUrl = isDefaultAssistant
+    ? DEFAULT_ASSISTANT_AVATAR_URL
+    : recipient
+      ? recipient.avatar_url
+      : (threadExpert?.avatarUrl ?? null);
   const isResolvingAuthor =
     !recipient && !threadExpert && !!isResolvingThreadExpert;
   const showAuthor =
@@ -237,7 +237,6 @@ export const MessageRow = memo(function MessageRow({
           name={name}
           avatarUrl={avatarUrl}
           color={recipient ? undefined : threadExpert?.color}
-          isAutopilot={isAutopilot}
           isLoading={isResolvingAuthor}
         />
       )}
@@ -331,12 +330,7 @@ export const MessageRow = memo(function MessageRow({
         <WorkCheckTool
           part={workCheckPart as ToolUIPart}
           target={feedbackTarget}
-          author={{
-            title: name,
-            avatarUrl: isAutopilot
-              ? (avatarUrl ?? AUTOPILOT_AVATAR_URL)
-              : avatarUrl,
-          }}
+          author={{ title: name, avatarUrl }}
         />
       )}
     </Message>

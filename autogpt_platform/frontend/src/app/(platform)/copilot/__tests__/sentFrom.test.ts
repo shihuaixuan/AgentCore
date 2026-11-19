@@ -80,7 +80,7 @@ describe("getSentFromDisplayTitle", () => {
         undefined,
         "en",
       ),
-    ).toBe("Otto");
+    ).toBe("General Office Assistant");
   });
 });
 

@@ -280,8 +280,8 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    const autopilot = await screen.findByText("Otto");
-    expect(screen.getByText("Head of AI")).toBeDefined();
+    const autopilot = await screen.findByText("General Office Assistant");
+    expect(screen.getByText("Built in")).toBeDefined();
 
     const maria = await screen.findByText("Marketing Strategist");
     expect(
@@ -390,10 +390,12 @@ describe("TeamPage", () => {
 
     await user.click(autopilotChat);
     const autopilotPanel = await screen.findByRole("complementary", {
-      name: "Chat with Otto",
+      name: "Chat with General Office Assistant",
     });
     expect(
-      within(autopilotPanel).getByPlaceholderText("Message Otto…"),
+      within(autopilotPanel).getByPlaceholderText(
+        "Message General Office Assistant…",
+      ),
     ).toBeDefined();
     await waitFor(() => {
       expect(
@@ -509,7 +511,9 @@ describe("TeamPage", () => {
       name: "View Marketing Strategist",
     });
     expect(maria.querySelector('img[src^="/experts/covers/"]')).toBeNull();
-    const otto = screen.getByRole("link", { name: "View Otto" });
+    const otto = screen.getByRole("link", {
+      name: "View General Office Assistant",
+    });
     expect(otto.querySelector('img[src^="/experts/covers/"]')).toBeNull();
   });
 
@@ -1160,7 +1164,7 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    expect(await screen.findByText("Otto")).toBeDefined();
+    expect(await screen.findByText("General Office Assistant")).toBeDefined();
     const link = await screen.findByRole("link", {
       name: "Browse the marketplace",
     });
@@ -1194,7 +1198,7 @@ describe("TeamPage", () => {
 
     render(<TeamPage />);
 
-    await screen.findByText("Otto");
+    await screen.findByText("General Office Assistant");
     expect(await screen.findByText("Marketing Strategist")).toBeDefined();
   });
 

@@ -102,7 +102,7 @@ describe("RecentChats — conversation list", () => {
     expect(screen.queryByText("Yesterday")).toBeNull();
   });
 
-  it("shows the original expert's profession and portrait without replacing the conversation title", async () => {
+  it("shows the conversation title without the expert's profession or portrait", async () => {
     const session = makeSession({
       id: "marketing-chat",
       title: "Plan the launch",
@@ -125,12 +125,10 @@ describe("RecentChats — conversation list", () => {
     renderRecentChats();
 
     const link = await screen.findByRole("link", {
-      name: "Plan the launch Marketing Manager",
+      name: "Plan the launch",
     });
     expect(link.getAttribute("href")).toBe("/home?sessionId=marketing-chat");
-    expect(link.querySelector("img")?.getAttribute("src")).toBe(
-      "/experts/professional/expert-maria.webp",
-    );
+    expect(link.querySelector("img")).toBeNull();
   });
 });
 

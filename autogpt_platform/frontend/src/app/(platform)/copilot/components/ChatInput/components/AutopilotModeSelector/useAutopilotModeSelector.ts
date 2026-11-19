@@ -1,3 +1,5 @@
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getDefaultAssistantTitle } from "@/services/experts/default-assistant";
 import { useContext, useState } from "react";
 import {
   type AutopilotMode,
@@ -14,6 +16,7 @@ interface Args {
 }
 
 export function useAutopilotModeSelector({ sessionId, persistedMode }: Args) {
+  const { locale } = useTranslation();
   const choice = useAutopilotModeChoice(sessionId);
   const choose = useAutopilotModeStore((state) => state.choose);
   const actions = useContext(CopilotChatActionsContext);
@@ -45,6 +48,6 @@ export function useAutopilotModeSelector({ sessionId, persistedMode }: Args) {
     isConfirmOpen,
     confirmUnsupervised,
     cancelUnsupervised,
-    assistantName: actions?.assistantName ?? "Otto",
+    assistantName: actions?.assistantName ?? getDefaultAssistantTitle(locale),
   };
 }

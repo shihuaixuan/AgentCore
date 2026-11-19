@@ -1,6 +1,5 @@
 "use client";
 
-import { AUTOPILOT_AVATAR_URL } from "@/components/molecules/AutopilotAvatar/helpers";
 import { WorkCheckCard } from "@/components/organisms/FeedbackPrompts/WorkCheckCard";
 import type { ToolUIPart } from "ai";
 import {
@@ -16,7 +15,7 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 interface Props {
   part: ToolUIPart;
   target: FeedbackCardTarget;
-  author?: { title: string; avatarUrl: string | null };
+  author: { title: string; avatarUrl: string | null };
 }
 
 export function WorkCheckTool({ part, target, author }: Props) {
@@ -45,8 +44,8 @@ function WorkCheckPrompt({ promptId, isFirst, target, author }: PromptProps) {
 
   return (
     <WorkCheckCard
-      name={author?.title ?? "Otto"}
-      avatarUrl={author ? author.avatarUrl : AUTOPILOT_AVATAR_URL}
+      name={author.title}
+      avatarUrl={author.avatarUrl}
       note={getWorkCheckNote(isFirst, t)}
       initialRating={ratingFromState(card.state)}
       initialSent={card.state.answered}

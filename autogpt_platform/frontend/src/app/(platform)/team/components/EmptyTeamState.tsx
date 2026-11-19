@@ -18,8 +18,8 @@ export function EmptyTeamState() {
       </Text>
       <Text variant="body" tone="secondary" className="max-w-prose">
         {t(
-          "Hire an expert from the marketplace and they will show up here, ready to work alongside Otto.",
-          "从市场聘用专家后，他们会显示在这里，随时与 Otto 协作。",
+          "Hire an expert from the marketplace and they will show up here, ready to work alongside your office assistant.",
+          "从市场聘用专家后，他们会显示在这里，随时与通用办公助手协作。",
         )}
       </Text>
       <div className="flex flex-wrap items-center justify-center gap-2">

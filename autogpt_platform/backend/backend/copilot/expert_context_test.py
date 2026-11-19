@@ -251,11 +251,12 @@ class TestBuildExpertIdentitySuffix:
         )
 
     @pytest.mark.asyncio
-    async def test_plain_session_returns_empty(self):
+    async def test_plain_session_uses_the_default_assistant_title(self):
         result = await build_expert_identity_suffix(
             "user-1", None, organization_id=None, team_id=None
         )
-        assert result == ""
+        assert "General Office Assistant" in result
+        assert "<expert_identity>" not in result
 
     @pytest.mark.asyncio
     async def test_expert_session_without_user_fails_before_lookup(self):

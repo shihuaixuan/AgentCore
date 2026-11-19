@@ -34,7 +34,9 @@ describe("Otto tab navigation", () => {
       </NuqsTestingAdapter>,
     );
 
-    expect(await screen.findByText("Otto's Workflows")).toBeDefined();
+    expect(
+      await screen.findByText("General Office Assistant's Workflows"),
+    ).toBeDefined();
     expect(
       screen
         .getByRole("tab", { name: "Workflows" })
@@ -67,7 +69,7 @@ describe("Otto tab navigation", () => {
         <AutopilotPage />
       </NuqsTestingAdapter>,
     );
-    await screen.findByText("Otto's Workflows");
+    await screen.findByText("General Office Assistant's Workflows");
 
     rerender(
       <NuqsTestingAdapter searchParams="?tab=basics" hasMemory>
@@ -76,7 +78,9 @@ describe("Otto tab navigation", () => {
     );
 
     expect(await screen.findByText("Identity")).toBeDefined();
-    expect(screen.queryByText("Otto's Workflows")).toBeNull();
+    expect(
+      screen.queryByText("General Office Assistant's Workflows"),
+    ).toBeNull();
   });
 
   test("writes tab navigation to history and preserves other query parameters", async () => {

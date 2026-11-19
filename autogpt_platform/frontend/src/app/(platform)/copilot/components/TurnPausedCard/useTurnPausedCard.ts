@@ -2,6 +2,7 @@
 
 import { useContext, useState } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getDefaultAssistantTitle } from "@/services/experts/default-assistant";
 
 import { parseTurnPause } from "../../turnPause";
 import { CopilotChatActionsContext } from "../CopilotChatActionsProvider/useCopilotChatActions";
@@ -17,7 +18,7 @@ interface Args {
 }
 
 export function useTurnPausedCard({ data, pauseKey, isStoredRow }: Args) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const actions = useContext(CopilotChatActionsContext);
   const current = useContext(CurrentPauseContext);
   const pause = parseTurnPause(data);
@@ -44,7 +45,7 @@ export function useTurnPausedCard({ data, pauseKey, isStoredRow }: Args) {
   return {
     pause,
     sessionId: canAct ? sessionId : null,
-    assistantName: actions?.assistantName ?? "Otto",
+    assistantName: actions?.assistantName ?? getDefaultAssistantTitle(locale),
     isLive: isCurrent && canAct && !isStopped && !isPickedUp,
     note: isStopped
       ? t("Stopped here", "在此停止")

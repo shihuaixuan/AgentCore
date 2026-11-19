@@ -787,7 +787,7 @@ describe("first-run walkthrough", () => {
       ),
     );
     expect(document.activeElement?.getAttribute("aria-label")).toBe(
-      "Start with Otto: Turn sales calls into CRM updates",
+      "Start with General Office Assistant: Turn sales calls into CRM updates",
     );
     // It lands on the row that carries the Start here pill.
     expect(document.activeElement?.closest("li")?.textContent).toContain(

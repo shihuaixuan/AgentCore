@@ -59,7 +59,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
     ref={ref}
     data-slot="menu-submenu-trigger"
     className={cn(
-      "flex cursor-default items-center rounded-sm px-2 py-1.5 text-body leading-5 outline-none select-none focus:bg-surface-hover data-[state=open]:bg-surface-hover [@media(pointer:coarse)]:py-3",
+      "flex cursor-default items-center rounded-sm px-2 py-1.5 text-body leading-5 outline-none select-none focus:bg-surface-hover data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[state=open]:bg-surface-hover [@media(pointer:coarse)]:py-3",
       inset && "pl-8",
       className,
     )}

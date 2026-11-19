@@ -75,10 +75,11 @@ export function RecipientChip({
   const interactedOutside = useRef(false);
   const chip = recipient ?? (isThreadPicker ? OTTO_RECIPIENT_OPTION : null);
   const title = chip ? recipientTitle(chip, locale) : "";
-  const label = recipient
-    ? (recipientChoices(options, locale).find(
-        ({ option }) => option.id === recipient.id,
-      )?.label ?? title)
+  const label = chip
+    ? (recipientChoices(
+        isThreadPicker ? [OTTO_RECIPIENT_OPTION, ...options] : options,
+        locale,
+      ).find(({ option }) => option.id === chip.id)?.label ?? title)
     : title;
   if (isLoading) {
     return (

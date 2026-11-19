@@ -14,6 +14,7 @@ import {
 } from "@/components/molecules/InputGroup/InputGroup";
 import { containsLikelySecret } from "@/lib/secret-detection";
 import { cn } from "@/lib/utils";
+import { getDefaultAssistantTitle } from "@/services/experts/default-assistant";
 import { Flag, useGetFlag } from "@/services/feature-flags/use-get-flag";
 import {
   ClipboardEvent,
@@ -515,9 +516,11 @@ export const ChatInput = memo(function ChatInput({
                         onSelect={handleRecipientSelect}
                       />
                     ),
-                    pickerLabel: recipientPicker.options.length
-                      ? t("Search experts", "搜索专家")
-                      : undefined,
+                    pickerLabel:
+                      recipientPicker.isThreadPicker ||
+                      recipientPicker.options.length
+                        ? t("Search experts", "搜索专家")
+                        : undefined,
                   }
                 : undefined,
           },
@@ -629,7 +632,7 @@ export const ChatInput = memo(function ChatInput({
         )}
         <SecretPasteNotice
           visible={containsLikelySecret(value)}
-          assistantName={assistantName ?? "Otto"}
+          assistantName={assistantName ?? getDefaultAssistantTitle(locale)}
           className={stacked ? undefined : "mt-1.5"}
         />
         <FileChips

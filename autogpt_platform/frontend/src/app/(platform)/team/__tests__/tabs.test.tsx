@@ -159,7 +159,7 @@ describe("TeamRoster toolbar", () => {
     expect(screen.getByText("Researcher")).toBeDefined();
     expect(screen.queryByText("Marketing Strategist")).toBeNull();
     // Otto is pinned, but steps aside once the roster is narrowed.
-    expect(screen.queryByText("Otto")).toBeNull();
+    expect(screen.queryByText("General Office Assistant")).toBeNull();
   });
 
   test("says so when nothing matches the search", async () => {
@@ -245,7 +245,9 @@ describe("AutopilotCard", () => {
     render(<TeamPage />);
     expect(await screen.findByText("Researcher")).toBeDefined();
 
-    const autopilot = screen.getByRole("region", { name: "Otto" });
+    const autopilot = screen.getByRole("region", {
+      name: "General Office Assistant",
+    });
     expect(getStatValue(autopilot, "Skills")).toBe("3");
     expect(getStatValue(autopilot, "Schedules")).toBe("1");
     expect(getStatValue(autopilot, "Workflows")).toBe("1");
@@ -257,7 +259,9 @@ describe("AutopilotCard", () => {
     render(<TeamPage />);
     expect(await screen.findByText("Marketing Strategist")).toBeDefined();
 
-    const autopilot = screen.getByRole("region", { name: "Otto" });
+    const autopilot = screen.getByRole("region", {
+      name: "General Office Assistant",
+    });
     // A zero total is left out of the meta line rather than shown as "0".
     expect(within(autopilot).queryByText("Skills")).toBeNull();
     expect(within(autopilot).queryByText("Schedules")).toBeNull();
@@ -276,10 +280,12 @@ describe("AutopilotCard", () => {
     render(<TeamPage />);
     expect(await screen.findByText("Marketing Strategist")).toBeDefined();
 
-    const autopilot = screen.getByRole("region", { name: "Otto" });
+    const autopilot = screen.getByRole("region", {
+      name: "General Office Assistant",
+    });
     expect(
       within(autopilot)
-        .getByRole("link", { name: "View Otto" })
+        .getByRole("link", { name: "View General Office Assistant" })
         .getAttribute("href"),
     ).toBe("/team/autopilot");
   });

@@ -476,7 +476,7 @@ describe("useSuggestedTasks — an expert who isn't on the team", () => {
 
     expect(
       await screen.findByText(
-        "That expert isn't on your team, so Otto has this one.",
+        "That expert isn't on your team, so your office assistant has this one.",
       ),
     ).toBeDefined();
     expect(onSend).toHaveBeenCalledExactlyOnceWith(TASKS[1].prompt);
@@ -498,7 +498,7 @@ describe("useSuggestedTasks — an expert who isn't on the team", () => {
 
     expect(
       await screen.findByText(
-        "That expert isn't on your team, so Otto has this one.",
+        "That expert isn't on your team, so your office assistant has this one.",
       ),
     ).toBeDefined();
     expect(onSend).toHaveBeenCalledExactlyOnceWith(TASKS[3].prompt);

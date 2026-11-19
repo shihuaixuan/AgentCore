@@ -37,7 +37,6 @@ import { ChatsNavSection } from "./components/ChatsNavSection/ChatsNavSection";
 import { CollapsibleNavGroup } from "./components/CollapsibleNavGroup/CollapsibleNavGroup";
 import { ShortcutHint } from "./components/ShortcutHint/ShortcutHint";
 import { SidebarUserActions } from "./components/SidebarUserActions/SidebarUserActions";
-import { useNavItemClassName } from "./useNavItemClassName";
 
 type NavLink = {
   name: string;
@@ -106,7 +105,6 @@ function HomeIcon() {
 function HomeItem() {
   const { t } = useTranslation();
   const pathname = usePathname();
-  const navItemClassName = useNavItemClassName();
 
   return (
     <SidebarMenuItem>
@@ -114,7 +112,7 @@ function HomeItem() {
         asChild
         tooltip={t("Home", "首页")}
         isActive={isLinkActive(pathname, "/home")}
-        className={navItemClassName}
+        variant="navigation"
       >
         <Link href="/home">
           <HomeIcon />
@@ -146,7 +144,6 @@ function NavItem({ link }: NavItemProps) {
     )[link.name] ?? link.name,
   );
   const pathname = usePathname();
-  const navItemClassName = useNavItemClassName();
 
   return (
     <SidebarMenuItem {...(link.tourTarget && tourTarget(link.tourTarget))}>
@@ -154,7 +151,7 @@ function NavItem({ link }: NavItemProps) {
         asChild
         tooltip={label}
         isActive={isLinkActive(pathname, link.href)}
-        className={navItemClassName}
+        variant="navigation"
       >
         <Link href={link.href}>
           <Icon
@@ -241,7 +238,7 @@ export function AppSidebar(props: Props) {
           className="flex shrink-0 flex-col gap-2"
         >
           <motion.div variants={itemVariants}>
-            <SidebarGroup className="mt-0 py-1">
+            <SidebarGroup size="sm" className="mt-0">
               <SidebarGroupContent>
                 <NavMenu links={mainLinks} leading={<HomeItem />} />
               </SidebarGroupContent>

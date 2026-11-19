@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getDefaultAssistantTitle } from "@/services/experts/default-assistant";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 
 import { ChatInput } from "@/app/(platform)/copilot/components/ChatInput/ChatInput";
@@ -8,7 +9,6 @@ import { ChatMessagesContainer } from "@/app/(platform)/copilot/components/ChatM
 import { CopilotChatActionsProvider } from "@/app/(platform)/copilot/components/CopilotChatActionsProvider/CopilotChatActionsProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
-import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
 import { ArrowExpandIcon, NoteEditIcon } from "@hugeicons/core-free-icons";
 import { ExpertSidePanel } from "../ExpertSidePanel/ExpertSidePanel";
 import {
@@ -53,11 +53,10 @@ export function ExpertChatDrawer({
     ? {
         name:
           target.expertId === null
-            ? AUTOPILOT_NAME
+            ? getDefaultAssistantTitle(locale)
             : getExpertDisplayTitle(target, locale),
         avatarUrl: target.avatarUrl,
         color: target.color,
-        isAutopilot: target.expertId === null,
       }
     : null;
 
@@ -116,7 +115,7 @@ interface BodyProps {
 }
 
 function ChatPanelBody({ target, identity, chat }: BodyProps) {
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const {
     sessionId,
     messages,
@@ -184,9 +183,6 @@ function ChatPanelBody({ target, identity, chat }: BodyProps) {
               </Text>
               <Text variant="small" tone="muted">
                 {identity.name}
-                {identity.isAutopilot
-                  ? ` · ${getExpertDisplayTitle(target, locale)}`
-                  : null}
               </Text>
             </div>
           </div>

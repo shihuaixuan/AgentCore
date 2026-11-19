@@ -34,7 +34,7 @@ describe("ChatInput secret warning", () => {
     const link = screen.getByRole("link", { name: "Marketplace → Connectors" });
     expect(link.getAttribute("href")).toBe("/marketplace/connectors");
     expect(link.getAttribute("target")).toBe("_blank");
-    expect(warning.textContent).toContain("Otto");
+    expect(warning.textContent).toContain("General Office Assistant");
     expect(composer().value).toBe(`use this token ${GITHUB_TOKEN}`);
   });
 
@@ -54,7 +54,7 @@ describe("ChatInput secret warning", () => {
     expect(region.contains(warning)).toBe(true);
   });
 
-  it("names the expert the chat is with instead of Otto", async () => {
+  it("names the expert the chat is with instead of the default assistant", async () => {
     const user = userEvent.setup();
     render(<ChatInput onSend={vi.fn()} assistantName="Maria" />);
 
@@ -63,7 +63,7 @@ describe("ChatInput secret warning", () => {
 
     const warning = await screen.findByText(WARNING);
     expect(warning.textContent).toContain("To let Maria use a key");
-    expect(warning.textContent).not.toContain("Otto");
+    expect(warning.textContent).not.toContain("General Office Assistant");
   });
 
   it("drops the warning once the token is removed", async () => {
