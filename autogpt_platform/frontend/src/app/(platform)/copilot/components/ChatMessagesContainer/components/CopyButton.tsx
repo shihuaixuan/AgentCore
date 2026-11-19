@@ -3,6 +3,7 @@
 import { credentialMentionDisplayText } from "../../CredentialMention/helpers";
 import { MessageAction } from "@/components/organisms/Message/Message";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { copyTextToClipboard } from "@/lib/clipboard";
 import { useState } from "react";
 import { Copy02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -19,20 +20,19 @@ export function CopyButton({ text }: Props) {
   if (!text.trim()) return null;
 
   async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(credentialMentionDisplayText(text));
+    if (await copyTextToClipboard(credentialMentionDisplayText(text))) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast({
-        title: t("Failed to copy", "复制失败"),
-        description: t(
-          "Your browser may not support clipboard access, or something went wrong.",
-          "你的浏览器可能不支持剪贴板访问，或发生了错误。",
-        ),
-        variant: "destructive",
-      });
+      return;
     }
+    toast({
+      title: t("Failed to copy", "复制失败"),
+      description: t(
+        "Your browser may not support clipboard access, or something went wrong.",
+        "你的浏览器可能不支持剪贴板访问，或发生了错误。",
+      ),
+      variant: "destructive",
+    });
   }
 
   return (

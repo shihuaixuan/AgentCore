@@ -1,10 +1,11 @@
 "use client";
 
 import { useToast } from "@/components/molecules/Toast/use-toast";
+import { copyTextToClipboard } from "@/lib/clipboard";
 import { useRef, useState } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { trackTourCtaClick } from "../../tracking";
-import { buildTourShareUrl, copyTextToClipboard } from "./helpers";
+import { buildTourShareUrl } from "./helpers";
 
 const COPIED_RESET_MS = 2000;
 

@@ -1,6 +1,7 @@
 import { usePostV2SubmitMessageFeedback } from "@/app/api/__generated__/endpoints/chat/chat";
 import type { MessageFeedbackRequest } from "@/app/api/__generated__/models/messageFeedbackRequest";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { copyTextToClipboard } from "@/lib/clipboard";
 import * as Sentry from "@sentry/nextjs";
 import type { UIDataTypes, UIMessage, UITools } from "ai";
 import { useState } from "react";
@@ -65,14 +66,7 @@ export function useMessageFeedback({
   }
 
   async function handleCopy(text: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast({
-        title: t("Copied!", "已复制！"),
-        variant: "success",
-        duration: 2000,
-      });
-    } catch {
+    if (!(await copyTextToClipboard(text))) {
       toast({
         title: t("Failed to copy", "复制失败"),
         variant: "destructive",
@@ -80,6 +74,12 @@ export function useMessageFeedback({
       });
       return;
     }
+
+    toast({
+      title: t("Copied!", "已复制！"),
+      variant: "success",
+      duration: 2000,
+    });
     // A signal for us, not an action the user asked for: the copy itself
     // succeeded, so a failure to record it is reported but not shown.
     if (canRate) void sendScore({ score_name: "copy", score_value: 1 });
