@@ -479,9 +479,10 @@ class QueuePendingMessageRequest(BaseModel):
 
 
 def _supports_turn_recipient(session: ChatSessionInfo) -> bool:
+    # The current turn's managed model takes precedence over the saved
+    # connection. The composer and POST each require that model separately.
     return (
-        session.metadata.llm_auth_provider == "platform"
-        and turn_queue.is_users_own_chat(session)
+        turn_queue.is_users_own_chat(session)
         and not session.metadata.source_platform
         and not session.metadata.builder_graph_id
     )
@@ -2281,9 +2282,9 @@ async def stream_chat_post(
                 user_id=user_id,
                 message=message,
                 message_id=message_id,
-                # The id already stops a retransmit; matching on text as well would
-                # drop a resend after a turn stopped before it wrote a reply.
-                dedupe_content=client_message_id is None,
+                # An explicit recipient can receive the same text as another
+                # expert, even if the earlier turn never wrote a reply.
+                dedupe_content=client_message_id is None and request.recipient is None,
                 message_metadata=message_metadata,
                 message_already_persisted=resume_persisted_kickoff,
                 is_user_message=request.is_user_message,

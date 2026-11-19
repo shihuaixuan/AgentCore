@@ -698,12 +698,24 @@ async def _is_sub_work(session: ChatSessionInfo) -> bool:
 
 async def _may_start(gates: "_UserGates", head: ChatSessionInfo) -> bool:
     """Whether ``head`` may start now: :func:`turn_refusal` for its route and,
-    on the platform route, an Advanced turn's tier."""
+    on the legacy platform route, an Advanced turn's tier."""
     route_provider = head.metadata.llm_auth_provider
+    if route_provider != "platform":
+        # A queued managed turn on an older chat spends platform allowance,
+        # even when the chat still records a different default connection.
+        try:
+            pending = await chat_db().get_latest_user_message_in_session(
+                head.session_id
+            )
+        except Exception as exc:
+            if not await gates.route_open(route_provider, head):
+                return False
+            raise _QueueOnHold("could not read the queued turn's model") from exc
+        if pending and (pending.metadata or {}).get("managed_model_id"):
+            route_provider = "platform"
+        return await gates.route_open(route_provider, head)
     if not await gates.route_open(route_provider, head):
         return False
-    if route_provider != "platform":
-        return True
     # A turn can sit in the queue long enough for the plan that bought it to
     # lapse. The tier was checked when the turn was accepted, but promoting it
     # is a second, later decision to spend, so it gets its own check --

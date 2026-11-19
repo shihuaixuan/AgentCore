@@ -992,12 +992,12 @@ async def schedule_chat_turn(
         if (message_already_persisted or require_fresh_slot) and not slot.admitted:
             return None
         if user_id and not slot.admitted:
-            # Two sends of one text racing past the in-flight check: the
-            # second only refreshed the first's slot, so it rides that turn,
-            # as the save below would collapse it. Any other text is refused
-            # before it is saved, so the client keeps its message and its id.
+            # Only a legacy send without a recipient can share the winning
+            # turn by matching text. An explicitly addressed request needs
+            # its own turn; refuse it before saving so the client keeps it.
             if (
-                message
+                recipient is None
+                and message
                 and not message_already_persisted
                 and await _repeats_trailing_message(
                     session_id, message, is_user_message
