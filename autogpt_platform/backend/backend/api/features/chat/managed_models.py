@@ -5,6 +5,12 @@ from fastapi import APIRouter, HTTPException, Request, Security
 
 from backend.copilot import managed_models
 from backend.copilot.llm_attribution import is_impersonated_request
+from backend.copilot.managed_model_discovery import (
+    DiscoveryFailure,
+    ModelDiscoveryError,
+    ModelDiscoveryRequest,
+    discover_model_ids,
+)
 from backend.util.request import validate_url_host
 
 router = APIRouter()
@@ -30,6 +36,24 @@ async def create_managed_chat_model(
     _require_direct_admin(request)
     await _validate_public_url(data.base_url)
     return await managed_models.create_model(data)
+
+
+@admin.post("/discover")
+async def discover_managed_chat_models(
+    data: ModelDiscoveryRequest, request: Request
+) -> list[str]:
+    _require_direct_admin(request)
+    try:
+        return await discover_model_ids(data)
+    except ModelDiscoveryError as exc:
+        status = {
+            DiscoveryFailure.INVALID_CONNECTION: 422,
+            DiscoveryFailure.REJECTED_KEY: 424,
+            DiscoveryFailure.NOT_SUPPORTED: 404,
+            DiscoveryFailure.UNAVAILABLE: 502,
+            DiscoveryFailure.TIMED_OUT: 504,
+        }[exc.reason]
+        raise HTTPException(status, exc.reason.value) from None
 
 
 @admin.patch("/{model_id}")

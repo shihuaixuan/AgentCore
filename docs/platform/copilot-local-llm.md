@@ -16,11 +16,15 @@ endpoint you control**.
 ## Configure chat models in Settings
 
 For the main web chat, an administrator can instead configure models in
-**Settings → Chat models**. Add a display name, the upstream model ID, a
-public HTTPS API base URL (for example `https://api.example.com/v1`), and an
-API key. The endpoint must support streaming OpenAI Chat Completions and
-tool calls. Keys are encrypted using the deployment's `ENCRYPTION_KEY` and
-are not displayed again. Open the model for chat after saving; only open
+**Settings → Chat models → Add model**. Enter a public HTTPS API base URL
+(for example `https://api.example.com/v1`) and an API key, then click
+**Fetch models**. AutoGPT queries the provider's `GET /models` endpoint
+with the key. Pick a model from the list, or enter the upstream model ID
+manually if the provider does not offer a list. Enter a display name and
+save. A listed model must still support streaming OpenAI Chat Completions
+and tool calls to work in chat. The key is saved only when you save the
+model, encrypted using the deployment's `ENCRYPTION_KEY`, and is not
+displayed again. Open the model for chat after saving; only open
 models appear in the chat composer. Closing a model blocks new turns using
 it, including turns that have not begun executing. It does not cancel an
 already-running turn.

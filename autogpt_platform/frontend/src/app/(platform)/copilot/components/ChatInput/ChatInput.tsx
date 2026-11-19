@@ -652,9 +652,6 @@ export const ChatInput = memo(function ChatInput({
                 onOpenChange={setIsRecipientPickerOpen}
               />
             )}
-            {managedModels && (
-              <ManagedModelPicker disabled={isBusy || isStreaming} />
-            )}
           </InputGroupAddon>
           {/* Must be a real flex item: `order`/`w-full` are ignored on a
               `display: contents` box, which is what PromptInputBody was. */}
@@ -700,6 +697,9 @@ export const ChatInput = memo(function ChatInput({
               isCompact && "gap-0.5 py-1 pr-1",
             )}
           >
+            {managedModels && (
+              <ManagedModelPicker disabled={isBusy || isStreaming} />
+            )}
             {hasOverflowControls && (
               <ComposerOverflowMenu
                 forceClosed={!!voiceBar}

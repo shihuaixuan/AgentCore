@@ -25091,6 +25091,57 @@
         ]
       }
     },
+    "/api/chat/managed-models/admin/discover": {
+      "post": {
+        "tags": ["v2", "chat"],
+        "summary": "Discover Managed Chat Models",
+        "operationId": "postV2DiscoverManagedChatModels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelDiscoveryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "title": "Response Postv2Discovermanagedchatmodels"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401NotAuthenticatedError"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearerJWT": []
+          }
+        ]
+      }
+    },
     "/api/chat/managed-models/admin/{model_id}": {
       "patch": {
         "tags": ["v2", "chat"],
@@ -57150,6 +57201,26 @@
         "type": "object",
         "required": ["id", "name", "model", "base_url", "enabled"],
         "title": "ModelDetails"
+      },
+      "ModelDiscoveryRequest": {
+        "properties": {
+          "base_url": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Base Url"
+          },
+          "api_key": {
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1,
+            "format": "password",
+            "title": "Api Key",
+            "writeOnly": true
+          }
+        },
+        "type": "object",
+        "required": ["base_url", "api_key"],
+        "title": "ModelDiscoveryRequest"
       },
       "ModelUpdate": {
         "properties": {
