@@ -85,11 +85,12 @@ interface RowProps {
 }
 
 function ScheduleWorkflowRow({ workflow, onScheduleCreated }: RowProps) {
+  const { t } = useTranslation();
   const { data: agent } = useGetV2GetLibraryAgent(
     workflow.library_agent_id ?? "",
     { query: { select: okData, enabled: Boolean(workflow.library_agent_id) } },
   );
-  const name = workflow.name ?? "Unnamed workflow";
+  const name = workflow.name ?? t("Unnamed workflow", "未命名工作流");
   const row = (
     <button
       type="button"

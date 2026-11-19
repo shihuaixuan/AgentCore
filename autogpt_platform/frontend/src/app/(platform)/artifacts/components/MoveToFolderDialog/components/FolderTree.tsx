@@ -22,6 +22,12 @@ interface Props {
   onToggleExpanded: (folderId: string) => void;
 }
 
+const DISABLED_LABELS = {
+  "moving-folder": ["Folder being moved", "正在移动的文件夹"],
+  descendant: ["Inside the folder being moved", "位于正在移动的文件夹内"],
+  "current-location": ["Current location", "当前位置"],
+} as const;
+
 /**
  * WAI-ARIA tree of move destinations. A click selects rather than moves —
  * with a chevron beside every name, a mis-click must not move anything.
@@ -87,6 +93,10 @@ export function FolderTree({
         const key = rowKey(row.id);
         const isSelected = key === selectedKey;
         const isDisabled = row.disabledReason !== null;
+        const name = row.name ?? t("Files (root)", "文件（根目录）");
+        const disabledLabel = row.disabledReason
+          ? DISABLED_LABELS[row.disabledReason]
+          : null;
         return (
           <li
             key={key}
@@ -116,7 +126,11 @@ export function FolderTree({
               <button
                 type="button"
                 tabIndex={-1}
-                aria-label={`${row.isExpanded ? "Collapse" : "Expand"} ${row.name}`}
+                aria-label={
+                  row.isExpanded
+                    ? t(`Collapse ${name}`, `折叠 ${name}`)
+                    : t(`Expand ${name}`, `展开 ${name}`)
+                }
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleExpanded(row.id as string);
@@ -150,14 +164,14 @@ export function FolderTree({
               variant="small-medium"
               as="span"
               className="min-w-0 truncate"
-              title={row.name}
+              title={name}
             >
-              {row.name}
+              {name}
             </Text>
-            {row.disabledReason ? (
+            {disabledLabel ? (
               <span className="ml-auto shrink-0 pl-2">
                 <Text variant="small" as="span" tone="subtle">
-                  {row.disabledReason}
+                  {t(disabledLabel[0], disabledLabel[1])}
                 </Text>
               </span>
             ) : null}

@@ -28,11 +28,6 @@ import { SectionEmptyState } from "../../components/SectionEmptyState";
 import { ToolbarSearch } from "../../components/ToolbarSearch";
 import { PillFilterMenu } from "../../components/PillFilterMenu";
 
-const VIEW_OPTIONS = [
-  { value: "list", label: "List view", icon: ListViewIcon },
-  { value: "grid", label: "Grid view", icon: GridViewIcon },
-] as const;
-
 interface Props {
   expertName: string;
   workflows: ExpertWorkflowRef[];
@@ -53,6 +48,10 @@ export function ExpertWorkflowsSection({
   onAskWorkflow,
 }: Props) {
   const { t } = useTranslation();
+  const viewOptions = [
+    { value: "list", label: t("List view", "列表视图"), icon: ListViewIcon },
+    { value: "grid", label: t("Grid view", "网格视图"), icon: GridViewIcon },
+  ] as const;
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<WorkflowFilter>("all");
   const { view, setView } = useExpertWorkflowsView();
@@ -92,7 +91,7 @@ export function ExpertWorkflowsSection({
             options={WORKFLOW_FILTERS}
             onChange={setFilter}
           />
-          <ViewToggle value={view} options={VIEW_OPTIONS} onChange={setView} />
+          <ViewToggle value={view} options={viewOptions} onChange={setView} />
         </div>
       </div>
       {workflows.length === 0 ? (

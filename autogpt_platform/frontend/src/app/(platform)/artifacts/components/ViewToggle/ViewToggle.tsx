@@ -15,12 +15,13 @@ interface Props {
 interface Option {
   value: ArtifactsView;
   label: string;
+  zh: string;
   icon: IconSvgElement;
 }
 
 const OPTIONS: Option[] = [
-  { value: "grid", label: "Grid view", icon: GridViewIcon },
-  { value: "list", label: "List view", icon: ListViewIcon },
+  { value: "grid", label: "Grid view", zh: "网格视图", icon: GridViewIcon },
+  { value: "list", label: "List view", zh: "列表视图", icon: ListViewIcon },
 ];
 
 export function ViewToggle({ value, onChange }: Props) {
@@ -38,7 +39,7 @@ export function ViewToggle({ value, onChange }: Props) {
           <button
             key={option.value}
             type="button"
-            aria-label={option.label}
+            aria-label={t(option.label, option.zh)}
             aria-pressed={active}
             onClick={() => onChange(option.value)}
             className={cn(

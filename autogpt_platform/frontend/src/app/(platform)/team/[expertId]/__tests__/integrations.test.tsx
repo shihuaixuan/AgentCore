@@ -11,6 +11,7 @@ import { getGetV1ListExecutionSchedulesForAUserMockHandler } from "@/app/api/__g
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import type { ExpertCredentialRef } from "@/app/api/__generated__/models/expertCredentialRef";
 import type { ConnectionResponse } from "@/app/api/__generated__/models/connectionResponse";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { server } from "@/mocks/mock-server";
 import {
   render,
@@ -686,6 +687,51 @@ describe("managing an expert's integrations", () => {
     );
     expect(within(list).getByRole("button", { name: /Notion/ })).toBeDefined();
     expect(within(list).queryByRole("button", { name: /Slack/ })).toBeNull();
+  });
+
+  it("localizes workspace service filters without translating provider names", async () => {
+    server.use(
+      getListExpertCredentialsMockHandler([]),
+      http.get("*/api/integrations/credentials", () => HttpResponse.json([])),
+      http.get("*/api/integrations/providers", () =>
+        HttpResponse.json([
+          {
+            name: "notion",
+            description: "Docs and databases",
+            supported_auth_types: ["api_key"],
+          },
+        ]),
+      ),
+    );
+    render(
+      <LanguageProvider>
+        <ExpertDetailPage />
+      </LanguageProvider>,
+    );
+
+    await userEvent.click(await screen.findByRole("tab", { name: "集成" }));
+    await userEvent.click(
+      screen.getAllByRole("button", { name: "添加集成" })[0],
+    );
+    const dialog = await screen.findByRole("dialog");
+    const filters = await within(dialog).findByRole("group", {
+      name: "筛选服务",
+    });
+    expect(
+      within(filters).getByRole("button", { name: "全部", pressed: true }),
+    ).toBeDefined();
+    expect(
+      within(filters).getByRole("button", { name: "已连接" }),
+    ).toBeDefined();
+    await userEvent.click(
+      within(filters).getByRole("button", { name: "未连接" }),
+    );
+    expect(
+      within(filters).getByRole("button", { name: "未连接", pressed: true }),
+    ).toBeDefined();
+    expect(
+      await within(dialog).findByRole("button", { name: "Notion" }),
+    ).toBeDefined();
   });
 
   it("offers a vendor once and opens its sign-in first, with an API key alternative", async () => {

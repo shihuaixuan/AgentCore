@@ -20,9 +20,9 @@ import { ExpertFileRow } from "./ExpertFileRow";
 import { useExpertFilesSection } from "./useExpertFilesSection";
 
 const FILTERS = [
-  { value: "all", label: "All files", icon: Folder01Icon },
-  { value: "generated", label: "Created", icon: SparklesIcon },
-  { value: "uploaded", label: "Uploaded", icon: Upload04Icon },
+  { value: "all", label: "All files", zh: "全部文件", icon: Folder01Icon },
+  { value: "generated", label: "Created", zh: "已创建", icon: SparklesIcon },
+  { value: "uploaded", label: "Uploaded", zh: "已上传", icon: Upload04Icon },
 ] as const;
 
 interface Props {
@@ -54,15 +54,7 @@ export function ExpertFilesSection({ expertId, expertName }: Props) {
             label={t("Filter files", "筛选文件")}
             value={files.filter}
             defaultValue="all"
-            options={FILTERS.map((option) => ({
-              ...option,
-              label: t(
-                option.label,
-                { all: "全部文件", generated: "已创建", uploaded: "已上传" }[
-                  option.value
-                ],
-              ),
-            }))}
+            options={FILTERS}
             onChange={files.setFilter}
           />
         </div>

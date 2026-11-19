@@ -11,10 +11,20 @@ import type { TeamFilter } from "../../helpers";
 import { PillFilterMenu } from "../PillFilterMenu";
 
 const OPTIONS = [
-  { value: "all", label: "All experts", icon: ConferenceIcon },
-  { value: "scheduled", label: "Scheduled", icon: Calendar03Icon },
-  { value: "needs-setup", label: "Needs setup", icon: Alert01Icon },
-  { value: "paused", label: "Paused", icon: PauseIcon },
+  { value: "all", label: "All experts", zh: "全部专家", icon: ConferenceIcon },
+  {
+    value: "scheduled",
+    label: "Scheduled",
+    zh: "已计划",
+    icon: Calendar03Icon,
+  },
+  {
+    value: "needs-setup",
+    label: "Needs setup",
+    zh: "需要设置",
+    icon: Alert01Icon,
+  },
+  { value: "paused", label: "Paused", zh: "已暂停", icon: PauseIcon },
 ] as const;
 
 interface Props {

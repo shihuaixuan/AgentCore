@@ -48,6 +48,7 @@ import {
   getGetHomeDashboardResponseMock200,
 } from "@/app/api/__generated__/endpoints/home/home.msw";
 import { HomeAttentionItem } from "@/app/api/__generated__/models/homeAttentionItem";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import {
   getGetV2ListMarketplaceSkillsMockHandler200,
   getPostV2InstallMarketplaceSkillMockHandler200,
@@ -507,6 +508,68 @@ describe("ExpertDetailPage", () => {
       "nothing-like-this",
     );
     expect(screen.getByText("No schedules match.")).toBeDefined();
+  });
+
+  test("localizes workspace schedule filters and unnamed workflow buttons", async () => {
+    server.use(
+      getGetExpertMockHandler({
+        ...maria,
+        workflows: [{ ...maria.workflows[0], name: null }, maria.workflows[1]],
+      }),
+    );
+    const user = userEvent.setup();
+    render(
+      <LanguageProvider>
+        <ExpertDetailPage />
+      </LanguageProvider>,
+    );
+
+    await openTab("计划");
+    await user.click(
+      screen.getByRole("button", { name: "筛选计划：全部计划" }),
+    );
+    expect(
+      await screen.findByRole("menuitemradio", { name: "未来 24 小时" }),
+    ).toBeDefined();
+    expect(
+      screen.getByRole("menuitemradio", { name: "未来 7 天" }),
+    ).toBeDefined();
+    await user.click(screen.getByRole("menuitemradio", { name: "更晚" }));
+    expect(screen.getByText("没有匹配的计划。")).toBeDefined();
+    await user.click(screen.getByRole("button", { name: "创建计划" }));
+    const dialog = await screen.findByRole("dialog", { name: "创建计划" });
+    expect(within(dialog).getByText("未命名工作流")).toBeDefined();
+    expect(within(dialog).getByText("SEO Audit")).toBeDefined();
+  });
+
+  test("localizes workspace workflow filters and view buttons", async () => {
+    const user = userEvent.setup();
+    render(
+      <LanguageProvider>
+        <ExpertDetailPage />
+      </LanguageProvider>,
+    );
+
+    await openTab("工作流");
+    expect(
+      screen.getByRole("button", { name: "列表视图", pressed: true }),
+    ).toBeDefined();
+    await user.click(screen.getByRole("button", { name: "网格视图" }));
+    expect(
+      screen.getByRole("button", { name: "网格视图", pressed: true }),
+    ).toBeDefined();
+    await user.click(
+      screen.getByRole("button", { name: "筛选工作流：全部工作流" }),
+    );
+    expect(
+      await screen.findByRole("menuitemradio", { name: "手动" }),
+    ).toBeDefined();
+    expect(
+      screen.getByRole("menuitemradio", { name: "需要设置" }),
+    ).toBeDefined();
+    await user.click(screen.getByRole("menuitemradio", { name: "已计划" }));
+    expect(screen.getByText("Content Calendar")).toBeDefined();
+    expect(screen.queryByText("SEO Audit")).toBeNull();
   });
 
   test("lists the expert's workflows in the create schedule dialog", async () => {

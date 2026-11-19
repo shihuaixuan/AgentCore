@@ -201,7 +201,7 @@ export function ExpertConnectServiceDialog({
                               aria-pressed={filter === option.value}
                               onClick={() => setFilter(option.value)}
                             >
-                              {option.label}
+                              {t(option.label, option.zh)}
                             </Button>
                           ))}
                         </div>

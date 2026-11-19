@@ -92,7 +92,7 @@ export default function ArtifactsPage() {
           id: folder.id,
           name: folder.name,
         }))
-      : [{ id: selectedFolderId, name: "Folder" }]
+      : [{ id: selectedFolderId, name: t("Folder", "文件夹") }]
     : [];
 
   useEffect(() => {

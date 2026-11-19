@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 import {
   fireEvent,
@@ -125,6 +126,73 @@ async function openHoverPreview() {
 }
 
 describe("ArtifactsPage - basic rendering", () => {
+  test("localizes workspace file view buttons", async () => {
+    useStorageHandler();
+    useFilesHandler([]);
+    server.use(getListWorkspaceFoldersMockHandler({ folders: [] }));
+
+    render(
+      <LanguageProvider>
+        <ArtifactsPage />
+      </LanguageProvider>,
+    );
+
+    await screen.findByTestId("artifacts-empty");
+    expect(
+      screen.getByRole("button", { name: "列表视图", pressed: true }),
+    ).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "网格视图" }));
+    expect(
+      screen.getByRole("button", { name: "网格视图", pressed: true }),
+    ).toBeDefined();
+  });
+
+  test("localizes workspace folder placeholders without altering real names", async () => {
+    resetNavigation("folder=fld-1");
+    useStorageHandler();
+    useFilesHandler([]);
+    let releaseFolders = () => {};
+    const foldersReady = new Promise<void>((resolve) => {
+      releaseFolders = resolve;
+    });
+    server.use(
+      http.get("/api/proxy/api/workspace/folders", async () => {
+        await foldersReady;
+        return HttpResponse.json({
+          folders: [
+            {
+              id: "fld-1",
+              workspace_id: "ws-1",
+              name: "Quarterly Reports",
+              file_count: 0,
+              created_at: "2026-05-01T00:00:00Z",
+              updated_at: "2026-05-01T00:00:00Z",
+            },
+          ],
+        });
+      }),
+    );
+
+    render(
+      <LanguageProvider>
+        <ArtifactsPage />
+      </LanguageProvider>,
+    );
+
+    try {
+      expect(screen.getByTestId("folder-breadcrumb").textContent).toContain(
+        "文件夹",
+      );
+    } finally {
+      releaseFolders();
+    }
+    expect(
+      (await screen.findByText("Quarterly Reports")).getAttribute(
+        "aria-current",
+      ),
+    ).toBe("page");
+  });
+
   test("renders the page intro and leaves the title to the inset header", async () => {
     useStorageHandler();
     useFilesHandler([]);

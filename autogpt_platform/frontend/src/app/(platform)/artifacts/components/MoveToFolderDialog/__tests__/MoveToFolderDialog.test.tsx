@@ -6,6 +6,7 @@ import {
   waitFor,
 } from "@/tests/integrations/test-utils";
 import { server } from "@/mocks/mock-server";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { http, HttpResponse } from "msw";
 import { MoveToFolderDialog } from "../MoveToFolderDialog";
 
@@ -36,6 +37,30 @@ beforeEach(() => {
 });
 
 describe("MoveToFolderDialog", () => {
+  test("localizes workspace move destinations without renaming user folders", async () => {
+    render(
+      <LanguageProvider>
+        <MoveToFolderDialog
+          move={{ kind: "folder", folderId: "fld-2" }}
+          subject="“2026”"
+          isOpen
+          setIsOpen={() => {}}
+        />
+      </LanguageProvider>,
+    );
+
+    expect(await screen.findByText("2026")).toBeDefined();
+    expect(screen.getByText("文件（根目录）")).toBeDefined();
+    expect(screen.getByText("当前位置")).toBeDefined();
+    expect(screen.getByText("正在移动的文件夹")).toBeDefined();
+    expect(screen.getByText("位于正在移动的文件夹内")).toBeDefined();
+    const collapse = screen.getByRole("button", { name: "折叠 Reports" });
+    fireEvent.click(collapse);
+    expect(screen.getByRole("button", { name: "展开 Reports" })).toBeDefined();
+    expect(screen.getByText("Reports")).toBeDefined();
+    expect(screen.queryByText("2026")).toBeNull();
+  });
+
   test("opens on the subject's own branch even when the folders arrive late", async () => {
     render(
       <MoveToFolderDialog

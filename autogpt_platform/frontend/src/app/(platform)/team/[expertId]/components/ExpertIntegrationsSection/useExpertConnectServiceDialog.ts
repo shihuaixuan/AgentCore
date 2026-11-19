@@ -23,10 +23,11 @@ export type ServiceFilter = "all" | "connected" | "available";
 export const SERVICE_FILTERS: readonly {
   value: ServiceFilter;
   label: string;
+  zh: string;
 }[] = [
-  { value: "all", label: "All" },
-  { value: "connected", label: "Connected" },
-  { value: "available", label: "Not connected" },
+  { value: "all", label: "All", zh: "全部" },
+  { value: "connected", label: "Connected", zh: "已连接" },
+  { value: "available", label: "Not connected", zh: "未连接" },
 ];
 
 interface Args {

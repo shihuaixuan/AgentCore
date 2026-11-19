@@ -10,15 +10,17 @@ export type MoveSubject =
   | { kind: "files"; fileIds: string[]; currentFolderId?: string | null }
   | { kind: "folder"; folderId: string };
 
+type DisabledReason = "moving-folder" | "descendant" | "current-location";
+
 export interface TreeRow {
   /** `null` is the workspace root. */
   id: string | null;
-  name: string;
+  name: string | null;
   level: number;
   hasChildren: boolean;
   isExpanded: boolean;
   /** Why this destination is refused, shown beside the name. */
-  disabledReason: string | null;
+  disabledReason: DisabledReason | null;
 }
 
 /**
@@ -39,7 +41,7 @@ export function buildTreeRows(args: {
   if (canMoveToRoot) {
     rows.push({
       id: null,
-      name: "Files (root)",
+      name: null,
       level: 1,
       hasChildren: false,
       isExpanded: false,
@@ -104,21 +106,21 @@ const ROOT_KEY = "__root__";
 function refusedTargets(
   folders: WorkspaceFolder[],
   move: MoveSubject,
-): Map<string, string> {
-  const refused = new Map<string, string>();
+): Map<string, DisabledReason> {
+  const refused = new Map<string, DisabledReason>();
   if (move.kind === "folder") {
     const self = folders.find((folder) => folder.id === move.folderId);
-    refused.set(move.folderId, "Folder being moved");
+    refused.set(move.folderId, "moving-folder");
     for (const id of descendantIdsOf(folders, move.folderId)) {
-      refused.set(id, "Inside the folder being moved");
+      refused.set(id, "descendant");
     }
-    refused.set(rowKey(self?.parent_id ?? null), "Current location");
+    refused.set(rowKey(self?.parent_id ?? null), "current-location");
     return refused;
   }
   // Null means "at the root" or "spread across folders", and only the first
   // is a location; `canMoveToRoot` already hides the root row in that case.
   if (move.currentFolderId) {
-    refused.set(move.currentFolderId, "Current location");
+    refused.set(move.currentFolderId, "current-location");
   }
   return refused;
 }

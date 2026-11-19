@@ -12,10 +12,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/molecules/DropdownMenu/DropdownMenu";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export interface PillFilterOption<T extends string> {
   value: T;
   label: string;
+  zh: string;
   icon: IconSvgElement;
 }
 
@@ -39,8 +41,10 @@ export function PillFilterMenu<T extends string>({
   onChange,
   textSize = "body",
 }: Props<T>) {
+  const { t } = useTranslation();
   const current =
     options.find((option) => option.value === value) ?? options[0];
+  const currentLabel = t(current.label, current.zh);
   const isActive = value !== defaultValue;
 
   return (
@@ -51,7 +55,10 @@ export function PillFilterMenu<T extends string>({
           variant={isActive ? "primary" : "secondary"}
           size="small"
           textSize={textSize}
-          aria-label={`${label}: ${current.label}`}
+          aria-label={t(
+            `${label}: ${currentLabel}`,
+            `${label}：${currentLabel}`,
+          )}
           leadingIcon={current.icon}
           rightIcon={
             <span
@@ -65,7 +72,7 @@ export function PillFilterMenu<T extends string>({
           }
           className="group shrink-0"
         >
-          {current.label}
+          {currentLabel}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[12rem]">
@@ -79,7 +86,7 @@ export function PillFilterMenu<T extends string>({
                 <span className="flex text-foreground-tertiary">
                   <Icon icon={option.icon} size={15} />
                 </span>
-                {option.label}
+                {t(option.label, option.zh)}
               </span>
             </DropdownMenuRadioItem>
           ))}

@@ -14,12 +14,13 @@ interface Props {
 interface Option {
   value: OriginFilterValue;
   label: string;
+  zh: string;
 }
 
 const OPTIONS: Option[] = [
-  { value: "all", label: "All" },
-  { value: "uploaded", label: "Uploaded" },
-  { value: "generated", label: "Generated" },
+  { value: "all", label: "All", zh: "全部" },
+  { value: "uploaded", label: "Uploaded", zh: "已上传" },
+  { value: "generated", label: "Generated", zh: "已生成" },
 ];
 
 const snappySpring: Transition = {
@@ -64,6 +65,7 @@ interface OriginTabProps {
 }
 
 function OriginTab({ option, active, onClick }: OriginTabProps) {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
@@ -85,7 +87,7 @@ function OriginTab({ option, active, onClick }: OriginTabProps) {
           transition={snappySpring}
         />
       ) : null}
-      <span className="relative z-10">{option.label}</span>
+      <span className="relative z-10">{t(option.label, option.zh)}</span>
     </button>
   );
 }

@@ -345,10 +345,25 @@ export function getAutopilotSummary({
 }
 
 export const WORKFLOW_FILTERS = [
-  { value: "all", label: "All workflows", icon: WorkflowSquare01Icon },
-  { value: "scheduled", label: "Scheduled", icon: Calendar03Icon },
-  { value: "manual", label: "Manual", icon: PlayIcon },
-  { value: "needs-setup", label: "Needs setup", icon: Alert01Icon },
+  {
+    value: "all",
+    label: "All workflows",
+    zh: "全部工作流",
+    icon: WorkflowSquare01Icon,
+  },
+  {
+    value: "scheduled",
+    label: "Scheduled",
+    zh: "已计划",
+    icon: Calendar03Icon,
+  },
+  { value: "manual", label: "Manual", zh: "手动", icon: PlayIcon },
+  {
+    value: "needs-setup",
+    label: "Needs setup",
+    zh: "需要设置",
+    icon: Alert01Icon,
+  },
 ] as const;
 
 export type WorkflowFilter = (typeof WORKFLOW_FILTERS)[number]["value"];
@@ -374,10 +389,25 @@ export function filterExpertWorkflows(
 }
 
 export const SCHEDULE_FILTERS = [
-  { value: "all", label: "All schedules", icon: Calendar03Icon },
-  { value: "today", label: "Next 24 hours", icon: Clock01Icon },
-  { value: "week", label: "Next 7 days", icon: Calendar04Icon },
-  { value: "later", label: "Later", icon: Time04Icon },
+  {
+    value: "all",
+    label: "All schedules",
+    zh: "全部计划",
+    icon: Calendar03Icon,
+  },
+  {
+    value: "today",
+    label: "Next 24 hours",
+    zh: "未来 24 小时",
+    icon: Clock01Icon,
+  },
+  {
+    value: "week",
+    label: "Next 7 days",
+    zh: "未来 7 天",
+    icon: Calendar04Icon,
+  },
+  { value: "later", label: "Later", zh: "更晚", icon: Time04Icon },
 ] as const;
 
 export type ScheduleFilter = (typeof SCHEDULE_FILTERS)[number]["value"];

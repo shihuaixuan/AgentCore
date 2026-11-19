@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
 import { fireEvent, render, screen } from "@/tests/integrations/test-utils";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 import { OriginFilter } from "./OriginFilter";
 
@@ -9,6 +10,22 @@ describe("OriginFilter", () => {
     expect(screen.getByRole("tab", { name: /all/i })).toBeDefined();
     expect(screen.getByRole("tab", { name: /uploaded/i })).toBeDefined();
     expect(screen.getByRole("tab", { name: /generated/i })).toBeDefined();
+  });
+
+  test("localizes workspace file type tabs without changing filter values", () => {
+    const onChange = vi.fn();
+    render(
+      <LanguageProvider>
+        <OriginFilter value="uploaded" onChange={onChange} />
+      </LanguageProvider>,
+    );
+
+    expect(screen.getByRole("tab", { name: "全部" })).toBeDefined();
+    expect(
+      screen.getByRole("tab", { name: "已上传", selected: true }),
+    ).toBeDefined();
+    fireEvent.click(screen.getByRole("tab", { name: "已生成" }));
+    expect(onChange).toHaveBeenCalledWith("generated");
   });
 
   test("marks the active tab as aria-selected", () => {

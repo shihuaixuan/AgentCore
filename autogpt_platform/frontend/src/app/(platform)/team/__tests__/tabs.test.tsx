@@ -7,8 +7,14 @@ import { getGetV2ListLibraryAgentsMockHandler200 } from "@/app/api/__generated__
 import { getGetV1ListExecutionSchedulesForAUserMockHandler } from "@/app/api/__generated__/endpoints/schedules/schedules.msw";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { ExpertPod } from "@/app/api/__generated__/models/expertPod";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { server } from "@/mocks/mock-server";
-import { render, screen, within } from "@/tests/integrations/test-utils";
+import {
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@/tests/integrations/test-utils";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import TeamPage from "../page";
@@ -98,6 +104,46 @@ describe("TeamPage layout", () => {
 });
 
 describe("TeamRoster toolbar", () => {
+  test("localizes workspace team filters without changing the filtered experts", async () => {
+    const pausedLee = makeExpert({
+      ...lee,
+      schedules_paused_at: new Date("2026-08-20T10:00:00Z"),
+    });
+    server.use(getListExpertsMockHandler([maria, pausedLee]));
+
+    const user = userEvent.setup();
+    render(
+      <LanguageProvider>
+        <TeamPage />
+      </LanguageProvider>,
+    );
+
+    const roster = screen.getByRole("region", { name: "专家" });
+    await waitFor(() => {
+      expect(
+        roster.querySelector('a[href="/team/expert-maria"]'),
+      ).not.toBeNull();
+      expect(roster.querySelector('a[href="/team/expert-lee"]')).not.toBeNull();
+    });
+    await user.click(
+      screen.getByRole("button", { name: "筛选专家：全部专家" }),
+    );
+    expect(
+      await screen.findByRole("menuitemradio", { name: "全部专家" }),
+    ).toBeDefined();
+    expect(screen.getByRole("menuitemradio", { name: "已计划" })).toBeDefined();
+    expect(
+      screen.getByRole("menuitemradio", { name: "需要设置" }),
+    ).toBeDefined();
+    await user.click(screen.getByRole("menuitemradio", { name: "已暂停" }));
+
+    expect(
+      screen.getByRole("button", { name: "筛选专家：已暂停" }),
+    ).toBeDefined();
+    expect(roster.querySelector('a[href="/team/expert-lee"]')).not.toBeNull();
+    expect(roster.querySelector('a[href="/team/expert-maria"]')).toBeNull();
+  });
+
   test("search narrows the roster to matching experts", async () => {
     const user = userEvent.setup();
     server.use(getListExpertsMockHandler([maria, lee]));
