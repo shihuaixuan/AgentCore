@@ -7,9 +7,9 @@ import {
   getCategoryHex,
   getExpertTopicHex,
 } from "@/components/molecules/ExpertAvatar/colors";
-import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { ExpertIdentityDetails } from "@/components/molecules/ExpertIdentityDetails/ExpertIdentityDetails";
 import { CategoryTag } from "../../../components/CategoryChip/CategoryTag";
+import { MarketplaceExpertAvatar } from "../../../components/ExpertsSection/components/MarketplaceExpertAvatar";
 
 interface BandProps {
   expert: Expert;
@@ -78,7 +78,7 @@ export function ExpertHeroIdentity({ expert, stats }: IdentityProps) {
   return (
     <header>
       <div className="relative -mt-16 sm:-mt-20">
-        <ExpertAvatar
+        <MarketplaceExpertAvatar
           name={expert.name}
           avatarUrl={expert.avatar_url}
           color={expert.color}
@@ -86,7 +86,7 @@ export function ExpertHeroIdentity({ expert, stats }: IdentityProps) {
           size={128}
           /* oxlint-disable design-system/no-restyle -- the hero portrait's frame; ExpertAvatar has no framed size */
           /* oxlint-disable design-system/no-arbitrary-values -- the 6px halo and drop shadow have no ring or shadow token */
-          className="ml-6 rounded-full border border-border-base shadow-[0_12px_32px_-12px_rgba(16,24,40,0.35)] ring-[6px] ring-surface-muted"
+          className="ml-6 rounded-2xl border border-border-base shadow-[0_12px_32px_-12px_rgba(16,24,40,0.35)] ring-[6px] ring-surface-muted"
           /* oxlint-enable design-system/no-arbitrary-values */
           /* oxlint-enable design-system/no-restyle */
         />

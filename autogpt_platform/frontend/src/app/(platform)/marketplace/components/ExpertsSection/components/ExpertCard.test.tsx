@@ -1,7 +1,9 @@
 import type { ExpertTemplate } from "@/app/api/__generated__/models/expertTemplate";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { render, screen } from "@/tests/integrations/test-utils";
-import { expect, test, vi } from "vitest";
+import { fireEvent, within } from "@testing-library/react";
+import { describe, expect, test, vi } from "vitest";
+import { CompactExpertCard } from "../../MainMarketplacePage/CompactExpertCard";
 import { ExpertCard } from "./ExpertCard";
 
 vi.mock("@/lib/auth/hooks/useAuth", () => ({
@@ -32,6 +34,55 @@ const expert: ExpertTemplate = {
     description: "Creator-authored description",
   })),
 };
+
+describe.each([
+  ["directory", CompactExpertCard],
+  ["search", ExpertCard],
+] as const)("%s expert card", (_surface, Card) => {
+  test("headlines the job title and shows the built-in professional portrait", () => {
+    render(
+      <Card
+        expert={{
+          ...expert,
+          role: "代码审查与质量保障",
+          job_title: "质量保障工程师",
+          avatar_url: "/autogpt-characters/v2.1/expert-casey/neutral/128.webp",
+        }}
+        isHired={false}
+        categories={[]}
+      />,
+    );
+
+    const link = screen.getByRole("link", { name: /质量保障工程师/ });
+    expect(
+      within(link).getByRole("heading", { name: "质量保障工程师" }),
+    ).toBeDefined();
+    expect(within(link).getByText("凯西")).toBeDefined();
+    expect(link.querySelector("img")?.getAttribute("src")).toBe(
+      "/experts/professional/expert-casey.webp",
+    );
+    const portrait = link.querySelector("img");
+    if (!portrait) throw new Error("Expected a professional portrait");
+    fireEvent.error(portrait);
+    expect(link.querySelector("img")?.getAttribute("src")).toMatch(
+      /^\/autogpt-characters\/v2\.1\/expert-casey\//,
+    );
+  });
+
+  test("falls back to the localized role when the job title is blank", () => {
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <Card
+          expert={{ ...expert, role: "Sales", job_title: " " }}
+          isHired={false}
+          categories={[]}
+        />
+      </LanguageProvider>,
+    );
+
+    expect(screen.getByRole("heading", { name: "销售开发代表" })).toBeDefined();
+  });
+});
 
 test.each([
   ["zh-CN", "技能：", "+2 项技能", "技术工程"],

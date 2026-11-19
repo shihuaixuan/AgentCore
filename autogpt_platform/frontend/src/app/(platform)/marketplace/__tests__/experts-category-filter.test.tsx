@@ -46,6 +46,7 @@ function template(name: string, categories: string[]): Expert {
     name,
     avatar_url: null,
     role: categories[0],
+    job_title: name === "Maria" ? "SEO Content Manager" : "Account Executive",
     bio: null,
     skills: [],
     categories,
@@ -161,8 +162,12 @@ describe("Marketplace category filter over experts", () => {
   test("picking a category narrows the roster and drops the others", async () => {
     const { rerender } = render(<MainMarkeplacePage />);
 
-    expect(await screen.findByRole("heading", { name: "Maria" })).toBeDefined();
-    expect(await screen.findByRole("heading", { name: "Max" })).toBeDefined();
+    expect(
+      await screen.findByRole("heading", { name: "SEO Content Manager" }),
+    ).toBeDefined();
+    expect(
+      await screen.findByRole("heading", { name: "Account Executive" }),
+    ).toBeDefined();
 
     await userEvent.click(await findCategoryChip("Marketing"));
     rerender(<MainMarkeplacePage />);
@@ -176,7 +181,7 @@ describe("Marketplace category filter over experts", () => {
 
   test("clearing the category restores the whole roster", async () => {
     const { rerender } = render(<MainMarkeplacePage />);
-    await screen.findByRole("heading", { name: "Maria" });
+    await screen.findByRole("heading", { name: "SEO Content Manager" });
 
     await userEvent.click(await findCategoryChip("Marketing"));
     rerender(<MainMarkeplacePage />);
@@ -187,7 +192,9 @@ describe("Marketplace category filter over experts", () => {
     await userEvent.click(await findCategoryChip("Marketing"));
     rerender(<MainMarkeplacePage />);
 
-    expect(await screen.findByRole("heading", { name: "Max" })).toBeDefined();
+    expect(
+      await screen.findByRole("heading", { name: "Account Executive" }),
+    ).toBeDefined();
   });
 
   test("a category with no experts offers to clear the filters", async () => {
@@ -198,7 +205,7 @@ describe("Marketplace category filter over experts", () => {
       }),
     );
     const { rerender } = render(<MainMarkeplacePage />);
-    await screen.findByRole("heading", { name: "Maria" });
+    await screen.findByRole("heading", { name: "SEO Content Manager" });
 
     await userEvent.click(await findCategoryChip("Sales"));
     rerender(<MainMarkeplacePage />);
@@ -218,11 +225,11 @@ describe("Marketplace category filter over experts", () => {
       }),
     );
     const { rerender } = render(<MainMarkeplacePage />);
-    await screen.findByRole("heading", { name: "Maria" });
+    await screen.findByRole("heading", { name: "SEO Content Manager" });
 
     await userEvent.click(await findCategoryChip("Sales"));
     rerender(<MainMarkeplacePage />);
-    await screen.findByRole("button", { name: "Retry" });
+    await screen.findByRole("button", { name: "Try Again" });
     expect(
       screen
         .getByRole("link", { name: "Create an Expert" })

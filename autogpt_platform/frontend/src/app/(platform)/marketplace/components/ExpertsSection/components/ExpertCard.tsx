@@ -1,11 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import {
-  expertPastel,
-  getCategoryHex,
-  getExpertTopicHex,
-} from "@/components/molecules/ExpertAvatar/colors";
+import { getExpertTopicHex } from "@/components/molecules/ExpertAvatar/colors";
 import { ExpertTemplate } from "@/app/api/__generated__/models/expertTemplate";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import {
@@ -14,15 +10,13 @@ import {
   TooltipPortal,
   TooltipTrigger,
 } from "@/components/atoms/Tooltip/BaseTooltip";
-import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
-import { ExpertIdentityDetails } from "@/components/molecules/ExpertIdentityDetails/ExpertIdentityDetails";
-import { ExpertTagline } from "@/components/molecules/ExpertIdentityDetails/components/ExpertTagline";
 import { cn } from "@/lib/utils";
 import { ArrowRight02Icon, Book04Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { CHIP_SHAPE, CHIP_SIZE } from "../../CategoryChip/CategoryChip";
 import { CategoryTag } from "../../CategoryChip/CategoryTag";
 import { getCategoryAccent } from "../helpers";
+import { ExpertCardIdentity } from "./ExpertCardIdentity";
 import { ExpertHireControl } from "./ExpertHireControl";
 
 /** Three named, then a count for the rest — enough to place the expert
@@ -62,35 +56,12 @@ export function ExpertCard({ expert, isHired, category }: Props) {
       // oxlint-disable-next-line design-system/no-arbitrary-values -- the card's hover lift shadow has no shadow token
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-border-base/80 bg-surface text-left shadow-message-table transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_16px_40px_-16px_rgba(16,24,40,0.18)]"
     >
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[4.5rem]"
-        // oxlint-disable-next-line design-system/no-inline-styles -- the card band is tinted at runtime with the expert's own colour
-        style={{ backgroundColor: expertPastel(topicColor) }}
-      />
       <Link
         href={`/marketplace/experts/${expert.id}`}
         className="relative flex flex-1 flex-col gap-4 rounded-2xl p-6 outline-none focus-visible:ring-2 focus-visible:ring-foreground-subtle"
       >
-        <ExpertAvatar
-          name={expert.name}
-          avatarUrl={expert.avatar_url}
-          size={88}
-          backgroundColor={topicColor}
-          // oxlint-disable-next-line design-system/no-restyle -- the card portrait's frame; ExpertAvatar has no framed size
-          className="rounded-full border border-border-base ring-4 ring-surface"
-        />
-
-        <div>
-          <ExpertIdentityDetails
-            name={expert.name}
-            role={expert.role}
-            jobTitle={expert.job_title}
-            nameAlign="baseline"
-            areaColor={getCategoryHex(area)}
-          />
-          {area ? <CategoryTag category={area} className="mt-2" /> : null}
-          <ExpertTagline tagline={expert.tagline} compact />
-        </div>
+        <ExpertCardIdentity expert={expert} />
+        {area ? <CategoryTag category={area} className="self-start" /> : null}
 
         {skills.length > 0 ? (
           <div>
@@ -150,7 +121,7 @@ export function ExpertCard({ expert, isHired, category }: Props) {
           </div>
         ) : null}
 
-        <div className="mt-auto flex items-center justify-end pt-2">
+        <div className="mt-auto flex min-h-8 items-center">
           <span className="flex items-center gap-1.5 text-body-lg font-medium text-foreground-subtle transition-colors duration-200 group-hover:text-foreground-strong">
             {t("View", "查看")}
             <Icon
@@ -163,7 +134,7 @@ export function ExpertCard({ expert, isHired, category }: Props) {
           </span>
         </div>
       </Link>
-      <div className="absolute top-5 right-5 z-10">
+      <div className="absolute right-6 bottom-6">
         <ExpertHireControl expert={expert} isHired={isHired} />
       </div>
     </div>
