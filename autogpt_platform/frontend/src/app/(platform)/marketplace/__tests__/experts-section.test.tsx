@@ -243,7 +243,7 @@ describe("Marketplace ExpertsSection", () => {
     expect(within(card).queryByText("Content strategy")).toBeNull();
   });
 
-  test("shows the job title on the name line, and the role when there is none", async () => {
+  test("uses the job title as the card heading, or the role when there is none", async () => {
     server.use(
       getListExpertTemplatesMockHandler([
         { ...mariaTemplate, job_title: "SEO Content Manager" },
@@ -259,11 +259,15 @@ describe("Marketplace ExpertsSection", () => {
       { name: /Maria/ },
       { timeout: 5_000 },
     );
-    expect(within(maria).getByText(/SEO Content Manager/)).toBeDefined();
+    expect(
+      within(maria).getByRole("heading", { name: "SEO Content Manager" }),
+    ).toBeDefined();
     expect(within(maria).queryByText("Marketing Strategist")).toBeNull();
     expect(within(maria).queryByText("AI Expert")).toBeNull();
-    const max = screen.getByRole("link", { name: /^Max\b/ });
-    expect(within(max).getByText(/Sales Development Rep/)).toBeDefined();
+    const max = screen.getByRole("link", { name: /\bMax\b/ });
+    expect(
+      within(max).getByRole("heading", { name: "Sales Development Rep" }),
+    ).toBeDefined();
   });
 
   test("shows no skills row on a card without Hub skills", async () => {
