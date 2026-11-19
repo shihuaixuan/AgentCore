@@ -13,7 +13,7 @@ const IMPORTS_URL = "/api/chat/imports";
 
 export type ArchiveSummary = {
   id: string;
-  source: ImportConversation["source"];
+  source: ImportConversation["source"] | "qianwen";
   title: string;
   created_at: string | null;
   imported_at: string;

@@ -1,4 +1,4 @@
-import { webcrypto } from "node:crypto";
+import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import { parseWorkBuddyTranscript } from "../workbuddyTranscript";
 
@@ -27,10 +27,10 @@ function jsonl(...records: unknown[]) {
 }
 
 describe("native WorkBuddy files", () => {
-  it("uses the session title and text only, preserving order and source identity", async () => {
-    vi.stubGlobal("crypto", webcrypto);
+  it("preserves the session title, text order, and legacy ID without Web Crypto", () => {
+    vi.stubGlobal("crypto", {});
     try {
-      const transcript = await parseWorkBuddyTranscript(
+      const transcript = parseWorkBuddyTranscript(
         "\ufeff" +
           jsonl(
             { type: "session_start", sessionId: sessionID },
@@ -47,7 +47,9 @@ describe("native WorkBuddy files", () => {
       );
       expect(transcript).toEqual({
         source: "workbuddy",
-        source_id: expect.stringMatching(/^[a-f0-9]{64}$/),
+        source_id: createHash("sha256")
+          .update(`workbuddy-jsonl-v1\0${sessionID}`, "utf8")
+          .digest("hex"),
         title: "工作笔记",
         messages: [
           {
@@ -62,7 +64,7 @@ describe("native WorkBuddy files", () => {
           },
         ],
       });
-      const updated = await parseWorkBuddyTranscript(jsonl(question));
+      const updated = parseWorkBuddyTranscript(jsonl(question));
       expect(updated.source_id).toBe(transcript.source_id);
       expect(updated.title).toBe("第一问");
     } finally {
@@ -80,9 +82,9 @@ describe("native WorkBuddy files", () => {
       }),
     ],
     ["no text messages", jsonl({ type: "tool_result", sessionId: sessionID })],
-  ])("rejects %s instead of sending a partial chat", async (_name, input) => {
-    await expect(parseWorkBuddyTranscript(input)).rejects.toMatchObject({
-      code: "transcript",
-    });
+  ])("rejects %s instead of sending a partial chat", (_name, input) => {
+    expect(() => parseWorkBuddyTranscript(input)).toThrow(
+      expect.objectContaining({ code: "transcript" }),
+    );
   });
 });

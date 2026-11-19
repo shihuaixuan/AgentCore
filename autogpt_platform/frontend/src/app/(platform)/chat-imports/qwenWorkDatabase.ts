@@ -3,6 +3,7 @@ import initSqlJs, {
   type SqlJsConfig,
   type SqlValue,
 } from "sql.js";
+import { nativeSourceID } from "./nativeSourceID";
 import { MAX_QWENWORK_DB_BYTES, SQLITE_HEADER } from "./qwenWorkDirectory";
 import { collectQwenWorkParts, qwenWorkTimestamp } from "./qwenWorkMessages";
 import {
@@ -30,15 +31,13 @@ export async function readQwenWorkDatabase(
   page = 0,
   config?: SqlJsConfig,
 ): Promise<QwenWorkReadResult> {
-  if (!globalThis.crypto?.subtle)
-    throw new ImportValidationError("secure-context");
   const bytes = checkpointedSnapshot(raw);
   const sqlite = await initSqlJs(config);
   let db: Database | undefined;
   try {
     db = new sqlite.Database(bytes);
     db.run("PRAGMA trusted_schema = OFF; PRAGMA query_only = ON;");
-    return await readProjectedChats(db, page);
+    return readProjectedChats(db, page);
   } catch (error) {
     if (error instanceof ImportValidationError) throw error;
     throw new ImportValidationError("qwenwork-database");
@@ -67,10 +66,7 @@ function checkpointedSnapshot(raw: ArrayBuffer) {
   throw new ImportValidationError("qwenwork-database");
 }
 
-async function readProjectedChats(
-  db: Database,
-  page: number,
-): Promise<QwenWorkReadResult> {
+function readProjectedChats(db: Database, page: number): QwenWorkReadResult {
   const tables = db.exec("PRAGMA main.table_list")[0]?.values ?? [];
   if (
     !["chats", "sub_chats", "messages"].every((name) =>
@@ -106,7 +102,7 @@ async function readProjectedChats(
   try {
     for (const chat of chats.slice(0, QWENWORK_PREVIEW_LIMIT)) {
       try {
-        entries.push(await projectChat(chat, messageQuery));
+        entries.push(projectChat(chat, messageQuery));
       } catch (error) {
         if (!(error instanceof ImportValidationError)) throw error;
         skipped++;
@@ -123,7 +119,7 @@ async function readProjectedChats(
   };
 }
 
-async function projectChat(
+function projectChat(
   [id, name, path]: SqlValue[],
   query: ReturnType<Database["prepare"]>,
 ) {
@@ -147,7 +143,7 @@ async function projectChat(
   const title = typeof name === "string" ? name.trim() : "";
   const conversation = validateNativeConversation({
     source: "qwenwork",
-    source_id: await hashChat(id),
+    source_id: nativeSourceID("qwenwork", id),
     title: Array.from(title || "QwenWork")
       .slice(0, 200)
       .join(""),
@@ -159,14 +155,4 @@ async function projectChat(
     cwd,
     references: [...references].map((path) => ({ path, cwd })),
   };
-}
-
-async function hashChat(id: string) {
-  const hash = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(`qwenwork-db-v1\0${id}`),
-  );
-  return Array.from(new Uint8Array(hash), (byte) =>
-    byte.toString(16).padStart(2, "0"),
-  ).join("");
 }

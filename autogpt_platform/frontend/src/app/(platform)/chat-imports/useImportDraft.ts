@@ -1,20 +1,15 @@
 import { ImpersonationState } from "@/lib/impersonation";
 import { useEffect, useRef, useState } from "react";
-import {
-  saveConversations,
-  type ArchiveSaveRequest,
-  type SaveResult,
-} from "./api";
+import type { ArchiveSaveRequest, SaveResult } from "./api";
 import { PartialArchiveSaveError, saveNativeChats } from "./saveNativeChats";
 import {
   ImportValidationError,
   MAX_SELECTION,
-  type ImportConversation,
   type NativeChatDraft,
 } from "./validation";
 import { readWorkBuddyFiles } from "./workbuddyTranscript";
 
-export function useSaveImport(ownerID: string, onSaved: () => Promise<void>) {
+function useSaveImport(ownerID: string, onSaved: () => Promise<void>) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [result, setResult] = useState<SaveResult | null>(null);
@@ -60,11 +55,7 @@ export function useSaveImport(ownerID: string, onSaved: () => Promise<void>) {
     }
   }
 
-  function save(getConversations: () => ImportConversation[]) {
-    return submit((request) => saveConversations(getConversations(), request));
-  }
-
-  return { pending, error, result, save, submit, clearNotice };
+  return { pending, error, result, submit, clearNotice };
 }
 
 export function useImportSelection() {

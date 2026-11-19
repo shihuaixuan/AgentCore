@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  encodeImport,
-  makeQianwenConversation,
-  parseWorkBuddyBundle,
-} from "../validation";
+import { encodeImport, parseWorkBuddyBundle } from "../validation";
 
 const conversation = {
   source: "workbuddy" as const,
@@ -86,41 +82,18 @@ describe("WorkBuddy bundle validation", () => {
       parseWorkBuddyBundle('{"version":2,"conversations":[]}'),
     ).toThrow(expect.objectContaining({ code: "bundle" }));
   });
-});
-
-describe("import request validation", () => {
-  it("requires a title, question and answer and preserves the pasted text", () => {
-    expect(() =>
-      makeQianwenConversation("Title", [{ question: "Question", answer: " " }]),
-    ).toThrow();
-    expect(
-      makeQianwenConversation("Title", [
-        { question: "Question", answer: "\n Answer 🙂" },
-      ]),
-    ).toEqual({
-      source: "qianwen",
-      title: "Title",
-      messages: [
-        { role: "user", text: "Question" },
-        { role: "assistant", text: "\n Answer 🙂" },
-      ],
-    });
-  });
 
   it.each(["contains\0NUL", "lone high \ud800", "lone low \udc00"])(
     "rejects invalid message text",
     (text) => {
       expect(() =>
-        makeQianwenConversation("Title", [
-          { question: "Question", answer: text },
-        ]),
-      ).toThrow(expect.objectContaining({ code: "manual" }));
-      expect(() =>
         parse({ ...conversation, messages: [{ role: "user", text }] }),
       ).toThrow(expect.objectContaining({ code: "conversation", entry: 1 }));
     },
   );
+});
 
+describe("import request validation", () => {
   it("accepts exactly 25 entries from a bundle that contains more", () => {
     const bundle = parse(...Array(26).fill(conversation));
     expect(() => encodeImport([])).toThrow(

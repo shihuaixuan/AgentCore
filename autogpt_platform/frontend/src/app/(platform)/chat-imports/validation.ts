@@ -3,7 +3,6 @@ import { z } from "zod";
 export const MAX_SELECTION = 25;
 const MAX_BODY_BYTES = 4 * 1024 * 1024;
 export const MAX_MESSAGES = 500;
-export const MAX_QIANWEN_PAIRS = MAX_MESSAGES / 2;
 
 function boundedText(max: number) {
   return z.string().refine(function withinLimit(value) {
@@ -23,19 +22,14 @@ const messageSchema = z.object({
   timestamp: z.string().datetime({ offset: true }).nullish(),
 });
 
-const conversationSchema = z.object({
-  source: z.enum(["workbuddy", "qianwen", "qwenwork"]),
-  source_id: z.string().nullish(),
-  title: boundedText(200),
-  messages: z.array(messageSchema).min(1).max(MAX_MESSAGES),
-});
-
-const nativeConversationSchema = conversationSchema.extend({
+const nativeConversationSchema = z.object({
   source: z.enum(["workbuddy", "qwenwork"]),
   source_id: z
     .string()
     .length(64)
     .regex(/^[0-9a-f]{64}$/),
+  title: boundedText(200),
+  messages: z.array(messageSchema).min(1).max(MAX_MESSAGES),
 });
 const workBuddySchema = nativeConversationSchema.extend({
   source: z.literal("workbuddy"),
@@ -46,9 +40,8 @@ const bundleSchema = z.object({
   conversations: z.array(z.unknown()),
 });
 
-export type ImportConversation = z.infer<typeof conversationSchema>;
+export type ImportConversation = z.infer<typeof nativeConversationSchema>;
 export type ImportMessage = z.infer<typeof messageSchema>;
-export type QianwenPair = { question: string; answer: string };
 export type AttachmentReference = { path: string; cwd?: string };
 export type NativeChatDraft = {
   conversation: ImportConversation;
@@ -65,9 +58,7 @@ export class ImportValidationError extends Error {
       | "file-size"
       | "file-type"
       | "transcript"
-      | "secure-context"
       | "conversation"
-      | "manual"
       | "selection"
       | "hosted-upload-size"
       | "archive-destination"
@@ -109,19 +100,6 @@ export function parseWorkBuddyBundle(text: string) {
   return bundle.data.conversations.map(function parseEntry(entry, index) {
     return validateWorkBuddyConversation(entry, index + 1);
   });
-}
-
-export function makeQianwenConversation(title: string, pairs: QianwenPair[]) {
-  const result = conversationSchema.safeParse({
-    source: "qianwen",
-    title,
-    messages: pairs.flatMap(({ question, answer }) => [
-      { role: "user", text: question },
-      { role: "assistant", text: answer },
-    ]),
-  });
-  if (!result.success) throw new ImportValidationError("manual");
-  return result.data;
 }
 
 export function encodeImport(conversations: ImportConversation[]) {

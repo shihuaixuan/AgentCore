@@ -1,4 +1,3 @@
-import { webcrypto } from "node:crypto";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -11,6 +10,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { ArchiveSummary } from "../api";
 import ChatImportsPage from "../page";
 import {
   addRecentToolOnlyConversations,
@@ -39,10 +39,13 @@ const workBuddyChat = {
   ],
 };
 
-function setup(locale: "en" | "zh-CN" = "en") {
+function setup(
+  locale: "en" | "zh-CN" = "en",
+  archiveSource: ArchiveSummary["source"] = "workbuddy",
+) {
   const summary = {
     id: "archive-id",
-    source: "workbuddy",
+    source: archiveSource,
     title: "Saved chat",
     created_at: null,
     imported_at: "2026-09-01T12:00:00Z",
@@ -102,8 +105,8 @@ afterEach(() => {
 });
 
 describe("conversation archive", () => {
-  it("imports a checked QwenWork conversation straight from the directory without posting its database", async () => {
-    vi.stubGlobal("crypto", webcrypto);
+  it("imports a checked QwenWork conversation without Web Crypto or posting its database", async () => {
+    vi.stubGlobal("crypto", {});
     const { request, user } = setup();
     await user.click(screen.getByRole("tab", { name: "QwenWork" }));
     const panel = screen.getByRole("tabpanel", { name: "QwenWork" });
@@ -171,7 +174,6 @@ describe("conversation archive", () => {
   });
 
   it("saves only explicitly checked QwenWork attachments and not local paths", async () => {
-    vi.stubGlobal("crypto", webcrypto);
     const { request, user } = setup();
     await user.click(screen.getByRole("tab", { name: "QwenWork" }));
     const panel = within(screen.getByRole("tabpanel", { name: "QwenWork" }));
@@ -241,7 +243,6 @@ describe("conversation archive", () => {
   });
 
   it("can preview older chats when the newest batch has no text", async () => {
-    vi.stubGlobal("crypto", webcrypto);
     const { request, user } = setup();
     await user.click(screen.getByRole("tab", { name: "QwenWork" }));
     const panel = within(screen.getByRole("tabpanel", { name: "QwenWork" }));
@@ -274,7 +275,6 @@ describe("conversation archive", () => {
   });
 
   it("reports a renamed database selected as an attachment without sending any conversation", async () => {
-    vi.stubGlobal("crypto", webcrypto);
     const { request, user } = setup();
     await user.click(screen.getByRole("tab", { name: "QwenWork" }));
     const panel = within(screen.getByRole("tabpanel", { name: "QwenWork" }));
@@ -305,7 +305,6 @@ describe("conversation archive", () => {
   });
 
   it("matches an authorized directory locally and uploads only checked attachment bytes", async () => {
-    vi.stubGlobal("crypto", webcrypto);
     const { request, user } = setup();
     const transcript = new File(
       [
@@ -403,8 +402,8 @@ describe("conversation archive", () => {
     ]);
   });
 
-  it("previews native WorkBuddy files without uploading the originals", async () => {
-    vi.stubGlobal("crypto", webcrypto);
+  it("previews native WorkBuddy files without Web Crypto or uploading the originals", async () => {
+    vi.stubGlobal("crypto", {});
     const { request, user } = setup();
     function nativeFile(sessionID: string, title: string) {
       const records = [
@@ -577,45 +576,19 @@ describe("conversation archive", () => {
     });
   });
 
-  it("saves repeated Qianwen pairs in order in Chinese", async () => {
-    const { request, user } = setup("zh-CN");
-    await user.click(screen.getByRole("tab", { name: "通义千问" }));
-    for (const label of ["标题", "问题", "回答"]) {
-      const field = screen.getByLabelText(label);
-      expect(field.closest(".ph-no-capture")).not.toBeNull();
-      expect(field.getAttribute("spellcheck")).toBe("false");
-    }
-    await user.type(screen.getByLabelText("标题"), "调研");
-    await user.type(screen.getByLabelText("问题"), "你好？");
-    await user.type(screen.getByLabelText("回答"), "你好！");
-    await user.click(screen.getByRole("button", { name: "添加问答" }));
-    const second = screen.getByRole("group", { name: "问答 2" });
-    await user.type(within(second).getByLabelText("问题"), "接下来呢？");
-    expect(
-      screen.getByRole<HTMLButtonElement>("button", { name: "保存到归档" })
-        .disabled,
-    ).toBe(true);
-    await user.type(within(second).getByLabelText("回答"), "继续。正在记录。");
-    expect(request.mock.calls.every(([, init]) => init.method === "GET")).toBe(
-      true,
-    );
-    await user.click(screen.getByRole("button", { name: "保存到归档" }));
-    await screen.findByText("已保存 1 条，已跳过 1 条重复对话。");
-    const post = request.mock.calls.find(([, init]) => init.method === "POST");
-    expect(JSON.parse(String(post?.[1].body))).toEqual({
-      conversations: [
-        {
-          source: "qianwen",
-          title: "调研",
-          messages: [
-            { role: "user", text: "你好？" },
-            { role: "assistant", text: "你好！" },
-            { role: "user", text: "接下来呢？" },
-            { role: "assistant", text: "继续。正在记录。" },
-          ],
-        },
-      ],
-    });
+  it("offers only the two native sources but still opens existing Qianwen archives", async () => {
+    const { user } = setup("zh-CN", "qianwen");
+    const tabs = within(screen.getByRole("tablist", { name: "导入来源" }));
+    expect(tabs.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
+      "WorkBuddy",
+      "千问办公",
+    ]);
+    expect(screen.queryByText(/通义千问/)).toBeNull();
+
+    await user.click(await screen.findByRole("button", { name: "下一页" }));
+    expect(await screen.findByText(/通义千问 · 2 条消息/)).toBeDefined();
+    await user.click(screen.getByRole("button", { name: "Saved chat" }));
+    expect(await screen.findByText("First question")).toBeDefined();
   });
 
   it("pages through the archive, opens saved text, and confirms deletion", async () => {
