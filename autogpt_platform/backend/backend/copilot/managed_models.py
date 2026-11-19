@@ -4,7 +4,8 @@ from uuid import uuid4
 
 from pydantic import AfterValidator, BaseModel, Field, SecretStr, StringConstraints
 
-from backend.data.db import query_raw_with_schema
+from backend.data.db import is_connected, query_raw_with_schema
+from backend.util.clients import get_database_manager_async_client
 from backend.util.encryption import JSONCryptor
 
 _TABLE = '{schema_prefix}"ManagedChatModel"'
@@ -71,7 +72,9 @@ class ModelUpdate(BaseModel):
     enabled: bool | None = None
 
 
-class _StoredModel(ModelDetails):
+class StoredModelConnection(BaseModel):
+    model: str
+    base_url: str
     encrypted_key: str = Field(repr=False)
 
 
@@ -102,19 +105,30 @@ async def select_chat_model(model_id: str | None) -> str:
 
 
 async def resolve_model(model_id: str) -> ModelRuntime:
-    rows = await query_raw_with_schema(
-        f'SELECT {_FIELDS}, "apiKey" AS encrypted_key FROM {_TABLE} '
-        'WHERE id = $1 AND "enabled" = TRUE',
-        model_id,
-        model=_StoredModel,
-    )
-    if not rows:
+    if is_connected():
+        row = await get_enabled_managed_model_connection(model_id)
+    else:
+        # Chat workers rely on the database manager; only ciphertext crosses RPC.
+        database_manager = get_database_manager_async_client()
+        row = await database_manager.get_enabled_managed_model_connection(model_id)
+    if row is None:
         raise ModelUnavailable("This chat model is no longer available.")
-    row = rows[0]
     key = JSONCryptor().decrypt(row.encrypted_key).get("key")
     if not key:
         raise ModelUnavailable("This chat model has no usable API key.")
     return ModelRuntime(model=row.model, base_url=row.base_url, key=key)
+
+
+async def get_enabled_managed_model_connection(
+    model_id: str,
+) -> StoredModelConnection | None:
+    rows = await query_raw_with_schema(
+        f'SELECT model, "baseUrl" AS base_url, "apiKey" AS encrypted_key FROM {_TABLE} '
+        'WHERE id = $1 AND "enabled" = TRUE',
+        model_id,
+        model=StoredModelConnection,
+    )
+    return rows[0] if rows else None
 
 
 async def list_model_details() -> list[ModelDetails]:
