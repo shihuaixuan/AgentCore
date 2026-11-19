@@ -1,6 +1,9 @@
 import { customMutator } from "@/app/api/mutators/custom-mutator";
+import { ApiError } from "@/lib/autogpt-server-api/helpers";
+import { ARCHIVE_DESTINATION_HEADER_NAME } from "@/lib/constants";
 import {
   encodeImport,
+  ImportValidationError,
   type ImportConversation,
   type ImportMessage,
 } from "./validation";
@@ -23,6 +26,7 @@ type ArchiveConversation = ArchiveSummary & {
   attachments?: { id: string; name: string; size: number }[];
 };
 export type SaveResult = { added: number; duplicates: number };
+export type ArchiveSaveRequest = { destination: string; signal: AbortSignal };
 
 async function requestArchive<T>(
   path: string,
@@ -55,24 +59,42 @@ export function getArchivedConversation(id: string, signal: AbortSignal) {
   });
 }
 
-export function saveConversations(conversations: ImportConversation[]) {
-  return requestArchive<SaveResult>("", {
-    method: "POST",
-    body: encodeImport(conversations),
-  });
+async function saveArchive(
+  path: string,
+  body: string | FormData,
+  { destination, signal }: ArchiveSaveRequest,
+) {
+  signal.throwIfAborted();
+  try {
+    return await requestArchive<SaveResult>(path, {
+      method: "POST",
+      body,
+      signal,
+      headers: { [ARCHIVE_DESTINATION_HEADER_NAME]: destination },
+    });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 412)
+      throw new ImportValidationError("archive-destination");
+    throw error;
+  }
+}
+
+export function saveConversations(
+  conversations: ImportConversation[],
+  request: ArchiveSaveRequest,
+) {
+  return saveArchive("", encodeImport(conversations), request);
 }
 
 export function saveWithAttachments(
   conversation: ImportConversation,
   files: File[],
+  request: ArchiveSaveRequest,
 ) {
   const body = new FormData();
   body.append("conversation", JSON.stringify(conversation));
   for (const file of files) body.append("files", file, file.name);
-  return requestArchive<SaveResult>("/with-attachments", {
-    method: "POST",
-    body,
-  });
+  return saveArchive("/with-attachments", body, request);
 }
 
 export function getAttachment(chatID: string, attachmentID: string) {

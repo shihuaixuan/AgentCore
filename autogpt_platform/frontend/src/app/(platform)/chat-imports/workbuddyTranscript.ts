@@ -6,8 +6,9 @@ import {
   MAX_MESSAGES,
   parseWorkBuddyBundle,
   validateWorkBuddyConversation,
+  type AttachmentReference,
   type ImportMessage,
-  type ImportConversation,
+  type NativeChatDraft,
 } from "./validation";
 
 const MAX_FILES = 25;
@@ -33,7 +34,7 @@ export async function readWorkBuddyFiles(files: File[]) {
   const totalBytes = files.reduce((total, file) => total + file.size, 0);
   if (totalBytes > MAX_FILE_BYTES) throw new ImportValidationError("file-size");
 
-  const entries: WorkBuddyDraftEntry[] = [];
+  const entries: NativeChatDraft[] = [];
   for (const file of files) {
     if (/\.jsonl$/i.test(file.name)) {
       entries.push(await parseWorkBuddyDraft(await file.text()));
@@ -51,20 +52,13 @@ export async function readWorkBuddyFiles(files: File[]) {
   return entries;
 }
 
-export type AttachmentReference = { path: string; cwd?: string };
-export type WorkBuddyDraftEntry = {
-  conversation: ImportConversation;
-  references: AttachmentReference[];
-  cwd?: string;
-};
-
 export async function parseWorkBuddyTranscript(text: string) {
   return (await parseWorkBuddyDraft(text)).conversation;
 }
 
 export async function parseWorkBuddyDraft(
   text: string,
-): Promise<WorkBuddyDraftEntry> {
+): Promise<NativeChatDraft> {
   const messages = new Map<string, ImportMessage>();
   const references = new Map<string, AttachmentReference>();
   let cwd: string | undefined;

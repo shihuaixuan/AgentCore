@@ -59,18 +59,25 @@ def archive_boundary(monkeypatch):
     return save, scanner
 
 
-def test_multipart_scans_and_saves_under_authenticated_owner(client, archive_boundary):
+@pytest.mark.parametrize("source", ["workbuddy", "qwenwork"])
+def test_multipart_scans_and_saves_under_authenticated_owner(
+    client, archive_boundary, source
+):
     save, scanner = archive_boundary
+    expected = {**CONVERSATION, "source": source}
     response = client.post(
         IMPORT_URL,
-        files=[conversation_part(), ("files", (r"C:\private\资料.txt", b"\xffbytes"))],
+        files=[
+            conversation_part(json.dumps(expected)),
+            ("files", (r"C:\private\资料.txt", b"\xffbytes")),
+        ],
     )
     assert response.status_code == 200
     assert response.json() == {"added": 0, "duplicates": 1}
     scanner.scan_file.assert_awaited_once_with(b"\xffbytes")
     owner, conversation, attachments = save.await_args.args
     assert owner == "owner"
-    assert conversation.model_dump(exclude_none=True) == CONVERSATION
+    assert conversation.model_dump(exclude_none=True) == expected
     assert [(item.name, item.content) for item in attachments] == [
         ("资料.txt", b"\xffbytes")
     ]
@@ -94,7 +101,8 @@ def test_multipart_authenticates_before_reading_body():
             [
                 conversation_part(
                     json.dumps({**CONVERSATION, "source": "qianwen", "source_id": None})
-                )
+                ),
+                ("files", ("file.txt", b"data")),
             ],
             422,
         ),

@@ -1,16 +1,21 @@
-import { saveConversations, saveWithAttachments, type SaveResult } from "./api";
+import {
+  saveConversations,
+  saveWithAttachments,
+  type ArchiveSaveRequest,
+  type SaveResult,
+} from "./api";
 import {
   encodeImport,
   ImportValidationError,
   type ImportConversation,
 } from "./validation";
 
-export type WorkBuddySelection = {
+type NativeChatSelection = {
   conversation: ImportConversation;
   files: File[];
 };
 
-export function fitsHostedUpload({ conversation, files }: WorkBuddySelection) {
+function fitsHostedUpload({ conversation, files }: NativeChatSelection) {
   const encoder = new TextEncoder();
   const bytes = files.reduce(
     (total, file) =>
@@ -20,14 +25,18 @@ export function fitsHostedUpload({ conversation, files }: WorkBuddySelection) {
   return bytes <= 4 * 1024 * 1024;
 }
 
-export class WorkBuddyPartialSaveError extends Error {
-  constructor(readonly confirmed: SaveResult) {
-    super("Some WorkBuddy archive requests did not complete.");
+export class PartialArchiveSaveError extends Error {
+  constructor(
+    readonly confirmed: SaveResult,
+    cause: unknown,
+  ) {
+    super("Some archive requests did not complete.", { cause });
   }
 }
 
-export async function saveWorkBuddy(
-  entries: WorkBuddySelection[],
+export async function saveNativeChats(
+  entries: NativeChatSelection[],
+  request: ArchiveSaveRequest,
   onConfirmed: (indexes: number[]) => void,
 ) {
   encodeImport(entries.map(({ conversation }) => conversation));
@@ -50,17 +59,18 @@ export async function saveWorkBuddy(
       track(
         await saveConversations(
           textOnly.map(({ conversation }) => conversation),
+          request,
         ),
       );
       onConfirmed(textOnly.map(({ index }) => index));
     }
     for (const { conversation, files, index } of withFiles) {
-      track(await saveWithAttachments(conversation, files));
+      track(await saveWithAttachments(conversation, files, request));
       onConfirmed([index]);
     }
   } catch (error) {
     if (confirmed.added + confirmed.duplicates)
-      throw new WorkBuddyPartialSaveError(confirmed);
+      throw new PartialArchiveSaveError(confirmed, error);
     throw error;
   }
   return confirmed;

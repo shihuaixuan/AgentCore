@@ -5563,7 +5563,7 @@
                 "properties": {
                   "conversation": {
                     "type": "string",
-                    "description": "One WorkBuddy ConversationToImport as JSON."
+                    "description": "WorkBuddy or QwenWork conversation JSON."
                   },
                   "files": {
                     "type": "array",
@@ -29469,7 +29469,7 @@
         "properties": {
           "source": {
             "type": "string",
-            "enum": ["workbuddy", "qianwen"],
+            "enum": ["workbuddy", "qianwen", "qwenwork"],
             "title": "Source"
           },
           "source_id": {
@@ -29557,7 +29557,7 @@
           },
           "source": {
             "type": "string",
-            "enum": ["workbuddy", "qianwen"],
+            "enum": ["workbuddy", "qianwen", "qwenwork"],
             "title": "Source"
           },
           "title": {
@@ -29636,7 +29636,7 @@
           },
           "source": {
             "type": "string",
-            "enum": ["workbuddy", "qianwen"],
+            "enum": ["workbuddy", "qianwen", "qwenwork"],
             "title": "Source"
           },
           "title": {

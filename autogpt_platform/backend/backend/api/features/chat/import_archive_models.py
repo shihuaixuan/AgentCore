@@ -15,7 +15,10 @@ from pydantic import (
 
 from backend.api.middleware.body_limit import MiB
 
-ChatImportSource = Literal["workbuddy", "qianwen"]
+ChatImportSource = Literal["workbuddy", "qianwen", "qwenwork"]
+DIRECTORY_IMPORT_SOURCES: frozenset[ChatImportSource] = frozenset(
+    {"workbuddy", "qwenwork"}
+)
 MAX_ATTACHMENT_BYTES = 5 * MiB
 MAX_ATTACHMENTS_BYTES = 10 * MiB
 MAX_ATTACHMENTS = 10
@@ -75,9 +78,9 @@ class ConversationToImport(BaseModel):
 
     @model_validator(mode="after")
     def validate_source(self) -> "ConversationToImport":
-        if (self.source == "workbuddy") != (self.source_id is not None):
+        if (self.source in DIRECTORY_IMPORT_SOURCES) != (self.source_id is not None):
             raise ValueError(
-                "WorkBuddy requires a source ID; Qianwen does not use one."
+                "WorkBuddy and QwenWork require a source ID; Qianwen does not use one."
             )
         return self
 

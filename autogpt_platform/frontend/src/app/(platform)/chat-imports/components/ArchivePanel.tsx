@@ -19,7 +19,11 @@ function ArchiveRow({
 }) {
   const { t, locale } = useTranslation();
   const source =
-    item.source === "workbuddy" ? "WorkBuddy" : t("Qianwen", "通义千问");
+    item.source === "workbuddy"
+      ? "WorkBuddy"
+      : item.source === "qwenwork"
+        ? t("QwenWork", "千问办公")
+        : t("Qianwen", "通义千问");
   const date = new Date(item.imported_at);
   const imported = Number.isNaN(date.getTime())
     ? ""

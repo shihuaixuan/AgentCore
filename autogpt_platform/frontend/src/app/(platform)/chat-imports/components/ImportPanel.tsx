@@ -8,9 +8,15 @@ import {
 } from "@/components/molecules/TabsLine/TabsLine";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { QianwenImport } from "./QianwenImport";
+import { QwenWorkImport } from "./QwenWorkImport";
 import { WorkBuddyImport } from "./WorkBuddyImport";
 
-export function ImportPanel({ onSaved }: { onSaved: () => Promise<void> }) {
+export type ImportSourceProps = {
+  ownerID: string;
+  onSaved: () => Promise<void>;
+};
+
+export function ImportPanel({ ownerID, onSaved }: ImportSourceProps) {
   const { t } = useTranslation();
   return (
     <Card variant="outlined" className="min-w-0">
@@ -30,15 +36,21 @@ export function ImportPanel({ onSaved }: { onSaved: () => Promise<void> }) {
         <TabsLine defaultValue="workbuddy" variant="compact">
           <TabsLineList aria-label={t("Import source", "导入来源")}>
             <TabsLineTrigger value="workbuddy">WorkBuddy</TabsLineTrigger>
+            <TabsLineTrigger value="qwenwork">
+              {t("QwenWork", "千问办公")}
+            </TabsLineTrigger>
             <TabsLineTrigger value="qianwen">
               {t("Qianwen", "通义千问")}
             </TabsLineTrigger>
           </TabsLineList>
           <TabsLineContent value="workbuddy" forceMount>
-            <WorkBuddyImport onSaved={onSaved} />
+            <WorkBuddyImport ownerID={ownerID} onSaved={onSaved} />
+          </TabsLineContent>
+          <TabsLineContent value="qwenwork" forceMount>
+            <QwenWorkImport ownerID={ownerID} onSaved={onSaved} />
           </TabsLineContent>
           <TabsLineContent value="qianwen" forceMount>
-            <QianwenImport onSaved={onSaved} />
+            <QianwenImport ownerID={ownerID} onSaved={onSaved} />
           </TabsLineContent>
         </TabsLine>
       </section>

@@ -24,18 +24,21 @@ const messageSchema = z.object({
 });
 
 const conversationSchema = z.object({
-  source: z.enum(["workbuddy", "qianwen"]),
+  source: z.enum(["workbuddy", "qianwen", "qwenwork"]),
   source_id: z.string().nullish(),
   title: boundedText(200),
   messages: z.array(messageSchema).min(1).max(MAX_MESSAGES),
 });
 
-const workBuddySchema = conversationSchema.extend({
-  source: z.literal("workbuddy"),
+const nativeConversationSchema = conversationSchema.extend({
+  source: z.enum(["workbuddy", "qwenwork"]),
   source_id: z
     .string()
     .length(64)
     .regex(/^[0-9a-f]{64}$/),
+});
+const workBuddySchema = nativeConversationSchema.extend({
+  source: z.literal("workbuddy"),
 });
 
 const bundleSchema = z.object({
@@ -46,6 +49,12 @@ const bundleSchema = z.object({
 export type ImportConversation = z.infer<typeof conversationSchema>;
 export type ImportMessage = z.infer<typeof messageSchema>;
 export type QianwenPair = { question: string; answer: string };
+export type AttachmentReference = { path: string; cwd?: string };
+export type NativeChatDraft = {
+  conversation: ImportConversation;
+  references: AttachmentReference[];
+  cwd?: string;
+};
 
 export class ImportValidationError extends Error {
   constructor(
@@ -61,11 +70,24 @@ export class ImportValidationError extends Error {
       | "manual"
       | "selection"
       | "hosted-upload-size"
+      | "archive-destination"
+      | "qwenwork-folder"
+      | "qwenwork-database"
+      | "qwenwork-db-size"
+      | "qwenwork-busy"
+      | "qwenwork-reader"
+      | "qwenwork-db-attachment"
       | "size",
     readonly entry?: number,
   ) {
     super(code);
   }
+}
+
+export function validateNativeConversation(input: unknown) {
+  const result = nativeConversationSchema.safeParse(input);
+  if (!result.success) throw new ImportValidationError("conversation");
+  return result.data;
 }
 
 export function validateWorkBuddyConversation(input: unknown, entry?: number) {

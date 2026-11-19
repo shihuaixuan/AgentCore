@@ -1,100 +1,23 @@
 import { Button } from "@/components/atoms/Button/Button";
-import { Checkbox } from "@/components/atoms/Checkbox/Checkbox";
 import { Text } from "@/components/atoms/Text/Text";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Upload01Icon } from "@hugeicons/core-free-icons";
-import { useId, useRef, type ChangeEvent, type ReactNode } from "react";
-import { saveWorkBuddy } from "../saveWorkBuddy";
-import { useSaveImport, useWorkBuddyDraft } from "../useImportDraft";
-import { useWorkBuddyAttachments } from "../useWorkBuddyAttachments";
-import { MAX_SELECTION, type ImportConversation } from "../validation";
+import { useRef, type ChangeEvent } from "react";
+import { useSaveNativeImport, useWorkBuddyDraft } from "../useImportDraft";
+import { useImportAttachments } from "../useImportAttachments";
+import { MAX_SELECTION } from "../validation";
+import { AttachmentChoices, AttachmentFolder } from "./ImportAttachments";
+import { ImportConversationRow } from "./ImportConversationRow";
 import { ImportNotice } from "./ImportNotice";
-import { Transcript } from "./Transcript";
-import { AttachmentChoices, AttachmentFolder } from "./WorkBuddyAttachments";
+import type { ImportSourceProps } from "./ImportPanel";
 
-type RowProps = {
-  entry: ImportConversation;
-  checked: boolean;
-  expanded: boolean;
-  disabled: boolean;
-  onSelect: (checked: boolean) => void;
-  onPreview: () => void;
-  children?: ReactNode;
-};
-
-function BundleRow({
-  entry,
-  checked,
-  expanded,
-  disabled,
-  onSelect,
-  onPreview,
-  children,
-}: RowProps) {
-  const { t } = useTranslation();
-  const id = useId();
-  function handleChecked(value: boolean | "indeterminate") {
-    onSelect(value === true);
-  }
-
-  return (
-    <li className="space-y-2 border-b border-border-base py-2 last:border-0">
-      <div className="flex min-w-0 items-center gap-3">
-        <Checkbox
-          aria-labelledby={`${id}-select ${id}-title`}
-          checked={checked}
-          onCheckedChange={handleChecked}
-          disabled={disabled}
-        />
-        <Text as="span" id={`${id}-select`} variant="small" className="sr-only">
-          {t("Select", "选择")}
-        </Text>
-        <div className="min-w-0 flex-1">
-          <Text
-            id={`${id}-title`}
-            variant="body-medium"
-            className="break-words"
-            dir="auto"
-          >
-            {entry.title}
-          </Text>
-          <Text variant="small" tone="secondary">
-            {t(
-              `Messages: ${entry.messages.length}`,
-              `${entry.messages.length} 条消息`,
-            )}
-          </Text>
-        </div>
-        <Button
-          type="button"
-          variant="secondary"
-          size="small"
-          aria-expanded={expanded}
-          aria-controls={id}
-          onClick={onPreview}
-        >
-          {expanded ? t("Hide preview", "收起预览") : t("Preview", "预览")}
-        </Button>
-      </div>
-      <div id={id} hidden={!expanded} className="space-y-3">
-        {expanded && (
-          <>
-            <Transcript messages={entry.messages} />
-            {children}
-          </>
-        )}
-      </div>
-    </li>
-  );
-}
-
-export function WorkBuddyImport({ onSaved }: { onSaved: () => Promise<void> }) {
+export function WorkBuddyImport({ ownerID, onSaved }: ImportSourceProps) {
   const { t } = useTranslation();
   const fileInput = useRef<HTMLInputElement>(null);
   const draft = useWorkBuddyDraft();
   const suggestedRoot = draft.entries.find((entry) => entry.cwd)?.cwd ?? "";
-  const attachments = useWorkBuddyAttachments(suggestedRoot);
-  const save = useSaveImport(onSaved);
+  const attachments = useImportAttachments(suggestedRoot);
+  const save = useSaveNativeImport(ownerID, onSaved);
   const busy = draft.loading || save.pending;
   const attachmentCount = [...draft.selected].reduce(
     (total, index) => total + attachments.selectedFiles(index).length,
@@ -116,17 +39,8 @@ export function WorkBuddyImport({ onSaved }: { onSaved: () => Promise<void> }) {
 
   async function handleSave() {
     if (busy) return;
-    const indexes = [...draft.selected].sort((left, right) => left - right);
-    const selection = indexes.map((index) => ({
-      conversation: draft.entries[index].conversation,
-      files: attachments.selectedFiles(index),
-    }));
     if (
-      await save.submit(() =>
-        saveWorkBuddy(selection, (confirmed) => {
-          draft.removeSelection(confirmed.map((index) => indexes[index]));
-        }),
-      )
+      await save.submitSelected(draft.entries, draft, attachments.selectedFiles)
     ) {
       attachments.clearChecks();
     }
@@ -222,7 +136,7 @@ export function WorkBuddyImport({ onSaved }: { onSaved: () => Promise<void> }) {
             aria-label={t("WorkBuddy conversations", "WorkBuddy 对话")}
           >
             {draft.entries.map((entry, index) => (
-              <BundleRow
+              <ImportConversationRow
                 key={index}
                 entry={entry.conversation}
                 checked={draft.selected.has(index)}
@@ -248,7 +162,7 @@ export function WorkBuddyImport({ onSaved }: { onSaved: () => Promise<void> }) {
                     }
                   />
                 )}
-              </BundleRow>
+              </ImportConversationRow>
             ))}
           </ul>
           <Text variant="small" tone="secondary" role="status">

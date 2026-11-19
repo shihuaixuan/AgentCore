@@ -33,6 +33,7 @@ import { getCountryToken } from "@/lib/auth/country-token";
 import { getServerAuthToken } from "@/lib/auth/server/getServerAuthToken";
 import { readServerSession } from "@/lib/auth/server/getServerSession";
 import { APIError } from "better-auth/api";
+import { SignJWT } from "jose";
 import { encodeImpersonation } from "@/lib/impersonation";
 import { GET, POST } from "../route";
 
@@ -154,6 +155,56 @@ describe("proxy route — handler pass-through", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ added: 1, duplicates: 0 });
   });
+
+  it.each([
+    {
+      subject: "original",
+      destination: '["original","original"]',
+      status: 200,
+    },
+    {
+      subject: "other-account",
+      destination: '["original","original"]',
+      status: 412,
+    },
+    {
+      subject: "original",
+      destination: '["original","other-recipient"]',
+      status: 412,
+    },
+  ])(
+    "only forwards an archive save for the confirmed destination ($subject / $status)",
+    async ({ subject, destination, status }) => {
+      vi.mocked(getServerAuthToken).mockResolvedValue(
+        await new SignJWT({})
+          .setSubject(subject)
+          .setProtectedHeader({ alg: "HS256" })
+          .sign(new Uint8Array(32)),
+      );
+      const path = ["api", "chat", "imports", "with-attachments"];
+      const req = new NextRequest(
+        `https://app.test/api/proxy/${path.join("/")}`,
+        {
+          method: "POST",
+          headers: { "x-archive-destination": destination },
+          body: new FormData(),
+        },
+      );
+      vi.mocked(fetch).mockResolvedValue(
+        Response.json({ added: 1, duplicates: 0 }),
+      );
+      expect((await POST(req, makeParams(path))).status).toBe(status);
+      if (status === 412) expect(fetch).not.toHaveBeenCalled();
+      else {
+        expect(fetch).toHaveBeenCalledOnce();
+        expect(
+          new Headers(vi.mocked(fetch).mock.calls[0][1]?.headers).has(
+            "x-archive-destination",
+          ),
+        ).toBe(false);
+      }
+    },
+  );
 
   it("relays private archive attachments without changing their bytes or download headers", async () => {
     const bytes = new Uint8Array([0, 42, 255]);
