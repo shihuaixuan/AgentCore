@@ -214,7 +214,11 @@ async def check_action(
     session_id = session.session_id
     review_id = review_store.review_id_for(session_id, user_id, tool_name, args)
 
-    review = await review_store.find_review(review_id, user_id, session_id)
+    review = (
+        None
+        if session.recipient_override
+        else await review_store.find_review(review_id, user_id, session_id)
+    )
     if review is not None and review.status == ReviewStatus.APPROVED:
         if await review_store.consume(review_id, user_id):
             if review_store.is_spend_card(review):
@@ -234,7 +238,9 @@ async def check_action(
         # The first call's card and stored call stand; re-storing would
         # re-point the late result at the retry's tool call id.
         return Decision(allowed=False, reason=_ALREADY_HELD, review_id=review_id)
-    if await approved_on_card(tool_name, args, user_id, session_id):
+    if not session.recipient_override and await approved_on_card(
+        tool_name, args, user_id, session_id
+    ):
         return Decision(allowed=True, approved=True, decided=True)
 
     subject = await subject_of() if subject_of is not None else None
@@ -293,6 +299,12 @@ async def check_action(
     )
     if ruling.run:
         return DECIDED
+    if session.recipient_override:
+        return Decision(
+            allowed=False,
+            decided=True,
+            reason="This action needs approval. Start a task with this recipient to run it.",
+        )
     call = held.HeldCall(
         review_id=review_id,
         tool_name=tool_name,
@@ -334,7 +346,10 @@ async def rule_on(
     # workspace work skip the Redis round trip.
     hit = (
         await chat_rules.rule_for(
-            session.session_id, rule_key, user_id, session.expert_id
+            session.recipient_workspace_id or session.session_id,
+            rule_key,
+            user_id,
+            session.expert_id,
         )
         if effect in PARKABLE
         else None

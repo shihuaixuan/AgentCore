@@ -155,13 +155,14 @@ export async function uploadFileDirect(
   file: File,
   sessionID?: string,
   locale: Locale = "en",
+  { overwrite = true }: { overwrite?: boolean } = {},
 ): Promise<WorkspaceUploadResponse> {
   const res = await postFileToBackend({
     path: "/api/workspace/files/upload",
     file,
     locale,
     searchParams: {
-      overwrite: "true",
+      overwrite: String(overwrite),
       ...(sessionID ? { session_id: sessionID } : {}),
     },
   });

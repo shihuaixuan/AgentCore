@@ -15,7 +15,14 @@ export interface RecipientPickerConfig {
   isLoading?: boolean;
   isRosterPending?: boolean;
   hasRosterFailed?: boolean;
+  isThreadPicker?: boolean;
 }
+
+export const OTTO_RECIPIENT_OPTION: RecipientOption = {
+  id: "otto",
+  name: "Otto",
+  avatarUrl: null,
+};
 
 export function expertRecipient(expert: ExpertIdentity): RecipientOption {
   return {

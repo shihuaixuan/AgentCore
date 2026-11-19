@@ -57,9 +57,12 @@ from backend.copilot.context import (
 )
 from backend.copilot.continuation import send_trailing_note_as_user
 from backend.copilot.expert_context import build_expert_identity_suffix
-from backend.copilot.expert_kickoff import is_expert_kickoff_turn
+from backend.copilot.expert_kickoff import (
+    is_expert_kickoff_turn,
+    is_hidden_chat_message,
+)
 from backend.copilot.gate import active_mode
-from backend.copilot.gate.held import resolve_answered
+from backend.copilot.gate.held import is_answer_row, resolve_answered
 from backend.copilot.graphiti.context import fetch_warm_context
 from backend.copilot.graphiti.context_marker import append_injected_memory_block
 from backend.copilot.graphiti.context_refresh import join_refresh, start_refresh
@@ -142,6 +145,7 @@ from backend.copilot.service import (
     _update_title_async,
     config,
     inject_user_context,
+    strip_injected_context_for_display,
     strip_user_context_tags,
 )
 from backend.copilot.session_cleanup import prune_orphan_tool_calls
@@ -193,6 +197,7 @@ from backend.copilot.transcript import (
     validate_transcript,
 )
 from backend.copilot.transcript_builder import TranscriptBuilder
+from backend.copilot.turn_recipient import RECIPIENT_OVERRIDE_DISABLED_TOOLS
 from backend.util import json as util_json
 from backend.util.exceptions import NotFoundError
 from backend.util.llm.provider_billing import (
@@ -1883,6 +1888,8 @@ async def stream_chat_completion_baseline(
             f"Session {session_id} not found. Please create a new session first."
         )
 
+    shared_history = session.reply_recipient is not None
+    sandbox_session_id = session.recipient_workspace_id or session_id
     expert_session_suffix = await build_expert_identity_suffix(
         session.user_id,
         session.expert_id,
@@ -1951,7 +1958,11 @@ async def stream_chat_completion_baseline(
     # inserting a new row, because routes.py has already saved the user message
     # before the executor picks up the turn (using insert_pending_before_last +
     # persist_session_safe would add a duplicate row at sequence N+1).
-    drained_at_start_pending = await drain_pending_safe(session_id, "[Baseline]")
+    drained_at_start_pending = (
+        []
+        if session.recipient_override
+        else await drain_pending_safe(session_id, "[Baseline]")
+    )
     if drained_at_start_pending:
         logger.info(
             "[Baseline] Draining %d pending message(s) at turn start for session %s",
@@ -2009,7 +2020,7 @@ async def stream_chat_completion_baseline(
             # An expert session runs on the expert's own persistent box;
             # everything else gets a per-session sandbox.
             e2b_sandbox = await get_or_create_sandbox(
-                session_id,
+                sandbox_session_id,
                 api_key=e2b_api_key,
                 template=config.e2b_sandbox_template,
                 timeout=config.e2b_sandbox_timeout,
@@ -2027,7 +2038,7 @@ async def stream_chat_completion_baseline(
         except SandboxLimitError as refusal:
             # Refused under a running-box limit: the turn ends here rather
             # than running its commands on the local fallback.
-            await forget_turn_ceiling(session_id, session.expert_id)
+            await forget_turn_ceiling(sandbox_session_id, session.expert_id)
             await _requeue_pending(session_id, drained_at_start_pending)
             # Saved before the yield, as on the outer error path, so a reloaded
             # chat still shows why the turn did not run.
@@ -2041,7 +2052,7 @@ async def stream_chat_completion_baseline(
             return
         except Exception:
             logger.warning("[Baseline] E2B sandbox setup failed", exc_info=True)
-            await forget_turn_ceiling(session_id, session.expert_id)
+            await forget_turn_ceiling(sandbox_session_id, session.expert_id)
 
     # --- Transcript support (feature parity with SDK path) ---
     transcript_builder = TranscriptBuilder()
@@ -2069,7 +2080,7 @@ async def stream_chat_completion_baseline(
     # messages drained at turn start don't spuriously trigger a transcript
     # load on an actual first turn.
     transcript_download: TranscriptDownload | None = None
-    if user_id and _pre_drain_msg_count > 1:
+    if user_id and _pre_drain_msg_count > 1 and not shared_history:
         (
             (transcript_upload_safe, transcript_download),
             (base_system_prompt, understanding),
@@ -2182,6 +2193,24 @@ async def stream_chat_completion_baseline(
     prior_context = await extract_context_messages(
         transcript_download, session.messages, session_id=session.session_id
     )
+    if shared_history:
+        prior_context = [
+            ChatMessage(
+                role=row.role,
+                content=(
+                    strip_injected_context_for_display(row.content).split(
+                        "\n\n[Attached files]\n", 1
+                    )[0]
+                    if row.role == "user"
+                    else row.content
+                ),
+            )
+            for row in prior_context
+            if row.role in {"user", "assistant"}
+            and row.content
+            and not is_hidden_chat_message(row.metadata)
+            and not is_answer_row(row)
+        ]
     messages_for_context = await _compress_session_messages(
         prior_context + without_stored_first_turn_memory(session.messages[-1:]),
         model=active_model,
@@ -2375,7 +2404,7 @@ async def stream_chat_completion_baseline(
     # per turn, the same trap the warm-context injection below names.
     budget_status = await build_turn_budget_block(envelope, user_id)
     if e2b_sandbox is not None:
-        budget_status += await build_sandbox_replaced_notice(session_id)
+        budget_status += await build_sandbox_replaced_notice(sandbox_session_id)
     if budget_status:
         for msg in reversed(openai_messages):
             if msg["role"] == "user":
@@ -2433,7 +2462,7 @@ async def stream_chat_completion_baseline(
     # session-start baseline the next turn diffs against. On the first
     # turn ``inject_user_context`` just wrote a fresh index into history,
     # so the diff is empty by construction and this is a no-op.
-    if is_user_message and user_id:
+    if is_user_message and user_id and not shared_history:
         try:
             skills_notice = await build_skills_update_notice(
                 user_id,
@@ -2554,6 +2583,8 @@ async def stream_chat_completion_baseline(
         if is_expert_kickoff_turn(session)
         else origin_disabled_tools(session.metadata.origin)
     )
+    if session.recipient_override:
+        disabled_tools = disabled_tools | RECIPIENT_OVERRIDE_DISABLED_TOOLS
     tools = get_available_tools(
         disabled_groups=disabled_tool_groups, disabled_tools=disabled_tools
     )
@@ -2597,22 +2628,23 @@ async def stream_chat_completion_baseline(
         # Closed or cancelled while suspended on the first yield: the finally
         # that pauses the box sits further down and would never run.
         if e2b_sandbox is not None:
-            _pause_uncounted_box(e2b_sandbox, session_id, session.expert_id)
+            _pause_uncounted_box(e2b_sandbox, sandbox_session_id, session.expert_id)
         raise
 
     if e2b_sandbox is not None:
         # From here the finally below always runs, so the turn can be counted.
-        await count_expert_turn(session_id, session.expert_id)
+        await count_expert_turn(sandbox_session_id, session.expert_id)
 
     # After the execution context: an approved held call runs here, in this
     # turn's sandbox and tool bounds, and its result opens the turn.
     unsaved_held: list[PendingMessage] = []
     held_results: list[PendingMessage] = []
     try:
-        async for held_status in resolve_answered(
-            user_id, session, unsaved_held.append
-        ):
-            yield held_status
+        if not session.recipient_override:
+            async for held_status in resolve_answered(
+                user_id, session, unsaved_held.append
+            ):
+                yield held_status
         held_results = [*unsaved_held]
         # The helper appends the rows before its first await, so from here the
         # session carries them.
@@ -2628,7 +2660,7 @@ async def stream_chat_completion_baseline(
             # Cut inside the fold's own save: its rows are on the session only.
             await persist_session_safe(session, "[Baseline]")
         if e2b_sandbox is not None:
-            _pause_counted_box(e2b_sandbox, session_id, session.expert_id)
+            _pause_counted_box(e2b_sandbox, sandbox_session_id, session.expert_id)
         raise
     if folded:
         opening_entries.append(drained_rows_entry(held_results))
@@ -2765,7 +2797,11 @@ async def stream_chat_completion_baseline(
                 # fallback uses this anchor to detect a silent finish.
                 text_len_before_final_round[0] = len(state.assistant_text)
                 try:
-                    pending = await drain_pending_messages(session_id)
+                    pending = (
+                        []
+                        if session.recipient_override
+                        else await drain_pending_messages(session_id)
+                    )
                 except Exception:
                     logger.warning(
                         "[Baseline] mid-loop drain_pending_messages failed for "
@@ -3053,7 +3089,7 @@ async def stream_chat_completion_baseline(
         # cleanup below. An expert's box is left running while another of
         # its turns is still active.
         if e2b_sandbox is not None:
-            _pause_counted_box(e2b_sandbox, session_id, session.expert_id)
+            _pause_counted_box(e2b_sandbox, sandbox_session_id, session.expert_id)
 
         # Pending messages are drained atomically at turn start and
         # between tool rounds, so there's nothing to clear in finally.
@@ -3221,7 +3257,11 @@ async def stream_chat_completion_baseline(
                     stop_reason=STOP_REASON_END_TURN,
                 )
 
-        if user_id and should_upload_transcript(user_id, transcript_upload_safe):
+        if (
+            user_id
+            and not shared_history
+            and should_upload_transcript(user_id, transcript_upload_safe)
+        ):
             # Watermark = the next uncovered DB sequence (= max non-reasoning
             # sequence + 1).  Stays accurate on cap-engaged sessions because
             # the loaded window always includes the most-recent rows; the

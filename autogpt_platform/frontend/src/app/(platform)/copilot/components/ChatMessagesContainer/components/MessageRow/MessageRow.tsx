@@ -1,10 +1,15 @@
 import { memo, type ReactNode } from "react";
 import type { ToolUIPart, UIDataTypes, UIMessage, UITools } from "ai";
 import {
+  AUTOPILOT_AVATAR_URL,
+  AUTOPILOT_NAME,
+} from "@/components/molecules/AutopilotAvatar/helpers";
+import {
   Message,
   MessageContent,
 } from "@/components/organisms/Message/Message";
 import type { TurnStats } from "../../../../helpers/convertChatSessionToUiMessages";
+import { getMessageReplyRecipient } from "../../../../helpers/replyRecipient";
 import type { SentFrom } from "../../../../sentFrom";
 import { WorkCheckTool } from "../../../../tools/FeedbackPrompts/WorkCheckTool";
 import {
@@ -18,6 +23,7 @@ import { WorkCard } from "../../../WorkCard/WorkCard";
 import { ChainMessageParts } from "../ChainMessageParts";
 import { MessageAttachments } from "../MessageAttachments";
 import { MessagePartRenderer } from "../MessagePartRenderer";
+import { ReplyAuthor } from "../ReplyAuthor";
 import { SentFromBadge } from "../SentFromBadge";
 import { UserMessageClamp } from "../UserMessageClamp";
 import { AssistantRowActions } from "./components/AssistantRowActions";
@@ -74,8 +80,8 @@ interface Props {
   filePattern?: RegExp;
   fileUrlBuilder?: (fileId: string) => string;
   onRetry?: () => void;
-  /** Whose name a work check on this row carries; set on the last row only. */
-  expert?: ExpertIdentity | null;
+  threadExpert?: ExpertIdentity | null;
+  isResolvingThreadExpert?: boolean;
 }
 
 // memo-boundary: a transcript row. The transcript re-renders on every
@@ -101,7 +107,8 @@ export const MessageRow = memo(function MessageRow({
   filePattern,
   fileUrlBuilder,
   onRetry,
-  expert,
+  threadExpert,
+  isResolvingThreadExpert,
 }: Props) {
   const {
     runMetadata,
@@ -160,6 +167,22 @@ export const MessageRow = memo(function MessageRow({
   }
 
   const isAssistant = message.role === "assistant";
+  const recipient = getMessageReplyRecipient(message);
+  const name = recipient?.name ?? threadExpert?.name ?? AUTOPILOT_NAME;
+  const avatarUrl = recipient
+    ? recipient.avatar_url
+    : (threadExpert?.avatarUrl ?? null);
+  const isAutopilot = recipient ? recipient.id === null : !threadExpert;
+  const isResolvingAuthor =
+    !recipient && !threadExpert && !!isResolvingThreadExpert;
+  const showAuthor =
+    isAssistant &&
+    (indicator ||
+      renderableParts.some((part) =>
+        part.type === "text" || part.type === "reasoning"
+          ? part.text.trim().length > 0
+          : part.type !== "step-start" && part.type !== "tool-TodoWrite",
+      ));
   const feedbackTarget = getFeedbackCardTarget({
     isLastAssistant,
     isCurrentlyStreaming,
@@ -187,6 +210,15 @@ export const MessageRow = memo(function MessageRow({
       data-message-id={message.id}
       className="duration-300 animate-in fade-in fill-mode-both slide-in-from-bottom-2"
     >
+      {showAuthor && (
+        <ReplyAuthor
+          name={name}
+          avatarUrl={avatarUrl}
+          color={recipient ? undefined : threadExpert?.color}
+          isAutopilot={isAutopilot}
+          isLoading={isResolvingAuthor}
+        />
+      )}
       <MessageContent className={getMessageContentClassName(compact)}>
         {isAssistant ? (
           <ChainMessageParts
@@ -277,7 +309,12 @@ export const MessageRow = memo(function MessageRow({
         <WorkCheckTool
           part={workCheckPart as ToolUIPart}
           target={feedbackTarget}
-          expert={expert}
+          expert={{
+            name,
+            avatarUrl: isAutopilot
+              ? (avatarUrl ?? AUTOPILOT_AVATAR_URL)
+              : avatarUrl,
+          }}
         />
       )}
     </Message>

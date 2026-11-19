@@ -1,8 +1,10 @@
 import { isPaywallError } from "@/components/contextual/PaywallToast/helpers";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { uploadFileDirect } from "@/lib/direct-upload";
 import type { Locale } from "@/lib/i18n/locale";
 import type { FileUIPart, UIMessage } from "ai";
+import { v4 as uuidv4 } from "uuid";
 import {
   useCopilotStreamStore,
   type PendingUploadAttachment,
@@ -10,6 +12,7 @@ import {
 } from "../copilotStreamStore";
 import type { ExpertKickoffMetadata } from "../expertKickoff";
 import type { SendInput } from "../stream/turnRuntime";
+import type { TurnRecipient, TurnSendOptions } from "../turnRecipient";
 import {
   isFolderPart,
   MAX_ATTACHMENTS,
@@ -26,6 +29,7 @@ export interface OutgoingMessage {
   files: File[];
   parts: StoredAttachmentPart[];
   metadata?: ExpertKickoffMetadata;
+  recipient?: TurnRecipient;
 }
 
 interface UploadedFile {
@@ -34,12 +38,11 @@ interface UploadedFile {
   mime_type: string;
 }
 
-type SendMessageFn = (message: SendInput) => Promise<void>;
-
 interface SendArgs {
   sessionId: string;
+  sessionExpertId?: string | null;
   message: OutgoingMessage;
-  sendMessage: SendMessageFn;
+  sendMessage: (message: SendInput, options?: TurnSendOptions) => Promise<void>;
   locale?: Locale;
   /** Awaited once the uploads are done and before the send: `true` sends,
    *  `false` drops the message. The placeholder shows the whole time. */
@@ -91,12 +94,25 @@ export function validateAttachments(
  */
 export async function sendWithAttachments({
   sessionId,
+  sessionExpertId,
   message,
   sendMessage,
   waitUntilReady,
   locale = "en",
 }: SendArgs) {
-  const { text, files, parts, metadata } = message;
+  const { text, files, parts, metadata, recipient } = message;
+  const uploadToWorkspace =
+    recipient?.type === "expert" && recipient.expert_id !== sessionExpertId;
+  function dispatch(parts: StoredAttachmentPart[]) {
+    const input = messageInput(
+      text,
+      parts,
+      recipient ? { turn_recipient: recipient } : metadata,
+    );
+    return recipient
+      ? sendMessage(input, { body: { recipient } })
+      : sendMessage(input);
+  }
   // The per-click UUID that becomes the backend's ``ChatMessage.id``
   // is generated inside the transport's ``prepareSendMessagesRequest``
   // (one call per ``sendMessages``, stable across SDK-internal
@@ -106,7 +122,7 @@ export async function sendWithAttachments({
   // target and break the optimistic-render path that pushes the user
   // bubble into ``messages`` synchronously.
   if (files.length === 0 && !waitUntilReady) {
-    await sendMessage(messageInput(text, parts, metadata));
+    await dispatch(parts);
     return;
   }
   // The bubble shows right away; the transcript reads "Uploading N files…"
@@ -117,7 +133,11 @@ export async function sendWithAttachments({
   useCopilotStreamStore.getState().setPendingUploadSend(sessionId, pending);
   let send: Promise<void> | undefined;
   try {
-    const uploaded = await uploadFiles(files, sessionId, locale);
+    const uploaded = await uploadFiles(
+      files,
+      uploadToWorkspace ? undefined : sessionId,
+      locale,
+    );
     let sentParts = [...parts, ...buildFileParts(uploaded)];
     if (files.length > 0 && uploaded.length === 0) {
       toast({
@@ -138,7 +158,7 @@ export async function sendWithAttachments({
       sentParts = parts;
     }
     if (waitUntilReady && !(await waitUntilReady())) return;
-    send = sendMessage(messageInput(text, sentParts, metadata));
+    send = dispatch(sentParts);
   } finally {
     // `sendMessage` pushes the user bubble into `messages` synchronously,
     // so the placeholder can go in the same tick with no gap between the
@@ -175,13 +195,15 @@ export function describePendingUpload(
 
 async function uploadFiles(
   files: File[],
-  sessionId: string,
+  sessionId: string | undefined,
   locale: Locale,
 ): Promise<UploadedFile[]> {
   const results = await Promise.allSettled(
     files.map(async (file) => {
       try {
-        const data = await uploadFileDirect(file, sessionId, locale);
+        const data = sessionId
+          ? await uploadFileDirect(file, sessionId, locale)
+          : await uploadWorkspaceAttachment(file, locale);
         if (!data.file_id) throw new Error("No file_id returned");
         return {
           file_id: data.file_id,
@@ -214,6 +236,25 @@ async function uploadFiles(
     .map((r) => r.value);
 }
 
+async function uploadWorkspaceAttachment(file: File, locale: Locale) {
+  try {
+    return await uploadFileDirect(file, undefined, locale, {
+      overwrite: false,
+    });
+  } catch (error) {
+    if (!(error instanceof ApiError) || error.status !== 409) throw error;
+    const dot = file.name.lastIndexOf(".");
+    const stem = dot > 0 ? file.name.slice(0, dot) : file.name;
+    const extension = dot > 0 ? file.name.slice(dot) : "";
+    const renamed = new File(
+      [file],
+      `${stem} (${uuidv4({}).slice(0, 8)})${extension}`,
+      { type: file.type, lastModified: file.lastModified },
+    );
+    return uploadFileDirect(renamed, undefined, locale, { overwrite: false });
+  }
+}
+
 function buildFileParts(uploaded: UploadedFile[]): FileUIPart[] {
   return uploaded.map((f) => ({
     type: "file" as const,
@@ -226,7 +267,7 @@ function buildFileParts(uploaded: UploadedFile[]): FileUIPart[] {
 function messageInput(
   text: string,
   parts: StoredAttachmentPart[],
-  metadata?: ExpertKickoffMetadata,
+  metadata?: ExpertKickoffMetadata | { turn_recipient: TurnRecipient },
 ) {
   // `{ text, files }` only accepts FileUIParts, so a message carrying a
   // folder is built from its parts instead.

@@ -101,6 +101,7 @@ class StreamStart(StreamBaseResponse):
 
     type: ResponseType = ResponseType.START
     messageId: str = Field(..., description="Unique message ID")
+    messageMetadata: dict[str, Any] | None = None
     sessionId: str | None = Field(
         default=None,
         description="Session ID for SSE reconnection.",
@@ -112,6 +113,8 @@ class StreamStart(StreamBaseResponse):
             "type": self.type.value,
             "messageId": self.messageId,
         }
+        if self.messageMetadata is not None:
+            data["messageMetadata"] = self.messageMetadata
         return f"data: {json.dumps(data)}\n\n"
 
 

@@ -116,11 +116,10 @@ interface Props {
    *  in markdown prose AND when building inline artifact source URLs.
    *  The public viewer passes a token-aware builder. */
   fileUrlBuilder?: (fileId: string) => string;
-  /** Expert identity for expert-scoped sessions: drives the thread header
-   *  and the assistant avatar/name. Null/undefined = default header. */
+  /** The session's original expert, used for replies without an author
+   *  snapshot. Null/undefined falls back to Otto. */
   expertIdentity?: ExpertIdentity | null;
-  /** The roster is still loading for an expert-scoped session, so the
-   *  header must not yet claim the thread is Otto's. */
+  /** The session's original expert is still loading. */
   isResolvingExpertIdentity?: boolean;
   /** Where this thread's opening task came from (session-level delegation
    *  metadata). Shown on the row that opened the thread (DB sequence 0) when
@@ -133,8 +132,9 @@ interface Props {
    *  spacing. */
   variant?: "default" | "compact";
   /** Hosts that already name the thread (e.g. the expert chat drawer)
-   *  turn the floating identity chip off. */
+   *  turn the floating conversation chip off. */
   showThreadHeader?: boolean;
+  sessionTitle?: string | null;
 }
 
 // Max consecutive auto-triggered loads where the container remains
@@ -299,6 +299,7 @@ export function ChatMessagesContainer({
   floatingControls,
   variant = "default",
   showThreadHeader = true,
+  sessionTitle,
 }: Props) {
   const { t } = useTranslation();
   const isCompact = variant === "compact";
@@ -521,7 +522,8 @@ export function ChatMessagesContainer({
         filePattern={filePattern}
         fileUrlBuilder={fileUrlBuilder}
         onRetry={isLastAssistant ? onRetry : undefined}
-        expert={isLastAssistant ? expertIdentity : undefined}
+        threadExpert={isAssistant ? expertIdentity : undefined}
+        isResolvingThreadExpert={isAssistant && isResolvingExpertIdentity}
       />
     );
   }
@@ -530,8 +532,7 @@ export function ChatMessagesContainer({
     <>
       {showThreadHeader && (
         <ThreadHeader
-          expertIdentity={expertIdentity}
-          isResolvingExpertIdentity={isResolvingExpertIdentity}
+          title={sessionTitle}
           floatingControls={floatingControls}
         />
       )}

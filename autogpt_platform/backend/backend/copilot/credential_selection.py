@@ -27,6 +27,7 @@ from urllib.parse import urlsplit
 
 from pydantic import BaseModel
 
+from backend.copilot.context import get_execution_context
 from backend.data.model import Credentials
 from backend.data.redis_client import get_redis_async
 from backend.integrations.credentials_store import provider_matches
@@ -139,6 +140,9 @@ async def selected_credentials(session_id: str | None) -> dict[str, str]:
     """
     pinned = {provider: pin.id for provider, pin in turn_credential_pins().items()}
     if not session_id:
+        return pinned
+    _, session = get_execution_context()
+    if session and session.recipient_override and session_id == session.session_id:
         return pinned
     try:
         redis = await get_redis_async()

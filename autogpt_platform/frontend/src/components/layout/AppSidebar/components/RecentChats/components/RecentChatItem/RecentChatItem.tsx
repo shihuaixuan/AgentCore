@@ -4,6 +4,8 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ChatOriginIcon } from "@/app/(platform)/copilot/components/ChatOriginIcon/ChatOriginIcon";
 import { resolvePlatformLogo } from "@/app/(platform)/copilot/components/ChatOriginIcon/platformLogos";
 import { LoadingSpinner } from "@/components/atoms/LoadingSpinner/LoadingSpinner";
+import { RelativeTime } from "@/components/atoms/RelativeTime/RelativeTime";
+import { Text } from "@/components/atoms/Text/Text";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -157,7 +159,18 @@ export const RecentChatItem = memo(function RecentChatItem({
           ) : hasPlatformLogo ? (
             <ChatOriginIcon sourcePlatform={session.source_platform} />
           ) : null}
-          <span className="truncate">{title}</span>
+          <span className="min-w-0 flex-1 truncate">{title}</span>
+          {Number.isFinite(Date.parse(session.updated_at)) && (
+            <Text
+              as="span"
+              variant="small-tight"
+              tone="muted"
+              className="shrink-0 whitespace-nowrap"
+              aria-hidden
+            >
+              <RelativeTime date={session.updated_at} />
+            </Text>
+          )}
           <ChatLinkLoader />
         </Link>
       </SidebarMenuButton>

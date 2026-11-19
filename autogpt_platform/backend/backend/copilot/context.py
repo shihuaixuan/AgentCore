@@ -493,7 +493,7 @@ async def current_workspace_scope(
     scope = await workspace_db().resolve_expert_workspace_scope(
         user_id, session.expert_id
     )
-    return scope.with_session(session.session_id)
+    return scope.with_session(session.recipient_workspace_id or session.session_id)
 
 
 async def get_workspace_manager(user_id: str, session_id: str) -> WorkspaceManager:
@@ -508,7 +508,15 @@ async def get_workspace_manager(user_id: str, session_id: str) -> WorkspaceManag
         workspace_db().get_or_create_workspace(user_id),
         current_workspace_scope(user_id, session_id),
     )
-    return WorkspaceManager(user_id, workspace.id, session_id, scope=scope)
+    _, session = get_execution_context()
+    workspace_session_id = (
+        session.recipient_workspace_id
+        if session and session.session_id == session_id
+        else None
+    )
+    return WorkspaceManager(
+        user_id, workspace.id, workspace_session_id or session_id, scope=scope
+    )
 
 
 def is_allowed_local_path(path: str, sdk_cwd: str | None = None) -> bool:

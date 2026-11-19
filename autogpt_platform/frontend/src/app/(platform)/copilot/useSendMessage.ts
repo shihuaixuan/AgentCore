@@ -18,12 +18,12 @@ import {
 } from "./helpers/workspaceAttachments";
 import { useCopilotUIStore } from "./store";
 import type { SendInput } from "./stream/turnRuntime";
-
-type SendMessageFn = (message: SendInput) => Promise<void>;
+import type { TurnRecipient, TurnSendOptions } from "./turnRecipient";
 
 interface Args {
   sessionId: string | null;
-  sendMessage: SendMessageFn;
+  sessionExpertId?: string | null;
+  sendMessage: (message: SendInput, options?: TurnSendOptions) => Promise<void>;
   createSession: (options?: {
     expertKickoff?: boolean;
   }) => Promise<string | undefined>;
@@ -43,6 +43,7 @@ interface Args {
  */
 export function useSendMessage({
   sessionId,
+  sessionExpertId,
   sendMessage,
   createSession,
   isUserStoppingRef,
@@ -60,6 +61,7 @@ export function useSendMessage({
   function dispatchToSession(sid: string, message: OutgoingMessage) {
     return sendWithAttachments({
       sessionId: sid,
+      sessionExpertId,
       message,
       sendMessage,
       locale,
@@ -103,6 +105,7 @@ export function useSendMessage({
     files?: File[],
     workspaceFiles?: WorkspaceAttachment[],
     metadata?: ExpertKickoffMetadata,
+    recipient?: TurnRecipient,
   ) {
     const trimmed = message.trim();
     const workspaceParts = buildStoredAttachmentParts(workspaceFiles ?? []);
@@ -124,6 +127,7 @@ export function useSendMessage({
       setPendingFileParts([]);
       await dispatchToSession(sessionId, {
         ...outgoing,
+        recipient: metadata?.kind === "expert_kickoff" ? undefined : recipient,
         parts: [...pendingFileParts, ...workspaceParts],
       });
       return sessionId;

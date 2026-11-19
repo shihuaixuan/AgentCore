@@ -7,8 +7,15 @@ export function getStandaloneBubbleMetadata(
   metadata: unknown,
 ): Record<string, unknown> | null {
   if (!metadata || typeof metadata !== "object") return null;
-  const kind = (metadata as Record<string, unknown>).kind;
-  return typeof kind === "string" && STANDALONE_METADATA_KINDS.has(kind)
-    ? (metadata as Record<string, unknown>)
-    : null;
+  const fields = metadata as Record<string, unknown>;
+  if (
+    (typeof fields.kind === "string" &&
+      STANDALONE_METADATA_KINDS.has(fields.kind)) ||
+    fields.background_task_stage === "followup" ||
+    "held_call" in fields ||
+    "held_calls_answered" in fields
+  ) {
+    return fields;
+  }
+  return null;
 }

@@ -1,5 +1,9 @@
 import { parseTurnPause, TURN_PAUSED_PART_TYPE } from "../turnPause";
 import {
+  getReplyRecipient,
+  REPLY_RECIPIENT_PART_TYPE,
+} from "../helpers/replyRecipient";
+import {
   addToolCall,
   addToolResult,
   appendDrainedUserRows,
@@ -63,8 +67,16 @@ export function compareEntryIds(a: string, b: string): number {
 
 function applyChunk(log: TurnLog, entryId: string, chunk: WireChunk): TurnLog {
   switch (chunk.type) {
-    case "start":
-      return startMessage(log, str(chunk.messageId));
+    case "start": {
+      const started = startMessage(log, str(chunk.messageId));
+      const recipient = getReplyRecipient(chunk.messageMetadata);
+      return recipient
+        ? addOverlay(started, entryId, {
+            type: REPLY_RECIPIENT_PART_TYPE,
+            data: recipient,
+          })
+        : started;
+    }
     case "finish":
       return {
         ...log,

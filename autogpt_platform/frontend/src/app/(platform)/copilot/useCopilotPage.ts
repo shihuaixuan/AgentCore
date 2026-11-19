@@ -46,6 +46,11 @@ import { recoverFailedDeferredSend, useSendMessage } from "./useSendMessage";
 import { useSessionTitlePoll } from "./useSessionTitlePoll";
 import { useSettleGate } from "./useSettleGate";
 import { useWorkflowImportAutoSubmit } from "./useWorkflowImportAutoSubmit";
+import type { TurnRecipient } from "./turnRecipient";
+import { useThreadRecipient } from "./useThreadRecipient";
+import { useChatDraftAccess } from "./components/ChatInput/useChatDraft";
+import { sessionDraftKey } from "./components/SendAtReset/helpers";
+import { toastSendFailure } from "./helpers/sendFailureToast";
 
 function trimVisibleMessagesForActiveRestore(messages: UIMessage[]) {
   const lastUserIndex = messages.findLastIndex(
@@ -99,9 +104,12 @@ function useCopilotPageSession() {
   );
   const {
     expertsById,
+    activeExperts,
     isLoadingExperts,
     hasExpertsSettled,
     hasExpertsErrored,
+    hasExpertsLoaded,
+    isExpertsError,
   } = useExpertMap();
   const validExpertIdParam =
     expertIdParam && isValidUUID(expertIdParam) ? expertIdParam : null;
@@ -138,6 +146,7 @@ function useCopilotPageSession() {
     sessionLlmCredentialId,
     chatLlmAuthProvider,
     sessionExpertId,
+    supportsTurnRecipient,
     isAdoptingExpertSession,
     hydratedMessages,
     rawSessionMessages,
@@ -154,6 +163,7 @@ function useCopilotPageSession() {
     isCreatingSession,
     refetchSession,
     sessionDryRun,
+    sessionTitle,
     sessionChatStatus,
     sessionSentFrom,
     sessionAutopilotMode,
@@ -205,6 +215,7 @@ function useCopilotPageSession() {
     sessionId,
     setSessionId,
     sessionExpertId,
+    supportsTurnRecipient,
     isAdoptingExpertSession,
     hydratedMessages,
     rawSessionMessages,
@@ -218,6 +229,7 @@ function useCopilotPageSession() {
     createSession,
     isCreatingSession,
     sessionDryRun,
+    sessionTitle,
     sessionChatStatus,
     sessionSentFrom,
     sessionAutopilotMode,
@@ -225,6 +237,12 @@ function useCopilotPageSession() {
     expertIdentity,
     isResolvingExpertIdentity,
     isExpertSendLocked,
+    roster: {
+      byId: expertsById,
+      active: activeExperts,
+      pending: !hasExpertsLoaded,
+      failed: isExpertsError,
+    },
     streamArgs,
   };
 }
@@ -266,6 +284,7 @@ function useCopilotPageChat(
     sessionId,
     setSessionId,
     sessionExpertId,
+    supportsTurnRecipient,
     isAdoptingExpertSession,
     hydratedMessages,
     rawSessionMessages,
@@ -279,6 +298,7 @@ function useCopilotPageChat(
     createSession,
     isCreatingSession,
     sessionDryRun,
+    sessionTitle,
     sessionChatStatus,
     sessionSentFrom,
     sessionAutopilotMode,
@@ -333,6 +353,11 @@ function useCopilotPageChat(
   // starting a separate turn on the selected model.
   const isLocalStreamSettled =
     !isInflight && !isFinishProbing && !isReconnecting;
+  const isRecipientTurnSettled =
+    isLocalStreamSettled && !isUserStopping && !isRestoringActiveSession;
+  const recipientDraft = useChatDraftAccess(
+    sessionId ? sessionDraftKey(sessionId) : undefined,
+  );
   // A held follow-up learns whether the stream settled (send now) or the
   // hook went away first (the chat host unmounts on a chat switch and on
   // reload; the follow-up then stays in sessionStorage, see below).
@@ -340,7 +365,7 @@ function useCopilotPageChat(
     waitUntilSettled: waitForLocalSettle,
     claimTurn,
     releaseTurn,
-  } = useSettleGate(isLocalStreamSettled);
+  } = useSettleGate(isLocalStreamSettled, isRecipientTurnSettled);
 
   // Follow-ups waiting on the settle above. Shown as "Queued" chips beside
   // the backend-buffered ones, since from the user's side they are the same
@@ -407,6 +432,18 @@ function useCopilotPageChat(
     return trimVisibleMessagesForActiveRestore(messages);
   }, [isRestoringActiveSession, runtimeStream, messages, cachedMessages]);
 
+  const threadRecipient = useThreadRecipient({
+    userId: user?.id,
+    sessionId: supportsTurnRecipient ? sessionId : null,
+    messages: rawMessages,
+    pinnedExpertId: sessionExpertId,
+    pinnedExpert: expertIdentity,
+    roster: session.roster,
+  });
+  const hasManagedModel = Boolean(
+    session.streamArgs.copilotModel.managedModelID,
+  );
+
   // Chip state machine (peek sync + auto-continue promotion + mid-turn poll)
   // lives in a dedicated hook so this component is just glue.
   const { queuedMessages } = useCopilotPendingChips({
@@ -430,6 +467,7 @@ function useCopilotPageChat(
     setPendingFileParts,
   } = useSendMessage({
     sessionId,
+    sessionExpertId,
     sendMessage,
     createSession,
     isUserStoppingRef,
@@ -440,6 +478,7 @@ function useCopilotPageChat(
     files?: File[],
     workspaceFiles?: WorkspaceAttachment[],
     metadata?: ExpertKickoffMetadata,
+    recipient?: TurnRecipient,
   ) {
     const trimmed = message.trim();
     const hasAttachments =
@@ -463,8 +502,13 @@ function useCopilotPageChat(
     }
 
     let heldForLocalSettle = false;
-    while (sessionId && !claimTurn()) {
+    while (sessionId && !claimTurn(Boolean(recipient))) {
       if (hasAttachments) {
+        if (recipient) {
+          throw new Error(
+            "Wait for the current reply before sending attachments.",
+          );
+        }
         toast({
           title: t("Please wait to attach files", "请稍后再添加文件"),
           description: t(
@@ -478,19 +522,42 @@ function useCopilotPageChat(
 
       if (!heldForLocalSettle) holdFollowUp(sessionId, trimmed);
       heldForLocalSettle = true;
-      if (!(await waitForLocalSettle())) return;
+      if (!(await waitForLocalSettle(Boolean(recipient)))) return;
     }
 
-    const dispatch = sendNewMessage(message, files, workspaceFiles, metadata);
+    const dispatch = sendNewMessage(
+      message,
+      files,
+      workspaceFiles,
+      metadata,
+      recipient,
+    );
     const result = sessionId ? dispatch.finally(releaseTurn) : dispatch;
     if (heldForLocalSettle && sessionId) {
       releaseFollowUp(sessionId, trimmed);
       // Resolve once dispatched, not when the whole answer has streamed:
       // the composer's enqueue path is waiting on this, and holding it for
       // the entire turn would lock Enter and the queue button again.
-      void result.catch((err: unknown) =>
-        recoverDeferredSend(trimmed, err),
-      );
+      void result.catch((error: unknown) => {
+        if (!recipient) {
+          recoverDeferredSend(trimmed, error);
+          return;
+        }
+        recipientDraft.write((draft) =>
+          draft.trim() && draft !== trimmed
+            ? `${trimmed}\n\n${draft}`
+            : trimmed,
+        );
+        toastSendFailure({
+          title: t("Couldn't send message", "无法发送消息"),
+          error,
+          recovery: t(
+            "your message is back in the composer",
+            "你的消息已返回输入框",
+          ),
+          locale,
+        });
+      });
       return;
     }
     return await result;
@@ -500,6 +567,33 @@ function useCopilotPageChat(
   const onSend = useStableCallback(
     async (...args: Parameters<typeof sendAfterCurrentTurn>) => {
       await sendAfterCurrentTurn(...args);
+    },
+  );
+  const onComposerSend = useStableCallback(
+    async (
+      message: string,
+      files?: File[],
+      workspaceFiles?: WorkspaceAttachment[],
+    ) => {
+      if (
+        !sessionId ||
+        !supportsTurnRecipient ||
+        (!hasManagedModel && !threadRecipient.isSwitched)
+      ) {
+        await sendAfterCurrentTurn(message, files, workspaceFiles);
+        return;
+      }
+      if (!hasManagedModel)
+        throw new Error("Select a chat model before sending to a recipient.");
+      if (threadRecipient.isUnavailable)
+        throw new Error("Choose an available recipient before sending.");
+      await sendAfterCurrentTurn(
+        message,
+        files,
+        workspaceFiles,
+        undefined,
+        threadRecipient.target,
+      );
     },
   );
   // A suggested task records which chat its message started.
@@ -564,6 +658,11 @@ function useCopilotPageChat(
     isLoggedIn,
     createSession,
     onSend,
+    onComposerSend,
+    threadRecipient:
+      sessionId && supportsTurnRecipient ? threadRecipient : undefined,
+    hasManagedModel,
+    isRecipientTurnSettled,
     onStartTask,
     onEnqueue: onSend,
     queuedMessages:
@@ -583,6 +682,7 @@ function useCopilotPageChat(
     // used to render the banner. The global `isDryRun` preference (for new
     // sessions) lives in the store and is consumed by the toggle button.
     sessionDryRun,
+    sessionTitle,
     sessionChatStatus,
     sessionSentFrom,
     sessionAutopilotMode,

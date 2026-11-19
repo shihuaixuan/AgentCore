@@ -91,6 +91,10 @@ function ChatHostView({
     isUserStopping,
     createSession,
     onSend,
+    onComposerSend,
+    threadRecipient,
+    hasManagedModel,
+    isRecipientTurnSettled,
     onStartTask,
     onEnqueue,
     queuedMessages,
@@ -111,6 +115,7 @@ function ChatHostView({
     dismissProviderLimit,
     sessionDryRun,
     sessionChatStatus,
+    sessionTitle,
     sessionSentFrom,
     sessionAutopilotMode,
     chatLlmAuthProvider,
@@ -151,6 +156,7 @@ function ChatHostView({
           status={status}
           error={error}
           sessionId={sessionId}
+          sessionTitle={sessionTitle}
           sessionChatStatus={sessionChatStatus}
           sessionSentFrom={sessionSentFrom}
           sessionAutopilotMode={sessionAutopilotMode}
@@ -166,6 +172,10 @@ function ChatHostView({
           isUserStopping={isUserStopping}
           onCreateSession={createSession}
           onSend={onSend}
+          onComposerSend={onComposerSend}
+          threadRecipient={threadRecipient}
+          hasManagedModel={hasManagedModel}
+          isRecipientTurnSettled={isRecipientTurnSettled}
           onStartTask={onStartTask}
           onStop={stop}
           onEnqueue={onEnqueue}

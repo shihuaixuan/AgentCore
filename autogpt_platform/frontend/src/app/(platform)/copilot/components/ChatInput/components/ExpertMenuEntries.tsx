@@ -8,11 +8,18 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { RecipientAvatar } from "./ExpertPickerOptions";
-import type { RecipientPickerConfig } from "./recipientOptions";
+import {
+  OTTO_RECIPIENT_OPTION,
+  type RecipientPickerConfig,
+} from "./recipientOptions";
 
 type Props = Pick<
   RecipientPickerConfig,
-  "recipient" | "options" | "isRosterPending" | "hasRosterFailed"
+  | "recipient"
+  | "options"
+  | "isRosterPending"
+  | "hasRosterFailed"
+  | "isThreadPicker"
 > & {
   selectionBlocked?: string;
   onSelect: (id: string | null) => void;
@@ -23,12 +30,13 @@ export function ExpertMenuEntries({
   options,
   isRosterPending,
   hasRosterFailed,
+  isThreadPicker,
   selectionBlocked,
   onSelect,
 }: Props) {
   const { t } = useTranslation();
 
-  if (!options.length) {
+  if (!options.length && !isThreadPicker) {
     const message = isRosterPending
       ? t("Loading experts…", "正在加载专家…")
       : hasRosterFailed
@@ -37,7 +45,7 @@ export function ExpertMenuEntries({
 
     return (
       <>
-        <Text as="p" variant="small" tone="secondary" className="px-2 py-1.5">
+        <Text as="p" variant="small" tone="secondary" className="mx-2 my-1.5">
           {message}
         </Text>
         {!isRosterPending && !hasRosterFailed && (
@@ -54,45 +62,51 @@ export function ExpertMenuEntries({
   return (
     <>
       {selectionBlocked && (
-        <Text as="p" variant="small" tone="secondary" className="px-2 py-1.5">
+        <Text as="p" variant="small" tone="secondary" className="mx-2 my-1.5">
           {selectionBlocked}
         </Text>
       )}
-      {options.map((option) => {
-        const selected = option.id === recipient?.id;
-        return (
-          <DropdownMenuItem
-            key={option.id}
-            textValue={option.name}
-            disabled={!!selectionBlocked && !selected}
-            className="gap-2"
-            onSelect={() => {
-              if (!selected) onSelect(option.id);
-            }}
-          >
-            <RecipientAvatar option={option} />
-            <span className="min-w-0 flex-1">
-              <Text as="span" variant="body-tight" className="block truncate">
-                {option.name}
-              </Text>
-              {option.role && (
-                <Text
-                  as="span"
-                  variant="small"
-                  tone="secondary"
-                  className="block truncate"
-                >
-                  {option.role}
+      {(isThreadPicker ? [OTTO_RECIPIENT_OPTION, ...options] : options).map(
+        (option) => {
+          const id = option === OTTO_RECIPIENT_OPTION ? null : option.id;
+          const selected = id === (recipient?.id ?? null);
+          return (
+            <DropdownMenuItem
+              key={option.id}
+              textValue={option.name}
+              disabled={!!selectionBlocked && !selected}
+              onSelect={() => {
+                if (!selected) onSelect(id);
+              }}
+            >
+              <RecipientAvatar option={option} />
+              <span className="min-w-0 flex-1">
+                <Text as="span" variant="body-tight" className="block truncate">
+                  {option.name}
                 </Text>
+                {option.role && (
+                  <Text
+                    as="span"
+                    variant="small"
+                    tone="secondary"
+                    className="block truncate"
+                  >
+                    {option.role}
+                  </Text>
+                )}
+              </span>
+              {selected && (
+                <Icon
+                  icon={Tick02Icon}
+                  className="size-4 shrink-0"
+                  aria-hidden
+                />
               )}
-            </span>
-            {selected && (
-              <Icon icon={Tick02Icon} className="size-4 shrink-0" aria-hidden />
-            )}
-          </DropdownMenuItem>
-        );
-      })}
-      {recipient && (
+            </DropdownMenuItem>
+          );
+        },
+      )}
+      {recipient && !isThreadPicker && (
         <>
           <DropdownMenuSeparator />
           <DropdownMenuItem

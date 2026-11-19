@@ -207,12 +207,21 @@ async def resolve_attachments_for_http(
     *,
     session_id: str,
     expert_id: str | None,
+    recipient_workspace_id: str | None = None,
 ) -> list["UserWorkspaceFile"]:
     """Resolve attachment IDs for an HTTP request, mapping an expert-scope
     violation to a 400 so the stream and pending routes answer alike."""
     try:
         return await resolve_attachable_workspace_files(
-            user_id, file_ids, session_id=session_id, expert_id=expert_id
+            user_id,
+            file_ids,
+            session_id=session_id,
+            expert_id=expert_id,
+            **(
+                {"recipient_workspace_id": recipient_workspace_id}
+                if recipient_workspace_id
+                else {}
+            ),
         )
     except WorkspaceAccessDeniedError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

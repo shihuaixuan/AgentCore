@@ -2,6 +2,7 @@ import type { UIMessage } from "ai";
 
 import { COMPACTION_DATA_PART_TYPE } from "./components/CompactionCard/helpers";
 import { DREAM_OPERATIONS_PART_TYPE } from "./dreamOperations";
+import { REPLY_RECIPIENT_PART_TYPE } from "./helpers/replyRecipient";
 
 /** Backend progress line ("Preparing workspace…"). Never shown to the user. */
 export const STATUS_PART_TYPE = "data-status";
@@ -33,6 +34,7 @@ const BOOKKEEPING_PART_TYPES: ReadonlySet<string> = new Set([
   COMPACTION_DATA_PART_TYPE,
   TOOL_DISPLAY_PART_TYPE,
   PENDING_DRAINED_PART_TYPE,
+  REPLY_RECIPIENT_PART_TYPE,
 ]);
 
 export function isBookkeepingPart(part: { type: string }): boolean {

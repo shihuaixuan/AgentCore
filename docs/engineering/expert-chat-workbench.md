@@ -1,14 +1,15 @@
-# 统一聊天入口与专家选择
+# 会话列表与按轮选择专家
 
-新任务从首页输入框开始。默认是普通任务，可以直接发送，输入框不显示专家标签。点击「＋ → 专家」可按名称或职责搜索；选中后才会显示专家头像和名称。发送前可点标签更换专家，或点「取消选择专家」回到普通任务。文本草稿和本地附件会保留；如果草稿包含工作区附件或连接引用，需要先移除这些引用才能更改专家选择。
+侧边栏统一展示最近会话，保留置顶、分页和会话操作。会话页头展示会话标题。每轮回复展示该轮答复者的名称和头像；没有作者快照的旧消息使用会话原来的专家，普通会话使用 Otto。
 
-已有对话保留原身份。在普通对话里选择专家，或在专家对话里更换专家或点「新建普通任务」，都需要确认另开对话。旧消息和附件不导入新会话，未提交的原会话文本草稿仍可在原对话中继续编辑。侧边栏保留历史分组、置顶、会话操作与新成员入职引导，取消历史分组里的新建入口。
+新任务不选专家也能直接发送。个人工作区使用托管模型的首页会话，可以通过输入框「＋ → 专家」选择下一轮的答复者，也可以切回普通任务。切换保留会话和文字草稿。已经添加的工作区附件或连接引用需要先移除，然后按新专家的权限重新附加。
 
-| 路径                                                                                 | 职责                                                                                                                           |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| `autogpt_platform/frontend/src/app/(platform)/copilot/components/ChatInput/`         | 「＋ → 专家」入口、专家标签、搜索、清除选择、另开对话确认与附件限制。                                                          |
-| `autogpt_platform/frontend/src/app/(platform)/copilot/components/EmptySession/`      | 首页选择专家、更新首条消息的接收者；普通任务和各专家分别保存草稿。                                                             |
-| `autogpt_platform/frontend/src/app/(platform)/copilot/components/ChatContainer/`     | 已有对话向输入框传递会话专家，并接入新任务导航。                                                                               |
-| `autogpt_platform/frontend/src/components/layout/AppSidebar/components/RecentChats/` | 展示历史及入职引导；新任务统一从首页输入框发起。                                                                               |
-| `autogpt_platform/frontend/src/app/(platform)/copilot/useChatSession.ts`             | 复用原有接口，仅为专家任务提交 `expert_id`。新任务 URL 的 `new=1` 避免自动进入目标专家的最近会话。                             |
-| `autogpt_platform/backend/backend/copilot/`                                          | Copilot 执行两类任务。普通任务使用平台默认助手身份 Otto；专家任务按 `expert_id` 加载专家身份和相关配置。无需后端或数据库迁移。 |
+发送时保存当前选择。`POST /api/chat/sessions/{session_id}/stream` 接收可选的 `recipient`：`{ "type": "otto" }` 或 `{ "type": "expert", "expert_id": "…" }`；省略时沿用会话原有身份。不同专家在同一会话中共享可见文字；外部连接授权、沙箱、私有文件和记忆按执行身份解析。已有审批不会交给其他专家；需要审批或续跑的操作可在该专家自己的任务中进行。构建器、外部渠道、自动化和其他专用会话沿用原有执行路径。
+
+| 路径                                                                                 | 职责                                                       |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| `frontend/src/components/layout/AppSidebar/components/RecentChats/`                  | 平铺最近会话和置顶会话。                                   |
+| `frontend/src/app/(platform)/copilot/components/ChatInput/`、`useThreadRecipient.ts` | 在输入框选择下一轮答复者，按会话记住选择。                 |
+| `frontend/src/app/(platform)/copilot/components/ChatMessagesContainer/`              | 展示会话标题和回复作者，兼容旧消息。                       |
+| `backend/backend/api/features/chat/routes.py`、`backend/backend/copilot/executor/`   | 校验、排队并按所选身份执行一轮，保留会话原有资源作用域。   |
+| `backend/backend/copilot/model.py`、`response_model.py`                              | 在现有消息元数据和事件流中记录实际答复者，无需数据库迁移。 |

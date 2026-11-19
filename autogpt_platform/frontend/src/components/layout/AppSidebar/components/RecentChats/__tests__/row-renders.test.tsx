@@ -70,9 +70,7 @@ async function renderRecentChats() {
       <RecentChats />
     </SidebarProvider>,
   );
-  fireEvent.click(
-    await screen.findByRole("button", { name: "Load all Otto chats" }),
-  );
+  await screen.findByText("First chat");
 }
 
 async function settle() {

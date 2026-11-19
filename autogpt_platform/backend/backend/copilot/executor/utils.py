@@ -41,6 +41,7 @@ from backend.copilot.tree import (
     root_envelope,
 )
 from backend.copilot.trial_cost_context import TrialCostContext, capture_cost_context
+from backend.copilot.turn_recipient import TurnRecipient
 from backend.data.db_accessors import chat_db
 from backend.data.rabbitmq import Exchange, ExchangeType, Queue, RabbitMQConfig
 from backend.util import tracing
@@ -325,6 +326,7 @@ class CoPilotExecutionEntry(BaseModel):
     """Per-request model tier: 'standard' or 'advanced'. None = server default."""
 
     managed_model_id: str | None = None
+    recipient: TurnRecipient | None = None
 
     llm_auth_provider: CopilotLlmAuthProvider = "platform"
     """Session-selected model authentication and execution route."""
@@ -428,6 +430,7 @@ async def enqueue_copilot_turn(
     *,
     envelope: TurnEnvelope,
     managed_model_id: str | None = None,
+    recipient: TurnRecipient | None = None,
     unattended: bool = False,
     impersonated: bool = False,
     credential_pins: CredentialPins | None = None,
@@ -474,6 +477,7 @@ async def enqueue_copilot_turn(
         team_id=team_id,
         model=model,
         managed_model_id=managed_model_id,
+        recipient=recipient,
         llm_auth_provider=llm_auth_provider,
         llm_credential_id=llm_credential_id,
         permissions=permissions,
@@ -634,6 +638,7 @@ async def dispatch_turn(
     team_id: str | None = None,
     model: CopilotLLMModel | None = None,
     managed_model_id: str | None = None,
+    recipient: TurnRecipient | None = None,
     llm_auth_provider: CopilotLlmAuthProvider = "platform",
     llm_credential_id: str | None = None,
     permissions: CopilotPermissions | None = None,
@@ -744,6 +749,7 @@ async def dispatch_turn(
             permissions=permissions,
             request_arrival_at=request_arrival_at,
             message_metadata=message_metadata,
+            **({"recipient": recipient} if recipient is not None else {}),
             envelope=envelope,
             unattended=unattended,
             impersonated=impersonated,
@@ -932,6 +938,7 @@ async def schedule_chat_turn(
     team_id: str | None = None,
     model: CopilotLLMModel | None = None,
     managed_model_id: str | None = None,
+    recipient: TurnRecipient | None = None,
     llm_auth_provider: CopilotLlmAuthProvider = "platform",
     llm_credential_id: str | None = None,
     permissions: CopilotPermissions | None = None,
@@ -1042,6 +1049,7 @@ async def schedule_chat_turn(
             team_id=team_id,
             model=model,
             **({"managed_model_id": managed_model_id} if managed_model_id else {}),
+            **({"recipient": recipient} if recipient is not None else {}),
             llm_auth_provider=llm_auth_provider,
             llm_credential_id=llm_credential_id,
             permissions=permissions,

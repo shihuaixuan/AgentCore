@@ -3,7 +3,6 @@ import {
   getGetExpertMockHandler,
   getListExpertIdentitiesMockHandler,
 } from "@/app/api/__generated__/endpoints/experts/experts.msw";
-import { getGetV1ListExecutionSchedulesForAUserMockHandler } from "@/app/api/__generated__/endpoints/schedules/schedules.msw";
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import { server } from "@/mocks/mock-server";
 import { CredentialsProvidersContext } from "@/providers/agent-credentials/credentials-provider";
@@ -26,7 +25,6 @@ import { ChatMessagesContainer } from "../components/ChatMessagesContainer/ChatM
 import { useChatSession } from "../useChatSession";
 import { newRecipientChatHref } from "../expertSessionQuery";
 import { useCopilotUIStore } from "../store";
-import { groupSessionsByExpert } from "../useSessionList";
 
 const { capture } = vi.hoisted(() => ({ capture: vi.fn() }));
 vi.mock("posthog-js", () => ({ default: { capture } }));
@@ -664,30 +662,6 @@ describe("useChatSession — expert sessions", () => {
   });
 });
 
-describe("groupSessionsByExpert", () => {
-  it("partitions sessions by expert_id with the Otto group first", () => {
-    const groups = groupSessionsByExpert([
-      makeSession({ id: "s1" }),
-      makeSession({ id: "s2", expert_id: "expert-maria" }),
-      makeSession({ id: "s3", expert_id: "expert-juan" }),
-      makeSession({ id: "s4", expert_id: "expert-maria" }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- a partial mock of the generated response type
-    ] as any);
-
-    expect(groups.map((group) => group.expertId)).toEqual([
-      null,
-      "expert-maria",
-      "expert-juan",
-    ]);
-    expect(
-      groups[1].sessions.map((session: { id: string }) => session.id),
-    ).toEqual(["s2", "s4"]);
-    expect(
-      groups[0].sessions.map((session: { id: string }) => session.id),
-    ).toEqual(["s1"]);
-  });
-});
-
 describe("ChatMessagesContainer — expert identity", () => {
   const assistantMessage = {
     id: "m1",
@@ -705,27 +679,45 @@ describe("ChatMessagesContainer — expert identity", () => {
     readOnlyReason: null,
   };
 
-  it("shows the expert name and avatar in the thread header only", () => {
-    server.use(
-      getGetExpertMockHandler(mariaExpert),
-      getGetV1ListExecutionSchedulesForAUserMockHandler([]),
-    );
+  it("shows the conversation title and uses the saved author for each reply", () => {
     render(
       <ChatMessagesContainer
-        messages={[assistantMessage]}
+        messages={[
+          assistantMessage,
+          {
+            id: "u2",
+            role: "user",
+            parts: [{ type: "text", text: "Can you make it a presentation?" }],
+          },
+          {
+            ...assistantMessage,
+            id: "m2",
+            parts: [{ type: "text", text: "Here is the slide outline." }],
+            metadata: {
+              reply_recipient: {
+                id: "expert-slides",
+                name: "Slide Designer",
+                avatar_url: null,
+              },
+            },
+          },
+        ]}
         status="ready"
         error={undefined}
         isLoading={false}
         expertIdentity={mariaIdentity}
+        sessionTitle="Campaign planning"
       />,
     );
 
     const header = screen.getByTestId("expert-thread-header");
-    expect(within(header).getByText("Maria")).toBeDefined();
-    expect(within(header).getByText("Marketing Manager")).toBeDefined();
-    expect(within(header).queryByText(mariaExpert.role)).toBeNull();
-    expect(within(header).getByRole("img", { name: "Maria" })).toBeDefined();
-    expect(screen.queryByTestId("expert-assistant-identity")).toBeNull();
+    expect(within(header).getByText("Campaign planning")).toBeDefined();
+    expect(within(header).queryByText("Maria")).toBeNull();
+    expect(
+      screen
+        .getAllByTestId("expert-assistant-identity")
+        .map((row) => row.textContent),
+    ).toEqual(["Maria", "Slide Designer"]);
   });
 
   it("keeps the chip a passive label with no file counter", async () => {
@@ -753,7 +745,7 @@ describe("ChatMessagesContainer — expert identity", () => {
     expect(workspaceFileRequests).toBe(0);
   });
 
-  it("wears the Otto identity on plain sessions", () => {
+  it("falls back to Otto on historical replies in plain sessions", () => {
     render(
       <ChatMessagesContainer
         messages={[assistantMessage]}
@@ -764,68 +756,10 @@ describe("ChatMessagesContainer — expert identity", () => {
     );
 
     const header = screen.getByTestId("expert-thread-header");
-    expect(header.textContent).toContain("Otto");
-    expect(screen.queryByTestId("expert-assistant-identity")).toBeNull();
-  });
-
-  it("keeps the passive chip keyboard-reachable with its area", () => {
-    server.use(
-      getGetExpertMockHandler(mariaExpert),
-      getGetV1ListExecutionSchedulesForAUserMockHandler([]),
+    expect(header.textContent).toContain("Conversation");
+    expect(screen.getByTestId("expert-assistant-identity").textContent).toBe(
+      "Otto",
     );
-    render(
-      <ChatMessagesContainer
-        messages={[assistantMessage]}
-        status="ready"
-        error={undefined}
-        isLoading={false}
-        expertIdentity={mariaIdentity}
-      />,
-    );
-
-    const header = screen.getByTestId("expert-thread-header");
-    const chip = within(header).getByLabelText("Maria — Marketing Manager");
-
-    // A tooltip opens on focus as well as hover; an unfocusable trigger
-    // hides the role from keyboard users entirely.
-    expect(chip.getAttribute("tabindex")).toBe("0");
-  });
-
-  it("does not rewrite a job title that matches a special area", () => {
-    render(
-      <ChatMessagesContainer
-        messages={[assistantMessage]}
-        status="ready"
-        error={undefined}
-        isLoading={false}
-        expertIdentity={{
-          ...mariaIdentity,
-          jobTitle: "Social & Content Repurposing",
-        }}
-      />,
-    );
-
-    const header = screen.getByTestId("expert-thread-header");
-    expect(
-      within(header).getByText("Social & Content Repurposing"),
-    ).toBeDefined();
-    expect(within(header).queryByText("Social media")).toBeNull();
-  });
-
-  it("falls back to the default role when an expert has no title or area", () => {
-    render(
-      <ChatMessagesContainer
-        messages={[assistantMessage]}
-        status="ready"
-        error={undefined}
-        isLoading={false}
-        expertIdentity={{ ...mariaIdentity, role: null, jobTitle: null }}
-      />,
-    );
-
-    const header = screen.getByTestId("expert-thread-header");
-    expect(within(header).getByText("Head of AI")).toBeDefined();
-    expect(within(header).getByLabelText("Maria — Head of AI")).toBeDefined();
   });
 });
 

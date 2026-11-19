@@ -17,7 +17,7 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 interface Props {
   part: ToolUIPart;
   target: FeedbackCardTarget;
-  expert?: ExpertIdentity | null;
+  expert?: Pick<ExpertIdentity, "name" | "avatarUrl"> | null;
 }
 
 export function WorkCheckTool({ part, target, expert }: Props) {

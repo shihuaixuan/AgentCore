@@ -24,9 +24,8 @@ from backend.api.features.chat.managed_models import require_chat_model
 from backend.api.features.experts import experts_db
 from backend.api.features.experts.models import Expert
 from backend.blocks.desktop._api import DesktopStream
-from backend.copilot import active_turns
+from backend.copilot import active_turns, stream_registry, turn_queue
 from backend.copilot import service as chat_service
-from backend.copilot import stream_registry, turn_queue
 from backend.copilot.active_turns import (
     ConcurrentTurnLimitError,
     get_inflight_turn_limit,
@@ -55,6 +54,10 @@ from backend.copilot.db import (
     get_chat_messages_paginated,
 )
 from backend.copilot.executor.utils import enqueue_cancel_task, schedule_chat_turn
+from backend.copilot.expert_context import (
+    ExpertSessionUnavailableError,
+    read_private_expert,
+)
 from backend.copilot.expert_kickoff import (
     expert_kickoff_message_id,
     expert_kickoff_metadata,
@@ -193,9 +196,15 @@ from backend.copilot.transports import (
     save_default_chat_route,
 )
 from backend.copilot.trial_reads import sharing_trial_reads
+from backend.copilot.turn_recipient import (
+    TurnRecipient,
+    is_personal_chat_scope,
+    recipient_expert_id,
+    turn_workspace_id,
+)
 from backend.copilot.turn_tracing import MODEL_OUTPUT_CHUNKS
 from backend.data.credit import UsageTransactionMetadata, get_user_credit_model
-from backend.data.db_accessors import background_task_db
+from backend.data.db_accessors import background_task_db, orgs_db
 from backend.data.redis_client import get_redis_async
 from backend.data.understanding import get_business_understanding
 from backend.data.workspace import build_files_block
@@ -398,6 +407,7 @@ class StreamChatRequest(BaseModel):
 
     message: str = Field(max_length=MAX_CHAT_MESSAGE_LENGTH)
     managed_model_id: UUID | None = None
+    recipient: TurnRecipient | None = None
     is_user_message: bool = True
     context: ChatContext | None = Field(default=None, max_length=MAX_CONTEXT_ENTRIES)
     voice: bool = Field(
@@ -466,6 +476,49 @@ class QueuePendingMessageRequest(BaseModel):
             "answered as accepted without queueing it again."
         ),
     )
+
+
+def _supports_turn_recipient(session: ChatSessionInfo) -> bool:
+    return (
+        session.metadata.llm_auth_provider == "platform"
+        and turn_queue.is_users_own_chat(session)
+        and not session.metadata.source_platform
+        and not session.metadata.builder_graph_id
+    )
+
+
+async def _resolve_turn_expert(
+    session: ChatSessionInfo,
+    request: StreamChatRequest,
+    user_id: str,
+    managed_model_id: str | None,
+) -> str | None:
+    if request.recipient is None:
+        return session.expert_id
+    if (
+        not managed_model_id
+        or not _supports_turn_recipient(session)
+        or request.expert_kickoff
+        or not request.is_user_message
+    ):
+        raise HTTPException(
+            422, "This chat does not support changing the reply recipient."
+        )
+    expert_id = recipient_expert_id(request.recipient)
+    if expert_id == session.expert_id:
+        return expert_id
+    if expert_id is not None:
+        try:
+            _, scope = await read_private_expert(user_id, expert_id)
+        except ExpertSessionUnavailableError as exc:
+            raise HTTPException(404, "Expert not available") from exc
+    else:
+        scope = await orgs_db().get_user_default_team(user_id)
+    if not is_personal_chat_scope((session.organization_id, session.team_id), scope):
+        raise HTTPException(
+            422, "Expert switching is available in your personal workspace."
+        )
+    return expert_id
 
 
 class PeekPendingMessagesResponse(BaseModel):
@@ -542,6 +595,7 @@ class CreateSessionResponse(BaseModel):
     user_id: str | None
     metadata: ChatSessionMetadata = ChatSessionMetadata()
     expert_id: str | None = None
+    supports_turn_recipient: bool = False
 
 
 class ActiveStreamInfo(BaseModel):
@@ -562,6 +616,7 @@ class SessionDetailResponse(BaseModel):
     """Response model providing complete details for a chat session, including messages."""
 
     id: str
+    title: str | None = None
     created_at: str
     updated_at: str
     user_id: str | None
@@ -1499,9 +1554,16 @@ async def get_session(
 
     total_prompt = sum(u.prompt_tokens for u in page.session.usage)
     total_completion = sum(u.completion_tokens for u in page.session.usage)
+    supports_turn_recipient = False
+    if page.session.organization_id and _supports_turn_recipient(page.session):
+        personal_scope = await orgs_db().get_user_default_team(user_id)
+        supports_turn_recipient = is_personal_chat_scope(
+            (page.session.organization_id, page.session.team_id), personal_scope
+        )
 
     return SessionDetailResponse(
         id=page.session.session_id,
+        title=page.session.title,
         created_at=page.session.started_at.isoformat(),
         updated_at=page.session.updated_at.isoformat(),
         user_id=page.session.user_id or None,
@@ -1514,6 +1576,7 @@ async def get_session(
         total_completion_tokens=total_completion,
         metadata=page.session.metadata,
         expert_id=page.session.expert_id,
+        supports_turn_recipient=supports_turn_recipient,
         background_outcome=background.outcome,
         background_pending=background.pending,
     )
@@ -1997,6 +2060,14 @@ async def stream_chat_post(
         or "managed_model_id" in request.model_fields_set
         else None
     )
+    turn_expert_id = await _resolve_turn_expert(
+        session, request, user_id, managed_model_id
+    )
+    recipient_workspace_id = (
+        turn_workspace_id(session_id, turn_expert_id)
+        if turn_expert_id is not None and turn_expert_id != session.expert_id
+        else None
+    )
     await _apply_autopilot_mode(session, user_id, request.autopilot_mode)
     if managed_model_id is None:
         await enforce_model_entitlement(request.model, session, user_id)
@@ -2023,7 +2094,7 @@ async def stream_chat_post(
     elif session.metadata.llm_auth_provider == "codex":
         await enforce_codex_access_http(user_id)
 
-    if request.is_user_message:
+    if request.is_user_message and turn_expert_id == session.expert_id:
         # The only writer of card approvals: a model can add chat rows, not requests.
         await record_card_decisions(user_id, session_id, message)
     message_id = (
@@ -2031,7 +2102,11 @@ async def stream_chat_post(
         if request.message_id
         else None
     )
-    message_metadata: dict[str, Any] | None = None
+    message_metadata: dict[str, Any] | None = (
+        {"turn_recipient": request.recipient.model_dump()}
+        if request.recipient
+        else None
+    )
     persisted_kickoff_has_reply: bool | None = None
     resume_persisted_kickoff = False
     if request.expert_kickoff:
@@ -2089,7 +2164,7 @@ async def stream_chat_post(
                 status_code=409,
                 detail="expert kickoff requires an idle session",
             )
-        if managed_model_id is not None:
+        if managed_model_id is not None or request.recipient is not None:
             raise HTTPException(
                 409, "Wait for the current reply before sending with a selected model."
             )
@@ -2147,10 +2222,15 @@ async def stream_chat_post(
             user_id,
             request.file_ids or [],
             session_id=session_id,
-            expert_id=session.expert_id,
+            expert_id=turn_expert_id,
+            **(
+                {"recipient_workspace_id": recipient_workspace_id}
+                if recipient_workspace_id
+                else {}
+            ),
         )
         folders = await resolve_attachable_workspace_folders(
-            user_id, request.folder_ids or [], expert_id=session.expert_id
+            user_id, request.folder_ids or [], expert_id=turn_expert_id
         )
         sanitized_file_ids = [wf.id for wf in files] or None
         message += build_files_block(files, folders)
@@ -2207,7 +2287,7 @@ async def stream_chat_post(
                 message_metadata=message_metadata,
                 message_already_persisted=resume_persisted_kickoff,
                 is_user_message=request.is_user_message,
-                expert_id=session.expert_id,
+                expert_id=turn_expert_id,
                 session_origin=session.metadata.origin,
                 session_source_platform=session.metadata.source_platform,
                 context=request.context,
@@ -2217,6 +2297,11 @@ async def stream_chat_post(
                 team_id=turn_team_id,
                 model=None if managed_model_id else request.model,
                 **({"managed_model_id": managed_model_id} if managed_model_id else {}),
+                **(
+                    {"recipient": request.recipient}
+                    if request.recipient is not None
+                    else {}
+                ),
                 llm_auth_provider=session.metadata.llm_auth_provider,
                 llm_credential_id=session.metadata.llm_credential_id,
                 permissions=builder_permissions,
@@ -2253,6 +2338,11 @@ async def stream_chat_post(
                 file_ids=sanitized_file_ids,
                 model=None if managed_model_id else request.model,
                 **({"managed_model_id": managed_model_id} if managed_model_id else {}),
+                **(
+                    {"recipient": request.recipient}
+                    if request.recipient is not None
+                    else {}
+                ),
                 llm_auth_provider=session.metadata.llm_auth_provider,
                 llm_credential_id=session.metadata.llm_credential_id,
                 permissions=(
@@ -2270,6 +2360,11 @@ async def stream_chat_post(
                 status_code=429,
                 detail=inflight_turn_limit_message(inflight_cap),
             )
+        except turn_queue.SessionNotIdle as busy_exc:
+            await release_client_message_claim()
+            raise HTTPException(
+                409, "Another reply is already queued. Please send this message again."
+            ) from busy_exc
         except BaseException:
             # Raised inside the handler above, so the outer BaseException
             # clause never sees it.
