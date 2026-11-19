@@ -18,6 +18,7 @@ import { useAuth } from "@/lib/auth/hooks/useAuth";
 import { isEditableElement } from "@/lib/platform";
 import {
   AddTeamIcon,
+  Archive01Icon,
   FlowIcon,
   Folder01Icon,
   GridViewIcon,
@@ -140,6 +141,7 @@ function NavItem({ link }: NavItemProps) {
         Build: "构建",
         Files: "文件",
         Team: "团队",
+        "Chat archive": "对话归档",
       } as Record<string, string>
     )[link.name] ?? link.name,
   );
@@ -205,6 +207,9 @@ export function AppSidebar(props: Props) {
       tourTarget: "team" as const,
     },
     ...WORKSPACE_LINKS,
+    ...(isLoggedIn
+      ? [{ name: "Chat archive", href: "/chat-imports", icon: Archive01Icon }]
+      : []),
   ];
 
   useEffect(() => {

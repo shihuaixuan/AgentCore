@@ -38,6 +38,7 @@ vi.mock("@sentry/nextjs", () => ({
 }));
 
 import { customMutator } from "../custom-mutator";
+import { resetClientRequestFailureLog } from "../request-failure-log";
 import { getSystemHeaders } from "@/lib/impersonation";
 import { environment } from "@/services/environment";
 import { IMPERSONATION_HEADER_NAME } from "@/lib/constants";
@@ -421,6 +422,50 @@ describe("customMutator — response dates", () => {
       execution.inputs,
     );
   });
+});
+
+describe("customMutator — sensitive responses", () => {
+  afterEach(() => {
+    resetClientRequestFailureLog();
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it.each([422, 200])(
+    "does not expose a private string from malformed JSON (%i)",
+    async (status) => {
+      mockIsClientSide.mockReturnValue(true);
+      mockGetSystemHeaders.mockReturnValue({});
+      const warn = vi.spyOn(console, "warn");
+      const info = vi.spyOn(console, "info");
+      const privateTitle = "Private archive title";
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue(
+          new Response(privateTitle, {
+            status,
+            headers: { "content-type": "application/json" },
+          }),
+        ),
+      );
+
+      await expect(
+        customMutator(
+          "/api/chat/imports",
+          { method: "GET" },
+          { sensitive: true },
+        ),
+      ).rejects.toMatchObject({
+        message: `HTTP ${status}`,
+        data: null,
+      });
+      expect(warn).not.toHaveBeenCalled();
+      expect(JSON.stringify(info.mock.calls)).not.toContain(privateTitle);
+      expect(
+        JSON.stringify(vi.mocked(Sentry.captureMessage).mock.calls),
+      ).not.toContain(privateTitle);
+    },
+  );
 });
 
 describe("customMutator — banned account", () => {

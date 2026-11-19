@@ -61,6 +61,10 @@ export const customMutator = async <
 >(
   url: string,
   options: RequestInit,
+  {
+    sensitive = false,
+    binary = false,
+  }: { sensitive?: boolean; binary?: boolean } = {},
 ): Promise<T> => {
   const requestOptions = options;
   const method = (requestOptions.method || "GET") as
@@ -141,11 +145,12 @@ export const customMutator = async <
     try {
       responseData = await getBody<any>(response);
     } catch (error) {
-      console.warn("Failed to parse error response body:", error);
+      if (!sensitive)
+        console.warn("Failed to parse error response body:", error);
       responseData = { error: "Failed to parse response" };
     }
 
-    const rawDetail = responseData?.detail;
+    const rawDetail = sensitive ? undefined : responseData?.detail;
     const detail = Array.isArray(rawDetail)
       ? rawDetail
           .map((e: unknown) =>
@@ -162,18 +167,18 @@ export const customMutator = async <
             ? JSON.stringify(rawDetail)
             : undefined;
 
-    const errorMessage =
-      detail ||
-      responseData?.message ||
-      response.statusText ||
-      `HTTP ${response.status}`;
+    const errorMessage = sensitive
+      ? `HTTP ${response.status}`
+      : detail ||
+        responseData?.message ||
+        response.statusText ||
+        `HTTP ${response.status}`;
 
     const failure = {
       status: response.status,
       method,
       url: fullUrl.replace(baseUrl, ""), // Show relative URL for cleaner logs
       errorMessage,
-      responseData,
     };
 
     if (environment.isServerSide()) {
@@ -183,14 +188,29 @@ export const customMutator = async <
       handleRefusedAccount(response.status, responseData);
     }
 
-    throw new ApiError(errorMessage, response.status, responseData);
+    throw new ApiError(
+      errorMessage,
+      response.status,
+      sensitive ? null : responseData,
+    );
   }
 
-  const responseData = await getBody<unknown>(response);
+  let responseData: unknown;
+  try {
+    responseData = binary
+      ? await response.blob()
+      : await getBody<unknown>(response);
+  } catch (error) {
+    if (sensitive)
+      throw new ApiError(`HTTP ${response.status}`, response.status, null);
+    throw error;
+  }
 
   // Transform ISO date strings to Date objects in the response data
   const transformedData =
-    responseData instanceof Blob ? responseData : transformDates(responseData);
+    sensitive || responseData instanceof Blob
+      ? responseData
+      : transformDates(responseData);
 
   return {
     status: response.status,
