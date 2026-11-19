@@ -1,10 +1,9 @@
-import { webcrypto } from "node:crypto";
-import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import { createHash } from "node:crypto";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { readQwenWorkDatabase } from "../qwenWorkDatabase";
 import { findQwenWorkDatabase } from "../qwenWorkDirectory";
 import { makeQwenWorkFixture, pickedFile } from "./qwenWorkFixture";
 
-beforeEach(() => vi.stubGlobal("crypto", webcrypto));
 afterEach(() => vi.unstubAllGlobals());
 
 describe("QwenWork directory import", () => {
@@ -34,7 +33,8 @@ describe("QwenWork directory import", () => {
     },
   );
 
-  it("projects ordered text, timestamps and attachment references without leaking tool input", async () => {
+  it("projects text and attachment references with legacy IDs without Web Crypto", async () => {
+    vi.stubGlobal("crypto", {});
     const raw = await makeQwenWorkFixture();
     const { entries, skipped } = await readQwenWorkDatabase(raw);
     expect(skipped).toBe(0);
@@ -47,7 +47,9 @@ describe("QwenWork directory import", () => {
       references: [{ path: "D:/Project/output/report.pdf", cwd: "D:/Project" }],
       conversation: {
         source: "qwenwork",
-        source_id: expect.stringMatching(/^[0-9a-f]{64}$/),
+        source_id: createHash("sha256")
+          .update("qwenwork-db-v1\0source-first", "utf8")
+          .digest("hex"),
         title: "Local fixture",
         messages: [
           {

@@ -32,8 +32,8 @@ export default function ChatImportsPage() {
         </Text>
         <Text variant="body" tone="secondary">
           {t(
-            "Keep private, read-only copies of chats from WorkBuddy, QwenWork, or Qianwen.",
-            "将 WorkBuddy、千问办公或通义千问的对话保存为私有的只读副本。",
+            "Keep private, read-only copies of chats from WorkBuddy and QwenWork.",
+            "将 WorkBuddy 和千问办公的对话保存为私有的只读副本。",
           )}
         </Text>
       </header>

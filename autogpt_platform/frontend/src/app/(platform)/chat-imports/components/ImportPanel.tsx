@@ -7,7 +7,6 @@ import {
   TabsLineTrigger,
 } from "@/components/molecules/TabsLine/TabsLine";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import { QianwenImport } from "./QianwenImport";
 import { QwenWorkImport } from "./QwenWorkImport";
 import { WorkBuddyImport } from "./WorkBuddyImport";
 
@@ -39,18 +38,12 @@ export function ImportPanel({ ownerID, onSaved }: ImportSourceProps) {
             <TabsLineTrigger value="qwenwork">
               {t("QwenWork", "千问办公")}
             </TabsLineTrigger>
-            <TabsLineTrigger value="qianwen">
-              {t("Qianwen", "通义千问")}
-            </TabsLineTrigger>
           </TabsLineList>
           <TabsLineContent value="workbuddy" forceMount>
             <WorkBuddyImport ownerID={ownerID} onSaved={onSaved} />
           </TabsLineContent>
           <TabsLineContent value="qwenwork" forceMount>
             <QwenWorkImport ownerID={ownerID} onSaved={onSaved} />
-          </TabsLineContent>
-          <TabsLineContent value="qianwen" forceMount>
-            <QianwenImport ownerID={ownerID} onSaved={onSaved} />
           </TabsLineContent>
         </TabsLine>
       </section>

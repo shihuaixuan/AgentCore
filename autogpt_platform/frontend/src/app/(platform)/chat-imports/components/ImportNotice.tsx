@@ -59,11 +59,6 @@ function errorMessage(error: unknown, t: Translate) {
         "A file is not a complete WorkBuddy text conversation. If WorkBuddy is still writing it, wait for the task to finish and try again.",
         "有文件不是完整的 WorkBuddy 文本会话。如果 WorkBuddy 还在写入，请等任务结束后重试。",
       );
-    case "secure-context":
-      return t(
-        "Open the archive using HTTPS or localhost to import local histories.",
-        "请通过 HTTPS 或 localhost 打开归档，再导入本地会话。",
-      );
     case "qwenwork-folder":
       return t(
         "QwenWork history not found. Select %APPDATA%\\QwenWorkCN\\data on Windows.",
@@ -109,11 +104,6 @@ function errorMessage(error: unknown, t: Translate) {
             `Conversation ${error.entry} is invalid. Check the source, ID, title, and messages.`,
             `第 ${error.entry} 条对话无效。请检查来源、ID、标题和消息。`,
           );
-    case "manual":
-      return t(
-        "Enter a title (up to 200 characters), question and answer (up to 100,000 characters each).",
-        "请输入标题（最多 200 字）、问题和回答（各最多 100,000 字）。",
-      );
     case "selection":
       return t(
         "Select 1 to 25 conversations per save.",

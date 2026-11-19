@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { nativeSourceID } from "./nativeSourceID";
 import { extractAttachmentPaths } from "./workbuddyAttachments";
 import {
   encodeImport,
@@ -37,7 +38,7 @@ export async function readWorkBuddyFiles(files: File[]) {
   const entries: NativeChatDraft[] = [];
   for (const file of files) {
     if (/\.jsonl$/i.test(file.name)) {
-      entries.push(await parseWorkBuddyDraft(await file.text()));
+      entries.push(parseWorkBuddyDraft(await file.text()));
     } else if (/\.json$/i.test(file.name)) {
       entries.push(
         ...parseWorkBuddyBundle(await file.text()).map((conversation) => ({
@@ -52,13 +53,11 @@ export async function readWorkBuddyFiles(files: File[]) {
   return entries;
 }
 
-export async function parseWorkBuddyTranscript(text: string) {
-  return (await parseWorkBuddyDraft(text)).conversation;
+export function parseWorkBuddyTranscript(text: string) {
+  return parseWorkBuddyDraft(text).conversation;
 }
 
-export async function parseWorkBuddyDraft(
-  text: string,
-): Promise<NativeChatDraft> {
+function parseWorkBuddyDraft(text: string): NativeChatDraft {
   const messages = new Map<string, ImportMessage>();
   const references = new Map<string, AttachmentReference>();
   let cwd: string | undefined;
@@ -105,7 +104,7 @@ export async function parseWorkBuddyDraft(
     title || ordered.find(({ role }) => role === "user")?.text || "WorkBuddy";
   const conversation = validateWorkBuddyConversation({
     source: "workbuddy",
-    source_id: await hashSession(sessionID),
+    source_id: nativeSourceID("workbuddy", sessionID),
     title: Array.from(heading.trim()).slice(0, 200).join(""),
     messages: ordered,
   });
@@ -169,14 +168,4 @@ function normalizeTimestamp(value: unknown): string | undefined {
     const utcYear = date.getUTCFullYear();
     if (utcYear >= 1 && utcYear <= 9999) return date.toISOString();
   }
-}
-
-async function hashSession(sessionID: string) {
-  if (!globalThis.crypto?.subtle)
-    throw new ImportValidationError("secure-context");
-  const data = new TextEncoder().encode(`workbuddy-jsonl-v1\0${sessionID}`);
-  const hash = await globalThis.crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hash), (byte) =>
-    byte.toString(16).padStart(2, "0"),
-  ).join("");
 }
