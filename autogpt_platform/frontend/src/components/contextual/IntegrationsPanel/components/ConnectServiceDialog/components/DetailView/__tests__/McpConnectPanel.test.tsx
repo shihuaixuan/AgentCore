@@ -492,6 +492,20 @@ describe("McpConnectPanel", () => {
     expect(screen.queryByPlaceholderText(manualTokenPlaceholder)).toBeNull();
   });
 
+  it("shows the Bearer token field without the redundant hint", () => {
+    render(
+      <McpConnectPanel
+        onSuccess={() => {}}
+        initialServerURL="https://api.gitee.com/mcp"
+        lockServerURL
+        allowedAuthMethods={["bearer"]}
+      />,
+    );
+
+    expect(screen.getByLabelText("API token")).toBeDefined();
+    expect(screen.queryByText(/paste the token itself/i)).toBeNull();
+  });
+
   it("submits a bearer token then calls onSuccess", async () => {
     const {
       postV2InitiateOauthLoginForAnMcpServer,
@@ -567,6 +581,9 @@ describe("McpConnectPanel", () => {
       target: { value: "basic" },
     });
     expect(screen.getByText("Basic authentication token")).toBeDefined();
+    expect(
+      screen.getByText(/^Paste the Base64 of user:password/),
+    ).toBeDefined();
     fireEvent.change(screen.getByPlaceholderText(manualTokenPlaceholder), {
       target: { value: "  cGstbGYtYWJjZA==  " },
     });

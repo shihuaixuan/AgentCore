@@ -119,7 +119,11 @@ export function McpConnectPanel({
             value={state.token}
             onChange={(e) => state.handleTokenChange(e.target.value)}
             disabled={state.isSubmitting}
-            hint={mcpAuthTokenHint(state.authScheme, t)}
+            hint={
+              state.authScheme === "basic"
+                ? mcpAuthTokenHint(state.authScheme, t)
+                : undefined
+            }
             {...noPasswordManager}
             autoComplete="new-password"
           />
