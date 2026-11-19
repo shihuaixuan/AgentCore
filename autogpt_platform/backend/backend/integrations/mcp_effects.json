@@ -604,5 +604,65 @@
   },
   "mcp_iphouse": {
     "source": "https://mcp.iphouse.cn/mcp/guide"
+  },
+  "mcp_dingtalk_aitable": {
+    "source": "https://aihub.dingtalk.com/#/detail?mcpId=9555&detailType=marketMcpDetail",
+    "review_when_gate_inactive": true,
+    "read": [
+      "get_base",
+      "get_fields",
+      "get_tables",
+      "list_bases",
+      "query_records"
+    ],
+    "external": [
+      "create_records",
+      "update_records"
+    ]
+  },
+  "mcp_dingtalk_calendar": {
+    "source": "https://aihub.dingtalk.com/#/detail?mcpId=1050&detailType=marketMcpDetail",
+    "review_when_gate_inactive": true,
+    "read": [
+      "list_calendar_events",
+      "list_calendars",
+      "list_event_instances"
+    ],
+    "external": [
+      "create_calendar_event"
+    ]
+  },
+  "mcp_dingtalk_docs": {
+    "source": "https://aihub.dingtalk.com/#/detail?mcpId=9629&detailType=marketMcpDetail",
+    "review_when_gate_inactive": true,
+    "read": [
+      "get_document_content",
+      "get_document_info",
+      "search_documents"
+    ],
+    "external": [
+      "create_document",
+      "update_document"
+    ]
+  },
+  "mcp_dingtalk_todo": {
+    "source": "https://aihub.dingtalk.com/#/detail?mcpId=2034&detailType=marketMcpDetail",
+    "review_when_gate_inactive": true,
+    "read": [
+      "get_todo_detail",
+      "get_user_todos",
+      "get_user_todos_in_current_org"
+    ],
+    "external": [
+      "create_personal_todo",
+      "update_todo_done_status"
+    ]
+  },
+  "mcp_tencent_yuanbao_search": {
+    "source": "https://cloud.tencent.com/developer/mcp/server/11764",
+    "review_when_gate_inactive": true,
+    "external": [
+      "SearchPro"
+    ]
   }
 }

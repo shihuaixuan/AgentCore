@@ -789,6 +789,67 @@ async def test_run_mcp_catalog_write_runs_without_review():
     assert run.await_args.kwargs["tool_arguments"] == {"a": 1}
 
 
+@pytest.mark.parametrize(
+    "capability_id,tool",
+    [
+        ("mcp:dingtalk_todo", "create_personal_todo"),
+        ("mcp:dingtalk_calendar", "create_calendar_event"),
+        ("https://mcp-gw.dingtalk.com/oauth/server/doc", "get_new_tool"),
+        ("mcp:dingtalk_aitable", "update_records"),
+        ("mcp:api.wsa.cloud.tencent.com", "SearchPro"),
+    ],
+)
+async def test_run_mcp_domestic_connector_reviews_external_or_unknown_tools(
+    capability_id, tool
+):
+    out = MCPToolOutputResponse(message="ran", server_url="u", tool_name=tool)
+    with (
+        patch("backend.copilot.tools.run_capability.gate_active", return_value=False),
+        patch(
+            "backend.copilot.tools.run_capability.RunMCPToolTool._execute",
+            AsyncMock(return_value=out),
+        ) as run,
+        patch(
+            "backend.copilot.tools.run_capability.open_mcp_review",
+            AsyncMock(return_value="copilot-mcp-x:1"),
+        ),
+    ):
+        result = await RunCapabilityTool()._execute(
+            USER, make_session(USER), id=capability_id, input={"tool": tool}
+        )
+
+    assert isinstance(result, ReviewRequiredResponse)
+    assert result.input_data["tool"] == tool
+    run.assert_not_awaited()
+
+
+async def test_run_mcp_dingtalk_known_read_does_not_require_legacy_review():
+    url = "https://mcp-gw.dingtalk.com/oauth/server/todo"
+    out = MCPToolOutputResponse(
+        message="done", server_url=url, tool_name="get_user_todos"
+    )
+    with (
+        patch("backend.copilot.tools.run_capability.gate_active", return_value=False),
+        patch(
+            "backend.copilot.tools.run_capability.RunMCPToolTool._execute",
+            AsyncMock(return_value=out),
+        ) as run,
+        patch(
+            "backend.copilot.tools.run_capability.open_mcp_review", AsyncMock()
+        ) as review,
+    ):
+        result = await RunCapabilityTool()._execute(
+            USER,
+            make_session(USER),
+            id="mcp:dingtalk_todo",
+            input={"tool": "get_user_todos"},
+        )
+
+    assert result is out
+    assert run.await_args.kwargs["server_url"] == url
+    review.assert_not_awaited()
+
+
 async def test_run_mcp_open_world_write_pauses_for_review():
     with (
         patch(

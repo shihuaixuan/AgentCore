@@ -2221,12 +2221,19 @@ async def get_ayrshare_sso_url(
 
 
 # === PROVIDER DISCOVERY ENDPOINTS ===
+# Unlist by service so the native and MCP versions are treated alike. Saved
+# credentials and workflow blocks still use the full provider registries.
+_UNLISTED_CONNECTOR_SERVICES = frozenset(
+    {"ando", "bird", "discord", "infobip", "slack", "telegram"}
+)
+
+
 @router.get("/providers", response_model=List[ProviderMetadata])
 async def list_providers(
     user_id: Annotated[str | None, Security(get_optional_user_id)],
 ) -> List[ProviderMetadata]:
     """
-    Get metadata for every available provider.
+    Get metadata for providers listed in the connector directory.
 
     Returns both statically defined providers (from ``ProviderName`` enum) and
     dynamically registered providers (from SDK decorators). Each entry includes
@@ -2278,8 +2285,12 @@ async def list_providers(
             service_icon=identity.icon,
         )
 
-    return [_native(name) for name in all_providers] + [
-        _catalog(entry) for entry in get_mcp_catalog()
+    providers = [_native(name) for name in all_providers]
+    providers.extend(_catalog(entry) for entry in get_mcp_catalog())
+    return [
+        provider
+        for provider in providers
+        if provider.service not in _UNLISTED_CONNECTOR_SERVICES
     ]
 
 

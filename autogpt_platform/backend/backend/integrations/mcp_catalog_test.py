@@ -325,6 +325,24 @@ def test_a_tool_cannot_carry_two_effects():
         ("https://mcp.cloudflare.com/mcp", "docs", "read"),
         ("https://mcp.cloudflare.com/mcp", "whoami", "read"),
         ("https://mcp.cloudflare.com/mcp", "execute", "external"),
+        ("https://mcp-gw.dingtalk.com/oauth/server/todo", "get_user_todos", "read"),
+        (
+            "https://mcp-gw.dingtalk.com/oauth/server/calendar",
+            "create_calendar_event",
+            "external",
+        ),
+        ("https://mcp-gw.dingtalk.com/oauth/server/doc", "search_documents", "read"),
+        (
+            "https://mcp-gw.dingtalk.com/oauth/server/doc",
+            "get_unclassified_tool",
+            None,
+        ),
+        (
+            "https://mcp-gw.dingtalk.com/oauth/server/aitable",
+            "update_records",
+            "external",
+        ),
+        ("https://api.wsa.cloud.tencent.com/Mcp", "SearchPro", "external"),
         ("https://mcp.example.com/mcp", "get_things", None),
     ],
 )

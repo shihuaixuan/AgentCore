@@ -273,6 +273,8 @@ class MCPEffectMap(BaseModel):
     external: list[str] = Field(default_factory=list)
     # External writes that cannot be taken back.
     irreversible: list[str] = Field(default_factory=list)
+    # Apply the effect map even when the Auto Mode gate is unavailable.
+    review_when_gate_inactive: bool = False
 
     @model_validator(mode="after")
     def validate_disjoint(self) -> "MCPEffectMap":
@@ -291,9 +293,13 @@ class MCPEffectMap(BaseModel):
 
 def mcp_tool_effect(server_url: str, tool: str) -> MCPToolEffect | None:
     """None: the server is not catalogued, or its map does not name the tool."""
-    entry = get_mcp_catalog_entry_for_url(server_url)
-    effects = get_mcp_effect_maps().get(entry.name) if entry else None
+    effects = mcp_effect_map_for_url(server_url)
     return effects.effect_of(tool) if effects else None
+
+
+def mcp_effect_map_for_url(server_url: str) -> MCPEffectMap | None:
+    entry = get_mcp_catalog_entry_for_url(server_url)
+    return get_mcp_effect_maps().get(entry.name) if entry else None
 
 
 @cache

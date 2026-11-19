@@ -1,10 +1,9 @@
 """Human review for MCP calls made through ``run_capability``.
 
-With the auto-mode gate off, MCP tool annotations are untrusted and mostly
-absent, so a call to a server that is not in the official catalog pauses for
-review when the tool looks like a write; catalog servers run without a pause.
-With the gate on, none of this runs: the server's effect map decides, or the
-tool asks on first use (``gate/subject.py``).
+With the Auto Mode gate off, an opted-in catalog server uses its effect map
+and asks about tools that are not known reads. Other catalog servers keep
+their legacy behavior, and uncatalogued servers ask when a tool looks like
+a write. With the gate on, ``gate/subject.py`` classifies the call instead.
 
 Records reuse the block review table with a synthetic node id so the
 existing approval UI, the pending-review feed and ``resume_capability`` all
@@ -22,6 +21,7 @@ from backend.copilot.constants import (
     COPILOT_SYNTHETIC_ID_PREFIX,
 )
 from backend.data.db_accessors import review_db
+from backend.integrations.mcp_catalog import mcp_effect_map_for_url
 from backend.util.json import same_json
 
 COPILOT_MCP_NODE_PREFIX = f"{COPILOT_SYNTHETIC_ID_PREFIX}mcp-"
@@ -55,7 +55,10 @@ def looks_like_write(tool_name: str) -> bool:
     return bool(_WRITE_VERBS.search(tool_name)) or not _READ_VERBS.search(tool_name)
 
 
-def needs_review(tool_name: str, *, catalog_server: bool) -> bool:
+def needs_review(server_url: str, tool_name: str, *, catalog_server: bool) -> bool:
+    effects = mcp_effect_map_for_url(server_url)
+    if effects and effects.review_when_gate_inactive:
+        return effects.effect_of(tool_name) != "read"
     return not catalog_server and looks_like_write(tool_name)
 
 
@@ -104,10 +107,7 @@ async def open_mcp_review(
         node_exec_id=review_id,
         chat_session_id=session_id,
         input_data=data,
-        message=(
-            f"Run MCP tool '{payload.tool}' on {host} with the shown arguments? "
-            "This server is not in the official catalog."
-        ),
+        message=f"Run MCP tool '{payload.tool}' on {host} with the shown arguments?",
         editable=True,
         organization_id=organization_id,
         team_id=team_id,

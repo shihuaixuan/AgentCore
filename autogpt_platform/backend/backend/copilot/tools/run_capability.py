@@ -509,13 +509,14 @@ async def _run_mcp(
             session_id=session.session_id,
         ).from_outside()
     host = urlsplit(server_url).hostname or server_url
-    # With the gate on it has already decided this call on the server's
-    # effect map; the verb heuristic is the flag-off path only.
+    # With the gate on it has already decided whether this call needs approval.
     if (
         tool_name
         and not session.dry_run
         and needs_review(
-            tool_name, catalog_server=entry is not None and not entry.custom_mcp
+            server_url,
+            tool_name,
+            catalog_server=entry is not None and not entry.custom_mcp,
         )
         and not await gate_active(user_id, session)
     ):
@@ -542,8 +543,7 @@ async def _run_mcp(
         )
         return ReviewRequiredResponse(
             message=(
-                f"'{tool_name}' on {host} looks like a write to a server outside the "
-                "official catalog, so it needs the user's approval. Tell the user; "
+                f"'{tool_name}' on {host} needs the user's approval. Tell the user; "
                 f"after they approve, call resume_capability(review_id='{review_id}'). "
                 f"{review_card_location(session.metadata)}"
             ),

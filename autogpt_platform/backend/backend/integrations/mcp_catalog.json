@@ -592,6 +592,66 @@
     }
   },
   {
+    "name": "mcp_dingtalk_aitable",
+    "display_name": "钉钉 AI 表格",
+    "description": "查询和更新钉钉 AI 表格记录，维护项目台账、客户清单和进度看板。",
+    "mcp_server": {
+      "server_url": "https://mcp-gw.dingtalk.com/oauth/server/aitable",
+      "documentation_url": "https://aihub.dingtalk.com/",
+      "setup_instructions": "点击连接，登录钉钉并选择要授权的组织。授权后可在账号权限范围内查询和更新 AI 表格（多维表），无需填写 API Key。若组织限制第三方应用，请联系管理员。",
+      "connection_mode": "hosted",
+      "auth_methods": [
+        "oauth"
+      ],
+      "icon_id": "dingtalk_aitable"
+    }
+  },
+  {
+    "name": "mcp_dingtalk_calendar",
+    "display_name": "钉钉日历",
+    "description": "查看日程和会议室安排，创建会议及其他日历事项。",
+    "mcp_server": {
+      "server_url": "https://mcp-gw.dingtalk.com/oauth/server/calendar",
+      "documentation_url": "https://aihub.dingtalk.com/",
+      "setup_instructions": "点击连接，登录钉钉并授权日历访问，无需填写 API Key。日程、参会人和会议室的操作范围取决于所选组织及账号权限。",
+      "connection_mode": "hosted",
+      "auth_methods": [
+        "oauth"
+      ],
+      "icon_id": "dingtalk_calendar"
+    }
+  },
+  {
+    "name": "mcp_dingtalk_docs",
+    "display_name": "钉钉文档",
+    "description": "搜索和读取钉钉文档，创建或更新会议纪要、周报等在线文档。",
+    "mcp_server": {
+      "server_url": "https://mcp-gw.dingtalk.com/oauth/server/doc",
+      "documentation_url": "https://aihub.dingtalk.com/",
+      "setup_instructions": "点击连接，登录钉钉并授权文档访问，无需填写 API Key。只能在所选组织内访问账号有权限的文档；创建及编辑需要目标位置的写入权限。",
+      "connection_mode": "hosted",
+      "auth_methods": [
+        "oauth"
+      ],
+      "icon_id": "dingtalk_docs"
+    }
+  },
+  {
+    "name": "mcp_dingtalk_todo",
+    "display_name": "钉钉待办",
+    "description": "查询个人待办，创建行动项，更新待办完成状态。",
+    "mcp_server": {
+      "server_url": "https://mcp-gw.dingtalk.com/oauth/server/todo",
+      "documentation_url": "https://aihub.dingtalk.com/",
+      "setup_instructions": "点击连接，登录钉钉并授权待办访问，无需填写 API Key。待办的查看、创建和状态更新遵循账号和组织权限。",
+      "connection_mode": "hosted",
+      "auth_methods": [
+        "oauth"
+      ],
+      "icon_id": "dingtalk_todo"
+    }
+  },
+  {
     "name": "mcp_gitee",
     "display_name": "Gitee",
     "description": "查询代码仓库、文件、Issue 和 PR，并执行评论、发布与研发协作操作。",
@@ -1164,6 +1224,21 @@
       ],
       "icon_id": "tavily",
       "provider": "tavily"
+    }
+  },
+  {
+    "name": "mcp_tencent_yuanbao_search",
+    "display_name": "腾讯云元宝搜索",
+    "description": "检索公开网页和腾讯内容，用于资料调研和新闻查找。",
+    "mcp_server": {
+      "server_url": "https://api.wsa.cloud.tencent.com/Mcp",
+      "documentation_url": "https://cloud.tencent.com/developer/mcp/server/11764",
+      "setup_instructions": "在腾讯云元宝搜索控制台开通服务并创建元宝搜索 API Key，填入下方令牌框。搜索按服务套餐消耗额度。",
+      "connection_mode": "hosted",
+      "auth_methods": [
+        "bearer"
+      ],
+      "icon_id": "tencent_yuanbao_search"
     }
   },
   {

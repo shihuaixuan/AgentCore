@@ -22,7 +22,15 @@ def test_provider_endpoint_only_exposes_connectable_catalog(behave_as: BehaveAs)
         patch("backend.blocks.load_all_blocks"),
         patch(
             "backend.api.features.integrations.router.get_all_provider_names",
-            return_value=["notion", "google"],
+            return_value=[
+                "notion",
+                "slack",
+                "google",
+                "discord",
+                "telegram",
+                "smtp",
+                "mcp",
+            ],
         ),
         patch(
             "backend.api.features.integrations.router.get_provider_description",
@@ -37,12 +45,29 @@ def test_provider_endpoint_only_exposes_connectable_catalog(behave_as: BehaveAs)
 
     assert response.status_code == 200
     providers = response.json()
-    connectable = {entry.name for entry in get_mcp_catalog()}
-    assert {provider["name"] for provider in providers[2:]} == connectable
-    assert len({provider["name"] for provider in providers}) == len(providers)
-    assert "mcp_langfuse" in {provider["name"] for provider in providers}
-    assert [provider["name"] for provider in providers[:2]] == ["notion", "google"]
-    assert all(provider["mcp_server"] is None for provider in providers[:2])
+    provider_names = {provider["name"] for provider in providers}
+    unlisted_catalog = {"mcp_ando", "mcp_bird", "mcp_infobip"}
+    assert provider_names.isdisjoint(
+        unlisted_catalog | {"slack", "discord", "telegram"}
+    )
+    assert len(provider_names) == len(providers)
+    assert [p["name"] for p in providers if p["mcp_server"] is None] == [
+        "notion",
+        "google",
+        "smtp",
+        "mcp",
+    ]
+    assert {p["name"] for p in providers if p["mcp_server"] is not None} == {
+        entry.name for entry in get_mcp_catalog()
+    } - unlisted_catalog
+    assert {
+        "mcp_langfuse",
+        "mcp_gitee",
+        "mcp_iphouse",
+        "mcp_processon",
+        "mcp_qcc_company",
+        "mcp_wps_yundoc",
+    } <= provider_names
     notion = next(
         provider for provider in providers if provider["name"] == "mcp_notion"
     )
@@ -50,6 +75,44 @@ def test_provider_endpoint_only_exposes_connectable_catalog(behave_as: BehaveAs)
     assert notion["supported_auth_types"] == []
     assert notion["mcp_server"]["server_url"] == "https://mcp.notion.com/mcp"
     assert notion["mcp_server"]["connection_mode"] == "hosted"
+
+
+def test_domestic_office_connectors_have_distinct_setup_cards():
+    expected = {
+        "mcp_dingtalk_todo": ("https://mcp-gw.dingtalk.com/oauth/server/todo", "oauth"),
+        "mcp_dingtalk_calendar": (
+            "https://mcp-gw.dingtalk.com/oauth/server/calendar",
+            "oauth",
+        ),
+        "mcp_dingtalk_docs": ("https://mcp-gw.dingtalk.com/oauth/server/doc", "oauth"),
+        "mcp_dingtalk_aitable": (
+            "https://mcp-gw.dingtalk.com/oauth/server/aitable",
+            "oauth",
+        ),
+        "mcp_tencent_yuanbao_search": (
+            "https://api.wsa.cloud.tencent.com/Mcp",
+            "bearer",
+        ),
+    }
+
+    with (
+        patch("backend.blocks.load_all_blocks"),
+        patch(
+            "backend.api.features.integrations.router.get_all_provider_names",
+            return_value=[],
+        ),
+    ):
+        response = TestClient(app).get("/providers")
+
+    assert response.status_code == 200
+    providers = {provider["name"]: provider for provider in response.json()}
+    assert expected.keys() <= providers.keys()
+    assert len({providers[name]["service"] for name in expected}) == len(expected)
+    for name, (url, method) in expected.items():
+        server = providers[name]["mcp_server"]
+        assert server["server_url"] == url
+        assert server["auth_methods"] == [method]
+        assert server["connection_mode"] == "hosted"
 
 
 def test_catalog_entries_do_not_register_credential_providers():
