@@ -1,14 +1,23 @@
 import { Text } from "@/components/atoms/Text/Text";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { SaveResult } from "../api";
-import { WorkBuddyPartialSaveError } from "../saveWorkBuddy";
+import { PartialArchiveSaveError } from "../saveNativeChats";
 import { ImportValidationError } from "../validation";
 
 type Translate = ReturnType<typeof useTranslation>["t"];
 
 function errorMessage(error: unknown, t: Translate) {
-  if (error instanceof WorkBuddyPartialSaveError) {
+  if (error instanceof PartialArchiveSaveError) {
     const { added, duplicates } = error.confirmed;
+    if (
+      error.cause instanceof ImportValidationError &&
+      error.cause.code === "archive-destination"
+    ) {
+      return t(
+        `Confirmed so far: ${added} new chats, ${duplicates} already archived. The archive account changed; remaining saves were stopped.`,
+        `已确认：新增 ${added} 条，已有归档 ${duplicates} 条。归档账号已变化，剩余保存已停止。`,
+      );
+    }
     return t(
       `Confirmed so far: ${added} new chats, ${duplicates} already archived. Some requests did not finish. You can retry this selection.`,
       `已确认：新增 ${added} 条，已有归档 ${duplicates} 条。部分请求未完成，可以重试当前选择。`,
@@ -52,8 +61,43 @@ function errorMessage(error: unknown, t: Translate) {
       );
     case "secure-context":
       return t(
-        "Open the archive using HTTPS or localhost to import WorkBuddy files.",
-        "请通过 HTTPS 或 localhost 打开归档，再导入 WorkBuddy 文件。",
+        "Open the archive using HTTPS or localhost to import local histories.",
+        "请通过 HTTPS 或 localhost 打开归档，再导入本地会话。",
+      );
+    case "qwenwork-folder":
+      return t(
+        "QwenWork history not found. Select %APPDATA%\\QwenWorkCN\\data on Windows.",
+        "未找到千问办公历史库。Windows 下请选择 %APPDATA%\\QwenWorkCN\\data。",
+      );
+    case "qwenwork-busy":
+      return t(
+        "QwenWork has a pending database journal. Quit the app completely and choose the history folder again.",
+        "千问办公历史库还有未合并的写入日志。请彻底退出客户端后重新选择历史目录。",
+      );
+    case "qwenwork-db-size":
+      return t(
+        "This QwenWork history exceeds the 64 MiB local import limit.",
+        "千问办公历史库超过 64 MiB 的本地导入上限。",
+      );
+    case "qwenwork-database":
+      return t(
+        "This is not a supported QwenWork history database, or the file is incomplete.",
+        "不是受支持的千问办公历史库，或文件不完整。",
+      );
+    case "qwenwork-reader":
+      return t(
+        "The browser could not read this history. Try again in a current version of Chrome or Edge.",
+        "浏览器无法读取此历史库，请用最新版 Chrome 或 Edge 重试。",
+      );
+    case "qwenwork-db-attachment":
+      return t(
+        "Database files cannot be saved as attachments. Uncheck the database file and try again.",
+        "不能将数据库作为附件保存。请取消勾选数据库文件后重试。",
+      );
+    case "archive-destination":
+      return t(
+        "The archive account changed. Confirm the signed-in account before saving again.",
+        "归档账号已变化。请确认当前登录账号后再保存。",
       );
     case "conversation":
       return error.entry === undefined

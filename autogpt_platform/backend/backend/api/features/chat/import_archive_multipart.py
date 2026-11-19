@@ -12,6 +12,7 @@ from backend.util.filename import sanitize_filename
 
 from .import_archive_models import (
     CONVERSATION_BODY_LIMIT,
+    DIRECTORY_IMPORT_SOURCES,
     MAX_ATTACHMENT_BYTES,
     MAX_ATTACHMENTS,
     MAX_ATTACHMENTS_BYTES,
@@ -31,7 +32,7 @@ MULTIPART_OPENAPI_BODY = {
                     "properties": {
                         "conversation": {
                             "type": "string",
-                            "description": "One WorkBuddy ConversationToImport as JSON.",
+                            "description": "WorkBuddy or QwenWork conversation JSON.",
                         },
                         "files": {
                             "type": "array",
@@ -104,18 +105,17 @@ class _TextPartTooLarge(MultiPartException):
 def _read_conversation(form: FormData) -> ConversationToImport:
     parts = form.getlist("conversation")
     if len(parts) != 1 or not isinstance(parts[0], str):
-        raise HTTPException(
-            status_code=422, detail="Expected one WorkBuddy conversation"
-        )
+        raise HTTPException(status_code=422, detail="Expected one archive conversation")
     try:
         conversation = ConversationToImport.model_validate_json(parts[0])
     except ValidationError:
         raise HTTPException(
             status_code=422, detail="Invalid archive conversation"
         ) from None
-    if conversation.source != "workbuddy":
+    if conversation.source not in DIRECTORY_IMPORT_SOURCES:
         raise HTTPException(
-            status_code=422, detail="Expected one WorkBuddy conversation"
+            status_code=422,
+            detail="Attachments require a WorkBuddy or QwenWork conversation",
         )
     return conversation
 

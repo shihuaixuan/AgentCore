@@ -3,7 +3,7 @@ import {
   indexAttachmentDirectory,
   resolveAttachment,
 } from "./workbuddyAttachments";
-import type { WorkBuddyDraftEntry } from "./workbuddyTranscript";
+import type { NativeChatDraft } from "./validation";
 
 const MiB = 1024 * 1024;
 
@@ -21,7 +21,10 @@ export function fitsAttachmentLimits(files: File[]) {
   );
 }
 
-export function useWorkBuddyAttachments(suggestedRoot: string) {
+export function useImportAttachments(
+  suggestedRoot: string,
+  allowFile?: (file: File) => boolean,
+) {
   const [directory, setDirectory] =
     useState<ReturnType<typeof indexAttachmentDirectory>>();
   const [rootOverride, setRootOverride] = useState<string>();
@@ -43,7 +46,11 @@ export function useWorkBuddyAttachments(suggestedRoot: string) {
   }
 
   function chooseDirectory(files: File[]) {
-    setDirectory(files.length ? indexAttachmentDirectory(files) : undefined);
+    setDirectory(
+      files.length
+        ? indexAttachmentDirectory(allowFile ? files.filter(allowFile) : files)
+        : undefined,
+    );
     setMapped(false);
     clearChecks();
   }
@@ -61,7 +68,9 @@ export function useWorkBuddyAttachments(suggestedRoot: string) {
 
   function chooseManual(index: number, files: File[]) {
     if (!files.length) return;
-    setManual(new Map(manual).set(index, files));
+    setManual(
+      new Map(manual).set(index, allowFile ? files.filter(allowFile) : files),
+    );
     setChecked(
       new Map(checked).set(
         index,
@@ -85,7 +94,7 @@ export function useWorkBuddyAttachments(suggestedRoot: string) {
       setChecked(new Map(checked).set(index, after));
   }
 
-  function preview(entry: WorkBuddyDraftEntry, index: number) {
+  function preview(entry: NativeChatDraft, index: number) {
     const matched = new Set<File>();
     const unmatched = new Set<string>();
     for (const ref of entry.references) {

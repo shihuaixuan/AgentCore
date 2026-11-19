@@ -7,7 +7,7 @@ import { useId, useRef } from "react";
 import {
   fitsAttachmentLimits,
   readLocalSelection,
-} from "../useWorkBuddyAttachments";
+} from "../useImportAttachments";
 
 export function AttachmentFolder({
   sourceRoot,

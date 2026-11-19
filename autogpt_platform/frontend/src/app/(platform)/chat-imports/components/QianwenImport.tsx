@@ -11,6 +11,7 @@ import {
   type QianwenPair,
 } from "../validation";
 import { ImportNotice } from "./ImportNotice";
+import type { ImportSourceProps } from "./ImportPanel";
 
 type DraftPair = QianwenPair & { id: number };
 const EMPTY_PAIR = { id: 0, question: "", answer: "" };
@@ -78,13 +79,13 @@ function PairFields({
   );
 }
 
-export function QianwenImport({ onSaved }: { onSaved: () => Promise<void> }) {
+export function QianwenImport({ ownerID, onSaved }: ImportSourceProps) {
   const { t } = useTranslation();
   const id = useId();
   const [title, setTitle] = useState("");
   const [pairs, setPairs] = useState([EMPTY_PAIR]);
   const nextID = useRef(1);
-  const save = useSaveImport(onSaved);
+  const save = useSaveImport(ownerID, onSaved);
   const complete =
     title.trim() &&
     pairs.every(({ question, answer }) => question.trim() && answer.trim());

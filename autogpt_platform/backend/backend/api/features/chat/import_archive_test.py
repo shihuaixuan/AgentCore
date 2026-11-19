@@ -89,6 +89,42 @@ def test_postgres_unsafe_text_and_naive_dates_are_rejected(fields):
         ImportedMessage.model_validate({"role": "user", "text": "okay", **fields})
 
 
+def test_qwenwork_uses_source_id_as_fingerprint():
+    source_id = "01abcdef" * 8
+    conversation = ConversationToImport.model_validate(
+        {
+            "source": "qwenwork",
+            "source_id": source_id,
+            "title": "Fixture",
+            "messages": [{"role": "user", "text": "Hello"}],
+        }
+    )
+    assert conversation.fingerprint() == source_id
+
+
+@pytest.mark.parametrize(
+    ("source", "source_id"),
+    [
+        ("qwenwork", None),
+        ("qwenwork", "a" * 63),
+        ("qwenwork", "a" * 65),
+        ("qwenwork", "A" * 64),
+        ("qwenwork", "g" * 64),
+        ("qianwen", "a" * 64),
+    ],
+)
+def test_import_rejects_invalid_source_ids(source, source_id):
+    with pytest.raises(ValidationError):
+        ConversationToImport.model_validate(
+            {
+                "source": source,
+                "source_id": source_id,
+                "title": "Fixture",
+                "messages": [{"role": "user", "text": "Hello"}],
+            }
+        )
+
+
 def test_qianwen_fingerprint_ignores_title_and_line_ending_convention():
     def chat(title: str, text: str, role: str = "user") -> ConversationToImport:
         return ConversationToImport.model_validate(

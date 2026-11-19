@@ -12,6 +12,11 @@ import {
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import ChatImportsPage from "../page";
+import {
+  addRecentToolOnlyConversations,
+  makeQwenWorkFixture,
+  pickedFile,
+} from "./qwenWorkFixture";
 
 const auth = vi.hoisted(() => ({
   user: { id: "owner" } as { id: string } | null,
@@ -19,6 +24,10 @@ const auth = vi.hoisted(() => ({
 vi.mock("@/lib/auth/hooks/useAuth", () => ({
   useAuth: () => ({ user: auth.user, isUserLoading: false }),
 }));
+vi.mock("../readQwenWorkInWorker", async () => {
+  const { readQwenWorkDatabase } = await import("../qwenWorkDatabase");
+  return { readQwenWorkInWorker: readQwenWorkDatabase };
+});
 
 const workBuddyChat = {
   source: "workbuddy",
@@ -93,6 +102,208 @@ afterEach(() => {
 });
 
 describe("conversation archive", () => {
+  it("imports a checked QwenWork conversation straight from the directory without posting its database", async () => {
+    vi.stubGlobal("crypto", webcrypto);
+    const { request, user } = setup();
+    await user.click(screen.getByRole("tab", { name: "QwenWork" }));
+    const panel = screen.getByRole("tabpanel", { name: "QwenWork" });
+    const db = pickedFile(
+      "QwenWorkCN/data/agents.db",
+      await makeQwenWorkFixture(),
+    );
+    const unrelated = pickedFile(
+      "QwenWorkCN/cache/private.db",
+      "unrelated content",
+    );
+    const readUnrelated = vi.spyOn(unrelated, "arrayBuffer");
+    fireEvent.change(within(panel).getByLabelText("QwenWork history folder"), {
+      target: { files: [unrelated, db] },
+    });
+    const first = await within(panel).findByRole("checkbox", {
+      name: "Select Local fixture",
+    });
+    const save = within(panel).getByRole<HTMLButtonElement>("button", {
+      name: "Save selected",
+    });
+    expect(save.disabled).toBe(true);
+    expect(within(panel).queryByText("Deleted fixture")).toBeNull();
+    await user.click(
+      within(first.closest("li")!).getByRole("button", { name: "Preview" }),
+    );
+    expect(
+      within(panel).getByText("<img src=example>").querySelector("img"),
+    ).toBeNull();
+    expect(within(panel).queryByText(/PRIVATE TOOL INPUT/)).toBeNull();
+    expect(readUnrelated).not.toHaveBeenCalled();
+    await user.click(first);
+    expect(request.mock.calls.every(([, init]) => init.method === "GET")).toBe(
+      true,
+    );
+    await user.click(save);
+    await within(panel).findByText("Saved: 1. Duplicates skipped: 1.");
+    const post = request.mock.calls.find(([, init]) => init.method === "POST")!;
+    expect(post[0]).toBe("/api/proxy/api/chat/imports");
+    expect(new Headers(post[1].headers).get("x-archive-destination")).toBe(
+      '["owner","owner"]',
+    );
+    expect(JSON.parse(String(post[1].body))).toEqual({
+      conversations: [
+        {
+          source: "qwenwork",
+          source_id: expect.stringMatching(/^[0-9a-f]{64}$/),
+          title: "Local fixture",
+          messages: [
+            {
+              role: "user",
+              text: "A local question",
+              timestamp: "2026-09-01T12:00:00.000Z",
+            },
+            {
+              role: "assistant",
+              text: "<img src=example>",
+              timestamp: "2026-09-01T12:00:01.000Z",
+            },
+            { role: "assistant", text: "Second sub-chat" },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("saves only explicitly checked QwenWork attachments and not local paths", async () => {
+    vi.stubGlobal("crypto", webcrypto);
+    const { request, user } = setup();
+    await user.click(screen.getByRole("tab", { name: "QwenWork" }));
+    const panel = within(screen.getByRole("tabpanel", { name: "QwenWork" }));
+    const db = pickedFile("data/agents.db", await makeQwenWorkFixture());
+    fireEvent.change(panel.getByLabelText("QwenWork history folder"), {
+      target: { files: [db] },
+    });
+    const chat = await panel.findByRole("checkbox", {
+      name: "Select Local fixture",
+    });
+    await user.click(
+      within(chat.closest("li")!).getByRole("button", { name: "Preview" }),
+    );
+
+    const report = pickedFile("Project/output/report.pdf", "report bytes");
+    fireEvent.change(panel.getByLabelText("Choose attachment folder"), {
+      target: { files: [report] },
+    });
+    await user.click(
+      panel.getByRole("checkbox", {
+        name: "Use this folder for the original path",
+      }),
+    );
+    fireEvent.change(panel.getByLabelText("Choose individual attachments"), {
+      target: { files: [db, new File(["not requested"], "unused.txt")] },
+    });
+
+    const attachment = panel.getByRole("checkbox", {
+      name: "Include report.pdf",
+    });
+    expect(attachment.getAttribute("aria-checked")).toBe("false");
+    expect(
+      panel
+        .getByRole("checkbox", { name: "Include unused.txt" })
+        .getAttribute("aria-checked"),
+    ).toBe("false");
+    expect(
+      panel.queryByRole("checkbox", { name: "Include agents.db" }),
+    ).toBeNull();
+    await user.click(attachment);
+    await user.click(chat);
+    expect(
+      request.mock.calls.filter(([, init]) => init.method === "POST"),
+    ).toEqual([]);
+    await user.click(panel.getByRole("button", { name: "Save selected" }));
+    await panel.findByText("Saved: 1. Duplicates skipped: 1.");
+
+    const posts = request.mock.calls.filter(
+      ([, init]) => init.method === "POST",
+    );
+    expect(posts).toHaveLength(1);
+    const [[url, init]] = posts;
+    expect(url).toBe("/api/proxy/api/chat/imports/with-attachments");
+    const body = init.body as FormData;
+    expect([...body.keys()]).toEqual(["conversation", "files"]);
+    const conversation = String(body.get("conversation"));
+    expect(JSON.parse(conversation)).toMatchObject({
+      source: "qwenwork",
+      title: "Local fixture",
+    });
+    expect(conversation).not.toMatch(
+      /D:\/Project|report\.pdf|PRIVATE TOOL INPUT/,
+    );
+    const file = body.get("files") as File;
+    expect(file.name).toBe("report.pdf");
+    expect(await file.text()).toBe("report bytes");
+  });
+
+  it("can preview older chats when the newest batch has no text", async () => {
+    vi.stubGlobal("crypto", webcrypto);
+    const { request, user } = setup();
+    await user.click(screen.getByRole("tab", { name: "QwenWork" }));
+    const panel = within(screen.getByRole("tabpanel", { name: "QwenWork" }));
+    const db = pickedFile(
+      "data/agents.db",
+      await makeQwenWorkFixture(addRecentToolOnlyConversations),
+    );
+    fireEvent.change(panel.getByLabelText("QwenWork history folder"), {
+      target: { files: [db] },
+    });
+    const older = await panel.findByRole("button", {
+      name: "Older conversations",
+    });
+    expect(
+      panel.queryByRole("checkbox", { name: "Select Local fixture" }),
+    ).toBeNull();
+    await user.click(older);
+    expect(
+      await panel.findByRole("checkbox", { name: "Select Local fixture" }),
+    ).toBeDefined();
+    await user.click(
+      panel.getByRole("button", { name: "Newer conversations" }),
+    );
+    await panel.findByText(
+      "No supported local text conversations in this batch.",
+    );
+    expect(request.mock.calls.every(([, init]) => init.method === "GET")).toBe(
+      true,
+    );
+  });
+
+  it("reports a renamed database selected as an attachment without sending any conversation", async () => {
+    vi.stubGlobal("crypto", webcrypto);
+    const { request, user } = setup();
+    await user.click(screen.getByRole("tab", { name: "QwenWork" }));
+    const panel = within(screen.getByRole("tabpanel", { name: "QwenWork" }));
+    const bytes = await makeQwenWorkFixture();
+    fireEvent.change(panel.getByLabelText("QwenWork history folder"), {
+      target: { files: [pickedFile("data/agents.db", bytes)] },
+    });
+    const chat = await panel.findByRole("checkbox", {
+      name: "Select Local fixture",
+    });
+    await user.click(
+      within(chat.closest("li")!).getByRole("button", { name: "Preview" }),
+    );
+    fireEvent.change(panel.getByLabelText("Choose individual attachments"), {
+      target: { files: [new File([bytes], "backup.txt")] },
+    });
+    await user.click(
+      panel.getByRole("checkbox", { name: "Include backup.txt" }),
+    );
+    await user.click(chat);
+    await user.click(panel.getByRole("button", { name: "Save selected" }));
+    expect((await panel.findByRole("alert")).textContent).toContain(
+      "Uncheck the database file",
+    );
+    expect(request.mock.calls.every(([, init]) => init.method === "GET")).toBe(
+      true,
+    );
+  });
+
   it("matches an authorized directory locally and uploads only checked attachment bytes", async () => {
     vi.stubGlobal("crypto", webcrypto);
     const { request, user } = setup();

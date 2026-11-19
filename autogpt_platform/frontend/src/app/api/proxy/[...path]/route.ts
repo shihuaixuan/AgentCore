@@ -1,5 +1,6 @@
 import {
   API_KEY_HEADER_NAME,
+  ARCHIVE_DESTINATION_HEADER_NAME,
   CLIENT_COUNTRY_TOKEN_HEADER_NAME,
   CLIENT_IP_TOKEN_HEADER_NAME,
   IMPERSONATION_HEADER_NAME,
@@ -14,6 +15,7 @@ import {
 } from "@/lib/auth/server/getServerSession";
 import { ImpersonationState } from "@/lib/impersonation";
 import { environment } from "@/services/environment";
+import { decodeJwt } from "jose";
 import { NextRequest, NextResponse } from "next/server";
 
 import {
@@ -49,6 +51,29 @@ function isTimeoutError(error: unknown): boolean {
     "name" in error &&
     (error as { name: unknown }).name === "TimeoutError"
   );
+}
+
+function isArchiveSave(method: string, path: string[]) {
+  return (
+    method === "POST" &&
+    (path.join("/") === "api/chat/imports" ||
+      path.join("/") === "api/chat/imports/with-attachments")
+  );
+}
+
+function matchesArchiveDestination(
+  expected: string,
+  serverToken: string | null,
+  headers: Headers,
+) {
+  if (!serverToken || headers.has(API_KEY_HEADER_NAME)) return false;
+  try {
+    const { sub } = decodeJwt(serverToken);
+    const recipient = headers.get(IMPERSONATION_HEADER_NAME) || sub;
+    return !!sub && expected === JSON.stringify([sub, recipient]);
+  } catch {
+    return false;
+  }
 }
 
 const FORWARDED_REQUEST_HEADERS: ReadonlyArray<string> = [
@@ -290,6 +315,17 @@ async function handler(
     }
 
     const headers = await buildForwardHeaders(req, token, path);
+    const destination = req.headers.get(ARCHIVE_DESTINATION_HEADER_NAME);
+    if (
+      destination !== null &&
+      isArchiveSave(method, path) &&
+      !matchesArchiveDestination(destination, token, headers)
+    ) {
+      return NextResponse.json(
+        { error: "Archive destination changed" },
+        { status: 412, headers: { "Cache-Control": "no-store" } },
+      );
+    }
     if (isPrivateMedia) {
       headers.set("cache-control", "no-store");
     }
