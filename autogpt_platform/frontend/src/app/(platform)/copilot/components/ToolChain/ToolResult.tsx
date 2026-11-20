@@ -425,14 +425,24 @@ function toolCard(
         row.tool === "handoff_to_expert" ||
         !!(output && asObject(output.expert));
       if (output && str(output, "status"))
-        return <SubSessionCard output={output} minimal={delegated} />;
+        return (
+          <SubSessionCard
+            output={output}
+            minimal={delegated}
+            readOnly={readOnly}
+          />
+        );
       // A blocking delegate has no output while the teammate works — show
       // who's on it and what they were asked from the tool input instead.
       // Not for result polls: the delegation card above is already showing
       // this sub-session live, a second identical card would stack under it.
       return row.state === "running" &&
         row.tool !== "get_sub_session_result" ? (
-        <SubSessionPendingCard input={row.input} minimal={delegated} />
+        <SubSessionPendingCard
+          input={row.input}
+          minimal={delegated}
+          readOnly={readOnly}
+        />
       ) : null;
     }
     case "consult_teammate":
@@ -592,6 +602,10 @@ interface Props {
 export function ToolResult({ row, readOnly = false }: Props) {
   const output = asObject(row.output);
   const pendingQuestions = useContext(PendingQuestionsContext);
+
+  if (row.supersededSubSession) {
+    return row.held?.card ? <HeldCallDetail held={row.held} /> : null;
+  }
 
   // The latest unanswered clarifying questions are one card, so one form
   // hosts them: on the lifted copy of the first asking row, the one the chain

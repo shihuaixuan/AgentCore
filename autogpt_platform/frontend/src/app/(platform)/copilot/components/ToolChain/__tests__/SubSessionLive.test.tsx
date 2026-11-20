@@ -20,40 +20,6 @@ function failingSubSession() {
   return http.get(SESSION_ROUTE, () => new HttpResponse(null, { status: 500 }));
 }
 
-function summary(id: string, extra: Record<string, unknown>) {
-  return {
-    id,
-    created_at: "2026-08-21T00:00:00Z",
-    updated_at: "2026-08-21T00:00:00Z",
-    title: id,
-    chat_status: "idle",
-    is_processing: false,
-    is_pinned: false,
-    expert_id: "exp-1",
-    ...extra,
-  };
-}
-
-/** Mimics the backend default: pinned sessions win over recency, so a running
- *  session only reaches a small page when pinned_first is explicitly off. */
-function expertSessions() {
-  return http.get(SESSION_LIST_ROUTE, ({ request }) => {
-    const pinnedFirst =
-      new URL(request.url).searchParams.get("pinned_first") !== "false";
-    const pinned = Array.from({ length: 5 }, (_, i) =>
-      summary(`pin-${i}`, { is_pinned: true }),
-    );
-    const running = summary("sub-live", {
-      chat_status: "running",
-      is_processing: true,
-    });
-    return HttpResponse.json({
-      sessions: pinnedFirst ? pinned : [running, ...pinned],
-      total: 6,
-    });
-  });
-}
-
 function subSession(
   messages: Record<string, unknown>[],
   extra: Record<string, unknown> = {},
@@ -477,8 +443,16 @@ describe("SubSessionLive", () => {
     }
   });
 
-  it("finds the delegate's running session behind a wall of pinned ones", async () => {
-    server.use(expertSessions());
+  it("does not guess the child session from the expert's other active chats", async () => {
+    const listSessions = vi.fn(() =>
+      HttpResponse.json({
+        sessions: [
+          { id: "unrelated-chat", expert_id: "exp-1", is_processing: true },
+        ],
+        total: 1,
+      }),
+    );
+    server.use(http.get(SESSION_LIST_ROUTE, listSessions));
 
     render(
       <ToolResult
@@ -493,11 +467,9 @@ describe("SubSessionLive", () => {
       />,
     );
 
-    expect(
-      (
-        await screen.findByRole("link", { name: "Open sub-session" })
-      ).getAttribute("href"),
-    ).toBe("/copilot?sessionId=sub-live");
+    expect(await screen.findByText("running")).toBeDefined();
+    expect(screen.queryByRole("link", { name: "Open sub-session" })).toBeNull();
+    expect(listSessions).not.toHaveBeenCalled();
   });
 
   it("stays quiet once the sub-session has finished", () => {
@@ -545,8 +517,9 @@ describe("SubSessionLive", () => {
     ).toBe("/copilot?sessionId=sub-1");
   });
 
-  it("drops the running pill on the pending card when the poll fails", async () => {
-    server.use(failingSubSession());
+  it("does not trust an unconfirmed session ID from pending tool input", () => {
+    const getSession = vi.fn(() => new HttpResponse(null, { status: 500 }));
+    server.use(http.get(SESSION_ROUTE, getSession));
 
     render(
       <ToolResult
@@ -561,7 +534,8 @@ describe("SubSessionLive", () => {
       />,
     );
 
-    expect(await screen.findByText("unknown")).toBeDefined();
-    expect(screen.queryByText("running")).toBeNull();
+    expect(screen.getByText("running")).toBeDefined();
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(getSession).not.toHaveBeenCalled();
   });
 });

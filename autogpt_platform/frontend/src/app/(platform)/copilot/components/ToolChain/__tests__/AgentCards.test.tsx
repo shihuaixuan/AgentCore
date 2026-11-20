@@ -150,17 +150,17 @@ describe("SubSessionCard", () => {
           status: "COMPLETED",
           response: "All finished",
           elapsed_seconds: 125,
-          sub_autopilot_session_link: "/copilot?session=sub-1",
+          sub_autopilot_session_link: "/copilot?sessionId=sub-1",
         }}
       />,
     );
 
-    expect(screen.getByText("Expert")).toBeDefined();
+    expect(screen.getByText("Sub-agent")).toBeDefined();
     expect(screen.getByText("completed")).toBeDefined();
     expect(screen.getByText("All finished")).toBeDefined();
     expect(screen.getByText("2m 5s")).toBeDefined();
     expect(screen.getByLabelText("Open sub-session").getAttribute("href")).toBe(
-      "/copilot?session=sub-1",
+      "/copilot?sessionId=sub-1",
     );
   });
 

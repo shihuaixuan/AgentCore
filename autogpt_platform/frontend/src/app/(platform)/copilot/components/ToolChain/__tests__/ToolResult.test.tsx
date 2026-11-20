@@ -372,19 +372,19 @@ describe("ToolResult", () => {
               status: "COMPLETED",
               response: "Everything worked",
               elapsed_seconds: 75,
-              sub_autopilot_session_link: "/copilot?session=sub-1",
+              sub_autopilot_session_link: "/copilot?sessionId=sub-1",
             },
             "run_sub_session",
           )}
         />,
       );
 
-      expect(screen.getByText("Expert")).toBeDefined();
+      expect(screen.getByText("Sub-agent")).toBeDefined();
       expect(screen.getByText("1m 15s")).toBeDefined();
       expect(screen.getByText("Everything worked")).toBeDefined();
       expect(
         screen.getByLabelText("Open sub-session").getAttribute("href"),
-      ).toBe("/copilot?session=sub-1");
+      ).toBe("/copilot?sessionId=sub-1");
     });
 
     it("renders found library agents with stats", () => {
@@ -1211,7 +1211,7 @@ describe("ToolResult deferred platform tools", () => {
         status: "COMPLETED",
         response: "Everything worked",
         elapsed_seconds: 75,
-        sub_autopilot_session_link: "/copilot?session=sub-1",
+        sub_autopilot_session_link: "/copilot?sessionId=sub-1",
       },
       marker: "1m 15s",
     },

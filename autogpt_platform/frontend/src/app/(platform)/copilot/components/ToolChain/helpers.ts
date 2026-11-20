@@ -20,6 +20,11 @@ import type { HeldRowInfo } from "./heldRow";
 import { heldAskText, heldToolName } from "./heldRow";
 import { asObject, integrationIconSrc } from "./resultHelpers";
 import { getCategorySummary } from "./chainSummary";
+import {
+  childSessionID,
+  SUB_SESSION_RESULT_TOOL,
+  subSessionTargetRow,
+} from "./subSessionRows";
 
 export type ChainRowState = "running" | "done" | "error";
 
@@ -49,51 +54,51 @@ export interface ChainRow {
   emptyResult?: boolean;
 }
 
-const SUB_SESSION_CARD_TOOLS = new Set([
-  "run_sub_session",
-  "delegate_to_expert",
-  "handoff_to_expert",
-  "get_sub_session_result",
-]);
-
-function subSessionIdOf(row: ChainRow): string | null {
-  const tool = capabilityTargetRow(row).tool;
-  if (!tool || !SUB_SESSION_CARD_TOOLS.has(tool)) return null;
-  const output = asObject(row.output);
-  const sid = output?.sub_session_id;
-  return typeof sid === "string" && sid ? sid : null;
-}
-
-/** Delegating opens a run; ``get_sub_session_result`` only polls one. A
- *  re-delegation reuses the same sub-session, so grouping by id alone would
- *  hide the previous run's answer. */
-const SUB_SESSION_START_TOOLS = new Set([
-  "run_sub_session",
-  "delegate_to_expert",
-  "handoff_to_expert",
-]);
-
 /** Delegate → poll → poll chains reference the same sub-session; only the
  *  LAST row per RUN keeps its card, earlier ones are marked superseded. A
  *  fresh delegation starts a new run, so the row holding the previous run's
  *  response stays readable instead of dropping out of the transcript. */
 export function markSupersededSubSessionRows(rows: ChainRow[]): ChainRow[] {
   const supersededKeys = new Set<string>();
-  const openRowKey = new Map<string, string>();
+  const latest = new Map<
+    string,
+    { key: string; output: Record<string, unknown> }
+  >();
+  const updatedOutputs = new Map<string, Record<string, unknown>>();
   for (const row of rows) {
-    const sid = subSessionIdOf(row);
-    if (!sid) continue;
-    const open = openRowKey.get(sid);
-    const tool = capabilityTargetRow(row).tool ?? "";
-    if (open && !SUB_SESSION_START_TOOLS.has(tool)) {
-      supersededKeys.add(open);
+    const target = subSessionTargetRow(row);
+    const output = target && asObject(target.output);
+    if (
+      !target ||
+      !output ||
+      row.state !== "done" ||
+      typeof output.status !== "string"
+    )
+      continue;
+    const sessionID = childSessionID(output);
+    if (!sessionID) continue;
+    const previous = latest.get(sessionID);
+    if (previous && target.tool === SUB_SESSION_RESULT_TOOL) {
+      supersededKeys.add(previous.key);
+      const merged = {
+        ...output,
+        expert: output.expert ?? previous.output.expert,
+        background_task_id:
+          output.background_task_id ?? previous.output.background_task_id,
+      };
+      updatedOutputs.set(row.key, merged);
+      latest.set(sessionID, { key: row.key, output: merged });
+    } else {
+      latest.set(sessionID, { key: row.key, output });
     }
-    openRowKey.set(sid, row.key);
   }
   if (supersededKeys.size === 0) return rows;
-  return rows.map((row) =>
-    supersededKeys.has(row.key) ? { ...row, supersededSubSession: true } : row,
-  );
+  return rows.map((row) => {
+    if (supersededKeys.has(row.key))
+      return { ...row, supersededSubSession: true };
+    const output = updatedOutputs.get(row.key);
+    return output ? { ...row, output } : row;
+  });
 }
 
 const ACTION_RESPONSE_TYPES = new Set([

@@ -56,6 +56,7 @@ import {
 } from "./helpers";
 import { SwapText } from "./SwapText";
 import { ToolResult } from "./ToolResult";
+import { isCompactSubSessionRow } from "./subSessionRows";
 
 const COLLAPSED_WINDOW = 2;
 
@@ -293,11 +294,21 @@ export function ToolChain({ parts, isStreaming, readOnly = false }: Props) {
   // only the streaming window's rows. Mounting the full list the moment the
   // stream ends would flood the collapsing panel with entering rows; the
   // rest mount when the user actually expands.
+  const subSessions = shownRows.filter(isCompactSubSessionRow);
+  const pinnedSubSessions = !open ? subSessions : [];
   const visible = actionOnly
     ? shownRows.filter((row) => row.requiresAction)
-    : windowMode || !panelOpen
-      ? shownRows.slice(-COLLAPSED_WINDOW)
-      : shownRows;
+    : !panelOpen
+      ? shownRows
+          .filter((row) => !isCompactSubSessionRow(row))
+          .slice(-COLLAPSED_WINDOW)
+      : windowMode
+        ? shownRows.filter(
+            (row, index) =>
+              index >= shownRows.length - COLLAPSED_WINDOW ||
+              isCompactSubSessionRow(row),
+          )
+        : shownRows;
 
   // A finished chain closes with a "Done" step, so the rail always ends on
   // a resolved node instead of trailing off the last tool. An errored or
@@ -439,6 +450,18 @@ export function ToolChain({ parts, isStreaming, readOnly = false }: Props) {
                 </div>
               </div>
             </div>
+            {pinnedSubSessions.length > 0 && (
+              <div className="flex flex-col gap-1 pt-1">
+                {pinnedSubSessions.map((row) => (
+                  <ChainRowView
+                    key={row.key}
+                    row={row}
+                    isLast
+                    readOnly={readOnly}
+                  />
+                ))}
+              </div>
+            )}
           </>
         )}
 

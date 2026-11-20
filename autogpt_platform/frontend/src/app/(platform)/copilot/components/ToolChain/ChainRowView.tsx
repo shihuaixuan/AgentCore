@@ -5,26 +5,19 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { HIDDEN_FROM_REPLAY } from "@/lib/replay-privacy";
 import { cn } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useCopilotUIStore } from "../../store";
 import { ACCORDION_PANEL, accordionState, PANEL_REVEAL } from "./accordion";
 import type { ChainRow } from "./helpers";
 import { ProviderIcon, RowIcon } from "./RowIcon";
-import { useSubSessionEffectiveStatus } from "./SubSessionLive";
 import { StepClock } from "./StepClock";
 import { SwapText } from "./SwapText";
 import { HeldTag } from "./HeldCallRowParts";
 import { heldShowsOwnCall } from "./heldRow";
 import { hidesOutputFromReplay } from "./replayPrivacy";
-import { getCatalogLabel } from "./toolCatalog";
 import { ToolResult } from "./ToolResult";
 import { ToolStatusBadge } from "./ToolStatusBadge";
-import {
-  isCompactSubSessionRow,
-  isLiveSubSessionRow,
-  isSubSessionTool,
-  SubSessionChainRow,
-} from "./SubSessionChainRow";
+import { SubSessionChainRow } from "./SubSessionChainRow";
+import { isCompactSubSessionRow, isLiveSubSessionRow } from "./subSessionRows";
 
 interface ReasoningStreamProps {
   text: string;
@@ -62,7 +55,13 @@ interface Props {
 }
 
 export function ChainRowView({ row, isLast, readOnly = false }: Props) {
-  const { locale } = useTranslation();
+  if (isCompactSubSessionRow(row)) {
+    return <SubSessionChainRow row={row} isLast={isLast} readOnly={readOnly} />;
+  }
+  return <ExpandableChainRow row={row} isLast={isLast} readOnly={readOnly} />;
+}
+
+function ExpandableChainRow({ row, isLast, readOnly }: Props) {
   const [open, setOpen] = useState(row.requiresAction === true);
   const isReasoning = row.category === "reasoning";
   const artifactPanelOpen = useCopilotUIStore((s) => s.artifactPanel.isOpen);
@@ -80,57 +79,25 @@ export function ChainRowView({ row, isLast, readOnly = false }: Props) {
   }, [row.category, artifactPanelOpen]);
   // A delegated run's card is the live view of the teammate working —
   // surface it without a click while the sub-session is still going.
-  const liveSubSession = isLiveSubSessionRow(row) && !row.supersededSubSession;
+  const liveSubSession =
+    !readOnly && isLiveSubSessionRow(row) && !row.supersededSubSession;
   useEffect(() => {
     if (liveSubSession) setOpen(true);
   }, [liveSubSession]);
-  // A delegate output frozen at "running" got its done-state label
-  // ("Teammate handled:") while the teammate is in fact still working —
-  // keep the running label + shimmer until the polled session goes idle.
-  const output =
-    row.output && typeof row.output === "object"
-      ? (row.output as Record<string, unknown>)
-      : null;
-  const isSubTool = isSubSessionTool(row.tool);
-  const effectiveStatus = useSubSessionEffectiveStatus(
-    isSubTool && typeof output?.sub_session_id === "string"
-      ? output.sub_session_id
-      : null,
-    isSubTool && typeof output?.status === "string" ? output.status : null,
-    isSubTool && typeof output?.background_task_id === "string",
-  );
-  // "unknown" means the poll died, not that the teammate finished — the row
-  // only has a running label and a done label, and claiming a result landed
-  // is the worse of the two guesses. It also keeps this row consistent with
-  // the card below it, whose poll caps on its own mount clock.
-  const stillWorking =
-    isSubTool &&
-    row.state === "done" &&
-    ["running", "queued", "unknown"].includes(
-      effectiveStatus?.toLowerCase() ?? "",
-    );
-  if (isCompactSubSessionRow(row)) {
-    return <SubSessionChainRow row={row} isLast={isLast} readOnly={readOnly} />;
-  }
   const liveReasoning =
     isReasoning && row.state === "running" && !!row.reasoningText;
   const hasContent = isReasoning
     ? !!row.reasoningText
-    : !row.supersededSubSession &&
-      ((row.output !== undefined && row.output !== "" && !row.emptyResult) ||
-        liveSubSession ||
-        !!row.held?.card ||
-        heldShowsOwnCall(row));
+    : !!row.held?.card ||
+      heldShowsOwnCall(row) ||
+      (!row.supersededSubSession &&
+        ((row.output !== undefined && row.output !== "" && !row.emptyResult) ||
+          liveSubSession));
   const showContent = liveReasoning || (open && hasContent);
   const rowText = (
     <SwapText
-      text={
-        stillWorking && row.tool
-          ? (getCatalogLabel(row.tool, row.input, "running", {}, locale)
-              ?.text ?? row.text)
-          : row.text
-      }
-      shimmer={row.state === "running" || stillWorking}
+      text={row.text}
+      shimmer={row.state === "running"}
       className={cn(
         "max-w-full text-body transition-colors duration-300",
         row.state === "error"

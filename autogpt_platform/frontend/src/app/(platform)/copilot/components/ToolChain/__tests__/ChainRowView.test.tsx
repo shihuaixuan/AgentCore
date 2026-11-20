@@ -2,7 +2,7 @@ import { getGetV2GetSessionMockHandler200 } from "@/app/api/__generated__/endpoi
 import { server } from "@/mocks/mock-server";
 import { render, screen } from "@/tests/integrations/test-utils";
 import { http, HttpResponse } from "msw";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ChainRow } from "../helpers";
 import { ChainRowView } from "../ChainRowView";
 
@@ -32,7 +32,7 @@ afterEach(() => {
 });
 
 describe("ChainRowView - live sub-session rows", () => {
-  it("auto-opens and shows the pending card for a blocking delegate with no output yet", async () => {
+  it("shows only the pending identity for a blocking delegate", async () => {
     render(
       <ChainRowView
         row={row({
@@ -46,8 +46,7 @@ describe("ChainRowView - live sub-session rows", () => {
     );
 
     expect(await screen.findByText("Expert")).toBeDefined();
-    // Delegated cards are status-only — the prompt stays in the teammate's
-    // own thread, not in the parent chain.
+    expect(screen.queryByRole("link")).toBeNull();
     expect(screen.queryByText("Create a chat app")).toBeNull();
   });
 
@@ -83,7 +82,7 @@ describe("ChainRowView - live sub-session rows", () => {
     expect(screen.queryByText("Expert")).toBeNull();
   });
 
-  it("keeps showing the running label while a done delegate output is still working", async () => {
+  it("keeps showing the teammate identity while a delegate output is still working", async () => {
     server.use(subSession({ chat_status: "running", active_stream: false }));
 
     render(
@@ -91,23 +90,24 @@ describe("ChainRowView - live sub-session rows", () => {
         row={row({
           tool: "delegate_to_expert",
           state: "done",
-          output: { status: "running", sub_session_id: "sub-1" },
+          output: {
+            status: "running",
+            sub_session_id: "sub-1",
+            expert: { name: "Curie" },
+          },
           input: { prompt: "Create a chat app" },
         })}
         isLast
       />,
     );
 
-    expect(
-      await screen.findByText(
-        'Handing off to a teammate: "Create a chat app"…',
-      ),
-    ).toBeDefined();
+    expect(await screen.findByText("Curie")).toBeDefined();
+    expect(screen.getByText("running")).toBeDefined();
   });
 
   it("does not claim the teammate finished when the poll dies", async () => {
     server.use(
-      http.get("*/api/chat/sessions/:sessionId", () => {
+      http.get("/api/proxy/api/chat/sessions/:sessionId", () => {
         return new HttpResponse(null, { status: 500 });
       }),
     );
@@ -125,17 +125,11 @@ describe("ChainRowView - live sub-session rows", () => {
       />,
     );
 
-    // A dead poll can't refute the frozen "running", so the done label must
-    // never land — the row keeps saying the teammate is on it.
-    await expect(
-      screen.findByText('Teammate handled: "Create a chat app"'),
-    ).rejects.toThrow();
-    expect(
-      screen.getByText('Handing off to a teammate: "Create a chat app"…'),
-    ).toBeDefined();
+    expect(await screen.findByText("unknown")).toBeDefined();
+    expect(screen.queryByText("completed")).toBeNull();
   });
 
-  it("switches to the done label once the polled sub-session goes idle", async () => {
+  it("switches to completed once the polled sub-session goes idle", async () => {
     server.use(subSession({ chat_status: "completed" }));
 
     render(
@@ -151,8 +145,74 @@ describe("ChainRowView - live sub-session rows", () => {
       />,
     );
 
+    expect(await screen.findByText("completed")).toBeDefined();
+  });
+
+  it("shows a completed sub-agent as an identity row with a transcript link", () => {
+    render(
+      <ChainRowView
+        row={row({
+          tool: "delegate_to_expert",
+          state: "done",
+          output: {
+            status: "completed",
+            response: "The full response belongs in the child transcript.",
+            sub_session_id: "run-id",
+            sub_autopilot_session_id: "sub-1",
+            sub_autopilot_session_link: "/copilot?sessionId=wrong-chat",
+            expert: {
+              id: "exp-1",
+              name: "Curie",
+              role: "Researcher",
+              avatar_url: "https://cdn.example.com/curie.png",
+            },
+          },
+        })}
+        isLast
+      />,
+    );
+
+    expect(screen.getByText("Curie")).toBeDefined();
+    expect(screen.queryByText("Researcher")).toBeNull();
+    expect(screen.getByText("completed")).toBeDefined();
+    expect(screen.getByAltText("Curie").getAttribute("src")).toBe(
+      "https://cdn.example.com/curie.png",
+    );
     expect(
-      await screen.findByText('Teammate handled: "Create a chat app"'),
-    ).toBeDefined();
+      screen
+        .getByRole("link", { name: "Curie completed" })
+        .getAttribute("href"),
+    ).toBe("/copilot?sessionId=sub-1");
+    expect(
+      screen.queryByText("The full response belongs in the child transcript."),
+    ).toBeNull();
+  });
+
+  it("keeps private links, polling and Stop out of a shared transcript", () => {
+    const getSession = vi.fn(() => new HttpResponse(null, { status: 500 }));
+    server.use(http.get("/api/proxy/api/chat/sessions/:sessionId", getSession));
+
+    render(
+      <ChainRowView
+        row={row({
+          tool: "run_sub_session",
+          state: "done",
+          output: {
+            status: "running",
+            background_task_id: "job-1",
+            sub_session_id: "sub-1",
+          },
+        })}
+        isLast
+        readOnly
+      />,
+    );
+
+    expect(screen.getByText("Background subtask")).toBeDefined();
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Stop background subtask" }),
+    ).toBeNull();
+    expect(getSession).not.toHaveBeenCalled();
   });
 });
