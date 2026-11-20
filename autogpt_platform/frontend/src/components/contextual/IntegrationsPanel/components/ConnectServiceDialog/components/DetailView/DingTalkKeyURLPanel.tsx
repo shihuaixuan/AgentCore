@@ -10,11 +10,16 @@ import { noPasswordManager } from "./helpers";
 import { useDingTalkKeyURL } from "./useDingTalkKeyURL";
 
 type Props = {
+  serviceName: string;
   onSuccess: (credential: CredentialsMetaResponse) => void;
   actions?: ReactNode;
 };
 
-export function DingTalkKeyURLPanel({ onSuccess, actions }: Props) {
+export function DingTalkKeyURLPanel({
+  serviceName,
+  onSuccess,
+  actions,
+}: Props) {
   const { t } = useTranslation();
   const { value, change, canSave, save, saving, failed } =
     useDingTalkKeyURL(onSuccess);
@@ -23,7 +28,7 @@ export function DingTalkKeyURLPanel({ onSuccess, actions }: Props) {
     <div className="flex flex-col gap-4">
       <Input
         id="dingtalk-key-url"
-        label={t("DingTalk Mail API Key URL", "钉钉邮箱 API Key 链接")}
+        label={t(`${serviceName} API Key URL`, `${serviceName} API Key 链接`)}
         type="password"
         value={value}
         onChange={(event) => change(event.target.value)}
@@ -32,8 +37,8 @@ export function DingTalkKeyURLPanel({ onSuccess, actions }: Props) {
         {...noPasswordManager}
         autoComplete="new-password"
         hint={t(
-          "Paste the full Streamable HTTP URL from the API Key setup for DingTalk Mail, including its key parameter.",
-          "粘贴钉钉邮箱 API Key 配置中的完整 Streamable HTTP 链接，包含 key 参数。",
+          `Paste the full API Key URL from the ${serviceName} page in the DingTalk marketplace, including its key parameter.`,
+          `请从钉钉市场的「${serviceName}」页面复制完整的 API Key 链接（含 key 参数），不要使用其他服务的链接。`,
         )}
       />
       {failed && (

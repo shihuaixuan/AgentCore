@@ -7,7 +7,7 @@
 - Keep a stable `mcp_...` ID and link directly to the vendor's setup documentation.
 - Describe the server's purpose and required plan, admin approval, region, endpoint, and credentials in `description` and `setup_instructions`.
 - Choose the connection setup that matches the vendor's server; see [Choose how users connect](#choose-how-users-connect).
-- Order the supported `auth_methods` by preference; the first method is selected initially. Choices are `oauth`, `bearer`, `basic`, and `none`.
+- Order the supported `auth_methods` by preference; the first method is selected initially. Choices are `oauth`, `bearer`, `basic`, `none`, and `query_key` (DingTalk personal gateway URLs only).
 - Set `oauth_server_url` when the vendor supplies a separate signed-in endpoint.
 - Set documented `oauth_scopes` to cover what the server's tools need, write scopes included. The vendor refuses any call the grant doesn't cover, and whether a covered call asks first is the effect map's job, so don't withhold write scopes to prevent changes. An empty list omits the scope parameter; omission/null uses discovery defaults, which are the resource's `scopes_supported`, else the authorization server's.
 - Set `oauth_request_all_scopes` instead when the resource lists only a minimum and adds the rest through step-up authorization, which our client doesn't do. Sign-in then requests every scope the authorization server advertises, so the list can't go stale, and the vendor's consent screen lets the user narrow it. Example: Cloudflare.
@@ -81,6 +81,7 @@ users can authorize the services they need independently.
 | [钉钉日历](https://aihub.dingtalk.com/#/detail?mcpId=1050&detailType=marketMcpDetail) | `mcp_dingtalk_calendar` |
 | [钉钉文档](https://aihub.dingtalk.com/#/detail?mcpId=9629&detailType=marketMcpDetail) | `mcp_dingtalk_docs` |
 | [钉钉 AI 表格](https://aihub.dingtalk.com/#/detail?mcpId=9555&detailType=marketMcpDetail) | `mcp_dingtalk_aitable` |
+| 钉钉邮箱 | `mcp_dingtalk_mail` |
 
 The gateway advertises the `user` scope, PKCE S256, and dynamic client
 registration with `client_secret_post`. Registration accepted
@@ -90,8 +91,9 @@ authenticated tool calls still need an authorized DingTalk account. Available
 data and tools depend on the DingTalk user and organization.
 
 The [personal URL flow](https://help.aliyun.com/zh/model-studio/connector/dingtalk)
-is separate. It embeds a credential in a `key` query parameter, which the custom
-MCP form does not accept. Use the catalog's Connect button for the OAuth flow.
+is available alongside OAuth for all five services. Choose **API Key URL** and
+paste the full link from that specific service’s API Key setup. The connector
+stores the key separately from the server address; it is not a Bearer token.
 
 [腾讯云元宝搜索](https://cloud.tencent.com/developer/mcp/server/11764)
 (`mcp_tencent_yuanbao_search`) uses a Yuanbao Search API Key as a Bearer token.

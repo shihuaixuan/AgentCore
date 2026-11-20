@@ -63,11 +63,13 @@ export function endpointAuthOptions(
     return server.auth_methods.map((method) => ({
       method,
       endpoint:
-        method === "oauth" && server.oauth_server_url
-          ? server.oauth_server_url
-          : isToolURL
-            ? serverURL
-            : (server.server_url ?? null),
+        method === "query_key"
+          ? null
+          : method === "oauth" && server.oauth_server_url
+            ? server.oauth_server_url
+            : isToolURL
+              ? serverURL
+              : (server.server_url ?? null),
     }));
   }
   return [];

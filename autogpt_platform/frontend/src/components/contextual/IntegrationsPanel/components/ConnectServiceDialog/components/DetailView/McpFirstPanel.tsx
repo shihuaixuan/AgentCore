@@ -9,6 +9,7 @@ import { withoutDuplicateKeyMethod, type AuthMethod } from "../../helpers";
 import { MCPPresetPanel } from "./MCPPresetPanel";
 
 interface Props {
+  serviceName: string;
   server: NonNullable<ProviderMetadata["mcp_server"]>;
   /** The vendor's block credential methods, if it also ships any. */
   nativeMethods: AuthMethod[];
@@ -22,6 +23,7 @@ interface Props {
  *  click away when the vendor also ships one. */
 export function McpFirstPanel({
   server,
+  serviceName,
   nativeMethods,
   onUseNative,
   onSuccess,
@@ -31,6 +33,7 @@ export function McpFirstPanel({
 
   return (
     <MCPPresetPanel
+      serviceName={serviceName}
       server={withoutDuplicateKeyMethod(server, nativeMethods)}
       onSuccess={onSuccess}
       actions={

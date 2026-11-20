@@ -28,23 +28,22 @@ const credential: CredentialsMetaResponse = {
   username: null,
 };
 
-async function openPreset() {
+async function openPreset(id = "mail", name = "DingTalk Mail", url = oauthURL) {
   const onConnected = vi.fn();
   const onOpenChange = vi.fn();
   const user = userEvent.setup();
   server.use(
     getGetV1ListProvidersMockHandler200([
       {
-        name: "mcp_dingtalk_mail",
-        service: "dingtalk_mail",
-        service_name: "DingTalk Mail",
+        name: `mcp_dingtalk_${id}`,
+        service: `dingtalk_${id}`,
+        service_name: name,
         supported_auth_types: [],
         mcp_server: {
-          server_url: oauthURL,
+          server_url: url,
           connection_mode: "hosted",
           documentation_url: "https://aihub.dingtalk.com/",
-          setup_instructions:
-            "Sign in or paste the API Key URL for DingTalk Mail.",
+          setup_instructions: `Sign in or paste the API Key URL for ${name}.`,
           auth_methods: ["oauth", "query_key"],
         },
       },
@@ -53,7 +52,7 @@ async function openPreset() {
   render(
     <ConnectServiceDialog
       open
-      initialProviderId="mcp_dingtalk_mail"
+      initialProviderId={`mcp_dingtalk_${id}`}
       onConnected={onConnected}
       onOpenChange={onOpenChange}
     />,
@@ -62,7 +61,29 @@ async function openPreset() {
   return { user, onConnected, onOpenChange };
 }
 
-describe("DingTalk Mail preset", () => {
+describe("DingTalk presets", () => {
+  it.each([
+    ["calendar", "钉钉日历", "calendar"],
+    ["docs", "钉钉文档", "doc"],
+    ["aitable", "钉钉 AI 表格", "aitable"],
+    ["todo", "钉钉待办", "todo"],
+  ])(
+    "uses the selected service for %s in both tabs",
+    async (id, name, path) => {
+      const url = `https://mcp-gw.dingtalk.com/oauth/server/${path}`;
+      const { user } = await openPreset(id, name, url);
+      expect(screen.getByLabelText<HTMLInputElement>("Server URL").value).toBe(
+        url,
+      );
+      expect(screen.getAllByRole("tab")).toHaveLength(2);
+      await user.click(screen.getByRole("tab", { name: "API Key URL" }));
+      expect(
+        screen.getByLabelText<HTMLInputElement>(`${name} API Key URL`).type,
+      ).toBe("password");
+      expect(screen.queryByText(/DingTalk Mail/)).toBeNull();
+    },
+  );
+
   it("offers a locked OAuth endpoint and separately saves the service URL and key", async () => {
     const requests: unknown[] = [];
     server.use(

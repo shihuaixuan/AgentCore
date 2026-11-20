@@ -88,4 +88,24 @@ describe("catalog auth", () => {
       endpointAuthOptions("https://fixture.example/docs", catalog),
     ).toEqual([]);
   });
+
+  it("asks for a separate key link rather than sending a key to the OAuth endpoint", () => {
+    const url = "https://mcp-gw.dingtalk.com/oauth/server/calendar";
+    expect(
+      endpointAuthOptions(url, [
+        {
+          name: "mcp_dingtalk_calendar",
+          mcp_server: {
+            ...catalog[0].mcp_server!,
+            server_url: url,
+            oauth_server_url: url,
+            auth_methods: ["oauth", "query_key"],
+          },
+        },
+      ]),
+    ).toEqual([
+      { method: "oauth", endpoint: url },
+      { method: "query_key", endpoint: null },
+    ]);
+  });
 });

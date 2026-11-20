@@ -79,19 +79,29 @@ def test_provider_endpoint_only_exposes_connectable_catalog(behave_as: BehaveAs)
 
 def test_domestic_office_connectors_have_distinct_setup_cards():
     expected = {
-        "mcp_dingtalk_todo": ("https://mcp-gw.dingtalk.com/oauth/server/todo", "oauth"),
+        "mcp_dingtalk_todo": (
+            "https://mcp-gw.dingtalk.com/oauth/server/todo",
+            ["oauth", "query_key"],
+        ),
         "mcp_dingtalk_calendar": (
             "https://mcp-gw.dingtalk.com/oauth/server/calendar",
-            "oauth",
+            ["oauth", "query_key"],
         ),
-        "mcp_dingtalk_docs": ("https://mcp-gw.dingtalk.com/oauth/server/doc", "oauth"),
+        "mcp_dingtalk_docs": (
+            "https://mcp-gw.dingtalk.com/oauth/server/doc",
+            ["oauth", "query_key"],
+        ),
+        "mcp_dingtalk_mail": (
+            "https://mcp-gw.dingtalk.com/oauth/server/mail",
+            ["oauth", "query_key"],
+        ),
         "mcp_dingtalk_aitable": (
             "https://mcp-gw.dingtalk.com/oauth/server/aitable",
-            "oauth",
+            ["oauth", "query_key"],
         ),
         "mcp_tencent_yuanbao_search": (
             "https://api.wsa.cloud.tencent.com/Mcp",
-            "bearer",
+            ["bearer"],
         ),
     }
 
@@ -108,10 +118,10 @@ def test_domestic_office_connectors_have_distinct_setup_cards():
     providers = {provider["name"]: provider for provider in response.json()}
     assert expected.keys() <= providers.keys()
     assert len({providers[name]["service"] for name in expected}) == len(expected)
-    for name, (url, method) in expected.items():
+    for name, (url, methods) in expected.items():
         server = providers[name]["mcp_server"]
         assert server["server_url"] == url
-        assert server["auth_methods"] == [method]
+        assert server["auth_methods"] == methods
         assert server["connection_mode"] == "hosted"
 
 

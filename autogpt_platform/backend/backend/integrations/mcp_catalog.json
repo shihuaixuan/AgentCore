@@ -598,10 +598,11 @@
     "mcp_server": {
       "server_url": "https://mcp-gw.dingtalk.com/oauth/server/aitable",
       "documentation_url": "https://aihub.dingtalk.com/",
-      "setup_instructions": "点击连接，登录钉钉并选择要授权的组织。授权后可在账号权限范围内查询和更新 AI 表格（多维表），无需填写 API Key。若组织限制第三方应用，请联系管理员。",
+      "setup_instructions": "选择「登录」授权钉钉 AI 表格，或选择「API Key 链接」，粘贴从钉钉市场「钉钉 AI 表格」复制的完整链接。可查询和更新的记录取决于账号和组织权限。",
       "connection_mode": "hosted",
       "auth_methods": [
-        "oauth"
+        "oauth",
+        "query_key"
       ],
       "icon_id": "dingtalk_aitable"
     }
@@ -613,10 +614,11 @@
     "mcp_server": {
       "server_url": "https://mcp-gw.dingtalk.com/oauth/server/calendar",
       "documentation_url": "https://aihub.dingtalk.com/",
-      "setup_instructions": "点击连接，登录钉钉并授权日历访问，无需填写 API Key。日程、参会人和会议室的操作范围取决于所选组织及账号权限。",
+      "setup_instructions": "选择「登录」授权钉钉日历，或选择「API Key 链接」，粘贴从钉钉市场「钉钉日历」复制的完整链接。日程、参会人和会议室的操作范围取决于账号和组织权限。",
       "connection_mode": "hosted",
       "auth_methods": [
-        "oauth"
+        "oauth",
+        "query_key"
       ],
       "icon_id": "dingtalk_calendar"
     }
@@ -628,10 +630,11 @@
     "mcp_server": {
       "server_url": "https://mcp-gw.dingtalk.com/oauth/server/doc",
       "documentation_url": "https://aihub.dingtalk.com/",
-      "setup_instructions": "点击连接，登录钉钉并授权文档访问，无需填写 API Key。只能在所选组织内访问账号有权限的文档；创建及编辑需要目标位置的写入权限。",
+      "setup_instructions": "选择「登录」授权钉钉文档，或选择「API Key 链接」，粘贴从钉钉市场「钉钉文档」复制的完整链接。只能访问账号有权限的文档；创建及编辑需要目标位置的写入权限。",
       "connection_mode": "hosted",
       "auth_methods": [
-        "oauth"
+        "oauth",
+        "query_key"
       ],
       "icon_id": "dingtalk_docs"
     }
@@ -658,10 +661,11 @@
     "mcp_server": {
       "server_url": "https://mcp-gw.dingtalk.com/oauth/server/todo",
       "documentation_url": "https://aihub.dingtalk.com/",
-      "setup_instructions": "点击连接，登录钉钉并授权待办访问，无需填写 API Key。待办的查看、创建和状态更新遵循账号和组织权限。",
+      "setup_instructions": "选择「登录」授权钉钉待办，或选择「API Key 链接」，粘贴从钉钉市场「钉钉待办」复制的完整链接。待办的查看、创建和状态更新遵循账号和组织权限。",
       "connection_mode": "hosted",
       "auth_methods": [
-        "oauth"
+        "oauth",
+        "query_key"
       ],
       "icon_id": "dingtalk_todo"
     }

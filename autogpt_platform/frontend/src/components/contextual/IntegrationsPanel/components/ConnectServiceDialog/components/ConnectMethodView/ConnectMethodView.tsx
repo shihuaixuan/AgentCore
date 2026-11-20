@@ -195,6 +195,7 @@ export function ConnectMethodView({
         {showMcp && provider.mcpServer ? (
           <McpFirstPanel
             server={provider.mcpServer}
+            serviceName={provider.name}
             nativeMethods={methods}
             onUseNative={() => mcpSignIn?.onShowNativeChange(true)}
             onSuccess={onInlineConnectSuccess}

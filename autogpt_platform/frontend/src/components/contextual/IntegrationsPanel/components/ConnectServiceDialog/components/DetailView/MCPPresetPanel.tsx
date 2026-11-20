@@ -29,13 +29,19 @@ const METHOD_LABELS: Record<AuthMethod, [string, string]> = {
 };
 
 interface Props {
+  serviceName: string;
   server: NonNullable<ProviderMetadata["mcp_server"]>;
   onSuccess: (credential?: CredentialsMetaResponse) => void;
   /** Extra buttons for the row that holds Connect. */
   actions?: ReactNode;
 }
 
-export function MCPPresetPanel({ server, onSuccess, actions }: Props) {
+export function MCPPresetPanel({
+  server,
+  serviceName,
+  onSuccess,
+  actions,
+}: Props) {
   const { t } = useTranslation();
 
   const methods = server.auth_methods;
@@ -49,6 +55,7 @@ export function MCPPresetPanel({ server, onSuccess, actions }: Props) {
       </Link>
       {methods.length === 1 ? (
         <PresetMethod
+          serviceName={serviceName}
           server={server}
           onSuccess={onSuccess}
           method={methods[0]}
@@ -66,6 +73,7 @@ export function MCPPresetPanel({ server, onSuccess, actions }: Props) {
           {methods.map((method) => (
             <TabsLineContent key={method} value={method}>
               <PresetMethod
+                serviceName={serviceName}
                 server={server}
                 onSuccess={onSuccess}
                 method={method}
@@ -81,12 +89,20 @@ export function MCPPresetPanel({ server, onSuccess, actions }: Props) {
 
 function PresetMethod({
   server,
+  serviceName,
   onSuccess,
   method,
   actions,
 }: Props & { method: AuthMethod }) {
   if (method === "query_key") {
-    return <DingTalkKeyURLPanel onSuccess={onSuccess} actions={actions} />;
+    return (
+      <DingTalkKeyURLPanel
+        key={serviceName}
+        serviceName={serviceName}
+        onSuccess={onSuccess}
+        actions={actions}
+      />
+    );
   }
   if (method === "none") {
     return server.server_url ? (
