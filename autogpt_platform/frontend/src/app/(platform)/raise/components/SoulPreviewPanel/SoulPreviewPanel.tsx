@@ -4,6 +4,10 @@ import { GlassOrb } from "@/components/molecules/GlassOrb/GlassOrb";
 import { DEFAULT_GLASS_PARAMS } from "@/components/molecules/GlassOrb/GlassSurface";
 import Image from "next/image";
 import {
+  getManagedIdentity,
+  resolveExpertAvatarUrl,
+} from "@/components/molecules/ExpertAvatar/helpers";
+import {
   kitBudgetLabel,
   kitToolsLabel,
   type RaiseKit,
@@ -37,6 +41,10 @@ export function SoulPreviewPanel({
   kit,
 }: Props) {
   const { t } = useTranslation();
+  const identity = avatarUrl ? getManagedIdentity(avatarUrl) : null;
+  const preview = identity
+    ? `/experts/professional/${identity.id === "otto" ? "office-assistant" : identity.id}.webp`
+    : resolveExpertAvatarUrl(avatarUrl);
   const details = [
     { label: t("About", "关于"), value: about },
     {
@@ -54,7 +62,7 @@ export function SoulPreviewPanel({
         <div className="size-28 shrink-0 overflow-hidden rounded-full">
           {avatarUrl ? (
             <Image
-              src={avatarUrl}
+              src={preview}
               alt={t(`${title}'s picture`, `${title} 的头像`)}
               width={112}
               height={112}

@@ -41,6 +41,7 @@ export function useRaisePage() {
   );
   const { title } = getRaiseProfession(draft, locale);
   const { hasSkillsToOffer } = useSkillsAvailability();
+  const [candidateUrl, setCandidateUrl] = useState<string | null>(null);
   const hasSkillsBeat = draft.marketplace !== null || hasSkillsToOffer;
   const progress = useFlowProgress(beatTriggers(draft, hasSkillsBeat));
   const { finish: submitRaise, isSubmitting } = useRaiseSubmission();
@@ -171,6 +172,8 @@ export function useRaisePage() {
     category: draft.category,
     color: draft.color,
     avatarUrl: draft.avatarUrl,
+    previewAvatarUrl: draft.avatarUrl || candidateUrl,
+    setCandidateUrl,
     about: draft.about,
     voiceLabel: draft.voiceLabel,
     items: buildFlowItems(title, progress, t),

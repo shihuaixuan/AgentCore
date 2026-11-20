@@ -28,7 +28,10 @@ export function defaultAvatarUrl(
   for (const character of name.trim().toLowerCase()) {
     hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
   }
-  return candidates[hash % candidates.length]?.url ?? DEFAULT_EXPERT_AVATAR_URL;
+  const identity = candidates[hash % candidates.length];
+  return identity
+    ? `/experts/professional/${identity.id}.webp`
+    : DEFAULT_EXPERT_AVATAR_URL;
 }
 
 /** Everything except the category is left to chance, so regenerating shuffles

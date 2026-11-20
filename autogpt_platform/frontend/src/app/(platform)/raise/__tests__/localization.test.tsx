@@ -203,3 +203,14 @@ test("localizes the category role used as the preview's only title", () => {
   fireEvent.click(screen.getByRole("button", { name: "English" }));
   expect(screen.getByRole("heading", { name: "Marketer" })).toBeDefined();
 });
+test("uses the translated suggestion in the preview and conversation while preserving the stored profession", () => {
+  const draft = { ...EMPTY_DRAFT, jobTitle: "Research Analyst" };
+  expect(getRaiseProfession(draft, "zh-CN")).toMatchObject({
+    title: "研究分析师",
+    jobTitle: "Research Analyst",
+  });
+  expect(getRaiseProfession(draft, "en").title).toBe("Research Analyst");
+  expect(
+    getRaiseProfession({ ...draft, jobTitle: "My Analyst" }, "zh-CN").title,
+  ).toBe("My Analyst");
+});

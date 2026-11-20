@@ -36,7 +36,7 @@ export function RaiseFlow() {
     items,
     title,
     color,
-    avatarUrl,
+    previewAvatarUrl,
     about,
     voiceLabel,
     kit,
@@ -144,7 +144,7 @@ export function RaiseFlow() {
           <div className="relative flex h-full items-center justify-center p-4 sm:p-6">
             <SoulPreviewPanel
               title={title}
-              avatarUrl={avatarUrl || null}
+              avatarUrl={previewAvatarUrl}
               color={color}
               about={about}
               voiceLabel={voiceLabel}

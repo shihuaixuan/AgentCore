@@ -182,18 +182,24 @@ test.each([
         identity.visual_category === category ||
         identity.categories.includes(category),
     );
-    const preview = screen
-      .getByRole("img", { name: "Financial Analyst, AI Expert" })
-      .getAttribute("src");
+    const preview = (
+      await screen.findByRole("img", { name: "Financial Analyst" })
+    ).getAttribute("src");
     expect(candidates.some((identity) => preview?.includes(identity.id))).toBe(
       true,
     );
+    expect(
+      screen
+        .getByRole("img", { name: "Financial Analyst's picture" })
+        .getAttribute("src"),
+    ).toBe(preview);
     await userEvent.click(confirm);
-    await waitFor(() =>
-      expect(
-        candidates.some((identity) => identity.url === loadDraft().avatarUrl),
-      ).toBe(true),
-    );
+    await waitFor(() => expect(loadDraft().avatarUrl).toBe(preview));
+    expect(
+      screen
+        .getByRole("img", { name: "Financial Analyst's picture" })
+        .getAttribute("src"),
+    ).toBe(preview);
     expect(requests).toHaveLength(0);
   },
 );

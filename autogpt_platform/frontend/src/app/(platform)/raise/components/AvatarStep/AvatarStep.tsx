@@ -13,6 +13,7 @@ interface Props {
   color: string | null;
   avatarUrl: string | null;
   onPick: (avatarUrl: string) => void;
+  onPreviewChange: (url: string | null) => void;
 }
 
 export function AvatarStep({
@@ -21,6 +22,7 @@ export function AvatarStep({
   color,
   avatarUrl,
   onPick,
+  onPreviewChange,
 }: Props) {
   const { t } = useTranslation();
   if (avatarUrl) {
@@ -45,5 +47,12 @@ export function AvatarStep({
     );
   }
 
-  return <ExpertAvatarPicker name={name} category={category} onPick={onPick} />;
+  return (
+    <ExpertAvatarPicker
+      name={name}
+      category={category}
+      onPick={onPick}
+      onPreviewChange={onPreviewChange}
+    />
+  );
 }

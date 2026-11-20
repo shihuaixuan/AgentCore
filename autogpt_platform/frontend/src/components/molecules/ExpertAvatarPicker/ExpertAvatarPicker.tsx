@@ -7,17 +7,23 @@ import { ExpertAvatar } from "../ExpertAvatar/ExpertAvatar";
 import { ACCEPTED_AVATAR_TYPES } from "./helpers";
 import { useExpertAvatarPicker } from "./useExpertAvatarPicker";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { useEffect } from "react";
 
 interface Props {
   name: string;
   category: ExpertAvatarRequestCategory;
   avatarUrl?: string | null;
   onPick: (url: string) => void;
+  onPreviewChange?: (url: string | null) => void;
 }
 
-export function ExpertAvatarPicker({ name, ...props }: Props) {
+export function ExpertAvatarPicker({ name, onPreviewChange, ...props }: Props) {
   const { t } = useTranslation();
   const picker = useExpertAvatarPicker({ name, ...props });
+  useEffect(() => {
+    onPreviewChange?.(picker.selectedUrl);
+    return () => onPreviewChange?.(null);
+  }, [onPreviewChange, picker.selectedUrl]);
   return (
     <div
       data-slot="expert-avatar-picker"

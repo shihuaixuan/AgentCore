@@ -182,5 +182,7 @@ const JOB_TITLE_LABELS_ZH: Record<string, string> = {
 };
 
 export function jobTitleLabelFor(title: string): string {
-  return JOB_TITLE_LABELS_ZH[title] ?? title;
+  return Object.hasOwn(JOB_TITLE_LABELS_ZH, title)
+    ? JOB_TITLE_LABELS_ZH[title]
+    : title;
 }

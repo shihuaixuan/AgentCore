@@ -56,6 +56,7 @@ export function BeatControl({ beat, flow }: Props) {
           color={flow.color}
           avatarUrl={flow.avatarUrl || null}
           onPick={flow.pickAvatar}
+          onPreviewChange={flow.setCandidateUrl}
         />
       );
     case "about":
