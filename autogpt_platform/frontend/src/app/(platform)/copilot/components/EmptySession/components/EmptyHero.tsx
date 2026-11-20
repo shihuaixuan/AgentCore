@@ -24,7 +24,8 @@ export function EmptyHero({ name, intro }: Props) {
           {t("Hey", "你好")}
           {name ? (
             <>
-              , <span className="text-foreground-strong">{name}</span>
+              {t(", ", "，")}
+              <span className="text-foreground-strong">{name}</span>
             </>
           ) : (
             t(" there", "")

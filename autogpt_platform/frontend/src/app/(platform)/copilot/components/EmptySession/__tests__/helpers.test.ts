@@ -1,4 +1,5 @@
 import type { User } from "@/lib/auth/types";
+import { usernameIdentity } from "@/lib/auth/local-username";
 import { describe, expect, it } from "vitest";
 import { getGreetingName } from "../helpers";
 
@@ -17,22 +18,30 @@ describe("getGreetingName", () => {
 
   it("ignores a blank preferred_name", () => {
     const user = makeUser({ preferred_name: "  ", full_name: "Jane Doe" });
-    expect(getGreetingName(user)).toBe("Jane");
+    expect(getGreetingName(user)).toBe("Jane Doe");
   });
 
-  it("uses the first name from full_name when no preferred_name is set", () => {
+  it("preserves the complete name when no preferred_name is set", () => {
     const user = makeUser({ full_name: "Jane Doe" });
-    expect(getGreetingName(user)).toBe("Jane");
+    expect(getGreetingName(user)).toBe("Jane Doe");
   });
 
   it("falls back to the name metadata field", () => {
     const user = makeUser({ name: "John Smith" });
-    expect(getGreetingName(user)).toBe("John");
+    expect(getGreetingName(user)).toBe("John Smith");
   });
 
   it("keeps a given name that the email address starts with", () => {
     const user = makeUser({ name: "Jane Doe" }, "jane@example.com");
-    expect(getGreetingName(user)).toBe("Jane");
+    expect(getGreetingName(user)).toBe("Jane Doe");
+  });
+
+  it("uses the login username instead of a generic account name", () => {
+    const email = usernameIdentity("小林");
+    expect(getGreetingName(makeUser({ name: "AutoGPT" }, email))).toBe("小林");
+    expect(getGreetingName(makeUser({ preferred_name: "林老师" }, email))).toBe(
+      "林老师",
+    );
   });
 
   // Email sign-up stores the address's local part as the name.

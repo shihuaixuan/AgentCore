@@ -1,4 +1,5 @@
 import type { User } from "@/lib/auth/types";
+import { identityUsername } from "@/lib/auth/local-username";
 
 export function getExpertInputPlaceholder(expertName: string) {
   return `What should ${expertName} work on?`;
@@ -25,10 +26,12 @@ export function getGreetingName(user?: User | null): string | null {
   if (typeof preferredName === "string" && preferredName.trim()) {
     return preferredName.trim();
   }
+  const loginName = user.email && identityUsername(user.email);
+  if (loginName) return loginName;
   // Email sign-up stores the address's local part as the name; that one was never given.
   const emailName = user.email?.split("@")[0].toLowerCase();
   const givenName = [metadata?.full_name, metadata?.name]
     .map((value) => (typeof value === "string" ? value.trim() : ""))
     .find((value) => value && value.toLowerCase() !== emailName);
-  return givenName ? givenName.split(/\s+/)[0] : null;
+  return givenName ?? null;
 }
