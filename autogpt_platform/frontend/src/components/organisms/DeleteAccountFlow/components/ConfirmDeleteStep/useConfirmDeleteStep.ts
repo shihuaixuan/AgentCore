@@ -3,6 +3,7 @@ import type { DeletionSource } from "../../helpers";
 import { emailMatches } from "./helpers";
 import { useDeleteAccount } from "./useDeleteAccount";
 import { useDeletionConsequences } from "./useDeletionConsequences";
+import { identityUsername } from "@/lib/auth/local-username";
 
 interface Args {
   source: DeletionSource;
@@ -16,16 +17,20 @@ export function useConfirmDeleteStep({ source, onBusyChange }: Args) {
     source,
     onBusyChange,
   });
-  const canDelete = !isDeleting && emailMatches({ typed: typedEmail, email });
+  const username = identityUsername(email);
+  const canDelete =
+    !isDeleting &&
+    emailMatches({ typed: typedEmail, email: username ?? email });
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!canDelete) return;
-    void deleteAccount(typedEmail.trim());
+    void deleteAccount(username ? email : typedEmail.trim());
   }
 
   return {
-    email,
+    email: username ?? email,
+    username,
     typedEmail,
     setTypedEmail,
     consequences,

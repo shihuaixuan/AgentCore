@@ -235,9 +235,9 @@ class EmailSender:
 
 def _suppress_preview_email(user_email: str) -> bool:
     """Preview accounts have fake addresses that would damage sender reputation."""
-    if not user_email.strip().lower().endswith("@previews.agpt.co"):
+    if not user_email.strip().lower().endswith(("@previews.agpt.co", "@username.invalid")):
         return False
-    logger.info("Skipping transactional email to the preview recipient domain")
+    logger.info("Skipping transactional email to a non-mailbox identity")
     return True
 
 

@@ -3,6 +3,10 @@
 import { postV1GetOrCreateUser } from "@/app/api/__generated__/endpoints/auth/auth";
 import { getOnboardingStatus } from "@/app/api/helpers";
 import { auth } from "@/lib/auth/auth";
+import {
+  usernameIdentity,
+  usernameSignupEnabled,
+} from "@/lib/auth/local-username";
 import { getEmailVerificationCallbackURL } from "@/lib/auth/email-verification";
 import { recordSignupConsent } from "@/lib/auth/server/recordSignupConsent";
 import { rollbackSession } from "@/lib/auth/server/rollbackSession";
@@ -44,7 +48,9 @@ export async function signup(
       // The session cookie is set automatically by the nextCookies plugin.
       signUpResult = await auth.api.signUpEmail({
         body: {
-          email: parsed.data.email,
+          email: usernameSignupEnabled()
+            ? usernameIdentity(parsed.data.email)
+            : parsed.data.email,
           password: parsed.data.password,
           name: parsed.data.email.split("@")[0],
           callbackURL: getEmailVerificationCallbackURL({
@@ -103,7 +109,8 @@ export async function signup(
         // below: the account exists and the signup still succeeds.
         await recordSignupConsent({
           userID: signUpResult.user.id,
-          marketingOptOut: parsed.data.marketingOptOut,
+          marketingOptOut:
+            usernameSignupEnabled() || parsed.data.marketingOptOut,
         });
       }
     } catch (createUserError) {

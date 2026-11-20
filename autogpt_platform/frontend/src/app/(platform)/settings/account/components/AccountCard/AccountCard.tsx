@@ -2,6 +2,7 @@
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { User } from "@/lib/auth/types";
+import { identityUsername } from "@/lib/auth/local-username";
 import { motion, useReducedMotion } from "framer-motion";
 import { useState } from "react";
 
@@ -34,6 +35,7 @@ export function AccountCard({ user, index = 0 }: Props) {
     useAccountCard({ user });
 
   const watchedEmail = emailForm.watch("email");
+  const username = identityUsername(currentEmail);
   const emailHasError = Object.keys(emailForm.formState.errors).length > 0;
   const isSameEmail = watchedEmail === currentEmail;
   const disableEmailSubmit = emailHasError || isSameEmail;
@@ -64,91 +66,93 @@ export function AccountCard({ user, index = 0 }: Props) {
       <div className="flex flex-col divide-y divide-border-base rounded-large border border-border-base bg-surface shadow-message-table">
         <div className="flex items-center justify-between gap-4 px-4 py-4">
           <Text variant="body-medium" as="span">
-            {t("Email", "电子邮箱")}
+            {username ? t("Username", "用户名") : t("Email", "电子邮箱")}
           </Text>
 
           <div className="flex min-w-0 items-center gap-3">
             <Text variant="body" as="span" className="min-w-0 truncate">
-              {currentEmail}
+              {username ?? currentEmail}
             </Text>
 
-            <Dialog
-              title={t("Update email", "更新邮箱")}
-              styling={{ maxWidth: "420px" }}
-              controlled={{
-                isOpen: emailDialogOpen,
-                set: (open) => {
-                  setEmailDialogOpen(open);
-                  if (open) emailForm.reset({ email: currentEmail });
-                },
-              }}
-            >
-              <Dialog.Trigger>
-                <Button
-                  variant="secondary"
-                  size="icon-xs"
-                  shape="pill"
-                  withTooltip={false}
-                  aria-label={t("Edit email", "修改邮箱")}
-                >
-                  <Icon icon={PencilIcon} size={14} />
-                </Button>
-              </Dialog.Trigger>
-              <Dialog.Content>
-                <Form form={emailForm} onSubmit={handleEmailSubmit}>
-                  <div className="flex flex-col gap-4">
-                    <Text variant="small" as="span" tone="muted">
-                      {t(
-                        "We'll send a confirmation link to verify your new address.",
-                        "我们将发送确认链接，以验证你的新邮箱地址。",
-                      )}
-                    </Text>
-                    <FormField
-                      control={emailForm.control}
-                      name="email"
-                      render={({ field, fieldState }) => (
-                        // oxlint-disable-next-line design-system/no-restyle -- the email field sits flush under its hint
-                        <FormItem className="space-y-0">
-                          <FormControl>
-                            <Input
-                              id={field.name}
-                              label={t("Email", "电子邮箱")}
-                              type="email"
-                              autoComplete="email"
-                              size="medium"
-                              className="w-full"
-                              wrapperClassName="!mb-0"
-                              error={fieldState.error?.message}
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <Dialog.Footer>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="small"
-                      onClick={() => setEmailDialogOpen(false)}
-                    >
-                      {t("Cancel", "取消")}
-                    </Button>
-                    <Button
-                      type="submit"
-                      size="small"
-                      disabled={disableEmailSubmit}
-                      loading={isUpdatingEmail}
-                    >
-                      {isUpdatingEmail
-                        ? t("Saving", "正在保存")
-                        : t("Update email", "更新邮箱")}
-                    </Button>
-                  </Dialog.Footer>
-                </Form>
-              </Dialog.Content>
-            </Dialog>
+            {!username && (
+              <Dialog
+                title={t("Update email", "更新邮箱")}
+                styling={{ maxWidth: "420px" }}
+                controlled={{
+                  isOpen: emailDialogOpen,
+                  set: (open) => {
+                    setEmailDialogOpen(open);
+                    if (open) emailForm.reset({ email: currentEmail });
+                  },
+                }}
+              >
+                <Dialog.Trigger>
+                  <Button
+                    variant="secondary"
+                    size="icon-xs"
+                    shape="pill"
+                    withTooltip={false}
+                    aria-label={t("Edit email", "修改邮箱")}
+                  >
+                    <Icon icon={PencilIcon} size={14} />
+                  </Button>
+                </Dialog.Trigger>
+                <Dialog.Content>
+                  <Form form={emailForm} onSubmit={handleEmailSubmit}>
+                    <div className="flex flex-col gap-4">
+                      <Text variant="small" as="span" tone="muted">
+                        {t(
+                          "We'll send a confirmation link to verify your new address.",
+                          "我们将发送确认链接，以验证你的新邮箱地址。",
+                        )}
+                      </Text>
+                      <FormField
+                        control={emailForm.control}
+                        name="email"
+                        render={({ field, fieldState }) => (
+                          // oxlint-disable-next-line design-system/no-restyle -- the email field sits flush under its hint
+                          <FormItem className="space-y-0">
+                            <FormControl>
+                              <Input
+                                id={field.name}
+                                label={t("Email", "电子邮箱")}
+                                type="email"
+                                autoComplete="email"
+                                size="medium"
+                                className="w-full"
+                                wrapperClassName="!mb-0"
+                                error={fieldState.error?.message}
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <Dialog.Footer>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="small"
+                        onClick={() => setEmailDialogOpen(false)}
+                      >
+                        {t("Cancel", "取消")}
+                      </Button>
+                      <Button
+                        type="submit"
+                        size="small"
+                        disabled={disableEmailSubmit}
+                        loading={isUpdatingEmail}
+                      >
+                        {isUpdatingEmail
+                          ? t("Saving", "正在保存")
+                          : t("Update email", "更新邮箱")}
+                      </Button>
+                    </Dialog.Footer>
+                  </Form>
+                </Dialog.Content>
+              </Dialog>
+            )}
           </div>
         </div>
 
@@ -157,14 +161,20 @@ export function AccountCard({ user, index = 0 }: Props) {
             {t("Password", "密码")}
           </Text>
 
-          <Button
-            as="NextLink"
-            href="/reset-password"
-            size="small"
-            variant="secondary"
-          >
-            {t("Reset password", "重置密码")}
-          </Button>
+          {username ? (
+            <Text variant="body" tone="muted">
+              {t("No recovery email", "未设置邮箱找回")}
+            </Text>
+          ) : (
+            <Button
+              as="NextLink"
+              href="/reset-password"
+              size="small"
+              variant="secondary"
+            >
+              {t("Reset password", "重置密码")}
+            </Button>
+          )}
         </div>
       </div>
     </motion.section>

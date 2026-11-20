@@ -1,6 +1,7 @@
 "use client";
 
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
+import { identityUsername } from "@/lib/auth/local-username";
 import {
   Popover,
   PopoverContent,
@@ -60,7 +61,7 @@ export function AccountMenuHeader({
                   data-testid="account-menu-user-email"
                   className="truncate text-body leading-tight text-foreground-body"
                 >
-                  {userEmail}
+                  {identityUsername(userEmail) ?? userEmail}
                 </span>
               </>
             )}

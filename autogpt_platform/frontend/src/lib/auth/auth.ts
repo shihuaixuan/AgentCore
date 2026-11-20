@@ -3,6 +3,7 @@ import {
   APIError,
   createAuthMiddleware,
   getIP,
+  getSessionFromCtx,
   isAPIError,
 } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
@@ -54,6 +55,11 @@ import { getMicrosoftLoginProvider } from "./microsoft-login";
 import { assertMicrosoftSignUpAllowed } from "./microsoft-sign-up-policy";
 import { assertTeamEmailUsesGoogle } from "./team-email-policy";
 import { sendVerificationLink } from "./verification-link";
+import {
+  identityUsername,
+  isUsernameIdentity,
+  usernameSignupEnabled,
+} from "./local-username";
 
 const baseURL =
   process.env.BETTER_AUTH_URL ||
@@ -165,7 +171,34 @@ export const auth = betterAuth({
       // Before Better Auth looks the address up, so an address that already
       // has an account is refused the same way, in the same time.
       if (signUpEmail) {
+        if (
+          usernameSignupEnabled() &&
+          (!identityUsername(signUpEmail) ||
+            identityUsername(signUpEmail) !== ctx.body.name)
+        ) {
+          throw new APIError("BAD_REQUEST", {
+            message: "Use a username to register.",
+          });
+        }
+        if (
+          isUsernameIdentity(signUpEmail) &&
+          (!usernameSignupEnabled() || requireEmailVerification)
+        ) {
+          throw new APIError("FORBIDDEN", {
+            message:
+              "Username registration requires local mode without email verification.",
+          });
+        }
         await assertEmailSignUpAllowed(signUpEmail, getRequestIP(ctx));
+      }
+      if (
+        ctx.path === "/change-email" &&
+        (isUsernameIdentity(String(ctx.body?.newEmail)) ||
+          isUsernameIdentity((await getSessionFromCtx(ctx))?.user.email ?? ""))
+      ) {
+        throw new APIError("BAD_REQUEST", {
+          message: "A username account cannot change its login address.",
+        });
       }
       // With verification required, sign-up and resend email an address with
       // no session yet: at most a few per IP per window (ip-email-cap.ts).
@@ -235,6 +268,14 @@ export const auth = betterAuth({
         ) => {
           // Microsoft's first: its refusals carry codes /login explains.
           assertMicrosoftSignUpAllowed(user, ctx);
+          if (
+            isUsernameIdentity(user.email) &&
+            ctx?.path !== EMAIL_SIGN_UP_PATH
+          ) {
+            throw new APIError("BAD_REQUEST", {
+              message: "Reserved local identity.",
+            });
+          }
           assertSignUpPolicy(user.email, ctx);
           // An email sign-up was already checked in hooks.before.
           if (
@@ -392,6 +433,7 @@ export const auth = betterAuth({
     // Without the record the link still resets the password, it just doesn't
     // verify the address (reset-link-address.ts).
     sendResetPassword: async ({ user, url, token }) => {
+      if (isUsernameIdentity(user.email)) return;
       await getAuthContext()
         .then((context) =>
           recordResetLinkAddress(context, {
@@ -425,6 +467,7 @@ export const auth = betterAuth({
     // Throttled per address, except for the resend button's own route: see
     // verification-link.ts.
     sendVerificationEmail: async ({ user, url }, request) => {
+      if (isUsernameIdentity(user.email)) return;
       await sendVerificationLink({
         user,
         url,
@@ -539,6 +582,7 @@ async function assertEmailSignUpAllowed(
 ) {
   await assertSignUpAllowed(authDbPool, { email, ipAddress });
   await assertNotBannedAddress(email);
+  if (usernameSignupEnabled() && identityUsername(email)) return;
   const dns = sharedLookups();
   await assertNotDisposableEmail(email, { dns });
   await assertEmailHasMailServer(email, { dns });
