@@ -44,10 +44,10 @@ describe("generateMetadata", () => {
     });
 
     expect(mockGetCreatorDetails).toHaveBeenCalledWith("creator-one");
-    expect(metadata.title).toBe("Creator One - AutoGPT Store");
+    expect(metadata.title).toBe("Creator One - Duanmu Software Marketplace");
     expect(metadata.description).toBe("Creator profile");
     expect(metadata.openGraph).toMatchObject({
-      title: "Creator One - AutoGPT Store",
+      title: "Creator One - Duanmu Software Marketplace",
       description: "Creator profile",
       type: "profile",
     });

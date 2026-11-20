@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/atoms/Card/Card";
 import { APIKeysModals } from "./components/APIKeysModals/APIKeysModals";
 import { APIKeysHeader } from "./components/APIKeysHeader";
 
-export const metadata: Metadata = { title: "API Keys - AutoGPT Platform" };
+export const metadata: Metadata = { title: "API Keys - Duanmu Software" };
 
 const ApiKeysPage = () => {
   return (

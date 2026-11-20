@@ -30,7 +30,7 @@ function DefaultHeading() {
   const { t } = useTranslation();
   return (
     <>
-      <AutoGPTLogo hideText className="relative right-5 mb-2 h-8 w-20" />
+      <AutoGPTLogo className="mb-2 size-10" />
       <Text variant="h3" as="h1" className="leading-9">
         {t("Choose the plan that's right for you", "选择适合你的套餐")}
       </Text>

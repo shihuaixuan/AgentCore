@@ -27,8 +27,8 @@ export function MobileWarningBanner() {
         <div className="flex flex-col gap-1">
           <Text variant="body-medium" tone="warning">
             {t(
-              "Heads up: AutoGPT works best on desktop",
-              "提示：在电脑上使用 AutoGPT 体验更佳",
+              "Heads up: This app works best on desktop",
+              "提示：在电脑上使用体验更佳",
             )}
           </Text>
           <Text variant="small" tone="warning">

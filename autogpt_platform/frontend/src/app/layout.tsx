@@ -20,6 +20,7 @@ import { environment } from "@/services/environment";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { headers } from "next/headers";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
+import { BRAND_NAME } from "@/lib/branding";
 import Script from "next/script";
 import { getSiteUrl } from "@/lib/metadata";
 
@@ -32,7 +33,7 @@ const faviconPath = isDev
     ? "/favicon-local.ico"
     : "/favicon.ico";
 
-const SITE_TITLE = "AutoGPT 平台";
+const SITE_TITLE = `${BRAND_NAME.zh}平台`;
 const SITE_DESCRIPTION = "一站式创建 AI 专家、构建工作流并自动完成任务";
 
 export const metadata: Metadata = {
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    siteName: "AutoGPT",
+    siteName: BRAND_NAME.zh,
     type: "website",
   },
   twitter: {

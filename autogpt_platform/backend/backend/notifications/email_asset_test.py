@@ -1,5 +1,6 @@
 """Email artwork stays transparent when clients recolor the surrounding band."""
 
+from filecmp import cmp
 from pathlib import Path
 
 import pytest
@@ -34,3 +35,18 @@ def test_email_hero_default_uses_the_transparent_export():
     ).render()
     assert f'src="https://platform.agpt.co{OTTO_PATH}/256.png"' in html
     assert 'width="160" height="160"' in html
+
+
+@pytest.mark.parametrize("assets", ["", "https://platform.agpt.co/email"])
+def test_masthead_is_omitted_without_a_custom_asset_host(assets):
+    template = create_body_environment(autoescape=True).from_string(
+        '{% import "_email_ui.j2" as ui with context %}{{ ui.masthead() }}'
+    )
+    html = template.render(assets=assets, urls={"dashboard": "https://example.test"})
+    assert html.strip() == ""
+
+
+def test_email_masthead_uses_the_same_icon_without_the_wordmark():
+    assert cmp(
+        PUBLIC / "email/logo-light.png", PUBLIC / "duanmu-icon.png", shallow=False
+    )

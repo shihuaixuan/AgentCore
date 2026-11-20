@@ -31,7 +31,7 @@ export async function generateMetadata({
   const agent = data as StoreAgentDetails;
 
   return buildPageMetadata({
-    title: `${agent.agent_name} - AutoGPT Marketplace`,
+    title: `${agent.agent_name} - Duanmu Software Marketplace`,
     description: agent.sub_heading?.trim() || agent.agent_name,
     path: `/marketplace/agent/${params.creator}/${params.slug}`,
     images: agent.agent_image?.slice(0, 1),

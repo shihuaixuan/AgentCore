@@ -43,7 +43,7 @@ beforeEach(() => {
 });
 
 describe("SharePage (execution share viewer)", () => {
-  test("renders the AutoGPT logo header + run summary + outputs on the happy path", async () => {
+  test("renders the Duanmu Software logo header + run summary + outputs on the happy path", async () => {
     server.use(
       getGetV1GetSharedExecutionMockHandler200(
         (): SharedExecutionResponse => ({
@@ -59,11 +59,11 @@ describe("SharePage (execution share viewer)", () => {
 
     render(<SharePage />);
 
-    // Logo (rendered inside the chrome wrapper at the top of the page).
-    // Both light + dark variants ship in the DOM behind dark: class
-    // selectors, so we look for at least one match.
-    const logos = await screen.findAllByAltText("AutoGPT");
-    expect(logos.length).toBeGreaterThan(0);
+    expect(
+      (
+        await screen.findByRole("img", { name: "Duanmu Software logo" })
+      ).getAttribute("src"),
+    ).toBe("/duanmu-icon.png");
     // Public-share affordance alert.
     expect(
       await screen.findByText(/publicly shared workflow run result/i),

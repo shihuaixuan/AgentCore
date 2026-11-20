@@ -1,4 +1,4 @@
-// push-sw.js — Generic Web Push service worker for AutoGPT Platform.
+// push-sw.js — Generic Web Push service worker for the platform.
 // Handles push events for ALL notification types.
 // Plain JS (not TypeScript) because Next.js serves public/ files as-is.
 
@@ -6,12 +6,12 @@
 var NOTIFICATION_MAP = {
   copilot_completion: {
     session_completed: {
-      title: "AutoGPT",
+      title: "端木软件",
       body: "Task completed",
       url: "/copilot",
     },
     session_failed: {
-      title: "AutoGPT",
+      title: "端木软件",
       body: "Task failed",
       url: "/copilot",
     },
@@ -32,7 +32,7 @@ function getNotificationConfig(data) {
     if (eventConfig) return eventConfig;
   }
   return {
-    title: "AutoGPT Notification",
+    title: "端木软件通知",
     body: data.event || "Something happened.",
     url: "/",
   };

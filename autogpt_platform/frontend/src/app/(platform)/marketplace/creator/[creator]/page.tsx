@@ -37,7 +37,7 @@ export async function generateMetadata({
   }
 
   return buildPageMetadata({
-    title: `${creator.name} - AutoGPT Store`,
+    title: `${creator.name} - Duanmu Software Marketplace`,
     description: creator.description,
     path: `/marketplace/creator/${params.creator}`,
     images: [creator.avatar_url],

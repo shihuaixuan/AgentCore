@@ -2,7 +2,7 @@ import { Metadata } from "next/types";
 import { OAuthAppsSection } from "./components/OAuthAppsSection";
 import { OAuthAppsHeader } from "./components/OAuthAppsHeader";
 
-export const metadata: Metadata = { title: "OAuth Apps - AutoGPT Platform" };
+export const metadata: Metadata = { title: "OAuth Apps - Duanmu Software" };
 
 const OAuthAppsPage = () => {
   return (

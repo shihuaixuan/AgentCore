@@ -71,16 +71,18 @@ footer link and ops has no footer links.
 
 ## Images and configuration
 
-`EMAIL_ASSET_BASE_URL` defaults to `https://platform.agpt.co/email`, containing
-`logo-light.png` (790x356 served at 100x45). Otto uses the same URL origin plus
-`/autogpt-characters/v1.1/otto/neutral-transparent/256.png`, served at 160x160 or
-80x80 for ops. Its transparent background lets the surrounding hero band show
-through when a mail client recolors the message in dark mode. The original
-opaque export remains available for already-delivered messages. The 256px,
-512px and 1024px transparent exports come unchanged from the approved October 6
-design handoff.
+Set `EMAIL_ASSET_BASE_URL` to your publicly reachable frontend's `/email` URL
+to show the Duanmu Software icon without a wordmark (`logo-light.png`,
+displayed at 48×48). The masthead is omitted when the URL is empty or uses
+the upstream default (`https://platform.agpt.co/email`). Otto uses the same
+URL origin plus `/autogpt-characters/v1.1/otto/neutral-transparent/256.png`,
+served at 160x160 or 80x80 for ops. Its transparent background lets the
+surrounding hero band show through when a mail client recolors the message
+in dark mode. The original opaque export remains available for already-delivered
+messages. The 256px, 512px and 1024px transparent exports come unchanged from
+the approved October 6 design handoff.
 
-The logo and transparent Otto ship in the frontend public assets. A custom
+The icon and transparent Otto ship in the frontend public assets. A custom
 asset host must serve both paths publicly over HTTPS without cookies or
 authentication. Deploy the frontend/static assets before the backend renderer
 so the new image URL resolves as soon as templates start using it.

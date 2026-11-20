@@ -44,7 +44,7 @@ interface Props {
   onConnected?: (credential?: CredentialsMetaResponse) => void;
 }
 
-/** The onboarding connect flow (logo pair, "Connect AutoGPT to X",
+/** The onboarding connect flow (logo pair, connection heading,
  *  method cards with the API-key form inlined) scoped to a single
  *  provider — used by CredentialsInput's "Add credential" action so the
  *  copilot and the onboarding funnel ask for credentials the same way. */

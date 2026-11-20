@@ -1,5 +1,6 @@
 "use client";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { BRAND_NAME } from "@/lib/branding";
 
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { AutoGPTLogo } from "@/components/atoms/AutoGPTLogo/AutoGPTLogo";
@@ -64,8 +65,8 @@ export const METHOD_ORDER: AuthMethod[] = [
   AuthType.host_scoped,
 ];
 
-// The connect step behind a provider click: logo pair, "Connect AutoGPT
-// to X", method radio cards. Form methods expand their inputs inline as
+// The connect step behind a provider click: logo pair and method radio cards.
+// Form methods expand their inputs inline as
 // an accordion; OAuth is driven by the panel footer's Continue.
 export function ConnectMethodView({
   workflowConnect,
@@ -153,11 +154,8 @@ export function ConnectMethodView({
     <LazyMotion features={domAnimation}>
       <div className="flex flex-col gap-5 pt-2">
         <div className="flex items-center justify-center gap-6">
-          <span className="relative flex h-20 w-20 items-center justify-center rounded-full bg-surface shadow-lg ring-1 ring-separator">
-            <AutoGPTLogo
-              hideText
-              className="absolute top-1/2 left-1/2 h-8 w-[4.4rem] -translate-x-[77%] -translate-y-1/2"
-            />
+          <span className="flex size-20 items-center justify-center rounded-full bg-surface shadow-lg ring-1 ring-separator">
+            <AutoGPTLogo alt="" className="size-12" />
           </span>
           <span aria-hidden className="grid grid-cols-3 gap-1.5">
             {Array.from({ length: 9 }, (_, dot) => (
@@ -180,8 +178,8 @@ export function ConnectMethodView({
             {showMcp
               ? t(`Connect ${provider.name}`, `连接 ${provider.name}`)
               : t(
-                  `Connect AutoGPT to ${provider.name}`,
-                  `将 AutoGPT 连接到 ${provider.name}`,
+                  `Connect ${BRAND_NAME.en} to ${provider.name}`,
+                  `将${BRAND_NAME.zh}连接到 ${provider.name}`,
                 )}
           </Text>
           {showMcp ? null : (

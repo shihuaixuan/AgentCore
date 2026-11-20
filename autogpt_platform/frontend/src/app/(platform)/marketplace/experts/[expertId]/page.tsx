@@ -37,14 +37,17 @@ export async function generateMetadata({
 
   if (!expert) {
     return buildPageMetadata({
-      title: t("Expert - AutoGPT Marketplace", "专家 - AutoGPT 市场"),
+      title: t("Expert - Duanmu Software Marketplace", "专家 - 端木软件市场"),
       path,
     });
   }
 
   const title = getExpertDisplayTitle(expert, locale);
   return buildPageMetadata({
-    title: t(`${title} · AutoGPT Marketplace`, `${title} · AutoGPT 市场`),
+    title: t(
+      `${title} · Duanmu Software Marketplace`,
+      `${title} · 端木软件市场`,
+    ),
     description:
       formatExpertIntro(
         expert.tagline || expert.bio || "",

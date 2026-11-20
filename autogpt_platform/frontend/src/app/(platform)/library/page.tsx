@@ -31,10 +31,7 @@ export default function LibraryPage() {
   const fleetSummary = useLibraryFleetSummary(agents);
 
   useEffect(() => {
-    document.title = t(
-      "Library – AutoGPT Platform",
-      "工作流库 – AutoGPT Platform",
-    );
+    document.title = t("Library – Duanmu Software", "工作流库 – 端木软件");
   }, [t]);
 
   function handleTabChange(tabId: string) {

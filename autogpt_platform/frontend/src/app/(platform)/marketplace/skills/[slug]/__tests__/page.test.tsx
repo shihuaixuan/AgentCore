@@ -35,7 +35,9 @@ describe("marketplace skill page module", () => {
 
     const metadata = await generateMetadata({ params });
 
-    expect(metadata.title).toBe("Outreach playbook - AutoGPT Marketplace");
+    expect(metadata.title).toBe(
+      "Outreach playbook - Duanmu Software Marketplace",
+    );
     expect(metadata.description).toBe("Run cold outreach that gets replies.");
   });
 

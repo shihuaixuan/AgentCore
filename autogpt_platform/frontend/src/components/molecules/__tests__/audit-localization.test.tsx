@@ -3,7 +3,6 @@ import { fireEvent, render, screen } from "@/tests/integrations/test-utils";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { Calendar } from "@/components/atoms/Calendar/Calendar";
 import { AutoGPTLogo } from "@/components/atoms/AutoGPTLogo/AutoGPTLogo";
-import { AutoGPTLogoWhite } from "@/components/atoms/AutoGPTLogo/AutoGPTLogoWhite";
 import { SkillPackageFileList } from "@/components/contextual/SkillPackage/SkillPackageFileList";
 import { ExpertAvatar } from "../ExpertAvatar/ExpertAvatar";
 import { CollapseButton, Tree } from "../file-tree";
@@ -29,11 +28,12 @@ test("localizes shared image defaults while preserving identity names", () => {
   render(
     <LanguageProvider>
       <AutoGPTLogo />
-      <AutoGPTLogoWhite />
       <ExpertAvatar name="Original Expert" avatarUrl={null} />
     </LanguageProvider>,
   );
-  expect(screen.getAllByLabelText("AutoGPT 标志")).toHaveLength(2);
+  expect(
+    screen.getByRole("img", { name: "端木软件标志" }).getAttribute("src"),
+  ).toBe("/duanmu-icon.png");
   expect(
     screen.getByRole("img", { name: "Original Expert，AI 专家" }),
   ).toBeDefined();

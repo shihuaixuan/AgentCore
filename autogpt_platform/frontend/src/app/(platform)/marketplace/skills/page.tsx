@@ -9,7 +9,7 @@ import { BROWSE_PAGE_SIZE } from "../components/SkillsSection/helpers";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Skills - AutoGPT Marketplace",
+  title: "Skills - Duanmu Software Marketplace",
   description: "Playbooks your experts follow. Teach them your way of working.",
 };
 

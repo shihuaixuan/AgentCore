@@ -8,8 +8,8 @@ export default function Page() {
   const { t } = useTranslation();
   useEffect(() => {
     document.title = t(
-      "Creator Dashboard – AutoGPT Platform",
-      "创作者面板 – AutoGPT 平台",
+      "Creator Dashboard – Duanmu Software",
+      "创作者面板 – 端木软件",
     );
   }, [t]);
 

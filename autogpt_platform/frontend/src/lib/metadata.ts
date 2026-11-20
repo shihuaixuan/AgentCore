@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import { BRAND_NAME } from "./branding";
 
-const SITE_NAME = "AutoGPT";
 // X truncates around 200 characters, the tightest of the platforms we target.
 const DESCRIPTION_MAX_LENGTH = 200;
 
@@ -34,7 +34,7 @@ export function buildPageMetadata({
     openGraph: {
       title,
       description: summary,
-      siteName: SITE_NAME,
+      siteName: BRAND_NAME.zh,
       type,
       url,
       ...(cardImages.length > 0 ? { images: cardImages } : {}),

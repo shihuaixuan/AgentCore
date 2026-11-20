@@ -113,9 +113,7 @@ export default function SharePage() {
               </div>
             </div>
             <div className="mt-8 text-center text-caption text-foreground-tertiary">
-              <p>
-                {t("Powered by AutoGPT Platform", "由 AutoGPT 平台提供支持")}
-              </p>
+              <p>{t("Powered by Duanmu Software", "由端木软件平台提供支持")}</p>
             </div>
           </div>
         </div>
@@ -183,7 +181,7 @@ export default function SharePage() {
         </Card>
 
         <div className="mt-8 text-center text-body text-foreground-tertiary">
-          <p>{t("Powered by AutoGPT Platform", "由 AutoGPT 平台提供支持")}</p>
+          <p>{t("Powered by Duanmu Software", "由端木软件平台提供支持")}</p>
         </div>
       </div>
     </ExecutionShareChrome>

@@ -13,10 +13,7 @@ export default function FollowupsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    document.title = t(
-      "Scheduled – AutoGPT Platform",
-      "计划 – AutoGPT Platform",
-    );
+    document.title = t("Scheduled – Duanmu Software", "计划 – 端木软件");
   }, [t]);
 
   function handleGuidedPrompt(prompt: string) {

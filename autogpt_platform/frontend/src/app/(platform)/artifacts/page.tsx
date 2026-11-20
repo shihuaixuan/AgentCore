@@ -100,7 +100,7 @@ export default function ArtifactsPage() {
     : [];
 
   useEffect(() => {
-    document.title = t("Files – AutoGPT Platform", "文件 – AutoGPT Platform");
+    document.title = t("Files – Duanmu Software", "文件 – 端木软件");
   }, [t]);
 
   const variants = reduceMotion ? REDUCED_SECTION_VARIANTS : SECTION_VARIANTS;

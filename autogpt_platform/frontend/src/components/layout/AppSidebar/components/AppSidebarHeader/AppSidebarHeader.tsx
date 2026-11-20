@@ -1,5 +1,6 @@
 "use client";
 
+import { BRAND_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { AutoGPTLogo } from "@/components/atoms/AutoGPTLogo/AutoGPTLogo";
 import {
@@ -68,18 +69,17 @@ export function AppSidebarHeader() {
       >
         <Link
           href="/home"
-          aria-label="AutoGPT"
+          aria-label={t(BRAND_NAME.en, BRAND_NAME.zh)}
           className={cn(
             "flex items-center",
             isCollapsed &&
               "size-8 items-center justify-center group-focus-within:hidden group-hover:hidden",
           )}
         >
-          {isCollapsed ? (
-            <AutoGPTLogo hideText viewBox="47 -1 42 42" className="size-7" />
-          ) : (
-            <AutoGPTLogo className="-mt-1 ml-2.5 h-7 w-auto max-md:mt-2 max-md:h-9" />
-          )}
+          <AutoGPTLogo
+            alt=""
+            className={isCollapsed ? "size-7" : "ml-2.5 size-9"}
+          />
         </Link>
         {isCollapsed ? toggleButton : null}
       </div>
