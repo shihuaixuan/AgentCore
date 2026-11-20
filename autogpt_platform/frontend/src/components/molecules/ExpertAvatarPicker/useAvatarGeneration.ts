@@ -3,11 +3,12 @@ import {
   useGetExpertAvatarGeneration,
 } from "@/app/api/__generated__/endpoints/experts/experts";
 import type { ExpertAvatarRequest } from "@/app/api/__generated__/models/expertAvatarRequest";
+import type { Locale } from "@/lib/i18n/locale";
 import { useRef, useState } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 export function useAvatarGeneration() {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const [jobID, setJobID] = useState("");
   const requestVersion = useRef(0);
   const mutation = useGenerateExpertAvatar<Error>({
@@ -31,14 +32,12 @@ export function useAvatarGeneration() {
   const isGenerating =
     mutation.isPending ||
     Boolean(jobID && !query.isError && (!job || job.status === "pending"));
-  const error =
+  const rawError =
     mutation.error?.message ??
     (query.isError
-      ? t(
-          "Could not check generation. Try again or regenerate.",
-          "无法获取生成进度，请重试或重新生成。",
-        )
-      : job?.error);
+      ? "Could not check generation. Try again or regenerate."
+      : (job?.error ?? undefined));
+  const error = localizeAvatarError(rawError, locale, t);
 
   function generate(request: ExpertAvatarRequest) {
     const version = ++requestVersion.current;
@@ -65,4 +64,37 @@ export function useAvatarGeneration() {
   }
 
   return { generate, reset, isGenerating, error, job };
+}
+
+function localizeAvatarError(
+  error: string | undefined,
+  locale: Locale,
+  translate: (english: string, chinese: string) => string,
+) {
+  if (!error || locale === "en") return error;
+  if (error === "Please wait before generating again.") {
+    return translate(error, "请稍后再重新生成。");
+  }
+  if (error === "Avatar generation is temporarily unavailable") {
+    return translate(error, "头像生成服务暂时不可用。");
+  }
+  if (error === "Avatar generation not found") {
+    return translate(error, "找不到头像生成任务。");
+  }
+  if (error === "Generation timed out. Choose a catalog avatar or try again.") {
+    return translate(error, "头像生成超时，请选择预设头像或重试。");
+  }
+  if (
+    error ===
+    "Could not generate this avatar. Choose a catalog avatar or try again."
+  ) {
+    return translate(error, "头像生成失败，请选择预设头像或重试。");
+  }
+  if (error === "Could not check generation. Try again or regenerate.") {
+    return translate(error, "无法获取生成进度，请重试或重新生成。");
+  }
+  return translate(
+    "Could not generate avatar. Try again or regenerate.",
+    "头像生成失败，请重试或重新生成。",
+  );
 }

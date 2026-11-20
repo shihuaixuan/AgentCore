@@ -3,10 +3,10 @@ import { describe, expect, test } from "vitest";
 import { AutoGPTBubble } from "./AutoGPTBubble";
 
 describe("AutoGPTBubble", () => {
-  test("shows Otto as the sender label", () => {
+  test("shows the default assistant as the sender label", () => {
     render(<AutoGPTBubble text="Hello there." animate={false} />);
 
-    expect(screen.getByText("Otto")).toBeDefined();
+    expect(screen.getByText("General Office Assistant")).toBeDefined();
     expect(screen.queryByText("AutoGPT")).toBeNull();
   });
 });

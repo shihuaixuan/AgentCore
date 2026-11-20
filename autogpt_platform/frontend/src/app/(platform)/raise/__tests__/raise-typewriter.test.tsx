@@ -70,7 +70,7 @@ test("instantly restores the conversation at the avatar instead of the old name 
   expect(
     visible.some((text) =>
       text.includes(
-        "Hello, I'm Otto. I'll help you create your own AI Expert.",
+        "Hello, I'm your General Office Assistant. I'll help you create your own AI Expert.",
       ),
     ),
   ).toBe(true);

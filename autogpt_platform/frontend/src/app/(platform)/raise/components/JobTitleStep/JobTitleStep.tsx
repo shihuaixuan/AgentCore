@@ -7,6 +7,7 @@ import { Input } from "@/components/atoms/Input/Input";
 import { cn } from "@/lib/utils";
 import { Forward02Icon } from "@hugeicons/core-free-icons";
 import { bubbleClassFor } from "../ColorStep/helpers";
+import { jobTitleLabelFor } from "../CategoryStep/helpers";
 import { JOB_TITLE_MAX_LENGTH, useJobTitleStep } from "./useJobTitleStep";
 
 interface Props {
@@ -68,7 +69,10 @@ export function JobTitleStep({
                   : "border-border-base bg-canvas hover:border-brand hover:bg-brand/5",
               )}
             >
-              {chip}
+              {t(
+                chip,
+                suggestions.includes(chip) ? jobTitleLabelFor(chip) : chip,
+              )}
             </button>
           ))}
         </div>

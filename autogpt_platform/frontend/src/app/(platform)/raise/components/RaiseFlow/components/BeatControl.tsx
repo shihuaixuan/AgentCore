@@ -1,8 +1,9 @@
 "use client";
 
 import { VoicePicker } from "@/components/organisms/VoicePicker/VoicePicker";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { BeatKey } from "../../../flowItems";
-import { VOICE_SAMPLES } from "../../../helpers";
+import { voiceSamplesFor } from "../../../helpers";
 import type { useRaisePage } from "../../../useRaisePage";
 import { AboutStep } from "../../AboutStep/AboutStep";
 import { AvatarStep } from "../../AvatarStep/AvatarStep";
@@ -24,6 +25,8 @@ interface Props {
 }
 
 export function BeatControl({ beat, flow }: Props) {
+  const { locale } = useTranslation();
+
   switch (beat) {
     case "category":
       return (
@@ -69,7 +72,7 @@ export function BeatControl({ beat, flow }: Props) {
       return (
         <VoicePicker
           name={flow.title}
-          samples={VOICE_SAMPLES}
+          samples={voiceSamplesFor(locale)}
           hideHeader
           // oxlint-disable-next-line design-system/require-static-classes -- the colour helpers return whole, static class strings from COLOR_OPTIONS
           labelClassName={textClassFor(flow.color)}

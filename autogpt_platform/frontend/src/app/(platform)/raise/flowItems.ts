@@ -39,7 +39,7 @@ export function buildFlowItems(
       role: "autogpt",
       text: t(
         RAISE_PROMPTS.greeting,
-        "你好，我是 Otto。我会帮助你创建专属 AI 专家。",
+        "你好，我是你的通用办公助手。我会帮助你创建专属 AI 专家。",
       ),
     },
     { kind: "startButton", id: "start-button" },

@@ -3,7 +3,12 @@
 import { GlassOrb } from "@/components/molecules/GlassOrb/GlassOrb";
 import { DEFAULT_GLASS_PARAMS } from "@/components/molecules/GlassOrb/GlassSurface";
 import Image from "next/image";
-import { kitBudgetLabel, kitToolsLabel, type RaiseKit } from "../../helpers";
+import {
+  kitBudgetLabel,
+  kitToolsLabel,
+  type RaiseKit,
+  voiceDisplayLabel,
+} from "../../helpers";
 import { SoulDetailCard } from "./SoulDetailCard";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
@@ -34,7 +39,10 @@ export function SoulPreviewPanel({
   const { t } = useTranslation();
   const details = [
     { label: t("About", "关于"), value: about },
-    { label: t("Voice", "声音"), value: voiceLabel },
+    {
+      label: t("Voice", "声音"),
+      value: voiceDisplayLabel(voiceLabel, t),
+    },
     { label: t("Weekly budget", "每周预算"), value: kitBudgetLabel(kit, t) },
     { label: t("Tools", "工具"), value: kitToolsLabel(kit) },
   ].filter((detail): detail is SoulDetail => Boolean(detail.value));
