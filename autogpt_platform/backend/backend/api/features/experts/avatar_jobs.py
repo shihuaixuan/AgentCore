@@ -5,6 +5,7 @@ import uuid
 from typing import Literal
 
 from fastapi import HTTPException, UploadFile
+from openai import APIConnectionError, APIStatusError
 from pydantic import BaseModel, Field
 from starlette.datastructures import Headers
 
@@ -85,7 +86,7 @@ async def load_job(user_id: str, job_id: uuid.UUID) -> ExpertAvatarJob:
     job = ExpertAvatarJob.model_validate_json(value)
     if job.status == "pending" and time.time() - job.created_at > GENERATION_TIMEOUT:
         job.status = "failed"
-        job.error = "Generation timed out. Choose a catalog avatar or try again."
+        job.error = "Avatar generation timed out. Try again later."
     return job
 
 
@@ -107,13 +108,25 @@ async def run_generation(
             finally:
                 await file.close()
             job.status = "complete"
-    except Exception:
-        logger.exception("Expert avatar generation failed")
+    except APIStatusError as exc:
+        logger.warning(f"Expert avatar provider returned HTTP {exc.status_code}")
         job.status = "failed"
         job.error = (
-            "Could not generate this avatar. Choose a catalog avatar or try again."
+            "The image provider rejected the request. Contact your administrator."
+            if exc.status_code in (400, 401, 403, 404, 405, 422)
+            else "The image provider is unavailable. Try again later."
         )
+    except (APIConnectionError, TimeoutError) as exc:
+        logger.warning(f"Expert avatar generation unavailable: {type(exc).__name__}")
+        job.status = "failed"
+        job.error = "The image provider is unavailable. Try again later."
+    except Exception as exc:
+        logger.error(f"Expert avatar generation failed: {type(exc).__name__}")
+        job.status = "failed"
+        job.error = "Could not generate this avatar. Keep this avatar or try again."
     try:
         await save_job(user_id, job)
-    except Exception:
-        logger.exception("Could not save expert avatar generation result")
+    except Exception as exc:
+        logger.error(
+            f"Could not save expert avatar generation result: {type(exc).__name__}"
+        )

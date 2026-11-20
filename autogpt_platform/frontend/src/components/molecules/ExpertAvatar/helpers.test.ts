@@ -2,14 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_EXPERT_AVATAR_URL,
   getExpertVisualCategory,
-  getManagedAvatar,
   getManagedIdentity,
   MANAGED_IDENTITIES,
   resolveExpertAvatarUrl,
 } from "./helpers";
 
-const MARIA = "/autogpt-characters/v1.1/expert-maria/neutral/128.webp";
-const JULES = "/autogpt-characters/v2.1/expert-jules/neutral/128.webp";
+const MARIA = "/experts/professional/expert-maria.webp";
+const JULES = "/experts/professional/expert-jules.webp";
 
 describe("managed expert identities", () => {
   it("maps stored roster and retired clay defaults to the identity they stood for", () => {
@@ -32,6 +31,8 @@ describe("managed expert identities", () => {
       "https://cdn.example/upload.png",
       "/api/store/media/user/images/custom.png",
       "/avatars/mine.svg",
+      "https://uploads.example/autogpt-characters/v2.1/expert-jules/neutral/40.png?token=mine",
+      "/autogpt-characters/v9.9/expert-jules/neutral/128.webp",
       MARIA,
       JULES,
       DEFAULT_EXPERT_AVATAR_URL,
@@ -42,7 +43,7 @@ describe("managed expert identities", () => {
 
   it("uses the General fallback for missing avatars, custom Notion picks and the retired category sheets", () => {
     expect(DEFAULT_EXPERT_AVATAR_URL).toBe(
-      "/autogpt-characters/v2.1/expert-general-01/neutral/128.webp",
+      "/experts/professional/expert-general-01.webp",
     );
     expect(resolveExpertAvatarUrl(null)).toBe(DEFAULT_EXPERT_AVATAR_URL);
     expect(resolveExpertAvatarUrl("/avatars/notion/1-2-3.violet.svg")).toBe(
@@ -53,27 +54,19 @@ describe("managed expert identities", () => {
     );
   });
 
-  it("serves every identity from its own versioned library path", () => {
+  it("recognizes canonical portraits and legacy size variants", () => {
     expect(MANAGED_IDENTITIES).toHaveLength(35);
     for (const identity of MANAGED_IDENTITIES) {
-      expect(identity.url).toBe(
-        `${identity.base_url}/${identity.id}/neutral/128.webp`,
-      );
       expect(getManagedIdentity(identity.url)?.id).toBe(identity.id);
     }
-    expect(getManagedAvatar(JULES, 40)).toMatchObject({
-      assetID: "expert-jules",
-      base: "/autogpt-characters/v2.1/expert-jules/neutral",
-      pixels: 40,
-    });
-    expect(getManagedAvatar(MARIA, 88)?.pixels).toBe(96);
-    expect(getManagedAvatar("https://cdn.example/upload.png", 40)).toBeNull();
     expect(
-      getManagedAvatar(
-        "/autogpt-characters/v9.9/expert-jules/neutral/128.webp",
-        40,
+      resolveExpertAvatarUrl(
+        "/autogpt-characters/v1.1/expert-maria/neutral/512.png",
       ),
-    ).toBeNull();
+    ).toBe(MARIA);
+    expect(resolveExpertAvatarUrl("/experts/transparent/maria.webp")).toBe(
+      MARIA,
+    );
   });
 
   it("keeps the visual family with the identity, not the filter", () => {

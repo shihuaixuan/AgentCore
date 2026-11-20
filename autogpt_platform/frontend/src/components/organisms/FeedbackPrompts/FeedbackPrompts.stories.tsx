@@ -19,7 +19,7 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-const MARIA_AVATAR = "/autogpt-characters/v1.1/expert-maria/neutral/128.webp";
+const MARIA_AVATAR = "/experts/professional/expert-maria.webp";
 
 export const TrialCancel: Story = {
   name: "1a. Trial cancel",

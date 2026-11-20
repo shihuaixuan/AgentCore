@@ -6,7 +6,7 @@ const MINA = "/autogpt-characters/v1.1/expert-mina/neutral/128.webp";
 const JULES = "/autogpt-characters/v2.1/expert-jules/neutral/128.webp";
 
 describe("ExpertAvatar saved appearance", () => {
-  test("uses the matching professional portrait after a title and color change", () => {
+  test("keeps the same professional portrait after a rename and color change", () => {
     const { rerender } = render(
       <ExpertAvatar name="Mina" avatarUrl={MINA} size={32} />,
     );
@@ -27,17 +27,14 @@ describe("ExpertAvatar saved appearance", () => {
     );
   });
 
-  test("falls back to the same 2.1 identity with 1x and 2x sources", () => {
+  test("does not request a versioned size variant", () => {
     const { container } = render(
       <ExpertAvatar name="Jules" avatarUrl={JULES} size={88} />,
     );
-    fireEvent.error(screen.getByRole("img"));
     expect(screen.getByRole("img").getAttribute("src")).toBe(
-      "/autogpt-characters/v2.1/expert-jules/neutral/96.webp",
+      "/experts/professional/expert-jules.webp",
     );
-    expect(container.querySelector("source")?.getAttribute("srcset")).toBe(
-      "/autogpt-characters/v2.1/expert-jules/neutral/96.webp 1x, /autogpt-characters/v2.1/expert-jules/neutral/192.webp 2x",
-    );
+    expect(container.querySelector("source")).toBeNull();
   });
 
   test("a retired clay default shows the identity it stood for, not the filter's variant", () => {
@@ -53,16 +50,8 @@ describe("ExpertAvatar saved appearance", () => {
     );
   });
 
-  test("falls back to managed WebP, PNG then initials without borrowing another identity", () => {
+  test("falls back directly to initials without requesting retired artwork", () => {
     render(<ExpertAvatar name="My editor" avatarUrl={MINA} size={32} />);
-    fireEvent.error(screen.getByRole("img"));
-    expect(screen.getByRole("img").getAttribute("src")).toBe(
-      "/autogpt-characters/v1.1/expert-mina/neutral/32.webp",
-    );
-    fireEvent.error(screen.getByRole("img"));
-    expect(screen.getByRole("img").getAttribute("src")).toBe(
-      "/autogpt-characters/v1.1/expert-mina/neutral/32.png",
-    );
     fireEvent.error(screen.getByRole("img"));
     expect(screen.getByRole("img").textContent).toBe("MY");
   });
@@ -80,12 +69,12 @@ describe("ExpertAvatar saved appearance", () => {
   test("a missing avatar shows the General fallback, never Otto", () => {
     render(<ExpertAvatar name="Nova" avatarUrl={null} size={40} />);
     expect(screen.getByRole("img").getAttribute("src")).toBe(
-      "/autogpt-characters/v2.1/expert-general-01/neutral/40.webp",
+      "/experts/professional/expert-general-01.webp",
     );
   });
 });
 
-test("a managed identity keeps its opaque studio tile on a topic background", () => {
+test("the topic background does not change the portrait", () => {
   render(
     <ExpertAvatar
       name="Mina"

@@ -38,10 +38,8 @@ export function useExpertAvatarPicker({
       uploadSubmissionMediaDirect(file, "expert-avatar", locale),
   });
 
-  const generatedUrl =
-    generation.job?.status === "complete" ? generation.job.avatar_url : null;
   const selectedUrl =
-    generatedUrl ??
+    generation.generatedUrl ??
     previewUrl ??
     (avatarUrl
       ? resolveExpertAvatarUrl(avatarUrl)

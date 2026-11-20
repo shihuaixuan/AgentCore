@@ -33,8 +33,8 @@ test("generates only on request, keeping the default until it lands", async () =
   server.use(...completesAs("https://cdn.test/generated.png"));
   render(<ExpertAvatarPicker name="Nova" category="finance" onPick={onPick} />);
   expect(
-    screen.getByRole("img", { name: "Nova, AI Expert" }).getAttribute("src"),
-  ).toContain(defaultAvatarUrl("finance", "Nova").split("/")[3]);
+    (await screen.findByRole("img", { name: "Nova" })).getAttribute("src"),
+  ).toBe(defaultAvatarUrl("finance", "Nova"));
   expect(screen.queryByRole("status")).toBeNull();
   await userEvent.click(screen.getByRole("button", { name: "Regenerate" }));
 
@@ -72,7 +72,7 @@ test("StrictMode does not generate until asked", async () => {
   await waitFor(() => expect(requests).toHaveLength(2));
 });
 
-test("regenerating rolls every trait but the category", async () => {
+test("regenerating requests a portrait without clay design traits", async () => {
   const requests: unknown[] = [];
   server.use(...completesAs("https://cdn.test/generated.png", requests));
   render(
@@ -86,14 +86,7 @@ test("regenerating rolls every trait but the category", async () => {
   for (const request of requests) {
     const body = request as Record<string, string>;
     expect(body.category).toBe("marketing");
-    expect(Object.keys(body).sort()).toEqual([
-      "base",
-      "category",
-      "expression",
-      "inlay",
-      "shape",
-      "tilt",
-    ]);
+    expect(Object.keys(body).sort()).toEqual(["category", "expression"]);
   }
 });
 

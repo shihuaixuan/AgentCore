@@ -76,8 +76,7 @@ export const TopicSurfaces: Story = {
 };
 
 /** Every managed identity at the sizes the product uses, grouped by palette
- *  family: category peers share one material color and differ in silhouette
- *  and cream route. */
+ *  family: category peers share one surface color, not one portrait. */
 export const Family: Story = {
   render: function Family() {
     const families = Array.from(

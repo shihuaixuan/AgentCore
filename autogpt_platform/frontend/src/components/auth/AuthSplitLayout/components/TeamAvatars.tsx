@@ -8,12 +8,12 @@ const AVATAR_CLASS =
 const FLANK = [
   {
     name: "Maya",
-    avatarUrl: "/autogpt-characters/v2.1/expert-maya/neutral/128.webp",
+    avatarUrl: "/experts/professional/expert-maya.webp",
     className: "left-0 top-1 -rotate-6",
   },
   {
     name: "Devon",
-    avatarUrl: "/autogpt-characters/v2.1/expert-devon/neutral/128.webp",
+    avatarUrl: "/experts/professional/expert-devon.webp",
     className: "right-0 top-1 rotate-6",
   },
 ];

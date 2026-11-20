@@ -1,5 +1,7 @@
 # Clay & Rock 2.1: the whole Expert family
 
+Historical release note. The expert tiles described here are retired; see [Expert avatars](../../../autogpt_platform/backend/backend/api/features/experts/AVATARS.md) for the current catalog and rollout.
+
 Follows [Clay & Rock V1](clay-rock-v1.md). Design reference: [expert-design-system](https://github.com/Significant-Gravitas/expert-design-system), Edition 9 (`expert-family-v2.1/`).
 
 ## Why

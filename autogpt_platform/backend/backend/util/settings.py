@@ -934,12 +934,19 @@ class Config(UpdateTrackingModel["Config"], BaseSettings):
         ),
     )
 
+    openai_base_url: str = Field(
+        default="https://api.openai.com/v1",
+        description="Server-wide OpenAI-compatible API base URL for expert avatars.",
+    )
     expert_avatar_model: str = Field(
         default="gpt-image-2-2026-04-21",
         description=(
             "OpenAI image-edit model for brand-constrained Expert avatar candidates; "
             "the design system pins this dated snapshot"
         ),
+    )
+    expert_avatar_base_url: str = Field(
+        default="", description="Dedicated avatar image-edit gateway URL"
     )
 
     use_agent_image_generation_v2: bool = Field(
@@ -1449,6 +1456,9 @@ class Secrets(UpdateTrackingModel["Secrets"], BaseSettings):
     )
 
     openai_api_key: str = Field(default="", description="OpenAI API key")
+    expert_avatar_api_key: str = Field(
+        default="", description="Dedicated avatar image-edit gateway key"
+    )
     openai_internal_api_key: str = Field(
         default="", description="OpenAI Internal API key"
     )

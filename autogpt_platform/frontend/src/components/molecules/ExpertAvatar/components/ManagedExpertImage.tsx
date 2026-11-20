@@ -8,36 +8,31 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   name: string;
-  base: string;
-  pixels: number;
-  /** Largest PNG the library ships; WebP goes to 2x of every size. */
-  pngMaxPixels?: number;
+  src: string;
+  imageLabel?: string;
   size: number;
   isOtto: boolean;
-  portrait?: string;
   className?: string;
 }
 
 export function ManagedExpertImage({
   name,
-  base,
-  pixels,
-  pngMaxPixels = 1024,
+  src,
+  imageLabel,
   size,
   isOtto,
-  portrait,
   className,
 }: Props) {
   const { t } = useTranslation();
-  const [format, setFormat] = useState<"portrait" | "webp" | "png" | null>(
-    portrait ? "portrait" : "webp",
-  );
-  const label = isOtto
-    ? t(
-        `${AUTOPILOT_NAME}, your personal Head of AI`,
-        `${AUTOPILOT_NAME}，你的专属 AI 负责人`,
-      )
-    : t(`${name}, AI Expert`, `${name}，AI 专家`);
+  const [failed, setFailed] = useState(false);
+  const label =
+    imageLabel ??
+    (isOtto
+      ? t(
+          `${AUTOPILOT_NAME}, your personal Head of AI`,
+          `${AUTOPILOT_NAME}，你的专属 AI 负责人`,
+        )
+      : t(`${name}, AI Expert`, `${name}，AI 专家`));
   const classes = cn(
     "inline-flex shrink-0 overflow-hidden rounded-xl",
     className,
@@ -45,24 +40,7 @@ export function ManagedExpertImage({
   );
   const sizeStyle = { "--avatar-size": `${size}px` } as CSSProperties;
 
-  if (format === "portrait" && portrait) {
-    return (
-      <picture data-slot="expert-avatar" className={classes} style={sizeStyle}>
-        <Image
-          src={portrait}
-          alt={label}
-          width={size}
-          height={size}
-          unoptimized
-          data-slot="expert-avatar-image"
-          className="h-full w-full object-cover"
-          onError={() => setFormat("webp")}
-        />
-      </picture>
-    );
-  }
-
-  if (!format) {
+  if (failed) {
     return (
       <span
         role="img"
@@ -80,26 +58,17 @@ export function ManagedExpertImage({
   }
 
   return (
-    <picture data-slot="expert-avatar" className={classes} style={sizeStyle}>
-      <source
-        data-slot="expert-avatar-source"
-        type={`image/${format}`}
-        srcSet={
-          format === "png" && pixels * 2 > pngMaxPixels
-            ? `${base}/${pixels}.png 1x`
-            : `${base}/${pixels}.${format} 1x, ${base}/${pixels * 2}.${format} 2x`
-        }
-      />
+    <span data-slot="expert-avatar" className={classes} style={sizeStyle}>
       <Image
-        src={`${base}/${pixels}.${format}`}
+        src={src}
         alt={label}
         width={size}
         height={size}
         unoptimized
         data-slot="expert-avatar-image"
-        className="h-full w-full object-contain"
-        onError={() => setFormat(format === "webp" ? "png" : null)}
+        className="h-full w-full object-cover"
+        onError={() => setFailed(true)}
       />
-    </picture>
+    </span>
   );
 }

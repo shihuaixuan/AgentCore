@@ -10,13 +10,14 @@ import { StatusDot } from "@/components/molecules/NotionAvatar/StatusDot";
 import { expertPastel } from "./colors";
 import { cn } from "@/lib/utils";
 import type { CSSProperties } from "react";
-import { getManagedAvatar, resolveExpertAvatarUrl } from "./helpers";
+import { getManagedIdentity, resolveExpertAvatarUrl } from "./helpers";
 
 import { ManagedExpertImage } from "./components/ManagedExpertImage";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props {
   name: string | null;
+  imageLabel?: string;
   avatarUrl: string | null;
   color?: string | null;
   status?: AvatarStatus;
@@ -27,10 +28,12 @@ interface Props {
   backgroundColor?: string;
 }
 
-/** An Expert's saved appearance. Managed assets use their matching portrait;
- * uploads and generated images are shown as saved. */
+/** An Expert's saved appearance. The image never depends on the name, role,
+ *  category or the marketplace filter: a managed identity is served from its
+ *  portrait URL, anything else is shown exactly as saved. */
 export function ExpertAvatar({
   name,
+  imageLabel,
   avatarUrl,
   status = "idle",
   size = 40,
@@ -39,22 +42,16 @@ export function ExpertAvatar({
 }: Props) {
   const { t } = useTranslation();
   const src = resolveExpertAvatarUrl(avatarUrl);
-  const managed = getManagedAvatar(src, size);
+  const managed = getManagedIdentity(src);
   if (managed) {
     return (
       <ManagedExpertImage
-        key={`${managed.base}:${size}`}
+        key={managed.url}
         name={name ?? t("Expert", "专家")}
-        base={managed.base}
-        pixels={managed.pixels}
-        pngMaxPixels={managed.pngMaxPixels}
+        imageLabel={imageLabel}
+        src={managed.url}
         size={size}
-        portrait={
-          managed.assetID === "otto" || managed.assetID === "expert-general-01"
-            ? undefined
-            : `/experts/professional/${managed.assetID}.webp`
-        }
-        isOtto={managed.assetID === "otto"}
+        isOtto={managed.id === "otto"}
         className={className}
       />
     );
@@ -85,7 +82,7 @@ export function ExpertAvatar({
       >
         <AvatarImage
           src={src}
-          alt={name ?? t("Expert", "专家")}
+          alt={imageLabel ?? name ?? t("Expert", "专家")}
           width={size}
           height={size}
           data-slot="expert-avatar-image"
@@ -93,7 +90,7 @@ export function ExpertAvatar({
         />
         <AvatarFallback
           data-slot="expert-avatar-fallback"
-          accessibleLabel={name ?? t("AI Expert", "AI 专家")}
+          accessibleLabel={name ? `${name}, AI Expert` : "AI Expert"}
         >
           <span
             data-slot="expert-avatar-initial"

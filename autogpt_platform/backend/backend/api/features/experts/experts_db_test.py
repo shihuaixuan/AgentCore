@@ -1140,7 +1140,7 @@ async def test_raise_expert_defaults_avatar_and_color_when_omitted(
         role=None,
         voice_preferences=None,
     )
-    assert raised.expert.avatar_url is None
+    assert raised.expert.avatar_url == "/experts/professional/expert-general-01.webp"
     assert raised.expert.color == ""
 
 
@@ -4909,7 +4909,7 @@ async def test_seed_roster_keeps_an_owner_set_avatar(
     hired = await experts_db.hire_expert(test_user.id, template_id, None)
     assert (
         hired.expert.avatar_url
-        == "/autogpt-characters/v1.1/expert-maria/neutral/128.webp"
+        == "/experts/professional/expert-maria.webp"
     )
     await experts_db.update_avatar(test_user.id, hired.expert.id, "/avatars/mine.svg")
 

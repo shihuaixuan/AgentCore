@@ -4,7 +4,10 @@ from autogpt_libs.auth import get_user_id, requires_user
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Security
 
 from backend.api.features.experts import avatar_jobs
-from backend.api.features.experts.avatar_generation import ExpertAvatarRequest
+from backend.api.features.experts.avatar_generation import (
+    ExpertAvatarRequest,
+    avatar_provider,
+)
 from backend.api.features.experts.avatar_jobs import ExpertAvatarJob
 from backend.copilot.rate_limit import enforce_payment_paywall
 from backend.util.settings import Settings
@@ -25,10 +28,14 @@ async def generate_expert_avatar(
     background_tasks: BackgroundTasks,
     user_id: str = Security(get_user_id),
 ) -> ExpertAvatarJob:
-    if not Settings().secrets.openai_api_key:
+    settings = Settings()
+    if not all(avatar_provider(settings)):
         raise HTTPException(
             503,
-            "Avatar generation is not configured. Choose a catalog avatar or upload a picture.",
+            detail={
+                "code": "avatar_provider_not_configured",
+                "message": "Avatar generation is not configured. Keep this avatar or upload a picture.",
+            },
         )
     await avatar_jobs.reserve_generation(user_id)
     job = ExpertAvatarJob()

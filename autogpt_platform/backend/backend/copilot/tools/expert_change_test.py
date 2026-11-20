@@ -244,7 +244,7 @@ class TestPreviewNeverWrites:
         assert isinstance(resp, ExpertChangeProposedResponse)
         assert (
             resp.preview.avatar_url
-            == "/autogpt-characters/v2.1/expert-general-01/neutral/128.webp"
+            == "/experts/professional/expert-general-01.webp"
         )
         assert "avatar_category" not in RaiseExpertTool().parameters["properties"]
 

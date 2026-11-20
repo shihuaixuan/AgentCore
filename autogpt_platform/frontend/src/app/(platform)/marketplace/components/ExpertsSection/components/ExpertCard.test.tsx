@@ -64,8 +64,8 @@ describe.each([
     const portrait = link.querySelector("img");
     if (!portrait) throw new Error("Expected a professional portrait");
     fireEvent.error(portrait);
-    expect(link.querySelector("img")?.getAttribute("src")).toMatch(
-      /^\/autogpt-characters\/v2\.1\/expert-casey\//,
+    expect(link.querySelector('[data-slot="expert-avatar"]')?.textContent).toBe(
+      "凯西",
     );
   });
 

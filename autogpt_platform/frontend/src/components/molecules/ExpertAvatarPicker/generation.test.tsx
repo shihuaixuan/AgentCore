@@ -4,10 +4,84 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { expect, test, vi } from "vitest";
 import { ExpertAvatarPicker } from "./ExpertAvatarPicker";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 // The hook polls on a real 2s interval, so the default 5s budget is not enough
 // on a loaded CI runner.
 const POLLING_TEST_TIMEOUT = 20000;
+
+test("explains an unconfigured image provider without selecting an avatar", async () => {
+  server.use(
+    http.post("*/api/experts/avatars/generations", () =>
+      HttpResponse.json(
+        {
+          detail: {
+            code: "avatar_provider_not_configured",
+            message: "Image generation is not configured.",
+          },
+        },
+        { status: 503 },
+      ),
+    ),
+  );
+  const onPick = vi.fn();
+  render(
+    <LanguageProvider>
+      <ExpertAvatarPicker name="Nova" category="finance" onPick={onPick} />
+    </LanguageProvider>,
+  );
+  const before = screen.getByRole("img").getAttribute("src");
+  await userEvent.click(screen.getByRole("button", { name: "重新生成" }));
+  expect((await screen.findByRole("alert")).textContent).toContain("未配置");
+  expect(screen.getByRole("img").getAttribute("src")).toBe(before);
+  expect(onPick).not.toHaveBeenCalled();
+});
+
+test("can retry a malformed start response and show only the new image", async () => {
+  let attempts = 0;
+  server.use(
+    http.post("*/api/experts/avatars/generations", () =>
+      HttpResponse.json(++attempts === 1 ? {} : { id: "retry" }, {
+        status: 202,
+      }),
+    ),
+    http.get("*/api/experts/avatars/generations/retry", () =>
+      HttpResponse.json({
+        status: "complete",
+        avatar_url: "https://cdn.test/retry.png",
+      }),
+    ),
+  );
+  const onPick = vi.fn();
+  render(<ExpertAvatarPicker name="Nova" category="finance" onPick={onPick} />);
+  const button = screen.getByRole("button", { name: "Regenerate" });
+  await userEvent.click(button);
+  await screen.findByRole("alert");
+  await userEvent.click(button);
+  await waitFor(() =>
+    expect(screen.getByRole("img").getAttribute("src")).toContain("retry.png"),
+  );
+  expect(screen.queryByRole("alert")).toBeNull();
+  expect(onPick).not.toHaveBeenCalled();
+});
+
+test("a completed job without an image is a failure, not a generated preview", async () => {
+  server.use(
+    http.post("*/api/experts/avatars/generations", () =>
+      HttpResponse.json({ id: "empty" }, { status: 202 }),
+    ),
+    http.get("*/api/experts/avatars/generations/empty", () =>
+      HttpResponse.json({ id: "empty", status: "complete", avatar_url: " " }),
+    ),
+  );
+  const onPick = vi.fn();
+  render(<ExpertAvatarPicker name="Nova" category="finance" onPick={onPick} />);
+  const before = screen.getByRole("img").getAttribute("src");
+  await userEvent.click(screen.getByRole("button", { name: "Regenerate" }));
+  await screen.findByRole("alert");
+  expect(screen.getByRole("img").getAttribute("src")).toBe(before);
+  expect(onPick).not.toHaveBeenCalled();
+});
 
 test(
   "polls a pending job until the preview is ready",

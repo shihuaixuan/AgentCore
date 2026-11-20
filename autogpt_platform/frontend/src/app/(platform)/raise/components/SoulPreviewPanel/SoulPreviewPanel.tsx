@@ -3,10 +3,7 @@
 import { GlassOrb } from "@/components/molecules/GlassOrb/GlassOrb";
 import { DEFAULT_GLASS_PARAMS } from "@/components/molecules/GlassOrb/GlassSurface";
 import Image from "next/image";
-import {
-  getManagedIdentity,
-  resolveExpertAvatarUrl,
-} from "@/components/molecules/ExpertAvatar/helpers";
+import { resolveExpertAvatarUrl } from "@/components/molecules/ExpertAvatar/helpers";
 import {
   kitBudgetLabel,
   kitToolsLabel,
@@ -41,10 +38,7 @@ export function SoulPreviewPanel({
   kit,
 }: Props) {
   const { t } = useTranslation();
-  const identity = avatarUrl ? getManagedIdentity(avatarUrl) : null;
-  const preview = identity
-    ? `/experts/professional/${identity.id === "otto" ? "office-assistant" : identity.id}.webp`
-    : resolveExpertAvatarUrl(avatarUrl);
+  const preview = resolveExpertAvatarUrl(avatarUrl);
   const details = [
     { label: t("About", "关于"), value: about },
     {

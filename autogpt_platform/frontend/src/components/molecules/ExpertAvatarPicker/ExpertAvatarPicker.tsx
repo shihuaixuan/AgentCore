@@ -31,6 +31,7 @@ export function ExpertAvatarPicker({ name, onPreviewChange, ...props }: Props) {
     >
       <ExpertAvatar
         name={name || t("Your expert", "你的专家")}
+        imageLabel={name || t("Your expert", "你的专家")}
         avatarUrl={picker.selectedUrl}
         size={144}
         className={picker.isGenerating ? "animate-pulse" : undefined}

@@ -1,5 +1,6 @@
 import { withPostHogConfig } from "@posthog/nextjs-config";
 import { withSentryConfig } from "@sentry/nextjs/config";
+import avatarCatalog from "./src/components/molecules/ExpertAvatar/catalog.json" with { type: "json" };
 
 // Allow Docker builds to skip source-map generation (halves memory usage).
 // Defaults to true so Vercel/local builds are unaffected.
@@ -55,6 +56,14 @@ const nextConfig = {
   // These /profile pages have no page left for the layout's redirect to run on.
   async redirects() {
     return [
+      ...Object.entries(avatarCatalog.legacy).map(([path, destination]) => ({
+        source: path.replace(
+          /\/neutral\/128\.webp$/,
+          "/neutral/:size(\\d+).:format(webp|png)",
+        ),
+        destination,
+        permanent: true,
+      })),
       {
         source: "/profile",
         destination: "/settings/profile",

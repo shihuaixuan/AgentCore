@@ -1,5 +1,7 @@
 # Clay & Rock V1
 
+Historical release note. For current artwork and URL compatibility, see [Expert avatars](../../../autogpt_platform/backend/backend/api/features/experts/AVATARS.md).
+
 Repository baseline: `45275cbb0bb36aa9aadfd2688de94daab3a8456e` (public master inspected 23 September 2026).
 
 Retargeted to `dev` at `bdb8806affd46e79d412163f94b903615cf677d9`. That branch expands the roster to 32 Experts; its additional roles and saved template cohorts need a follow-up copy/artwork review. Catalog defaults use the approved specialist artwork for Maria and Mina. The onboarding illustration also uses supplied transparent artwork for seven specialists.

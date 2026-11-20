@@ -14,7 +14,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, ValidationError
 
-from backend.api.features.experts.avatar_catalog import DEFAULT_AVATAR_URL
+from backend.api.features.experts.avatar_catalog import DEFAULT_RAISED_PORTRAIT_URL
 from backend.api.features.experts.copy_policy import EXPERT_CREATION_COPY_POLICY
 from backend.api.features.experts.models import (
     EXPERT_COLOR_MAX_LENGTH,
@@ -254,9 +254,7 @@ class RaiseExpertTool(BaseTool):
             job_title=params.job_title,
             tagline=params.tagline,
             color=params.color,
-            # A raised Expert starts on the General fallback; its owner picks or
-            # generates a reviewed appearance from the Team page afterwards.
-            avatar_url=DEFAULT_AVATAR_URL,
+            avatar_url=DEFAULT_RAISED_PORTRAIT_URL,
             about=soul.identity or "",
             boundaries=soul.boundaries,
             voice_preferences=soul.voice_preferences or "",

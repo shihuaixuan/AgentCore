@@ -18,13 +18,13 @@ MANAGED_PRESENTATION: dict[str, dict[PresentationField, tuple[str, str]]] = {
         ),
         "avatarUrl": (
             "/experts/maria.svg",
-            "/autogpt-characters/v1.1/expert-maria/neutral/128.webp",
+            "/experts/professional/expert-maria.webp",
         ),
     },
     "Mina": {
         "avatarUrl": (
             "/avatars/notion/10-8-2-6-1-0-51-9-0-0.violet.svg",
-            "/autogpt-characters/v1.1/expert-mina/neutral/128.webp",
+            "/experts/professional/expert-mina.webp",
         )
     },
     "Max": {

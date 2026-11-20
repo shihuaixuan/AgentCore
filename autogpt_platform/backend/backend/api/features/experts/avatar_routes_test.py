@@ -2,11 +2,39 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import fastapi
+import pytest
 from autogpt_libs.auth.dependencies import get_request_context
 from autogpt_libs.auth.jwt_utils import get_jwt_payload
 from fastapi.testclient import TestClient
 
 from backend.api.features.experts import avatar_routes
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("key", ["", "  "])
+async def test_missing_image_provider_does_not_reserve_or_schedule(monkeypatch, key):
+    monkeypatch.setattr(
+        avatar_routes,
+        "Settings",
+        lambda: SimpleNamespace(
+            secrets=SimpleNamespace(openai_api_key="unused", expert_avatar_api_key=key),
+            config=SimpleNamespace(
+                expert_avatar_base_url="https://test", expert_avatar_model="test"
+            ),
+        ),
+    )
+    reserve = AsyncMock()
+    monkeypatch.setattr(avatar_routes.avatar_jobs, "reserve_generation", reserve)
+    monkeypatch.setattr(avatar_routes.avatar_jobs, "save_job", AsyncMock())
+    tasks = fastapi.BackgroundTasks()
+    with pytest.raises(fastapi.HTTPException) as error:
+        await avatar_routes.generate_expert_avatar(
+            avatar_routes.ExpertAvatarRequest(), tasks, "owner"
+        )
+    assert error.value.status_code == 503
+    assert error.value.detail["code"] == "avatar_provider_not_configured"
+    reserve.assert_not_awaited()
+    assert not tasks.tasks
 
 
 def test_generation_requires_authentication():
@@ -26,7 +54,16 @@ def test_start_generation_returns_job_and_uses_authenticated_owner(
     monkeypatch.setattr(
         avatar_routes,
         "Settings",
-        lambda: SimpleNamespace(secrets=SimpleNamespace(openai_api_key="test-key")),
+        lambda: SimpleNamespace(
+            secrets=SimpleNamespace(
+                openai_api_key="test-key", expert_avatar_api_key=""
+            ),
+            config=SimpleNamespace(
+                openai_base_url="https://test",
+                expert_avatar_base_url="",
+                expert_avatar_model="test",
+            ),
+        ),
     )
     reserve, save, run = AsyncMock(), AsyncMock(), AsyncMock()
     monkeypatch.setattr(avatar_routes.avatar_jobs, "reserve_generation", reserve)

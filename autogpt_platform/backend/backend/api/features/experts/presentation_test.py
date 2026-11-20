@@ -54,9 +54,7 @@ def test_template_projection_changes_only_recorded_defaults():
         tagline="Custom tagline",
     )
     result = template_presentation(row)
-    assert (
-        result["avatarUrl"] == "/autogpt-characters/v1.1/expert-maria/neutral/128.webp"
-    )
+    assert result["avatarUrl"] == "/experts/professional/expert-maria.webp"
     assert result["bio"] == "Custom bio"
     assert result["identity"] == "Custom instructions"
 
@@ -214,12 +212,12 @@ def test_template_projection_replaces_retired_defaults_only():
     )
     assert (
         template_presentation(row)["avatarUrl"]
-        == "/autogpt-characters/v2.1/expert-noor/neutral/128.webp"
+        == "/experts/professional/expert-noor.webp"
     )
     row.avatarUrl = "/experts/clay/v5/noor-marketing.png"
     assert (
         template_presentation(row)["avatarUrl"]
-        == "/autogpt-characters/v2.1/expert-noor/neutral/128.webp"
+        == "/experts/professional/expert-noor.webp"
     )
     row.avatarUrl = "https://custom.example/image.png"
     assert template_presentation(row)["avatarUrl"] == row.avatarUrl
@@ -238,7 +236,7 @@ async def test_hired_avatar_refresh_is_scoped_to_its_template_and_known_default(
     template = SimpleNamespace(
         id="template",
         name="Noor",
-        avatarUrl="/autogpt-characters/v2.1/expert-noor/neutral/128.webp",
+        avatarUrl="/experts/professional/expert-noor.webp",
         jobTitle="Writer",
         tagline="Hi",
         bio=None,
@@ -252,7 +250,7 @@ async def test_hired_avatar_refresh_is_scoped_to_its_template_and_known_default(
         )
         for i, url in enumerate(
             [
-                "/experts/clay/v5/noor-marketing.png",
+                "/autogpt-characters/v2.1/expert-noor/neutral/128.webp",
                 "https://custom.example/image.png",
                 "/autogpt-characters/v2.1/expert-general-01/neutral/128.webp",
             ]
@@ -272,5 +270,5 @@ async def test_hired_avatar_refresh_is_scoped_to_its_template_and_known_default(
             "isTemplate": False,
             "updatedAt": "0",
         },
-        data={"avatarUrl": "/autogpt-characters/v2.1/expert-noor/neutral/128.webp"},
+        data={"avatarUrl": "/experts/professional/expert-noor.webp"},
     )

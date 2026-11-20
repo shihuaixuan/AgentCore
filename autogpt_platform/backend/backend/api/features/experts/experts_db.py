@@ -14,6 +14,7 @@ from prisma.enums import ResourceVisibility
 from pydantic import BaseModel, JsonValue, ValidationError
 
 from backend.api.features.experts import raise_attachments, scheduling
+from backend.api.features.experts.avatar_catalog import DEFAULT_RAISED_PORTRAIT_URL
 
 # Re-exported so `db_accessors.experts_db()` resolves the same attribute name
 # on both branches: the module here, and the RPC client stub in db_manager.
@@ -1458,7 +1459,7 @@ async def create_raised_expert(
         role,
         voice_preferences,
         job_title=job_title,
-        avatar_url=avatar_url,
+        avatar_url=avatar_url or DEFAULT_RAISED_PORTRAIT_URL,
         color=color,
         tagline=tagline,
         about=about,

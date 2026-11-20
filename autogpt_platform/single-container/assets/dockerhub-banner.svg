@@ -20,11 +20,11 @@
     <text x="66" y="521" font-size="25" fill="#4b4b68">Self-hosted with Docker</text>
   </g>
   <g font-family="DejaVu Sans, sans-serif" text-anchor="middle" fill="#151530">
-    <image x="858" y="203" width="216" height="216" clip-path="url(#frankie)" xlink:href="../../frontend/public/autogpt-characters/v2.1/expert-frankie/neutral/256.png" />
+    <image x="858" y="203" width="216" height="216" clip-path="url(#frankie)" xlink:href="../../frontend/public/experts/professional/expert-frankie.webp" />
     <text x="966" y="459" font-size="26" font-weight="700">Frankie</text>
-    <image x="1096" y="157" width="216" height="216" clip-path="url(#maria)" xlink:href="../../frontend/public/autogpt-characters/v1.1/expert-maria/neutral/256.png" />
+    <image x="1096" y="157" width="216" height="216" clip-path="url(#maria)" xlink:href="../../frontend/public/experts/professional/expert-maria.webp" />
     <text x="1204" y="413" font-size="26" font-weight="700">Maria</text>
-    <image x="1334" y="203" width="216" height="216" clip-path="url(#max)" xlink:href="../../frontend/public/autogpt-characters/v2.1/expert-max/neutral/256.png" />
+    <image x="1334" y="203" width="216" height="216" clip-path="url(#max)" xlink:href="../../frontend/public/experts/professional/expert-max.webp" />
     <text x="1442" y="459" font-size="26" font-weight="700">Max</text>
   </g>
 </svg>
