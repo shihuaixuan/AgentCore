@@ -1,4 +1,5 @@
 import type { RelatedAccountPaymentStatus } from "@/app/api/__generated__/models/relatedAccountPaymentStatus";
+import { usernameIdentity, usernameSchema } from "@/lib/auth/local-username";
 import type { Locale } from "@/lib/i18n/locale";
 
 export const USER_QUERY_PARAM = "user";
@@ -54,6 +55,10 @@ export function parseLookupQuery(
   // Better Auth stores emails lowercased, so this makes the exact match
   // case-insensitive without a LIKE.
   if (value.includes("@")) return { kind: "email", value: value.toLowerCase() };
+  const username = usernameSchema.safeParse(value);
+  if (username.success) {
+    return { kind: "email", value: usernameIdentity(username.data) };
+  }
   return { kind: "id", value };
 }
 

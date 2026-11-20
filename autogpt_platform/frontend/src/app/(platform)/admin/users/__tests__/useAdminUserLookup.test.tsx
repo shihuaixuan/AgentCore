@@ -17,6 +17,20 @@ const FIRSTXLAST = authUser({
 });
 
 describe("useAdminUserLookup", () => {
+  it("looks up a normalized local username by its exact login identity", async () => {
+    const account = authUser({
+      id: FIRST_LAST.id,
+      email: "e5b08f615f31@username.invalid",
+    });
+    const requests = mockListUsers([FIRSTXLAST, account]);
+    const { result } = renderLookup();
+
+    act(() => result.current.search("  小Ａ_1  "));
+
+    await waitFor(() => expect(result.current.user?.id).toBe(account.id));
+    expect(requests[0].get("filterValue")).toBe(account.email);
+  });
+
   it("looks an email up by exact match, so `_` matches only itself", async () => {
     const requests = mockListUsers([FIRSTXLAST, FIRST_LAST]);
     const { result } = renderLookup();

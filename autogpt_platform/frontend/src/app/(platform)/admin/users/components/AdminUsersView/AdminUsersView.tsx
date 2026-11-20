@@ -94,8 +94,8 @@ function LookupTab() {
     <div className="flex flex-col gap-6">
       <Text variant="body" className="max-w-[600px]" tone="body">
         {t(
-          "Look up an account by ID or email to inspect it, limit it, or act as the user.",
-          "通过用户 ID 或邮箱查找账户，以查看详情、限制账户或代为操作。",
+          "Look up an account by username, user ID or email to inspect it, limit it, or act as the user.",
+          "通过用户名、用户 ID 或邮箱查找账户，以查看详情、限制账户或代为操作。",
         )}
       </Text>
 

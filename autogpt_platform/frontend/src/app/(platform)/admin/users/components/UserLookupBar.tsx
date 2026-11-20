@@ -46,11 +46,11 @@ export function UserLookupBar({
           ref={inputRef}
           value={value}
           onChange={setValue}
-          placeholder={t("User ID or email…", "用户 ID 或邮箱…")}
+          placeholder={t("Username, user ID or email…", "用户名、用户 ID 或邮箱…")}
           name="user"
           autoComplete="off"
           spellCheck={false}
-          aria-label={t("User ID or email", "用户 ID 或邮箱")}
+          aria-label={t("Username, user ID or email", "用户名、用户 ID 或邮箱")}
           disabled={isLoading}
           size="small"
         />
@@ -67,7 +67,7 @@ export function UserLookupBar({
       </div>
       {showHint ? (
         <Text variant="small" tone="muted">
-          {t("Exact match only: a full user ID or the complete email address.", "仅支持精确匹配：完整用户 ID 或完整邮箱地址。")}
+          {t("Exact match only: enter the full username, user ID or email address.", "仅支持精确匹配：请输入完整的用户名、用户 ID 或邮箱地址。")}
         </Text>
       ) : null}
     </form>

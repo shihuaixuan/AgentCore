@@ -20,7 +20,7 @@ export function EmptyState() {
         {t("Look up a user", "查找用户")}
       </Text>
       <Text variant="body" tone="secondary">
-        {t("Paste a user ID or the complete email address.", "粘贴用户 ID 或完整邮箱地址。")}
+        {t("Enter the full username, user ID or email address.", "请输入完整的用户名、用户 ID 或邮箱地址。")}
       </Text>
     </div>
   );
@@ -37,7 +37,7 @@ export function NotFoundState({ query }: { query: string }) {
         {t("No user matches", "没有找到匹配的用户")} <span className="font-medium">{query}</span>
       </Text>
       <Text variant="body" tone="secondary">
-        {t("Lookup is exact: a full user ID or the complete email address.", "请使用完整用户 ID 或完整邮箱地址进行精确查找。")}
+        {t("Lookup is exact: use the full username, user ID or email address.", "请使用完整的用户名、用户 ID 或邮箱地址进行精确查找。")}
       </Text>
       <Link
         variant="secondary"
