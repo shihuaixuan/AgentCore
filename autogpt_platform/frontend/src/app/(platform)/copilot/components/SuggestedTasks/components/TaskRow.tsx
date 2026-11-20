@@ -20,6 +20,7 @@ import {
   type TaskOwner,
 } from "../helpers";
 import { OwnerAvatar, OwnerLabel } from "./TaskOwner";
+import { localizeStarterCopy } from "../starterTaskCopy";
 
 interface Props {
   task: SuggestedTask;
@@ -50,7 +51,9 @@ export function TaskRow({
   onSend,
   onRemove,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const title = localizeStarterCopy(task.title, locale);
+  const why = task.why && localizeStarterCopy(task.why, locale);
   const prefersReducedMotion = useReducedMotion();
   const pillID = useId();
   const whyID = useId();
@@ -78,14 +81,14 @@ export function TaskRow({
         <NextLink
           href={getChatHref(task.session_id ?? "")}
           aria-label={t(
-            `Open the chat with ${name}: ${task.title}`,
-            `打开与 ${name} 的对话：${task.title}`,
+            `Open the chat with ${name}: ${title}`,
+            `打开与 ${name} 的对话：${title}`,
           )}
           className={ROW_CLASSES}
           {...control}
         >
           <OwnerAvatar owner={owner} />
-          <RowText task={task} showWhy={showWhy} isMuted>
+          <RowText title={title} why={showWhy ? why : null} isMuted>
             <Text
               variant="small"
               as="span"
@@ -102,8 +105,8 @@ export function TaskRow({
           {...tourStartingPoint()}
           {...control}
           aria-label={t(
-            `Start with ${name}: ${task.title}`,
-            `与 ${name} 开始：${task.title}`,
+            `Start with ${name}: ${title}`,
+            `与 ${name} 开始：${title}`,
           )}
           aria-describedby={describedBy}
           aria-busy={isSending || undefined}
@@ -116,8 +119,8 @@ export function TaskRow({
         >
           <OwnerAvatar owner={owner} />
           <RowText
-            task={task}
-            showWhy={showWhy}
+            title={title}
+            why={showWhy ? why : null}
             isStartHere={isStartHere}
             pillID={pillID}
             whyID={whyID}
@@ -146,7 +149,7 @@ export function TaskRow({
             variant="toggle"
             size="icon-xs"
             withTooltip={false}
-            aria-label={t(`Remove: ${task.title}`, `移除：${task.title}`)}
+            aria-label={t(`Remove: ${title}`, `移除：${title}`)}
             disabled={isRemoveDisabled}
             onClick={() => onRemove(task)}
           >
@@ -162,8 +165,8 @@ export function TaskRow({
 }
 
 interface RowTextProps {
-  task: SuggestedTask;
-  showWhy: boolean;
+  title: string;
+  why: SuggestedTask["why"];
   isStartHere?: boolean;
   isMuted?: boolean;
   pillID?: string;
@@ -174,8 +177,8 @@ interface RowTextProps {
 // The title (with "Start here" in its flow) and the why, then the owner or
 // the state: right-aligned on a wide row, under the title on a phone.
 function RowText({
-  task,
-  showWhy,
+  title,
+  why,
   isStartHere,
   isMuted,
   pillID,
@@ -200,9 +203,9 @@ function RowText({
               {t("Start here", "从这里开始")}
             </span>
           ) : null}
-          {task.title}
+          {title}
         </Text>
-        {showWhy && task.why ? (
+        {why ? (
           <Text
             variant="small"
             as="span"
@@ -210,7 +213,7 @@ function RowText({
             id={whyID}
             className="mt-0.5"
           >
-            {task.why}
+            {why}
           </Text>
         ) : null}
       </span>

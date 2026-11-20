@@ -14,10 +14,19 @@ interface Props {
   agent: HomeAgentStatus;
 }
 
-/** One expert with its status and two ways in. The detail line is gone:
- *  anything that needs doing is already spelled out under Needs you. */
+const DETAIL_ZH = new Map([
+  ["Working on a task now", "正在执行任务"],
+  ["Scheduled work is paused", "计划任务已暂停"],
+  ["A connection needs setup", "有一个连接需要设置"],
+  ["Last run failed", "上次运行失败"],
+  ["Ready for the next task", "已准备好执行下一个任务"],
+]);
+
 export function AgentRow({ agent }: Props) {
   const { t, locale } = useTranslation();
+  const detail = agent.detail
+    ? t(agent.detail, DETAIL_ZH.get(agent.detail) ?? agent.detail)
+    : t("No status details available.", "暂无状态详情。");
   const spend = formatWeeklySpend(agent.spend_cents, t);
   const nextRun = agent.next_run_time
     ? t(
@@ -42,7 +51,7 @@ export function AgentRow({ agent }: Props) {
           <StatusBadge status={agent.status} />
         </div>
         <Text variant="small" tone="secondary" className="break-words">
-          {agent.detail || t("No status details available.", "暂无状态详情。")}{" "}
+          {detail}{" "}
           {agent.status === "failed"
             ? t(
                 "Open Manage to inspect recent work.",

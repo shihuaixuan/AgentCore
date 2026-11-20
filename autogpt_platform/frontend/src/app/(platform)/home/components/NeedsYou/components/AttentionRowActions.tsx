@@ -12,6 +12,16 @@ interface Props {
   onDeclineBlur: () => void;
 }
 
+const ACTION_LABEL_ZH = new Map([
+  ["Review", "审核"],
+  ["Open chat", "打开聊天"],
+  ["Review budget", "查看预算"],
+  ["Finish setup", "完成设置"],
+  ["Fix it", "修复"],
+  ["Answer", "回答"],
+  ["Add credits", "充值额度"],
+]);
+
 export function AttentionRowActions({
   item,
   isProcessing,
@@ -21,14 +31,10 @@ export function AttentionRowActions({
   onDeclineBlur,
 }: Props) {
   const { t } = useTranslation();
+  const { href, label } = item.primary_action;
   const primaryAction = (
-    <Button
-      as="NextLink"
-      href={item.primary_action.href}
-      variant="secondary"
-      size="row"
-    >
-      {item.primary_action.label}
+    <Button as="NextLink" href={href} variant="secondary" size="row">
+      {t(label, ACTION_LABEL_ZH.get(label) ?? label)}
     </Button>
   );
 

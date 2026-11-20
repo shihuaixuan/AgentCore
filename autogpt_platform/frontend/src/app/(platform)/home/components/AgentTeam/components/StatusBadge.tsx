@@ -1,20 +1,29 @@
 import type { HomeAgentStatus } from "@/app/api/__generated__/models/homeAgentStatus";
 import { Text } from "@/components/atoms/Text/Text";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 
 const STATUS_CONFIG = {
-  working: { label: "Working", dot: "bg-action", pulse: true },
-  ready: { label: "Ready", dot: "bg-success", pulse: false },
-  needs_setup: { label: "Finish setup", dot: "bg-warning", pulse: false },
-  paused: { label: "Paused", dot: "bg-foreground-subtle", pulse: false },
-  failed: { label: "Failed", dot: "bg-error", pulse: false },
-};
+  working: { label: ["Working", "工作中"], dot: "bg-action", pulse: true },
+  ready: { label: ["Ready", "就绪"], dot: "bg-success", pulse: false },
+  needs_setup: {
+    label: ["Finish setup", "完成设置"],
+    dot: "bg-warning",
+    pulse: false,
+  },
+  paused: {
+    label: ["Paused", "已暂停"],
+    dot: "bg-foreground-subtle",
+    pulse: false,
+  },
+  failed: { label: ["Failed", "失败"], dot: "bg-error", pulse: false },
+} as const;
 
 const UNKNOWN_STATUS_CONFIG = {
-  label: "Unknown",
+  label: ["Unknown", "未知"],
   dot: "bg-border-strong",
   pulse: false,
-};
+} as const;
 
 interface Props {
   status: HomeAgentStatus["status"];
@@ -23,7 +32,11 @@ interface Props {
 /** A dot and a word: the status reads at a glance without a filled pill
  *  competing with the name beside it. */
 export function StatusBadge({ status }: Props) {
-  const config = STATUS_CONFIG[status] ?? UNKNOWN_STATUS_CONFIG;
+  const { t } = useTranslation();
+  const config = Object.hasOwn(STATUS_CONFIG, status)
+    ? STATUS_CONFIG[status]
+    : UNKNOWN_STATUS_CONFIG;
+  const [english, chinese] = config.label;
 
   return (
     <Text
@@ -40,7 +53,7 @@ export function StatusBadge({ status }: Props) {
         )}
         aria-hidden="true"
       />
-      {config.label}
+      {t(english, chinese)}
     </Text>
   );
 }
