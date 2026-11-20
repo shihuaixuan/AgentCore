@@ -65,7 +65,6 @@ import { format, subDays } from "date-fns";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { heldRead } from "@/app/(platform)/copilot/components/ApprovalQueue/__tests__/fixtures";
 import ExpertDetailPage from "../page";
-import { RECENT_CONVERSATIONS_LIMIT } from "../components/ExpertOverview/useExpertOverview";
 
 vi.mock("@/services/environment", async (importActual) => {
   const actual = await importActual<typeof import("@/services/environment")>();
@@ -1289,99 +1288,16 @@ describe("ExpertDetailPage", () => {
     expect(within(row).queryByText("Unknown")).toBeNull();
   });
 
-  test("opens a fresh inline chat from the header Chat button", async () => {
-    let listedSessions = 0;
-    server.use(
-      http.get("*/api/chat/sessions", ({ request }) => {
-        // The Overview's recent-conversations card lists a short preview;
-        // only a listing for the chat itself would mean it resumed one.
-        const limit = new URL(request.url).searchParams.get("limit");
-        if (limit !== String(RECENT_CONVERSATIONS_LIMIT)) listedSessions += 1;
-        return HttpResponse.json({ sessions: [], total: 0 });
-      }),
-    );
-    const user = userEvent.setup();
+  test("links the header and empty conversations card to a fresh chat with the expert", async () => {
+    server.use(getGetV2ListSessionsMockHandler200({ sessions: [], total: 0 }));
     render(<ExpertDetailPage />);
 
-    const chat = await screen.findByRole("button", { name: "Chat" });
-    await user.click(chat);
-
-    const panel = screen.getByRole("complementary", {
-      name: "Chat with Marketing Manager",
-    });
-    expect(
-      await within(panel).findByText("What can I do for you?"),
-    ).toBeDefined();
-    expect(within(panel).queryByRole("heading", { level: 2 })).toBeNull();
-    expect(
-      within(panel).getByPlaceholderText("Message Marketing Manager…"),
-    ).toBeDefined();
-    expect(
-      within(panel)
-        .getByRole("link", { name: "Open in Chat" })
-        .getAttribute("href"),
-    ).toBe("/copilot?expertId=expert-maria&new=1");
-    expect(listedSessions).toBe(0);
-
-    await user.click(chat);
-    await waitFor(() => {
-      expect(
-        screen.queryByRole("complementary", {
-          name: "Chat with Marketing Manager",
-        }),
-      ).toBeNull();
-    });
-  });
-
-  test("starts a new thread for the expert with the first message", async () => {
-    const createBodies: unknown[] = [];
-    const streamBodies: string[] = [];
-    server.use(
-      getGetV2ListSessionsMockHandler200({ sessions: [], total: 0 }),
-      getPostV2CreateSessionMockHandler200(async (info) => {
-        createBodies.push(await info.request.clone().json());
-        return getPostV2CreateSessionResponseMock200({ id: "sess-new" });
-      }),
-      getGetV2GetSessionMockHandler200(
-        getGetV2GetSessionResponseMock200({
-          id: "sess-new",
-          messages: [],
-          active_stream: null,
-        }),
-      ),
-      http.post(
-        `${TEST_BACKEND_BASE_URL}/api/chat/sessions/sess-new/stream`,
-        async ({ request }) => {
-          streamBodies.push(await request.clone().text());
-          return streamSseResponse(assistantTextChunks("On it."), {
-            abortSignal: request.signal,
-          });
-        },
-      ),
-    );
-    const user = userEvent.setup();
-    render(<ExpertDetailPage />);
-
-    await user.click(await screen.findByRole("button", { name: "Chat" }));
-    const panel = screen.getByRole("complementary", {
-      name: "Chat with Marketing Manager",
-    });
-    expect(
-      await within(panel).findByText("What can I do for you?"),
-    ).toBeDefined();
-    expect(within(panel).queryByRole("heading", { level: 2 })).toBeNull();
-
-    await user.type(
-      screen.getByPlaceholderText("Message Marketing Manager…"),
-      "Draft the Q4 plan{enter}",
-    );
-
-    await waitFor(() =>
-      expect(createBodies).toEqual([{ expert_id: "expert-maria" }]),
-    );
-    await waitFor(() => expect(streamBodies.length).toBe(1));
-    expect(streamBodies[0]).toContain("Draft the Q4 plan");
-    expect(await screen.findByText("On it.")).toBeDefined();
+    for (const name of ["Chat", "Start a chat"]) {
+      const link = await screen.findByRole("link", { name });
+      expect(link.getAttribute("href")).toBe(
+        "/home?expertId=expert-maria&new=1",
+      );
+    }
   });
 
   test("asks about a workflow in the inline chat with the prompt sent first", async () => {
@@ -1413,6 +1329,12 @@ describe("ExpertDetailPage", () => {
     const user = userEvent.setup();
     render(<ExpertDetailPage />);
 
+    const editSoul = await screen.findByRole("button", { name: "Edit Soul" });
+    await user.click(editSoul);
+    expect(
+      screen.getByRole("complementary", { name: "Marketing Manager's Soul" }),
+    ).toBeDefined();
+
     await openTab("Workflows");
     const [askFirst] = await screen.findAllByRole("button", {
       name: "Ask about this workflow",
@@ -1431,6 +1353,21 @@ describe("ExpertDetailPage", () => {
     expect(
       await within(panel).findByText("It plans a week of posts."),
     ).toBeDefined();
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("complementary", { name: "Marketing Manager's Soul" }),
+      ).toBeNull();
+    });
+
+    await user.click(editSoul);
+    expect(
+      screen.getByRole("complementary", { name: "Marketing Manager's Soul" }),
+    ).toBeDefined();
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("complementary", { name: "Chat with Marketing Manager" }),
+      ).toBeNull();
+    });
   });
 
   test("edits the weekly budget from the pencil next to the title", async () => {
@@ -1463,43 +1400,6 @@ describe("ExpertDetailPage", () => {
         screen.queryByRole("dialog", { name: "Weekly budget" }),
       ).toBeNull(),
     );
-  });
-
-  test("opening the chat closes the Soul panel and vice versa", async () => {
-    server.use(getGetV2ListSessionsMockHandler200({ sessions: [], total: 0 }));
-    const user = userEvent.setup();
-    render(<ExpertDetailPage />);
-
-    await user.click(await screen.findByRole("button", { name: "Edit Soul" }));
-    expect(
-      screen.getByRole("complementary", { name: "Marketing Manager's Soul" }),
-    ).toBeDefined();
-
-    await user.click(screen.getByRole("button", { name: "Chat" }));
-    expect(
-      screen.getByRole("complementary", {
-        name: "Chat with Marketing Manager",
-      }),
-    ).toBeDefined();
-    await waitFor(() => {
-      expect(
-        screen.queryByRole("complementary", {
-          name: "Marketing Manager's Soul",
-        }),
-      ).toBeNull();
-    });
-
-    await user.click(screen.getByRole("button", { name: "Edit Soul" }));
-    expect(
-      screen.getByRole("complementary", { name: "Marketing Manager's Soul" }),
-    ).toBeDefined();
-    await waitFor(() => {
-      expect(
-        screen.queryByRole("complementary", {
-          name: "Chat with Marketing Manager",
-        }),
-      ).toBeNull();
-    });
   });
 
   test("surfaces only this expert's attention items above the tabs", async () => {

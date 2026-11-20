@@ -117,7 +117,6 @@ export default function ExpertDetailPage() {
     isChatOpen,
     chatDrawerKey,
     chatSeed,
-    toggleChat,
     openChatWithPrompt,
     closeChat,
   } = useExpertDetailPage({
@@ -154,11 +153,7 @@ export default function ExpertDetailPage() {
     <div className="flex w-full">
       <main className={cn(MAIN_CLASS, "min-w-0 flex-1")}>
         <BackToTeamLink />
-        <ExpertDetailHeader
-          expert={expert}
-          onEditSoul={toggleSoul}
-          onChat={toggleChat}
-        />
+        <ExpertDetailHeader expert={expert} onEditSoul={toggleSoul} />
 
         {isPaused ? (
           <div className="flex items-center justify-between gap-2 rounded-lg bg-warning-surface px-4 py-2.5 ring-1 ring-warning-border ring-inset">
@@ -207,7 +202,6 @@ export default function ExpertDetailPage() {
               activity={activity}
               isActivityLoading={isActivityLoading}
               isActivityError={isActivityError}
-              onChat={toggleChat}
             />
           </TabsLineContent>
 

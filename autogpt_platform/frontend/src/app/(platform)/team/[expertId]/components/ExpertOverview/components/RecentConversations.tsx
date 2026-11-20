@@ -9,6 +9,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { formatRelativeDate } from "@/app/(platform)/artifacts/components/ArtifactsList/helpers";
 import { PanelEmptyState } from "@/app/(platform)/copilot/components/ContextPanel/components/PanelEmptyState/PanelEmptyState";
+import { newRecipientChatHref } from "@/app/(platform)/copilot/expertSessionQuery";
 import type { SessionSummaryResponse } from "@/app/api/__generated__/models/sessionSummaryResponse";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -18,21 +19,21 @@ import { CardError } from "./CardError";
 import { OverviewCard } from "./OverviewCard";
 
 interface Props {
+  expertId: string;
   expertName: string;
   sessions: SessionSummaryResponse[];
   isLoading: boolean;
   isError: boolean;
   onRetry: () => unknown;
-  onChat: () => void;
 }
 
 export function RecentConversations({
+  expertId,
   expertName,
   sessions,
   isLoading,
   isError,
   onRetry,
-  onChat,
 }: Props) {
   const { t, locale } = useTranslation();
   return (
@@ -68,11 +69,12 @@ export function RecentConversations({
           )}
         >
           <Button
+            as="NextLink"
+            href={newRecipientChatHref(expertId)}
             variant="primary"
             size="small"
             textSize="body-md"
             leadingIcon={BubbleChatIcon}
-            onClick={onChat}
           >
             {t("Start a chat", "开始聊天")}
           </Button>

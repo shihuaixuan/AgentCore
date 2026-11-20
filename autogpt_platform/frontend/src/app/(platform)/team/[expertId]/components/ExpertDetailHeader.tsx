@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { newRecipientChatHref } from "@/app/(platform)/copilot/expertSessionQuery";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { Button } from "@/components/atoms/Button/Button";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
@@ -16,10 +17,9 @@ import { ExpertBudgetSection } from "./ExpertBudgetSection";
 interface Props {
   expert: Expert;
   onEditSoul: () => void;
-  onChat: () => void;
 }
 
-export function ExpertDetailHeader({ expert, onEditSoul, onChat }: Props) {
+export function ExpertDetailHeader({ expert, onEditSoul }: Props) {
   const { t, locale } = useTranslation();
   const title = getExpertDisplayTitle(expert, locale);
   const cover = getExpertCover(expert);
@@ -65,10 +65,11 @@ export function ExpertDetailHeader({ expert, onEditSoul, onChat }: Props) {
             {t("Edit Soul", "编辑设定")}
           </Button>
           <Button
+            as="NextLink"
+            href={newRecipientChatHref(expert.id)}
             variant="primary"
             size="small"
             leadingIcon={BubbleChatIcon}
-            onClick={onChat}
           >
             {t("Chat", "聊天")}
           </Button>

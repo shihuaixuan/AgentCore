@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { newRecipientChatHref } from "@/app/(platform)/copilot/expertSessionQuery";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -33,14 +34,12 @@ interface Props {
   skillCount: number;
   scheduleCount: number;
   workflowCount: number;
-  onChat: () => void;
 }
 
 export function AutopilotCard({
   skillCount,
   scheduleCount,
   workflowCount,
-  onChat,
 }: Props) {
   const { t, locale } = useTranslation();
   const title = getDefaultAssistantTitle(locale);
@@ -124,11 +123,12 @@ export function AutopilotCard({
 
       <div className="flex items-center gap-2 px-4 pb-4">
         <Button
+          as="NextLink"
+          href={newRecipientChatHref(null)}
           variant="secondary"
           size="small"
           className="flex-1"
           leadingIcon={BubbleChatIcon}
-          onClick={onChat}
         >
           {t("Chat", "聊天")}
         </Button>

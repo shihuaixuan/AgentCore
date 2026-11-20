@@ -22,7 +22,6 @@ import type { ExpertSetupItem } from "@/app/api/__generated__/models/expertSetup
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
-import { getGetV2ListSessionsMockHandler200 } from "@/app/api/__generated__/endpoints/chat/chat.msw";
 import { server } from "@/mocks/mock-server";
 import {
   fireEvent,
@@ -363,51 +362,21 @@ describe("TeamPage", () => {
     expect(link.getAttribute("href")).toBe("/team/expert-maria");
   });
 
-  test("opens an inline chat from the expert and Otto cards", async () => {
-    server.use(
-      getListExpertsMockHandler([hiredMaria]),
-      getGetV2ListSessionsMockHandler200({ sessions: [], total: 0 }),
-    );
-    const user = userEvent.setup();
+  test("opens the new chat page with the recipient from the team card", async () => {
+    server.use(getListExpertsMockHandler([hiredMaria]));
 
     render(<TeamPage />);
 
     await screen.findByText("Marketing Strategist");
-    const [autopilotChat, mariaChat] = screen.getAllByRole("button", {
-      name: "Chat",
-    });
-
-    await user.click(mariaChat);
-    const mariaPanel = screen.getByRole("complementary", {
-      name: "Chat with Marketing Strategist",
-    });
     expect(
-      await within(mariaPanel).findByText("What can I do for you?"),
-    ).toBeDefined();
+      screen
+        .getByRole("link", { name: "Chat with Marketing Strategist" })
+        .getAttribute("href"),
+    ).toBe("/home?expertId=expert-maria&new=1");
+    const otto = screen.getByRole("region", { name: "General Office Assistant" });
     expect(
-      within(mariaPanel).getByPlaceholderText("Message Marketing Strategist…"),
-    ).toBeDefined();
-
-    await user.click(autopilotChat);
-    const autopilotPanel = await screen.findByRole("complementary", {
-      name: "Chat with General Office Assistant",
-    });
-    expect(
-      within(autopilotPanel).getByPlaceholderText(
-        "Message General Office Assistant…",
-      ),
-    ).toBeDefined();
-    await waitFor(() => {
-      expect(
-        screen.queryByRole("complementary", {
-          name: "Chat with Marketing Strategist",
-        }),
-      ).toBeNull();
-    });
-
-    expect(
-      screen.getByRole("button", { name: "Install workflow" }),
-    ).toBeDefined();
+      within(otto).getByRole("link", { name: "Chat" }).getAttribute("href"),
+    ).toBe("/home");
   });
 
   test("shows an expert's integrations as logos, the rest behind +N more", async () => {
