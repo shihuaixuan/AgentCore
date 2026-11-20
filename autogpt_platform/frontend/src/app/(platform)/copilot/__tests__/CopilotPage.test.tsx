@@ -197,12 +197,18 @@ describe("CopilotPage child conversation", () => {
     const getSession = vi.fn(({ params }) =>
       HttpResponse.json({
         id: params.sessionId,
+        expert_id: "harper",
         chat_status: "running",
         messages: [
           {
             role: "user",
             content: `Task for ${params.sessionId}`,
             sequence: 0,
+          },
+          {
+            role: "assistant",
+            content: "正在整理招聘要求。",
+            sequence: 1,
           },
         ],
       }),
@@ -216,6 +222,7 @@ describe("CopilotPage child conversation", () => {
             name: "哈珀",
             role: "招聘与录用",
             job_title: "招聘专员",
+            avatar_url: "/experts/professional/expert-harper.webp",
             is_archived: false,
           },
         ]),
@@ -271,6 +278,14 @@ describe("CopilotPage child conversation", () => {
       name: "招聘专员 的会话",
     });
     expect(await within(panel).findByText("Task for harper-a")).toBeDefined();
+    const author = await within(panel).findByTestId(
+      "expert-assistant-identity",
+    );
+    expect(await within(author).findByText("招聘专员")).toBeDefined();
+    expect(within(author).getByAltText("招聘专员").getAttribute("src")).toBe(
+      "/experts/professional/expert-harper.webp",
+    );
+    expect(within(author).queryByText("通用办公助手")).toBeNull();
     expect(getSession).not.toHaveBeenCalledWith(
       expect.objectContaining({ params: { sessionId: "harper-b" } }),
     );

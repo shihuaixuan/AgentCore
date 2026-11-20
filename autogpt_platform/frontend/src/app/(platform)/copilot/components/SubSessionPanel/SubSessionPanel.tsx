@@ -10,6 +10,7 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ArrowUpRight01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import type { ReactNode } from "react";
 import { convertChatSessionMessagesToUiMessages } from "../../helpers/convertChatSessionToUiMessages";
+import { resolveExpertIdentity, useExpertMap } from "../../useExpertMap";
 import { ChatMessagesContainer } from "../ChatMessagesContainer/ChatMessagesContainer";
 import { CopilotChatActionsProvider } from "../CopilotChatActionsProvider/CopilotChatActionsProvider";
 import { isSessionLive } from "../ToolChain/subSessionStatus";
@@ -127,6 +128,13 @@ function ChildTranscript({ sessionID }: { sessionID: string }) {
 
 function TranscriptContent({ session }: { session: SessionDetailResponse }) {
   const { t } = useTranslation();
+  const expertID = session.expert_id ?? null;
+  const { expertsById, hasExpertsSettled, hasExpertsErrored } =
+    useExpertMap(!!expertID);
+  const expertIdentity = resolveExpertIdentity(expertID, expertsById, {
+    settled: hasExpertsSettled,
+    errored: hasExpertsErrored,
+  });
   const isLive = isSessionLive(session);
   const { messages, stats } = convertChatSessionMessagesToUiMessages(
     session.id,
@@ -157,6 +165,9 @@ function TranscriptContent({ session }: { session: SessionDetailResponse }) {
           status={isLive ? "streaming" : "ready"}
           error={undefined}
           isLoading={false}
+          expertIdentity={expertIdentity}
+          replyExpertsById={expertsById}
+          isResolvingExpertIdentity={!!expertID && !expertIdentity}
           readOnly
           variant="compact"
           showThreadHeader={false}
