@@ -4,14 +4,16 @@ import json
 from datetime import UTC, datetime
 from typing import get_args
 from unittest.mock import Mock
+from urllib.parse import urlsplit
 
 import httpx
 import pytest
-from openai import AsyncOpenAI
 from PIL import Image
 from pydantic import SecretStr
 
+from backend.copilot import managed_model_client
 from backend.copilot.context import set_execution_context
+from backend.copilot.managed_models import ModelRuntime, ModelUnavailable
 from backend.copilot.model import ChatSession, ChatSessionMetadata
 from backend.copilot.permissions import (
     ALL_TOOL_NAMES,
@@ -25,23 +27,14 @@ from backend.copilot.tools import (
     get_tool,
     reachable_tool_names,
 )
-from backend.copilot.tools.expert_scope import CredentialScopeSnapshot
-from backend.data.model import APIKeyCredentials
 from backend.data.workspace import WorkspaceFile
 from backend.data.workspace_scope import WorkspaceAccessDeniedError
-from backend.integrations import openai_image
-from backend.integrations.credentials_store import openai_credentials
 from backend.util.workspace import WorkspaceManager
 
 from . import generate_openai_image as image_tool
 
 _TOOL_NAME = GENERATE_OPENAI_IMAGE_TOOL
-_KEY = APIKeyCredentials(
-    id="image-test-key",
-    title="Image project",
-    provider="openai",
-    api_key=SecretStr("mock-openai-image-key"),
-)
+_GATEWAY = "https://gateway.example.test/custom/v1"
 
 
 def _session(**overrides) -> ChatSession:
@@ -61,11 +54,11 @@ def _session(**overrides) -> ChatSession:
     )
 
 
-def test_openai_image_generation_is_reachable_only_by_experts():
+def test_openai_image_generation_is_reachable_in_both_chat_roles():
     assert get_tool(_TOOL_NAME) is not None
-    for expert_id, expected in (("expert-1", True), (None, False)):
+    for expert_id in ("expert-1", None):
         groups = expert_tool_disabled_groups(experts_enabled=True, expert_id=expert_id)
-        assert (_TOOL_NAME in reachable_tool_names(disabled_groups=groups)) is expected
+        assert _TOOL_NAME in reachable_tool_names(disabled_groups=groups)
 
 
 def test_openai_image_generation_is_not_a_workflow_tool_option():
@@ -76,8 +69,20 @@ def test_openai_image_generation_is_not_a_workflow_tool_option():
 @pytest.mark.parametrize(
     "overrides",
     [
-        {"expert_id": None},
         {"user_id": "another-user"},
+        pytest.param(
+            {"expert_id": None, "metadata": ChatSessionMetadata(origin="automation")},
+            id="office-workflow",
+        ),
+        pytest.param(
+            {
+                "expert_id": None,
+                "metadata": ChatSessionMetadata(
+                    origin="interactive", delegated_by_session_id="parent"
+                ),
+            },
+            id="office-delegation",
+        ),
         {"external_caller": True},
         {"metadata": ChatSessionMetadata(origin="interactive", dry_run=True)},
         {"metadata": ChatSessionMetadata(origin="automation")},
@@ -92,11 +97,7 @@ def test_openai_image_generation_is_not_a_workflow_tool_option():
 async def test_openai_image_generation_is_refused_without_running_it(mocker, overrides):
     tool = get_tool(_TOOL_NAME)
     assert tool is not None
-    resolve = mocker.patch(
-        "backend.copilot.tools.generate_openai_image.resolve_credential_scope",
-        return_value=CredentialScopeSnapshot([], set()),
-    )
-    mocker.patch.object(image_tool, "selected_credentials", return_value={})
+    resolve = mocker.patch.object(image_tool, "resolve_image_model")
 
     result = await tool._execute("user-1", _session(**overrides), prompt="An otter")
 
@@ -104,17 +105,12 @@ async def test_openai_image_generation_is_refused_without_running_it(mocker, ove
     resolve.assert_not_awaited()
 
 
-async def test_openai_provider_denial_prevents_a_credential_lookup(mocker):
+async def test_openai_provider_denial_prevents_a_managed_model_lookup(mocker):
     session = _session()
     set_execution_context(
         "user-1", session, permissions=CopilotPermissions(providers=["openai"])
     )
-    resolve = mocker.patch.object(
-        image_tool,
-        "resolve_credential_scope",
-        return_value=CredentialScopeSnapshot([], set()),
-    )
-    mocker.patch.object(image_tool, "selected_credentials", return_value={})
+    resolve = mocker.patch.object(image_tool, "resolve_image_model")
 
     result = await image_tool.GenerateOpenAIImageTool()._execute(
         "user-1", session, prompt="An otter"
@@ -125,62 +121,17 @@ async def test_openai_provider_denial_prevents_a_credential_lookup(mocker):
     resolve.assert_not_awaited()
 
 
-async def test_only_eligible_personal_keys_are_offered_to_the_expert(mocker):
-    scope = CredentialScopeSnapshot(
-        owned=[
-            openai_credentials,
-            _KEY.model_copy(update={"id": "openai-default"}),
-            _KEY.model_copy(update={"id": "replicate-key", "provider": "replicate"}),
-            _KEY.model_copy(update={"id": "empty-key", "api_key": SecretStr(" ")}),
-            _KEY,
-        ],
-        allowed_ids={
-            openai_credentials.id,
-            "openai-default",
-            "replicate-key",
-            "empty-key",
-        },
-    )
-    mocker.patch.object(image_tool, "resolve_credential_scope", return_value=scope)
+@pytest.mark.parametrize("expert_id", ["expert-1", pytest.param(None, id="office")])
+async def test_missing_managed_image_model_never_offers_a_connector(mocker, expert_id):
     mocker.patch.object(
         image_tool,
-        "selected_credentials",
-        return_value={"openai": openai_credentials.id},
+        "resolve_image_model",
+        side_effect=ModelUnavailable("Ask your administrator to enable an image model."),
     )
-    workspace = mocker.patch.object(image_tool, "get_workspace_manager")
-
-    result = await image_tool.GenerateOpenAIImageTool()._execute(
-        "user-1", _session(), prompt="An otter"
-    )
-
-    assert isinstance(result, image_tool.SetupRequirementsResponse)
-    requirement = result.setup_info.user_readiness.missing_credentials[
-        "openai_credentials"
-    ]
-    assert requirement["provider"] == "openai"
-    assert requirement["types"] == ["api_key"]
-    assert requirement["expert_grant"] == {
-        "expert_id": "expert-1",
-        "credentials": [{"id": _KEY.id, "title": _KEY.title, "type": "api_key"}],
-    }
-    assert "mock-openai-image-key" not in result.model_dump_json()
-    workspace.assert_not_awaited()
-
-
-async def test_expert_without_an_openai_key_gets_only_the_openai_setup_card(mocker):
-    replicate_key = _KEY.model_copy(
-        update={"id": "replicate-key", "provider": "replicate"}
-    )
-    mocker.patch.object(
-        image_tool,
-        "resolve_credential_scope",
-        return_value=CredentialScopeSnapshot([replicate_key], {replicate_key.id}),
-    )
-    mocker.patch.object(image_tool, "selected_credentials", return_value={})
     generate = mocker.patch.object(image_tool, "request_openai_image")
     mocker.patch("backend.copilot.tools.track_tool_called")
     mocker.patch("backend.copilot.gate.gate_active", return_value=False)
-    session = _session()
+    session = _session(expert_id=expert_id)
     set_execution_context("user-1", session)
 
     event = await execute_tool(
@@ -189,16 +140,17 @@ async def test_expert_without_an_openai_key_gets_only_the_openai_setup_card(mock
         "user-1",
         session,
         "image-call",
-        disabled_groups=(),
+        disabled_groups=expert_tool_disabled_groups(
+            experts_enabled=True, expert_id=expert_id
+        ),
         disabled_tools=(),
     )
 
     assert event.toolName == _TOOL_NAME
     assert isinstance(event.output, str)
-    result = image_tool.SetupRequirementsResponse.model_validate_json(event.output)
-    [requirement] = result.setup_info.requirements["credentials"]
-    assert requirement["provider"] == "openai"
-    assert result.setup_info.agent_id == f"tool:{_TOOL_NAME}"
+    result = image_tool.ErrorResponse.model_validate_json(event.output)
+    assert result.type == "error" and "administrator" in result.message
+    assert "setup_info" not in json.loads(event.output)
     generate.assert_not_awaited()
 
 
@@ -225,15 +177,14 @@ def _workspace_file(file_id: str, mime_type: str, size_bytes: int) -> WorkspaceF
 
 @pytest.fixture
 def workspace(mocker):
-    other_key = _KEY.model_copy(
-        update={"id": "other-key", "api_key": SecretStr("other-key")}
-    )
-    scope = CredentialScopeSnapshot(
-        owned=[openai_credentials, other_key, _KEY], allowed_ids={other_key.id, _KEY.id}
-    )
-    mocker.patch.object(image_tool, "resolve_credential_scope", return_value=scope)
     mocker.patch.object(
-        image_tool, "selected_credentials", return_value={"openai": _KEY.id}
+        image_tool,
+        "resolve_image_model",
+        side_effect=lambda preferred: ModelRuntime(
+            model=f"gateway/{preferred or 'gpt-image-2.6-flare'}",
+            base_url=_GATEWAY,
+            key=SecretStr("mock-gateway-key"),
+        ),
     )
     manager = Mock(spec=WorkspaceManager)
     mocker.patch.object(image_tool, "get_workspace_manager", return_value=manager)
@@ -244,17 +195,20 @@ def workspace(mocker):
 def mock_openai(mocker, monkeypatch):
     monkeypatch.setenv("OPENAI_ORG_ID", "deployment-org")
     monkeypatch.setenv("OPENAI_PROJECT_ID", "deployment-project")
+    mocker.patch.object(
+        managed_model_client,
+        "validate_url_host",
+        return_value=(urlsplit(_GATEWAY), None, ["93.184.216.34"]),
+    )
 
     def install(response: httpx.Response):
         handler = Mock(return_value=response)
 
-        def client(**kwargs):
-            return AsyncOpenAI(
-                **kwargs,
-                http_client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
-            )
-
-        mocker.patch.object(openai_image, "AsyncOpenAI", side_effect=client)
+        mocker.patch.object(
+            managed_model_client,
+            "_PinnedTransport",
+            return_value=httpx.MockTransport(handler),
+        )
         return handler
 
     return install
@@ -267,9 +221,10 @@ def _provider_image(content: bytes) -> httpx.Response:
     )
 
 
-@pytest.mark.parametrize("model", ["gpt-image-2.6-sunburst", "gpt-image-2.6-flare"])
+@pytest.mark.parametrize("model", [None, "gpt-image-2.6-sunburst"])
+@pytest.mark.parametrize("expert_id", ["expert-1", pytest.param(None, id="office")])
 async def test_generation_calls_openai_and_returns_a_chat_image(
-    workspace, mock_openai, mocker, model
+    workspace, mock_openai, mocker, model, expert_id
 ):
     content = _image_bytes("JPEG")
     handler = mock_openai(_provider_image(content))
@@ -279,7 +234,7 @@ async def test_generation_calls_openai_and_returns_a_chat_image(
 
     mocker.patch("backend.copilot.tools.track_tool_called")
     mocker.patch("backend.copilot.gate.gate_active", return_value=False)
-    session = _session()
+    session = _session(expert_id=expert_id)
     set_execution_context("user-1", session)
     event = await execute_tool(
         "run_capability",
@@ -291,7 +246,7 @@ async def test_generation_calls_openai_and_returns_a_chat_image(
                 "quality": "xhigh",
                 "complexity": "low",
                 "output_format": "jpeg",
-                **({"model": model} if model.endswith("flare") else {}),
+                **({"model": model} if model else {}),
             },
         },
         "user-1",
@@ -306,15 +261,15 @@ async def test_generation_calls_openai_and_returns_a_chat_image(
     handler.assert_called_once()
     outgoing = handler.call_args.args[0]
     assert outgoing.method == "POST"
-    assert outgoing.url == "https://api.openai.com/v1/images/generations"
-    assert outgoing.headers["Authorization"] == "Bearer mock-openai-image-key"
+    assert outgoing.url == f"{_GATEWAY}/images/generations"
+    assert outgoing.headers["Authorization"] == "Bearer mock-gateway-key"
     assert "OpenAI-Organization" not in outgoing.headers
     assert "OpenAI-Project" not in outgoing.headers
     payload = json.loads(outgoing.content)
     safety_identifier = payload.pop("safety_identifier")
     assert len(safety_identifier) == 64 and "user-1" not in safety_identifier
     assert payload == {
-        "model": model,
+        "model": f"gateway/{model or 'gpt-image-2.6-flare'}",
         "prompt": "An otter",
         "size": "1536x864",
         "quality": "xhigh",
@@ -333,6 +288,7 @@ async def test_generation_calls_openai_and_returns_a_chat_image(
     assert event.toolName == _TOOL_NAME
     assert isinstance(event.output, str)
     result = image_tool.WorkspaceWriteResponse.model_validate_json(event.output)
+    assert result.source == payload["model"]
     assert result.download_url == "workspace://generated#image/jpeg"
     assert f"![Generated image]({result.download_url})" in result.message
 
@@ -366,12 +322,13 @@ async def test_edits_send_only_the_selected_workspace_images(workspace, mock_ope
 
     assert isinstance(result, image_tool.WorkspaceWriteResponse)
     outgoing = handler.call_args.args[0]
-    assert outgoing.url.path == "/v1/images/edits"
+    assert outgoing.url == f"{_GATEWAY}/images/edits"
+    assert outgoing.headers["Authorization"] == "Bearer mock-gateway-key"
     assert outgoing.headers["Content-Type"].startswith("multipart/form-data;")
     assert outgoing.content.count(b'name="image[]"') == 2
     assert png in outgoing.content and webp in outgoing.content
     for field, value in {
-        "model": "gpt-image-2.6-flare",
+        "model": "gateway/gpt-image-2.6-flare",
         "quality": "max",
         "complexity": "medium",
         "background": "transparent",
@@ -382,6 +339,21 @@ async def test_edits_send_only_the_selected_workspace_images(workspace, mock_ope
         "reference-1",
         "reference-2",
     ]
+
+
+async def test_older_image_model_omits_unsupported_extensions(workspace, mock_openai):
+    png = _image_bytes("PNG")
+    handler = mock_openai(_provider_image(png))
+    workspace.write_file.return_value = _workspace_file(
+        "generated", "image/png", len(png)
+    )
+    result = await image_tool.GenerateOpenAIImageTool()._execute(
+        "user-1", _session(), prompt="An otter", model="gpt-image-1"
+    )
+    assert result.type != "error"
+    payload = json.loads(handler.call_args.args[0].content)
+    assert payload["model"] == "gateway/gpt-image-1"
+    assert "complexity" not in payload and "safety_identifier" not in payload
 
 
 @pytest.mark.parametrize(

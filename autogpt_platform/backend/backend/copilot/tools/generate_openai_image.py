@@ -1,20 +1,18 @@
 import logging
 from hashlib import sha256
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any
 
 from pydantic import Field, ValidationError
 
 from backend.copilot.context import get_workspace_manager
-from backend.copilot.credential_selection import selected_credentials
+from backend.copilot.managed_model_client import managed_model_client
+from backend.copilot.managed_models import (
+    ModelRuntime,
+    ModelUnavailable,
+    resolve_image_model,
+)
 from backend.copilot.model import ChatSession
 from backend.copilot.permissions import GENERATE_OPENAI_IMAGE_TOOL
-from backend.data.model import (
-    APIKeyCredentials,
-    Credentials,
-    CredentialsFieldInfo,
-    is_sdk_default,
-)
-from backend.integrations.credentials_store import is_system_credential
 from backend.integrations.openai_image import (
     MAX_REFERENCE_BYTES,
     RASTER_FORMATS,
@@ -24,35 +22,16 @@ from backend.integrations.openai_image import (
     is_raster_image,
     request_openai_image,
 )
-from backend.integrations.providers import ProviderName
 from backend.util.file import check_total_file_size, parse_workspace_uri
 from backend.util.type import MediaFileType
 from backend.util.workspace import WorkspaceManager
 
 from .base import BaseTool
-from .expert_image_policy import EXPERT_IMAGE_ONLY, image_turn_error
-from .expert_scope import (
-    CredentialScopeSnapshot,
-    annotate_expert_grants,
-    resolve_credential_scope,
-)
-from .models import (
-    ErrorResponse,
-    SetupInfo,
-    SetupRequirementsResponse,
-    ToolResponseBase,
-    UserReadiness,
-)
-from .utils import build_missing_credentials_from_field_info, find_matching_credential
+from .expert_image_policy import image_turn_error
+from .models import ErrorResponse, ToolResponseBase
 from .workspace_files import AGENT_CREATED_METADATA, WorkspaceWriteResponse
 
 logger = logging.getLogger(__name__)
-
-_OPENAI_KEY = CredentialsFieldInfo[Literal[ProviderName.OPENAI], Literal["api_key"]](
-    credentials_provider=frozenset([ProviderName.OPENAI]),
-    credentials_types=frozenset(["api_key"]),
-    credentials_scopes=None,
-)
 
 
 class _GenerateOpenAIImageInput(OpenAIImageRequest):
@@ -81,8 +60,8 @@ class GenerateOpenAIImageTool(BaseTool):
     @property
     def description(self) -> str:
         return (
-            "Generate or edit images with OpenAI GPT-Image-2.6 in an expert chat. "
-            "Requires an OpenAI API key granted to the expert. Show the returned Markdown image."
+            "Generate or edit images using the administrator's OpenAI-compatible image model. "
+            "Show the returned Markdown image."
         )
 
     @property
@@ -111,9 +90,10 @@ class GenerateOpenAIImageTool(BaseTool):
         self, user_id: str | None, session: ChatSession, **kwargs: Any
     ) -> ToolResponseBase:
         session_id = session.session_id
-        expert_id = session.expert_id
-        if not user_id or user_id != session.user_id or not expert_id:
-            return ErrorResponse(session_id=session_id, message=EXPERT_IMAGE_ONLY)
+        if not user_id or user_id != session.user_id:
+            return ErrorResponse(
+                session_id=session_id, message="Chat owner authentication required."
+            )
         if error := image_turn_error(session):
             return ErrorResponse(session_id=session_id, message=error)
         try:
@@ -127,82 +107,41 @@ class GenerateOpenAIImageTool(BaseTool):
                 message=f"Invalid image settings. {prefix}{problem['msg']}",
             )
 
-        scope = await resolve_credential_scope(user_id, expert_id)
-        personal = CredentialScopeSnapshot(
-            [
-                credential
-                for credential in scope.owned
-                if _is_personal_openai_key(credential)
-            ],
-            scope.allowed_ids,
-        )
-        key = find_matching_credential(
-            personal.available,
-            _OPENAI_KEY,
-            await selected_credentials(session_id),
-            ask_when_ambiguous=True,
-        )
-        if key is None or key.type != "api_key":
-            return await _setup_response(user_id, expert_id, session_id, personal)
-        return await _generate_image(user_id, session_id, request, key)
-
-
-def _is_personal_openai_key(credential: Credentials) -> bool:
-    return (
-        credential.type == "api_key"
-        and credential.provider == ProviderName.OPENAI
-        and not is_system_credential(credential.id)
-        and not is_sdk_default(credential.id)
-        and bool(credential.api_key.get_secret_value().strip())
-    )
-
-
-async def _setup_response(
-    user_id: str, expert_id: str, session_id: str, scope: CredentialScopeSnapshot
-) -> SetupRequirementsResponse:
-    missing = await annotate_expert_grants(
-        user_id,
-        expert_id,
-        build_missing_credentials_from_field_info(
-            {"openai_credentials": _OPENAI_KEY}, set()
-        ),
-        scope,
-    )
-    missing["openai_credentials"]["provider_name"] = "OpenAI"
-    return SetupRequirementsResponse(
-        message="Connect or grant an OpenAI project API key with access to GPT Image models.",
-        session_id=session_id,
-        setup_info=SetupInfo(
-            agent_id=f"tool:{GENERATE_OPENAI_IMAGE_TOOL}",
-            agent_name="OpenAI Image Generation",
-            requirements={
-                "credentials": list(missing.values()),
-                "inputs": [],
-                "execution_modes": ["immediate"],
-            },
-            user_readiness=UserReadiness(missing_credentials=missing),
-        ),
-    )
+        try:
+            route = await resolve_image_model(request.model)
+        except ModelUnavailable as error:
+            return ErrorResponse(session_id=session_id, message=str(error))
+        except Exception:
+            logger.warning("Could not load the managed image model configuration")
+            return ErrorResponse(
+                session_id=session_id,
+                message="Image model settings are unavailable. Contact your administrator.",
+            )
+        return await _generate_image(user_id, session_id, request, route)
 
 
 async def _generate_image(
     user_id: str,
     session_id: str,
     request: _GenerateOpenAIImageInput,
-    key: APIKeyCredentials,
+    route: ModelRuntime,
 ) -> ToolResponseBase:
     manager = await get_workspace_manager(user_id, session_id)
     try:
         references = await _load_references(manager, request.reference_images)
-        content = await request_openai_image(
-            request,
-            key.api_key.get_secret_value().strip(),
-            references,
-            sha256(f"autogpt:{user_id}".encode()).hexdigest(),
-        )
-    except (ValueError, OpenAIImageError) as error:
+        async with managed_model_client(route) as client:
+            content = await request_openai_image(
+                request,
+                client,
+                route.model,
+                references,
+                sha256(f"autogpt:{user_id}".encode()).hexdigest(),
+            )
+    except (ValueError, OpenAIImageError, ModelUnavailable) as error:
         return ErrorResponse(session_id=session_id, message=str(error))
-    return await _save_generated_image(manager, session_id, request, content)
+    return await _save_generated_image(
+        manager, session_id, request, content, route.model
+    )
 
 
 async def _save_generated_image(
@@ -210,6 +149,7 @@ async def _save_generated_image(
     session_id: str,
     request: OpenAIImageRequest,
     content: bytes,
+    model: str,
 ) -> ToolResponseBase:
     mime_type = f"image/{request.output_format}"
     try:
@@ -234,7 +174,7 @@ async def _save_generated_image(
 
     url = f"workspace://{file.id}#{mime_type}"
     return WorkspaceWriteResponse(
-        message=f"Generated with {request.model}. Show this image in chat: ![Generated image]({url})",
+        message=f"Generated with {model}. Show this image in chat: ![Generated image]({url})",
         session_id=session_id,
         file_id=file.id,
         name=file.name,
@@ -242,7 +182,7 @@ async def _save_generated_image(
         mime_type=mime_type,
         size_bytes=file.size_bytes,
         download_url=url,
-        source=request.model,
+        source=model,
     )
 
 
@@ -282,7 +222,7 @@ async def _load_reference(
         content = await manager.read_file_by_id(file.id)
     except OSError:
         raise ValueError(
-            f"Reference image {number} is not available in this expert's workspace."
+            f"Reference image {number} is not available in this chat's workspace."
         ) from None
     if not 0 < len(content) <= MAX_REFERENCE_BYTES or not is_raster_image(
         content, image_format

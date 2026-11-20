@@ -29,10 +29,11 @@ REPLICATE_RUNNER = ReplicateModelBlock()
         ("direct", None, EXPERT, False),
         ("direct", "tool", EXPERT, False),
         ("graph", "block", EXPERT, True),
-        ("direct", "block", None, True),
+        ("direct", "block", None, False),
+        ("graph", "block", None, True),
     ],
 )
-async def test_replicate_search_is_filtered_only_in_expert_direct_context(
+async def test_replicate_search_is_filtered_only_in_direct_chat(
     mocker, context, kind, expert_id, shows_replicate
 ):
     session = ChatSession.new(USER, dry_run=False, expert_id=expert_id)
@@ -70,14 +71,15 @@ async def test_replicate_search_is_filtered_only_in_expert_direct_context(
         (REPLICATE_RUNNER.name, {"model_name": "black-forest-labs/flux-schnell"}),
     ],
 )
-async def test_expert_cannot_run_or_connect_a_legacy_block(
-    mocker, capability_id, inputs
+@pytest.mark.parametrize("expert_id", [EXPERT, pytest.param(None, id="office")])
+async def test_chat_cannot_run_or_connect_a_legacy_block(
+    mocker, capability_id, inputs, expert_id
 ):
     credentials = mocker.patch(
         "backend.copilot.tools.helpers.resolve_block_credentials",
         side_effect=AssertionError("A retired block must not resolve credentials"),
     )
-    session = ChatSession.new(USER, dry_run=False, expert_id=EXPERT)
+    session = ChatSession.new(USER, dry_run=False, expert_id=expert_id)
 
     result = await RunCapabilityTool()._execute(
         USER, session, id=capability_id, input=inputs

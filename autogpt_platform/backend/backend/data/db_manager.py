@@ -67,7 +67,10 @@ from backend.api.features.store.embeddings import backfill_missing_embeddings
 from backend.blocks import get_blocks
 from backend.copilot import background_task_db
 from backend.copilot import db as chat_db
-from backend.copilot.managed_models import get_enabled_managed_model_connection
+from backend.copilot.managed_models import (
+    get_enabled_managed_image_connection,
+    get_enabled_managed_model_connection,
+)
 from backend.copilot.scheduled_chats.forget import forget_scheduled_chat
 from backend.copilot.scheduled_chats.service import record_scheduled_run
 from backend.copilot.sharing.db import link_new_execution_to_chat_share
@@ -799,6 +802,7 @@ class DatabaseManager(AppService):
 
     # ============ CoPilot Chat Sessions ============ #
     get_enabled_managed_model_connection = _(get_enabled_managed_model_connection)
+    get_enabled_managed_image_connection = _(get_enabled_managed_image_connection)
     get_background_task = _(background_task_db.get_background_task)
     get_session_background_state = _(background_task_db.get_session_background_state)
     create_background_task = _(background_task_db.create_background_task)
@@ -1379,6 +1383,7 @@ class DatabaseManagerAsyncClient(AppServiceClient):
 
     # ============ CoPilot Chat Sessions ============ #
     get_enabled_managed_model_connection = d.get_enabled_managed_model_connection
+    get_enabled_managed_image_connection = d.get_enabled_managed_image_connection
     get_chat_session_metadata = d.get_chat_session_metadata
     get_background_task = d.get_background_task
     get_session_background_state = d.get_session_background_state

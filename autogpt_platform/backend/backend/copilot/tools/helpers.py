@@ -1494,7 +1494,7 @@ def block_run_refusal(
     ):
         return ErrorResponse(
             message=(
-                "Replicate blocks cannot run directly in an expert chat. "
+                "Replicate blocks cannot run directly in this chat. "
                 "Use the built-in OpenAI tool for image generation or editing."
             ),
             session_id=session_id,

@@ -4,12 +4,16 @@ from uuid import uuid4
 
 from pydantic import AfterValidator, BaseModel, Field, SecretStr, StringConstraints
 
+from backend.copilot.config import ChatConfig
 from backend.data.db import is_connected, query_raw_with_schema
 from backend.util.clients import get_database_manager_async_client
 from backend.util.encryption import JSONCryptor
 
 _TABLE = '{schema_prefix}"ManagedChatModel"'
 _FIELDS = 'id, name, model, "baseUrl" AS base_url, enabled'
+_MODEL_SLUG = "lower(regexp_replace(model, '^.*/', ''))"
+_IMAGE_ROUTE = f"(id = $1 OR {_MODEL_SLUG} LIKE 'gpt-image-%')"
+_config = ChatConfig()
 
 
 def validate_base_url(value: str) -> str:
@@ -90,7 +94,9 @@ class ModelUnavailable(Exception):
 
 async def list_chat_models() -> list[ChatModel]:
     return await query_raw_with_schema(
-        f'SELECT id, name FROM {_TABLE} WHERE "enabled" = TRUE ORDER BY "createdAt", id',
+        f'SELECT id, name FROM {_TABLE} WHERE "enabled" = TRUE '
+        f'AND NOT {_IMAGE_ROUTE} ORDER BY "createdAt", id',
+        _config.managed_image_model_id,
         model=ChatModel,
     )
 
@@ -113,10 +119,46 @@ async def resolve_model(model_id: str) -> ModelRuntime:
         row = await database_manager.get_enabled_managed_model_connection(model_id)
     if row is None:
         raise ModelUnavailable("This chat model is no longer available.")
+    return _runtime(row)
+
+
+def _runtime(row: StoredModelConnection) -> ModelRuntime:
     key = JSONCryptor().decrypt(row.encrypted_key).get("key")
     if not key:
-        raise ModelUnavailable("This chat model has no usable API key.")
+        raise ModelUnavailable("The configured model has no usable API key.")
     return ModelRuntime(model=row.model, base_url=row.base_url, key=key)
+
+
+async def resolve_image_model(preferred: str | None) -> ModelRuntime:
+    lookup = (
+        get_enabled_managed_image_connection
+        if is_connected()
+        else get_database_manager_async_client().get_enabled_managed_image_connection
+    )
+    row = await lookup(_config.managed_image_model_id, preferred)
+    if row is None:
+        raise ModelUnavailable(
+            "No matching image model is enabled. Ask your administrator to enable "
+            "an OpenAI-compatible image model in Settings → AI Connections."
+        )
+    return _runtime(row)
+
+
+async def get_enabled_managed_image_connection(
+    pinned_id: str, preferred: str | None
+) -> StoredModelConnection | None:
+    rows = await query_raw_with_schema(
+        f'SELECT model, "baseUrl" AS base_url, "apiKey" AS encrypted_key FROM {_TABLE} '
+        f'WHERE "enabled" = TRUE AND {_IMAGE_ROUTE} '
+        f"AND ($2::text IS NULL OR lower(model) = lower($2) OR {_MODEL_SLUG} = lower($2)) "
+        "AND ($1 = '' OR id = $1) "
+        f"ORDER BY ({_MODEL_SLUG} = 'gpt-image-2.6-sunburst') DESC, "
+        '"createdAt", id LIMIT 1',
+        pinned_id,
+        preferred,
+        model=StoredModelConnection,
+    )
+    return rows[0] if rows else None
 
 
 async def get_enabled_managed_model_connection(

@@ -87,10 +87,11 @@ async def test_hidden_chat_tool_still_respects_context_and_permissions(
 
 
 @pytest.mark.parametrize("kind", [None, "block"])
-async def test_expert_chat_finds_openai_image_generation(links, kind):
+@pytest.mark.parametrize("expert_id", ["image-expert", pytest.param(None, id="office")])
+async def test_chat_finds_openai_image_generation(links, kind, expert_id):
     result = await FindCapabilityTool()._execute(
         USER,
-        make_session(USER, expert_id="image-expert"),
+        make_session(USER, expert_id=expert_id),
         query="OpenAI image generation",
         kind=kind,
     )
@@ -101,11 +102,11 @@ async def test_expert_chat_finds_openai_image_generation(links, kind):
 
 
 @pytest.mark.parametrize("kind", [None, "block"])
-@pytest.mark.parametrize("reason", ["plain_chat", "tool_hidden", "provider_denied"])
+@pytest.mark.parametrize("reason", ["builder", "tool_hidden", "provider_denied"])
 async def test_openai_image_generation_is_hidden_when_unavailable(links, kind, reason):
-    session = make_session(
-        USER, expert_id=None if reason == "plain_chat" else "image-expert"
-    )
+    session = make_session(USER, expert_id="image-expert")
+    if reason == "builder":
+        session.metadata.builder_graph_id = "workflow-1"
     set_execution_context(
         USER,
         session,

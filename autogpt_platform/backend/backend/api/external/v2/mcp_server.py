@@ -91,7 +91,7 @@ EXTERNAL_USE_EXCLUSIONS: dict[str, str] = {
     "browser_act": "browser state is bound to the chat session",
     "browser_screenshot": "browser state is bound to the chat session",
     "expert_onboarding": "renders the expert intake card in a chat session",
-    GENERATE_OPENAI_IMAGE_TOOL: "uses an expert's OpenAI connection and chat workspace",
+    GENERATE_OPENAI_IMAGE_TOOL: "uses the managed image model in an interactive chat workspace",
     "request_work_check": "renders a feedback card in a chat session",
     "flag_mistake": "Otto's report on its own mistake in a chat session",
     "consult_teammate": "teammate checks run inside a chat session",

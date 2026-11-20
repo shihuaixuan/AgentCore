@@ -268,7 +268,6 @@ TOOL_GROUPS: dict[str, ToolGroup] = {
     "update_expert_soul": "experts",
     # The intake card names the expert it belongs to, so it needs one.
     "expert_onboarding": "experts",
-    GENERATE_OPENAI_IMAGE_TOOL: "experts",
     "confirm_expert_soul_update": "experts",
     # A handoff transfers a task between experts, so it needs a caller with
     # an expert identity to hand it off from.

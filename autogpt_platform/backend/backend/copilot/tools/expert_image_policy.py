@@ -6,25 +6,23 @@ from backend.integrations.providers import ProviderName
 
 from .capability_gates import gate_denied
 
-EXPERT_IMAGE_ONLY = "OpenAI image generation is only available in an expert chat."
-
 
 def replicate_block_is_workflow_only(
     session: ChatSession, provider: str | None
 ) -> bool:
-    """Retire Replicate's direct expert-chat route without changing workflows."""
-    return provider == ProviderName.REPLICATE and _is_interactive_expert_chat(session)
+    """Keep Replicate in workflows, not in direct image chats."""
+    return provider == ProviderName.REPLICATE and _is_image_chat(session)
 
 
 def expert_image_prompt(user_id: str | None, session: ChatSession) -> str:
     if (
         not user_id
         or user_id != session.user_id
-        or not _is_interactive_expert_chat(session)
+        or not _is_image_chat(session)
         or is_expert_kickoff_turn(session)
     ):
         return ""
-    heading = "\n\n### Image generation and editing in expert chat\n"
+    heading = "\n\n### Image generation and editing in this chat\n"
     no_fallback = (
         "Do not load or save a skill for this image step, even if one matches, "
         "and do not switch providers or use another integration, block, workflow, "
@@ -45,7 +43,9 @@ def expert_image_prompt(user_id: str | None, session: ChatSession) -> str:
         "unless they ask for specific image settings. For edits, include the source "
         "`workspace://` image references in `reference_images`. Skip capability "
         "discovery for this step. Show the Markdown image from the result. If the "
-        "tool returns a setup or approval card, show it and wait. Report failures. "
+        "tool requests approval, wait for it. Use the administrator's image model; "
+        "omit model unless the user names one. Never ask for a personal OpenAI "
+        "connection or key. Report configuration errors to the user. "
         + no_fallback
     )
 
@@ -58,27 +58,24 @@ def openai_image_is_visible(session: ChatSession) -> bool:
 
 
 def image_turn_error(session: ChatSession) -> str | None:
-    if not _is_expert_chat(session):
-        return EXPERT_IMAGE_ONLY
-    if (
-        session.dry_run
-        or session.metadata.origin != "interactive"
-        or is_unattended_turn()
-    ):
-        return "OpenAI image generation requires a live expert chat. No image was generated."
+    if not _is_image_chat(session) or session.dry_run or is_unattended_turn():
+        return "OpenAI image generation requires a live interactive chat. No image was generated."
     permissions = get_current_permissions()
     if permissions is not None and not permissions.is_provider_allowed("openai"):
-        return "This session's permissions do not allow using the OpenAI connection."
+        return "This session's permissions do not allow using the managed OpenAI-compatible image model."
     return None
 
 
-def _is_interactive_expert_chat(session: ChatSession) -> bool:
-    return _is_expert_chat(session) and session.metadata.origin == "interactive"
-
-
-def _is_expert_chat(session: ChatSession) -> bool:
+def _is_image_chat(session: ChatSession) -> bool:
     return (
-        bool(session.expert_id)
+        session.metadata.origin == "interactive"
         and not session.external_caller
         and not session.metadata.builder_graph_id
+        and (
+            session.expert_id is not None
+            or (
+                not session.metadata.source_platform
+                and not session.metadata.delegated_by_session_id
+            )
+        )
     )

@@ -191,6 +191,10 @@ CopilotLLMModel = Literal["standard", "advanced"]
 class ChatConfig(BaseSettings):
     """Configuration for the chat system."""
 
+    managed_image_model_id: str = Field(
+        default="", description="Optional managed model record ID to use for chat images."
+    )
+
     # Chat model tiers — a 2×2 of (path, tier).  ``path`` = ``CopilotMode``
     # (``"fast"`` → baseline OpenAI-compat / any OpenRouter model;
     # ``"extended_thinking"`` → Claude Agent SDK, Anthropic-only CLI).

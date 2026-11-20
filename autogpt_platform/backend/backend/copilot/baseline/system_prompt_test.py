@@ -40,13 +40,15 @@ async def test_system_message_tells_the_model_formulas_render(
 
 
 @pytest.mark.parametrize("openai_allowed", [True, False])
-async def test_baseline_tells_the_expert_how_to_handle_a_plain_image_request(
+@pytest.mark.parametrize("expert_id", ["expert-1", pytest.param(None, id="office")])
+async def test_baseline_routes_plain_image_requests_in_both_chat_roles(
     monkeypatch: pytest.MonkeyPatch,
     baseline_io: list[ChatSession],
     openai_allowed: bool,
+    expert_id: str | None,
 ) -> None:
-    request = "给我生成一张图片"
-    session = ChatSession.new("user-1", dry_run=False, expert_id="expert-1")
+    request = "生成一个橘猫的图片"
+    session = ChatSession.new("user-1", dry_run=False, expert_id=expert_id)
     session.title = "Image request"
     session.messages.append(ChatMessage(role="user", content=request))
     monkeypatch.setattr(

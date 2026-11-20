@@ -15,16 +15,15 @@ from pydantic import (
 
 from backend.util.file import MAX_FILE_SIZE_BYTES
 
-_OPENAI_BASE_URL = "https://api.openai.com/v1"
 RASTER_FORMATS = {"image/png": "png", "image/jpeg": "jpeg", "image/webp": "webp"}
 MAX_REFERENCE_BYTES = min(MAX_FILE_SIZE_BYTES, 50_000_000 - 1)
 _API_STATUS_MESSAGES = {
     400: "OpenAI rejected the image request. Check the inputs and content policy.",
-    401: "OpenAI rejected the API key. Check your OpenAI connection.",
-    403: "OpenAI denied access. Check model permissions and organization verification.",
-    404: "The image model is unavailable. Check model access for your OpenAI project.",
+    401: "The OpenAI-compatible gateway rejected the configured key. Contact your administrator.",
+    403: "The OpenAI-compatible gateway denied access to the configured image model.",
+    404: "The OpenAI-compatible image endpoint or configured model was not found.",
     422: "OpenAI rejected the image inputs. Check the request parameters.",
-    429: "OpenAI's rate limit or quota was reached. Check your project's usage and billing.",
+    429: "The configured OpenAI-compatible gateway reached its rate limit or quota.",
 }
 RasterFormat = Literal["png", "jpeg", "webp"]
 ImageBackground = Literal["auto", "opaque", "transparent"]
@@ -35,9 +34,11 @@ class OpenAIImageRequest(BaseModel):
     prompt: Annotated[str, StringConstraints(strip_whitespace=True)] = Field(
         min_length=1, max_length=32_000, description="Describe the image or edit."
     )
-    model: Literal["gpt-image-2.6-sunburst", "gpt-image-2.6-flare"] = Field(
-        default="gpt-image-2.6-sunburst",
-        description="Sunburst for detailed work or Flare for faster iteration.",
+    model: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=240,
+        description="Omit for the configured image model; set only if the user specifies a model.",
     )
     size: str = Field(
         default="1024x1024",
@@ -87,12 +88,13 @@ class OpenAIImageError(Exception):
 
 async def request_openai_image(
     request: OpenAIImageRequest,
-    api_key: str,
+    client: AsyncOpenAI,
+    model: str,
     images: list[ImageUpload],
     safety_identifier: str,
 ) -> bytes:
     options: _ImageOptions = {
-        "model": request.model,
+        "model": model,
         "prompt": request.prompt,
         "n": 1,
         "output_format": request.output_format,
@@ -101,22 +103,18 @@ async def request_openai_image(
         "extra_body": {
             "size": request.size,
             "quality": request.quality,
-            "complexity": request.complexity,
-            "safety_identifier": safety_identifier,
         },
     }
+    if model.rsplit("/", 1)[-1].lower().startswith("gpt-image-2.6"):
+        options["extra_body"]["complexity"] = request.complexity
+        options["extra_body"]["safety_identifier"] = safety_identifier
     try:
-        async with AsyncOpenAI(
-            api_key=api_key,
-            base_url=_OPENAI_BASE_URL,
-            timeout=240.0,
-            max_retries=0,
-        ) as client:
-            response = (
-                await client.images.edit(image=images, **options)
-                if images
-                else await client.images.generate(**options)
-            )
+        images_api = client.with_options(timeout=240.0, max_retries=0).images
+        response = (
+            await images_api.edit(image=images, **options)
+            if images
+            else await images_api.generate(**options)
+        )
     except APITimeoutError:
         raise OpenAIImageError(
             "OpenAI did not return an image in time. The request may have been billed; "

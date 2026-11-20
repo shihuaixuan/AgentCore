@@ -36,11 +36,13 @@ AutoPilot can run supported blocks directly without building a full agent. This 
 - **Make custom HTTP requests** to APIs you configure
 - **Write and execute code** with supported coding tools
 
-### Generate Images in an Expert Chat
+### Generate Images in Chat
 
-Start a new expert chat and ask for an image, for example: “Use OpenAI Flare to generate a wide watercolor illustration of an otter.” Sunburst (`gpt-image-2.6-sunburst`) is the default for detailed work; Flare (`gpt-image-2.6-flare`) is for quick iteration. To edit an image, attach a PNG, JPEG, or WebP and describe what to change. The expert can show the result in chat, and the image is saved to the chat workspace.
+Ask the General Office Assistant or a hired expert for an image, for example: “Generate a picture of an orange cat.” You don't need to change the chat model. To edit an image, attach a PNG, JPEG, or WebP and describe what to change. The result appears in chat and is saved to the chat workspace.
 
-Connect a personal OpenAI API key and grant it to the expert when prompted. The key needs access to the [OpenAI Image API](https://developers.openai.com/api/docs/guides/image-generation), which may require organization verification. OpenAI bills the connected project. You don't need a Replicate key or a workflow.
+Administrators configure and enable an image model in **Settings → AI Connections**. Chat uses that record's Base URL, model ID and API key for the OpenAI-compatible Images API. The gateway must support `/images/generations` and `/images/edits` and return base64 image data. No personal OpenAI or Replicate connection is needed. The gateway's account is billed.
+
+Enabled `gpt-image-*` models (including provider-prefixed IDs) are recognized automatically. If the user doesn't name a model, Sunburst is preferred, then the oldest enabled image model. To restrict chat images to a particular gateway/model, or use a custom model alias, set `CHAT_MANAGED_IMAGE_MODEL_ID` to the managed record's ID on the backend. If that record is missing, disabled, or doesn't match a user's explicit model request, chat reports the problem instead of switching endpoints.
 
 ### Manage Your Library
 
