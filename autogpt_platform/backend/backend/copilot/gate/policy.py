@@ -8,6 +8,7 @@ from enum import Enum
 from typing import Any
 
 from backend.copilot.autopilot_mode import AutopilotMode
+from backend.copilot.permissions import GENERATE_OPENAI_IMAGE_TOOL
 
 DEFAULT_MODE: AutopilotMode = "auto"
 
@@ -151,8 +152,10 @@ _TEAM = frozenset({"delegate_to_expert", "handoff_to_expert"})
 
 _EXTERNAL = frozenset({"browser_act"})
 
-# A bot post in a chat platform the user linked: the supervisor judges it.
-_EXTERNAL_JUDGED = frozenset({"edit_chat_platform_message", "post_to_chat_platform"})
+# Writes to a chat platform or requests billed to a connected image project.
+_EXTERNAL_JUDGED = frozenset(
+    {"edit_chat_platform_message", GENERATE_OPENAI_IMAGE_TOOL, "post_to_chat_platform"}
+)
 
 _UNGATED = frozenset(
     {

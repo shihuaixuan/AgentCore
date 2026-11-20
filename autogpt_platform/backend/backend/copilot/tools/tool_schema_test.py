@@ -322,8 +322,10 @@ from ._test_data import make_session
 #     merged tree                                 78,567
 #     + headroom                       +300       78,867
 #     + flag_mistake's reason argument +150       79,017
+# Expert-only generate_openai_image adds 1,711 chars to the measured
+# 79,006-char registry; it is deferred, so the session wire budget is unchanged.
 # On conflict keep the higher value: this line must cover every in-flight PR.
-_CHAR_BUDGET = 79_017
+_CHAR_BUDGET = 80_718
 
 
 @pytest.fixture(scope="module")

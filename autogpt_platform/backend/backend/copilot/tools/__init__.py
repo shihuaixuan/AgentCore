@@ -9,6 +9,7 @@ from openai.types.chat import ChatCompletionToolParam
 from backend.copilot.capabilities.dispatch import resolve_tool_dispatch
 from backend.copilot.capabilities.registry import configure_tools
 from backend.copilot.capabilities.sources import EAGER_CORE
+from backend.copilot.permissions import GENERATE_OPENAI_IMAGE_TOOL
 from backend.copilot.response_model import StreamToolOutputAvailable
 from backend.copilot.tracking import track_tool_called
 
@@ -51,6 +52,7 @@ from .find_capability import FindCapabilityTool
 from .find_library_agent import FindLibraryAgentTool
 from .find_session import FindSessionTool
 from .fix_agent import FixAgentGraphTool
+from .generate_openai_image import GenerateOpenAIImageTool
 from .get_agent_building_guide import GetAgentBuildingGuideTool
 from .get_doc_page import GetDocPageTool
 from .get_sub_session_result import GetSubSessionResultTool
@@ -200,6 +202,7 @@ TOOL_REGISTRY: dict[str, BaseTool] = {
     "read_workspace_file": ReadWorkspaceFileTool(),
     "write_workspace_file": WriteWorkspaceFileTool(),
     "delete_workspace_file": DeleteWorkspaceFileTool(),
+    GENERATE_OPENAI_IMAGE_TOOL: GenerateOpenAIImageTool(),
     # The hire's first turn (expert sessions only): greeting + intake card.
     "expert_onboarding": ExpertOnboardingTool(),
     # Feedback cards in the chat. In no TOOL_GROUPS group: both work in expert
@@ -265,6 +268,7 @@ TOOL_GROUPS: dict[str, ToolGroup] = {
     "update_expert_soul": "experts",
     # The intake card names the expert it belongs to, so it needs one.
     "expert_onboarding": "experts",
+    GENERATE_OPENAI_IMAGE_TOOL: "experts",
     "confirm_expert_soul_update": "experts",
     # A handoff transfers a task between experts, so it needs a caller with
     # an expert identity to hand it off from.

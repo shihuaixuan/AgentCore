@@ -14,9 +14,11 @@ from backend.copilot.capabilities.ranking import (
 from backend.copilot.capabilities.resolve import load_connection_state
 from backend.copilot.context import get_current_permissions
 from backend.copilot.model import ChatSession
+from backend.copilot.permissions import GENERATE_OPENAI_IMAGE_TOOL
 
 from .base import BaseTool
 from .chat_platform_hint import POST_TOOL, ChatPlatformLinks, chat_platform_links
+from .generate_openai_image import openai_image_is_visible
 from .models import (
     CapabilityListResponse,
     ErrorResponse,
@@ -133,6 +135,11 @@ class FindCapabilityTool(BaseTool):
             connections=connections,
             permissions=get_current_permissions(),
             prefer_mcp=session.expert_id is not None and context != "graph",
+            hidden_tools=(
+                frozenset()
+                if openai_image_is_visible(session)
+                else frozenset({GENERATE_OPENAI_IMAGE_TOOL})
+            ),
         )
         if not result.hits and not result.fallback and not result.other_kinds:
             return NoResultsResponse(

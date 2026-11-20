@@ -54,6 +54,7 @@ from backend.api.external.v2.mcp_tenancy import check_ids_in_tenant
 from backend.api.external.v2.tenancy import resolve_credential_tenancy
 from backend.copilot.context import set_execution_context, set_turn_unattended
 from backend.copilot.model import ChatSession
+from backend.copilot.permissions import GENERATE_OPENAI_IMAGE_TOOL
 from backend.copilot.sdk.tool_adapter import _execute_tool_sync
 from backend.copilot.tools import TOOL_REGISTRY
 from backend.copilot.tools.base import BaseTool
@@ -90,6 +91,7 @@ EXTERNAL_USE_EXCLUSIONS: dict[str, str] = {
     "browser_act": "browser state is bound to the chat session",
     "browser_screenshot": "browser state is bound to the chat session",
     "expert_onboarding": "renders the expert intake card in a chat session",
+    GENERATE_OPENAI_IMAGE_TOOL: "uses an expert's OpenAI connection and chat workspace",
     "request_work_check": "renders a feedback card in a chat session",
     "flag_mistake": "Otto's report on its own mistake in a chat session",
     "consult_teammate": "teammate checks run inside a chat session",

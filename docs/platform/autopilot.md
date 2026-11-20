@@ -36,6 +36,12 @@ AutoPilot can run supported blocks directly without building a full agent. This 
 - **Make custom HTTP requests** to APIs you configure
 - **Write and execute code** with supported coding tools
 
+### Generate Images in an Expert Chat
+
+Start a new expert chat and ask for an image, for example: “Use OpenAI Flare to generate a wide watercolor illustration of an otter.” Sunburst (`gpt-image-2.6-sunburst`) is the default for detailed work; Flare (`gpt-image-2.6-flare`) is for quick iteration. To edit an image, attach a PNG, JPEG, or WebP and describe what to change. The expert can show the result in chat, and the image is saved to the chat workspace.
+
+Connect a personal OpenAI API key and grant it to the expert when prompted. The key needs access to the [OpenAI Image API](https://developers.openai.com/api/docs/guides/image-generation), which may require organization verification. OpenAI bills the connected project. You don't need a Replicate key or a workflow.
+
 ### Manage Your Library
 
 AutoPilot can help you manage your agent library, view task results, set up schedules, and more.

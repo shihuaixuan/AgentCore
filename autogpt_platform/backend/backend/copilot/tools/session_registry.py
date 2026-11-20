@@ -31,12 +31,14 @@ from backend.copilot.capabilities.sources import (
     skill_name,
 )
 from backend.copilot.model import ChatSession
+from backend.copilot.permissions import GENERATE_OPENAI_IMAGE_TOOL
 from backend.data import db
 from backend.data.custom_mcp import list_custom_mcp_connections
 from backend.data.db_accessors import experts_db
 from backend.util.cache import cached
 from backend.util.clients import get_database_manager_async_client
 
+from .generate_openai_image import openai_image_is_visible
 from .skills import SKILLS_INDEX_CACHE_TTL_S, is_skills_feature_enabled, list_all_skills
 
 logger = logging.getLogger(__name__)
@@ -118,7 +120,14 @@ async def resolve_session_entry(
         )
     name = skill_name(capability_id)
     if name is None:
-        return resolve_entry(get_registry(), capability_id)
+        entry = resolve_entry(get_registry(), capability_id)
+        if (
+            entry is not None
+            and entry.id == f"tool:{GENERATE_OPENAI_IMAGE_TOOL}"
+            and not openai_image_is_visible(session)
+        ):
+            return None
+        return entry
     return next(
         (
             entry
