@@ -138,7 +138,7 @@ function NavItem({ link }: NavItemProps) {
         Marketplace: "市场",
         Build: "构建",
         Files: "文件",
-        Team: "团队",
+        Team: "数字员工",
         "Chat archive": "对话归档",
       } as Record<string, string>
     )[link.name] ?? link.name,
