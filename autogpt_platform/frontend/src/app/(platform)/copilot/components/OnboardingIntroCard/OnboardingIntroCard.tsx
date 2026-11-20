@@ -1,6 +1,6 @@
 "use client";
 
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
+import { AssistantPortrait } from "@/app/(no-navbar)/onboarding/components/AssistantPortrait";
 import {
   GREETING_ORB_LAYOUT_ID,
   ORB_FLIP_TRANSITION,
@@ -122,7 +122,7 @@ export function OnboardingIntroCard({
           }
           className="relative block size-10 shrink-0"
         >
-          <AutopilotAvatar size={40} transparent className="size-full" />
+          <AssistantPortrait size={40} className="size-full" />
         </motion.span>
         <motion.div {...reveal(HEADING_START)}>
           <Text variant="large-medium" tone="primary">

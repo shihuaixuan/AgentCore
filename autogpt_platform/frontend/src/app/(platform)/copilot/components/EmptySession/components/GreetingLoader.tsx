@@ -2,7 +2,7 @@
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
+import { AssistantPortrait } from "@/app/(no-navbar)/onboarding/components/AssistantPortrait";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   GREETING_ORB_LAYOUT_ID,
@@ -59,7 +59,7 @@ export function GreetingLoader() {
             ease: "easeInOut",
           }}
         >
-          <AutopilotAvatar size={64} transparent className="size-full" />
+          <AssistantPortrait size={64} className="size-full" />
         </motion.span>
       </motion.span>
     </div>

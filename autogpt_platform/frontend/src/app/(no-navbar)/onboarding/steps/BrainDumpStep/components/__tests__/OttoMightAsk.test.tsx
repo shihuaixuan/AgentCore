@@ -1,3 +1,4 @@
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
@@ -63,21 +64,27 @@ describe("OttoMightAsk", () => {
     });
   });
 
-  it("announces a question only once the user asks for it", async () => {
-    render(<LivePrompt />);
-    const region = screen.getByTestId("otto-might-ask-announcer");
+  it.each([
+    ["en", "Another question", QUESTIONS[5].text, "Your assistant might ask: "],
+    ["zh-CN", "换个问题", "你的第一封邮件通常怎么写？", "助手可能会问："],
+  ] as const)(
+    "shows and announces the requested question in %s",
+    async (locale, button, question, prefix) => {
+      render(
+        <LanguageProvider initialLocale={locale}>
+          <LivePrompt />
+        </LanguageProvider>,
+      );
+      const region = screen.getByTestId("otto-might-ask-announcer");
+      expect(region.getAttribute("aria-live")).toBe("polite");
+      expect(region.textContent).toBe("");
 
-    expect(region.getAttribute("aria-live")).toBe("polite");
-    expect(region.textContent).toBe("");
+      await userEvent.click(screen.getByRole("button", { name: button }));
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "Another question" }),
-    );
-
-    expect(region.textContent).toBe(
-      `Your assistant might ask: ${QUESTIONS[5].text}`,
-    );
-  });
+      expect(await screen.findByText(question)).toBeDefined();
+      expect(region.textContent).toBe(prefix + question);
+    },
+  );
 
   it("offers no button where the question is only a hint", () => {
     render(<OttoMightAsk question={QUESTIONS[0].text} compact />);

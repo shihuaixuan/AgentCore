@@ -13,5 +13,11 @@ describe("GreetingLoader", () => {
     const status = screen.getByRole("status");
     expect(status).toBeDefined();
     expect(status.textContent).toContain("Writing your greeting");
+    const portrait = screen.getByRole("img", {
+      name: "General Office Assistant",
+    });
+    expect(decodeURIComponent(portrait.getAttribute("src") ?? "")).toContain(
+      "/experts/professional/office-assistant.webp",
+    );
   });
 });

@@ -1,5 +1,7 @@
 import { getGetBrainDumpIntroMockHandler200 } from "@/app/api/__generated__/endpoints/brain-dump/brain-dump.msw";
 import type { IntroCardResponse } from "@/app/api/__generated__/models/introCardResponse";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
+import type { Locale } from "@/lib/i18n/locale";
 import { server } from "@/mocks/mock-server";
 import { setIntroPath } from "@/services/onboarding/brain-dump-handoff";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -45,20 +47,38 @@ const PENDING_INTRO: IntroCardResponse = {
   prompts: [],
 };
 
-function makeWrapper() {
+function makeWrapper(locale: Locale) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
-      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+      <LanguageProvider initialLocale={locale}>
+        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+      </LanguageProvider>
     );
   };
 }
 
-function renderIntro() {
-  return renderHook(() => useOnboardingIntroCard(), { wrapper: makeWrapper() });
+function renderIntro(locale: Locale = "en") {
+  return renderHook(() => useOnboardingIntroCard(), {
+    wrapper: makeWrapper(locale),
+  });
 }
+
+it.each([
+  ["B", "zh-CN", "我是你的通用办公助手"],
+  ["B", "en", READY_INTRO.greeting],
+  ["A", "zh-CN", READY_INTRO.greeting],
+] as const)(
+  "shows the correct greeting for path %s in %s",
+  async (path, locale, text) => {
+    countIntroRequests({ ...READY_INTRO, path });
+    const { result } = renderIntro(locale);
+    await waitFor(() => expect(result.current.isVisible).toBe(true));
+    expect(result.current.greeting).toContain(text);
+  },
+);
 
 // Counts every intro request so "the endpoint is never called" means silence
 // rather than a handler that happens not to be registered.

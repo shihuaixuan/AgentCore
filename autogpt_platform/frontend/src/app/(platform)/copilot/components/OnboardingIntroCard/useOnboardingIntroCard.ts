@@ -1,6 +1,7 @@
 import { peekFirstRunTourSeen } from "@/app/(platform)/components/FirstRunTour/helpers";
 import { useGetBrainDumpIntro } from "@/app/api/__generated__/endpoints/brain-dump/brain-dump";
 import { useAuth } from "@/lib/auth/hooks/useAuth";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { trackBrainDump } from "@/services/onboarding/brain-dump-analytics";
 import {
   clearWelcomePending,
@@ -26,6 +27,7 @@ const PENDING_POLL_MS = 1500;
 const PENDING_GIVE_UP_MS = 120_000;
 
 export function useOnboardingIntroCard() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const userId = user?.id ?? null;
   // localStorage answers first so a returning user never flashes the
@@ -172,7 +174,13 @@ export function useOnboardingIntroCard() {
     // has nothing to do with whether they have sent their first message.
     isFirstRunPending,
     finishFirstRun,
-    greeting: intro?.greeting ?? "",
+    greeting:
+      intro?.path === "B" && intro.greeting
+        ? t(
+            intro.greeting,
+            "我是你的通用办公助手。告诉我哪些事情最耗时间，或者点一下麦克风，聊聊你这周的工作。我会帮你找到合适的数字员工，分担这些任务。",
+          )
+        : (intro?.greeting ?? ""),
     transcript: typeof intro?.transcript === "string" ? intro.transcript : "",
     path: intro?.path ?? "B",
   };

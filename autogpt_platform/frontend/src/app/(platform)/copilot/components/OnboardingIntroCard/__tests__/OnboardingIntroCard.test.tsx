@@ -183,6 +183,12 @@ describe("OnboardingIntroCard — content", () => {
   it("omits the list and stops pointing at it once nothing is left", () => {
     renderCard({ suggestions: makeSuggestions([]) });
 
+    const portrait = screen.getByRole("img", {
+      name: "General Office Assistant",
+    });
+    expect(decodeURIComponent(portrait.getAttribute("src") ?? "")).toContain(
+      "/experts/professional/office-assistant.webp",
+    );
     expect(screen.queryByRole("list")).toBeNull();
     expect(screen.getByText(EMPTY_FOOTER)).toBeDefined();
     expect(screen.queryByText(FOOTER)).toBeNull();

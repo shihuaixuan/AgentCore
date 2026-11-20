@@ -7,11 +7,11 @@ import { motion } from "framer-motion";
 import { AssistantPortrait } from "../../../components/AssistantPortrait";
 
 const POINTS = [
-  "I help plan and coordinate your work.",
-  "When an expert gets stuck, I step in.",
-  "I delegate tasks across the team.",
-  "I suggest Experts you can hire.",
-];
+  ["I help plan and coordinate your work.", "我帮你规划和协调工作。"],
+  ["When an expert gets stuck, I step in.", "专家遇到困难时，我会出手相助。"],
+  ["I delegate tasks across the team.", "我把任务分配给团队成员。"],
+  ["I suggest Experts you can hire.", "我会推荐适合你聘用的专家。"],
+] as const;
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -27,17 +27,17 @@ export function AutopilotScene() {
 
       <div className="flex flex-col items-center gap-3">
         <ul className="flex flex-col items-start gap-2">
-          {POINTS.map((point, i) => (
+          {POINTS.map(([english, chinese], index) => (
             <motion.li
-              key={point}
+              key={english}
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={reveal(i)}
+              transition={reveal(index)}
               className="flex items-center gap-1.5 text-brand"
             >
               <Icon icon={ArrowRight01Icon} size={18} className="shrink-0" />
               <span className="font-sans text-body-lg font-normal text-foreground-base md:text-lead">
-                {point}
+                {t(english, chinese)}
               </span>
             </motion.li>
           ))}

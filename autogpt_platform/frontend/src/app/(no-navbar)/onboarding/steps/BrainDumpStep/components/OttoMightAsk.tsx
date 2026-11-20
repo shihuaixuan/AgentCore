@@ -34,6 +34,7 @@ export function OttoMightAsk({
 }: Props) {
   const { translatePrompt } = usePromptTranslation();
   const { t } = useTranslation();
+  const questionText = translatePrompt(question);
   const isLeft = align === "left";
 
   // Left aligned above the composer, the button shares the label's row to
@@ -58,7 +59,7 @@ export function OttoMightAsk({
         {t("Your assistant might ask", "助手可能会问")}
       </span>
       <SwapFade
-        swapKey={translatePrompt(question)}
+        swapKey={questionText}
         className={cn("mt-0.5", isLeft && "col-span-2 row-start-2")}
       >
         <Text
@@ -67,7 +68,7 @@ export function OttoMightAsk({
           className={cn("text-pretty", onTogglePause && "cursor-pointer")}
           onClick={onTogglePause}
         >
-          {question}
+          {questionText}
         </Text>
       </SwapFade>
       {onAnother && (

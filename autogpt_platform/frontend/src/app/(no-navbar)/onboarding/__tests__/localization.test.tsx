@@ -2,10 +2,40 @@ import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { AmbientCard } from "../steps/BrainDumpStep/components/AmbientCard";
+import { AutopilotScene } from "../steps/IntroStep/components/AutopilotScene";
 import { TeamScene } from "../steps/IntroStep/components/TeamScene";
 import { PlanProgressCard } from "../steps/SubscriptionStep/components/PlanPanel/PlanProgressCard";
 
 describe("onboarding localization", () => {
+  it.each([
+    [
+      "en",
+      [
+        "I help plan and coordinate your work.",
+        "When an expert gets stuck, I step in.",
+        "I delegate tasks across the team.",
+        "I suggest Experts you can hire.",
+      ],
+    ],
+    [
+      "zh-CN",
+      [
+        "我帮你规划和协调工作。",
+        "专家遇到困难时，我会出手相助。",
+        "我把任务分配给团队成员。",
+        "我会推荐适合你聘用的专家。",
+      ],
+    ],
+  ] as const)("shows the assistant's intro points in %s", (locale, points) => {
+    render(
+      <LanguageProvider initialLocale={locale}>
+        <AutopilotScene />
+      </LanguageProvider>,
+    );
+    const items = screen.getAllByRole("listitem");
+    expect(items.map((item) => item.textContent)).toEqual(points);
+  });
+
   it.each([
     [
       "Your business",
