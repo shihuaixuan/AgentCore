@@ -38,7 +38,7 @@ from backend.data.db_accessors import experts_db
 from backend.util.cache import cached
 from backend.util.clients import get_database_manager_async_client
 
-from .generate_openai_image import openai_image_is_visible
+from .expert_image_policy import openai_image_is_visible
 from .skills import SKILLS_INDEX_CACHE_TTL_S, is_skills_feature_enabled, list_all_skills
 
 logger = logging.getLogger(__name__)

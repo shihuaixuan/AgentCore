@@ -175,6 +175,7 @@ from backend.copilot.tools.e2b_sandbox import (
     get_or_create_sandbox,
     pause_sandbox_direct,
 )
+from backend.copilot.tools.expert_image_policy import expert_image_prompt
 from backend.copilot.tools.seen_capabilities import build_seen_capabilities_notice
 from backend.copilot.tools.session_context import build_session_context
 from backend.copilot.tools.skill_matching import build_matched_skills_notice
@@ -2232,9 +2233,8 @@ async def stream_chat_completion_baseline(
     # Build OpenAI message list from session history.
     # Include tool_calls on assistant messages and tool-role results so the
     # model retains full context of what tools were invoked and their outcomes.
-    openai_messages: list[dict[str, Any]] = [
-        {"role": "system", "content": system_prompt}
-    ]
+    system_message = {"role": "system", "content": system_prompt}
+    openai_messages: list[dict[str, Any]] = [system_message]
     for msg in messages_for_context:
         if msg.role == "assistant":
             entry: dict[str, Any] = {"role": "assistant"}
@@ -2620,6 +2620,7 @@ async def stream_chat_completion_baseline(
             | denied_tool_names(permissions)
         ),
     )
+    system_message["content"] = system_prompt + expert_image_prompt(user_id, session)
 
     # Pre-mark cache_control on the last tool schema once per session.  The
     # tool set is static within a request, so doing this here (instead of in

@@ -69,6 +69,7 @@ from backend.copilot.host_fs import cli_tmpdir, save_new_file
 from backend.copilot.markers import append_error_marker
 from backend.copilot.provider_failure import ProviderFailure
 from backend.copilot.segments import Segment, stamp_segment
+from backend.copilot.tools.expert_image_policy import expert_image_prompt
 from backend.copilot.tools.skill_matching import build_matched_skills_notice
 from backend.copilot.graphiti.ingest import enqueue_conversation_turn
 from backend.copilot.learning.capture import capture_chat_turn, find_initiating_user_row
@@ -1898,6 +1899,7 @@ async def _apply_building_mode_restart(
     message_id: str,
     log_prefix: str,
     provider_supplement: str = "",
+    image_supplement: str = "",
 ) -> StreamStatus:
     """Reconfigure *state* to relaunch the attempt with the guide in the
     system prompt, returning the status event to yield.
@@ -1949,6 +1951,7 @@ async def _apply_building_mode_restart(
         + auto_mode_supplement
         + building_suffix
         + expert_session_suffix
+        + image_supplement
     )
     sdk_options_restart = copy(sdk_options)
     sdk_options_restart.system_prompt = _build_system_prompt_value(
@@ -5559,6 +5562,8 @@ async def stream_chat_completion_sdk(  # pyright: ignore[reportGeneralTypeIssues
             envelope=envelope,
             hidden_tools=hidden_tools,
         )
+        image_supplement = expert_image_prompt(user_id, session)
+        system_prompt += image_supplement
         mcp_server = create_copilot_mcp_server(
             use_e2b=use_e2b,
             hidden_tool_names=hidden_tools,
@@ -6398,6 +6403,7 @@ async def stream_chat_completion_sdk(  # pyright: ignore[reportGeneralTypeIssues
                     sdk_options=sdk_options,
                     base_system_prompt=base_system_prompt,
                     provider_supplement=provider_supplement,
+                    image_supplement=image_supplement,
                     delegation_supplement=delegation_supplement,
                     oversight_supplement=oversight_supplement,
                     team_building_supplement=team_building_supplement,

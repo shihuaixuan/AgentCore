@@ -145,7 +145,7 @@ class CapabilityIndex:
         limit: int = DEFAULT_LIMIT,
         fallback_limit: int = DEFAULT_FALLBACK_LIMIT,
         prefer_mcp: bool = False,
-        hidden_tools: frozenset[str] = frozenset(),
+        hidden_ids: frozenset[str] = frozenset(),
     ) -> SearchResult:
         """Rank entries for *query*, listing relevant alternatives hidden by
         a ``kind`` filter under ``other_kinds``."""
@@ -158,7 +158,7 @@ class CapabilityIndex:
             limit=limit,
             fallback_limit=fallback_limit,
             prefer_mcp=prefer_mcp,
-            hidden_tools=hidden_tools,
+            hidden_ids=hidden_ids,
         )
         if kind is not None and result.query:
             self._add_other_kinds(
@@ -168,7 +168,7 @@ class CapabilityIndex:
                 connections=connections,
                 permissions=permissions,
                 prefer_mcp=prefer_mcp,
-                hidden_tools=hidden_tools,
+                hidden_ids=hidden_ids,
             )
         return result
 
@@ -182,14 +182,14 @@ class CapabilityIndex:
         permissions: "CopilotPermissions | None",
         limit: int,
         fallback_limit: int,
-        hidden_tools: frozenset[str],
+        hidden_ids: frozenset[str],
         prefer_mcp: bool = False,
     ) -> SearchResult:
         query = " ".join((query or "").split())
         if not query:
             return SearchResult(query=query, hits=[])
 
-        allowed = self._allowed_indices(context, kind, permissions, hidden_tools)
+        allowed = self._allowed_indices(context, kind, permissions, hidden_ids)
         scores = self._scores(query, allowed)
         if not scores:
             return SearchResult(query=query, hits=[])
@@ -271,7 +271,7 @@ class CapabilityIndex:
         connections: ConnectionState | None,
         permissions: "CopilotPermissions | None",
         prefer_mcp: bool,
-        hidden_tools: frozenset[str],
+        hidden_ids: frozenset[str],
     ) -> None:
         """Fill ``result.other_kinds`` from the same search without *kind*.
 
@@ -293,7 +293,7 @@ class CapabilityIndex:
             limit=len(self.entries),
             fallback_limit=0,
             prefer_mcp=prefer_mcp,
-            hidden_tools=hidden_tools,
+            hidden_ids=hidden_ids,
         )
         hidden = sorted(
             (
@@ -314,7 +314,7 @@ class CapabilityIndex:
         context: CapabilityContext,
         kind: CapabilityKindName | None,
         permissions: "CopilotPermissions | None",
-        hidden_tools: frozenset[str],
+        hidden_ids: frozenset[str],
     ) -> set[int]:
         allowed_tools: frozenset[str] | None = None
         if permissions is not None:
@@ -326,7 +326,7 @@ class CapabilityIndex:
         for idx, entry in enumerate(self.entries):
             if not entry.available_in(context):
                 continue
-            if entry.kind == "tool" and entry.name in hidden_tools:
+            if entry.id in hidden_ids:
                 continue
             if kind is not None and entry.kind != kind:
                 continue

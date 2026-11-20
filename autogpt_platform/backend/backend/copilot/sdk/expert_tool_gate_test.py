@@ -140,12 +140,14 @@ async def _run_sdk_turn(
     *,
     user_id: str | None,
     expert_id: str | None = None,
+    message: str = "hello",
     extra_patches: list[tuple[str, dict]] | None = None,
 ):
     from backend.copilot.sdk.service import stream_chat_completion_sdk
 
     session = _make_session()
     session.expert_id = expert_id
+    session.messages[-1].content = message
     patches, mcp_server_mock = _make_patches()
     patches += extra_patches or []
 
@@ -156,7 +158,7 @@ async def _run_sdk_turn(
         async with asyncio.timeout(10):
             async for event in stream_chat_completion_sdk(
                 session_id=session.session_id,
-                message="hello",
+                message=message,
                 is_user_message=True,
                 user_id=user_id,
                 session=session,
@@ -221,3 +223,25 @@ class TestSdkComputerNoteWiring:
         supplement.assert_called_once_with(
             use_e2b=False, expert_session=bool(expert_id)
         )
+
+
+async def test_sdk_routes_a_plain_expert_image_request_to_openai() -> None:
+    options = MagicMock(side_effect=_ToolRegistrationReached)
+    await _run_sdk_turn(
+        user_id="test-user",
+        expert_id="expert-1",
+        message="给我生成一张图片",
+        extra_patches=[
+            (f"{_SVC}.create_copilot_mcp_server", {}),
+            (f"{_SVC}.ClaudeAgentOptions", dict(new=options)),
+            (
+                f"{_SVC}.build_expert_identity_suffix",
+                dict(new=AsyncMock(return_value="")),
+            ),
+        ],
+    )
+
+    prompt = options.call_args.kwargs["system_prompt"]
+    text = prompt if isinstance(prompt, str) else prompt["append"]
+    assert 'run_capability(id="tool:generate_openai_image"' in text
+    assert "do not switch providers" in text

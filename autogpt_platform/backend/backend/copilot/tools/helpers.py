@@ -75,6 +75,7 @@ from .ayrshare_managed import not_linked_response as ayrshare_not_linked_respons
 from .ayrshare_managed import provision_for_block as provision_ayrshare_for_block
 from .chat_platform_hint import bot_link_hint
 from .credential_gaps import annotate_credential_gaps, credentials_for_gaps
+from .expert_image_policy import replicate_block_is_workflow_only
 from .expert_scope import (
     CredentialScopeSnapshot,
     annotate_expert_grants,
@@ -1259,7 +1260,14 @@ async def prepare_block_for_execution(
         ).from_outside()
 
     # Before credentials: resolving them can provision a managed profile.
-    if refusal := block_run_refusal(block, block_id, session_id):
+    inspect_workflow_block = (
+        validate_only
+        and not dry_run
+        and replicate_block_is_workflow_only(session, get_block_provider(block))
+    )
+    if refusal := block_run_refusal(
+        block, block_id, session, inspect_only=inspect_workflow_block
+    ):
         return refusal
 
     emit_tool_display_name(block.name)
@@ -1272,8 +1280,12 @@ async def prepare_block_for_execution(
         if field_name in input_data and input_data[field_name] is None:
             input_data.pop(field_name)
 
-    matched_credentials, missing_credentials = await resolve_block_credentials(
-        user_id, block, input_data, session.expert_id, session_id=session_id
+    matched_credentials, missing_credentials = (
+        ({}, [])
+        if inspect_workflow_block
+        else await resolve_block_credentials(
+            user_id, block, input_data, session.expert_id, session_id=session_id
+        )
     )
     # Ayrshare's credential is a profile AutoGPT provisions, never one the
     # user brings: create it now and hand back the account-linking link.
@@ -1466,12 +1478,27 @@ async def prepare_block_for_execution(
 
 
 def block_run_refusal(
-    block: AnyBlockSchema, block_id: str, session_id: str
+    block: AnyBlockSchema,
+    block_id: str,
+    session: ChatSession,
+    *,
+    inspect_only: bool = False,
 ) -> ErrorResponse | None:
     """The refusal when this turn may not run *block* directly: a block made
     for graphs only, or one the session's permissions or provider ceiling
     keep from the run.  Resuming an approved call answers to it too, since an
     approval from an earlier turn is no exemption from this one's."""
+    session_id = session.session_id
+    if not inspect_only and replicate_block_is_workflow_only(
+        session, get_block_provider(block)
+    ):
+        return ErrorResponse(
+            message=(
+                "Replicate blocks cannot run directly in an expert chat. "
+                "Use the built-in OpenAI tool for image generation or editing."
+            ),
+            session_id=session_id,
+        ).from_outside()
     if (
         block.block_type in block_meta.COPILOT_EXCLUDED_BLOCK_TYPES
         or block.id in block_meta.COPILOT_EXCLUDED_BLOCK_IDS

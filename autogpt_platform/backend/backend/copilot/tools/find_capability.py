@@ -5,7 +5,7 @@ import asyncio
 import logging
 from typing import Any
 
-from backend.copilot.capabilities.index import SearchHit
+from backend.copilot.capabilities.index import CapabilityIndex, SearchHit
 from backend.copilot.capabilities.models import CapabilityKindName
 from backend.copilot.capabilities.ranking import (
     ConnectionState,
@@ -18,7 +18,10 @@ from backend.copilot.permissions import GENERATE_OPENAI_IMAGE_TOOL
 
 from .base import BaseTool
 from .chat_platform_hint import POST_TOOL, ChatPlatformLinks, chat_platform_links
-from .generate_openai_image import openai_image_is_visible
+from .expert_image_policy import (
+    openai_image_is_visible,
+    replicate_block_is_workflow_only,
+)
 from .models import (
     CapabilityListResponse,
     ErrorResponse,
@@ -135,11 +138,7 @@ class FindCapabilityTool(BaseTool):
             connections=connections,
             permissions=get_current_permissions(),
             prefer_mcp=session.expert_id is not None and context != "graph",
-            hidden_tools=(
-                frozenset()
-                if openai_image_is_visible(session)
-                else frozenset({GENERATE_OPENAI_IMAGE_TOOL})
-            ),
+            hidden_ids=_hidden_capability_ids(index, session, context),
         )
         if not result.hits and not result.fallback and not result.other_kinds:
             return NoResultsResponse(
@@ -186,6 +185,25 @@ class FindCapabilityTool(BaseTool):
             service=result.service,
             session_id=session_id,
         )
+
+
+def _hidden_capability_ids(
+    index: CapabilityIndex, session: ChatSession, context: str
+) -> frozenset[str]:
+    hidden = (
+        set()
+        if openai_image_is_visible(session)
+        else {f"tool:{GENERATE_OPENAI_IMAGE_TOOL}"}
+    )
+    if context == "direct":
+        hidden.update(
+            entry.id
+            for entry in index.entries
+            if entry.kind == "block"
+            and entry.connection.key_type == "provider"
+            and replicate_block_is_workflow_only(session, entry.connection.key)
+        )
+    return frozenset(hidden)
 
 
 def _no_result_suggestions(kind: str | None) -> list[str]:

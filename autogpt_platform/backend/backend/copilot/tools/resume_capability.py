@@ -246,9 +246,7 @@ async def _rerun_block(
         )
     # Before the claim, as on the plain resume: a refusal keeps the approval,
     # and a parallel resume never finds it held by a run that won't happen.
-    if block is not None and (
-        refusal := block_run_refusal(block, block_id, session.session_id)
-    ):
+    if block is not None and (refusal := block_run_refusal(block, block_id, session)):
         return refusal
     stored = review.payload if isinstance(review.payload, dict) else {}
     return await run_claimed(

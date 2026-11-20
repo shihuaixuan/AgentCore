@@ -52,6 +52,7 @@ from .describe_capability import (
     describe_expert,
     describe_skill,
 )
+from .expert_image_policy import replicate_block_is_workflow_only
 from .helpers import (
     missing_picker_fields,
     prepare_block_for_execution,
@@ -148,7 +149,9 @@ class RunCapabilityTool(BaseTool):
             (impl.ref for impl in entry.implementations if impl.kind == "block"), ""
         )
         block = get_block(block_id)
-        if block is None:
+        if block is None or replicate_block_is_workflow_only(
+            session, get_block_provider(block)
+        ):
             return NO_OP
         required = required_input_keys(block)
         if not required <= set(payload or {}):
@@ -203,7 +206,9 @@ class RunCapabilityTool(BaseTool):
         block = get_block(
             next((i.ref for i in entry.implementations if i.kind == "block"), "")
         )
-        if block is None:
+        if block is None or replicate_block_is_workflow_only(
+            session, get_block_provider(block)
+        ):
             return args
         try:
             resolved = await expand_file_refs_in_args(
