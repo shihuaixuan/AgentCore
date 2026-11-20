@@ -487,7 +487,7 @@ describe("usePreparingStep — hiring the plan's team", () => {
         title:
           "Couldn't hire SEO Content Manager, Sales Development Rep and Bookkeeper",
         description:
-          "Otto takes on their tasks for now. You can hire experts any time.",
+          "Your assistant takes on their tasks for now. You can hire experts any time.",
         variant: "destructive",
       }),
     );

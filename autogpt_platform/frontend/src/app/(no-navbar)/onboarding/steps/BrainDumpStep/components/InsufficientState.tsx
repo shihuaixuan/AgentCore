@@ -6,7 +6,7 @@ import { useOnboardingTranslation } from "../../../useOnboardingTranslation";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Text } from "@/components/atoms/Text/Text";
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
+import { AssistantPortrait } from "../../../components/AssistantPortrait";
 import { cn } from "@/lib/utils";
 import { offYourPlateExampleForRole } from "../prompts";
 import { useIsNarrowScreen } from "../useIsNarrowScreen";
@@ -68,7 +68,7 @@ export function InsufficientState({
           aria-hidden="true"
           className="absolute -inset-[20%] rounded-full bg-brand/20 blur-2xl"
         />
-        <AutopilotAvatar transparent size={ottoSize} className="relative" />
+        <AssistantPortrait size={ottoSize} className="relative" />
       </div>
       <div className="mt-4 w-full md:mt-5">
         <OttoReply

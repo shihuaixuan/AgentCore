@@ -4,7 +4,7 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { RecommendedExpert } from "@/app/api/__generated__/models/recommendedExpert";
 import type { SuggestedTask } from "@/app/api/__generated__/models/suggestedTask";
 import { Text } from "@/components/atoms/Text/Text";
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
+import { AssistantPortrait } from "../../../../components/AssistantPortrait";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { cn } from "@/lib/utils";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
@@ -37,7 +37,7 @@ export function PlanTaskCard({ task, owner, isFirst }: Props) {
           size={AVATAR_SIZE}
         />
       ) : (
-        <AutopilotAvatar size={AVATAR_SIZE} />
+        <AssistantPortrait size={AVATAR_SIZE} />
       )}
       <div className="flex min-w-0 flex-col items-start">
         {isFirst ? (
@@ -65,7 +65,7 @@ function OwnerLine({ title }: { title: string | null }) {
     return (
       // Text has no accent tone, so the role classes go on the span.
       <span className="mt-1.5 font-sans text-caption text-accent-strong">
-        {t("Otto handles this one", "这项工作由 Otto 负责")}
+        {t("Your assistant handles this one", "这项工作由助手负责")}
       </span>
     );
   return (

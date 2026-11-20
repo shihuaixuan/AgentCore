@@ -92,7 +92,7 @@ describe("onboarding localization", () => {
     expect(progress.getByText("正在为每项任务安排负责人")).toBeDefined();
   });
 
-  it("localizes the team titles without changing Otto", () => {
+  it("localizes the team titles including the default assistant", () => {
     render(
       <LanguageProvider>
         <TeamScene />
@@ -102,7 +102,7 @@ describe("onboarding localization", () => {
       screen.getByRole("list", { name: "你的团队" }),
     ).getAllByRole("listitem");
     expect(members.map((member) => member.textContent)).toEqual([
-      "OttoAI 负责人",
+      "通用办公助手",
       "SEO 内容经理",
       "销售开发代表",
       "记账员",
@@ -112,7 +112,7 @@ describe("onboarding localization", () => {
       "应用安全工程师",
     ]);
     expect(members[0].querySelector("img")?.getAttribute("src")).toBe(
-      "/experts/transparent/otto.webp",
+      "/experts/professional/office-assistant.webp",
     );
   });
 });

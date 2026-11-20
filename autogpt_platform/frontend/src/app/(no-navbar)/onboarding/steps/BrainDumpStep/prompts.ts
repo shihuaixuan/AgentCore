@@ -1,4 +1,4 @@
-// What Otto might ask, by the role picked on the step before. Every question
+// What Your assistant might ask, by the role picked on the step before. Every question
 // points at work the experts can take on (research, writing, outreach,
 // follow-ups, reporting, scheduling, inbox and data chores), never at writing
 // the user's code, driving their computer or making calls. Each question is

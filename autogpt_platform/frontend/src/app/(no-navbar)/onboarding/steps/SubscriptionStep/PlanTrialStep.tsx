@@ -17,7 +17,7 @@ interface Props {
   hasPaywall: boolean;
 }
 
-// The step after the brain dump: Otto's plan, and the trial that starts it.
+// The step after the brain dump: Your assistant's plan, and the trial that starts it.
 // Without a paywall (self-hosted, e2e) the plan stands alone with Continue.
 export function PlanTrialStep({ hasPaywall }: Props) {
   return hasPaywall ? <PaywallPlanStep /> : <PlanOnlyStep />;

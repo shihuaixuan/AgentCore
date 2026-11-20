@@ -7,6 +7,7 @@ import { FadeIn } from "@/components/atoms/FadeIn/FadeIn";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
+import { getDefaultAssistantTitle } from "@/services/experts/default-assistant";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
 import { MotionConfig } from "framer-motion";
@@ -29,6 +30,7 @@ const SCENES: Record<IntroSlideId, () => React.JSX.Element> = {
 // place in the funnel and a Back button like every other step.
 export function IntroStep({ slide }: Props) {
   const { t, locale } = useTranslation();
+  const assistant = getDefaultAssistantTitle(locale);
   const contentTitle = getExpertDisplayTitle({ role: CONTENT_ROLE }, locale);
   const salesTitle = getExpertDisplayTitle({ role: SALES_ROLE }, locale);
   const translatedSlides = {
@@ -42,10 +44,10 @@ export function IntroStep({ slide }: Props) {
         `The ${contentTitle} drafts your blog posts. The ${salesTitle} finds your next customers.`,
         `${contentTitle}为你起草博客文章，${salesTitle}帮你寻找下一批客户。`,
       ),
-      cta: t("Meet Otto", "认识 Otto"),
+      cta: t("Meet your assistant", "认识你的助手"),
     },
     autopilot: {
-      title: t("Meet Otto, your Head of AI.", "认识 Otto，你的 AI 负责人。"),
+      title: t(`Meet your ${assistant}`, `认识你的${assistant}`),
       cta: t("Next", "下一步"),
     },
   } satisfies Record<IntroSlideId, IntroSlide>;

@@ -4,7 +4,7 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { motion } from "framer-motion";
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
+import { AssistantPortrait } from "../../../components/AssistantPortrait";
 
 const POINTS = [
   "I help plan and coordinate your work.",
@@ -23,7 +23,7 @@ export function AutopilotScene() {
   const { t } = useTranslation();
   return (
     <div className="flex h-full flex-col items-center justify-start gap-4">
-      <AutopilotAvatar size={120} transparent />
+      <AssistantPortrait size={120} />
 
       <div className="flex flex-col items-center gap-3">
         <ul className="flex flex-col items-start gap-2">

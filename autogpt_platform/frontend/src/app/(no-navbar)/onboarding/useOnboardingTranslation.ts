@@ -13,11 +13,11 @@ const COPY: Record<string, string> = {
   "Even a minute helps. Keep going if you have more.":
     "一分钟也有帮助。还有想说的就继续。",
   "Keep going, this is gold": "继续说，这些信息很有价值",
-  "The more you share, the sharper Otto gets":
-    "分享越多，Otto 就越了解你的需求",
-  "You're building Otto's memory right now": "你正在帮助 Otto 建立记忆",
+  "The more you share, the better your assistant understands your work":
+    "分享越多，助手就越了解你的需求",
+  "You're building your assistant's memory right now": "你正在帮助助手建立记忆",
   "You're doing great. Keep going": "说得很好，继续吧",
-  "Every detail makes Otto more useful": "每个细节都能让 Otto 更好地帮助你",
+  "Every detail helps your assistant": "每个细节都能让助手更好地帮助你",
   "Share whatever comes to mind next": "想到什么就接着说吧",
   "You're offline. We'll send this when you're back.":
     "当前离线，恢复连接后会自动发送。",
@@ -48,7 +48,8 @@ const COPY: Record<string, string> = {
     "别担心，很快就好。请告诉我，",
   "Just one task you'd hand off is plenty.": "说一项你想交出的工作就够了。",
   "You can skip below. But first, tell me,": "你可以在下方跳过。不过先告诉我，",
-  "I'm Otto, here to take work off your hands.": "我是 Otto，来帮你分担工作。",
+  "I'm your assistant, here to take work off your hands.":
+    "我是你的助手，来帮你分担工作。",
   "No rush, take your time. When you're ready,": "不着急，慢慢来。准备好后，",
   "Sorry, I'll keep this quick. So tell me,": "抱歉，我们尽快完成。请告诉我，",
   "Thanks, that's a good start! So tell me,":

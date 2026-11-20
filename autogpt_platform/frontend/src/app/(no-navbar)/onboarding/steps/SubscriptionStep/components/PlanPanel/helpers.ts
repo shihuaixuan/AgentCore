@@ -65,7 +65,7 @@ export function joinNames(names: string[]) {
 
 export function consentLine(names: string[], moment: ConsentMoment) {
   if (names.length === 0)
-    return `Otto takes these on for now. You can hire experts any time. ${NOTHING_RUNS}`;
+    return `Your assistant takes these on for now. You can hire experts any time. ${NOTHING_RUNS}`;
   const verb = names.length === 1 ? "joins" : "join";
   return `${joinNames(names)} ${verb} your team ${JOIN_MOMENT[moment]}. ${NOTHING_RUNS}`;
 }

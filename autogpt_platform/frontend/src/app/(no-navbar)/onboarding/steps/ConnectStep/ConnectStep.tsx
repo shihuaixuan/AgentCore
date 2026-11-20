@@ -5,7 +5,7 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { FadeIn } from "@/components/atoms/FadeIn/FadeIn";
 import { Text } from "@/components/atoms/Text/Text";
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
+import { AssistantPortrait } from "../../components/AssistantPortrait";
 import { MicrosoftCopilotProviderBox } from "@/components/contextual/IntegrationsPanel/components/AIConnectionsSection/MicrosoftCopilotProviderBox";
 import { UpcomingProviderBoxes } from "@/components/contextual/IntegrationsPanel/components/AIConnectionsSection/UpcomingProviderBoxes";
 import { ProviderBox } from "@/components/contextual/IntegrationsPanel/components/AIConnectionsSection/ProviderBox";
@@ -33,7 +33,7 @@ export function ConnectStep() {
     <FadeIn>
       <div className="flex w-full max-w-2xl flex-col items-center gap-8 px-4">
         <div className="flex flex-col items-center gap-4 text-center">
-          <AutopilotAvatar size={120} transparent />
+          <AssistantPortrait size={120} />
           <Text variant="h4" as="h1">
             {t(
               "Already paying for an AI subscription?",
@@ -43,7 +43,7 @@ export function ConnectStep() {
           <Text variant="large" as="p" tone="muted" className="max-w-md">
             {t(
               "Connect it for AutoGPT chats. No API keys, no billing setup.",
-              "连接后即可与 Otto 聊天，无需 API 密钥或设置账单。",
+              "连接后即可与助手聊天，无需 API 密钥或设置账单。",
             )}
           </Text>
         </div>

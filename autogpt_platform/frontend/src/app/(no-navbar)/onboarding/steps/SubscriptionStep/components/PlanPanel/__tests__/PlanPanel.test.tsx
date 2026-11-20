@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { useOnboardingWizardStore } from "../../../../../store";
 import { PlanPanel } from "../PlanPanel";
 
-const OTTO_AVATAR = "Otto, your personal Head of AI";
+const OTTO_AVATAR = "General Office Assistant";
 
 const MARIA: RecommendedExpert = {
   template_id: "tpl-maria",
@@ -95,11 +95,11 @@ beforeEach(() => {
 });
 
 describe("PlanPanel header", () => {
-  test("introduces Otto's plan with his avatar and a second-level heading", () => {
+  test("introduces Your assistant's plan with his avatar and a second-level heading", () => {
     render(<PlanPanel plan={makePlan()} moment="trial" />);
 
     const panel = screen.getByTestId("plan-panel");
-    expect(within(panel).getByText("Otto's plan")).toBeDefined();
+    expect(within(panel).getByText("Your assistant's plan")).toBeDefined();
     expect(
       within(panel).getAllByRole("img", { name: OTTO_AVATAR }).length,
     ).toBeGreaterThan(0);
@@ -302,7 +302,9 @@ describe("PlanPanel task cards", () => {
     render(<PlanPanel plan={makePlan()} moment="trial" />);
 
     const invoices = getTaskCards()[2];
-    expect(within(invoices).getByText("Otto handles this one")).toBeDefined();
+    expect(
+      within(invoices).getByText("Your assistant handles this one"),
+    ).toBeDefined();
     expect(
       within(invoices).getByRole("img", { name: OTTO_AVATAR }),
     ).toBeDefined();
@@ -318,7 +320,9 @@ describe("PlanPanel task cards", () => {
     );
 
     const leads = getTaskCards()[1];
-    expect(within(leads).getByText("Otto handles this one")).toBeDefined();
+    expect(
+      within(leads).getByText("Your assistant handles this one"),
+    ).toBeDefined();
     expect(within(leads).getByRole("img", { name: OTTO_AVATAR })).toBeDefined();
     expect(
       within(leads).queryByRole("img", {
@@ -369,7 +373,7 @@ describe("PlanPanel consent line", () => {
 
     expect(
       screen.getByText(
-        "Otto takes these on for now. You can hire experts any time. Nothing runs until you pick a task.",
+        "Your assistant takes these on for now. You can hire experts any time. Nothing runs until you pick a task.",
       ),
     ).toBeDefined();
   });
@@ -412,13 +416,13 @@ test("uses an explicit job title in the task and consent labels", () => {
 });
 
 describe("PlanPanel while the plan is being written", () => {
-  test("shows skeletons and says Otto is writing", () => {
+  test("shows skeletons and says Your assistant is writing", () => {
     render(<PlanPanel plan={null} moment="trial" />);
 
     const panel = screen.getByTestId("plan-panel");
     expect(within(panel).getByTestId("plan-panel-pending")).toBeDefined();
     expect(within(panel).getByRole("status").textContent).toBe(
-      "Otto is writing your plan",
+      "Your assistant is writing your plan",
     );
     expect(
       screen.getByRole("heading", { name: "Here's what your team does first" }),

@@ -5,7 +5,7 @@ import type { PlanProgress } from "@/app/api/__generated__/models/planProgress";
 import type { PlanResponse } from "@/app/api/__generated__/models/planResponse";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { Text } from "@/components/atoms/Text/Text";
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
+import { AssistantPortrait } from "../../../../components/AssistantPortrait";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 import { useOnboardingWizardStore } from "../../../../store";
@@ -35,7 +35,7 @@ interface Props {
   footer?: ReactNode;
 }
 
-// Otto's plan: what he heard, the first three tasks and who takes each, and
+// Your assistant's plan: what he heard, the first three tasks and who takes each, and
 // when they join. Nothing here is a control; the step's only action is the
 // trial (or Continue) beside or below it.
 export function PlanPanel({
@@ -56,9 +56,9 @@ export function PlanPanel({
       )}
     >
       <div className="flex items-center gap-2">
-        <AutopilotAvatar size={26} />
+        <AssistantPortrait size={26} />
         <Text variant="small-medium" as="span" tone="secondary">
-          {t("Otto's plan", "Otto 的计划")}
+          {t("Your assistant's plan", "助手的计划")}
         </Text>
       </div>
       <Text
@@ -73,7 +73,7 @@ export function PlanPanel({
       <span className="sr-only" role="status">
         {plan
           ? t("Your plan is ready", "计划已准备就绪")
-          : t("Otto is writing your plan", "Otto 正在制定计划")}
+          : t("Your assistant is writing your plan", "助手正在制定计划")}
       </span>
       {plan ? (
         <PlanBody plan={plan} moment={moment} />

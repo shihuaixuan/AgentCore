@@ -2,6 +2,7 @@
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
+import { getDefaultAssistantTitle } from "@/services/experts/default-assistant";
 import { Text } from "@/components/atoms/Text/Text";
 import { cn } from "@/lib/utils";
 import { useIsNarrowScreen } from "../useIsNarrowScreen";
@@ -17,7 +18,7 @@ interface Props {
 // are in the DOM from the first render, so a screen reader reads them at
 // once; only their opacity waits for the typing dots.
 export function OttoReply({ firstLine }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const isNarrow = useIsNarrowScreen();
   const { isTyping, reduceMotion } = useOttoTyping();
 
@@ -31,7 +32,7 @@ export function OttoReply({ firstLine }: Props) {
         className="absolute -top-2 left-1/2 size-4 -translate-x-1/2 rotate-45 rounded-tl-sm border-t border-l border-brand/15 bg-accent-surface"
       />
       <Text variant="eyebrow" tone="accent" as="span">
-        Otto
+        {getDefaultAssistantTitle(locale)}
       </Text>
       <div className="relative">
         {isTyping && <TypingDots />}

@@ -113,7 +113,7 @@ describe("consentLine", () => {
   });
 
   test("leaves the work with Otto when nobody joins, whatever the moment", () => {
-    const line = `Otto takes these on for now. You can hire experts any time. ${NOTHING_RUNS}`;
+    const line = `Your assistant takes these on for now. You can hire experts any time. ${NOTHING_RUNS}`;
     expect(consentLine([], "trial")).toBe(line);
     expect(consentLine([], "subscribe")).toBe(line);
     expect(consentLine([], "continue")).toBe(line);

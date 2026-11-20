@@ -74,8 +74,8 @@ export function StepHeader({
               )}{" "}
               <Text variant="body-medium" as="span">
                 {t(
-                  "Otto uses it to pick your experts and plan your first week.",
-                  "Otto 会据此为你选择专家并安排第一周的工作。",
+                  "Your assistant uses it to pick your experts and plan your first week.",
+                  "助手会据此为你选择专家并安排第一周的工作。",
                 )}
               </Text>{" "}
               {t(

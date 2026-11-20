@@ -1,6 +1,6 @@
 "use client";
 
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
+import { AssistantPortrait } from "../../../components/AssistantPortrait";
 import {
   AUTOPILOT_AURA_COLORS,
   AUTOPILOT_DOT_COLOR,
@@ -132,7 +132,7 @@ export function MicButton({
           // oxlint-disable-next-line design-system/no-inline-styles -- framer-motion MotionValues
           style={{ scale: bodyScale, opacity: bodyOpacity }}
         >
-          <AutopilotAvatar size={AVATAR_SIZE} transparent />
+          <AssistantPortrait size={AVATAR_SIZE} />
         </motion.div>
         <VoiceDots
           levels={levels}

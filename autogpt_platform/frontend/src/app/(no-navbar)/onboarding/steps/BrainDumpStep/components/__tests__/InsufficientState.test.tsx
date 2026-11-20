@@ -63,7 +63,7 @@ describe("InsufficientState — what Otto heard", () => {
 
     expect(screen.getByText("You")).toBeDefined();
     expect(screen.getByText("Um, okay. Hi. Is this working?")).toBeDefined();
-    expect(screen.getByText("Otto")).toBeDefined();
+    expect(screen.getByText("General Office Assistant")).toBeDefined();
     expect(screen.getByText("Got it. So tell me,")).toBeDefined();
     expect(screen.getByRole("heading", { name: QUESTION })).toBeDefined();
     expect(buttonNames()).toEqual(["Talk", "Write", "Continue without it"]);

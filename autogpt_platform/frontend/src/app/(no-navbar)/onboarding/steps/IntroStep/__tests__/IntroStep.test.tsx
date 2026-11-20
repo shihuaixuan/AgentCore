@@ -32,7 +32,7 @@ function membersWaitingToEnter() {
 }
 
 describe("IntroStep", () => {
-  it("welcomes the user on the team slide and moves on to Otto", () => {
+  it("welcomes the user on the team slide and introduces the assistant", () => {
     render(<IntroStep slide="team" />);
     expect(screen.getByText("Welcome to AutoGPT")).toBeDefined();
     expect(
@@ -41,26 +41,37 @@ describe("IntroStep", () => {
         name: "Your new team, ready on day one",
       }),
     ).toBeDefined();
-    fireEvent.click(screen.getByRole("button", { name: "Meet Otto" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Meet your assistant" }),
+    );
     expect(useOnboardingWizardStore.getState().currentStep).toBe(2);
   });
 
-  it("shows the Otto slide with its own Next button", () => {
+  it("shows the current assistant and portrait with its own Next button", () => {
     render(<IntroStep slide="autopilot" />);
     expect(
-      screen.getByRole("heading", { name: "Meet Otto, your Head of AI." }),
+      screen.getByRole("heading", {
+        name: "Meet your General Office Assistant",
+      }),
     ).toBeDefined();
+    expect(
+      screen
+        .getByRole("img", { name: "General Office Assistant" })
+        .getAttribute("src"),
+    ).toBe("/experts/professional/office-assistant.webp");
     expect(screen.getByRole("button", { name: "Next" })).toBeDefined();
     expect(screen.queryByText("Welcome to AutoGPT")).toBeNull();
   });
 
-  it("introduces the team by occupational title, keeping Otto", () => {
+  it("introduces the assistant and team by occupational title", () => {
     render(<IntroStep slide="team" />);
     const team = screen.getByRole("list", { name: "Your team" });
     const members = within(team).getAllByRole("listitem");
     expect(members).toHaveLength(TEAM.length);
-    expect(within(members[0]).getByText("Otto")).toBeDefined();
-    expect(within(members[0]).getByText("Head of AI")).toBeDefined();
+    expect(members[0].textContent).toBe("General Office Assistant");
+    expect(members[0].querySelector("img")?.getAttribute("src")).toBe(
+      "/experts/professional/office-assistant.webp",
+    );
     expect(members.slice(1).map((member) => member.textContent)).toEqual([
       "SEO Content Manager",
       "Sales Development Rep",

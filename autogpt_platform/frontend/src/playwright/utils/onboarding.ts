@@ -81,7 +81,7 @@ export async function advanceToRoleStep(
     name: "Your new team, ready on day one",
   });
   const autopilot = page.getByRole("heading", {
-    name: "Meet Otto, your Head of AI.",
+    name: "Meet your General Office Assistant",
   });
 
   for (let step = 0; step < 4; step++) {
@@ -101,7 +101,7 @@ export async function advanceToRoleStep(
       const current = onTeam ? team : autopilot;
       await page
         .getByRole("button", {
-          name: onTeam ? "Meet Otto" : "Next",
+          name: onTeam ? "Meet your assistant" : "Next",
           exact: true,
         })
         .click();
@@ -140,7 +140,7 @@ export async function completeOnboardingWizard(
   const preparing = page.getByText("Preparing your workspace...", {
     exact: false,
   });
-  // The plan step: Otto's plan, then Continue (e2e runs with no paywall).
+  // The plan step: Your assistant's plan, then Continue (e2e runs with no paywall).
   // Wait for the plan itself so the click lands on a settled step.
   const planPanel = page.getByTestId("plan-panel");
   await expect(planPanel).toBeVisible({ timeout: 10000 });

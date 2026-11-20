@@ -42,7 +42,7 @@ describe("OttoMightAsk", () => {
   it("shows the role's question under its label", () => {
     render(<LivePrompt />);
 
-    expect(screen.getByText("Otto might ask")).toBeDefined();
+    expect(screen.getByText("Your assistant might ask")).toBeDefined();
     expect(screen.getByText(QUESTIONS[4].text)).toBeDefined();
   });
 
@@ -74,7 +74,9 @@ describe("OttoMightAsk", () => {
       screen.getByRole("button", { name: "Another question" }),
     );
 
-    expect(region.textContent).toBe(`Otto might ask: ${QUESTIONS[5].text}`);
+    expect(region.textContent).toBe(
+      `Your assistant might ask: ${QUESTIONS[5].text}`,
+    );
   });
 
   it("offers no button where the question is only a hint", () => {

@@ -237,7 +237,7 @@ const DUMP_HEADLINE = "Talk to me about your work";
 const OFF_YOUR_PLATE = "What do you want off your plate?";
 const TYPING_HEADLINE = "Write to me about your work";
 const REST_GUIDANCE =
-  "Tell me what you do and what eats up your week. Otto uses it to pick your experts and plan your first week. A minute is plenty, and you can type instead.";
+  "Tell me what you do and what eats up your week. Your assistant uses it to pick your experts and plan your first week. A minute is plenty, and you can type instead.";
 
 // Copy split across a nested emphasis: matches the element that holds all
 // of it, not each piece.
@@ -454,7 +454,7 @@ describe("onboarding brain dump", () => {
     // The middle sentence is the reason to share, so it stands out.
     expect(
       screen.getByText(
-        "Otto uses it to pick your experts and plan your first week.",
+        "Your assistant uses it to pick your experts and plan your first week.",
       ).tagName,
     ).toBe("SPAN");
     expect(screen.getByRole("button", { name: "Talk" })).toBeDefined();
@@ -1395,7 +1395,7 @@ describe("onboarding brain dump — insufficient content", () => {
   });
 });
 
-describe("onboarding brain dump — Otto might ask", () => {
+describe("onboarding brain dump — Your assistant might ask", () => {
   // The progress fixture's role.
   const ENGINEERING = BRAIN_DUMP_PROMPT_SETS.Engineering;
 

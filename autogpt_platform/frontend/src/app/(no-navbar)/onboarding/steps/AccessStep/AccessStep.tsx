@@ -27,7 +27,7 @@ export function AccessStep() {
           <Text variant="large" as="p" tone="muted" className="max-w-md">
             {t(
               access.description,
-              "使用 Microsoft 登录仅用于验证身份。连接后，Otto 才能使用你的 Microsoft 365。你可以随时在设置中更改。",
+              "使用 Microsoft 登录仅用于验证身份。连接后，助手才能使用你的 Microsoft 365。你可以随时在设置中更改。",
             )}
           </Text>
         </div>

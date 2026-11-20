@@ -3,6 +3,10 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import {
+  DEFAULT_ASSISTANT_AVATAR_URL,
+  getDefaultAssistantTitle,
+} from "@/services/experts/default-assistant";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import {
   fluidSize,
@@ -56,7 +60,7 @@ export function TeamNode({ member, animate }: Props) {
           <Image
             src={
               lead
-                ? "/experts/transparent/otto.webp"
+                ? DEFAULT_ASSISTANT_AVATAR_URL
                 : `/experts/professional/expert-${member.asset}.webp`
             }
             alt=""
@@ -64,11 +68,7 @@ export function TeamNode({ member, animate }: Props) {
             height={member.size}
             sizes={`${member.size}px`}
             priority
-            className={
-              lead
-                ? "relative size-full object-contain"
-                : "relative size-full rounded-xl object-cover"
-            }
+            className="relative size-full rounded-xl object-cover"
           />
         </div>
         {lead ? (
@@ -76,17 +76,9 @@ export function TeamNode({ member, animate }: Props) {
             <Text
               as="span"
               variant="body-medium"
-              className="block whitespace-nowrap"
+              className="block w-[23cqw] text-balance"
             >
-              Otto
-            </Text>
-            <Text
-              as="span"
-              variant="small"
-              tone="accent"
-              className="block whitespace-nowrap"
-            >
-              {title}
+              {getDefaultAssistantTitle(locale)}
             </Text>
           </span>
         ) : (

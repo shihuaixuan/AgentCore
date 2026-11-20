@@ -14,7 +14,7 @@ describe("onboarding hire failure localization", () => {
       await screen.findByText("未能聘用凯西、Custom Expert"),
     ).toBeDefined();
     expect(
-      await screen.findByText("这些任务暂由 Otto 负责。你随时可以聘用专家。"),
+      await screen.findByText("这些任务暂由助手负责。你随时可以聘用专家。"),
     ).toBeDefined();
   });
 });

@@ -3,7 +3,7 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Text } from "@/components/atoms/Text/Text";
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
+import { AssistantPortrait } from "../components/AssistantPortrait";
 import { TypingText } from "@/components/molecules/TypingText/TypingText";
 import { cn } from "@/lib/utils";
 import {
@@ -43,7 +43,7 @@ export function PreparingStep({ onComplete, canHire = false }: Props) {
   return (
     <div className="flex w-full max-w-md flex-col items-center gap-8 px-4">
       <div className="flex flex-col items-center gap-4">
-        <AutopilotAvatar size={120} transparent />
+        <AssistantPortrait size={120} />
         <Text variant="h4" className="text-center">
           <TypingText
             text={t("Preparing your workspace...", "正在准备工作空间…")}

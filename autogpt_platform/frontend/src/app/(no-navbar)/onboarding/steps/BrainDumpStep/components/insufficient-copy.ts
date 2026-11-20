@@ -33,7 +33,7 @@ export const REPLY_LINES: Record<Exclude<OttoReplyKind, "other">, string> = {
   reluctant: "No worries, we'll keep it quick. So tell me,",
   what_to_say: "Just one task you'd hand off is plenty.",
   wants_to_skip: "You can skip below. But first, tell me,",
-  about_otto: "I'm Otto, here to take work off your hands.",
+  about_otto: "I'm your assistant, here to take work off your hands.",
   busy: "No rush, take your time. When you're ready,",
   annoyed: "Sorry, I'll keep this quick. So tell me,",
   some_work: "Thanks, that's a good start! So tell me,",

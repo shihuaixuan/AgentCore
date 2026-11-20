@@ -393,7 +393,7 @@ test("the trial starts while Otto is still writing the plan", async () => {
     name: "Start my free trial",
   });
   await waitFor(() => expect(planRequested).toHaveBeenCalled());
-  expect(screen.getByText("Otto is writing your plan")).toBeDefined();
+  expect(screen.getByText("Your assistant is writing your plan")).toBeDefined();
   expect(start.hasAttribute("disabled")).toBe(false);
 
   fireEvent.click(start);
@@ -404,7 +404,7 @@ test("the trial starts while Otto is still writing the plan", async () => {
     ),
   );
   // Still pending: the trial never waited for the plan.
-  expect(screen.getByText("Otto is writing your plan")).toBeDefined();
+  expect(screen.getByText("Your assistant is writing your plan")).toBeDefined();
   expect(eventsNamed("plan_viewed")).toEqual([]);
 });
 

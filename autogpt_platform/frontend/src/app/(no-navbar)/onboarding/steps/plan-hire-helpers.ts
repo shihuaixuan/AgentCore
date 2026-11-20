@@ -74,8 +74,8 @@ export function toastHireFailed(names: string[], locale: Locale = "en") {
           ? "未能聘用你的团队"
           : "Couldn't hire your team",
     description: chinese
-      ? "这些任务暂由 Otto 负责。你随时可以聘用专家。"
-      : "Otto takes on their tasks for now. You can hire experts any time.",
+      ? "这些任务暂由助手负责。你随时可以聘用专家。"
+      : "Your assistant takes on their tasks for now. You can hire experts any time.",
     variant: "destructive",
     // Until closed: the screen moves on to Home, and this should be there.
     duration: Infinity,

@@ -46,7 +46,7 @@ export function PlanConsentLine({ team, moment }: Props) {
         {t(
           consentLine(titles, moment),
           team.length === 0
-            ? "这些工作暂由 Otto 负责。你可以随时聘用专家。选择任务后才会开始执行。"
+            ? "这些工作暂由助手负责。你可以随时聘用专家。选择任务后才会开始执行。"
             : `${titles.join("、")}将在${moment === "trial" ? "试用开始" : moment === "subscribe" ? "订阅" : "继续"}时加入团队。选择任务后才会开始执行。`,
         )}
       </Text>

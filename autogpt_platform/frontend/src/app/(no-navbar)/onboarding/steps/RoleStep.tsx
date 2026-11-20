@@ -5,7 +5,7 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
 import { Text } from "@/components/atoms/Text/Text";
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
+import { AssistantPortrait } from "../components/AssistantPortrait";
 
 import { FadeIn } from "@/components/atoms/FadeIn/FadeIn";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -99,7 +99,7 @@ export function RoleStep() {
     <FadeIn>
       <div className="flex w-full flex-col items-center gap-8 px-4">
         <div className="mx-auto flex w-full max-w-lg flex-col items-center gap-4 px-4 text-center">
-          <AutopilotAvatar size={120} transparent />
+          <AssistantPortrait size={120} />
           <Text variant="h4">
             {t("What best describes you?", "以下哪项最符合你的角色？")}
           </Text>

@@ -55,7 +55,7 @@ export function OttoMightAsk({
           isLeft && "col-start-1 row-start-1",
         )}
       >
-        {t("Otto might ask", "Otto 可能会问")}
+        {t("Your assistant might ask", "助手可能会问")}
       </span>
       <SwapFade
         swapKey={translatePrompt(question)}
@@ -93,8 +93,8 @@ export function OttoMightAsk({
       >
         {announcement &&
           t(
-            `Otto might ask: ${announcement}`,
-            `Otto 可能会问：${translatePrompt(announcement)}`,
+            `Your assistant might ask: ${announcement}`,
+            `助手可能会问：${translatePrompt(announcement)}`,
           )}
       </p>
     </div>

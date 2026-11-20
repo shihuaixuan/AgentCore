@@ -7,7 +7,7 @@ import { Text } from "@/components/atoms/Text/Text";
 import { LockIcon } from "@hugeicons/core-free-icons";
 
 const PRIVACY_COPY =
-  "Private to you · Saved as Otto memory · Downloadable anytime";
+  "Private to you · Saved in your assistant's memory · Downloadable anytime";
 
 export function PrivacyNote() {
   const { t } = useTranslation();
@@ -19,7 +19,7 @@ export function PrivacyNote() {
         tone="subtle"
         className="text-center sm:whitespace-nowrap"
       >
-        {t(PRIVACY_COPY, "仅你可见 · 保存为 Otto 记忆 · 随时可下载")}
+        {t(PRIVACY_COPY, "仅你可见 · 保存为助手记忆 · 随时可下载")}
       </Text>
     </div>
   );
