@@ -1,19 +1,39 @@
 "use client";
 
+import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { useAuth } from "@/lib/auth/hooks/useAuth";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { HIDDEN_FROM_REPLAY } from "@/lib/replay-privacy";
+import { useState } from "react";
 import { ArchivePanel } from "./components/ArchivePanel";
+import { DirectorySyncPanel } from "./components/DirectorySyncPanel";
 import { ImportPanel } from "./components/ImportPanel";
 import { useArchive } from "./useArchive";
 
 function ArchiveWorkspace({ ownerID }: { ownerID: string }) {
+  const { t } = useTranslation();
   const archive = useArchive(ownerID);
+  const [showManualImport, setShowManualImport] = useState(false);
   return (
     <div className={`${HIDDEN_FROM_REPLAY} flex min-w-0 flex-col gap-6`}>
+      <DirectorySyncPanel ownerID={ownerID} />
       <ArchivePanel ownerID={ownerID} archive={archive} />
-      <ImportPanel ownerID={ownerID} onSaved={archive.refreshArchive} />
+      <div className="space-y-3">
+        <Button
+          type="button"
+          size="small"
+          variant="secondary"
+          aria-expanded={showManualImport}
+          aria-controls="manual-chat-archive"
+          onClick={() => setShowManualImport((open) => !open)}
+        >
+          {t("Archive individual chats and attachments", "手动归档会话与附件")}
+        </Button>
+        <div id="manual-chat-archive" hidden={!showManualImport}>
+          <ImportPanel ownerID={ownerID} onSaved={archive.refreshArchive} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -30,8 +50,8 @@ export default function ChatImportsPage() {
         </Text>
         <Text variant="body" tone="secondary">
           {t(
-            "Browse your saved WorkBuddy and QwenWork chats, or copy one to your chat list to continue.",
-            "查看已归档的 WorkBuddy 和千问办公对话，也可以同步到会话列表继续提问。",
+            "Sync WorkBuddy and QwenWork history to Recent chats, or view previously saved conversations.",
+            "将 WorkBuddy 和千问办公的历史对话同步到最近会话，也可以查看已有归档。",
           )}
         </Text>
       </header>

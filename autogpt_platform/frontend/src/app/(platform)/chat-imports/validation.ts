@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const MAX_SELECTION = 25;
-const MAX_BODY_BYTES = 4 * 1024 * 1024;
+export const MAX_BODY_BYTES = 4 * 1024 * 1024;
 export const MAX_MESSAGES = 500;
 
 function boundedText(max: number) {
@@ -62,6 +62,7 @@ export class ImportValidationError extends Error {
       | "selection"
       | "hosted-upload-size"
       | "archive-destination"
+      | "workbuddy-folder"
       | "qwenwork-folder"
       | "qwenwork-database"
       | "qwenwork-db-size"

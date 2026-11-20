@@ -1,4 +1,7 @@
-import { readQwenWorkDatabase } from "./qwenWorkDatabase";
+import {
+  openQwenWorkDatabase,
+  type QwenWorkDatabaseReader,
+} from "./qwenWorkDatabase";
 import type {
   QwenWorkWorkerRequest,
   QwenWorkWorkerResponse,
@@ -11,17 +14,28 @@ const scope = self as unknown as {
   postMessage: (response: QwenWorkWorkerResponse) => void;
 };
 
-scope.onmessage = async function readDirectoryDatabase({
-  data: { raw, page },
-}) {
+let reader: QwenWorkDatabaseReader | undefined;
+let opened = false;
+
+scope.onmessage = async function readDirectoryDatabase({ data }) {
   try {
-    const result = await readQwenWorkDatabase(raw, page, {
-      locateFile: () => new URL(wasm.href, self.location.origin).href,
-    });
-    scope.postMessage({ result });
+    if (data.type === "open" && !opened) {
+      opened = true;
+      reader = await openQwenWorkDatabase(data.raw, {
+        locateFile: () => new URL(wasm.href, self.location.origin).href,
+      });
+      scope.postMessage({ type: "opened", total: reader.total });
+    } else if (data.type === "read-page" && reader) {
+      scope.postMessage({ type: "page", result: reader.readPage(data.page) });
+    } else {
+      throw new ImportValidationError("qwenwork-reader");
+    }
   } catch (error) {
+    reader?.close();
+    reader = undefined;
     scope.postMessage({
-      error:
+      type: "error",
+      code:
         error instanceof ImportValidationError ? error.code : "qwenwork-reader",
     });
   }

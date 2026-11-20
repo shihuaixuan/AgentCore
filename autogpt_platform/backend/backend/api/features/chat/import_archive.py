@@ -26,6 +26,7 @@ from .import_archive_db import (
 )
 from .import_archive_models import (
     CONVERSATION_BODY_LIMIT,
+    DIRECTORY_IMPORT_SOURCES,
     MULTIPART_BODY_LIMIT,
     AttachmentUpload,
     ChatImportSource,
@@ -38,7 +39,7 @@ from .import_archive_models import (
     ImportedMessage,
 )
 from .import_archive_multipart import MULTIPART_OPENAPI_BODY, read_attachment_import
-from .import_archive_sync import sync_imported_chat
+from .import_archive_sync import sync_imported_chat, sync_native_chats
 
 router = APIRouter(prefix="/imports")
 logger = logging.getLogger(__name__)
@@ -79,6 +80,26 @@ async def import_conversation_with_attachments(
         raise HTTPException(
             status_code=409, detail="Archive was deleted during import; retry"
         ) from None
+    except _ARCHIVE_ERRORS as error:
+        raise archive_unavailable(error) from None
+    return ImportConversationsResult(added=added, duplicates=duplicates)
+
+
+@router.post("/sync")
+@request_body_limit(CONVERSATION_BODY_LIMIT)
+async def sync_native_conversations(
+    request: ImportConversationsRequest,
+    ctx: Annotated[auth.RequestContext, Security(auth.get_request_context)],
+) -> ImportConversationsResult:
+    """Import local WorkBuddy and QwenWork text directly as private sessions."""
+    if any(
+        chat.source not in DIRECTORY_IMPORT_SOURCES for chat in request.conversations
+    ):
+        raise HTTPException(status_code=422, detail="Unsupported native chat source")
+    try:
+        added, duplicates = await sync_native_chats(
+            ctx.user_id, ctx.org_id, request.conversations
+        )
     except _ARCHIVE_ERRORS as error:
         raise archive_unavailable(error) from None
     return ImportConversationsResult(added=added, duplicates=duplicates)

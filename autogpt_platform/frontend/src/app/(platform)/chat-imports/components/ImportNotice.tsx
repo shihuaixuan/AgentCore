@@ -59,6 +59,11 @@ function errorMessage(error: unknown, t: Translate) {
         "A file is not a complete WorkBuddy text conversation. If WorkBuddy is still writing it, wait for the task to finish and try again.",
         "有文件不是完整的 WorkBuddy 文本会话。如果 WorkBuddy 还在写入，请等任务结束后重试。",
       );
+    case "workbuddy-folder":
+      return t(
+        "No WorkBuddy history was found. Choose the projects folder or one of its project folders.",
+        "未找到 WorkBuddy 会话文件。请选择 projects 目录或其中的项目目录。",
+      );
     case "qwenwork-folder":
       return t(
         "QwenWork history not found. Select %APPDATA%\\QwenWorkCN\\data on Windows.",

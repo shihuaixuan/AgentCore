@@ -60,7 +60,7 @@ function isArchiveWrite(method: string, path: string[]) {
     path[1] === "chat" &&
     path[2] === "imports" &&
     (path.length === 3 ||
-      (path.length === 4 && path[3] === "with-attachments") ||
+      (path.length === 4 && ["with-attachments", "sync"].includes(path[3])) ||
       (path.length === 5 && path[4] === "sync"))
   );
 }

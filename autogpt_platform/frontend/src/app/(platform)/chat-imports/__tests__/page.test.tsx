@@ -31,8 +31,21 @@ vi.mock("@/lib/auth/hooks/useAuth", () => ({
   useAuth: () => ({ user: auth.user, isUserLoading: false }),
 }));
 vi.mock("../readQwenWorkInWorker", async () => {
-  const { readQwenWorkDatabase } = await import("../qwenWorkDatabase");
-  return { readQwenWorkInWorker: readQwenWorkDatabase };
+  const { openQwenWorkDatabase, readQwenWorkDatabase } = await import(
+    "../qwenWorkDatabase"
+  );
+  return {
+    readQwenWorkInWorker: readQwenWorkDatabase,
+    async openQwenWorkReader(raw: ArrayBuffer) {
+      const reader = await openQwenWorkDatabase(raw);
+      return {
+        ...reader,
+        async readPage(page: number) {
+          return reader.readPage(page);
+        },
+      };
+    },
+  };
 });
 
 const workBuddyChat = {
@@ -44,6 +57,24 @@ const workBuddyChat = {
     { role: "assistant", text: "<img src=example>\n\n**Literal text**" },
   ],
 };
+
+function workBuddyDirectoryFile(index: number) {
+  return pickedFile(
+    `projects/project-${index % 2}/chat-${index}.jsonl`,
+    JSON.stringify({
+      type: "message",
+      role: "user",
+      id: "first-question",
+      sessionId: `session-${index}`,
+      content: [
+        {
+          type: "input_text",
+          text: `<system-reminder data-role="user-context">INJECTED CONTEXT</system-reminder>\n<user_query>Question ${index}</user_query>`,
+        },
+      ],
+    }),
+  );
+}
 
 function setup(
   locale: "en" | "zh-CN" = "en",
@@ -69,8 +100,12 @@ function setup(
   const request = vi.fn(async (url: string, init: RequestInit) => {
     const path = new URL(url, "http://localhost");
     expect(path.pathname).toMatch(
-      /^\/api\/proxy\/api\/chat\/imports(?:\/(?:archive-id|with-attachments|archive-id\/attachments\/file-id))?$/,
+      /^\/api\/proxy\/api\/chat\/imports(?:\/(?:sync|archive-id|with-attachments|archive-id\/attachments\/file-id))?$/,
     );
+    if (init.method === "POST" && path.pathname.endsWith("/sync")) {
+      const { conversations } = JSON.parse(String(init.body));
+      return Response.json({ added: conversations.length, duplicates: 0 });
+    }
     if (init.method === "POST")
       return Response.json({ added: 1, duplicates: 1 });
     if (init.method === "DELETE") {
@@ -104,6 +139,13 @@ function setup(
   return { request, client, user: userEvent.setup() };
 }
 
+async function openManualArchive(
+  user: ReturnType<typeof userEvent.setup>,
+  name = "Archive individual chats and attachments",
+) {
+  await user.click(screen.getByRole("button", { name }));
+}
+
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
@@ -112,9 +154,111 @@ afterEach(() => {
 });
 
 describe("conversation archive", () => {
+  it("syncs a whole WorkBuddy directory in batches and shows confirmed progress", async () => {
+    const { request, client, user } = setup("zh-CN");
+    const invalidate = vi.spyOn(client, "invalidateQueries");
+    const original = request.getMockImplementation()!;
+    const pending = Promise.withResolvers<Response>();
+    let attempts = 0;
+    request.mockImplementation(async (url, options) => {
+      if (url.endsWith("/sync") && ++attempts === 2) return pending.promise;
+      return original(url, options);
+    });
+    const chooseFolder = screen.getByRole("button", {
+      name: "选择 WorkBuddy 会话目录",
+    });
+    try {
+      await user.click(chooseFolder);
+      const picker = screen.getByLabelText("WorkBuddy 批量同步目录");
+      expect(picker.hasAttribute("webkitdirectory")).toBe(true);
+      fireEvent.change(picker, {
+        target: {
+          files: [
+            ...Array.from({ length: 26 }, (_, index) =>
+              workBuddyDirectoryFile(index),
+            ),
+            pickedFile("projects/project-1/broken.jsonl", "{"),
+            pickedFile("projects/project-1/private.txt", "NOT A CONVERSATION"),
+          ],
+        },
+      });
+      const progress = await screen.findByRole("progressbar", {
+        name: "同步进度",
+      });
+      await waitFor(() => expect(attempts).toBe(2));
+      await waitFor(() =>
+        expect(progress.getAttribute("aria-valuenow")).toBe("26"),
+      );
+      expect(progress.getAttribute("aria-valuemax")).toBe("27");
+      expect(chooseFolder.hasAttribute("disabled")).toBe(true);
+      expect(screen.queryByRole("checkbox")).toBeNull();
+    } finally {
+      pending.resolve(Response.json({ added: 0, duplicates: 1 }));
+    }
+    expect(await screen.findByText("同步完成：27 / 27 条")).toBeDefined();
+    expect(
+      screen.getByText("新增 25 · 已存在 1 · 跳过 1 · 失败 0"),
+    ).toBeDefined();
+    expect(push).not.toHaveBeenCalled();
+    expect(invalidate).toHaveBeenCalledWith({
+      queryKey: SESSION_LIST_QUERY_KEY,
+    });
+    const posts = request.mock.calls.filter(
+      ([, init]) => init.method === "POST",
+    );
+    expect(posts.map(([url]) => url)).toEqual(
+      Array(2).fill("/api/proxy/api/chat/imports/sync"),
+    );
+    const body = posts.map(([, init]) => String(init.body));
+    expect(body.join(" ")).not.toMatch(/INJECTED CONTEXT|NOT A CONVERSATION/);
+    expect(
+      body.flatMap((batch) => JSON.parse(batch).conversations),
+    ).toHaveLength(26);
+    expect(JSON.parse(body[0]).conversations[0].messages[0].text).toBe(
+      "Question 0",
+    );
+    for (const [, init] of posts) {
+      expect(new Headers(init.headers).get("x-archive-destination")).toBe(
+        '["owner","owner"]',
+      );
+    }
+  });
+
+  it("syncs QwenWork past a whole page of unsupported chats without uploading its database", async () => {
+    const { request, user } = setup("zh-CN");
+    const raw = await makeQwenWorkFixture(addRecentToolOnlyConversations);
+    await user.click(
+      screen.getByRole("button", { name: "选择千问办公会话目录" }),
+    );
+    const picker = screen.getByLabelText("千问办公批量同步目录");
+    expect(picker.hasAttribute("webkitdirectory")).toBe(true);
+    fireEvent.change(picker, {
+      target: { files: [pickedFile("data/agents.db", raw)] },
+    });
+    expect(await screen.findByText("同步完成：102 / 102 条")).toBeDefined();
+    expect(
+      screen.getByText("新增 2 · 已存在 0 · 跳过 100 · 失败 0"),
+    ).toBeDefined();
+    const posts = request.mock.calls.filter(
+      ([, init]) => init.method === "POST",
+    );
+    expect(posts).toHaveLength(1);
+    expect(posts[0][0]).toBe("/api/proxy/api/chat/imports/sync");
+    const body = String(posts[0][1].body);
+    expect(body).not.toMatch(
+      /agents\.db|PRIVATE TOOL INPUT|Deleted text|report\.pdf/,
+    );
+    expect(
+      JSON.parse(body).conversations.map(
+        ({ title }: { title: string }) => title,
+      ),
+    ).toEqual(["Local fixture", "Leave this out"]);
+  });
+
   it("imports a checked QwenWork conversation without Web Crypto or posting its database", async () => {
     vi.stubGlobal("crypto", {});
     const { request, user } = setup();
+    await openManualArchive(user);
     await user.click(screen.getByRole("tab", { name: "QwenWork" }));
     const panel = screen.getByRole("tabpanel", { name: "QwenWork" });
     const db = pickedFile(
@@ -182,6 +326,7 @@ describe("conversation archive", () => {
 
   it("saves only explicitly checked QwenWork attachments and not local paths", async () => {
     const { request, user } = setup();
+    await openManualArchive(user);
     await user.click(screen.getByRole("tab", { name: "QwenWork" }));
     const panel = within(screen.getByRole("tabpanel", { name: "QwenWork" }));
     const db = pickedFile("data/agents.db", await makeQwenWorkFixture());
@@ -251,6 +396,7 @@ describe("conversation archive", () => {
 
   it("can preview older chats when the newest batch has no text", async () => {
     const { request, user } = setup();
+    await openManualArchive(user);
     await user.click(screen.getByRole("tab", { name: "QwenWork" }));
     const panel = within(screen.getByRole("tabpanel", { name: "QwenWork" }));
     const db = pickedFile(
@@ -283,6 +429,7 @@ describe("conversation archive", () => {
 
   it("reports a renamed database selected as an attachment without sending any conversation", async () => {
     const { request, user } = setup();
+    await openManualArchive(user);
     await user.click(screen.getByRole("tab", { name: "QwenWork" }));
     const panel = within(screen.getByRole("tabpanel", { name: "QwenWork" }));
     const bytes = await makeQwenWorkFixture();
@@ -313,6 +460,7 @@ describe("conversation archive", () => {
 
   it("matches an authorized directory locally and uploads only checked attachment bytes", async () => {
     const { request, user } = setup();
+    await openManualArchive(user);
     const transcript = new File(
       [
         JSON.stringify({
@@ -412,6 +560,7 @@ describe("conversation archive", () => {
   it("previews native WorkBuddy files without Web Crypto or uploading the originals", async () => {
     vi.stubGlobal("crypto", {});
     const { request, user } = setup();
+    await openManualArchive(user);
     function nativeFile(sessionID: string, title: string) {
       const records = [
         { type: "ai-title", sessionId: sessionID, aiTitle: title },
@@ -474,6 +623,7 @@ describe("conversation archive", () => {
 
   it("keeps the selected chats and files available for retry after a partial save", async () => {
     const { request, user } = setup();
+    await openManualArchive(user);
     const file = new File(
       [
         JSON.stringify({
@@ -540,6 +690,7 @@ describe("conversation archive", () => {
 
   it("previews real text locally and sends only checked WorkBuddy entries after Save", async () => {
     const { request, user } = setup();
+    await openManualArchive(user);
     const file = new File(
       [
         JSON.stringify({
@@ -585,6 +736,7 @@ describe("conversation archive", () => {
 
   it("offers only the two native sources but still opens existing Qianwen archives", async () => {
     const { user } = setup("zh-CN", "qianwen");
+    await openManualArchive(user, "手动归档会话与附件");
     const tabs = within(screen.getByRole("tablist", { name: "导入来源" }));
     expect(tabs.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
       "WorkBuddy",
@@ -705,6 +857,9 @@ describe("conversation archive", () => {
   it("does not fetch or accept drafts before authentication", () => {
     auth.user = null;
     const { request } = setup();
+    expect(
+      screen.queryByRole("button", { name: "Choose WorkBuddy history folder" }),
+    ).toBeNull();
     expect(screen.queryByRole("tab", { name: "WorkBuddy" })).toBeNull();
     expect(request).not.toHaveBeenCalled();
   });

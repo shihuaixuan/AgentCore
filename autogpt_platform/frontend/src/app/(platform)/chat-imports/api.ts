@@ -97,6 +97,13 @@ export function syncArchivedConversation(
   );
 }
 
+export function syncNativeConversations(
+  conversations: ImportConversation[],
+  request: ArchiveSaveRequest,
+) {
+  return saveArchive("/sync", encodeImport(conversations), request);
+}
+
 export function saveConversations(
   conversations: ImportConversation[],
   request: ArchiveSaveRequest,

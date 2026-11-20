@@ -220,6 +220,58 @@ async def test_sync_does_not_promote_server_only_tags_into_history(owners):
         assert (await client.get(url)).json()["messages"][0]["text"] == message
 
 
+async def test_bulk_sync_reuses_legacy_copies_and_keeps_chat_history_private(owners):
+    user_id, other_id = owners
+    org_id = str(uuid4())
+    qwen_chat = {**CONVERSATION, "source": "qwenwork", "title": "QwenWork notes"}
+    batch = {"conversations": [CONVERSATION, qwen_chat]}
+    async with (
+        owner_client(user_id, org_id) as client,
+        owner_client(other_id, org_id) as stranger,
+    ):
+        archive_url = await save_archive(client)
+        legacy = (await client.post(f"{archive_url}/sync")).json()["session_id"]
+        assert (await client.post("/imports/sync", json=batch)).json() == {
+            "added": 1,
+            "duplicates": 1,
+        }
+        [workbuddy, qwenwork] = await get_client().chatsession.find_many(
+            where={"userId": user_id, "organizationId": org_id},
+            order={"title": "asc"},
+        )
+        assert workbuddy.id == legacy
+        assert qwenwork.importedChatId is None
+        assert qwenwork.visibility == "PRIVATE"
+        assert await chat_db.get_next_sequence(qwenwork.id) == 3
+        await chat_db.add_chat_message(
+            session_id=qwenwork.id, role="user", content="Follow-up", sequence=3
+        )
+        assert (await client.post("/imports/sync", json=batch)).json() == {
+            "added": 0,
+            "duplicates": 2,
+        }
+        assert await chat_db.get_next_sequence(qwenwork.id) == 4
+        assert (await client.delete(archive_url)).status_code == 204
+        assert (await client.post("/imports/sync", json=batch)).json() == {
+            "added": 0,
+            "duplicates": 2,
+        }
+        qwen_archive_url = await save_archive(client, "qwenwork")
+        assert (await client.post(f"{qwen_archive_url}/sync")).json() == {
+            "session_id": qwenwork.id
+        }
+        assert (
+            await chat_db.get_chat_messages_paginated(
+                qwenwork.id, user_id=other_id, organization_id=org_id
+            )
+            is None
+        )
+        assert (await stranger.post("/imports/sync", json=batch)).json() == {
+            "added": 2,
+            "duplicates": 0,
+        }
+
+
 async def test_sync_requires_authentication():
     app = FastAPI()
     app.include_router(import_archive.router)

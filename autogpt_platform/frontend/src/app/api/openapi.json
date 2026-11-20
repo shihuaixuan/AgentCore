@@ -5593,6 +5593,50 @@
         }
       }
     },
+    "/api/chat/imports/sync": {
+      "post": {
+        "tags": ["v2", "chat"],
+        "summary": "Sync Native Conversations",
+        "description": "Import local WorkBuddy and QwenWork text directly as private sessions.",
+        "operationId": "postV2SyncNativeConversations",
+        "security": [{ "HTTPBearerJWT": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportConversationsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportConversationsResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401NotAuthenticatedError"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chat/imports/{chat_id}/attachments/{attachment_id}": {
       "get": {
         "tags": ["v2", "chat"],

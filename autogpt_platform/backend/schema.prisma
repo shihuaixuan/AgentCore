@@ -993,6 +993,7 @@ model ChatSession {
   BackgroundTask     ChatBackgroundTask?  @relation("BackgroundChild")
   importedChatId     String?
   ImportedChat       ImportedChatConversation? @relation(fields: [importedChatId], references: [id], onDelete: SetNull)
+  importedSourceKey  String?
 
   // Expert this session is scoped to; null = plain Autopilot session.
   // Sessions keep expertId for history when the expert is archived (soft delete).
@@ -1035,6 +1036,7 @@ model ChatSession {
   @@index([shareToken])
   @@index([expertId])
   @@unique([importedChatId, organizationId])
+  @@unique([userId, organizationId, importedSourceKey], map: "ChatSession_owner_org_imported_source_key")
 }
 
 // Tracks which workspace files are exposed via a shared chat session.
