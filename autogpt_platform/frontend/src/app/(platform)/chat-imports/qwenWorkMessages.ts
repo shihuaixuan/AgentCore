@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { cleanNativeUserText } from "./nativeUserText";
 import { ImportValidationError } from "./validation";
 import { normalizeLocalPath } from "./workbuddyAttachments";
 
@@ -10,7 +11,11 @@ const blockSchema = z.object({
 });
 const fileDataSchema = z.object({ filePath: z.string() });
 
-export function collectQwenWorkParts(raw: unknown, references: Set<string>) {
+export function collectQwenWorkParts(
+  raw: unknown,
+  references: Set<string>,
+  role: "user" | "assistant",
+) {
   if (typeof raw !== "string") throw new ImportValidationError("conversation");
   let blocks: unknown;
   try {
@@ -28,7 +33,9 @@ export function collectQwenWorkParts(raw: unknown, references: Set<string>) {
     if (type === "text") {
       if (typeof content !== "string")
         throw new ImportValidationError("conversation");
-      if (content.trim()) text.push(content);
+      const messageText =
+        role === "user" ? cleanNativeUserText(content) : content;
+      if (messageText.trim()) text.push(messageText);
       continue;
     }
     if (references.size >= 100) continue;

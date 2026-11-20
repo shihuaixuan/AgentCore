@@ -1,6 +1,9 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
-import { parseWorkBuddyTranscript } from "../workbuddyTranscript";
+import {
+  parseWorkBuddyTranscript,
+  readWorkBuddyFiles,
+} from "../workbuddyTranscript";
 
 const sessionID = "cb2b2f1c-8a2d-4f18-8c42-f96c12df6830";
 const question = {
@@ -70,6 +73,40 @@ describe("native WorkBuddy files", () => {
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+
+  it("projects the real user query, not injected context or its attachment paths", async () => {
+    const wrapper =
+      '<system-reminder data-role="user-context">CONTEXT `C:/fixture/private.txt`</system-reminder>\n' +
+      '<system-reminder data-role="additional-data">EXTRA</system-reminder>\n' +
+      "<user_query>Keep `C:/fixture/share.txt`</user_query>";
+    const literal = "<system-reminder>literal assistant text</system-reminder>";
+    const file = new File(
+      [
+        jsonl(
+          {
+            ...question,
+            id: "reminder-only",
+            content: [
+              {
+                type: "input_text",
+                text: "<system-prompt>ONLY</system-prompt>",
+              },
+            ],
+          },
+          { ...question, content: [{ type: "input_text", text: wrapper }] },
+          { ...answer, content: [{ type: "output_text", text: literal }] },
+        ),
+      ],
+      "fixture.jsonl",
+    );
+    const [draft] = await readWorkBuddyFiles([file]);
+    expect(draft.conversation.title).toBe("Keep `C:/fixture/share.txt`");
+    expect(draft.conversation.messages.map(({ text }) => text)).toEqual([
+      "Keep `C:/fixture/share.txt`",
+      literal,
+    ]);
+    expect(draft.references).toEqual([{ path: "C:/fixture/share.txt" }]);
   });
 
   it.each([

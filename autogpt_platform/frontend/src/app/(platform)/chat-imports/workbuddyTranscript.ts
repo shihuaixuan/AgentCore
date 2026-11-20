@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { nativeSourceID } from "./nativeSourceID";
-import { extractAttachmentPaths } from "./workbuddyAttachments";
+import { cleanNativeUserText } from "./nativeUserText";
 import {
   encodeImport,
   ImportValidationError,
@@ -11,9 +11,10 @@ import {
   type ImportMessage,
   type NativeChatDraft,
 } from "./validation";
+import { extractAttachmentPaths } from "./workbuddyAttachments";
 
 const MAX_FILES = 25;
-const MAX_FILE_BYTES = 32 * 1024 * 1024;
+export const MAX_WORKBUDDY_FILE_BYTES = 32 * 1024 * 1024;
 const eventSchema = z.object({
   type: z.string(),
   sessionId: z
@@ -33,7 +34,8 @@ const timestampSchema = z.string().datetime({ offset: true });
 export async function readWorkBuddyFiles(files: File[]) {
   if (files.length > MAX_FILES) throw new ImportValidationError("files");
   const totalBytes = files.reduce((total, file) => total + file.size, 0);
-  if (totalBytes > MAX_FILE_BYTES) throw new ImportValidationError("file-size");
+  if (totalBytes > MAX_WORKBUDDY_FILE_BYTES)
+    throw new ImportValidationError("file-size");
 
   const entries: NativeChatDraft[] = [];
   for (const file of files) {
@@ -122,7 +124,24 @@ function readEvent(line: string, lineNumber: number) {
   const result = eventSchema.safeParse(input);
   if (!result.success)
     throw new ImportValidationError("transcript", lineNumber);
-  return result.data;
+  const event = result.data;
+  if (
+    event.type === "message" &&
+    event.role === "user" &&
+    Array.isArray(event.content)
+  ) {
+    event.content = event.content.map(cleanUserBlock);
+  }
+  return event;
+}
+
+function cleanUserBlock(block: unknown) {
+  const parsed = contentSchema.safeParse(block);
+  if (!parsed.success) return block;
+  const { type, text } = parsed.data;
+  if (type !== "input_text" && type !== "text") return block;
+  const cleaned = cleanNativeUserText(text);
+  return cleaned === text ? block : { type, text: cleaned };
 }
 
 function readMessage(
