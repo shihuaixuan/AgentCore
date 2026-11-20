@@ -1,6 +1,9 @@
-import { ImpersonationState } from "@/lib/impersonation";
 import { useEffect, useRef, useState } from "react";
-import type { ArchiveSaveRequest, SaveResult } from "./api";
+import {
+  archiveDestination,
+  type ArchiveSaveRequest,
+  type SaveResult,
+} from "./api";
 import { PartialArchiveSaveError, saveNativeChats } from "./saveNativeChats";
 import {
   ImportValidationError,
@@ -28,10 +31,7 @@ function useSaveImport(ownerID: string, onSaved: () => Promise<void>) {
     if (active.current) return false;
     const controller = new AbortController();
     active.current = controller;
-    const destination = JSON.stringify([
-      ownerID,
-      ImpersonationState.get() ?? ownerID,
-    ]);
+    const destination = archiveDestination(ownerID);
     clearNotice();
     setPending(true);
     try {

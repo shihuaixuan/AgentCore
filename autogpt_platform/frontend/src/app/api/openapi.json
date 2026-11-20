@@ -5638,6 +5638,51 @@
         }
       }
     },
+    "/api/chat/imports/{chat_id}/sync": {
+      "post": {
+        "tags": ["v2", "chat"],
+        "summary": "Sync Imported Conversation",
+        "description": "Open a private, continuable copy of a saved conversation in the active organization.",
+        "operationId": "postV2SyncImportedConversation",
+        "security": [{ "HTTPBearerJWT": [] }],
+        "parameters": [
+          {
+            "name": "chat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Chat Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportedChatSyncResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401NotAuthenticatedError"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chat/imports/{chat_id}": {
       "get": {
         "tags": ["v2", "chat"],
@@ -29675,6 +29720,17 @@
           "message_count"
         ],
         "title": "ImportedChatSummary"
+      },
+      "ImportedChatSyncResult": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          }
+        },
+        "type": "object",
+        "required": ["session_id"],
+        "title": "ImportedChatSyncResult"
       },
       "ImportedMessage": {
         "properties": {

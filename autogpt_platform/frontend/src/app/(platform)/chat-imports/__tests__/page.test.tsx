@@ -1,3 +1,4 @@
+import { SESSION_LIST_QUERY_KEY } from "@/app/(platform)/copilot/useSessionList";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -21,6 +22,11 @@ import {
 const auth = vi.hoisted(() => ({
   user: { id: "owner" } as { id: string } | null,
 }));
+const push = vi.hoisted(() => vi.fn());
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ push }),
+}));
 vi.mock("@/lib/auth/hooks/useAuth", () => ({
   useAuth: () => ({ user: auth.user, isUserLoading: false }),
 }));
@@ -35,7 +41,7 @@ const workBuddyChat = {
   title: "Work notes",
   messages: [
     { role: "user", text: "First question" },
-    { role: "assistant", text: "<img src=example>\n**Literal text**" },
+    { role: "assistant", text: "<img src=example>\n\n**Literal text**" },
   ],
 };
 
@@ -95,12 +101,13 @@ function setup(
       </LanguageProvider>
     </QueryClientProvider>,
   );
-  return { request, user: userEvent.setup() };
+  return { request, client, user: userEvent.setup() };
 }
 
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  push.mockReset();
   auth.user = { id: "owner" };
 });
 
@@ -641,6 +648,58 @@ describe("conversation archive", () => {
     expect(
       request.mock.calls.some(([, init]) => init.method === "DELETE"),
     ).toBe(true);
+  });
+
+  it("opens the native conversation and refreshes the sidebar only after sync succeeds", async () => {
+    const { request, client, user } = setup("zh-CN", "qwenwork");
+    const existing = request.getMockImplementation()!;
+    const invalidate = vi.spyOn(client, "invalidateQueries");
+    let attempts = 0;
+    request.mockImplementation(async (url, init) => {
+      if (!url.endsWith("/sync")) return existing(url, init);
+      expect(url).toBe("/api/proxy/api/chat/imports/archive-id/sync");
+      expect(init).toMatchObject({
+        method: "POST",
+        cache: "no-store",
+        redirect: "error",
+      });
+      expect(init.body).toBeUndefined();
+      expect(new Headers(init.headers).get("x-archive-destination")).toBe(
+        '["owner","owner"]',
+      );
+      if (++attempts === 1) return new Response(null, { status: 503 });
+      return Response.json({ session_id: "native-chat-id" });
+    });
+
+    expect(screen.queryByRole("button", { name: "同步到会话" })).toBeNull();
+    await user.click(await screen.findByRole("button", { name: "下一页" }));
+    await user.click(await screen.findByRole("button", { name: "Saved chat" }));
+    const transcript = within(
+      await screen.findByRole("list", { name: "对话记录" }),
+    );
+    expect(transcript.getAllByRole("listitem")).toHaveLength(3);
+    expect(transcript.getByText("First question")).toBeDefined();
+    expect(transcript.getByText("<img src=example>")).toBeDefined();
+    expect(transcript.getByText("Literal text").tagName).toBe("STRONG");
+    expect(
+      transcript.getAllByRole("listitem")[1].querySelector("img"),
+    ).toBeNull();
+
+    const sync = screen.getByRole("button", { name: "同步到会话" });
+    await user.click(sync);
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "无法同步",
+    );
+    expect(push).not.toHaveBeenCalled();
+    expect(invalidate).not.toHaveBeenCalled();
+    await user.click(sync);
+    await waitFor(() =>
+      expect(push).toHaveBeenCalledWith("/home?sessionId=native-chat-id"),
+    );
+    expect(invalidate).toHaveBeenCalledWith({
+      queryKey: SESSION_LIST_QUERY_KEY,
+    });
+    expect(attempts).toBe(2);
   });
 
   it("does not fetch or accept drafts before authentication", () => {

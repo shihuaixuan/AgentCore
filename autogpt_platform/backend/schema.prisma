@@ -940,6 +940,7 @@ model ImportedChatConversation {
   createdAt    DateTime?
   importedAt   DateTime @default(now())
   Attachments  ImportedChatAttachment[]
+  Sessions     ChatSession[]
 
   @@unique([userId, source, fingerprint])
   @@index([userId, importedAt, id])
@@ -990,6 +991,8 @@ model ChatSession {
   Messages           ChatMessage[]
   BackgroundChildren ChatBackgroundTask[] @relation("BackgroundParent")
   BackgroundTask     ChatBackgroundTask?  @relation("BackgroundChild")
+  importedChatId     String?
+  ImportedChat       ImportedChatConversation? @relation(fields: [importedChatId], references: [id], onDelete: SetNull)
 
   // Expert this session is scoped to; null = plain Autopilot session.
   // Sessions keep expertId for history when the expert is archived (soft delete).
@@ -1031,6 +1034,7 @@ model ChatSession {
   @@index([organizationId])
   @@index([shareToken])
   @@index([expertId])
+  @@unique([importedChatId, organizationId])
 }
 
 // Tracks which workspace files are exposed via a shared chat session.

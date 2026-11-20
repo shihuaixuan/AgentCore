@@ -1,6 +1,8 @@
+import type { ImportedChatSyncResult } from "@/app/api/__generated__/models/importedChatSyncResult";
 import { customMutator } from "@/app/api/mutators/custom-mutator";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { ARCHIVE_DESTINATION_HEADER_NAME } from "@/lib/constants";
+import { ImpersonationState } from "@/lib/impersonation";
 import {
   encodeImport,
   ImportValidationError,
@@ -21,12 +23,17 @@ export type ArchiveSummary = {
 };
 
 type ArchiveList = { items: ArchiveSummary[]; has_more: boolean };
+export type ArchiveAttachment = { id: string; name: string; size: number };
 type ArchiveConversation = ArchiveSummary & {
   messages: ImportMessage[];
-  attachments?: { id: string; name: string; size: number }[];
+  attachments?: ArchiveAttachment[];
 };
 export type SaveResult = { added: number; duplicates: number };
 export type ArchiveSaveRequest = { destination: string; signal: AbortSignal };
+
+export function archiveDestination(ownerID: string) {
+  return JSON.stringify([ownerID, ImpersonationState.get() ?? ownerID]);
+}
 
 async function requestArchive<T>(
   path: string,
@@ -59,14 +66,14 @@ export function getArchivedConversation(id: string, signal: AbortSignal) {
   });
 }
 
-async function saveArchive(
+async function saveArchive<T = SaveResult>(
   path: string,
-  body: string | FormData,
+  body: string | FormData | undefined,
   { destination, signal }: ArchiveSaveRequest,
 ) {
   signal.throwIfAborted();
   try {
-    return await requestArchive<SaveResult>(path, {
+    return await requestArchive<T>(path, {
       method: "POST",
       body,
       signal,
@@ -77,6 +84,17 @@ async function saveArchive(
       throw new ImportValidationError("archive-destination");
     throw error;
   }
+}
+
+export function syncArchivedConversation(
+  id: string,
+  request: ArchiveSaveRequest,
+) {
+  return saveArchive<ImportedChatSyncResult>(
+    `/${encodeURIComponent(id)}/sync`,
+    undefined,
+    request,
+  );
 }
 
 export function saveConversations(

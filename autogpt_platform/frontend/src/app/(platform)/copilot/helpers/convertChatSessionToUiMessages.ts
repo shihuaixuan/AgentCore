@@ -8,7 +8,10 @@ import {
 } from "../turnPause";
 import { toolDisplayName } from "./toolDisplay";
 import { backgroundNotice } from "./backgroundSubtasks";
-import { getStandaloneBubbleMetadata } from "./standaloneMessages";
+import {
+  getStandaloneBubbleMetadata,
+  isImportedArchiveMessage,
+} from "./standaloneMessages";
 import {
   WORKSPACE_FOLDER_PART_TYPE,
   type WorkspaceFolderPartData,
@@ -562,6 +565,11 @@ interface RowPartsContext {
 }
 
 function buildRowParts(msg: SessionChatMessage, ctx: RowPartsContext) {
+  if (isImportedArchiveMessage(msg.metadata)) {
+    return [
+      { type: "text", text: msg.content ?? "", state: "done" },
+    ] satisfies UiPart[];
+  }
   // A pause marker draws the Paused card. The pause rides on the part rather
   // than the message, because merged assistant bubbles drop row metadata.
   const pause =

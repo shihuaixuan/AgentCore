@@ -34,9 +34,11 @@ from .import_archive_models import (
     ImportedChatDetail,
     ImportedChatList,
     ImportedChatSummary,
+    ImportedChatSyncResult,
     ImportedMessage,
 )
 from .import_archive_multipart import MULTIPART_OPENAPI_BODY, read_attachment_import
+from .import_archive_sync import sync_imported_chat
 
 router = APIRouter(prefix="/imports")
 logger = logging.getLogger(__name__)
@@ -117,6 +119,21 @@ async def get_imported_chat(chat_id: str, user_id: Owner) -> ImportedChatDetail:
     except _ARCHIVE_ERRORS as error:
         raise archive_unavailable(error) from None
     raise HTTPException(status_code=404, detail="Imported chat not found")
+
+
+@router.post("/{chat_id}/sync")
+async def sync_imported_conversation(
+    chat_id: str,
+    ctx: Annotated[auth.RequestContext, Security(auth.get_request_context)],
+) -> ImportedChatSyncResult:
+    """Open a private, continuable copy of a saved conversation in the active organization."""
+    try:
+        session_id = await sync_imported_chat(chat_id, ctx.user_id, ctx.org_id)
+    except _ARCHIVE_ERRORS as error:
+        raise archive_unavailable(error) from None
+    if session_id is None:
+        raise HTTPException(status_code=404, detail="Imported chat not found")
+    return ImportedChatSyncResult(session_id=session_id)
 
 
 @router.get(

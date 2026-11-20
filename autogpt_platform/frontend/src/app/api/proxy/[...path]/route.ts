@@ -53,11 +53,15 @@ function isTimeoutError(error: unknown): boolean {
   );
 }
 
-function isArchiveSave(method: string, path: string[]) {
+function isArchiveWrite(method: string, path: string[]) {
   return (
     method === "POST" &&
-    (path.join("/") === "api/chat/imports" ||
-      path.join("/") === "api/chat/imports/with-attachments")
+    path[0] === "api" &&
+    path[1] === "chat" &&
+    path[2] === "imports" &&
+    (path.length === 3 ||
+      (path.length === 4 && path[3] === "with-attachments") ||
+      (path.length === 5 && path[4] === "sync"))
   );
 }
 
@@ -318,7 +322,7 @@ async function handler(
     const destination = req.headers.get(ARCHIVE_DESTINATION_HEADER_NAME);
     if (
       destination !== null &&
-      isArchiveSave(method, path) &&
+      isArchiveWrite(method, path) &&
       !matchesArchiveDestination(destination, token, headers)
     ) {
       return NextResponse.json(

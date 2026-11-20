@@ -16,6 +16,17 @@ describe("transformDates", () => {
     expect(out.started_at).toBe("2024-03-10T09:30:00");
   });
 
+  it("keeps chat titles and message content literal", () => {
+    const text = "2026-11-19T08:30:00Z";
+    const out = transformDates({
+      title: text,
+      messages: [{ role: "user", content: text, created_at: text }],
+    });
+    expect(out.title).toBe(text);
+    expect(out.messages[0].content).toBe(text);
+    expect(out.messages[0].created_at).toBeInstanceOf(Date);
+  });
+
   it("does not touch user graph inputs/outputs", () => {
     const payload = {
       id: "exec-1",
