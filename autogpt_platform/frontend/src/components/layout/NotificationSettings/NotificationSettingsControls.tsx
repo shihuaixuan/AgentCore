@@ -68,8 +68,8 @@ export function NotificationSettingsControls() {
           />
           <Text variant="small" as="p" tone="secondary">
             {t(
-              "Your browser is blocking notifications for AutoGPT. Allow them in its site settings to switch this back on.",
-              "浏览器已阻止 AutoGPT 通知。请在网站设置中允许通知，然后重新开启。",
+              "Your browser is blocking notifications for this site. Allow them in its site settings to switch this back on.",
+              "浏览器已阻止此站点的通知。请在网站设置中允许通知，然后重新开启。",
             )}
           </Text>
         </div>

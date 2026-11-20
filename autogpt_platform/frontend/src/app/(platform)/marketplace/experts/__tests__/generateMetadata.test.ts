@@ -50,10 +50,10 @@ describe("generateMetadata", () => {
     });
 
     expect(metadata.title).toBe(
-      "Maria, Marketing · AI Expert - AutoGPT Marketplace",
+      "Maria, Marketing · AI Expert - Duanmu Software Marketplace",
     );
     expect(metadata.openGraph).toMatchObject({
-      title: "Maria, Marketing · AI Expert - AutoGPT Marketplace",
+      title: "Maria, Marketing · AI Expert - Duanmu Software Marketplace",
       description: "Turns your product story into campaigns that land.",
       type: "profile",
     });
@@ -80,7 +80,7 @@ describe("generateMetadata", () => {
       params: Promise.resolve({ expertId: "nobody" }),
     });
 
-    expect(metadata.title).toBe("Expert - AutoGPT Marketplace");
+    expect(metadata.title).toBe("Expert - Duanmu Software Marketplace");
   });
 
   test("falls back rather than throwing when the API is unreachable", async () => {
@@ -90,7 +90,7 @@ describe("generateMetadata", () => {
       params: Promise.resolve({ expertId: "template-maria" }),
     });
 
-    expect(metadata.title).toBe("Expert - AutoGPT Marketplace");
+    expect(metadata.title).toBe("Expert - Duanmu Software Marketplace");
   });
 
   test("localizes Chinese metadata and known roles without translating expert content", async () => {
@@ -101,7 +101,7 @@ describe("generateMetadata", () => {
     const metadata = await generateMetadata({
       params: Promise.resolve({ expertId: maria.id }),
     });
-    expect(metadata.title).toBe("Maria，SEO 内容经理 · AI 专家 - AutoGPT 市场");
+    expect(metadata.title).toBe("Maria，SEO 内容经理 · AI 专家 - 端木软件市场");
     expect(metadata.openGraph).toMatchObject({
       description: maria.tagline,
       type: "profile",
@@ -125,7 +125,7 @@ describe("generateMetadata", () => {
       const metadata = await generateMetadata({
         params: Promise.resolve({ expertId: maria.id }),
       });
-      expect(metadata.title).toBe(`Maria，${title} · AI 专家 - AutoGPT 市场`);
+      expect(metadata.title).toBe(`Maria，${title} · AI 专家 - 端木软件市场`);
     },
   );
 
@@ -135,6 +135,6 @@ describe("generateMetadata", () => {
     const metadata = await generateMetadata({
       params: Promise.resolve({ expertId: "nobody" }),
     });
-    expect(metadata.title).toBe("专家 - AutoGPT 市场");
+    expect(metadata.title).toBe("专家 - 端木软件市场");
   });
 });

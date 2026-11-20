@@ -90,7 +90,7 @@ function SettingsBillingPage() {
 
   useEffect(
     function setBillingDocumentTitle() {
-      document.title = t("Billing – AutoGPT Platform", "账单 – AutoGPT 平台");
+      document.title = t("Billing – Duanmu Software", "账单 – 端木软件");
     },
     [t],
   );

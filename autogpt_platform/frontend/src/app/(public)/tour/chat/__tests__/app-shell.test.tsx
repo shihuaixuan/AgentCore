@@ -110,7 +110,9 @@ describe("Tour chat app shell", () => {
     const marketplace = screen.getByRole("link", { name: "Marketplace" });
     expect(marketplace.getAttribute("href")).toBe("/marketplace");
     expect(
-      screen.getByRole("link", { name: "AutoGPT" }).getAttribute("href"),
+      screen
+        .getByRole("link", { name: "Duanmu Software" })
+        .getAttribute("href"),
     ).toBe("/marketplace");
     for (const label of ["New Task", "Search", "Workflows", "Build", "Files"]) {
       const item = screen.getByRole("button", { name: label });

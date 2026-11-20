@@ -49,7 +49,7 @@ describe("Chinese tour chrome", () => {
       screen.getByRole("heading", { name: "聊聊天，就能构建 AI 工作流" }),
     ).toBeDefined();
     expect(screen.getByText("实时演示，无需注册")).toBeDefined();
-    expect(screen.getByText(/Otto.*AutoGPT/)).toBeDefined();
+    expect(screen.getByText(/Otto.*端木软件/)).toBeDefined();
     expect(
       screen.getByRole("link", { name: "体验演示" }).getAttribute("href"),
     ).toBe("/tour/chat");

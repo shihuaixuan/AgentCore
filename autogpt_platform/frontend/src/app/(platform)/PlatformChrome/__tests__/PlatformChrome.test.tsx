@@ -115,7 +115,9 @@ describe("PlatformChrome", () => {
     expect(trialCTA.getAttribute("href")).toBe("/signup");
     expect(trialCTA.getAttribute("target")).toBeNull();
     expect(
-      screen.getByRole("link", { name: "AutoGPT" }).getAttribute("href"),
+      screen
+        .getByRole("link", { name: "Duanmu Software" })
+        .getAttribute("href"),
     ).toBe("/marketplace");
     expect(screen.queryByText(/Start with Pro/i)).toBeNull();
     expect(screen.queryByText(/\$42\.50/)).toBeNull();

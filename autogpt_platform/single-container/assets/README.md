@@ -1,9 +1,9 @@
 # Docker Hub artwork
 
 `dockerhub-banner.svg` is the editable source for `dockerhub-banner.png`. It
-reuses the AutoGPT logo and the current Frankie, Maria, and Max portraits from
-`frontend/public`. The PNG lets Docker Hub display the complete artwork without
-loading the SVG's relative image references.
+reuses the Duanmu Software icon and the current Frankie, Maria, and Max portraits
+from `frontend/public`. The PNG lets Docker Hub display the complete artwork
+without loading the SVG's relative image references.
 
 From the repository root, with DejaVu Sans installed, regenerate it with:
 

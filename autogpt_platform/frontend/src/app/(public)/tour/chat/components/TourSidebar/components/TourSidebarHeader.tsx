@@ -5,6 +5,7 @@ import {
   SidebarHeader,
   useSidebar,
 } from "@/components/molecules/Sidebar/Sidebar";
+import { BRAND_NAME } from "@/lib/branding";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { SidebarLeftIcon } from "@hugeicons/core-free-icons";
@@ -47,26 +48,14 @@ export function TourSidebarHeader() {
       >
         <Link
           href="/marketplace"
-          aria-label="AutoGPT"
+          aria-label={t(BRAND_NAME.en, BRAND_NAME.zh)}
           className={cn(
             "flex items-center",
             isCollapsed &&
               "size-8 items-center justify-center group-focus-within:hidden group-hover:hidden",
           )}
         >
-          {isCollapsed ? (
-            <AutoGPTLogo
-              hideText
-              viewBox="47 -1 42 42"
-              className="size-8"
-              aria-label={t("AutoGPT Logo", "AutoGPT 标志")}
-            />
-          ) : (
-            <AutoGPTLogo
-              className="h-9 w-auto"
-              aria-label={t("AutoGPT Logo", "AutoGPT 标志")}
-            />
-          )}
+          <AutoGPTLogo alt="" className={isCollapsed ? "size-8" : "size-9"} />
         </Link>
         {isCollapsed ? toggleButton : null}
       </div>

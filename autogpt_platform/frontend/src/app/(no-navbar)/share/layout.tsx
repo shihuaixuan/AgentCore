@@ -1,7 +1,8 @@
+import { BRAND_NAME } from "@/lib/branding";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Shared Workflow Run - AutoGPT",
+  title: `Shared Workflow Run - ${BRAND_NAME.en}`,
   description: "View shared workflow run results",
   robots: "noindex, nofollow",
 };

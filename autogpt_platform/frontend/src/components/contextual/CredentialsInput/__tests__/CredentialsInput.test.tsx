@@ -50,7 +50,7 @@ vi.mock(
   () => ({
     ConnectMethodView: ({ provider }: { provider: { name: string } }) => (
       <div data-testid="connect-method-view">
-        Connect AutoGPT to {provider.name}
+        Connect Duanmu Software to {provider.name}
       </div>
     ),
   }),
@@ -1017,7 +1017,9 @@ describe("CredentialsInput default variant", () => {
       await screen.findByRole("button", { name: /add account/i }),
     );
 
-    expect(await screen.findByText(/^Connect AutoGPT to/)).toBeDefined();
+    expect(
+      await screen.findByText(/^Connect Duanmu Software to/),
+    ).toBeDefined();
     expect(backendAPI.oAuthLogin).not.toHaveBeenCalled();
     expect(mockOpenOAuthPopup).not.toHaveBeenCalled();
   });

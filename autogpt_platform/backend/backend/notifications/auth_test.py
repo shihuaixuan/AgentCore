@@ -75,7 +75,11 @@ def test_account_deleted_subject_headline_and_body_in_order():
     assert DELETED_REASON in html
 
 
-def test_account_deleted_has_no_button_link_or_ignore_line():
+@pytest.mark.parametrize(
+    "assets", ["https://platform.agpt.co/email", "https://assets.example/email"]
+)
+def test_account_deleted_has_no_button_link_or_ignore_line(monkeypatch, assets):
+    monkeypatch.setattr(auth_email.settings.config, "email_asset_base_url", assets)
     email = render_auth_email("account_deleted", None, "sam@example.com")
     discord = build_urls("").discord
 
@@ -122,14 +126,22 @@ def test_account_deleted_plain_text_part():
     )
 
 
-def test_account_deleted_keeps_the_shared_service_frame():
+def test_account_deleted_keeps_the_shared_service_frame(monkeypatch):
+    monkeypatch.setattr(
+        auth_email.settings.config,
+        "email_asset_base_url",
+        "https://assets.example/email",
+    )
     email = render_auth_email("account_deleted", None, "sam@example.com")
     body = email.html
 
     assert body.startswith("<!doctype html>")
     assert 'width="560"' in body
     assert "font-family:Geist," in body
-    assert 'alt="AutoGPT"' in body and "logo-light.png" in body
+    assert (
+        'src="https://assets.example/email/logo-light.png" '
+        'width="48" height="48" alt="Duanmu Software"' in body
+    )
     assert all(
         'role="presentation"' in table and 'bgcolor="' in table
         for table in re.findall(r"<table\b[^>]*>", body)

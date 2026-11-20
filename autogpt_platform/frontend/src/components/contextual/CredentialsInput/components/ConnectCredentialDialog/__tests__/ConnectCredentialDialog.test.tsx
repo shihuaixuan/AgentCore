@@ -48,7 +48,7 @@ vi.mock(
               : `Continue with ${provider.name}`}
           </button>
         )}
-        <span>Connect AutoGPT to {provider.name}</span>
+        <span>Connect Duanmu Software to {provider.name}</span>
         <span data-testid="auth-methods">
           {provider.supportedAuthTypes.join(",")}
         </span>
@@ -223,7 +223,7 @@ describe("ConnectCredentialDialog", () => {
       } as unknown as BlockIOCredentialsSubSchema,
     });
 
-    expect(screen.getByText("Connect AutoGPT to GitHub")).toBeDefined();
+    expect(screen.getByText("Connect Duanmu Software to GitHub")).toBeDefined();
     expect(screen.getByTestId("auth-methods").textContent).toBe(
       "api_key,oauth2",
     );

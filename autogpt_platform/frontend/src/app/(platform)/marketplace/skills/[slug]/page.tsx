@@ -25,11 +25,11 @@ export async function generateMetadata({
     const { data } = await getV2GetMarketplaceSkill(slug);
     const skill = data as MarketplaceSkillDetails;
     return {
-      title: `${skill.title} - AutoGPT Marketplace`,
+      title: `${skill.title} - Duanmu Software Marketplace`,
       description: skill.description,
     };
   } catch {
-    return { title: "Skill - AutoGPT Marketplace" };
+    return { title: "Skill - Duanmu Software Marketplace" };
   }
 }
 

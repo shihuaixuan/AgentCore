@@ -17,7 +17,7 @@ export function AuthSplitLayout({ marketing, children, className }: Props) {
       </aside>
       <section className="relative flex flex-1 flex-col items-center bg-surface px-6 pt-12 pb-4 sm:px-10">
         <div className="flex w-full max-w-[26rem] flex-1 flex-col justify-center">
-          <AutoGPTLogo className="mx-auto mb-10 h-auto w-32 sm:w-40 lg:hidden" />
+          <AutoGPTLogo className="mx-auto mb-10 size-12 sm:size-14 lg:hidden" />
           {children}
         </div>
         <CookieSettingsLink className="mt-6" />

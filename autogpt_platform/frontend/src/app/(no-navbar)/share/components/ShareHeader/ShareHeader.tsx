@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { AutoGPTLogo } from "@/components/atoms/AutoGPTLogo/AutoGPTLogo";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -45,33 +45,13 @@ export function ShareHeader({ title, subtitle, actions }: Props) {
         )}
       </div>
       <div className="flex justify-center [grid-area:logo]">
-        <Logo />
+        <Link href="/" className="inline-block">
+          <AutoGPTLogo className="size-8" priority />
+        </Link>
       </div>
       <div className="flex shrink-0 items-center justify-end gap-2 [grid-area:actions]">
         {actions}
       </div>
     </header>
-  );
-}
-
-function Logo() {
-  return (
-    <Link href="/" className="inline-block">
-      <Image
-        src="/autogpt-logo-dark-bg.png"
-        alt="AutoGPT"
-        width={120}
-        height={54}
-        className="hidden h-7 w-auto"
-      />
-      <Image
-        src="/autogpt-logo-light-bg.png"
-        alt="AutoGPT"
-        width={120}
-        height={54}
-        className="block h-7 w-auto"
-        priority
-      />
-    </Link>
   );
 }

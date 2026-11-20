@@ -21,7 +21,7 @@ import { useMemoryPage } from "./useMemoryPage";
 export default function SettingsMemoryPage() {
   const { t } = useTranslation();
   useEffect(() => {
-    document.title = t("Memory – AutoGPT Platform", "记忆 – AutoGPT 平台");
+    document.title = t("Memory – Duanmu Software", "记忆 – 端木软件");
   }, [t]);
 
   if (!environment.isGraphMemoryAvailable()) {

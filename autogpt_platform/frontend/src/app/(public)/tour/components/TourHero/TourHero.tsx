@@ -17,12 +17,7 @@ export function TourHero() {
       <TourBackground />
       <div className="relative z-10 flex flex-1 flex-col items-center overflow-y-auto px-6 pt-16 pb-4">
         <div className="flex w-full max-w-2xl flex-1 flex-col items-center justify-center text-center">
-          <AutoGPTLogo
-            hideText
-            viewBox="46 0 43 40"
-            className="mb-6 h-20 w-20"
-            aria-label={t("AutoGPT Logo", "AutoGPT 标志")}
-          />
+          <AutoGPTLogo className="mb-6 size-20" />
 
           {/* oxlint-disable-next-line design-system/no-arbitrary-values -- hero glass badge's indigo gradient ring and glow, no token */}
           <span className="relative mb-6 inline-flex overflow-hidden rounded-full bg-[linear-gradient(135deg,rgba(99,102,241,0.6),rgba(59,130,246,0.35),rgba(165,180,252,0.6))] p-px shadow-[0_6px_20px_-6px_rgba(59,130,246,0.35)]">
@@ -50,8 +45,8 @@ export function TourHero() {
             className="mt-5 max-w-xl text-balance"
           >
             {t(
-              "Describe a goal in plain English and watch Otto build and run a working AutoGPT workflow for you, in seconds, right in your browser.",
-              "用日常语言描述目标，Otto 就能在几秒内为你构建并运行可用的 AutoGPT 工作流，全程都在浏览器中完成。",
+              "Describe a goal and watch Otto build and run a working workflow on Duanmu Software, right in your browser.",
+              "用日常语言描述目标，Otto 就能在端木软件平台上为你构建并运行工作流，全程都在浏览器中完成。",
             )}
           </Text>
 

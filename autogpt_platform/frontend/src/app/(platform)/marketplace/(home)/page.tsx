@@ -7,7 +7,7 @@ import { MainMarkeplacePage } from "../components/MainMarketplacePage/MainMarket
 export const dynamic = "force-dynamic";
 
 export const metadata = buildPageMetadata({
-  title: "Marketplace - AutoGPT Platform",
+  title: "Marketplace - Duanmu Software",
   description: "Browse AI experts, skills, workflows, and connectors.",
   path: "/marketplace",
 });

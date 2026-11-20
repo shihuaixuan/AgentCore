@@ -73,11 +73,12 @@
   <!--[if mso]></td></tr></table><![endif]-->
 {%- endmacro -%}
 
-{# Masthead: ink band, the wordmark with the octopus eyes, 100x45. #}
 {%- macro masthead() -%}
+  {%- if assets and assets != 'https://platform.agpt.co/email' -%}
     <tr><td bgcolor="#171925" align="center" class="corner" style="border-radius:16px 16px 0 0; padding:10px 0 8px; line-height:0;">
-      <a href="https://agpt.co" style="display:inline-block;"><img src="{{ assets | default('https://platform.agpt.co/email', true) }}/logo-light.png" width="100" height="45" alt="AutoGPT" style="display:block; border:0;"></a>
+      <img src="{{ assets }}/logo-light.png" width="48" height="48" alt="Duanmu Software" style="display:block; margin:0 auto; border:0; color:#FFFFFF; font-size:12px; line-height:16px;">
     </td></tr>
+  {%- endif -%}
 {%- endmacro -%}
 {# Header uses the shared masthead. #}
 {%- macro header() -%}{{ masthead() }}{%- endmacro -%}

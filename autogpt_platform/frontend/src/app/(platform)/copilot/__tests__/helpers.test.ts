@@ -74,7 +74,7 @@ describe("hasVisibleAssistantContent", () => {
 describe("COPILOT_COMPLETION_NOTIFICATION", () => {
   it("matches the copy hardcoded in public/push-sw.js", () => {
     expect(COPILOT_COMPLETION_NOTIFICATION).toEqual({
-      title: "AutoGPT",
+      title: "端木软件",
       body: "Task completed",
       icon: "/notification-icon-192.png",
     });

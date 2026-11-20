@@ -14,10 +14,14 @@ function renderHeader() {
 }
 
 describe("AppSidebarHeader", () => {
-  it("renders the AutoGPT home link pointing at /home", () => {
+  it("renders an icon-only home link pointing at /home", () => {
     renderHeader();
-    const homeLink = screen.getByRole("link", { name: "AutoGPT" });
+    const homeLink = screen.getByRole("link", { name: "Duanmu Software" });
     expect(homeLink.getAttribute("href")).toBe("/home");
+    expect(homeLink.querySelector("img")?.getAttribute("src")).toBe(
+      "/duanmu-icon.png",
+    );
+    expect(homeLink.textContent).toBe("");
   });
 
   it("shows the 'Collapse sidebar' control while expanded", () => {
@@ -44,13 +48,18 @@ describe("AppSidebarHeader", () => {
 
     await user.click(screen.getByRole("button", { name: "Collapse sidebar" }));
 
-    const homeLink = await screen.findByRole("link", { name: "AutoGPT" });
+    const homeLink = await screen.findByRole("link", {
+      name: "Duanmu Software",
+    });
     const expandButton = await screen.findByRole("button", {
       name: "Expand sidebar",
       hidden: true,
     });
 
     expect(homeLink.className).toContain("size-8");
+    expect(homeLink.querySelector("img")?.getAttribute("src")).toBe(
+      "/duanmu-icon.png",
+    );
     expect(expandButton.className).toContain("size-8");
     expect(homeLink.parentElement).toBe(expandButton.parentElement);
     expect(homeLink.parentElement?.className).toContain("size-8");

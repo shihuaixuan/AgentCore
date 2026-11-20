@@ -25,7 +25,7 @@ describe("buildPageMetadata", () => {
     expect(metadata.openGraph).toMatchObject({
       title: "An Agent",
       description: "What it does",
-      siteName: "AutoGPT",
+      siteName: "端木软件",
       type: "article",
     });
   });

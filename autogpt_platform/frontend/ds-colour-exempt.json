@@ -47,10 +47,6 @@
       "reason": "Empty-state illustrations: fixed artwork palettes."
     },
     {
-      "files": "src/components/atoms/AutoGPTLogo/AutoGPTLogo.tsx",
-      "reason": "The AutoGPT logo's brand colours."
-    },
-    {
       "files": "src/components/molecules/GlassOrb/GlassOrb.tsx",
       "reason": "The glass orb artwork's colour blobs."
     },

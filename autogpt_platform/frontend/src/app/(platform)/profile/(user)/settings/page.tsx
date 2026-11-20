@@ -42,7 +42,7 @@ export default function SettingsPage() {
   useTimezoneDetection(!!user ? timezone : undefined);
 
   useEffect(() => {
-    document.title = t("Settings – AutoGPT Platform", "设置 – AutoGPT 平台");
+    document.title = t("Settings – Duanmu Software", "设置 – 端木软件");
   }, [t]);
 
   if (preferencesError) {

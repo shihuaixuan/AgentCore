@@ -1,6 +1,6 @@
 {
-  "name": "AutoGPT 平台",
-  "short_name": "AutoGPT",
+  "name": "端木软件平台",
+  "short_name": "端木软件",
   "description": "一站式创建 AI 专家、构建工作流并自动完成任务",
   "start_url": "/",
   "display": "standalone",

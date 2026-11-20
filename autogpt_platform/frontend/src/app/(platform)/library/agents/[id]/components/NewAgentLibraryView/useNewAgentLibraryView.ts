@@ -128,7 +128,7 @@ export function useNewAgentLibraryView() {
 
   useEffect(() => {
     if (agent) {
-      document.title = `${agent.name} - ${t("Library", "工作流库")} - AutoGPT Platform`;
+      document.title = `${agent.name} - ${t("Library – Duanmu Software", "工作流库 – 端木软件")}`;
     }
   }, [agent, t]);
 

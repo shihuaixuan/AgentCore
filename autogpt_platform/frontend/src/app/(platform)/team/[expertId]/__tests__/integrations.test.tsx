@@ -911,7 +911,9 @@ describe("managing an expert's integrations", () => {
     );
     await userEvent.click(await screen.findByText("Notion"));
 
-    expect(await screen.findByText("Connect AutoGPT to Notion")).toBeDefined();
+    expect(
+      await screen.findByText("Connect Duanmu Software to Notion"),
+    ).toBeDefined();
     await userEvent.click(screen.getByRole("button", { name: /API Key/ }));
     await userEvent.type(
       await screen.findByPlaceholderText("My Notion key"),
@@ -990,7 +992,9 @@ describe("managing an expert's integrations", () => {
       screen.getAllByRole("button", { name: /Add integration/ })[0],
     );
     await userEvent.click(await screen.findByText("Notion"));
-    expect(await screen.findByText("Connect AutoGPT to Notion")).toBeDefined();
+    expect(
+      await screen.findByText("Connect Duanmu Software to Notion"),
+    ).toBeDefined();
     await userEvent.click(screen.getByRole("button", { name: /API Key/ }));
     await userEvent.type(
       await screen.findByPlaceholderText("My Notion key"),

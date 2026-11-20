@@ -13,6 +13,7 @@ from backend.data.notifications import (
     VerdictData,
     get_delivery_stream,
 )
+from backend.notifications import renderer
 from backend.notifications.design_system_fixtures import URLS, EmailScenario, scenarios
 from backend.notifications.renderer import RenderedEmail, render
 
@@ -22,7 +23,12 @@ ADDRESS = "3rd Floor, 1 Ashley Road, Altrincham, WA14 2DT, UK"
 
 
 @pytest.fixture(params=SCENARIOS, ids=lambda scenario: scenario.name)
-def rendered(request) -> tuple[EmailScenario, RenderedEmail, "EmailDocument"]:
+def rendered(
+    request, monkeypatch
+) -> tuple[EmailScenario, RenderedEmail, "EmailDocument"]:
+    monkeypatch.setattr(
+        renderer.settings.config, "email_asset_base_url", "https://assets.example/email"
+    )
     scenario = request.param
     email = render(scenario.notification_type, scenario.data, "sam@example.com", URLS)
     document = EmailDocument()
@@ -57,8 +63,12 @@ def test_masthead_and_otto_survive_email_image_restrictions(rendered):
     images = document.elements("img")
     assert len(images) == 2
     logo, otto = images
-    assert logo["src"].endswith("/email/logo-light.png")
-    assert (logo["width"], logo["height"], logo["alt"]) == ("100", "45", "AutoGPT")
+    assert logo["src"] == "https://assets.example/email/logo-light.png"
+    assert (logo["width"], logo["height"], logo["alt"]) == (
+        "48",
+        "48",
+        "Duanmu Software",
+    )
     assert otto["src"].endswith(OTTO_PATH)
     size = "80" if scenario.notification_type == NotificationType.OPS else "160"
     assert (otto["width"], otto["height"]) == (size, size)
@@ -66,7 +76,6 @@ def test_masthead_and_otto_survive_email_image_restrictions(rendered):
     for image in images:
         assert image["src"].startswith("https://")
         assert re.search(r"\.(png|jpe?g)$", image["src"], re.I)
-    assert any(link == "https://agpt.co" for link in document.links)
     assert document.text.strip()
 
 

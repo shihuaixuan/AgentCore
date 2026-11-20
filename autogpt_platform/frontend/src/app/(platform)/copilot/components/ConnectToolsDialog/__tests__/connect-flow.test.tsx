@@ -105,7 +105,9 @@ function renderPanel() {
 async function openGithub() {
   const user = userEvent.setup();
   await user.click(await screen.findByRole("button", { name: /GitHub/ }));
-  await screen.findByRole("heading", { name: "Connect AutoGPT to GitHub" });
+  await screen.findByRole("heading", {
+    name: "Connect Duanmu Software to GitHub",
+  });
   return user;
 }
 
@@ -170,7 +172,9 @@ describe("ConnectToolsPanel — picking a provider", () => {
 
     expect(await screen.findByLabelText("Search services")).toBeDefined();
     expect(
-      screen.queryByRole("heading", { name: "Connect AutoGPT to GitHub" }),
+      screen.queryByRole("heading", {
+        name: "Connect Duanmu Software to GitHub",
+      }),
     ).toBeNull();
   });
 
@@ -180,7 +184,9 @@ describe("ConnectToolsPanel — picking a provider", () => {
 
     const user = userEvent.setup();
     await user.click(await screen.findByRole("button", { name: /Smtp/ }));
-    await screen.findByRole("heading", { name: "Connect AutoGPT to Smtp" });
+    await screen.findByRole("heading", {
+      name: "Connect Duanmu Software to Smtp",
+    });
 
     await user.click(
       screen.getByRole("button", { name: /Username & password/ }),
@@ -233,7 +239,9 @@ describe("ConnectToolsPanel — inline host-scoped flow", () => {
 
     const user = userEvent.setup();
     await user.click(await screen.findByRole("button", { name: /Http/ }));
-    await screen.findByRole("heading", { name: "Connect AutoGPT to Http" });
+    await screen.findByRole("heading", {
+      name: "Connect Duanmu Software to Http",
+    });
     await user.click(screen.getByRole("button", { name: /^Website access/ }));
     return user;
   }
@@ -373,7 +381,9 @@ describe("ConnectToolsPanel — inline user/password flow", () => {
     renderPanel();
     const user = userEvent.setup();
     await user.click(await screen.findByRole("button", { name: /Smtp/ }));
-    await screen.findByRole("heading", { name: "Connect AutoGPT to Smtp" });
+    await screen.findByRole("heading", {
+      name: "Connect Duanmu Software to Smtp",
+    });
     await user.click(
       screen.getByRole("button", { name: /Username & password/ }),
     );
@@ -480,7 +490,9 @@ describe("ConnectToolsPanel — inline API key flow", () => {
     // Success returns to the list so more tools can be wired up.
     expect(await screen.findByLabelText("Search services")).toBeDefined();
     expect(
-      screen.queryByRole("heading", { name: "Connect AutoGPT to GitHub" }),
+      screen.queryByRole("heading", {
+        name: "Connect Duanmu Software to GitHub",
+      }),
     ).toBeNull();
   });
 
@@ -512,7 +524,9 @@ describe("ConnectToolsPanel — inline API key flow", () => {
       ),
     );
     expect(
-      screen.getByRole("heading", { name: "Connect AutoGPT to GitHub" }),
+      screen.getByRole("heading", {
+        name: "Connect Duanmu Software to GitHub",
+      }),
     ).toBeDefined();
   });
 });

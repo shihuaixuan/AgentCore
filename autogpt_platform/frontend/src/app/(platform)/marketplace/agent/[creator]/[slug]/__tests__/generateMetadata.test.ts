@@ -149,8 +149,10 @@ describe("generateMetadata", () => {
       params: Promise.resolve(params),
     });
 
-    expect(metadata.title).toBe("An Agent - AutoGPT Marketplace");
-    expect(metadata.openGraph?.title).toBe("An Agent - AutoGPT Marketplace");
+    expect(metadata.title).toBe("An Agent - Duanmu Software Marketplace");
+    expect(metadata.openGraph?.title).toBe(
+      "An Agent - Duanmu Software Marketplace",
+    );
     expect(metadata.openGraph?.description).toBe("Summarises yesterday's runs");
     expect(metadata.openGraph?.images).toEqual([
       "https://cdn.example.com/agent.png",

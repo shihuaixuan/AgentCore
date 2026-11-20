@@ -22,7 +22,7 @@ import { usePreferencesPage } from "./usePreferencesPage";
 export default function SettingsPreferencesPage() {
   const { t } = useTranslation();
   useEffect(() => {
-    document.title = t("Account – AutoGPT Platform", "账户 – AutoGPT 平台");
+    document.title = t("Account – Duanmu Software", "账户 – 端木软件");
   }, [t]);
 
   const {

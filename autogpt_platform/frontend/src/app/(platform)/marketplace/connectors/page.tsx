@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { MainMarketplacePageLoading } from "../components/MainMarketplacePageLoading";
 import { ConnectorsBrowsePage } from "./components/ConnectorsBrowsePage";
 
-export const metadata = { title: "Connectors - AutoGPT Marketplace" };
+export const metadata = { title: "Connectors - Duanmu Software Marketplace" };
 
 export default function MarketplaceConnectorsPage() {
   return (

@@ -1,4 +1,5 @@
 import { getSystemHeaders } from "@/lib/impersonation";
+import { BRAND_NAME } from "@/lib/branding";
 import { getPostHogSessionHeader } from "@/services/analytics/posthog-request-context";
 import { getWebSocketToken } from "@/lib/auth/actions";
 import type { ChatStatus, UIMessage } from "ai";
@@ -17,7 +18,7 @@ import { TURN_PAUSED_PART_TYPE } from "./turnPause";
  * sources are matched by test rather than by reference.
  */
 export const COPILOT_COMPLETION_NOTIFICATION = {
-  title: "AutoGPT",
+  title: BRAND_NAME.zh,
   body: "Task completed",
   icon: "/notification-icon-192.png",
 } as const;

@@ -13,7 +13,7 @@ export default function SkillsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    document.title = t("Skills – AutoGPT Platform", "技能 – AutoGPT Platform");
+    document.title = t("Skills – Duanmu Software", "技能 – 端木软件");
   }, [t]);
 
   function handleGuidedPrompt(prompt: string) {

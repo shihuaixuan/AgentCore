@@ -11,7 +11,7 @@ interface Props {
 export function MarketingHeader({ headingLines, description }: Props) {
   return (
     <>
-      <AutoGPTLogo className="h-auto w-28" />
+      <AutoGPTLogo className="size-16" />
       <div className="flex flex-col gap-6">
         <TeamAvatars />
         <div className="flex flex-col gap-4">

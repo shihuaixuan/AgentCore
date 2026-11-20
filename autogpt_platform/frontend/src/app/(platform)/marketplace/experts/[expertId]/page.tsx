@@ -36,7 +36,7 @@ export async function generateMetadata({
 
   if (!expert) {
     return buildPageMetadata({
-      title: t("Expert - AutoGPT Marketplace", "专家 - AutoGPT 市场"),
+      title: t("Expert - Duanmu Software Marketplace", "专家 - 端木软件市场"),
       path,
     });
   }
@@ -45,8 +45,8 @@ export async function generateMetadata({
   // text card until experts have a raster image.
   return buildPageMetadata({
     title: t(
-      `${expert.name}, ${expert.job_title || getExpertRoleLabel(expert.role, locale)} · AI Expert - AutoGPT Marketplace`,
-      `${expert.name}，${expert.job_title || getExpertRoleLabel(expert.role, locale)} · AI 专家 - AutoGPT 市场`,
+      `${expert.name}, ${expert.job_title || getExpertRoleLabel(expert.role, locale)} · AI Expert - Duanmu Software Marketplace`,
+      `${expert.name}，${expert.job_title || getExpertRoleLabel(expert.role, locale)} · AI 专家 - 端木软件市场`,
     ),
     description: expert.tagline || expert.bio,
     path,
