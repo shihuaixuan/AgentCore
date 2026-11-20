@@ -99,6 +99,11 @@ function errorMessage(error: unknown, t: Translate) {
         "The archive account changed. Confirm the signed-in account before saving again.",
         "归档账号已变化。请确认当前登录账号后再保存。",
       );
+    case "history-changed":
+      return t(
+        "This conversation can no longer be read as reviewed. Choose the folder again.",
+        "这条会话已变化或无法按预览时的内容读取，请重新选择目录。",
+      );
     case "conversation":
       return error.entry === undefined
         ? t(

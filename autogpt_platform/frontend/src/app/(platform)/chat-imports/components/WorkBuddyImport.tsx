@@ -139,6 +139,7 @@ export function WorkBuddyImport({ ownerID, onSaved }: ImportSourceProps) {
               <ImportConversationRow
                 key={index}
                 entry={entry.conversation}
+                omittedUnattributed={entry.omittedUnattributed}
                 checked={draft.selected.has(index)}
                 expanded={draft.preview === index}
                 disabled={

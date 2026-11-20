@@ -110,6 +110,71 @@ describe("native WorkBuddy files", () => {
   });
 
   it.each([
+    [
+      "separate context blocks",
+      [
+        '<system-reminder data-role="tool-hint">Hidden `secret.md`</system-reminder>',
+        "<user_query>Question `public.md`</user_query>",
+      ],
+    ],
+    [
+      "adjacent and trailing reminders with a variant data role",
+      [
+        "<system-reminder data-role = 'fixture-context'>Hidden `secret.md`</system-reminder><user_query>Question `public.md`</user_query>\r\n<system-reminder data-role=\"hook\">Private suffix</system-reminder>",
+      ],
+    ],
+    [
+      "a plain query after an installed reminder type",
+      [
+        '<system-reminder data-role="ide-context">Hidden `secret.md`</system-reminder>\nQuestion `public.md`',
+      ],
+    ],
+  ])("projects only the question in %s", async (_name, blocks) => {
+    const file = new File(
+      [
+        jsonl({
+          ...question,
+          content: blocks.map((text) => ({ type: "input_text", text })),
+        }),
+      ],
+      "fixture.jsonl",
+    );
+    const [draft] = await readWorkBuddyFiles([file]);
+    expect(draft.conversation.messages).toEqual([
+      {
+        role: "user",
+        text: "Question `public.md`",
+        timestamp: question.timestamp,
+      },
+    ]);
+    expect(draft.references).toEqual([{ path: "public.md" }]);
+  });
+
+  it("does not expose an unsupported question envelope after native context", async () => {
+    const file = new File(
+      [
+        jsonl(question, {
+          ...question,
+          id: "uncertain",
+          content: [
+            {
+              type: "input_text",
+              text: '<system-reminder data-role="user-context">Hidden</system-reminder>\n<unknown_envelope>Private `secret.md`</unknown_envelope>',
+            },
+          ],
+        }),
+      ],
+      "fixture.jsonl",
+    );
+    const [draft] = await readWorkBuddyFiles([file]);
+    expect(draft.conversation.messages.map(({ text }) => text)).toEqual([
+      "第一问",
+    ]);
+    expect(draft.references).toEqual([]);
+    expect(draft).toHaveProperty("omittedUnattributed", true);
+  });
+
+  it.each([
     ["a truncated last line", jsonl(question) + '\n{"type":'],
     [
       "mixed sessions",

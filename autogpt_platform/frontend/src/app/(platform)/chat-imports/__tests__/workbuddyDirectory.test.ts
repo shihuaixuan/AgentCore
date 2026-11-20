@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   findWorkBuddyTranscripts,
+  readWorkBuddyTranscriptDraftFile,
   readWorkBuddyTranscriptFile,
 } from "../workbuddyDirectory";
 import { readWorkBuddyFiles } from "../workbuddyTranscript";
@@ -25,6 +26,58 @@ function transcript(index: number) {
 }
 
 describe("WorkBuddy directory reads", () => {
+  it("does not open worker files, including files whose records share the parent's session ID", async () => {
+    const files = [
+      pickedFile(
+        "projects/fixture/parent/subagents/member.jsonl",
+        transcript(1),
+      ),
+      pickedFile("projects/fixture/agent-worker.JSONL", transcript(1)),
+      pickedFile(
+        "projects/fixture/parent/tool-results/copy.jsonl",
+        transcript(1),
+      ),
+    ];
+    expect(findWorkBuddyTranscripts(files)).toEqual([]);
+    for (const file of files) {
+      const read = vi.spyOn(file, "text");
+      await expect(readWorkBuddyTranscriptDraftFile(file)).rejects.toThrow();
+      await expect(readWorkBuddyFiles([file])).rejects.toThrow();
+      expect(read).not.toHaveBeenCalled();
+    }
+  });
+
+  it("returns the same draft including local references and ambiguity as a manual read", async () => {
+    const file = pickedFile(
+      "projects/fixture/session.jsonl",
+      [
+        transcript(1),
+        JSON.stringify({
+          type: "message",
+          sessionId: "session-1",
+          role: "assistant",
+          id: "reply",
+          cwd: "C:/Fixture",
+          content: [{ type: "output_text", text: "See `public.pdf`" }],
+        }),
+        JSON.stringify({
+          type: "message",
+          sessionId: "session-1",
+          role: "unknown",
+          id: "unknown",
+          content: [{ type: "text", text: "Not public `private.pdf`" }],
+        }),
+      ].join("\n"),
+    );
+    const draft = await readWorkBuddyTranscriptDraftFile(file);
+    expect(draft).toMatchObject({
+      omittedUnattributed: true,
+      references: [{ path: "public.pdf", cwd: "C:/Fixture" }],
+    });
+    expect(await readWorkBuddyFiles([file])).toEqual([draft]);
+    expect(await readWorkBuddyTranscriptFile(file)).toEqual(draft.conversation);
+  });
+
   it("finds and reads more than 25 nested transcripts without the manual selection cap", async () => {
     const files = Array.from({ length: 29 }, (_, index) =>
       pickedFile(

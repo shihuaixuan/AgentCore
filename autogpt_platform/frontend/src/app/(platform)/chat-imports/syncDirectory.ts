@@ -1,6 +1,6 @@
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { syncNativeConversations, type ArchiveSaveRequest } from "./api";
-import { openLocalHistory, type NativeImportSource } from "./readLocalHistory";
+import type { DirectoryReview, ReviewEntry } from "./directoryReview";
 import {
   ImportValidationError,
   MAX_BODY_BYTES,
@@ -32,6 +32,7 @@ export function shouldStopSync(error: unknown) {
 
 type SyncOptions = ArchiveSaveRequest & {
   onProgress: (progress: DirectorySyncProgress) => void;
+  onConfirmed?: (entries: ReviewEntry[]) => void;
   beforeRequest: () => void;
 };
 
@@ -41,7 +42,7 @@ function createBatchWriter(total: number, options: SyncOptions) {
   const { signal, onProgress, beforeRequest } = options;
   const progress = { total, added: 0, duplicates: 0, skipped: 0, failed: 0 };
   const encoder = new TextEncoder();
-  const batch: ImportConversation[] = [];
+  const batch: { chat: ImportConversation; entry: ReviewEntry }[] = [];
   let size = EMPTY_BODY_BYTES;
 
   function report() {
@@ -57,7 +58,8 @@ function createBatchWriter(total: number, options: SyncOptions) {
   async function flush() {
     signal.throwIfAborted();
     if (!batch.length) return;
-    const chats = batch.splice(0);
+    const pending = batch.splice(0);
+    const chats = pending.map(({ chat }) => chat);
     size = EMPTY_BODY_BYTES;
     beforeRequest();
     try {
@@ -74,6 +76,7 @@ function createBatchWriter(total: number, options: SyncOptions) {
       }
       progress.added += result.added;
       progress.duplicates += result.duplicates;
+      options.onConfirmed?.(pending.map(({ entry }) => entry));
     } catch (error) {
       signal.throwIfAborted();
       if (shouldStopSync(error)) throw error;
@@ -82,7 +85,7 @@ function createBatchWriter(total: number, options: SyncOptions) {
     report();
   }
 
-  async function add(chat: ImportConversation) {
+  async function add(chat: ImportConversation, entry: ReviewEntry) {
     signal.throwIfAborted();
     const bytes = encoder.encode(JSON.stringify(chat)).byteLength;
     if (EMPTY_BODY_BYTES + bytes > MAX_BODY_BYTES) {
@@ -91,7 +94,7 @@ function createBatchWriter(total: number, options: SyncOptions) {
     }
     if (size + Number(batch.length > 0) + bytes > MAX_BODY_BYTES) await flush();
     size += bytes + Number(batch.length > 0);
-    batch.push(chat);
+    batch.push({ chat, entry });
     if (batch.length === MAX_SELECTION) await flush();
   }
 
@@ -99,20 +102,18 @@ function createBatchWriter(total: number, options: SyncOptions) {
   return { add, flush, skip };
 }
 
-export async function syncDirectory(
-  source: NativeImportSource,
-  files: File[],
+export async function syncReviewedSelection(
+  review: DirectoryReview,
+  selected: ReadonlySet<ReviewEntry>,
   options: SyncOptions,
 ) {
-  const history = await openLocalHistory(source, files, options.signal);
-  try {
-    const writer = createBatchWriter(history.total, options);
-    for await (const { chats, skipped } of history.pages) {
-      writer.skip(skipped);
-      for (const chat of chats) await writer.add(chat);
-    }
-    await writer.flush();
-  } finally {
-    history.close?.();
+  const entries = review.entries.filter((entry) => selected.has(entry));
+  if (!entries.length || entries.length !== selected.size)
+    throw new ImportValidationError("selection");
+  const writer = createBatchWriter(entries.length, options);
+  for (const entry of entries) {
+    options.signal.throwIfAborted();
+    await writer.add(await review.load(entry), entry);
   }
+  await writer.flush();
 }

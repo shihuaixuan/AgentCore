@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanNativeUserText } from "../nativeUserText";
+import { cleanNativeUserText, readWorkBuddyUserText } from "../nativeUserText";
 
 describe("native user text", () => {
   it("extracts a whole query after the known WorkBuddy reminder blocks", () => {
@@ -48,5 +48,21 @@ describe("native user text", () => {
     "<user_query>example</user_query> followed by prose",
   ])("preserves %j verbatim", (text) => {
     expect(cleanNativeUserText(text)).toBe(text);
+  });
+
+  it("preserves quoted markup inside the verified query, including a quoted closing tag", () => {
+    const body =
+      "Compare `<user_query>` to the example:\n```xml\n</user_query><system-reminder>example</system-reminder>\n```\n";
+    const text = `<system-reminder data-role="hook">Hidden</system-reminder>\n<user_query>${body}</user_query>`;
+    expect(readWorkBuddyUserText(text)).toMatchObject({
+      query: true,
+      text: body,
+    });
+  });
+
+  it("does not join sibling native envelopes through a private reminder", () => {
+    const text =
+      "<user_query>One</user_query>\n<system-reminder>Private</system-reminder>\n<user_query>Two</user_query>";
+    expect(readWorkBuddyUserText(text)).toMatchObject({ uncertain: true });
   });
 });

@@ -10,12 +10,19 @@ type State = NonNullable<ReturnType<typeof useDirectorySync>["state"]>;
 
 export function DirectorySyncStatus({ state }: { state: State }) {
   const { t } = useTranslation();
-  const { phase, progress, error } = state;
+  const { phase, progress, error, scan } = state;
+  const reading = phase === "reading";
   const done = phase === "done" || phase === "stopped";
-  const total = progress?.total ?? 0;
-  const processed = progress ? processedCount(progress) : 0;
+  const total = scan?.total ?? progress?.total ?? 0;
+  const processed = scan?.read ?? (progress ? processedCount(progress) : 0);
   const headline = {
-    reading: t("Reading local conversations…", "正在解析本地会话…"),
+    reading: scan
+      ? t(
+          `Reading locally: ${processed} / ${total}`,
+          `正在本机解析：${processed} / ${total} 条`,
+        )
+      : t("Reading local conversations…", "正在解析本地会话…"),
+    review: null,
     syncing: t(
       `Syncing: ${processed} / ${total}`,
       `正在同步：${processed} / ${total} 条`,
@@ -34,7 +41,7 @@ export function DirectorySyncStatus({ state }: { state: State }) {
     <div className="space-y-2 border-t border-border-base pt-3">
       <Text variant="body-medium" role="status">
         {phase === "stopped" && !progress
-          ? t("Could not sync the folder", "无法同步此目录")
+          ? t("Could not read the folder", "无法读取此目录")
           : headline}
       </Text>
       {total > 0 && (
@@ -42,7 +49,11 @@ export function DirectorySyncStatus({ state }: { state: State }) {
           value={processed}
           max={total}
           role="progressbar"
-          aria-label={t("Sync progress", "同步进度")}
+          aria-label={
+            reading
+              ? t("Reading progress", "解析进度")
+              : t("Sync progress", "同步进度")
+          }
           aria-valuemin={0}
           aria-valuemax={total}
           aria-valuenow={processed}
@@ -51,10 +62,15 @@ export function DirectorySyncStatus({ state }: { state: State }) {
       {progress && done && <DirectorySyncSummary progress={progress} />}
       {!done && (
         <Text variant="small" tone="secondary">
-          {t(
-            "Keep this page open until sync finishes.",
-            "请保持本页打开，直到同步结束。",
-          )}
+          {reading
+            ? t(
+                "No conversations are being uploaded.",
+                "解析期间不会上传任何会话。",
+              )
+            : t(
+                "Keep this page open until sync finishes.",
+                "请保持本页打开，直到同步结束。",
+              )}
         </Text>
       )}
       {phase === "stopped" && <DirectorySyncError error={error} />}
@@ -80,8 +96,8 @@ function DirectorySyncSummary({
       {failed > 0 ? (
         <Text variant="small" tone="error-strong" role="alert">
           {t(
-            "Some requests failed. Choose the same folder to retry without making duplicates.",
-            "部分同步请求失败。可以重新选择同一目录重试，不会产生重复会话。",
+            "Some requests failed. The unconfirmed chats are still selected; you can retry without making duplicates.",
+            "部分请求失败，未确认的会话仍已勾选。可以直接重试，不会创建重复会话。",
           )}
         </Text>
       ) : total === skipped ? (
@@ -102,8 +118,8 @@ function DirectorySyncError({ error }: { error: unknown }) {
     const message =
       error.status === 429
         ? t(
-            "Too many requests. Wait a moment and choose the same folder again.",
-            "请求过于频繁。请稍后重新选择同一目录。",
+            "Too many requests. Wait a moment and sync the remaining selection again.",
+            "请求过于频繁。请稍后重试剩余的已选会话。",
           )
         : t(
             "Check your signed-in account before trying again.",

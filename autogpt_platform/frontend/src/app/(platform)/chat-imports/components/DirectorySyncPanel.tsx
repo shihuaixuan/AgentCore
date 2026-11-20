@@ -7,6 +7,7 @@ import { useRef, type ChangeEvent } from "react";
 import { useDirectorySync } from "../useDirectorySync";
 import { readLocalSelection } from "../useImportAttachments";
 import { DirectorySyncStatus } from "./DirectorySyncStatus";
+import { DirectorySelection } from "./DirectorySelection";
 
 type PickerProps = {
   busy: boolean;
@@ -79,8 +80,8 @@ export function DirectorySyncPanel({ ownerID }: { ownerID: string }) {
           </Text>
           <Text variant="body" tone="secondary">
             {t(
-              "Choose a history folder to sync its conversations to Recent chats. Only titles and message text are sent—not original files, attachments, or tool logs.",
-              "选中会话目录后自动同步，无需逐条勾选。只发送会话标题和问答文本，不上传原文件、附件或工具日志。",
+              "Choose a folder to review its conversations on this device. Only the chats you select and confirm are sent to Recent chats. Original files, attachments and tool logs stay on this device.",
+              "选择目录后，先在本机预览会话。勾选或全选后，点击「同步已选会话」才会写入最近会话；不上传原文件、附件或工具日志。",
             )}
           </Text>
         </div>
@@ -109,7 +110,22 @@ export function DirectorySyncPanel({ ownerID }: { ownerID: string }) {
             onPick={(files) => void sync.start("qwenwork", files)}
           />
         </div>
-        {sync.state && <DirectorySyncStatus state={sync.state} />}
+        {sync.state && sync.state.phase !== "review" && (
+          <DirectorySyncStatus state={sync.state} />
+        )}
+        {sync.review && <DirectorySelection {...sync} review={sync.review} />}
+        {sync.state && !sync.busy && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="small"
+            onClick={sync.clear}
+          >
+            {sync.state.phase === "reading"
+              ? t("Cancel reading", "取消解析")
+              : t("Clear folder", "清除目录")}
+          </Button>
+        )}
       </section>
     </Card>
   );

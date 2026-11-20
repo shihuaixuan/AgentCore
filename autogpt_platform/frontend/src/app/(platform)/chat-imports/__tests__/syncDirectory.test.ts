@@ -1,8 +1,8 @@
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { syncNativeConversations } from "../api";
-import { openLocalHistory } from "../readLocalHistory";
-import { syncDirectory } from "../syncDirectory";
+import type { DirectoryReview } from "../directoryReview";
+import { syncReviewedSelection } from "../syncDirectory";
 import {
   encodeImport,
   MAX_BODY_BYTES,
@@ -10,10 +10,8 @@ import {
 } from "../validation";
 
 vi.mock("../api", () => ({ syncNativeConversations: vi.fn() }));
-vi.mock("../readLocalHistory", () => ({ openLocalHistory: vi.fn() }));
 
 const send = vi.mocked(syncNativeConversations);
-const open = vi.mocked(openLocalHistory);
 
 function chat(index: number, text = "Test question"): ImportConversation {
   return {
@@ -24,30 +22,37 @@ function chat(index: number, text = "Test question"): ImportConversation {
   };
 }
 
-function mockHistory(chats: ImportConversation[]) {
-  async function* pages() {
-    for (const conversation of chats)
-      yield { chats: [conversation], skipped: 0 };
-  }
-  const close = vi.fn();
-  open.mockResolvedValue({ total: chats.length, pages: pages(), close });
-  return close;
+function mockReview(chats: ImportConversation[]): DirectoryReview {
+  return {
+    entries: chats.map((chat, page) => ({
+      page,
+      slot: 0,
+      fingerprint: "fixture",
+      title: chat.title,
+      messageCount: 1,
+    })),
+    skipped: 0,
+    copies: 0,
+    conflicts: 0,
+    load: vi.fn(async (entry) => chats[entry.page]),
+  };
 }
 
-function sync() {
+function sync(review: DirectoryReview, selected = new Set(review.entries)) {
   const onProgress = vi.fn();
-  const promise = syncDirectory("workbuddy", [], {
+  const onConfirmed = vi.fn();
+  const promise = syncReviewedSelection(review, selected, {
     destination: '["owner","owner"]',
     signal: new AbortController().signal,
     onProgress,
+    onConfirmed,
     beforeRequest: vi.fn(),
   });
-  return { onProgress, promise };
+  return { onProgress, onConfirmed, promise };
 }
 
 beforeEach(() => {
   send.mockReset();
-  open.mockReset();
 });
 
 describe("directory sync batches", () => {
@@ -56,13 +61,13 @@ describe("directory sync batches", () => {
     const chats = Array.from({ length: 16 }, (_, index) =>
       chat(index, question),
     );
-    const close = mockHistory(chats);
+    const review = mockReview(chats);
     send.mockRejectedValueOnce(new ApiError("Unavailable", 503, null));
     send.mockImplementation(async (batch) => ({
       added: batch.length,
       duplicates: 0,
     }));
-    const { onProgress, promise } = sync();
+    const { onProgress, onConfirmed, promise } = sync(review);
 
     await promise;
 
@@ -81,16 +86,16 @@ describe("directory sync batches", () => {
       skipped: 0,
       failed: 13,
     });
-    expect(close).toHaveBeenCalledOnce();
+    expect(onConfirmed.mock.calls).toEqual([[review.entries.slice(13)]]);
   });
 
   it("stops on a session or rate-limit error without sending another batch", async () => {
-    const close = mockHistory(
+    const review = mockReview(
       Array.from({ length: 28 }, (_, index) => chat(index)),
     );
     const blocked = new ApiError("Rate limited", 429, null);
     send.mockRejectedValueOnce(blocked);
-    const { onProgress, promise } = sync();
+    const { onProgress, onConfirmed, promise } = sync(review);
 
     await expect(promise).rejects.toBe(blocked);
 
@@ -102,6 +107,22 @@ describe("directory sync batches", () => {
       skipped: 0,
       failed: 0,
     });
-    expect(close).toHaveBeenCalledOnce();
+    expect(onConfirmed).not.toHaveBeenCalled();
+  });
+
+  it("does not read or send unchecked entries and rejects a stale selection", async () => {
+    const review = mockReview([chat(0), chat(1), chat(2)]);
+    const selected = new Set([review.entries[2], review.entries[0]]);
+    send.mockResolvedValue({ added: 2, duplicates: 0 });
+    await sync(review, selected).promise;
+    expect(vi.mocked(review.load).mock.calls.flat()).toEqual([
+      review.entries[0],
+      review.entries[2],
+    ]);
+    expect(send.mock.calls[0][0]).toEqual([chat(0), chat(2)]);
+    await expect(
+      sync(mockReview([chat(3)]), selected).promise,
+    ).rejects.toMatchObject({ code: "selection" });
+    expect(send).toHaveBeenCalledOnce();
   });
 });

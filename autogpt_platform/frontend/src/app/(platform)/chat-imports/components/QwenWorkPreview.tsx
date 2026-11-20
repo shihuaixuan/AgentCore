@@ -93,6 +93,7 @@ function QwenWorkRows({
         <ImportConversationRow
           key={entry.conversation.source_id}
           entry={entry.conversation}
+          omittedUnattributed={entry.omittedUnattributed}
           checked={draft.selected.has(index)}
           expanded={draft.preview === index}
           disabled={

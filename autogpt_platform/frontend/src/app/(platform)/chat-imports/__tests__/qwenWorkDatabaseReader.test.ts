@@ -9,6 +9,55 @@ import {
 } from "./qwenWorkFixture";
 
 describe("QwenWork snapshot reader", () => {
+  it("accepts a lightweight single thread with message IDs but no metadata or input ledger", async () => {
+    const raw = await makeQwenWorkFixture((db) => {
+      db.run("ALTER TABLE messages ADD COLUMN message_id TEXT");
+      db.run("UPDATE messages SET message_id='message-'||id");
+    });
+    const { entries, skipped } = await readQwenWorkDatabase(raw);
+    expect(skipped).toBe(0);
+    expect(entries[0].conversation.messages.map(({ role }) => role)).toEqual([
+      "user",
+      "assistant",
+      "assistant",
+    ]);
+  });
+
+  it("does not choose a legacy sibling by position, even if only one has messages", async () => {
+    const raw = await makeQwenWorkFixture((db) => {
+      db.run("INSERT INTO sub_chats VALUES ('empty','source-first',999)");
+    });
+    const { entries, skipped } = await readQwenWorkDatabase(raw);
+    expect(skipped).toBe(1);
+    expect(entries.map(({ conversation }) => conversation.title)).toEqual([
+      "Leave this out",
+    ]);
+  });
+
+  it("skips ambiguous sequence order without affecting the next chat", async () => {
+    const raw = await makeQwenWorkFixture((db) => {
+      db.run("UPDATE messages SET sequence=0 WHERE id='second'");
+    });
+    const { entries, skipped } = await readQwenWorkDatabase(raw);
+    expect(skipped).toBe(1);
+    expect(entries).toHaveLength(1);
+    expect(entries[0].conversation.title).toBe("Leave this out");
+  });
+
+  it("keeps the 2,000-row bound even when excess rows are tool-only", async () => {
+    const raw = await makeQwenWorkFixture((db) => {
+      db.run(`
+        WITH RECURSIVE extra(n) AS (VALUES(4) UNION ALL SELECT n+1 FROM extra WHERE n<2000)
+        INSERT INTO messages SELECT 'extra-'||n,'source-first','sub-earlier',n,'assistant','[]',NULL FROM extra;
+      `);
+    });
+    const { entries, skipped } = await readQwenWorkDatabase(raw);
+    expect(skipped).toBe(1);
+    expect(entries.map(({ conversation }) => conversation.title)).toEqual([
+      "Leave this out",
+    ]);
+  });
+
   it("counts the same candidates that it pages, including an entirely skipped page", async () => {
     const raw = await makeQwenWorkFixture((db) => {
       addRecentToolOnlyConversations(db);

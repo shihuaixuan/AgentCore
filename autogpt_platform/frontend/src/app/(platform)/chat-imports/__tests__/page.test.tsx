@@ -1,5 +1,6 @@
 import { SESSION_LIST_QUERY_KEY } from "@/app/(platform)/copilot/useSessionList";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
+import { ImpersonationState } from "@/lib/impersonation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   cleanup,
@@ -154,7 +155,7 @@ afterEach(() => {
 });
 
 describe("conversation archive", () => {
-  it("syncs a whole WorkBuddy directory in batches and shows confirmed progress", async () => {
+  it("reviews a WorkBuddy folder locally and selects across pages before syncing in batches", async () => {
     const { request, client, user } = setup("zh-CN");
     const invalidate = vi.spyOn(client, "invalidateQueries");
     const original = request.getMockImplementation()!;
@@ -182,22 +183,55 @@ describe("conversation archive", () => {
           ],
         },
       });
+      const selection = await screen.findByRole("checkbox", {
+        name: "选择 Question 0",
+      });
+      const submit = screen.getByRole<HTMLButtonElement>("button", {
+        name: "同步已选会话",
+      });
+      expect(selection.getAttribute("aria-checked")).toBe("false");
+      expect(submit.disabled).toBe(true);
+      await user.click(
+        within(selection.closest("li")!).getByRole("button", { name: "预览" }),
+      );
+      expect(
+        (await screen.findByRole("list", { name: "对话记录" })).textContent,
+      ).toContain("Question 0");
+      expect(submit.disabled).toBe(true);
+      await user.click(selection);
+      await user.click(screen.getByRole("button", { name: "下一页会话" }));
+      await user.click(screen.getByRole("button", { name: "上一页会话" }));
+      expect(
+        screen
+          .getByRole("checkbox", { name: "选择 Question 0" })
+          .getAttribute("aria-checked"),
+      ).toBe("true");
+      await user.click(screen.getByRole("button", { name: "全选" }));
+      expect(screen.getByText("共 26 条会话，已选 26 条")).toBeDefined();
+      await user.click(screen.getByRole("button", { name: "取消全选" }));
+      expect(submit.disabled).toBe(true);
+      await user.click(screen.getByRole("button", { name: "全选" }));
+      expect(
+        request.mock.calls.every(([, init]) => init.method === "GET"),
+      ).toBe(true);
+      expect(invalidate).not.toHaveBeenCalled();
+      await user.click(submit);
       const progress = await screen.findByRole("progressbar", {
         name: "同步进度",
       });
       await waitFor(() => expect(attempts).toBe(2));
       await waitFor(() =>
-        expect(progress.getAttribute("aria-valuenow")).toBe("26"),
+        expect(progress.getAttribute("aria-valuenow")).toBe("25"),
       );
-      expect(progress.getAttribute("aria-valuemax")).toBe("27");
+      expect(progress.getAttribute("aria-valuemax")).toBe("26");
       expect(chooseFolder.hasAttribute("disabled")).toBe(true);
-      expect(screen.queryByRole("checkbox")).toBeNull();
+      expect(submit.disabled).toBe(true);
     } finally {
       pending.resolve(Response.json({ added: 0, duplicates: 1 }));
     }
-    expect(await screen.findByText("同步完成：27 / 27 条")).toBeDefined();
+    expect(await screen.findByText("同步完成：26 / 26 条")).toBeDefined();
     expect(
-      screen.getByText("新增 25 · 已存在 1 · 跳过 1 · 失败 0"),
+      screen.getByText("新增 25 · 已存在 1 · 跳过 0 · 失败 0"),
     ).toBeDefined();
     expect(push).not.toHaveBeenCalled();
     expect(invalidate).toHaveBeenCalledWith({
@@ -224,7 +258,110 @@ describe("conversation archive", () => {
     }
   });
 
-  it("syncs QwenWork past a whole page of unsupported chats without uploading its database", async () => {
+  it("discards a replaced directory even when its read finishes last", async () => {
+    const { request, user } = setup();
+    const first = workBuddyDirectoryFile(1);
+    const read = Promise.withResolvers<string>();
+    const text = await first.text();
+    const reader = vi.spyOn(first, "text").mockReturnValue(read.promise);
+    const picker = screen.getByLabelText("WorkBuddy sync directory");
+    try {
+      fireEvent.change(picker, { target: { files: [first] } });
+      await waitFor(() => expect(reader).toHaveBeenCalledOnce());
+      fireEvent.change(picker, {
+        target: { files: [workBuddyDirectoryFile(2)] },
+      });
+      const next = await screen.findByRole("checkbox", {
+        name: "Select Question 2",
+      });
+      await user.click(next);
+      await user.click(screen.getByRole("button", { name: "Clear folder" }));
+    } finally {
+      read.resolve(text);
+    }
+    fireEvent.change(picker, {
+      target: { files: [workBuddyDirectoryFile(3)] },
+    });
+    const last = await screen.findByRole("checkbox", {
+      name: "Select Question 3",
+    });
+    expect(last.getAttribute("aria-checked")).toBe("false");
+    expect(
+      screen.queryByRole("checkbox", { name: "Select Question 1" }),
+    ).toBeNull();
+    expect(
+      screen.queryByRole("checkbox", { name: "Select Question 2" }),
+    ).toBeNull();
+    expect(request.mock.calls.every(([, init]) => init.method === "GET")).toBe(
+      true,
+    );
+  });
+
+  it("does not send a reviewed selection if the destination account changes before confirmation", async () => {
+    const { request, user } = setup();
+    const impersonation = vi
+      .spyOn(ImpersonationState, "get")
+      .mockReturnValue(null);
+    try {
+      fireEvent.change(screen.getByLabelText("WorkBuddy sync directory"), {
+        target: { files: [workBuddyDirectoryFile(5)] },
+      });
+      await user.click(
+        await screen.findByRole("checkbox", { name: "Select Question 5" }),
+      );
+      impersonation.mockReturnValue("different-account");
+      await user.click(
+        screen.getByRole("button", { name: "Sync selected chats" }),
+      );
+      expect((await screen.findByRole("alert")).textContent).toContain(
+        "account changed",
+      );
+      expect(
+        request.mock.calls.every(([, init]) => init.method === "GET"),
+      ).toBe(true);
+    } finally {
+      impersonation.mockRestore();
+    }
+  });
+
+  it("keeps only the unconfirmed directory batch selected for retry", async () => {
+    const { request, user } = setup();
+    const original = request.getMockImplementation()!;
+    const batches: string[][] = [];
+    request.mockImplementation(async (url, init) => {
+      if (url.endsWith("/sync")) {
+        const { conversations } = JSON.parse(String(init.body));
+        batches.push(
+          conversations.map(({ title }: { title: string }) => title),
+        );
+        if (batches.length === 2) return new Response(null, { status: 503 });
+      }
+      return original(url, init);
+    });
+    fireEvent.change(screen.getByLabelText("WorkBuddy sync directory"), {
+      target: {
+        files: Array.from({ length: 26 }, (_, index) =>
+          workBuddyDirectoryFile(index),
+        ),
+      },
+    });
+    await user.click(await screen.findByRole("button", { name: "Select all" }));
+    const submit = screen.getByRole<HTMLButtonElement>("button", {
+      name: "Sync selected chats",
+    });
+    await user.click(submit);
+    await screen.findByText(
+      "New 25 · Already present 0 · Skipped 0 · Failed 1",
+    );
+    expect(screen.getByText("26 conversations · 1 selected")).toBeDefined();
+    await user.click(submit);
+    await screen.findByText("Sync complete: 1 / 1");
+    expect(batches.map((batch) => batch.length)).toEqual([25, 1, 1]);
+    expect(batches[2]).toEqual(batches[1]);
+    expect(submit.disabled).toBe(true);
+  });
+
+  it("previews QwenWork past an unsupported page, and syncs only the selected transcript", async () => {
     const { request, user } = setup("zh-CN");
     const raw = await makeQwenWorkFixture(addRecentToolOnlyConversations);
     await user.click(
@@ -235,10 +372,22 @@ describe("conversation archive", () => {
     fireEvent.change(picker, {
       target: { files: [pickedFile("data/agents.db", raw)] },
     });
-    expect(await screen.findByText("同步完成：102 / 102 条")).toBeDefined();
-    expect(
-      screen.getByText("新增 2 · 已存在 0 · 跳过 100 · 失败 0"),
-    ).toBeDefined();
+    const keep = await screen.findByRole("checkbox", {
+      name: "选择 Leave this out",
+    });
+    await user.click(
+      within(keep.closest("li")!).getByRole("button", { name: "预览" }),
+    );
+    const preview = await screen.findByRole("list", { name: "对话记录" });
+    const question = within(preview).getByText("Not selected").textContent;
+    await user.click(keep);
+    expect(screen.getByText("共 2 条会话，已选 1 条")).toBeDefined();
+    expect(screen.getByText(/跳过 100 条/)).toBeDefined();
+    expect(request.mock.calls.every(([, init]) => init.method === "GET")).toBe(
+      true,
+    );
+    await user.click(screen.getByRole("button", { name: "同步已选会话" }));
+    expect(await screen.findByText("同步完成：1 / 1 条")).toBeDefined();
     const posts = request.mock.calls.filter(
       ([, init]) => init.method === "POST",
     );
@@ -248,11 +397,12 @@ describe("conversation archive", () => {
     expect(body).not.toMatch(
       /agents\.db|PRIVATE TOOL INPUT|Deleted text|report\.pdf/,
     );
-    expect(
-      JSON.parse(body).conversations.map(
-        ({ title }: { title: string }) => title,
-      ),
-    ).toEqual(["Local fixture", "Leave this out"]);
+    expect(JSON.parse(body).conversations).toEqual([
+      expect.objectContaining({
+        title: "Leave this out",
+        messages: [{ role: "user", text: question }],
+      }),
+    ]);
   });
 
   it("imports a checked QwenWork conversation without Web Crypto or posting its database", async () => {

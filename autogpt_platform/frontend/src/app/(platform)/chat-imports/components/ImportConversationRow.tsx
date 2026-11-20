@@ -6,23 +6,44 @@ import { useId, type ReactNode } from "react";
 import type { ImportConversation } from "../validation";
 import { Transcript } from "./Transcript";
 
+type RowProps = {
+  checked: boolean;
+  expanded: boolean;
+  disabled: boolean;
+  onSelect: (checked: boolean) => void;
+  onPreview: () => void;
+  omittedUnattributed?: boolean;
+  children?: ReactNode;
+};
+
 export function ImportConversationRow({
   entry,
+  children,
+  ...controls
+}: RowProps & { entry: ImportConversation }) {
+  return (
+    <ConversationReviewRow
+      {...controls}
+      title={entry.title}
+      messageCount={entry.messages.length}
+    >
+      <Transcript messages={entry.messages} />
+      {children}
+    </ConversationReviewRow>
+  );
+}
+
+export function ConversationReviewRow({
+  title,
+  messageCount,
+  omittedUnattributed,
   checked,
   expanded,
   disabled,
   onSelect,
   onPreview,
   children,
-}: {
-  entry: ImportConversation;
-  checked: boolean;
-  expanded: boolean;
-  disabled: boolean;
-  onSelect: (checked: boolean) => void;
-  onPreview: () => void;
-  children?: ReactNode;
-}) {
+}: RowProps & { title: string; messageCount: number }) {
   const { t } = useTranslation();
   const id = useId();
   return (
@@ -44,14 +65,19 @@ export function ImportConversationRow({
             className="break-words"
             dir="auto"
           >
-            {entry.title}
+            {title}
           </Text>
           <Text variant="small" tone="secondary">
-            {t(
-              `Messages: ${entry.messages.length}`,
-              `${entry.messages.length} 条消息`,
-            )}
+            {t(`Messages: ${messageCount}`, `${messageCount} 条消息`)}
           </Text>
+          {omittedUnattributed && (
+            <Text variant="small" tone="secondary">
+              {t(
+                "Messages with unclear authorship were left out.",
+                "已略过无法确认归属的消息。",
+              )}
+            </Text>
+          )}
         </div>
         <Button
           type="button"
@@ -65,12 +91,7 @@ export function ImportConversationRow({
         </Button>
       </div>
       <div id={id} hidden={!expanded} className="space-y-3">
-        {expanded && (
-          <>
-            <Transcript messages={entry.messages} />
-            {children}
-          </>
-        )}
+        {expanded && children}
       </div>
     </li>
   );

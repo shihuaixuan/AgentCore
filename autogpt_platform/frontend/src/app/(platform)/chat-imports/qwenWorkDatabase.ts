@@ -4,8 +4,15 @@ import initSqlJs, {
   type SqlValue,
 } from "sql.js";
 import { nativeSourceID } from "./nativeSourceID";
+import {
+  readFields,
+  requireNativeChat,
+  rowAttribution,
+  trackPublicTurns,
+} from "./qwenWorkAttribution";
 import { MAX_QWENWORK_DB_BYTES, SQLITE_HEADER } from "./qwenWorkDirectory";
 import { collectQwenWorkParts, qwenWorkTimestamp } from "./qwenWorkMessages";
+import { prepareQwenWorkQueries } from "./qwenWorkQueries";
 import {
   encodeImport,
   ImportValidationError,
@@ -17,13 +24,6 @@ import {
 } from "./validation";
 
 export const QWENWORK_PREVIEW_LIMIT = 100;
-const MAX_PROJECTED_ROWS = 2_000;
-const MAX_PARTS_BYTES = 1024 * 1024;
-const candidateChats = `
-  FROM chats c
-  WHERE c.deleted_at IS NULL AND typeof(c.id) = 'text' AND length(c.id) BETWEEN 1 AND 256
-    AND EXISTS (SELECT 1 FROM messages m JOIN sub_chats s ON s.id=m.sub_chat_id
-      WHERE m.chat_id=c.id AND s.chat_id=c.id AND m.role IN ('user','assistant'))`;
 
 export type QwenWorkReadResult = {
   entries: NativeChatDraft[];
@@ -90,26 +90,7 @@ function checkpointedSnapshot(raw: ArrayBuffer) {
 }
 
 function openSnapshot(db: Database): QwenWorkDatabaseReader {
-  for (const name of ["chats", "sub_chats", "messages"]) {
-    const table = db.exec(`PRAGMA main.table_list('${name}')`)[0]?.values[0];
-    if (table?.[1] !== name || table[2] !== "table")
-      throw new ImportValidationError("qwenwork-database");
-  }
-  const count = db.exec(`SELECT COUNT(*) ${candidateChats}`)[0]?.values[0]?.[0];
-  if (typeof count !== "number" || !Number.isSafeInteger(count) || count < 0)
-    throw new ImportValidationError("qwenwork-database");
-  const total = count;
-  const chats = db.prepare(`
-    SELECT c.id, CASE WHEN length(c.name) <= 1000 THEN c.name END,
-      CASE WHEN length(c.worktree_path) <= 1024 THEN c.worktree_path END
-    ${candidateChats}
-    ORDER BY c.updated_at DESC, c.created_at DESC, c.id
-    LIMIT ? OFFSET ?`);
-  const messages = db.prepare(`
-    SELECT m.role, CASE WHEN length(CAST(m.parts AS BLOB)) <= ? THEN m.parts END, m.created_at
-    FROM messages m JOIN sub_chats s ON s.id=m.sub_chat_id AND s.chat_id=m.chat_id
-    WHERE m.chat_id=? AND m.role IN ('user','assistant')
-    ORDER BY s.created_at, s.id, m.sequence, m.id LIMIT ?`);
+  const queries = prepareQwenWorkQueries(db);
   let closed = false;
 
   function close() {
@@ -123,7 +104,7 @@ function openSnapshot(db: Database): QwenWorkDatabaseReader {
     try {
       if (!Number.isSafeInteger(page) || page < 0)
         throw new ImportValidationError("qwenwork-reader");
-      return readProjectedChats(chats, messages, total, page);
+      return readProjectedChats(queries, page);
     } catch (error) {
       close();
       if (error instanceof ImportValidationError) throw error;
@@ -131,36 +112,29 @@ function openSnapshot(db: Database): QwenWorkDatabaseReader {
     }
   }
 
-  return { total, readPage, close };
+  return { total: queries.total, readPage, close };
 }
 
-type Statement = ReturnType<Database["prepare"]>;
+type Queries = ReturnType<typeof prepareQwenWorkQueries>;
 
 function readProjectedChats(
-  chats: Statement,
-  messages: Statement,
-  total: number,
+  queries: Queries,
   page: number,
 ): QwenWorkReadResult {
+  const { total } = queries;
   const entries: NativeChatDraft[] = [];
   if (page >= Math.ceil(total / QWENWORK_PREVIEW_LIMIT))
     return { entries, skipped: 0, page, hasOlder: false };
 
   const offset = page * QWENWORK_PREVIEW_LIMIT;
   let skipped = 0;
-  chats.bind([QWENWORK_PREVIEW_LIMIT, offset]);
-  try {
-    while (chats.step()) {
-      try {
-        entries.push(projectChat(chats.get(), messages));
-      } catch (error) {
-        if (!(error instanceof ImportValidationError)) throw error;
-        skipped++;
-      }
+  for (const chat of queries.pageRows(QWENWORK_PREVIEW_LIMIT, offset)) {
+    try {
+      entries.push(projectChat(chat, queries));
+    } catch (error) {
+      if (!(error instanceof ImportValidationError)) throw error;
+      skipped++;
     }
-  } finally {
-    chats.reset();
-    messages.reset();
   }
   return {
     entries,
@@ -170,19 +144,70 @@ function readProjectedChats(
   };
 }
 
-function projectChat([id, name, path]: SqlValue[], query: Statement) {
+function projectChat(
+  [id, name, path, ext, execution]: SqlValue[],
+  queries: Queries,
+): NativeChatDraft {
   if (typeof id !== "string") throw new ImportValidationError("conversation");
+  requireNativeChat(ext, execution);
+  const thread = queries.publicThread(id);
   const cwd = typeof path === "string" && path.trim() ? path : undefined;
   const messages: ImportMessage[] = [];
   const references = new Set<string>();
   let textLength = 0;
-  query.bind([MAX_PARTS_BYTES, id, MAX_PROJECTED_ROWS + 1]);
-  for (let count = 0; query.step(); count++) {
-    if (count === MAX_PROJECTED_ROWS)
+  let omitted = thread.omitted;
+  const turns = trackPublicTurns(queries.legacy);
+  let previousSequence = -1;
+  for (const [
+    role,
+    parts,
+    created,
+    sequence,
+    raw,
+    session,
+    message,
+    input,
+  ] of queries.messageRows(id, thread.id)) {
+    if (
+      typeof sequence !== "number" ||
+      !Number.isSafeInteger(sequence) ||
+      sequence <= previousSequence
+    )
       throw new ImportValidationError("conversation");
-    const [role, parts, created] = query.get();
+    previousSequence = sequence;
     if (role !== "assistant" && role !== "user") continue;
-    const text = collectQwenWorkParts(parts, references, role);
+    const meta = readFields(raw);
+    const owner = rowAttribution(
+      role,
+      meta,
+      session,
+      message,
+      input,
+      queries.legacy,
+    );
+    if (!meta || owner !== "public") {
+      if (role === "user") turns.user(owner, meta?.requestSetId);
+      omitted ||= owner === "unknown";
+      continue;
+    }
+    if (role === "assistant") {
+      const turn = turns.assistant(meta.requestSetId);
+      if (turn !== "public") {
+        omitted ||= turn === "unknown";
+        continue;
+      }
+    }
+    const {
+      text,
+      omitted: uncertainParts,
+      userInput,
+    } = collectQwenWorkParts(parts, references, role, meta, queries.legacy);
+    omitted ||= uncertainParts;
+    if (role === "user")
+      turns.user(
+        userInput ? "public" : uncertainParts ? "unknown" : "internal",
+        meta.requestSetId,
+      );
     if (!text) continue;
     textLength += text.length;
     if (textLength > MAX_BODY_BYTES || messages.length >= MAX_MESSAGES)
@@ -204,5 +229,6 @@ function projectChat([id, name, path]: SqlValue[], query: Statement) {
     conversation,
     cwd,
     references: [...references].map((path) => ({ path, cwd })),
+    ...(omitted ? { omittedUnattributed: true } : {}),
   };
 }
