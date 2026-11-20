@@ -78,7 +78,7 @@ export function useRaiseSubmission() {
     } catch (error) {
       submitLatch.current = false;
       setIsLocked(false);
-      reportFailure(error, title, t);
+      reportFailure(error, title, locale, t);
     }
   }
 
@@ -88,6 +88,7 @@ export function useRaiseSubmission() {
 function reportFailure(
   error: unknown,
   title: string,
+  locale: "zh-CN" | "en",
   translate: (english: string, chinese: string) => string,
 ) {
   if (error instanceof ApiError && error.status === 409) {
@@ -116,11 +117,24 @@ function reportFailure(
     title: translate(`Couldn't create ${title}`, `无法创建 ${title}`),
     description:
       error instanceof ApiError && [400, 422, 503].includes(error.status)
-        ? error.message
+        ? localizedRaiseError(error.message, error.status, locale, translate)
         : translate(
             "Something went wrong. Please try again.",
             "出现错误，请重试。",
           ),
     variant: "destructive",
   });
+}
+
+function localizedRaiseError(
+  message: string,
+  status: number,
+  locale: "zh-CN" | "en",
+  translate: (english: string, chinese: string) => string,
+) {
+  if (locale === "en") return message;
+  if (status === 503) {
+    return translate(message, "服务暂时不可用，请稍后重试。");
+  }
+  return translate(message, "提交信息无效，请检查填写内容后重试。");
 }

@@ -1,5 +1,6 @@
 import type { ExpertAvatarRequestCategory } from "@/app/api/__generated__/models/expertAvatarRequestCategory";
 import type { VoiceSample } from "@/app/api/__generated__/models/voiceSample";
+import type { Locale } from "@/lib/i18n/locale";
 import { legacyCategoryForRole } from "./legacyCategory";
 import { creditsToUsdLabel } from "@/lib/credits";
 import {
@@ -58,8 +59,25 @@ export const VOICE_SAMPLES: VoiceSample[] = [
   },
 ];
 
+const VOICE_SAMPLES_ZH: VoiceSample[] = [
+  {
+    label: "简洁直接",
+    text: "这是我找到的结果，以及我建议的下一步。不说废话——只给出结论和理由。",
+  },
+  {
+    label: "温暖详细",
+    text: "我为你仔细研究了这件事，想带你了解其中的重点、它为何重要，以及我认为我们接下来可以一起努力的方向。",
+  },
+];
+
+/** The stored voice guidance stays canonical; only the picker copy changes. */
+export function voiceSamplesFor(locale: Locale): VoiceSample[] {
+  return locale === "zh-CN" ? VOICE_SAMPLES_ZH : VOICE_SAMPLES;
+}
+
 export const RAISE_PROMPTS = {
-  greeting: "Hello, I'm Otto. I'll help you create your own AI Expert.",
+  greeting:
+    "Hello, I'm your General Office Assistant. I'll help you create your own AI Expert.",
   categoryQuestion:
     "First — which area should your expert work in? It sets their color.",
   jobTitleQuestion: "And what's their job title?",
@@ -82,6 +100,14 @@ export const RAISE_PROMPTS = {
 export const PROMPT_DELAY_MS = 500;
 
 export const VOICE_SKIPPED_LABEL = "I'll decide the voice later";
+
+const VOICE_LABELS_ZH: Record<string, string> = {
+  "Concise and direct": "简洁直接",
+  "Warm and detailed": "温暖详细",
+  "My own writing sample": "我的写作示例",
+  "A voice": "一种写作风格",
+  [VOICE_SKIPPED_LABEL]: "稍后决定写作风格",
+};
 
 export interface RaiseDraft {
   step: RaiseStep;
@@ -263,6 +289,15 @@ export function voiceSummaryLabel(
   if (result.choice === "custom") return "My own writing sample";
   const sample = result.choice === "a" ? samples[0] : samples[1];
   return sample?.label ?? "A voice";
+}
+
+export function voiceDisplayLabel(
+  label: string | null,
+  translate: (english: string, chinese: string) => string = (english) =>
+    english,
+): string | null {
+  if (!label) return null;
+  return translate(label, VOICE_LABELS_ZH[label] ?? label);
 }
 
 export function resolveVoicePreferences(

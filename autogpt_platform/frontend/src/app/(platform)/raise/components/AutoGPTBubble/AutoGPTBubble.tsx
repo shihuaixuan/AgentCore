@@ -1,7 +1,11 @@
 "use client";
 
-import { AutopilotAvatar } from "@/components/molecules/AutopilotAvatar/AutopilotAvatar";
-import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
+import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
+import {
+  DEFAULT_ASSISTANT_AVATAR_URL,
+  getDefaultAssistantTitle,
+} from "@/services/experts/default-assistant";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useTypewriter } from "./useTypewriter";
 
 type Props = {
@@ -17,7 +21,9 @@ export function AutoGPTBubble({
   animate = true,
   onTypingComplete,
 }: Props) {
+  const { locale } = useTranslation();
   const { typed, isTyping } = useTypewriter(text, onTypingComplete, animate);
+  const assistantName = getDefaultAssistantTitle(locale);
 
   return (
     <div
@@ -25,9 +31,13 @@ export function AutoGPTBubble({
       className="flex max-w-[85%] flex-col gap-1.5 self-start duration-500 animate-in fade-in fill-mode-both slide-in-from-bottom-3 motion-reduce:animate-none"
     >
       <div className="flex items-end gap-2">
-        <AutopilotAvatar size={20} />
+        <ExpertAvatar
+          name={assistantName}
+          avatarUrl={DEFAULT_ASSISTANT_AVATAR_URL}
+          size={20}
+        />
         <span className="text-body font-medium text-foreground-base">
-          {AUTOPILOT_NAME}
+          {assistantName}
         </span>
       </div>
       <p className="text-body-md leading-relaxed text-foreground-base">

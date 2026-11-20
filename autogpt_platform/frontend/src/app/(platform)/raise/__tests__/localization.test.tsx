@@ -40,7 +40,9 @@ test("translates creation conversation prompts without translating a custom titl
     </LanguageProvider>,
   );
   expect(
-    screen.getByText("你好，我是 Otto。我会帮助你创建专属 AI 专家。"),
+    screen.getByText(
+      "你好，我是你的通用办公助手。我会帮助你创建专属 AI 专家。",
+    ),
   ).toBeDefined();
   expect(
     screen.getByText(
