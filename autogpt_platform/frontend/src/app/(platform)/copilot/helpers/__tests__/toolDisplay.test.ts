@@ -6,7 +6,7 @@ import {
 } from "../../components/ToolChain/helpers";
 import { getSessionActivity } from "../../components/WorkspaceFileCards/helpers";
 import { convertChatSessionMessagesToUiMessages } from "../convertChatSessionToUiMessages";
-import { getAgentDisplayName, withToolDisplayNames } from "../toolDisplay";
+import { getAgentDisplayName, withToolDisplayMetadata } from "../toolDisplay";
 
 type Part = UIMessage["parts"][number];
 
@@ -31,7 +31,7 @@ describe("agent display names", () => {
   it("updates concurrent tool rows and the live heading by actual call ID", () => {
     const first = runPart();
     const second = runPart("call-two");
-    const parts = withToolDisplayNames([
+    const parts = withToolDisplayMetadata([
       first,
       displayPart("call-two", "Second workflow"),
       second,
@@ -100,7 +100,7 @@ describe("agent display names", () => {
   it.each([undefined, null, "", "  ", 42, {}, []])(
     "ignores malformed display names %j",
     (displayName) => {
-      const parts = withToolDisplayNames([
+      const parts = withToolDisplayMetadata([
         runPart(),
         displayPart("call-one", displayName),
       ]);
@@ -112,7 +112,7 @@ describe("agent display names", () => {
   );
 
   it("keeps the latest valid name on replay and uses it for done and error labels", () => {
-    const parts = withToolDisplayNames([
+    const parts = withToolDisplayMetadata([
       runPart(),
       displayPart("call-one", "First name"),
       displayPart("call-one", " Canonical name "),
@@ -251,7 +251,7 @@ describe("agent display names", () => {
     expect(
       latest?.parts.filter((part) => part.type === "data-tool-display"),
     ).toHaveLength(1);
-    const parts = withToolDisplayNames(latest?.parts ?? []);
+    const parts = withToolDisplayMetadata(latest?.parts ?? []);
     expect(toChainRow(parts[0], 0)?.text).toBe(
       'Ran workflow "Daily briefing updated"',
     );

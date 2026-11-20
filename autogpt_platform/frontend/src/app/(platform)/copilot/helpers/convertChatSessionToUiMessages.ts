@@ -714,17 +714,20 @@ function toolCallPart(rawToolCall: unknown, ctx: RowPartsContext) {
   const toolCall = rawToolCall as {
     id?: unknown;
     display_name?: unknown;
+    sub_session_id?: unknown;
     function?: { name?: unknown; arguments?: unknown };
   };
   const toolCallId = String(toolCall.id ?? "").trim();
   const toolName = String(toolCall.function?.name ?? "").trim();
   if (!toolCallId || !toolName) return null;
+  const subSessionID = toolDisplayName(toolCall.sub_session_id);
 
   const base = {
     type: `tool-${toolName}` as const,
     toolCallId,
     title: toolDisplayName(toolCall.display_name) ?? undefined,
     input: toToolInput(toolCall.function?.arguments),
+    ...(subSessionID ? { subSessionID } : {}),
   };
   const output = ctx.toolOutputsByCallId.get(toolCallId);
   if (output !== undefined) {
@@ -968,6 +971,7 @@ function sessionRowOf(row: LogRow): SessionChatMessage {
     tool_calls: row.toolCalls.map((call) => ({
       id: call.id,
       display_name: call.displayName,
+      ...(call.subSessionID ? { sub_session_id: call.subSessionID } : {}),
       function: { name: call.name, arguments: call.input },
     })),
     sequence: row.sequence,

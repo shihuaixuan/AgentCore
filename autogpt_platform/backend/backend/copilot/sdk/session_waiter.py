@@ -46,6 +46,7 @@ from backend.copilot.pending_message_helpers import (
     queue_user_message,
 )
 from backend.copilot.response_model import StreamError, StreamFinish
+from backend.copilot.tool_display import emit_tool_sub_session
 from backend.copilot.tree import SpawnRequest, TreeRefusal
 from backend.copilot.turn_pause import TurnPause
 from backend.copilot.turn_queue import queued_turn_refusal
@@ -377,6 +378,8 @@ async def run_copilot_turn_via_queue(
         return "rejected_concurrent_turn_cap", SessionResult()
     except Exception as e:
         raise TurnNotDispatched(f"The turn could not be dispatched: {e}") from e
+    if spawn is not None:
+        emit_tool_sub_session(session_id)
     if timeout <= 0:
         # The turn is queued and the caller waits for nothing. Subscribing
         # anyway could only fail, and a failure here, after the dispatch,
@@ -487,6 +490,8 @@ async def _queue_for_slot(
     track_turn_cap(
         user_id, running_cap, surface=_cap_surface(tool_name), outcome="queued"
     )
+    if spawn is not None:
+        emit_tool_sub_session(session_id)
     if timeout <= 0:
         # Stored, so it runs when a slot frees; as after a dispatch, a read
         # with nothing to wait for could only fail and read as "not queued".

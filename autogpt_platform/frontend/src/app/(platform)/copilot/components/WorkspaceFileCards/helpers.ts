@@ -2,7 +2,7 @@ import type { ToolUIPart, UIMessage } from "ai";
 import { asObject, str } from "../ToolChain/resultHelpers";
 import {
   getAgentDisplayName,
-  withToolDisplayNames,
+  withToolDisplayMetadata,
 } from "../../helpers/toolDisplay";
 
 export interface SessionRun {
@@ -45,7 +45,7 @@ export function getSessionActivity(messages: UIMessage[]): {
   const deletedScheduleIds = new Set<string>();
 
   for (const message of messages) {
-    for (const part of withToolDisplayNames(message.parts)) {
+    for (const part of withToolDisplayMetadata(message.parts)) {
       if (!part.type.startsWith("tool-")) continue;
       const output = asObject((part as { output?: unknown }).output);
       const toolInput = asObject((part as { input?: unknown }).input);

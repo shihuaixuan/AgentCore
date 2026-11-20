@@ -3828,6 +3828,27 @@ def test_list_sessions_can_request_strict_recency(
     assert mock_get.await_args.kwargs["pinned_first"] is False
 
 
+@pytest.mark.parametrize(
+    ("query", "include_sub_sessions"),
+    [("", False), ("?expert_id=expert-1", False), ("?include_sub_sessions=true", True)],
+)
+def test_list_sessions_defaults_to_top_level_chats(
+    mocker: pytest_mock.MockerFixture, query: str, include_sub_sessions: bool
+) -> None:
+    get_sessions = mocker.patch(
+        "backend.api.features.chat.routes.get_user_sessions",
+        new_callable=AsyncMock,
+        return_value=([], 0),
+    )
+
+    response = client.get(f"/sessions{query}")
+
+    assert response.status_code == 200
+    assert (
+        get_sessions.await_args.kwargs["include_sub_sessions"] is include_sub_sessions
+    )
+
+
 def test_list_sessions_marks_running_as_processing(
     mocker: pytest_mock.MockerFixture,
 ) -> None:

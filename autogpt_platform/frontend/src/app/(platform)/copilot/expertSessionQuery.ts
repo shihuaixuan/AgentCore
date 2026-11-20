@@ -17,3 +17,7 @@ export function latestExpertSessionParams(
     pinned_first: false,
   };
 }
+
+export function expertKickoffHistoryParams(expertId: string | null) {
+  return { ...latestExpertSessionParams(expertId), include_sub_sessions: true };
+}

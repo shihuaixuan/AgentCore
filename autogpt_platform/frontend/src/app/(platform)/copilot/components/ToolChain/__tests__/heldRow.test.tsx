@@ -90,12 +90,12 @@ test("only a confirmed, approved delegation gets a compact child link", async ()
   const { rerender } = render(delegation(new Map()));
 
   expect(screen.getByText("Waiting for you")).toBeDefined();
-  expect(screen.queryByRole("link", { name: /Curie/ })).toBeNull();
+  expect(screen.queryByRole("link")).toBeNull();
 
   act(() =>
     useHeldAnswersStore.setState({ answers: { [reviewID]: "approved" } }),
   );
-  expect(screen.queryByRole("link", { name: /Curie/ })).toBeNull();
+  expect(screen.queryByRole("link")).toBeNull();
 
   rerender(
     delegation(
@@ -107,7 +107,7 @@ test("only a confirmed, approved delegation gets a compact child link", async ()
             output: {
               status: "completed",
               sub_autopilot_session_id: "curie-session",
-              expert: { name: "Curie" },
+              expert: { name: "Curie", job_title: "Research Analyst" },
             },
             card: {
               args: { prompt },
@@ -120,7 +120,9 @@ test("only a confirmed, approved delegation gets a compact child link", async ()
     ),
   );
 
-  const entry = await screen.findByRole("link", { name: "Curie completed" });
+  const entry = await screen.findByRole("link", {
+    name: "Research Analyst completed",
+  });
   expect(entry.getAttribute("href")).toBe("/copilot?sessionId=curie-session");
   expect(entry.closest("[inert]")).toBeNull();
   expect(screen.queryByText(prompt)).toBeNull();

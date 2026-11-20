@@ -45,10 +45,13 @@ def test_provider_tool_calls_omit_display_metadata_without_mutating_saved_calls(
         {
             "id": "call-1",
             "display_name": "Daily report",
+            "sub_session_id": "private-child",
             "function": {"name": "run_agent", "arguments": '{"display_name":"input"}'},
         }
     ]
     provider = tool_calls_for_provider(saved)
     assert "display_name" not in provider[0]
+    assert "sub_session_id" not in provider[0]
     assert provider[0]["function"]["arguments"] == '{"display_name":"input"}'
     assert saved[0]["display_name"] == "Daily report"
+    assert saved[0]["sub_session_id"] == "private-child"

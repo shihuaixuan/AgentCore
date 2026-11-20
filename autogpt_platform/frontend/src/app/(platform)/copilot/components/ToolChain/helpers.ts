@@ -1,6 +1,9 @@
 import type { ToolUIPart } from "ai";
 import type { Locale } from "@/lib/i18n/locale";
-import { getBlockDisplayName } from "../../helpers/toolDisplay";
+import {
+  getBlockDisplayName,
+  type DisplayToolPart,
+} from "../../helpers/toolDisplay";
 import type { MessagePart } from "../ChatMessagesContainer/helpers";
 import { EXPERT_ONBOARDING_PART_TYPE } from "../ExpertOnboardingCard/helpers";
 import { isFeedbackCardPart } from "../../tools/FeedbackPrompts/helpers";
@@ -38,6 +41,7 @@ export interface ChainRow {
   tool?: string;
   input?: unknown;
   output?: unknown;
+  subSessionID?: string;
   reasoningText?: string;
   requiresAction?: boolean;
   /** The row's user-facing work (connectors, inputs, questions) renders in
@@ -314,7 +318,7 @@ export function toChainRow(
     };
   }
   if (part.type.startsWith("tool-")) {
-    const tool = part as ToolUIPart;
+    const tool = part as DisplayToolPart;
     const toolName = extractToolName(tool);
     const state: ChainRowState =
       tool.state === "output-error"
@@ -341,6 +345,7 @@ export function toChainRow(
       tool: toolName,
       input: stableTool.input,
       output: tool.output,
+      ...(tool.subSessionID ? { subSessionID: tool.subSessionID } : {}),
     };
 
     const catalogLabel = getRowCatalogLabel(

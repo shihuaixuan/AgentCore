@@ -16,13 +16,13 @@ class BaselineToolPersistence(BaseModel):
         self.pending_message = message
         messages.append(message)
 
-    def set_display_name(self, tool_call_id: str, name: str) -> None:
+    def set_display_metadata(self, tool_call_id: str, metadata: dict[str, str]) -> None:
         message = self.pending_message
         if message is None:
             return
         for call in message.tool_calls or []:
             if call["id"] == tool_call_id:
-                call["display_name"] = name
+                call.update(metadata)
                 message.mark_tool_calls_pending_save()
                 return
 

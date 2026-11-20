@@ -279,7 +279,7 @@ from .tool_adapter import (
 )
 from .tool_display import (
     SDKToolDisplayBridge,
-    stamp_tool_display_name,
+    stamp_tool_display_metadata,
     strip_display_token,
 )
 
@@ -3898,7 +3898,9 @@ class _StreamAccumulator:
     # inline with text/tool rows so they survive session reload; the reader
     # filters role="reasoning" out of LLM context.
     reasoning_response: ChatMessage | None = None
-    tool_display_names: dict[str, str] = dataclass_field(default_factory=dict)
+    tool_display_metadata: dict[str, dict[str, str]] = dataclass_field(
+        default_factory=dict
+    )
 
 
 def _dispatch_response(
@@ -4035,11 +4037,12 @@ def _dispatch_response(
 
     elif isinstance(response, StreamToolDisplayAvailable):
         display = response.data
-        acc.tool_display_names[display.toolCallId] = display.displayName
-        stamp_tool_display_name(
+        metadata = display.call_metadata()
+        acc.tool_display_metadata.setdefault(display.toolCallId, {}).update(metadata)
+        stamp_tool_display_metadata(
             [acc.assistant_response, *ctx.session.messages],
             display.toolCallId,
-            display.displayName,
+            metadata,
         )
 
     elif isinstance(response, StreamToolInputAvailable):
@@ -4059,8 +4062,8 @@ def _dispatch_response(
                 },
             }
         )
-        if name := acc.tool_display_names.get(response.toolCallId):
-            acc.accumulated_tool_calls[-1]["display_name"] = name
+        if metadata := acc.tool_display_metadata.get(response.toolCallId):
+            acc.accumulated_tool_calls[-1].update(metadata)
         acc.assistant_response.tool_calls = acc.accumulated_tool_calls
         acc.assistant_response.mark_tool_calls_pending_save()
         if not acc.has_appended_assistant:

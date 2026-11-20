@@ -60,21 +60,13 @@ export function SubSessionChainRow({ row, isLast, readOnly }: Props) {
       isLast={isLast}
     />
   ) : (
-    <PendingActivity
-      input={target?.input}
-      readOnly={readOnly}
-      isLast={isLast}
-    />
+    <PendingActivity row={target ?? row} readOnly={readOnly} isLast={isLast} />
   );
 }
 
-function PendingActivity({
-  input,
-  readOnly,
-  isLast,
-}: Omit<Props, "row"> & { input: unknown }) {
+function PendingActivity({ row, readOnly, isLast }: Props) {
   const { t, locale } = useTranslation();
-  const args = asObject(input) ?? {};
+  const args = asObject(row.input) ?? {};
   const expertID = str(args, "expert_id");
   const { expertsById } = useExpertMap(!readOnly && !!expertID);
   const expert = !readOnly && expertID ? expertsById.get(expertID) : null;
@@ -87,13 +79,11 @@ function PendingActivity({
     <ActivityLine
       isLast={isLast}
       activity={{
-        sessionID: null,
-        name:
-          expert?.name ??
-          (expertID ? getExpertDisplayTitle(expert, locale) : fallback),
+        sessionID: readOnly ? null : (row.subSessionID ?? null),
+        name: expertID ? getExpertDisplayTitle(expert, locale) : fallback,
         avatarURL: expert?.avatarUrl ?? null,
         color: expert?.color,
-        status: "running",
+        status: row.state === "running" ? "running" : "unknown",
         named: !!expert,
       }}
     />
@@ -111,13 +101,12 @@ function SettledActivity({
 }) {
   const { t, locale } = useTranslation();
   const expert = asObject(output.expert);
-  const name =
-    expert &&
-    (str(expert, "name") ??
-      getExpertDisplayTitle(
+  const name = expert
+    ? getExpertDisplayTitle(
         { jobTitle: str(expert, "job_title"), role: str(expert, "role") },
         locale,
-      ));
+      )
+    : null;
   const background = !!str(output, "background_task_id");
   const sessionID = readOnly ? null : childSessionID(output);
   const status =

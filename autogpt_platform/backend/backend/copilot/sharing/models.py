@@ -207,7 +207,12 @@ def sanitize_chat_message(message: ChatMessageDomain) -> SharedChatMessage:
 def _redact_tool_calls(tool_calls: list[dict] | None) -> list[dict] | None:
     if tool_calls is None:
         return None
-    return [_redact_secret_keys(tc) for tc in tool_calls]
+    return [
+        _redact_secret_keys(
+            {key: value for key, value in call.items() if key != "sub_session_id"}
+        )
+        for call in tool_calls
+    ]
 
 
 def _redact_secret_keys(value: Any) -> Any:

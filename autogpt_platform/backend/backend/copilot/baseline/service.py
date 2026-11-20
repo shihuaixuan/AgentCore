@@ -1264,18 +1264,30 @@ async def _baseline_tool_executor(
         ),
     )
 
-    def on_display_name(name: str) -> None:
-        state.tool_persistence.set_display_name(tool_call_id, name)
+    display = ToolDisplayData(toolCallId=tool_call_id)
+
+    def publish_display(
+        *, name: str | None = None, child_id: str | None = None
+    ) -> None:
+        nonlocal display
+        display = ToolDisplayData(
+            toolCallId=tool_call_id,
+            displayName=name or display.displayName,
+            subSessionId=child_id or display.subSessionId,
+        )
+        state.tool_persistence.set_display_metadata(
+            tool_call_id, display.call_metadata()
+        )
         _emit(
             state,
-            StreamToolDisplayAvailable(
-                id=tool_call_id,
-                data=ToolDisplayData(toolCallId=tool_call_id, displayName=name),
-            ),
+            StreamToolDisplayAvailable(id=tool_call_id, data=display),
         )
 
     try:
-        with tool_display_context(on_display_name):
+        with tool_display_context(
+            lambda name: publish_display(name=name),
+            on_sub_session=lambda child_id: publish_display(child_id=child_id),
+        ):
             result: StreamToolOutputAvailable = await execute_tool(
                 tool_name=tool_name,
                 parameters=tool_args,

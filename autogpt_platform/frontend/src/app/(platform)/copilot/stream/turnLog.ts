@@ -8,6 +8,7 @@
  */
 
 import { TURN_PAUSE_KEY, turnPauseSummary, type TurnPause } from "../turnPause";
+import type { ToolDisplayMetadata } from "../helpers/toolDisplay";
 
 export type RowRole = "assistant" | "reasoning" | "tool" | "user";
 
@@ -16,6 +17,7 @@ export interface LogToolCall {
   name: string;
   input: unknown;
   displayName: string | null;
+  subSessionID?: string;
 }
 
 export interface LogRow {
@@ -73,7 +75,7 @@ export interface TurnLog {
   rows: readonly LogRow[];
   blocks: Readonly<Record<string, BlockState>>;
   tools: Readonly<Record<string, ToolState>>;
-  displayNames: Readonly<Record<string, string>>;
+  toolDisplays: Readonly<Record<string, ToolDisplayMetadata>>;
   /** The engine's current assistant row, once appended. */
   assistantRow: number | null;
   /** A tool result landed since the current assistant row opened. */
@@ -108,7 +110,7 @@ export function emptyTurnLog(): TurnLog {
     rows: [],
     blocks: {},
     tools: {},
-    displayNames: {},
+    toolDisplays: {},
     assistantRow: null,
     hasToolResults: false,
     overlay: [],
@@ -154,9 +156,9 @@ export function appendReasoning(log: TurnLog, row: number, delta: string) {
 /** Row rule 4: a tool call joins the current assistant row, or opens one after tool results. */
 export function addToolCall(
   log: TurnLog,
-  call: Omit<LogToolCall, "displayName">,
+  call: Omit<LogToolCall, keyof ToolDisplayMetadata>,
 ) {
-  const toolCall = { ...call, displayName: log.displayNames[call.id] ?? null };
+  const toolCall = { ...call, displayName: null, ...log.toolDisplays[call.id] };
   if (log.assistantRow === null || log.hasToolResults) {
     return {
       ...pushRow(log, {
@@ -219,21 +221,24 @@ export function appendErrorMarker(
   });
 }
 
-/** Row rule 7: a display name lands on its tool call, now or when the call arrives. */
-export function setToolDisplayName(
+/** Row rule 7: display metadata lands on its tool call, now or when it arrives. */
+export function setToolDisplayMetadata(
   log: TurnLog,
-  toolCallId: string,
-  name: string,
+  toolCallID: string,
+  metadata: ToolDisplayMetadata,
 ) {
-  const displayNames = { ...log.displayNames, [toolCallId]: name };
+  const toolDisplays = {
+    ...log.toolDisplays,
+    [toolCallID]: { ...log.toolDisplays[toolCallID], ...metadata },
+  };
   const index = log.rows.findIndex((r) =>
-    r.toolCalls.some((c) => c.id === toolCallId),
+    r.toolCalls.some((call) => call.id === toolCallID),
   );
-  if (index === -1) return { ...log, displayNames };
-  const toolCalls = log.rows[index].toolCalls.map((c) =>
-    c.id === toolCallId ? { ...c, displayName: name } : c,
+  if (index === -1) return { ...log, toolDisplays };
+  const toolCalls = log.rows[index].toolCalls.map((call) =>
+    call.id === toolCallID ? { ...call, ...metadata } : call,
   );
-  return { ...patchRow(log, index, { toolCalls }), displayNames };
+  return { ...patchRow(log, index, { toolCalls }), toolDisplays };
 }
 
 /**
@@ -387,6 +392,7 @@ function persistedToolCall(raw: unknown): LogToolCall {
   const call = (raw ?? {}) as {
     id?: unknown;
     display_name?: unknown;
+    sub_session_id?: unknown;
     function?: { name?: unknown; arguments?: unknown };
   };
   const args = call.function?.arguments;
@@ -396,6 +402,9 @@ function persistedToolCall(raw: unknown): LogToolCall {
     input: typeof args === "string" ? parseJsonLoose(args) : (args ?? {}),
     displayName:
       typeof call.display_name === "string" ? call.display_name : null,
+    ...(typeof call.sub_session_id === "string"
+      ? { subSessionID: call.sub_session_id }
+      : {}),
   };
 }
 

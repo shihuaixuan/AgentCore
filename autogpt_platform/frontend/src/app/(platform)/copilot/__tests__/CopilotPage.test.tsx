@@ -5,6 +5,7 @@ import {
   waitFor,
   within,
 } from "@/tests/integrations/test-utils";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { server } from "@/mocks/mock-server";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
@@ -20,16 +21,22 @@ vi.mock("@/providers/onboarding/onboarding-provider", () => ({
 // Mock child components that are complex and not under test here
 vi.mock("../components/ChatContainer/ChatContainer", async () => {
   const { ToolChain } = await import("../components/ToolChain/ToolChain");
+  const { deriveRowParts } = await import(
+    "../components/ChatMessagesContainer/components/MessageRow/helpers"
+  );
   const { CopilotChatActionsProvider } = await import(
     "../components/CopilotChatActionsProvider/CopilotChatActionsProvider"
   );
-  function ChatContainer({ messages, onSend }: ChatContainerProps) {
+  function ChatContainer({ messages, onSend, status }: ChatContainerProps) {
     return (
       <div data-testid="chat-container">
         <CopilotChatActionsProvider onSend={onSend}>
           <ToolChain
-            parts={messages.flatMap((message) => message.parts)}
-            isStreaming={false}
+            parts={messages.flatMap(
+              (message) =>
+                deriveRowParts(message.role, message.parts).renderableParts,
+            )}
+            isStreaming={status === "streaming"}
           />
         </CopilotChatActionsProvider>
       </div>
@@ -140,7 +147,7 @@ vi.mock("nuqs", () => ({
 const basePageState = {
   sessionId: null as string | null,
   messages: [] as ChatContainerProps["messages"],
-  status: "ready" as const,
+  status: "ready" as ChatContainerProps["status"],
   error: undefined,
   stop: vi.fn(),
   isReconnecting: false,
@@ -170,6 +177,7 @@ vi.mock("../useCopilotPage", () => ({
 
 afterEach(() => {
   cleanup();
+  useCopilotUIStore.getState().closeSubSessionPreview();
   mockUseCopilotPage.mockReset();
   mockUseCopilotPage.mockImplementation(() => basePageState);
   mockUseAuth.mockReset();
@@ -183,6 +191,107 @@ afterEach(() => {
 });
 
 describe("CopilotPage child conversation", () => {
+  it("opens the matching running child of two calls to the same expert", async () => {
+    const user = userEvent.setup();
+    mockSessionIdForQueryState = "parent-chat";
+    const getSession = vi.fn(({ params }) =>
+      HttpResponse.json({
+        id: params.sessionId,
+        chat_status: "running",
+        messages: [
+          {
+            role: "user",
+            content: `Task for ${params.sessionId}`,
+            sequence: 0,
+          },
+        ],
+      }),
+    );
+    server.use(
+      http.get("/api/proxy/api/chat/sessions/:sessionId", getSession),
+      http.get("/api/proxy/api/experts/identities", () =>
+        HttpResponse.json([
+          {
+            id: "harper",
+            name: "哈珀",
+            role: "招聘与录用",
+            job_title: "招聘专员",
+            is_archived: false,
+          },
+        ]),
+      ),
+    );
+    mockUseCopilotPage.mockReturnValue({
+      ...basePageState,
+      sessionId: "parent-chat",
+      status: "streaming",
+      messages: [
+        {
+          id: "parent-turn",
+          role: "assistant",
+          parts: [
+            ...["call-a", "call-b"].map((toolCallId) => ({
+              type: "tool-run_capability" as const,
+              toolCallId,
+              state: "input-available" as const,
+              input: {
+                id: "tool:delegate_to_expert",
+                input: {
+                  expert_id: "harper",
+                  prompt: "Draft a job description",
+                },
+              },
+            })),
+            {
+              type: "data-tool-display",
+              data: { toolCallId: "call-b", subSessionId: "harper-b" },
+            },
+            {
+              type: "data-tool-display",
+              data: { toolCallId: "call-a", subSessionId: "harper-a" },
+            },
+          ],
+        },
+      ],
+    });
+
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <CopilotPage />
+      </LanguageProvider>,
+    );
+    const parent = screen.getByTestId("chat-container");
+    const entries = await within(parent).findAllByRole("link", {
+      name: "招聘专员 运行中",
+    });
+    expect(entries).toHaveLength(2);
+    await user.click(entries[0]);
+
+    const panel = await screen.findByRole("complementary", {
+      name: "招聘专员 的会话",
+    });
+    expect(await within(panel).findByText("Task for harper-a")).toBeDefined();
+    expect(getSession).not.toHaveBeenCalledWith(
+      expect.objectContaining({ params: { sessionId: "harper-b" } }),
+    );
+    expect(useCopilotUIStore.getState().subSessionPreview).toMatchObject({
+      parentSessionID: "parent-chat",
+      sessionID: "harper-a",
+    });
+    expect(screen.getByTestId("chat-container")).toBe(parent);
+
+    await user.click(
+      within(parent).getAllByRole("link", { name: "招聘专员 运行中" })[1],
+    );
+    expect(await within(panel).findByText("Task for harper-b")).toBeDefined();
+    expect(within(panel).queryByText("Task for harper-a")).toBeNull();
+    await user.click(within(panel).getByRole("button", { name: "关闭子对话" }));
+    expect(
+      screen.queryByRole("complementary", { name: "招聘专员 的会话" }),
+    ).toBeNull();
+    expect(screen.getByTestId("chat-container")).toBe(parent);
+  });
+
   it.each([false, true])(
     "opens the exact child without replacing the parent chat (mobile: %s)",
     async (mobile) => {
@@ -237,7 +346,7 @@ describe("CopilotPage child conversation", () => {
                 output: {
                   sub_autopilot_session_id: "curie-chat",
                   status: "completed",
-                  expert: { name: "Curie" },
+                  expert: { name: "Curie", role: "Research Analyst" },
                 },
               },
             ],
@@ -248,14 +357,14 @@ describe("CopilotPage child conversation", () => {
       render(<CopilotPage />);
       const parent = screen.getByTestId("chat-container");
       const entry = within(parent).getByRole("link", {
-        name: "Curie completed",
+        name: "Research Analyst completed",
       });
       await user.click(entry);
 
       const panel = await screen.findByRole(
         mobile ? "dialog" : "complementary",
         {
-          name: "Curie's conversation",
+          name: "Research Analyst's conversation",
         },
       );
       expect(
@@ -277,7 +386,9 @@ describe("CopilotPage child conversation", () => {
         );
       await waitFor(() => expect(panel.isConnected).toBe(false));
       expect(
-        within(parent).getByRole("link", { name: "Curie completed" }),
+        within(parent).getByRole("link", {
+          name: "Research Analyst completed",
+        }),
       ).toBe(entry);
     },
   );

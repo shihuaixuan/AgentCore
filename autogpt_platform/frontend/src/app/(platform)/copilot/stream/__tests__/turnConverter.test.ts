@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import { toChainRow } from "../../components/ToolChain/helpers";
+import { isCompactSubSessionRow } from "../../components/ToolChain/subSessionRows";
+import {
+  convertChatSessionMessagesToUiMessages,
+  createTurnLogRenderer,
+} from "../../helpers/convertChatSessionToUiMessages";
 import { applyEntry, foldEntries, type WireChunk } from "../turnConverter";
 import {
   COPILOT_ERROR_PREFIX,
@@ -334,6 +340,61 @@ describe("the converter table", () => {
     expect(
       fold([...call("c1"), display("Late")]).rows[0].toolCalls[0].displayName,
     ).toBe("Late");
+  });
+
+  it("keeps the confirmed child on its tool row during replay and after refresh", () => {
+    const input = { expert_id: "harper", prompt: "Draft the job description" };
+    const toolCall = {
+      type: "tool-input-available",
+      toolCallId: "call-a",
+      toolName: "delegate_to_expert",
+      input,
+    };
+    const log = fold([
+      {
+        type: "data-tool-display",
+        id: "call-a",
+        data: { toolCallId: "call-a", subSessionId: "child-a" },
+      },
+      toolCall,
+      { ...toolCall, toolCallId: "call-b" },
+      {
+        type: "data-tool-display",
+        id: "call-a",
+        data: { toolCallId: "call-a", displayName: "Harper" },
+      },
+    ]);
+    const liveParts = createTurnLogRenderer()(log)[0].parts;
+    expect(toChainRow(liveParts[0], 0)).toMatchObject({
+      key: "call-a",
+      subSessionID: "child-a",
+      state: "running",
+    });
+    expect(toChainRow(liveParts[1], 1)).not.toHaveProperty("subSessionID");
+
+    const { messages } = convertChatSessionMessagesToUiMessages(
+      "parent",
+      [
+        {
+          role: "assistant",
+          sequence: 0,
+          tool_calls: [
+            {
+              id: "call-a",
+              sub_session_id: "child-a",
+              function: {
+                name: "delegate_to_expert",
+                arguments: JSON.stringify(input),
+              },
+            },
+          ],
+        },
+      ],
+      { isComplete: true },
+    );
+    const restored = toChainRow(messages[0].parts[0], 0);
+    expect(restored).toMatchObject({ key: "call-a", subSessionID: "child-a" });
+    expect(restored && isCompactSubSessionRow(restored)).toBe(true);
   });
 
   it("data-pending-drained appends user rows keyed by pending id, once each", () => {

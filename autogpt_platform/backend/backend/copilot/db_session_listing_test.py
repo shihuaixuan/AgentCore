@@ -41,6 +41,10 @@ from backend.util.json import SafeJson
 
 _NULL_SAFE_DREAM_FILTER = "(metadata->>'kind' IS DISTINCT FROM 'dream')"
 _RAW_QUERY_TARGET = "backend.copilot.db.db.query_raw_with_schema"
+_TOP_LEVEL_FILTER = (
+    "(\"metadata\" ->> 'delegated_by_session_id' IS NULL "
+    "OR \"metadata\" ->> 'handed_off_from_expert_id' IS NOT NULL)"
+)
 
 
 def _make_prisma_session(session_id: str = "sess-1") -> PrismaChatSession:
@@ -204,6 +208,32 @@ async def test_count_query_uses_same_dream_exclusion_as_list():
     query = raw.call_args.args[0]
     assert _NULL_SAFE_DREAM_FILTER in query
     assert raw.call_args.args[1:] == ("u1",)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("include_sub_sessions", [False, True])
+async def test_sub_session_filter_applies_to_both_page_and_count(include_sub_sessions):
+    raw = AsyncMock(side_effect=[[], [{"count": 3}]])
+    options = {"organization_id": "org-1", "expert_id": "expert-1"}
+    with patch(_RAW_QUERY_TARGET, raw):
+        await get_user_chat_sessions(
+            "u1",
+            limit=1,
+            offset=2,
+            include_sub_sessions=include_sub_sessions,
+            **options,
+        )
+        await get_user_session_count(
+            "u1", include_sub_sessions=include_sub_sessions, **options
+        )
+
+    page, count = raw.await_args_list
+    assert (_TOP_LEVEL_FILTER in page.args[0].split("ORDER BY")[0]) is (
+        not include_sub_sessions
+    )
+    assert (_TOP_LEVEL_FILTER in count.args[0]) is (not include_sub_sessions)
+    assert page.args[1:] == ("u1", "org-1", "expert-1", 1, 2)
+    assert count.args[1:] == ("u1", "org-1", "expert-1")
 
 
 @pytest.mark.asyncio

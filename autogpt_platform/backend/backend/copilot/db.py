@@ -799,6 +799,10 @@ def exclude_dream_sessions_sql(column: str = "metadata") -> str:
 
 
 _EXCLUDE_DREAM_SESSIONS_SQL = exclude_dream_sessions_sql()
+_TOP_LEVEL_SESSIONS_SQL = (
+    "(\"metadata\" ->> 'delegated_by_session_id' IS NULL "
+    "OR \"metadata\" ->> 'handed_off_from_expert_id' IS NOT NULL)"
+)
 
 
 async def get_user_chat_sessions(
@@ -811,6 +815,7 @@ async def get_user_chat_sessions(
     autopilot_only: bool = False,
     experts_only: bool = False,
     pinned_first: bool = True,
+    include_sub_sessions: bool = True,
 ) -> list[ChatSessionInfo]:
     """Get chat sessions for a user, ordered by most recent.
 
@@ -832,6 +837,9 @@ async def get_user_chat_sessions(
 
     ``pinned_first=False`` provides strict recency ordering for internal
     adoption flows; the user-facing sidebar keeps pinned sessions first.
+    ``include_sub_sessions=False`` hides delegated work, but not handoffs
+    that transfer ownership to another expert. JSON text extraction treats
+    absent keys and explicit JSON nulls alike, so legacy and direct chats stay.
     """
     if expert_id == "":
         raise ValueError("expert_id must be non-empty")
@@ -842,6 +850,8 @@ async def get_user_chat_sessions(
 
     params: list[Any] = [user_id]
     conditions = ['"userId" = $1', _EXCLUDE_DREAM_SESSIONS_SQL]
+    if not include_sub_sessions:
+        conditions.append(_TOP_LEVEL_SESSIONS_SQL)
     if organization_id is not None:
         params.append(organization_id)
         # Same carve-out as _own_org_scope: the owner's expert sessions are
@@ -883,12 +893,12 @@ async def get_user_session_count(
     organization_id: str | None = None,
     expert_id: str | None = None,
     autopilot_only: bool = False,
+    include_sub_sessions: bool = True,
 ) -> int:
     """Get the total number of chat sessions for a user.
 
-    Applies the same dream-session exclusion, org scoping, and expert
-    filter as :func:`get_user_chat_sessions` so pagination totals always
-    match the visible list.
+    Applies the same visibility, org scoping and expert filters as
+    :func:`get_user_chat_sessions` so pagination totals match the list.
     """
     if expert_id == "":
         raise ValueError("expert_id must be non-empty")
@@ -897,6 +907,8 @@ async def get_user_session_count(
 
     params: list[Any] = [user_id]
     conditions = ['"userId" = $1', _EXCLUDE_DREAM_SESSIONS_SQL]
+    if not include_sub_sessions:
+        conditions.append(_TOP_LEVEL_SESSIONS_SQL)
     if organization_id is not None:
         params.append(organization_id)
         # Keep in lockstep with get_user_chat_sessions so pagination totals
@@ -1018,27 +1030,12 @@ async def get_sessions_with_pending_question(
         # existed persists an explicit ``"pending_question": null``, which is a
         # JSON null — present as far as ``->`` is concerned.
         + " AND jsonb_typeof(\"metadata\" -> 'pending_question') = 'object' "
-        # ``->>`` (text extraction), not ``->``: every session persists this
-        # key with an explicit JSON null by default, and ``->`` returns that
-        # as a "present" jsonb value rather than SQL NULL — an ``IS NULL``
-        # check on ``->`` would silently exclude every normal session (same
-        # class of bug as the dream-session filter above). ``->>`` collapses
-        # "key absent" and "explicit JSON null" to the same SQL NULL, so only
-        # a real delegating session id excludes the row.
-        #
-        # The second arm is load-bearing, not defensive: a handoff records the
-        # delegation fields too (``handoff_to_expert._transfer`` sets
-        # ``delegated_by_session_id`` for attribution and because
-        # ``get_sub_session_result._in_caller_scope`` reads it to refuse the
-        # poll), so "delegated" alone matches every handed-off thread as well.
-        # Without this arm the receiving expert's question — the only path
-        # back to the user — never reaches Home. See the docstring.
-        "AND (\"metadata\" ->> 'delegated_by_session_id' IS NULL "
-        "OR \"metadata\" ->> 'handed_off_from_expert_id' IS NOT NULL) "
+        f"AND {_TOP_LEVEL_SESSIONS_SQL} "
         # Lexicographic text sort — only correct because every writer emits
         # a UTC ``datetime.isoformat()`` timestamp (fixed-width, zero-padded
         # fields, so ISO-8601 string order matches chronological order).
-        "ORDER BY \"metadata\" -> 'pending_question' ->> 'asked_at' DESC " "LIMIT $2",
+        "ORDER BY \"metadata\" -> 'pending_question' ->> 'asked_at' DESC "
+        "LIMIT $2",
         user_id,
         limit,
         model=PrismaChatSession,

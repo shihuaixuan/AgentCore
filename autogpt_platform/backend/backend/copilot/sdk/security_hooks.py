@@ -170,10 +170,17 @@ def _validate_user_isolation(
     return {}
 
 
-# Tools whose display name (block, agent, MCP tool) streams to the UI before
-# the call finishes; the bridge tags their input with a call token.
+# Tools whose display metadata streams to the UI before the call finishes;
+# the bridge tags their input with a call token.
 _DISPLAY_BRIDGED_TOOLS: frozenset[str] = frozenset(
-    {"run_agent", "run_capability", "resume_capability"}
+    {
+        "run_agent",
+        "run_capability",
+        "resume_capability",
+        "delegate_to_expert",
+        "handoff_to_expert",
+        "run_sub_session",
+    }
 )
 
 

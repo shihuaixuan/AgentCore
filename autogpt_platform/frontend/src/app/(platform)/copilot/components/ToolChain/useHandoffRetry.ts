@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useGetV2ListSessions } from "@/app/api/__generated__/endpoints/chat/chat";
+import { expertKickoffHistoryParams } from "../../expertSessionQuery";
 
 /** Try again is the one retry path: Otto is told not to resend a failed
  *  hand-off himself. Someone may still have started work with the hire since
@@ -11,7 +12,7 @@ import { useGetV2ListSessions } from "@/app/api/__generated__/endpoints/chat/cha
 export function useHandoffRetry(expertId: string) {
   const [asked, setAsked] = useState(false);
   const { data, isFetchedAfterMount, isError } = useGetV2ListSessions(
-    { expert_id: expertId, limit: 1, pinned_first: false },
+    expertKickoffHistoryParams(expertId),
     {
       query: {
         select: (res) => (res.status === 200 ? res.data.sessions : null),

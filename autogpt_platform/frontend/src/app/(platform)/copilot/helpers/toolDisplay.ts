@@ -7,23 +7,54 @@ export function toolDisplayName(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
-export function withToolDisplayNames(
+export interface ToolDisplayMetadata {
+  displayName?: string;
+  subSessionID?: string;
+}
+
+export type DisplayToolPart = ToolUIPart &
+  Pick<ToolDisplayMetadata, "subSessionID">;
+
+export function parseToolDisplay(value: unknown) {
+  const data = asObject(value);
+  const toolCallID = toolDisplayName(data?.toolCallId);
+  const displayName = toolDisplayName(data?.displayName);
+  const subSessionID = toolDisplayName(data?.subSessionId);
+  if (!toolCallID || (!displayName && !subSessionID)) return null;
+  return {
+    toolCallID,
+    metadata: {
+      ...(displayName ? { displayName } : {}),
+      ...(subSessionID ? { subSessionID } : {}),
+    },
+  };
+}
+
+export function withToolDisplayMetadata(
   parts: UIMessage["parts"],
 ): UIMessage["parts"] {
-  const names = new Map<string, string>();
+  const displays = new Map<string, ToolDisplayMetadata>();
   for (const part of parts) {
     if (part.type !== TOOL_DISPLAY_PART_TYPE || !("data" in part)) continue;
-    const data = asObject(part.data);
-    const toolCallID = toolDisplayName(data?.toolCallId);
-    const name = toolDisplayName(data?.displayName);
-    if (toolCallID && name) names.set(toolCallID, name);
+    const display = parseToolDisplay(part.data);
+    if (!display) continue;
+    displays.set(display.toolCallID, {
+      ...displays.get(display.toolCallID),
+      ...display.metadata,
+    });
   }
-  if (names.size === 0) return parts;
+  if (displays.size === 0) return parts;
   return parts.map((part) => {
     if (!part.type.startsWith("tool-")) return part;
-    const tool = part as ToolUIPart;
-    const title = names.get(tool.toolCallId);
-    return title ? { ...tool, title } : part;
+    const tool = part as DisplayToolPart;
+    const display = displays.get(tool.toolCallId);
+    return display
+      ? {
+          ...tool,
+          title: display.displayName ?? tool.title,
+          subSessionID: display.subSessionID ?? tool.subSessionID,
+        }
+      : part;
   });
 }
 

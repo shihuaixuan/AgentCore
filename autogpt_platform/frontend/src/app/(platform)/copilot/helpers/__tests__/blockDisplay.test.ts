@@ -8,7 +8,7 @@ import { convertChatSessionMessagesToUiMessages } from "../convertChatSessionToU
 import {
   getAgentDisplayName,
   getBlockDisplayName,
-  withToolDisplayNames,
+  withToolDisplayMetadata,
 } from "../toolDisplay";
 
 type Part = UIMessage["parts"][number];
@@ -32,7 +32,7 @@ describe("block display names", () => {
     "renders canonical %s names in live rows and the heading",
     (tool) => {
       const input = { block_id: blockID };
-      const parts = withToolDisplayNames([
+      const parts = withToolDisplayMetadata([
         blockPart(tool, { input }),
         {
           type: "data-tool-display",

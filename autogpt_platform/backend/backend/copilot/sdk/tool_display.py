@@ -36,7 +36,7 @@ class SDKToolDisplayBridge:
         self._generation = 0
         self._bindings: dict[str, _CallBinding] = {}
         self._pending: list[StreamToolDisplayAvailable] = []
-        self._names: dict[str, str] = {}
+        self._displays: dict[str, ToolDisplayData] = {}
 
     def prepare_call(
         self, tool_name: str, arguments: dict[str, Any], call_id: str
@@ -55,7 +55,10 @@ class SDKToolDisplayBridge:
         binding = self._bindings.pop(token, None) if isinstance(token, str) else None
         if binding is not None and binding.tool_name != tool_name:
             binding = None
-        with tool_display_context(lambda name: self._publish(binding, name)):
+        with tool_display_context(
+            lambda name: self._publish(binding, name=name),
+            on_sub_session=lambda child_id: self._publish(binding, child_id=child_id),
+        ):
             yield strip_display_token(arguments)
 
     def drain(self) -> list[StreamToolDisplayAvailable]:
@@ -67,21 +70,28 @@ class SDKToolDisplayBridge:
         self._generation += 1
         self._bindings.clear()
         self._pending.clear()
-        self._names.clear()
+        self._displays.clear()
         self.ready.clear()
 
-    def _publish(self, binding: _CallBinding | None, name: str) -> None:
+    def _publish(
+        self,
+        binding: _CallBinding | None,
+        *,
+        name: str | None = None,
+        child_id: str | None = None,
+    ) -> None:
         if binding is None or binding.generation != self._generation:
             return
-        if self._names.get(binding.call_id) == name:
-            return
-        self._names[binding.call_id] = name
-        self._pending.append(
-            StreamToolDisplayAvailable(
-                id=binding.call_id,
-                data=ToolDisplayData(toolCallId=binding.call_id, displayName=name),
-            )
+        previous = self._displays.get(binding.call_id)
+        data = ToolDisplayData(
+            toolCallId=binding.call_id,
+            displayName=name or (previous.displayName if previous else None),
+            subSessionId=child_id or (previous.subSessionId if previous else None),
         )
+        if data == previous:
+            return
+        self._displays[binding.call_id] = data
+        self._pending.append(StreamToolDisplayAvailable(id=binding.call_id, data=data))
         self.ready.set()
 
 
@@ -89,11 +99,13 @@ def strip_display_token(arguments: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in arguments.items() if key != _TOKEN_KEY}
 
 
-def stamp_tool_display_name(
-    messages: Iterable["ChatMessage"], call_id: str, display_name: str
+def stamp_tool_display_metadata(
+    messages: Iterable["ChatMessage"], call_id: str, metadata: dict[str, str]
 ) -> None:
     for message in messages:
         for call in message.tool_calls or []:
-            if call.get("id") == call_id and call.get("display_name") != display_name:
-                call["display_name"] = display_name
+            if call.get("id") == call_id and any(
+                call.get(key) != value for key, value in metadata.items()
+            ):
+                call.update(metadata)
                 message.mark_tool_calls_pending_save()

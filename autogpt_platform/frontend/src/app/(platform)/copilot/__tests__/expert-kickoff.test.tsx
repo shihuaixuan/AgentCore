@@ -24,7 +24,7 @@ import {
 } from "../expertKickoff";
 import { getGetV2ListSessionsQueryKey } from "@/app/api/__generated__/endpoints/chat/chat";
 import { useQueryClient } from "@tanstack/react-query";
-import { latestExpertSessionParams } from "../expertSessionQuery";
+import { expertKickoffHistoryParams } from "../expertSessionQuery";
 import { useCopilotUIStore } from "../store";
 import { useChatSession } from "../useChatSession";
 import { useExpertKickoff } from "../useExpertKickoff";
@@ -92,7 +92,7 @@ function KickoffHarness({
       staleTime: 60_000,
     });
     queryClient.setQueryData(
-      getGetV2ListSessionsQueryKey(latestExpertSessionParams(expertId)),
+      getGetV2ListSessionsQueryKey(expertKickoffHistoryParams(expertId)),
       { status: 200, data: { sessions: [], total: 0 } },
     );
   });

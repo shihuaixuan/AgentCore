@@ -1,7 +1,7 @@
 import type { FileUIPart, UIDataTypes, UIMessage, UITools } from "ai";
 import { cn } from "@/lib/utils";
 import { parseSpecialMarkers } from "../../../../helpers/messageMarkers";
-import { withToolDisplayNames } from "../../../../helpers/toolDisplay";
+import { withToolDisplayMetadata } from "../../../../helpers/toolDisplay";
 import type { TurnStats } from "../../../../helpers/convertChatSessionToUiMessages";
 import {
   WORKSPACE_FOLDER_PART_TYPE,
@@ -30,7 +30,7 @@ export function deriveRowParts(
   // never reach the user UI, and so one landing between two tool calls
   // can't split a chain. data-status surfaces via ThinkingIndicator;
   // data-compaction via CompactionCard.
-  const renderableParts = withToolDisplayNames(
+  const renderableParts = withToolDisplayMetadata(
     role === "user" ? getVisibleUserMessageParts(parts) : parts,
   ).filter((p) => !isBookkeepingPart(p));
   const textParts = renderableParts.filter(

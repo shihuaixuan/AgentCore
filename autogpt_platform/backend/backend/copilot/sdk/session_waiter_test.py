@@ -32,6 +32,8 @@ from backend.copilot.sdk.session_waiter import (
     run_copilot_turn_via_queue,
     wait_for_session_result,
 )
+from backend.copilot.tool_display import tool_display_context
+from backend.copilot.tree import SpawnRequest, TreeRefusal
 from backend.copilot.turn_pause import TurnPause
 
 _QR = type(
@@ -724,6 +726,54 @@ async def test_a_dispatched_turn_with_no_wait_returns_without_reading_its_stream
     assert result == SessionResult()
     scheduled.assert_awaited_once()
     stream_read.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("dispatch", ["running", "queued", "refused"])
+async def test_reports_the_admitted_child_before_waiting(
+    mocker, mock_session_lookup, dispatch
+):
+    mock_session_lookup.return_value.metadata.delegated_by_session_id = "parent"
+    published: list[str] = []
+
+    async def check_before_publish(**kwargs):
+        assert not published
+        if dispatch == "queued":
+            raise ConcurrentTurnLimitError("full")
+        if dispatch == "refused":
+            raise TreeRefusal("Not admitted")
+
+    async def check_before_wait(**kwargs):
+        assert published == ["child"]
+        return "completed", SessionResult()
+
+    module = "backend.copilot.sdk.session_waiter"
+    mocker.patch(f"{module}.is_turn_in_flight", return_value=False)
+    mocker.patch(f"{module}.schedule_turn", side_effect=check_before_publish)
+    queued = mocker.patch(f"{module}.queue_spawned_turn", return_value=None)
+    mocker.patch(f"{module}.track_turn_cap")
+    wait = mocker.patch(
+        f"{module}.wait_for_session_result", side_effect=check_before_wait
+    )
+    wait_queued = mocker.patch(
+        f"{module}.wait_for_queued_session", side_effect=check_before_wait
+    )
+
+    with tool_display_context(lambda _: None, on_sub_session=published.append):
+        outcome, _ = await run_copilot_turn_via_queue(
+            session_id="child",
+            user_id="u1",
+            message="Draft the job description",
+            timeout=60,
+            tool_call_id="delegate:parent",
+            tool_name="delegate_to_expert",
+            spawn=SpawnRequest(may_spawn=True),
+        )
+
+    assert outcome == ("refused" if dispatch == "refused" else "completed")
+    assert published == ([] if dispatch == "refused" else ["child"])
+    assert wait.await_count == (dispatch == "running")
+    assert queued.await_count == wait_queued.await_count == (dispatch == "queued")
 
 
 @pytest.mark.asyncio

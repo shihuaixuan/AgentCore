@@ -1,4 +1,6 @@
 import { parseTurnPause, TURN_PAUSED_PART_TYPE } from "../turnPause";
+import { parseToolDisplay } from "../helpers/toolDisplay";
+import { TOOL_DISPLAY_PART_TYPE } from "../messageParts";
 import {
   getReplyRecipient,
   REPLY_RECIPIENT_PART_TYPE,
@@ -13,7 +15,7 @@ import {
   appendText,
   canonicalRows,
   openReasoning,
-  setToolDisplayName,
+  setToolDisplayMetadata,
   type TurnLog,
 } from "./turnLog";
 
@@ -104,13 +106,11 @@ function applyChunk(log: TurnLog, entryId: string, chunk: WireChunk): TurnLog {
       return receiveToolOutput(log, entryId, chunk);
     case "error":
       return appendErrorMarker(log, entryId, str(chunk.errorText));
-    case "data-tool-display": {
-      const data = record(chunk.data);
-      return setToolDisplayName(
-        log,
-        str(data.toolCallId),
-        str(data.displayName),
-      );
+    case TOOL_DISPLAY_PART_TYPE: {
+      const display = parseToolDisplay(chunk.data);
+      return display
+        ? setToolDisplayMetadata(log, display.toolCallID, display.metadata)
+        : log;
     }
     case "data-pending-drained":
       return appendDrainedUserRows(log, drainedMessages(chunk.data));

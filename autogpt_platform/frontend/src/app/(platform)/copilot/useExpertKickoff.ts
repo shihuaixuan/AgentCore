@@ -11,7 +11,7 @@ import {
   withKickoffLock,
   type KickoffAttemptToken,
 } from "./expertKickoff";
-import { latestExpertSessionParams } from "./expertSessionQuery";
+import { expertKickoffHistoryParams } from "./expertSessionQuery";
 import { useReadEveryRender } from "@/hooks/useReadEveryRender";
 
 interface Args {
@@ -60,7 +60,7 @@ export function useExpertKickoff({
     wantsSession && !!userId && !!expertId && kickoffStatus === "idle";
 
   const sessionsQuery = useGetV2ListSessions(
-    latestExpertSessionParams(expertId),
+    expertKickoffHistoryParams(expertId),
     {
       query: {
         enabled: wantsSession,

@@ -14,7 +14,7 @@ from backend.copilot.baseline.service import (
 from backend.copilot.model import ChatMessage, ChatSession
 from backend.copilot.response_model import StreamToolOutputAvailable
 from backend.copilot.sharing.models import sanitize_chat_message
-from backend.copilot.tool_display import emit_tool_display_name
+from backend.copilot.tool_display import emit_tool_display_name, emit_tool_sub_session
 from backend.copilot.transcript_builder import TranscriptBuilder
 from backend.util.prompt import CompressResult
 from backend.util.tool_call_loop import LLMLoopResponse, LLMToolCall
@@ -39,6 +39,15 @@ async def test_tool_display_streams_and_persists_before_tool_result(fails: bool)
             "type": "data-tool-display",
             "id": "call-1",
             "data": {"toolCallId": "call-1", "displayName": "Daily report"},
+        }
+        emit_tool_sub_session("child-session")
+        assert (
+            state.session_messages[0].tool_calls[0]["sub_session_id"] == "child-session"
+        )
+        assert state.emitted_events[-1].model_dump(mode="json")["data"] == {
+            "toolCallId": "call-1",
+            "displayName": "Daily report",
+            "subSessionId": "child-session",
         }
         if fails:
             raise RuntimeError("execution failed")
@@ -70,9 +79,10 @@ async def test_tool_display_streams_and_persists_before_tool_result(fails: bool)
     assistant = state.session_messages[0]
     assert assistant.tool_calls[0]["display_name"] == "Daily report"
     restored = ChatMessage.model_validate_json(assistant.model_dump_json())
-    assert (
-        sanitize_chat_message(restored).tool_calls[0]["display_name"] == "Daily report"
-    )
+    assert restored.tool_calls[0]["sub_session_id"] == "child-session"
+    shared_call = sanitize_chat_message(restored).tool_calls[0]
+    assert shared_call["display_name"] == "Daily report"
+    assert "sub_session_id" not in shared_call
 
 
 @pytest.mark.asyncio

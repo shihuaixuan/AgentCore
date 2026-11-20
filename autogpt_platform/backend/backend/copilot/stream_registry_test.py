@@ -15,11 +15,14 @@ from backend.data import redis_client
 from backend.util.testing import is_tcp_port_reachable
 
 
-def test_tool_display_roundtrips_redis_and_sse():
+@pytest.mark.parametrize(
+    "metadata", [{"displayName": "Daily report"}, {"subSessionId": "child-session"}]
+)
+def test_tool_display_roundtrips_redis_and_sse(metadata):
     payload = {
         "type": "data-tool-display",
         "id": "call-1",
-        "data": {"toolCallId": "call-1", "displayName": "Daily report"},
+        "data": {"toolCallId": "call-1", **metadata},
     }
     chunk = stream_registry._reconstruct_chunk(payload)
     assert chunk is not None

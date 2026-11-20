@@ -19,7 +19,10 @@ import {
   buildStoredAttachmentParts,
   type WorkspaceAttachment,
 } from "@/app/(platform)/copilot/helpers/workspaceAttachments";
-import { latestExpertSessionParams } from "@/app/(platform)/copilot/expertSessionQuery";
+import {
+  expertKickoffHistoryParams,
+  latestExpertSessionParams,
+} from "@/app/(platform)/copilot/expertSessionQuery";
 import { usePendingOnboardingSession } from "@/app/(platform)/copilot/components/ExpertOnboardingCard/usePendingOnboardingSession";
 import { useCopilotPendingChips } from "@/app/(platform)/copilot/useCopilotPendingChips";
 import { useCopilotStream } from "@/app/(platform)/copilot/useCopilotStream";
@@ -137,7 +140,7 @@ export function useExpertChatDrawer({
     kickoffCheckedFor !== expertId &&
     getKickoffStatus(userId, expertId) === "idle";
   const kickoffCheckQuery = useGetV2ListSessions(
-    latestExpertSessionParams(expertId),
+    expertKickoffHistoryParams(expertId),
     { query: { enabled: wantsKickoff, refetchOnWindowFocus: false } },
   );
 

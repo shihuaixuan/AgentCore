@@ -704,6 +704,10 @@ async def list_sessions(
             "strict recency when adopting the latest expert thread."
         ),
     ),
+    include_sub_sessions: bool = Query(
+        default=False,
+        description="Include delegated sub-sessions in addition to top-level chats.",
+    ),
 ) -> ListSessionsResponse:
     """
     List chat sessions for the authenticated user.
@@ -717,6 +721,7 @@ async def list_sessions(
         offset: Number of sessions to skip for pagination.
         expert_id: Restrict the listing to sessions scoped to this expert.
         pinned_first: Whether pinned sessions precede strict recency ordering.
+        include_sub_sessions: Whether to also list work delegated from another chat.
 
     Returns:
         ListSessionsResponse: List of session summaries and total count.
@@ -728,6 +733,7 @@ async def list_sessions(
         organization_id=ctx.org_id,
         expert_id=expert_id,
         pinned_first=pinned_first,
+        include_sub_sessions=include_sub_sessions,
     )
 
     # Batch-check Redis for active stream status on each session

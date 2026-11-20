@@ -32,7 +32,7 @@ from backend.copilot.sdk.tool_adapter import (
     set_execution_context,
 )
 from backend.copilot.sdk.tool_display import SDKToolDisplayBridge
-from backend.copilot.tool_display import emit_tool_display_name
+from backend.copilot.tool_display import emit_tool_display_name, emit_tool_sub_session
 from backend.copilot.tools import TOOL_REGISTRY
 
 
@@ -94,6 +94,12 @@ async def test_display_bridge_preserves_domain_execution_ids():
             "FillTextTemplateBlock",
             "block_name",
         ),
+        (
+            "delegate_to_expert",
+            {"expert_id": "harper", "prompt": "Draft a job description"},
+            "Harper",
+            "expert_name",
+        ),
     ],
 )
 @pytest.mark.asyncio
@@ -125,6 +131,8 @@ async def test_hook_to_mcp_handler_keeps_provider_identity_and_clean_stash(
     async def execute(clean_args):
         assert clean_args == args
         emit_tool_display_name(display_name)
+        if tool_name == "delegate_to_expert":
+            emit_tool_sub_session("child-session")
         return {
             "content": [{"type": "text", "text": json.dumps({name_key: display_name})}]
         }
@@ -141,9 +149,12 @@ async def test_hook_to_mcp_handler_keeps_provider_identity_and_clean_stash(
             result = await client.call_tool(tool_name, tagged)
             assert not result.isError
         assert bridge.ready.is_set()
-        [display] = bridge.drain()
+        displays = bridge.drain()
+        display = displays[-1]
         assert display.id == "toolu-provider"
         assert display.data.displayName == display_name
+        if tool_name == "delegate_to_expert":
+            assert display.data.subSessionId == "child-session"
         assert (
             json.loads(pop_pending_tool_output(tool_name, args))[name_key]
             == display_name
@@ -207,10 +218,13 @@ def test_dispatch_persists_name_without_duplicate_call_and_flags_late_save(
     display = StreamToolDisplayAvailable(
         id="call", data=ToolDisplayData(toolCallId="call", displayName=display_name)
     )
+    child = StreamToolDisplayAvailable(
+        id="call", data=ToolDisplayData(toolCallId="call", subSessionId="child-session")
+    )
     start = StreamToolInputAvailable(
         toolCallId="call", toolName=tool_name, input=tool_input
     )
-    events = [display, start] if name_first else [start, display]
+    events = [display, child, start] if name_first else [start, display, child]
     for event in events:
         _dispatch_response(event, acc, ctx, state, False, "[test]")
         if isinstance(event, StreamToolInputAvailable):
@@ -220,6 +234,7 @@ def test_dispatch_persists_name_without_duplicate_call_and_flags_late_save(
     assert len(session.messages[0].tool_calls) == 1
     call = session.messages[0].tool_calls[0]
     assert call["display_name"] == display_name
+    assert call["sub_session_id"] == "child-session"
     assert call["function"]["name"] == tool_name
     assert json.loads(call["function"]["arguments"]) == tool_input
     if not name_first:

@@ -1817,6 +1817,7 @@ async def get_user_sessions(
     title_contains: str | None = None,
     expert_id: str | None = None,
     pinned_first: bool = True,
+    include_sub_sessions: bool = True,
 ) -> tuple[list[ChatSessionInfo], int]:
     """Get chat sessions for a user from the database with total count.
 
@@ -1840,9 +1841,13 @@ async def get_user_sessions(
             title_contains=title_contains,
             expert_id=expert_id,
             pinned_first=pinned_first,
+            include_sub_sessions=include_sub_sessions,
         ),
         db.get_user_session_count(
-            user_id, organization_id=organization_id, expert_id=expert_id
+            user_id,
+            organization_id=organization_id,
+            expert_id=expert_id,
+            include_sub_sessions=include_sub_sessions,
         ),
     )
 

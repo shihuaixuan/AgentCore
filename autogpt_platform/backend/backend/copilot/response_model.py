@@ -218,11 +218,26 @@ class StreamToolInputAvailable(StreamBaseResponse):
 
 class ToolDisplayData(BaseModel):
     toolCallId: str
-    displayName: str
+    displayName: str | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
+    subSessionId: str | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
+
+    def call_metadata(self) -> dict[str, str]:
+        return {
+            key: value
+            for key, value in (
+                ("display_name", self.displayName),
+                ("sub_session_id", self.subSessionId),
+            )
+            if value is not None
+        }
 
 
 class StreamToolDisplayAvailable(StreamBaseResponse):
-    """Resolved display name, retained as an AI SDK data part on replay."""
+    """Presentation metadata for a tool call, retained on stream replay."""
 
     type: ResponseType = ResponseType.TOOL_DISPLAY_AVAILABLE
     id: str

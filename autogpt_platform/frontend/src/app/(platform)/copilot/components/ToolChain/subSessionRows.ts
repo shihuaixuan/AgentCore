@@ -39,14 +39,17 @@ export function isCompactSubSessionRow(row: ChainRow) {
   const target = subSessionTargetRow(row);
   if (!target) return false;
   const output = asObject(target.output);
-  return output
-    ? row.state === "done" &&
-        !!str(output, "status") &&
-        !!childSessionID(output)
-    : !row.held &&
-        row.output === undefined &&
-        row.state === "running" &&
-        target.tool !== SUB_SESSION_RESULT_TOOL;
+  if (output) {
+    return (
+      row.state === "done" &&
+      !!str(output, "status") &&
+      !!childSessionID(output)
+    );
+  }
+  if (row.held || target.tool === SUB_SESSION_RESULT_TOOL) return false;
+  if (row.output === undefined)
+    return row.state === "running" || !!row.subSessionID;
+  return row.output === "" && !!row.subSessionID;
 }
 
 export function isLiveSubSessionRow(row: ChainRow) {
