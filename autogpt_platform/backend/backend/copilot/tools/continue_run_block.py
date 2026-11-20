@@ -113,7 +113,7 @@ class ContinueRunBlockTool(BaseTool):
             ).from_outside()
         if block.disabled:
             return await refuse_disabled_block(block_id, review_id, user_id, session_id)
-        if refusal := block_run_refusal(block, block_id, session_id):
+        if refusal := block_run_refusal(block, block_id, session):
             return refusal
 
         emit_tool_display_name(block.name)

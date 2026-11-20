@@ -19,6 +19,7 @@ from backend.copilot.expert_context import (
 )
 from backend.copilot.model import ChatSession
 from backend.copilot.sdk.env import DISABLE_SLASH_COMMANDS_FLAG
+from backend.copilot.tools.expert_image_policy import expert_image_prompt
 
 from .service import (
     _apply_building_mode_restart,
@@ -115,6 +116,7 @@ class TestApplyBuildingModeRestart:
             state=state,
             sdk_options=sdk_options or MagicMock(),
             base_system_prompt="BASE",
+            image_supplement=expert_image_prompt(session.user_id, session),
             delegation_supplement=delegation_supplement,
             oversight_supplement=oversight_supplement,
             team_building_supplement=team_building_supplement,
@@ -180,6 +182,16 @@ class TestApplyBuildingModeRestart:
         prompt = state.options.system_prompt
         text = prompt if isinstance(prompt, str) else prompt["append"]
         assert "<auto_mode>RULES</auto_mode>" in text
+
+    async def test_expert_image_routing_survives_the_restart(self, mocker):
+        mocker.patch(
+            "backend.copilot.sdk.service.build_expert_identity_suffix", return_value=""
+        )
+        _, state, _, _ = await self._run(mocker, expert_id="expert-1")
+
+        prompt = state.options.system_prompt
+        text = prompt if isinstance(prompt, str) else prompt["append"]
+        assert 'run_capability(id="tool:generate_openai_image"' in text
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(

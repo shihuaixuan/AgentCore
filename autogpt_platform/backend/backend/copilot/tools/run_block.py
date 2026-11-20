@@ -6,12 +6,14 @@ from typing import Any
 
 from backend.blocks import get_block
 from backend.blocks.llm import LLM_PROVIDER_NAMES
+from backend.copilot.capabilities.block_meta import get_block_provider
 from backend.copilot.constants import COPILOT_NODE_EXEC_ID_SEPARATOR
 from backend.copilot.gate import unified_approvals
 from backend.copilot.model import ChatSession
 from backend.data.activity_event import ActivityEventDraft
 
 from .base import BaseTool
+from .expert_image_policy import replicate_block_is_workflow_only
 from .helpers import (
     BlockPreparation,
     check_hitl_review,
@@ -238,7 +240,9 @@ class RunBlockTool(BaseTool):
             )
             llm_input_schema = _strip_presentation_annotations(llm_input_schema)
             output_schema = _strip_presentation_annotations(output_schema)
-            if validate_only and not missing:
+            if replicate_block_is_workflow_only(session, get_block_provider(prep.block)):
+                detail_msg = f"Block '{prep.block.name}' is available for workflows only in this chat."
+            elif validate_only and not missing:
                 detail_msg = (
                     f"Block '{prep.block.name}' — all required inputs "
                     f"provided, ready to run."

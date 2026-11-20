@@ -4,11 +4,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import Field, ValidationError
 
-from backend.copilot.context import (
-    get_current_permissions,
-    get_workspace_manager,
-    is_unattended_turn,
-)
+from backend.copilot.context import get_workspace_manager
 from backend.copilot.credential_selection import selected_credentials
 from backend.copilot.model import ChatSession
 from backend.copilot.permissions import GENERATE_OPENAI_IMAGE_TOOL
@@ -34,7 +30,7 @@ from backend.util.type import MediaFileType
 from backend.util.workspace import WorkspaceManager
 
 from .base import BaseTool
-from .capability_gates import gate_denied
+from .expert_image_policy import EXPERT_IMAGE_ONLY, image_turn_error
 from .expert_scope import (
     CredentialScopeSnapshot,
     annotate_expert_grants,
@@ -52,7 +48,6 @@ from .workspace_files import AGENT_CREATED_METADATA, WorkspaceWriteResponse
 
 logger = logging.getLogger(__name__)
 
-_EXPERT_ONLY = "OpenAI image generation is only available in an expert chat."
 _OPENAI_KEY = CredentialsFieldInfo[Literal[ProviderName.OPENAI], Literal["api_key"]](
     credentials_provider=frozenset([ProviderName.OPENAI]),
     credentials_types=frozenset(["api_key"]),
@@ -118,8 +113,8 @@ class GenerateOpenAIImageTool(BaseTool):
         session_id = session.session_id
         expert_id = session.expert_id
         if not user_id or user_id != session.user_id or not expert_id:
-            return ErrorResponse(session_id=session_id, message=_EXPERT_ONLY)
-        if error := _image_turn_error(session):
+            return ErrorResponse(session_id=session_id, message=EXPERT_IMAGE_ONLY)
+        if error := image_turn_error(session):
             return ErrorResponse(session_id=session_id, message=error)
         try:
             request = _GenerateOpenAIImageInput.model_validate(kwargs)
@@ -150,29 +145,6 @@ class GenerateOpenAIImageTool(BaseTool):
         if key is None or key.type != "api_key":
             return await _setup_response(user_id, expert_id, session_id, personal)
         return await _generate_image(user_id, session_id, request, key)
-
-
-def openai_image_is_visible(session: ChatSession) -> bool:
-    return (
-        bool(session.expert_id)
-        and not gate_denied(GENERATE_OPENAI_IMAGE_TOOL)
-        and _image_turn_error(session) is None
-    )
-
-
-def _image_turn_error(session: ChatSession) -> str | None:
-    if session.external_caller or session.metadata.builder_graph_id:
-        return _EXPERT_ONLY
-    if (
-        session.dry_run
-        or session.metadata.origin != "interactive"
-        or is_unattended_turn()
-    ):
-        return "OpenAI image generation requires a live expert chat. No image was generated."
-    permissions = get_current_permissions()
-    if permissions is not None and not permissions.is_provider_allowed("openai"):
-        return "This session's permissions do not allow using the OpenAI connection."
-    return None
 
 
 def _is_personal_openai_key(credential: Credentials) -> bool:

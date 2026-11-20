@@ -167,6 +167,41 @@ async def test_only_eligible_personal_keys_are_offered_to_the_expert(mocker):
     workspace.assert_not_awaited()
 
 
+async def test_expert_without_an_openai_key_gets_only_the_openai_setup_card(mocker):
+    replicate_key = _KEY.model_copy(
+        update={"id": "replicate-key", "provider": "replicate"}
+    )
+    mocker.patch.object(
+        image_tool,
+        "resolve_credential_scope",
+        return_value=CredentialScopeSnapshot([replicate_key], {replicate_key.id}),
+    )
+    mocker.patch.object(image_tool, "selected_credentials", return_value={})
+    generate = mocker.patch.object(image_tool, "request_openai_image")
+    mocker.patch("backend.copilot.tools.track_tool_called")
+    mocker.patch("backend.copilot.gate.gate_active", return_value=False)
+    session = _session()
+    set_execution_context("user-1", session)
+
+    event = await execute_tool(
+        "run_capability",
+        {"id": f"tool:{_TOOL_NAME}", "input": {"prompt": "一只坐在窗边的橘猫"}},
+        "user-1",
+        session,
+        "image-call",
+        disabled_groups=(),
+        disabled_tools=(),
+    )
+
+    assert event.toolName == _TOOL_NAME
+    assert isinstance(event.output, str)
+    result = image_tool.SetupRequirementsResponse.model_validate_json(event.output)
+    [requirement] = result.setup_info.requirements["credentials"]
+    assert requirement["provider"] == "openai"
+    assert result.setup_info.agent_id == f"tool:{_TOOL_NAME}"
+    generate.assert_not_awaited()
+
+
 def _image_bytes(image_format: str) -> bytes:
     with io.BytesIO() as buffer, Image.new("RGB", (1, 1), "blue") as image:
         image.save(buffer, image_format)

@@ -14,6 +14,7 @@ from backend.copilot.permissions import BLOCK_GATE, MCP_GATE
 
 from .base import BaseTool
 from .capability_gates import gate_denied, gate_denied_error
+from .expert_image_policy import replicate_block_is_workflow_only
 from .models import (
     BlockDetailsResponse,
     CapabilityDetailsResponse,
@@ -143,10 +144,11 @@ async def _describe_block(
         user_id, session, block_id=block_id, input_data={}, validate_only=True
     )
     if isinstance(result, BlockDetailsResponse):
-        result.message = (
-            f"{result.message} Run it with run_capability(id='{entry.id}', "
-            "input={...}); credentials are resolved by the platform."
-        )
+        if not replicate_block_is_workflow_only(session, entry.connection.key):
+            result.message = (
+                f"{result.message} Run it with run_capability(id='{entry.id}', "
+                "input={...}); credentials are resolved by the platform."
+            )
         if not expand:
             result.block.inputs = collapse_large_enums(result.block.inputs)
             result.block.outputs = collapse_large_enums(result.block.outputs)
