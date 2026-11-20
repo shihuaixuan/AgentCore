@@ -25,11 +25,13 @@ import {
   EMAIL_VERIFICATION_NOTICE_COPY,
 } from "./helpers";
 import { useLoginPage } from "./useLoginPage";
+import { usernameSignupEnabled } from "@/lib/auth/local-username";
 
 export const dynamic = "force-dynamic";
 
 export default function LoginPage() {
   const { t } = useTranslation();
+  const usernames = usernameSignupEnabled();
   const { translateAuthMessage } = useAuthTranslation();
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("next");
@@ -115,9 +117,20 @@ export default function LoginPage() {
             render={({ field }) => (
               <Input
                 id={field.name}
-                label={t("Email", "邮箱")}
-                placeholder="name@company.com"
-                type="email"
+                label={
+                  usernames
+                    ? t("Username or email", "用户名或旧账号邮箱")
+                    : t("Email", "邮箱")
+                }
+                placeholder={
+                  usernames
+                    ? t(
+                        "Enter your username or email",
+                        "输入用户名或旧账号邮箱",
+                      )
+                    : "name@company.com"
+                }
+                type={usernames ? "text" : "email"}
                 autoComplete="username"
                 className="w-full"
                 error={
@@ -145,7 +158,9 @@ export default function LoginPage() {
                 }
                 hint={
                   <Link variant="secondary" href="/reset-password">
-                    {t("Forgot password?", "忘记密码？")}
+                    {usernames
+                      ? t("Recover an email account", "找回旧邮箱账号")
+                      : t("Forgot password?", "忘记密码？")}
                   </Link>
                 }
                 {...field}

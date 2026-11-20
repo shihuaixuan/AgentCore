@@ -16,6 +16,7 @@ import asyncio
 import logging
 import re
 from urllib.parse import urlparse
+from typing import Annotated
 
 from autogpt_libs.auth import requires_frontend_service
 from fastapi import APIRouter, HTTPException, Security, status
@@ -57,7 +58,7 @@ class AuthEmailSuppressionResponse(BaseModel):
 
 
 class AuthEmailBanRecordRequest(BaseModel):
-    email: EmailStr = Field(max_length=320)
+    email: EmailStr | Annotated[str, Field(pattern=r"^(?:[0-9a-f]{2}){1,32}@username\.invalid$")] = Field(max_length=320)
 
 
 class AuthEmailBanRecordResponse(BaseModel):

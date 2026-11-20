@@ -2,6 +2,7 @@
 
 import { postV1GetOrCreateUser } from "@/app/api/__generated__/endpoints/auth/auth";
 import { auth } from "@/lib/auth/auth";
+import { usernameIdentity } from "@/lib/auth/local-username";
 import {
   ACCOUNT_CLOSED_PATH,
   isAccountClosedError,
@@ -42,7 +43,9 @@ export async function login(
     try {
       const signInResult = await auth.api.signInEmail({
         body: {
-          email: parsed.data.email,
+          email: parsed.data.email.includes("@")
+            ? parsed.data.email
+            : usernameIdentity(parsed.data.email),
           password: parsed.data.password,
           // Only used for the link Better Auth emails to an unverified user.
           callbackURL: getEmailVerificationCallbackURL({ next }),

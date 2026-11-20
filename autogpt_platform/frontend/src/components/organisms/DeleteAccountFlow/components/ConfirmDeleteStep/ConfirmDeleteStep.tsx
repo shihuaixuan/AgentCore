@@ -22,6 +22,7 @@ export function ConfirmDeleteStep({ source, onClose, onBusyChange }: Props) {
   const inputID = useId();
   const {
     email,
+    username,
     typedEmail,
     setTypedEmail,
     consequences,
@@ -46,10 +47,12 @@ export function ConfirmDeleteStep({ source, onClose, onBusyChange }: Props) {
           </Text>
           <Input
             id={inputID}
-            label={t("Your email", "你的邮箱")}
+            label={
+              username ? t("Username", "用户名") : t("Your email", "你的邮箱")
+            }
             hideLabel
             aria-labelledby={labelID}
-            type="email"
+            type={username ? "text" : "email"}
             autoComplete="off"
             autoCapitalize="none"
             autoCorrect="off"

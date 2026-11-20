@@ -19,6 +19,7 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { signup as signupAction } from "./actions";
 import { isTeamEmail } from "@/lib/auth/team-email";
+import { usernameSignupEnabled } from "@/lib/auth/local-username";
 import { clearImpersonationEverywhere } from "@/lib/impersonation";
 import { useAuthPageTranslation } from "../useAuthPageTranslation";
 
@@ -181,12 +182,23 @@ export function useSignupPage() {
 
       if (!result.success) {
         if (result.error === "user_already_exists") {
-          setFeedback(t("User with this email already exists", "此邮箱已注册"));
+          setFeedback(
+            usernameSignupEnabled()
+              ? t("Username already taken", "此用户名已被使用")
+              : t("User with this email already exists", "此邮箱已注册"),
+          );
           setIsSigningUp(false);
           return;
         }
         if (result.error === "not_allowed") {
-          setShowNotAllowedModal(true);
+          if (usernameSignupEnabled())
+            setFeedback(
+              t(
+                "Registration is restricted on this instance.",
+                "此实例已限制新账号注册。",
+              ),
+            );
+          else setShowNotAllowedModal(true);
           setIsSigningUp(false);
           return;
         }

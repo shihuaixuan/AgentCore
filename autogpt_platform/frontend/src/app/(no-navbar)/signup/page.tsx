@@ -22,11 +22,13 @@ import { LoadingSignup } from "./components/LoadingSignup";
 import { SignupLegalLine } from "./components/SignupLegalLine";
 import { SignupMarketingPanel } from "./components/SignupMarketingPanel";
 import { useSignupPage } from "./useSignupPage";
+import { usernameSignupEnabled } from "@/lib/auth/local-username";
 
 export const dynamic = "force-dynamic";
 
 export default function SignupPage() {
   const { t } = useTranslation();
+  const usernames = usernameSignupEnabled();
   const { translateAuthMessage } = useAuthTranslation();
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("next");
@@ -98,10 +100,14 @@ export default function SignupPage() {
             render={({ field }) => (
               <Input
                 id={field.name}
-                label={t("Email", "邮箱")}
-                placeholder="name@company.com"
-                type="email"
-                autoComplete="email"
+                label={usernames ? t("Username", "用户名") : t("Email", "邮箱")}
+                placeholder={
+                  usernames
+                    ? t("Choose a username", "设置用户名")
+                    : "name@company.com"
+                }
+                type={usernames ? "text" : "email"}
+                autoComplete={usernames ? "username" : "email"}
                 error={
                   translateAuthMessage(form.formState.errors.email?.message) ??
                   undefined

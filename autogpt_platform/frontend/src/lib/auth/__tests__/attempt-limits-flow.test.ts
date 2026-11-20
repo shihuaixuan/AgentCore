@@ -174,6 +174,27 @@ afterEach(() => {
 });
 
 describe("sign-in through the login page", () => {
+  it("registers a local username once and signs it in without a mailbox", async () => {
+    vi.stubEnv("NEXT_PUBLIC_AUTH_USERNAME_SIGNUP", "true");
+    vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "LOCAL");
+    const { login, api } = await createAuth();
+    const { signup } = await import("@/app/(no-navbar)/signup/actions");
+    expect(await signup("小林42", password, password, false)).toMatchObject({
+      success: true,
+      next: "/home",
+    });
+    expect(await signup(" 小林42 ", password, password, false)).toMatchObject({
+      success: false,
+      error: "user_already_exists",
+    });
+    expect(await login("小林42", wrongPassword)).toMatchObject({
+      success: false,
+    });
+    expect(await login("小林42", password)).toMatchObject({ success: true });
+    const identity = testDB.current.UserAuthIdentity[0] as { email: string };
+    await api.requestPasswordReset({ body: { email: identity.email } });
+    expect(await resetEmailsSent()).toEqual([]);
+  });
   it("refuses guesses at one account from many IPs, then its right password too", async () => {
     const { api, login } = await createAuth();
     await signUp(api, "target@example.com");

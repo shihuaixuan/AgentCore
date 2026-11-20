@@ -87,6 +87,16 @@ function providerFetchCallOrder(
 }
 
 describe("SignupPage", () => {
+  test("local username signup does not ask for a contact email", async () => {
+    vi.stubEnv("NEXT_PUBLIC_AUTH_USERNAME_SIGNUP", "true");
+    vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "LOCAL");
+    render(<SignupPage />);
+    expect(await screen.findByLabelText("Username")).toHaveProperty(
+      "type",
+      "text",
+    );
+    expect(screen.queryByLabelText("Email")).toBeNull();
+  });
   beforeEach(() => {
     mockUseAuth.mockReturnValue({
       user: null,

@@ -536,18 +536,18 @@ def test_ban_record_lookup_answers_from_the_records(monkeypatch):
     )
 
     async def is_banned(email):
-        return email == "banned@example.com"
+        return email in {"banned@example.com", "616263@username.invalid"}
 
     monkeypatch.setattr(auth_email_routes, "is_banned_address", is_banned)
     try:
         answers = [
             client.post("/api/auth/email/ban-record", json={"email": e}).json()
-            for e in ("banned@example.com", "user@example.com")
+            for e in ("banned@example.com", "user@example.com", "616263@username.invalid")
         ]
     finally:
         app.dependency_overrides.clear()
 
-    assert answers == [{"banned": True}, {"banned": False}]
+    assert answers == [{"banned": True}, {"banned": False}, {"banned": True}]
 
 
 def test_ban_record_lookup_needs_the_frontend_service_token(

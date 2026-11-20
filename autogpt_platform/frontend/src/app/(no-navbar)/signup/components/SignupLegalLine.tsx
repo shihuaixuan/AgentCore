@@ -9,6 +9,7 @@ import {
 import { Text } from "@/components/atoms/Text/Text";
 import { PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from "@/lib/legal";
 import { cn } from "@/lib/utils";
+import { usernameSignupEnabled } from "@/lib/auth/local-username";
 
 interface Props {
   optedOut: boolean;
@@ -29,32 +30,41 @@ export function SignupLegalLine({ optedOut, onToggle, disabled }: Props) {
         {t("Privacy Policy", "隐私政策")}
       </Link>
       .{" "}
-      <span aria-live="polite">
-        {optedOut ? (
-          <span className="text-foreground-base">
-            {t("You won't get marketing emails.", "你将不会收到营销邮件。")}
-          </span>
-        ) : (
-          t(
-            "We may email you product updates and offers;",
-            "我们可能会向你发送产品更新和优惠信息；",
-          )
-        )}
-      </span>{" "}
-      <button
-        type="button"
-        onClick={onToggle}
-        disabled={disabled}
-        className={cn(
-          linkBaseClasses,
-          linkVariantClasses.secondary,
-          "rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-info focus-visible:ring-offset-2",
-          "disabled:cursor-not-allowed disabled:opacity-50",
-        )}
-      >
-        {optedOut ? t("Undo", "撤销") : t("opt out", "退订")}
-      </button>
-      .
+      {usernameSignupEnabled() ? (
+        t(
+          "Keep your password safe; username accounts have no recovery email.",
+          "请妥善保管密码，用户名账号不能通过邮箱找回。",
+        )
+      ) : (
+        <>
+          <span aria-live="polite">
+            {optedOut ? (
+              <span className="text-foreground-base">
+                {t("You won't get marketing emails.", "你将不会收到营销邮件。")}
+              </span>
+            ) : (
+              t(
+                "We may email you product updates and offers;",
+                "我们可能会向你发送产品更新和优惠信息；",
+              )
+            )}
+          </span>{" "}
+          <button
+            type="button"
+            onClick={onToggle}
+            disabled={disabled}
+            className={cn(
+              linkBaseClasses,
+              linkVariantClasses.secondary,
+              "rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-info focus-visible:ring-offset-2",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+            )}
+          >
+            {optedOut ? t("Undo", "撤销") : t("opt out", "退订")}
+          </button>
+          .
+        </>
+      )}
     </Text>
   );
 }
