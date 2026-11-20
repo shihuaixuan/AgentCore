@@ -6,6 +6,7 @@ import {
 } from "@/app/api/__generated__/endpoints/brain-dump/brain-dump.msw";
 import type { FinalizeResponseOttoReplyKind } from "@/app/api/__generated__/models/finalizeResponseOttoReplyKind";
 import openapi from "@/app/api/openapi.json";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { server } from "@/mocks/mock-server";
 import {
   act,
@@ -500,6 +501,37 @@ describe("onboarding brain dump", () => {
 });
 
 describe("onboarding brain dump — typed fallback", () => {
+  it.each([
+    [false, "en", "Write", "Talk", /HTTPS.*localhost/],
+    [false, "zh-CN", "文字输入", "语音讲述", /通过 HTTPS.*localhost/],
+    [true, "zh-CN", "文字输入", "语音讲述", /浏览器不支持录音/],
+  ] as const)(
+    "offers writing without an unusable mic (secure=%s, %s)",
+    async (secure, locale, write, talk, reason) => {
+      vi.stubGlobal("isSecureContext", secure);
+      if (secure) vi.stubGlobal("MediaRecorder", undefined);
+      onTestFinished(() => {
+        vi.unstubAllGlobals();
+      });
+      landOnPainPointsStep();
+      render(
+        <LanguageProvider initialLocale={locale}>
+          <OnboardingPage />
+        </LanguageProvider>,
+      );
+
+      const writeButton = await screen.findByRole("button", { name: write });
+      expect(screen.queryByRole("button", { name: talk })).toBeNull();
+      expect(screen.getByText(reason)).toBeDefined();
+      await userEvent.click(writeButton);
+      expect(await screen.findByRole("textbox")).toBeDefined();
+      expect(
+        screen.queryByRole("button", { name: /record instead|改用录音/ }),
+      ).toBeNull();
+      expect(getUserMedia).not.toHaveBeenCalled();
+    },
+  );
+
   it("opens the typed composer under a writing headline when mic permission is denied", async () => {
     getUserMedia.mockRejectedValue(
       new DOMException("denied", "NotAllowedError"),
@@ -848,6 +880,10 @@ describe("onboarding brain dump — finishing a take", () => {
   // Back and Log out hidden.
   it("takes 'Skip for now' away while the dump is being submitted", async () => {
     const partUploads: string[] = [];
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
     server.use(
       getUploadBrainDumpPartMockHandler200(() => {
         partUploads.push("part");
@@ -859,7 +895,7 @@ describe("onboarding brain dump — finishing a take", () => {
         };
       }),
       getFinalizeBrainDumpMockHandler200(async () => {
-        await new Promise(() => undefined);
+        await held;
         return { status: "completed" as const, input_mode: "voice" as const };
       }),
     );
@@ -875,8 +911,13 @@ describe("onboarding brain dump — finishing a take", () => {
       await screen.findByRole("button", { name: "Send recording" }),
     );
 
-    expect(await screen.findByText("Got it. One second…")).toBeDefined();
-    expect(screen.queryByRole("button", { name: "Skip for now" })).toBeNull();
+    try {
+      expect(await screen.findByText("Got it. One second…")).toBeDefined();
+      expect(screen.queryByRole("button", { name: "Skip for now" })).toBeNull();
+    } finally {
+      release();
+    }
+    expect(await screen.findByTestId("step-plan")).toBeDefined();
   });
 
   it("shows immediate progress while canceling a recording", async () => {

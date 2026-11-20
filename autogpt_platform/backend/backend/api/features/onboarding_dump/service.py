@@ -184,8 +184,8 @@ async def finalize_voice_dump(
         durationSecs=duration_secs,
         errorCode=None,
     )
-    # The audio is durable now; the buffer has done its job.
-    await storage.discard_parts(user_id, recording_id)
+    if audio_path:
+        await storage.discard_parts(user_id, recording_id)
 
     started_at = time.monotonic()
     try:
@@ -221,6 +221,8 @@ async def finalize_voice_dump(
         audioPath=None,
     )
     if transcript_saved:
+        if not audio_path:
+            await storage.discard_parts(user_id, recording_id)
         await _delete_recordings([audio_path, earlier_audio_path])
     # The transcript is stored *before* the gate so a rejected dump keeps
     # its text for debugging — the gate only decides whether the

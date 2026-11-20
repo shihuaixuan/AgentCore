@@ -14,12 +14,12 @@ become a colleague the user is invited to hire.
 """
 
 import logging
-import os
 from collections.abc import Sequence
 
 from backend.api.features.experts.copy_policy import EXPERT_COPY_POLICY
 from backend.api.features.experts.models import Expert
 from backend.api.features.onboarding_dump import plan, role_skills
+from backend.api.features.onboarding_dump.model_routing import onboarding_model
 from backend.api.features.onboarding_dump.models import (
     ExpertRecommendations,
     RaiseSuggestion,
@@ -32,7 +32,6 @@ logger = logging.getLogger(__name__)
 
 # Same reasoning as the provider job: matching needs against a roster is
 # a matching task, and the onboarding loading screen waits on it.
-_MODEL = os.environ.get("BRAIN_DUMP_RECOMMEND_MODEL", "anthropic/claude-haiku-5.5")
 _TIMEOUT_SECONDS = 30
 
 # The plan offers Jev this many owners to choose from and keeps three, so a
@@ -95,7 +94,8 @@ sentence, max {max_reason} characters, second person.
 Rules: never invent a template id or a workflow name that is not below; \
 never recommend an expert the transcript gives no evidence for (fewer, \
 better hires beat filling every available slot); do not promise anything the \
-listed workflows cannot do.
+listed workflows cannot do. Write the diagnosis and reasons in the language \
+of the transcript. Keep all identifiers and workflow names unchanged.
 
 Roster:
 {roster}
@@ -150,7 +150,7 @@ async def generate_expert_recommendations(
         try:
             reply = await request_json(
                 client,
-                model=_MODEL,
+                model=onboarding_model("BRAIN_DUMP_RECOMMEND_MODEL"),
                 prompt=prompt,
                 temperature=0.2,
                 max_tokens=2000,

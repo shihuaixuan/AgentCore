@@ -25,6 +25,7 @@ from backend.util.gcs_utils import (
     is_not_found_error,
     parse_gcs_path,
 )
+from backend.util.settings import BehaveAs, Config
 
 logger = logging.getLogger(__name__)
 
@@ -181,8 +182,11 @@ async def was_discarded(user_id: str, recording_id: str) -> bool:
     return bool(await redis.exists(_discarded_key(user_id, recording_id)))
 
 
-async def store_audio(user_id: str, content: bytes, filename: str) -> str:
+async def store_audio(user_id: str, content: bytes, filename: str) -> str | None:
+    """Persist a take, or use the expiring part buffer on bucketless local installs."""
     handler = await get_cloud_storage_handler()
+    if not handler.config.gcs_bucket_name and Config().behave_as == BehaveAs.LOCAL:
+        return None
     return await handler.store_file(
         content,
         filename,

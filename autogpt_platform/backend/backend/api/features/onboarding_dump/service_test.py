@@ -334,6 +334,30 @@ async def finalize_voice(duration_secs: float = 12.0, mime_type: str | None = No
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("transcription_fails", [False, True])
+async def test_bucketless_take_releases_buffer_only_after_transcription(
+    dumps, storage_mocks, transcribe, transcription_fails
+):
+    await start_voice_take(dumps)
+    storage_mocks["store_audio"].return_value = None
+
+    async def read_audio(*args):
+        storage_mocks["discard_parts"].assert_not_awaited()
+        if transcription_fails:
+            raise RuntimeError("transcriber unavailable")
+        return transcription.TranscriptionResult(text=TRANSCRIPT, model="test")
+
+    transcribe.side_effect = read_audio
+    response = await finalize_voice()
+    if transcription_fails:
+        assert response.error_code == "transcription_failed"
+        storage_mocks["discard_parts"].assert_not_awaited()
+    else:
+        assert response.status == BrainDumpStatus.transcribed
+        storage_mocks["discard_parts"].assert_awaited_once_with(USER_ID, RECORDING_ID)
+
+
+@pytest.mark.asyncio
 async def test_transcription_failure_keeps_the_audio_and_records_the_error(
     dumps: DumpStore, transcribe: AsyncMock, storage_mocks: dict[str, AsyncMock]
 ):

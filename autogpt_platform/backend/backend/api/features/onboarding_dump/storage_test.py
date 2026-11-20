@@ -183,6 +183,14 @@ def _handler(mocker: MockerFixture, bucket: str = "private-bucket") -> MagicMock
 
 
 @pytest.mark.asyncio
+async def test_local_install_without_private_bucket_uses_buffer(mocker, monkeypatch):
+    monkeypatch.setenv("BEHAVE_AS", "local")
+    handler = _handler(mocker, bucket="")
+    assert await storage.store_audio(USER_ID, b"audio", "test.ogg") is None
+    handler.store_file.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 async def test_recordings_are_stored_marked_with_an_expiry(
     mocker: MockerFixture,
 ):

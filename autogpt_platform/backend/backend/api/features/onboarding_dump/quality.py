@@ -29,11 +29,14 @@ import logging
 import os
 import zlib
 from collections import Counter
+from contextlib import AsyncExitStack
 from typing import Literal
 
+from openai import AsyncOpenAI, DefaultAsyncHttpxClient
 from prisma.enums import BrainDumpInputMode
 from pydantic import BaseModel
 
+from backend.api.features.onboarding_dump.model_routing import onboarding_model
 from backend.api.features.onboarding_dump.structured import request_json
 from backend.api.features.onboarding_dump.stt_artifacts import is_stt_artifact
 from backend.util.clients import get_openai_client
@@ -51,7 +54,6 @@ QUALITY_ERROR_CODES = frozenset(
     {NO_USABLE_SPEECH, INSUFFICIENT_CONTENT, QUALITY_CHECK_UNAVAILABLE}
 )
 
-_MODEL = os.environ.get("BRAIN_DUMP_QUALITY_MODEL", "anthropic/claude-haiku-5.5")
 # The gate runs inside the finalize request, after transcription already
 # spent part of the frontend proxy's 30s budget. A 100-token Haiku verdict
 # typically lands in a couple of seconds; a stalled provider must degrade
@@ -232,22 +234,39 @@ async def _semantic_verdict(
     a verdict, so the user is offered a retry instead of being told they
     said too little.
     """
-    client = get_openai_client(prefer_openrouter=True)
-    if client is None:
-        return _judge_unavailable("judge_unconfigured")
-
     template = (
         _TYPED_PROMPT if input_mode == BrainDumpInputMode.typed else _VOICE_PROMPT
     )
     try:
-        reply = await request_json(
-            client,
-            model=_MODEL,
-            prompt=template.format(transcript=text),
-            temperature=0,
-            max_tokens=100,
-            timeout=_TIMEOUT_SECONDS,
-        )
+        async with AsyncExitStack() as stack:
+            base_url = os.getenv("BRAIN_DUMP_TYPED_QUALITY_BASE_URL")
+            key = os.getenv("BRAIN_DUMP_TYPED_QUALITY_API_KEY")
+            model = os.getenv("BRAIN_DUMP_TYPED_QUALITY_MODEL")
+            if input_mode == BrainDumpInputMode.typed and (base_url or key or model):
+                if not (base_url and key and model):
+                    return _judge_unavailable("judge_unconfigured")
+                client = await stack.enter_async_context(
+                    AsyncOpenAI(
+                        base_url=base_url,
+                        api_key=key,
+                        http_client=DefaultAsyncHttpxClient(
+                            follow_redirects=False, trust_env=False
+                        ),
+                    )
+                )
+            else:
+                client = get_openai_client(prefer_openrouter=True)
+                if client is None:
+                    return _judge_unavailable("judge_unconfigured")
+                model = onboarding_model("BRAIN_DUMP_QUALITY_MODEL")
+            reply = await request_json(
+                client,
+                model=model,
+                prompt=template.format(transcript=text),
+                temperature=0,
+                max_tokens=100,
+                timeout=_TIMEOUT_SECONDS,
+            )
     except TimeoutError as e:
         return _judge_unavailable("judge_timeout", e)
     except Exception as e:

@@ -18,7 +18,8 @@ import { SkipButton } from "./components/SkipButton";
 import { StepHeader } from "./components/StepHeader";
 import { TypingComposer } from "./components/TypingComposer";
 import { OrbControlButton } from "./components/OrbControlButton";
-import { toOrbScreen } from "./helpers";
+import { useEffect, useState } from "react";
+import { recordingSupport, toOrbScreen } from "./helpers";
 import { useBrainDumpStep } from "./useBrainDumpStep";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
@@ -30,6 +31,11 @@ const TIME_LIMIT_CAPTION =
 export function BrainDumpStep() {
   const { t } = useTranslation();
   const dump = useBrainDumpStep();
+  const [captureIssue, setCaptureIssue] =
+    useState<ReturnType<typeof recordingSupport>["issue"]>(null);
+  useEffect(() => {
+    setCaptureIssue(recordingSupport().issue);
+  }, []);
   const isRecording = dump.screen === "recording";
   const isProcessing = dump.screen === "processing";
   const isTyping = dump.screen === "typing";
@@ -139,21 +145,33 @@ export function BrainDumpStep() {
                 ) : orbScreen === "rest" ? (
                   <>
                     <RestActions
-                      onTalk={dump.handleStart}
+                      onTalk={captureIssue ? undefined : dump.handleStart}
                       onWrite={dump.showTyping}
-                      writeFirst={dump.isMicUnavailable}
+                      writeFirst={
+                        Boolean(captureIssue) || dump.isMicUnavailable
+                      }
                     />
-                    {dump.isMicUnavailable && (
+                    {(captureIssue || dump.isMicUnavailable) && (
                       <Text
                         variant="body"
                         tone="muted"
                         role="alert"
                         className="mt-3 text-center"
                       >
-                        {t(
-                          MIC_UNAVAILABLE_COPY,
-                          "无法打开麦克风，你可以改用文字输入。",
-                        )}
+                        {captureIssue === "insecure"
+                          ? t(
+                              "To record, open this page over HTTPS (or localhost on this device). You can write here instead.",
+                              "如需录音，请通过 HTTPS 打开此页面（本机也可使用 localhost）。你也可以直接输入文字。",
+                            )
+                          : captureIssue === "unsupported"
+                            ? t(
+                                "This browser doesn't support recording here. You can write instead or try another browser.",
+                                "当前浏览器不支持录音。你可以改用文字输入，或换一个浏览器。",
+                              )
+                            : t(
+                                MIC_UNAVAILABLE_COPY,
+                                "无法打开麦克风，你可以改用文字输入。",
+                              )}
                       </Text>
                     )}
                   </>
@@ -208,7 +226,7 @@ export function BrainDumpStep() {
                 heardText={dump.heardText}
                 replyKind={dump.replyKind}
                 role={dump.role}
-                canRecord={!dump.isMicBlocked}
+                canRecord={!captureIssue && !dump.isMicBlocked}
                 onTalk={dump.handleRestart}
                 onWrite={dump.showTyping}
                 onSkip={dump.handleSkip}
@@ -216,13 +234,15 @@ export function BrainDumpStep() {
             </RevealItem>
           )}
 
-          <ModeSwitchLink
-            screen={dump.screen}
-            submittedMode={dump.submittedMode}
-            onTypeInstead={dump.showTyping}
-            onRecordInstead={dump.handleRecordInstead}
-            onTypeInsteadOfRecovered={dump.handleTypeInsteadOfRecovered}
-          />
+          {(!isTyping || !captureIssue) && (
+            <ModeSwitchLink
+              screen={dump.screen}
+              submittedMode={dump.submittedMode}
+              onTypeInstead={dump.showTyping}
+              onRecordInstead={dump.handleRecordInstead}
+              onTypeInsteadOfRecovered={dump.handleTypeInsteadOfRecovered}
+            />
+          )}
 
           {showPrivacyNote && !isRecording && <PrivacyNote />}
         </RevealGroup>

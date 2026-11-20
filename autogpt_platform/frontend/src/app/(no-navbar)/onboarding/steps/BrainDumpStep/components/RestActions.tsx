@@ -6,7 +6,7 @@ import { Button } from "@/components/atoms/Button/Button";
 import { Mic01Icon, PencilEdit01Icon } from "@hugeicons/core-free-icons";
 
 interface Props {
-  onTalk: () => void;
+  onTalk?: () => void;
   onWrite: () => void;
   writeFirst?: boolean;
 }
@@ -17,16 +17,18 @@ export function RestActions({ onTalk, onWrite, writeFirst = false }: Props) {
   const { t } = useTranslation();
   return (
     <div className="mt-4 flex items-center gap-3">
-      <Button
-        type="button"
-        variant={writeFirst ? "secondary" : "primary"}
-        size="small"
-        onClick={onTalk}
-        leadingIcon={Mic01Icon}
-        className="h-10 w-36"
-      >
-        {t("Talk", "语音讲述")}
-      </Button>
+      {onTalk && (
+        <Button
+          type="button"
+          variant={writeFirst ? "secondary" : "primary"}
+          size="small"
+          onClick={onTalk}
+          leadingIcon={Mic01Icon}
+          className="h-10 w-36"
+        >
+          {t("Talk", "语音讲述")}
+        </Button>
+      )}
       <Button
         type="button"
         variant={writeFirst ? "primary" : "secondary"}

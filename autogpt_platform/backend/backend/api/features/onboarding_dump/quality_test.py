@@ -16,6 +16,7 @@ from prisma.enums import BrainDumpInputMode
 from pytest_mock import MockerFixture
 
 from backend.api.features.onboarding_dump import quality, stt_artifacts
+from backend.copilot.sdk import env as sdk_env
 
 SUBSTANTIAL_DUMP = (
     "So I run a small bakery in Lisbon with my sister. Every Friday we get "
@@ -234,6 +235,54 @@ async def test_compression_seam_separates_looping_from_prose(llm):
 
 
 # --- the ambiguous middle: one LLM call decides ---------------------------
+
+
+@pytest.mark.asyncio
+async def test_dedicated_gateway_only_judges_typed_input(llm, mocker, monkeypatch):
+    monkeypatch.setenv("BRAIN_DUMP_TYPED_QUALITY_BASE_URL", "http://judge.test/v1")
+    monkeypatch.setenv("BRAIN_DUMP_TYPED_QUALITY_API_KEY", "test-key")
+    monkeypatch.setenv("BRAIN_DUMP_TYPED_QUALITY_MODEL", "test-gpt")
+    typed = _llm_client('{"usable": true}')
+    factory = mocker.patch.object(quality, "AsyncOpenAI")
+    factory.return_value.__aenter__.return_value = typed
+    default = llm(_llm_client('{"usable": false}'))
+    text = "我每周需要整理订单。"
+
+    assert (
+        await quality.check_transcript_quality(
+            text, input_mode=BrainDumpInputMode.typed
+        )
+        is None
+    )
+    default.assert_not_called()
+    assert factory.call_args.kwargs["base_url"] == "http://judge.test/v1"
+    assert factory.call_args.kwargs["api_key"] == "test-key"
+    assert typed.chat.completions.create.await_args.kwargs["model"] == "test-gpt"
+    assert await quality.check_transcript_quality(text) == JUDGED_UNUSABLE
+    factory.assert_called_once()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("override", [None, "dedicated-judge"])
+async def test_short_chinese_answer_uses_local_model(llm, monkeypatch, override):
+    monkeypatch.setattr(sdk_env.config, "use_local", True)
+    monkeypatch.setattr(sdk_env.config, "fast_standard_model", "local-chat")
+    if override:
+        monkeypatch.setenv("BRAIN_DUMP_QUALITY_MODEL", override)
+    else:
+        monkeypatch.delenv("BRAIN_DUMP_QUALITY_MODEL", raising=False)
+    client = _llm_client('{"usable": true}')
+    llm(client)
+
+    assert (
+        await quality.check_transcript_quality(
+            "我每周需要整理订单。", input_mode=BrainDumpInputMode.typed
+        )
+        is None
+    )
+    assert client.chat.completions.create.await_args.kwargs["model"] == (
+        override or "local-chat"
+    )
 
 
 @pytest.mark.asyncio

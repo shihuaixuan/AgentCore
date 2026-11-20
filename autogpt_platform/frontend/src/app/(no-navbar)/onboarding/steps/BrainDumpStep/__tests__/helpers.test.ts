@@ -81,8 +81,9 @@ describe("pickMimeType", () => {
     vi.unstubAllGlobals();
   });
 
-  it("falls back to webm where MediaRecorder does not exist", () => {
-    expect(pickMimeType()).toBe("audio/webm");
+  it("does not guess a format where MediaRecorder does not exist", () => {
+    vi.stubGlobal("MediaRecorder", undefined);
+    expect(pickMimeType()).toBeUndefined();
   });
 
   it("uses webm when the browser supports it", () => {

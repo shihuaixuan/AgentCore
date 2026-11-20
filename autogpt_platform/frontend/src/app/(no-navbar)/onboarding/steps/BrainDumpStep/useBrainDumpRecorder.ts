@@ -13,7 +13,7 @@ import {
   HARD_STOP_SECONDS,
   META_REFRESH_SECONDS,
   newRecordingId,
-  pickMimeType,
+  recordingSupport,
   SPEECH_PEAK_THRESHOLD,
   TIMESLICE_MS,
 } from "./helpers";
@@ -140,6 +140,12 @@ export function useBrainDumpRecorder({ promptSet }: Args = {}) {
   }
 
   async function openMicAndRecord({ onMicAnswer, shouldRecord }: StartOptions) {
+    const support = recordingSupport();
+    if (support.issue !== null) {
+      reportMicFailure(new DOMException("", "NotSupportedError"));
+      onMicAnswer?.("unavailable");
+      return false;
+    }
     // Permission is requested on the first tap, never on screen load —
     // a browser prompt before the user has read the headline is how
     // denial rates go up.
@@ -163,7 +169,7 @@ export function useBrainDumpRecorder({ promptSet }: Args = {}) {
     }
 
     const recordingId = newRecordingId();
-    const mimeType = pickMimeType();
+    const { mimeType } = support;
     recordingIdRef.current = recordingId;
     mimeTypeRef.current = mimeType;
     partIndexRef.current = 0;

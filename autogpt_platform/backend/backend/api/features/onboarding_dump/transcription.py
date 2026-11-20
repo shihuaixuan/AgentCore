@@ -1,7 +1,7 @@
 """Speech-to-text for the onboarding brain dump.
 
-``gpt-4o-transcribe`` is the primary model: on messy, rambling natural
-speech it is markedly more accurate and hallucinates far less than
+For direct OpenAI, ``gpt-4o-transcribe`` is the primary model: on messy,
+rambling natural speech it is markedly more accurate and hallucinates far less than
 ``whisper-1``, which is the failure mode that matters most here (a
 hallucinated sentence becomes a *fact* about the user). ``whisper-1`` is
 the automatic fallback so a model outage degrades rather than fails.
@@ -21,7 +21,7 @@ import shutil
 import string
 import tempfile
 
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, DefaultAsyncHttpxClient
 from pydantic import BaseModel
 
 from backend.api.features.onboarding_dump.models import MAX_DURATION_SECS
@@ -31,8 +31,13 @@ logger = logging.getLogger(__name__)
 
 settings = Settings()
 
-PRIMARY_MODEL = os.environ.get("BRAIN_DUMP_TRANSCRIPTION_MODEL", "gpt-4o-transcribe")
-FALLBACK_MODEL = os.environ.get("BRAIN_DUMP_TRANSCRIPTION_FALLBACK_MODEL", "whisper-1")
+STT_BASE_URL = os.environ.get("BRAIN_DUMP_TRANSCRIPTION_BASE_URL", "").strip()
+PRIMARY_MODEL = os.environ.get("BRAIN_DUMP_TRANSCRIPTION_MODEL") or (
+    "whisper-1" if STT_BASE_URL else "gpt-4o-transcribe"
+)
+FALLBACK_MODEL = os.environ.get(
+    "BRAIN_DUMP_TRANSCRIPTION_FALLBACK_MODEL", "" if STT_BASE_URL else "whisper-1"
+)
 
 # Both caps are the provider's, minus headroom for the multipart envelope.
 SINGLE_REQUEST_MAX_BYTES = 20 * 1024 * 1024
@@ -82,11 +87,8 @@ class TranscriptionResult(BaseModel):
 def get_stt_client() -> AsyncOpenAI | None:
     """Return a client for the audio-transcriptions endpoint.
 
-    Deliberately not ``backend.util.clients.get_openai_client()``: that
-    helper falls back to OpenRouter, which does not implement
-    ``/audio/transcriptions``, so a deployment with only an OpenRouter key
-    would get a confusing 404 from the provider instead of a clean
-    "not configured" error here.
+    An explicit STT endpoint gets only its own credential. Never infer the
+    destination for a recording from chat configuration or OPENAI_BASE_URL.
 
     Built per call rather than ``@cached``: ``AsyncOpenAI`` binds its
     connection pool to the first event loop that uses it, so a process-wide
@@ -95,12 +97,22 @@ def get_stt_client() -> AsyncOpenAI | None:
     grandfathered allowlist that is being burned down, not the pattern to
     copy. Finalize runs once per user, so the pool churn is negligible.
     """
-    api_key = (
-        settings.secrets.openai_internal_api_key or settings.secrets.openai_api_key
+    stt_key = os.environ.get("BRAIN_DUMP_TRANSCRIPTION_API_KEY", "").strip()
+    if STT_BASE_URL:
+        api_key = stt_key or "not-required"
+    else:
+        if stt_key:
+            return None
+        api_key = (
+            settings.secrets.openai_internal_api_key or settings.secrets.openai_api_key
+        )
+        if not api_key:
+            return None
+    return AsyncOpenAI(
+        api_key=api_key,
+        base_url=STT_BASE_URL or "https://api.openai.com/v1",
+        http_client=DefaultAsyncHttpxClient(follow_redirects=False),
     )
-    if not api_key:
-        return None
-    return AsyncOpenAI(api_key=api_key)
 
 
 async def transcribe(
@@ -118,22 +130,25 @@ async def transcribe(
     client = get_stt_client()
     if client is None:
         raise TranscriptionUnavailableError(
-            "Brain-dump transcription needs a direct OpenAI key. Set "
-            "OPENAI_INTERNAL_API_KEY or OPENAI_API_KEY."
+            "Configure BRAIN_DUMP_TRANSCRIPTION_BASE_URL for a custom STT service, "
+            "or use OPENAI_INTERNAL_API_KEY or OPENAI_API_KEY for direct OpenAI."
         )
 
     needs_split = len(audio) > SINGLE_REQUEST_MAX_BYTES or (
         duration_secs is not None and duration_secs > SINGLE_REQUEST_MAX_SECONDS
     )
-    if not needs_split:
-        return await _transcribe_one(client, audio, filename)
+    async with client:
+        if not needs_split:
+            return await _transcribe_one(client, audio, filename)
 
-    segments = await split_audio(audio, filename, duration_secs)
-    logger.info("Brain dump split into %s segments for transcription", len(segments))
-    results = [
-        await _transcribe_one(client, segment, f"segment-{index}{SEGMENT_SUFFIX}")
-        for index, segment in enumerate(segments)
-    ]
+        segments = await split_audio(audio, filename, duration_secs)
+        logger.info(
+            "Brain dump split into %s segments for transcription", len(segments)
+        )
+        results = [
+            await _transcribe_one(client, segment, f"segment-{index}{SEGMENT_SUFFIX}")
+            for index, segment in enumerate(segments)
+        ]
     return TranscriptionResult(
         text=stitch_transcripts([result.text for result in results]),
         model=",".join(dict.fromkeys(result.model for result in results)),
@@ -144,7 +159,7 @@ async def _transcribe_one(
     client: AsyncOpenAI, audio: bytes, filename: str
 ) -> TranscriptionResult:
     last_error: Exception | None = None
-    for model in (PRIMARY_MODEL, FALLBACK_MODEL):
+    for model in dict.fromkeys(filter(None, (PRIMARY_MODEL, FALLBACK_MODEL))):
         for attempt in range(MAX_ATTEMPTS):
             try:
                 response = await asyncio.wait_for(

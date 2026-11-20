@@ -8,8 +8,8 @@ it hallucinates outside the registry is dropped.
 """
 
 import logging
-import os
 
+from backend.api.features.onboarding_dump.model_routing import onboarding_model
 from backend.api.features.onboarding_dump.models import RecommendedProvider
 from backend.api.features.onboarding_dump.providers import (
     known_providers,
@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 # Picking six ids off a list is a matching task, not a writing one, and
 # the onboarding loading screen holds the user until it answers — so this
 # runs on the fast model rather than the one that writes the greeting.
-_MODEL = os.environ.get("BRAIN_DUMP_RECOMMEND_MODEL", "anthropic/claude-haiku-5.5")
 _TIMEOUT_SECONDS = 30
 
 MAX_RECOMMENDATIONS = 6
@@ -43,7 +42,7 @@ the provider to something they said
 
 Rules: never invent a provider id that is not in the list; skip generic \
 picks the transcript gives no evidence for; an empty array is a valid \
-answer for a thin transcript.
+answer for a thin transcript. Write reasons in the language of the transcript.
 
 Providers:
 {providers}
@@ -77,7 +76,7 @@ async def generate_recommendations(transcript: str) -> list[RecommendedProvider]
     try:
         reply = await request_json(
             client,
-            model=_MODEL,
+            model=onboarding_model("BRAIN_DUMP_RECOMMEND_MODEL"),
             prompt=prompt,
             temperature=0.2,
             max_tokens=1000,

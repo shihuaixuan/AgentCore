@@ -65,6 +65,16 @@ powershell -ExecutionPolicy Bypass -File .\start-source.ps1 -Action Stop
 
 尚未提供模型供应商 API key。平台页面和数据库就绪不等于模型调用已配置：聊天、嵌入和依赖第三方 API 的组件仍需对应凭据。后端支持在 `.env` 中配置 `OPEN_ROUTER_API_KEY`、`ANTHROPIC_API_KEY`，或按上游 `.env.default` 配置 `CHAT_USE_LOCAL` / `CHAT_BASE_URL` / `CHAT_API_KEY`；不同功能的凭据要求不同，不应把任一 key 当作所有功能的通用替代。配置后重启服务。未配置嵌入模型时，后台嵌入回填会报错；本机未配置 Postmark 时不会发送验证/找回密码邮件。
 
+### 入门语音录音转写（后端）
+
+`CHAT_USE_LOCAL=true` 不会把录音发给聊天服务。默认仅直连 OpenAI，依次读取 `OPENAI_INTERNAL_API_KEY`、`OPENAI_API_KEY`；两者都未设置时，语音转写不可用。
+
+若决定将录音交给其他服务，在后端 `.env` 中显式设置 `BRAIN_DUMP_TRANSCRIPTION_BASE_URL`（API 根地址，例如 `http://127.0.0.1:8001/v1`）和 `BRAIN_DUMP_TRANSCRIPTION_MODEL`。该地址必须从后端可达，并支持 `POST /audio/transcriptions`；远程服务请使用 HTTPS。需要鉴权时另设 `BRAIN_DUMP_TRANSCRIPTION_API_KEY`，不会自动借用聊天或 OpenAI 密钥。本机聊天网关的 `qwen3-asr-flash` 已用合成语音验证；只有在同意把录音发给该网关时，才将其 API 根地址和凭据显式填入转写配置。
+
+自定义端点默认模型为 `whisper-1`，默认没有备用模型；可用 `BRAIN_DUMP_TRANSCRIPTION_FALLBACK_MODEL` 指定同一端点支持的备用模型。失败不会改投其他端点。保存配置后重启后端。
+
+本地模式无需配置私有云存储桶即可转写。此时服务端暂存在 Redis 的录音分片在转写结果保存后删除，失败时保留至缓存到期；浏览器保留的副本仍可用于重试。
+
 ## 修改源码后
 
 后端修改后重启即可；前端使用生产构建，修改后需要重新构建。为避免构建和后端同时占满内存，先停止，再单独构建：

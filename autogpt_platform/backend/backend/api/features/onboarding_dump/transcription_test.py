@@ -2,11 +2,74 @@
 
 from unittest.mock import AsyncMock, MagicMock
 
+import httpx
 import pytest
 from pytest_mock import MockerFixture
 
 from backend.api.features.onboarding_dump import transcription
 from backend.api.features.onboarding_dump.models import MAX_DURATION_SECS
+
+
+@pytest.mark.asyncio
+async def test_redirect_cannot_forward_audio_to_another_host(monkeypatch):
+    sent_to: list[str] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        sent_to.append(str(request.url))
+        if request.url.host == "stt.test":
+            return httpx.Response(307, headers={"Location": "https://other.test/"})
+        return httpx.Response(200, json={"text": "unexpected redirect"})
+
+    monkeypatch.setattr(transcription, "STT_BASE_URL", "https://stt.test/v1")
+    monkeypatch.setenv("BRAIN_DUMP_TRANSCRIPTION_API_KEY", "speech")
+    monkeypatch.setattr(transcription, "PRIMARY_MODEL", "speech-model")
+    monkeypatch.setattr(transcription, "FALLBACK_MODEL", "")
+    monkeypatch.setattr(transcription, "MAX_ATTEMPTS", 1)
+    http_client = transcription.DefaultAsyncHttpxClient
+    monkeypatch.setattr(
+        transcription,
+        "DefaultAsyncHttpxClient",
+        lambda **kwargs: http_client(transport=httpx.MockTransport(respond), **kwargs),
+    )
+    with pytest.raises(transcription.TranscriptionFailedError):
+        await transcription.transcribe(b"audio", "sample.webm")
+    assert sent_to == ["https://stt.test/v1/audio/transcriptions"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "base_url, stt_key, internal_key, direct_key, expected_url, expected_key",
+    [
+        ("", "", "", "", None, None),
+        ("", "", "internal", "direct", "https://api.openai.com/v1/", "internal"),
+        ("", "", "", "direct", "https://api.openai.com/v1/", "direct"),
+        ("", "speech", "internal", "direct", None, None),
+        ("http://stt.test/v1", "speech", "i", "d", "http://stt.test/v1/", "speech"),
+        ("http://stt.test/v1", "", "i", "d", "http://stt.test/v1/", "not-required"),
+    ],
+)
+async def test_stt_destination_and_key(
+    monkeypatch, base_url, stt_key, internal_key, direct_key, expected_url, expected_key
+):
+    monkeypatch.setattr(transcription, "STT_BASE_URL", base_url)
+    monkeypatch.setenv("BRAIN_DUMP_TRANSCRIPTION_API_KEY", stt_key)
+    monkeypatch.setenv("CHAT_USE_LOCAL", "true")
+    monkeypatch.setenv("CHAT_BASE_URL", "http://chat.test/v1")
+    monkeypatch.setenv("CHAT_API_KEY", "chat")
+    monkeypatch.setenv("OPENAI_BASE_URL", "http://shared.test/v1")
+    monkeypatch.setattr(
+        transcription.settings.secrets, "openai_internal_api_key", internal_key
+    )
+    monkeypatch.setattr(transcription.settings.secrets, "openai_api_key", direct_key)
+
+    client = transcription.get_stt_client()
+    if expected_url is None:
+        assert client is None
+        return
+    assert client is not None
+    async with client:
+        assert str(client.base_url) == expected_url
+        assert client.api_key == expected_key
 
 
 @pytest.mark.parametrize(

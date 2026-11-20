@@ -27,7 +27,9 @@ GENERATION = {
 
 
 @pytest.fixture
-def client(mocker: MockerFixture) -> MagicMock:
+def client(mocker: MockerFixture, monkeypatch) -> MagicMock:
+    monkeypatch.setenv("BRAIN_DUMP_GREETING_MODEL", "primary-model")
+    monkeypatch.setenv("BRAIN_DUMP_GREETING_BACKUP_MODEL", "backup-model")
     completion = SimpleNamespace(
         choices=[
             SimpleNamespace(message=SimpleNamespace(content=json.dumps(GENERATION)))
@@ -238,7 +240,15 @@ async def test_a_failed_sonnet_call_gets_the_greeting_from_the_backup(
     assert greeting == GENERATION["greeting"]
     assert [p.title for p in prompts] == [p["title"] for p in GENERATION["prompts"]]
     models = [c.kwargs["model"] for c in client.chat.completions.create.await_args_list]
-    assert models == [intro._MODEL, intro._BACKUP_MODEL]
+    assert models == ["primary-model", "backup-model"]
+
+
+@pytest.mark.asyncio
+async def test_single_model_install_does_not_race_itself(client, monkeypatch):
+    monkeypatch.setenv("BRAIN_DUMP_GREETING_BACKUP_MODEL", "primary-model")
+    client.chat.completions.create.side_effect = RuntimeError("gateway down")
+    assert await intro.generate_intro(TRANSCRIPT) == intro.fallback_intro(TRANSCRIPT)
+    assert client.chat.completions.create.await_count == 1
 
 
 @pytest.mark.asyncio

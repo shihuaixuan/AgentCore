@@ -17,6 +17,7 @@ from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletion
 
 from backend.api.features.onboarding_dump.greeting_race import Attempt, IntroReply, race
+from backend.api.features.onboarding_dump.model_routing import onboarding_model
 from backend.api.features.onboarding_dump.models import MAX_WHY_CHARS, SuggestedPrompt
 from backend.api.features.onboarding_dump.parsing import parse_response_json
 from backend.api.features.onboarding_dump.providers import (
@@ -33,14 +34,11 @@ from backend.util.langfuse_prompts import (
 logger = logging.getLogger(__name__)
 
 # OpenRouter's own spelling: the one its responses carry.
-_MODEL = os.environ.get("BRAIN_DUMP_GREETING_MODEL", "anthropic/claude-sonnet-5.5")
+_CLOUD_MODEL = "anthropic/claude-sonnet-5.5"
 _TIMEOUT_SECONDS = 45
 # The fast answer behind Sonnet (``greeting_race``): the model the team job
 # calls the same way. It starts when Sonnet fails, or once Sonnet has run
 # _HEDGE_SECONDS, so the tasks land inside the plan step's wait.
-_BACKUP_MODEL = os.environ.get(
-    "BRAIN_DUMP_GREETING_BACKUP_MODEL", "anthropic/claude-haiku-5.5"
-)
 _BACKUP_TIMEOUT_SECONDS = 25
 _HEDGE_SECONDS = 12
 # Reasoning is off (``structured.NO_REASONING``): the plan step waits on this
@@ -101,7 +99,9 @@ problem no workflow or expert can take over too (a machine, a recipe, \
 on-site hardware, a personal decision), as something you will work through \
 with them yourself, never as a job for the team. When the transcript has \
 such a problem, make the last suggested prompt that work. The greeting may \
-run to {GREETING_CHAR_LIMIT} characters when it has to."""
+run to {GREETING_CHAR_LIMIT} characters when it has to. Write the greeting \
+and suggested tasks in the language of the user's work description; keep \
+JSON keys and identifiers unchanged."""
 
 # The local fallback for the Langfuse-managed instructions. The greeting
 # diagnoses the dump so the user can see they were heard; the suggested
@@ -198,12 +198,17 @@ async def generate_intro(transcript: str) -> tuple[str, list[SuggestedPrompt]]:
 
     instructions = await _fetch_langfuse_prompt() or _LOCAL_PROMPT
     content = f"{_integrations_block()}{instructions}{text}"
-    reply = await race(
-        Attempt(model=_MODEL, timeout=_TIMEOUT_SECONDS),
-        Attempt(model=_BACKUP_MODEL, timeout=_BACKUP_TIMEOUT_SECONDS),
-        lambda model, timeout: _generate(client, content, model, timeout),
-        hedge_after=_HEDGE_SECONDS,
-    )
+    primary = onboarding_model("BRAIN_DUMP_GREETING_MODEL", _CLOUD_MODEL)
+    backup = onboarding_model("BRAIN_DUMP_GREETING_BACKUP_MODEL")
+    if primary == backup:
+        reply = await _generate(client, content, primary, _TIMEOUT_SECONDS)
+    else:
+        reply = await race(
+            Attempt(model=primary, timeout=_TIMEOUT_SECONDS),
+            Attempt(model=backup, timeout=_BACKUP_TIMEOUT_SECONDS),
+            lambda model, timeout: _generate(client, content, model, timeout),
+            hedge_after=_HEDGE_SECONDS,
+        )
     if reply.greeting is None:
         return fallback_intro(text)
     if not reply.prompts:

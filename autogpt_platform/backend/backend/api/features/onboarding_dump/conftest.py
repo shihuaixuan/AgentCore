@@ -9,6 +9,12 @@ from backend.api.features.onboarding_dump import otto_reply, plan
 
 
 @pytest.fixture(autouse=True)
+def no_live_typed_judge(monkeypatch):
+    for setting in ("BASE_URL", "API_KEY", "MODEL"):
+        monkeypatch.delenv(f"BRAIN_DUMP_TYPED_QUALITY_{setting}", raising=False)
+
+
+@pytest.fixture(autouse=True)
 def has_session(mocker: MockerFixture) -> AsyncMock:
     """A brand-new user by default; the greeting is only for those.
 

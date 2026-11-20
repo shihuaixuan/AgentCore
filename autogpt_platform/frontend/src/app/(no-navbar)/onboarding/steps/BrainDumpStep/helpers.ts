@@ -88,13 +88,28 @@ export function formatElapsed(totalSeconds: number) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
-// Chrome/Edge give us webm/opus; Safari only offers mp4. Mirrors the
-// existing copilot recorder so both paths hit the same server allowlist.
+const RECORDING_FORMATS = [
+  "audio/webm",
+  "audio/mp4",
+  "audio/ogg",
+  "audio/mpeg",
+  "audio/wav",
+  "audio/x-wav",
+];
+
 export function pickMimeType() {
-  if (typeof MediaRecorder === "undefined") return "audio/webm";
-  return MediaRecorder.isTypeSupported("audio/webm")
-    ? "audio/webm"
-    : "audio/mp4";
+  if (typeof globalThis.MediaRecorder?.isTypeSupported !== "function")
+    return undefined;
+  return RECORDING_FORMATS.find((type) => MediaRecorder.isTypeSupported(type));
+}
+
+export function recordingSupport() {
+  if (window.isSecureContext === false) return { issue: "insecure" } as const;
+  const mimeType = pickMimeType();
+  if (!mimeType || typeof navigator.mediaDevices?.getUserMedia !== "function") {
+    return { issue: "unsupported" } as const;
+  }
+  return { issue: null, mimeType } as const;
 }
 
 export function newRecordingId() {

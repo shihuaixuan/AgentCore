@@ -173,6 +173,40 @@ describe("useBrainDumpRecorder", () => {
     vi.unstubAllGlobals();
   });
 
+  it.each([undefined, {}, { isTypeSupported: () => false }])(
+    "does not request the mic or create a recoverable take without a supported recorder",
+    async (recorder) => {
+      vi.stubGlobal("MediaRecorder", recorder);
+      const onMicAnswer = vi.fn();
+      const { result } = renderHook(() => useBrainDumpRecorder());
+      await act(async () => {
+        expect(await result.current.start({ onMicAnswer })).toBe(false);
+      });
+      expect(navigator.mediaDevices.getUserMedia).not.toHaveBeenCalled();
+      expect(onMicAnswer).toHaveBeenCalledExactlyOnceWith("unavailable");
+      expect(savedMeta).toEqual([]);
+    },
+  );
+
+  it("records as Ogg when neither WebM nor MP4 is supported", async () => {
+    class OggRecorder extends ChunkingMediaRecorder {
+      static isTypeSupported(type?: string) {
+        return type === "audio/ogg";
+      }
+      constructor(_stream: MediaStream, options: MediaRecorderOptions) {
+        super();
+        if (!OggRecorder.isTypeSupported(options.mimeType))
+          throw new DOMException("", "NotSupportedError");
+      }
+    }
+    vi.stubGlobal("MediaRecorder", OggRecorder);
+    const { result } = renderHook(() => useBrainDumpRecorder());
+    await act(async () => {
+      expect(await result.current.start()).toBe(true);
+    });
+    expect(savedMeta.at(-1)?.mimeType).toBe("audio/ogg");
+  });
+
   // The regression: the silence nudge keyed off `isSavedLocally`, which
   // flips as soon as the first chunk is persisted. MediaRecorder emits
   // one every timeslice whether or not anybody spoke, so by the nudge's
