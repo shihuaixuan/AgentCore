@@ -4,11 +4,6 @@ import { Expert } from "@/app/api/__generated__/models/expert";
 import { okData } from "@/app/api/helpers";
 import { useState } from "react";
 import {
-  AUTOPILOT_CHAT_TARGET,
-  ChatTarget,
-  expertToChatTarget,
-} from "./components/ExpertChatDrawer/helpers";
-import {
   getExpertSchedules,
   getHiredExperts,
   isSettingUp,
@@ -19,8 +14,6 @@ export function useTeamPage() {
   const [pickerExpertId, setPickerExpertId] = useState<string | null>(null);
   const [soulExpertId, setSoulExpertId] = useState<string | null>(null);
   const [soulDrawerKey, setSoulDrawerKey] = useState(0);
-  const [chatTarget, setChatTarget] = useState<ChatTarget | null>(null);
-  const [chatDrawerKey, setChatDrawerKey] = useState(0);
 
   const expertsQuery = useListExperts({
     query: {
@@ -59,20 +52,8 @@ export function useTeamPage() {
   }
 
   function openSoul(expertId: string) {
-    setChatTarget(null);
     setSoulExpertId(expertId);
     setSoulDrawerKey((current) => current + 1);
-  }
-
-  function openChat(expertId: string | null) {
-    const expert = hiredExperts.find((candidate) => candidate.id === expertId);
-    setSoulExpertId(null);
-    setChatTarget(expert ? expertToChatTarget(expert) : AUTOPILOT_CHAT_TARGET);
-    setChatDrawerKey((current) => current + 1);
-  }
-
-  function closeChat() {
-    setChatTarget(null);
   }
 
   return {
@@ -92,9 +73,5 @@ export function useTeamPage() {
     soulDrawerKey,
     openSoul,
     closeSoul,
-    chatTarget,
-    chatDrawerKey,
-    openChat,
-    closeChat,
   };
 }

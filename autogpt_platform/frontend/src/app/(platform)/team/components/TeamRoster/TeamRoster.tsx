@@ -17,7 +17,6 @@ interface Props {
   isNarrowed: boolean;
   schedulesForExpert: (expert: Expert) => GraphExecutionJobInfo[];
   renderCard: (expert: Expert) => ReactNode;
-  onAutopilotChat: () => void;
 }
 
 export function TeamRoster({
@@ -27,7 +26,6 @@ export function TeamRoster({
   isNarrowed,
   schedulesForExpert,
   renderCard,
-  onAutopilotChat,
 }: Props) {
   const { t } = useTranslation();
   // Otto reports on the whole team, so its summary ignores the toolbar.
@@ -37,7 +35,6 @@ export function TeamRoster({
       skillCount={summary.skillCount}
       scheduleCount={summary.scheduleCount}
       workflowCount={summary.workflowCount}
-      onChat={onAutopilotChat}
     />
   );
 

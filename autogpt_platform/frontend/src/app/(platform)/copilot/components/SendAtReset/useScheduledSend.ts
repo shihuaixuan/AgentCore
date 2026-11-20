@@ -10,6 +10,7 @@ import {
 } from "@/app/api/__generated__/endpoints/chat/chat";
 import type { AtResetTurn } from "@/app/api/__generated__/models/atResetTurn";
 import { toast } from "@/components/molecules/Toast/use-toast";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { toastSendFailure } from "../../helpers/sendFailureToast";
 import { describeSendFailure } from "../ChatInput/helpers";

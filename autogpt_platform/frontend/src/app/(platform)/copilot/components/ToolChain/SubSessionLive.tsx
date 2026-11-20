@@ -33,6 +33,7 @@ import {
   isSessionPending,
 } from "./subSessionStatus";
 import { Text } from "@/components/atoms/Text/Text";
+import { SubSessionIdentity } from "./SubSessionIdentity";
 
 interface Props {
   subSessionId: string;
@@ -285,11 +286,15 @@ function toMiniRow(
 interface PendingCardProps {
   input: unknown;
   minimal?: boolean;
+  compact?: boolean;
+  readOnly?: boolean;
 }
 
 export function SubSessionPendingCard({
   input,
   minimal = false,
+  compact = false,
+  readOnly = false,
 }: PendingCardProps) {
   const { t } = useTranslation();
   const { expertsById } = useExpertMap();
@@ -309,12 +314,50 @@ export function SubSessionPendingCard({
   } = useLiveSubSession(liveSessionId ?? "", !!liveSessionId);
   const expertId = inputExpertId ?? liveSession?.expert_id ?? null;
   const expert = expertId ? expertsById.get(expertId) : undefined;
+  const name =
+    expert?.name ??
+    (inputExpertId ? t("Expert", "专家") : t("Sub-agent", "子智能体"));
+
+  if (compact) {
+    return (
+      <div className="flex min-w-0 items-center gap-2">
+        {liveSessionId && !readOnly ? (
+          <Link
+            href={`/copilot?sessionId=${liveSessionId}`}
+            aria-label={t("Open sub-session", "打开子对话")}
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-1 py-0.5 text-left outline-none transition-colors hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-focus"
+          >
+            <SubSessionIdentity
+              name={name}
+              avatarUrl={expert?.avatarUrl ?? null}
+              color={expert?.color}
+              role={expert?.role ?? null}
+              size={24}
+            />
+          </Link>
+        ) : (
+          <div className="flex min-w-0 flex-1 items-center gap-2 px-1 py-0.5">
+            <SubSessionIdentity
+              name={name}
+              avatarUrl={expert?.avatarUrl ?? null}
+              color={expert?.color}
+              role={expert?.role ?? null}
+              size={24}
+            />
+          </div>
+        )}
+        <StatusPill
+          status={isError || isPaused ? "unknown" : "running"}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={cn(CARD, "w-full rounded-2xl p-2.5")}>
       <div className="flex items-center gap-2.5">
         <ExpertAvatar
-          name={expert?.name ?? t("Expert", "专家")}
+          name={name}
           avatarUrl={expert?.avatarUrl ?? null}
           color={expert?.color}
           size={28}
@@ -324,7 +367,7 @@ export function SubSessionPendingCard({
           tone="emphasis"
           className="min-w-0 flex-1 truncate"
         >
-          {expert?.name ?? t("Expert", "专家")}
+          {name}
           {expert?.role && (
             <span className="ml-1.5 font-normal text-foreground-subtle">
               {expert.role}
@@ -337,7 +380,7 @@ export function SubSessionPendingCard({
           status={isError || isPaused ? "unknown" : "running"}
           className="text-body"
         />
-        {liveSessionId && (
+        {liveSessionId && !readOnly && (
           <Link
             href={`/copilot?sessionId=${liveSessionId}`}
             aria-label={t("Open sub-session", "打开子对话")}

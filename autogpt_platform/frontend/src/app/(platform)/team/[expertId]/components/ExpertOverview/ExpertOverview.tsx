@@ -26,7 +26,6 @@ interface Props {
   activity: ExpertActivity | null;
   isActivityLoading: boolean;
   isActivityError: boolean;
-  onChat: () => void;
 }
 
 /** How the expert has been doing: headline numbers, the last 30 days of
@@ -36,7 +35,6 @@ export function ExpertOverview({
   activity,
   isActivityLoading,
   isActivityError,
-  onChat,
 }: Props) {
   const { t, locale } = useTranslation();
   const overview = useExpertOverview(expert.id, activity);
@@ -132,12 +130,12 @@ export function ExpertOverview({
 
       <div className="grid gap-4 lg:grid-cols-2">
         <RecentConversations
+          expertId={expert.id}
           expertName={expert.name}
           sessions={overview.sessions}
           isLoading={overview.isSessionsLoading}
           isError={overview.isSessionsError}
           onRetry={overview.retrySessions}
-          onChat={onChat}
         />
         <LatestOutputs
           expertName={expert.name}

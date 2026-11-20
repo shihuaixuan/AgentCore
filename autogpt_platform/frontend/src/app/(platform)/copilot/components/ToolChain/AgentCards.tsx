@@ -18,6 +18,7 @@ import { asObject, inline, resultItemKey, str } from "./resultHelpers";
 import { SubSessionLive, useSubSessionEffectiveStatus } from "./SubSessionLive";
 import { BackgroundSubtaskStop } from "./BackgroundSubtaskStop";
 import { Text } from "@/components/atoms/Text/Text";
+import { SubSessionIdentity } from "./SubSessionIdentity";
 
 function agentHref(agent: Record<string, unknown>): string | null {
   const id = str(agent, "id");
@@ -207,17 +208,23 @@ export function AgentPreviewCard({ output }: OutputCardProps) {
 
 interface SubSessionCardProps extends OutputCardProps {
   minimal?: boolean;
+  compact?: boolean;
+  readOnly?: boolean;
 }
 
 export function SubSessionCard({
   output,
   minimal = false,
+  compact = false,
+  readOnly = false,
 }: SubSessionCardProps) {
   const { t } = useTranslation();
   const frozenStatus = str(output, "status");
   const response = str(output, "response");
   const link = str(output, "sub_autopilot_session_link");
   const subSessionId = str(output, "sub_session_id");
+  const sessionLink =
+    link ?? (subSessionId ? `/copilot?sessionId=${subSessionId}` : null);
   const background = !!str(output, "background_task_id");
   const status = useSubSessionEffectiveStatus(
     subSessionId,
@@ -229,13 +236,70 @@ export function SubSessionCard({
   const expert = asObject(output.expert);
   const avatarUrl = expert && str(expert, "avatar_url");
   const role = expert && str(expert, "role");
+  const color = expert && str(expert, "color");
   const name =
     (expert && str(expert, "name")) ??
-    (background ? t("Background subtask", "后台子任务") : t("Expert", "专家"));
+    (background
+      ? t("Background subtask", "后台子任务")
+      : t("Sub-agent", "子智能体"));
+
+  if (compact) {
+    return (
+      <div className="flex min-w-0 items-center gap-2">
+        {sessionLink && !readOnly ? (
+          <Link
+            href={sessionLink}
+            aria-label={t("Open sub-session", "打开子对话")}
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-1 py-0.5 text-left outline-none transition-colors hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-focus"
+          >
+            <SubSessionIdentity
+              name={name}
+              avatarUrl={avatarUrl ?? null}
+              color={color}
+              role={role}
+              size={24}
+            />
+          </Link>
+        ) : (
+          <div className="flex min-w-0 flex-1 items-center gap-2 px-1 py-0.5">
+            <SubSessionIdentity
+              name={name}
+              avatarUrl={avatarUrl ?? null}
+              color={color}
+              role={role}
+              size={24}
+            />
+          </div>
+        )}
+        {elapsed !== null && (
+          <span className="shrink-0 text-caption-sm leading-inherit text-foreground-subtle">
+            {elapsed >= 60
+              ? t(
+                  `${Math.floor(elapsed / 60)}m ${Math.round(elapsed % 60)}s`,
+                  `${Math.floor(elapsed / 60)} 分 ${Math.round(elapsed % 60)} 秒`,
+                )
+              : t(`${Math.round(elapsed)}s`, `${Math.round(elapsed)} 秒`)}
+          </span>
+        )}
+        {status && <StatusPill status={status} />}
+        {background &&
+          subSessionId &&
+          ["running", "queued", "unknown"].includes(status ?? "") && (
+            <BackgroundSubtaskStop sessionId={subSessionId} />
+          )}
+      </div>
+    );
+  }
+
   return (
     <div className={cn(CARD, "w-full rounded-2xl p-2.5")}>
       <div className="flex items-center gap-2.5">
-        <ExpertAvatar name={name} avatarUrl={avatarUrl ?? null} size={28} />
+        <ExpertAvatar
+          name={name}
+          avatarUrl={avatarUrl ?? null}
+          color={color}
+          size={28}
+        />
         <Text
           variant="body-sm-medium-inherit"
           tone="emphasis"
@@ -264,8 +328,11 @@ export function SubSessionCard({
           ["running", "queued", "unknown"].includes(status ?? "") && (
             <BackgroundSubtaskStop sessionId={subSessionId} />
           )}
-        {link && (
-          <CardLink href={link} label={t("Open sub-session", "打开子对话")} />
+        {sessionLink && !readOnly && (
+          <CardLink
+            href={sessionLink}
+            label={t("Open sub-session", "打开子对话")}
+          />
         )}
       </div>
       {!minimal && response && (

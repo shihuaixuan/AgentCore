@@ -218,9 +218,7 @@ describe("AutopilotCard", () => {
     expect(within(autopilot).queryByText("Workflows")).toBeNull();
     expect(within(autopilot).queryByText("Built in")).toBeNull();
     expect(within(autopilot).queryByText("Budget")).toBeNull();
-    expect(
-      within(autopilot).getByRole("button", { name: "Chat" }),
-    ).toBeDefined();
+    expect(within(autopilot).getByRole("link", { name: "Chat" })).toBeDefined();
     expect(within(autopilot).queryByRole("link", { name: "Edit" })).toBeNull();
   });
 

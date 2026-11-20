@@ -6,7 +6,6 @@ import { InstallWorkflowPicker } from "@/components/molecules/InstallWorkflowPic
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 import { EmptyTeamState } from "./components/EmptyTeamState";
-import { ExpertChatDrawer } from "./components/ExpertChatDrawer/ExpertChatDrawer";
 import { ExpertTeamCard } from "./components/ExpertTeamCard/ExpertTeamCard";
 import { SetupNeeded } from "./components/SetupNeeded/SetupNeeded";
 import { SoulDrawer } from "./components/SoulDrawer/SoulDrawer";
@@ -34,10 +33,6 @@ export default function TeamPage() {
     soulDrawerKey,
     openSoul,
     closeSoul,
-    chatTarget,
-    chatDrawerKey,
-    openChat,
-    closeChat,
   } = useTeamPage();
   const roster = useTeamRosterView({
     experts: hiredExperts,
@@ -52,7 +47,6 @@ export default function TeamPage() {
         schedules={schedulesForExpert(expert)}
         onInstallWorkflow={installWorkflow}
         onEditSoul={openSoul}
-        onChat={openChat}
       />
     );
   }
@@ -89,7 +83,6 @@ export default function TeamPage() {
             isNarrowed={roster.isNarrowed}
             schedulesForExpert={schedulesForExpert}
             renderCard={renderCard}
-            onAutopilotChat={() => openChat(null)}
           />
 
           {!isLoading && !isError && hiredExperts.length === 0 ? (
@@ -106,12 +99,6 @@ export default function TeamPage() {
       </main>
 
       <SoulDrawer key={soulDrawerKey} expert={soulExpert} onClose={closeSoul} />
-      <ExpertChatDrawer
-        target={chatTarget}
-        threadKey={chatDrawerKey}
-        onClose={closeChat}
-        resumeLatest={false}
-      />
     </div>
   );
 }

@@ -1,11 +1,13 @@
 import { getGetV2GetCopilotUsageMockHandler200 } from "@/app/api/__generated__/endpoints/chat/chat.msw";
 import { getGetSubscriptionStatusMockHandler200 } from "@/app/api/__generated__/endpoints/credits/credits.msw";
+import { getListExpertIdentitiesMockHandler } from "@/app/api/__generated__/endpoints/experts/experts.msw";
 import { server } from "@/mocks/mock-server";
 import { render, screen, waitFor } from "@/tests/integrations/test-utils";
 import { http, HttpResponse } from "msw";
 import { withNuqsTestingAdapter } from "nuqs/adapters/testing";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
+import { newRecipientChatHref } from "../../../expertSessionQuery";
 import { ChatContainer, type ChatContainerProps } from "../ChatContainer";
 
 const voice = vi.hoisted(() => ({ isActive: false }));
@@ -114,10 +116,36 @@ describe("new full-page expert chats", () => {
     expect(urlUpdates).toEqual([]);
   });
 
-  test("keeps the home hero when an expert is picked before a chat exists", async () => {
+  test("preselects the expert in a fresh full-page chat without opening onboarding", async () => {
     const request = mockOnboarding();
-    render(<ChatContainer {...props} sessionId={null} />);
-    expect(await screen.findByRole("textbox")).toBeDefined();
+    server.use(
+      getListExpertIdentitiesMockHandler([
+        {
+          id: "expert-kepler",
+          name: "Kepler",
+          role: "researcher",
+          avatar_url: null,
+          is_archived: false,
+        },
+      ]),
+    );
+    const searchParams = new URL(
+      newRecipientChatHref("expert-kepler"),
+      "http://localhost",
+    ).searchParams;
+    const Wrapper = withNuqsTestingAdapter({ searchParams });
+    render(
+      <Wrapper>
+        <ChatContainer {...props} sessionId={null} />
+      </Wrapper>,
+    );
+
+    expect(
+      await screen.findByRole("button", {
+        name: "Sending to Kepler — change recipient",
+      }),
+    ).toBeDefined();
+    expect(screen.getByRole("textbox")).toBeDefined();
     expect(request).not.toHaveBeenCalled();
   });
 

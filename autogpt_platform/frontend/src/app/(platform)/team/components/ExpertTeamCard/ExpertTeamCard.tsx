@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { newRecipientChatHref } from "@/app/(platform)/copilot/expertSessionQuery";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
@@ -44,7 +45,6 @@ interface Props {
   schedules: GraphExecutionJobInfo[];
   onInstallWorkflow: (expertId: string) => void;
   onEditSoul: (expertId: string) => void;
-  onChat: (expertId: string) => void;
 }
 
 export function ExpertTeamCard({
@@ -52,7 +52,6 @@ export function ExpertTeamCard({
   schedules,
   onInstallWorkflow,
   onEditSoul,
-  onChat,
 }: Props) {
   const { t } = useTranslation();
   const rosterStatus = getExpertRosterStatus(expert);
@@ -213,11 +212,13 @@ export function ExpertTeamCard({
 
       <div className="flex items-center gap-2 px-4 pb-4">
         <Button
+          as="NextLink"
+          href={newRecipientChatHref(expert.id)}
           variant="secondary"
           size="small"
           className="flex-1"
           leadingIcon={BubbleChatIcon}
-          onClick={() => onChat(expert.id)}
+          aria-label={t(`Chat with ${expert.name}`, `与 ${expert.name} 聊天`)}
         >
           {t("Chat", "聊天")}
         </Button>

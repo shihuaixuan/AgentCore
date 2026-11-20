@@ -19,6 +19,12 @@ import { hidesOutputFromReplay } from "./replayPrivacy";
 import { getCatalogLabel } from "./toolCatalog";
 import { ToolResult } from "./ToolResult";
 import { ToolStatusBadge } from "./ToolStatusBadge";
+import {
+  isCompactSubSessionRow,
+  isLiveSubSessionRow,
+  isSubSessionTool,
+  SubSessionChainRow,
+} from "./SubSessionChainRow";
 
 interface ReasoningStreamProps {
   text: string;
@@ -55,29 +61,6 @@ interface Props {
   readOnly?: boolean;
 }
 
-const SUB_SESSION_TOOLS = new Set([
-  "run_sub_session",
-  "delegate_to_expert",
-  "handoff_to_expert",
-  "get_sub_session_result",
-]);
-
-function isLiveSubSessionRow(row: ChainRow): boolean {
-  if (!row.tool || !SUB_SESSION_TOOLS.has(row.tool)) return false;
-  // A blocking delegate has no output while the teammate works — that IS
-  // the live window, covered by the pending card built from the input.
-  // Result polls render no pending card (see ToolResult), so an outputless
-  // poll row has nothing to open.
-  if (row.output === undefined)
-    return row.state === "running" && row.tool !== "get_sub_session_result";
-  if (!row.output || typeof row.output !== "object") return false;
-  const status = (row.output as { status?: unknown }).status;
-  return (
-    typeof status === "string" &&
-    ["running", "queued"].includes(status.toLowerCase())
-  );
-}
-
 export function ChainRowView({ row, isLast, readOnly = false }: Props) {
   const { locale } = useTranslation();
   const [open, setOpen] = useState(row.requiresAction === true);
@@ -108,7 +91,7 @@ export function ChainRowView({ row, isLast, readOnly = false }: Props) {
     row.output && typeof row.output === "object"
       ? (row.output as Record<string, unknown>)
       : null;
-  const isSubTool = !!row.tool && SUB_SESSION_TOOLS.has(row.tool);
+  const isSubTool = isSubSessionTool(row.tool);
   const effectiveStatus = useSubSessionEffectiveStatus(
     isSubTool && typeof output?.sub_session_id === "string"
       ? output.sub_session_id
@@ -126,6 +109,9 @@ export function ChainRowView({ row, isLast, readOnly = false }: Props) {
     ["running", "queued", "unknown"].includes(
       effectiveStatus?.toLowerCase() ?? "",
     );
+  if (isCompactSubSessionRow(row)) {
+    return <SubSessionChainRow row={row} isLast={isLast} readOnly={readOnly} />;
+  }
   const liveReasoning =
     isReasoning && row.state === "running" && !!row.reasoningText;
   const hasContent = isReasoning

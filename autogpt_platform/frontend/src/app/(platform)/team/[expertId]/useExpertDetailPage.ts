@@ -93,17 +93,6 @@ export function useExpertDetailPage({ expertId }: Args) {
     setIsSoulOpen(false);
   }
 
-  function toggleChat() {
-    if (isChatOpen) {
-      setIsChatOpen(false);
-      return;
-    }
-    setIsSoulOpen(false);
-    setIsChatOpen(true);
-    setChatSeed(null);
-    setChatDrawerKey((current) => current + 1);
-  }
-
   function openChatWithPrompt(prompt: string) {
     setIsSoulOpen(false);
     setIsChatOpen(true);
@@ -142,7 +131,6 @@ export function useExpertDetailPage({ expertId }: Args) {
     isChatOpen,
     chatDrawerKey,
     chatSeed,
-    toggleChat,
     openChatWithPrompt,
     closeChat,
   };
