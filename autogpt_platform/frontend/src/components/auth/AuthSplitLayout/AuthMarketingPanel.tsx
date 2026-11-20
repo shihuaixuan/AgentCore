@@ -19,7 +19,7 @@ export function AuthMarketingPanel({
   description,
   itemsTitle,
   items = [],
-  footerText = "Connects with the tools you already use",
+  footerText,
   children,
 }: Props) {
   return (
@@ -31,7 +31,7 @@ export function AuthMarketingPanel({
         />
         {children ?? <FeatureList itemsTitle={itemsTitle} items={items} />}
       </div>
-      <MarketingFooter footerText={footerText} />
+      {footerText && <MarketingFooter footerText={footerText} />}
     </div>
   );
 }

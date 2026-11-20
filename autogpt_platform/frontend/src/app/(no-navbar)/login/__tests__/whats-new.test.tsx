@@ -85,6 +85,11 @@ describe("LoginPage What's new", () => {
     render(<LoginPage />);
     const panel = await findWhatsNew();
 
+    expect(
+      screen.queryByText("Connects with the tools you already use"),
+    ).toBeNull();
+    expect(screen.queryByRole("img", { name: "GitHub" })).toBeNull();
+
     const latest = await panel.findByRole("link", {
       name: "A clearer wallet, a kinder trial, and shorter replies from 通用办公助手, October 8 – October 14, latest release (opens in a new tab)",
     });
