@@ -5,6 +5,7 @@ import {
   forgetArtifactContent,
 } from "./components/ArtifactPanel/components/useArtifactContent";
 import { parseSessionIDs } from "./helpers";
+import type { SubSessionPreview } from "./components/SubSessionPanel/SubSessionPreviewContext";
 
 export interface DeleteTarget {
   id: string;
@@ -261,6 +262,12 @@ interface CopilotUIState {
 
   // Artifact panel
   artifactPanel: ArtifactPanelState;
+  subSessionPreview: (SubSessionPreview & { parentSessionID: string }) | null;
+  openSubSessionPreview: (
+    parentSessionID: string,
+    preview: SubSessionPreview,
+  ) => void;
+  closeSubSessionPreview: () => void;
   // `persist: false` skips the localStorage write — used by the public
   // /tour demo so a scripted open/close never leaks into the panel state
   // the real copilot restores on load.
@@ -442,6 +449,14 @@ export const useCopilotUIStore = create<CopilotUIState>((set, get) => ({
     computer: null,
     isComputerOpen: false,
   },
+  subSessionPreview: null,
+  openSubSessionPreview: (parentSessionID, preview) => {
+    if (preview.sessionID === parentSessionID) return;
+    if (get().artifactPanel.isOpen)
+      get().closeArtifactPanel({ persist: false });
+    set({ subSessionPreview: { ...preview, parentSessionID } });
+  },
+  closeSubSessionPreview: () => set({ subSessionPreview: null }),
   openArtifact: (ref, opts) =>
     set((state) => {
       const { activeArtifact, history: prevHistory } = state.artifactPanel;
@@ -461,6 +476,7 @@ export const useCopilotUIStore = create<CopilotUIState>((set, get) => ({
       const documentId =
         activeArtifact?.id === ref.id ? activeArtifact.documentId : undefined;
       return {
+        subSessionPreview: null,
         artifactPanel: {
           ...state.artifactPanel,
           isOpen: true,
@@ -489,6 +505,7 @@ export const useCopilotUIStore = create<CopilotUIState>((set, get) => ({
         // so leaving it set would float a drawer with no panel behind it (and
         // a later openArtifact would wrongly treat the closed artifact as
         // back-stack history).
+        subSessionPreview: null,
         artifactPanel: {
           ...state.artifactPanel,
           isOpen: false,
@@ -512,6 +529,7 @@ export const useCopilotUIStore = create<CopilotUIState>((set, get) => ({
     })),
   resetArtifactPanel: () =>
     set((state) => ({
+      subSessionPreview: null,
       artifactPanel: {
         ...state.artifactPanel,
         activeArtifact: null,
@@ -533,6 +551,7 @@ export const useCopilotUIStore = create<CopilotUIState>((set, get) => ({
       // reopen a computer the user has hidden.
       const isNews = computer?.sandbox_id !== ref.sandbox_id;
       const showNow =
+        !state.subSessionPreview &&
         opts?.show !== false &&
         (isComputerOpen || (isNews && activeArtifact == null));
       if (showNow && !isComputerOpen) _computerOverClosedPanel = !isOpen;
@@ -552,6 +571,7 @@ export const useCopilotUIStore = create<CopilotUIState>((set, get) => ({
       if (!state.artifactPanel.isComputerOpen)
         _computerOverClosedPanel = !state.artifactPanel.isOpen;
       return {
+        subSessionPreview: null,
         artifactPanel: {
           ...state.artifactPanel,
           isOpen: true,
@@ -645,6 +665,7 @@ export const useCopilotUIStore = create<CopilotUIState>((set, get) => ({
       // counts as an explicit close for files auto-open.
       if (!nextOpen) _autoOpenUserClosed = true;
       return {
+        subSessionPreview: null,
         artifactPanel: {
           ...state.artifactPanel,
           isOpen: nextOpen,
@@ -688,6 +709,7 @@ export const useCopilotUIStore = create<CopilotUIState>((set, get) => ({
       }
       if (!nextOpen) _autoOpenUserClosed = true;
       return {
+        subSessionPreview: null,
         artifactPanel: {
           ...state.artifactPanel,
           isOpen: nextOpen,
@@ -710,7 +732,7 @@ export const useCopilotUIStore = create<CopilotUIState>((set, get) => ({
     get().toggleContextPanelTab("integrations");
   },
   openContextPanelForFiles: () => {
-    if (_autoOpenUserClosed) return;
+    if (_autoOpenUserClosed || get().subSessionPreview) return;
     if (isClient) {
       storage.set(Key.COPILOT_CONTEXT_PANEL_OPEN, "true");
       storage.set(Key.COPILOT_CONTEXT_PANEL_TAB, "files");
@@ -736,6 +758,7 @@ export const useCopilotUIStore = create<CopilotUIState>((set, get) => ({
       storage.set(Key.COPILOT_CONTEXT_PANEL_TAB, "files");
     }
     set((state) => ({
+      subSessionPreview: null,
       artifactPanel: {
         ...state.artifactPanel,
         isOpen: true,
@@ -828,6 +851,7 @@ export const useCopilotUIStore = create<CopilotUIState>((set, get) => ({
       isNotificationBannerDismissed: false,
       isSoundEnabled: true,
       contextPanelExpert: null,
+      subSessionPreview: null,
       artifactPanel: {
         isOpen: false,
         activeArtifact: null,

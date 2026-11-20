@@ -4,18 +4,12 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
 import type { Locale } from "@/lib/i18n/locale";
 
-import {
-  useGetV2GetSession,
-  useGetV2ListSessions,
-} from "@/app/api/__generated__/endpoints/chat/chat";
+import { useGetV2GetSession } from "@/app/api/__generated__/endpoints/chat/chat";
 import type { SessionDetailResponse } from "@/app/api/__generated__/models/sessionDetailResponse";
-import { Icon } from "@/components/atoms/Icon/Icon";
 import { ExpertAvatar } from "@/components/molecules/ExpertAvatar/ExpertAvatar";
 import { cn } from "@/lib/utils";
-import { LinkSquare01Icon } from "@hugeicons/core-free-icons";
 import type { ToolUIPart } from "ai";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   getAnimationText,
   getToolCategory,
@@ -97,7 +91,11 @@ export function SubSessionLive({
           {latestText}
         </p>
       )}
-      {notice && <LiveNotice text={notice} subSessionId={subSessionId} />}
+      {notice && (
+        <Text variant="small" tone="secondary" className="mt-1.5">
+          {notice}
+        </Text>
+      )}
     </div>
   );
 }
@@ -144,29 +142,6 @@ function useLiveSubSession(
     // snapshot IS the final answer, so there is nothing left to watch.
     isPaused: isCapped && (!session || isSessionPending(session, background)),
   };
-}
-
-/** Says the polling stopped and keeps the deep link, so the user can follow
- *  the run at its source instead of watching a spinner that never resolves. */
-function LiveNotice({
-  text,
-  subSessionId,
-}: {
-  text: string;
-  subSessionId: string;
-}) {
-  const { t } = useTranslation();
-  return (
-    <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-caption text-foreground-subtle">
-      {text}
-      <Link
-        href={`/copilot?sessionId=${subSessionId}`}
-        className="underline underline-offset-2 hover:text-foreground-secondary"
-      >
-        {t("Open sub-session", "打开子对话")}
-      </Link>
-    </p>
-  );
 }
 
 function LiveSteps({ rows }: { rows: ChainRow[] }) {
@@ -275,42 +250,28 @@ function toMiniRow(
   };
 }
 
-/** The card for a delegated run that hasn't returned yet. A blocking
- *  delegate/handoff yields no tool output while the teammate works, so
- *  everything comes from the tool INPUT: delegate/handoff carry expert_id +
- *  prompt, get_sub_session_result carries the exact sub_session_id. When
- *  only the expert is known, their currently-processing session is found by
- *  polling their session list; when only the session is known, the expert
- *  is read off the polled session itself. Swapped for the full
- *  SubSessionCard the moment the tool returns. */
+/** A blocking call has no confirmed child session until its tool output lands. */
 interface PendingCardProps {
   input: unknown;
   minimal?: boolean;
+  readOnly?: boolean;
 }
 
 export function SubSessionPendingCard({
   input,
   minimal = false,
+  readOnly = false,
 }: PendingCardProps) {
   const { t, locale } = useTranslation();
-  const { expertsById } = useExpertMap();
   const args = asObject(input) ?? {};
   const inputExpertId = str(args, "expert_id");
   const prompt = str(args, "prompt");
-  const inputSessionId = str(args, "sub_session_id") ?? str(args, "session_id");
-  const discoveredId = useDelegatedSessionId(
-    inputSessionId ? null : inputExpertId,
-  );
-  const liveSessionId = inputSessionId ?? discoveredId;
-  // Same query key as the live view below, so a full card polls once.
-  const {
-    session: liveSession,
-    isError,
-    isPaused,
-  } = useLiveSubSession(liveSessionId ?? "", !!liveSessionId);
-  const expertId = inputExpertId ?? liveSession?.expert_id ?? null;
-  const expert = expertId ? expertsById.get(expertId) : undefined;
-  const title = getExpertDisplayTitle(expert, locale);
+  const { expertsById } = useExpertMap(!readOnly && !!inputExpertId);
+  const expert =
+    !readOnly && inputExpertId ? expertsById.get(inputExpertId) : undefined;
+  const title = inputExpertId
+    ? getExpertDisplayTitle(expert, locale)
+    : t("Sub-agent", "子智能体");
 
   return (
     <div className={cn(CARD, "w-full rounded-2xl p-2.5")}>
@@ -318,7 +279,7 @@ export function SubSessionPendingCard({
         <ExpertAvatar
           name={title}
           avatarUrl={expert?.avatarUrl ?? null}
-          color={expert?.color}
+          backgroundColor={expert?.color ?? undefined}
           size={28}
         />
         <Text
@@ -328,69 +289,15 @@ export function SubSessionPendingCard({
         >
           {title}
         </Text>
-        {/* Once the poll dies the card no longer knows the run is going —
-            keeping the spinner up would be a guess dressed as a fact. */}
-        <StatusPill
-          status={isError || isPaused ? "unknown" : "running"}
-          className="text-body"
-        />
-        {liveSessionId && (
-          <Link
-            href={`/copilot?sessionId=${liveSessionId}`}
-            aria-label={t("Open sub-session", "打开子对话")}
-            className="shrink-0 rounded-full p-1 text-foreground-subtle transition-colors hover:bg-surface-hover hover:text-foreground-body"
-          >
-            <Icon icon={LinkSquare01Icon} size={14} />
-          </Link>
-        )}
+        <StatusPill status="running" className="text-body" />
       </div>
       {!minimal && prompt && (
         <p className="mt-1.5 line-clamp-2 pl-9 text-body text-foreground-tertiary">
           {prompt}
         </p>
       )}
-      {!minimal && liveSessionId && (
-        <SubSessionLive subSessionId={liveSessionId} active />
-      )}
     </div>
   );
-}
-
-/** Find the delegated run's session while the tool output (which would name
- *  it) doesn't exist yet: the expert's currently-processing session. If the
- *  expert happens to be busy elsewhere this shows that work instead — still
- *  their live status, and the exact session takes over once the tool
- *  returns. */
-function useDelegatedSessionId(expertId: string | null) {
-  const mountedAtRef = useRef(Date.now());
-  const { data } = useGetV2ListSessions(
-    // Strict recency: the default puts pinned sessions first, so an expert
-    // with a handful of pinned threads would push the running one out of
-    // the window and the live view would never find it.
-    { expert_id: expertId ?? undefined, limit: 5, pinned_first: false },
-    {
-      query: {
-        enabled: !!expertId,
-        refetchInterval: (query) => {
-          if (query.state.status === "error") return false;
-          if (Date.now() - mountedAtRef.current > POLL_CAP_MS) return false;
-          const raw = query.state.data;
-          const sessions = raw && raw.status === 200 ? raw.data.sessions : [];
-          const hasLive = sessions.some(
-            (s) => s.is_processing || s.chat_status === "running",
-          );
-          // Once a live session is found, SubSessionLive takes over polling
-          // it directly by id — this list poll has nothing left to watch for.
-          return hasLive ? false : POLL_MS;
-        },
-        select: (res) => (res.status === 200 ? res.data.sessions : []),
-      },
-    },
-  );
-  const live = (data ?? []).find(
-    (s) => s.is_processing || s.chat_status === "running",
-  );
-  return live?.id ?? null;
 }
 
 /** A sub-session tool output freezes the status it had when the tool

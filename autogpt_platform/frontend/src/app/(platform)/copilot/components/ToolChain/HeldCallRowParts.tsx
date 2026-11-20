@@ -5,8 +5,14 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/molecules/Popover/Popover";
 import { ApprovalFields } from "@/components/organisms/ApprovalFields/ApprovalFields";
 import { AUTOPILOT_NAME } from "@/components/molecules/AutopilotAvatar/helpers";
+import { HIDDEN_FROM_REPLAY } from "@/lib/replay-privacy";
 import { cn } from "@/lib/utils";
 import { approvalCardId } from "../ApprovalQueue/helpers";
 import type { HeldRowInfo, HeldState } from "./heldRow";
@@ -85,6 +91,39 @@ export function HeldTag({ state, read }: { state: HeldState; read?: boolean }) {
   );
 }
 
+export function HeldApprovalBadge({ held }: { held: HeldRowInfo }) {
+  const badge = <HeldTag state={held.state} read={held.read} />;
+  if (!held.card) return badge;
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="inline-flex shrink-0 rounded-md focus-visible:ring-2 focus-visible:ring-focus"
+        >
+          {badge}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" collisionPadding={12}>
+        <div className={HIDDEN_FROM_REPLAY}>
+          <HeldArguments card={held.card} />
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function HeldArguments({ card }: { card: NonNullable<HeldRowInfo["card"]> }) {
+  return (
+    <ApprovalFields
+      fields={card.fields}
+      values={card.args}
+      clipped={card.clipped}
+      idsWhenAlone
+    />
+  );
+}
+
 const DETAIL: Record<Exclude<HeldState, "approved">, string> = {
   waiting: `Nothing has run yet. ${AUTOPILOT_NAME} carried on without it.`,
   rejected: `You rejected this, so it didn't run. ${AUTOPILOT_NAME} was told.`,
@@ -141,12 +180,7 @@ export function HeldCallDetail({ held, showArgs = true }: HeldCallDetailProps) {
       )}
       {card && (
         <div className="w-full py-1">
-          <ApprovalFields
-            fields={card.fields}
-            values={card.args}
-            clipped={card.clipped}
-            idsWhenAlone
-          />
+          <HeldArguments card={card} />
         </div>
       )}
       {held.state === "waiting" && reviewId && (

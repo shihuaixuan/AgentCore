@@ -63,6 +63,71 @@ function chain(outcomes: Map<string, HeldOutcome>) {
   );
 }
 
+test("only a confirmed, approved delegation gets a compact child link", async () => {
+  const reviewID = "copilot-node-gate-delegate_to_expert:abc";
+  const prompt = "Compare the options";
+  const part = {
+    type: "tool-delegate_to_expert",
+    state: "output-available",
+    toolCallId: "delegate-call",
+    input: { expert_id: "curie", prompt },
+    output: {
+      type: "approval_required",
+      tool_name: "delegate_to_expert",
+      review_id: reviewID,
+      ask: "Hand a task to a teammate",
+    },
+  } as MessagePart;
+  function delegation(outcomes: Map<string, HeldOutcome>) {
+    return (
+      <CopilotChatActionsProvider onSend={vi.fn()}>
+        <HeldOutcomesContext.Provider value={outcomes}>
+          <ToolChain parts={[part]} isStreaming={false} />
+        </HeldOutcomesContext.Provider>
+      </CopilotChatActionsProvider>
+    );
+  }
+  const { rerender } = render(delegation(new Map()));
+
+  expect(screen.getByText("Waiting for you")).toBeDefined();
+  expect(screen.queryByRole("link", { name: /Curie/ })).toBeNull();
+
+  act(() =>
+    useHeldAnswersStore.setState({ answers: { [reviewID]: "approved" } }),
+  );
+  expect(screen.queryByRole("link", { name: /Curie/ })).toBeNull();
+
+  rerender(
+    delegation(
+      new Map([
+        [
+          "delegate-call",
+          {
+            outcome: "approved",
+            output: {
+              status: "completed",
+              sub_autopilot_session_id: "curie-session",
+              expert: { name: "Curie" },
+            },
+            card: {
+              args: { prompt },
+              fields: [{ key: "prompt", label: "Task", format: null }],
+              clipped: [],
+            },
+          },
+        ],
+      ]),
+    ),
+  );
+
+  const entry = await screen.findByRole("link", { name: "Curie completed" });
+  expect(entry.getAttribute("href")).toBe("/copilot?sessionId=curie-session");
+  expect(entry.closest("[inert]")).toBeNull();
+  expect(screen.queryByText(prompt)).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Approved" }));
+  expect(await screen.findByText(prompt)).toBeDefined();
+});
+
 test("a held call's row flips from waiting to approved when its late result lands", async () => {
   const { rerender } = render(chain(new Map()));
 

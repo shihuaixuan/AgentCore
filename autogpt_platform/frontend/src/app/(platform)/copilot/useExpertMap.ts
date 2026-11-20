@@ -83,9 +83,10 @@ function joinedAt(value: Date | string | null | undefined): Date | null {
  * refetch fails. Consumers that present experts as addressable receive the
  * separate `activeExperts` projection instead of iterating this map.
  */
-export function useExpertMap() {
+export function useExpertMap(enabled = true) {
   const expertsQuery = useListExpertIdentities({
     query: {
+      enabled,
       select: (response) =>
         response.status === 200 ? response.data : undefined,
     },

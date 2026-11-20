@@ -13,6 +13,12 @@ import { FileDropZone } from "./components/FileDropZone/FileDropZone";
 import { NotificationBanner } from "./components/NotificationBanner/NotificationBanner";
 import { ManagedModelChatContext } from "./components/ProviderLimitDialog/useProviderLimitDialog";
 import { ScaleLoader } from "./components/ScaleLoader/ScaleLoader";
+import { SubSessionPanel } from "./components/SubSessionPanel/SubSessionPanel";
+import {
+  SubSessionPreviewContext,
+  type SubSessionPreview,
+} from "./components/SubSessionPanel/SubSessionPreviewContext";
+import { useCopilotUIStore } from "./store";
 import { useIsMobile } from "./useIsMobile";
 
 const ArtifactPanel = dynamic(
@@ -94,6 +100,22 @@ function MainArea({
   droppedFiles,
   setDroppedFiles,
 }: MainAreaProps) {
+  const preview = useCopilotUIStore((state) =>
+    state.subSessionPreview?.parentSessionID === sessionId
+      ? state.subSessionPreview
+      : null,
+  );
+  const openSubSessionPreview = useCopilotUIStore(
+    (state) => state.openSubSessionPreview,
+  );
+  const closeSubSessionPreview = useCopilotUIStore(
+    (state) => state.closeSubSessionPreview,
+  );
+
+  function openPreview(child: SubSessionPreview) {
+    if (sessionId) openSubSessionPreview(sessionId, child);
+  }
+
   return (
     <div className="flex h-full w-full flex-row overflow-hidden">
       <div className="relative flex min-w-0 flex-1 overflow-hidden bg-canvas">
@@ -108,12 +130,16 @@ function MainArea({
             <LowCreditBanner />
             <NotificationBanner />
           </div>
-          <CopilotChatHost
-            key={`chat-host-${sessionId ?? "new"}`}
-            droppedFiles={droppedFiles}
-            onDroppedFilesConsumed={() => setDroppedFiles([])}
-            floatingControls="newLayout"
-          />
+          <SubSessionPreviewContext.Provider
+            value={sessionId ? openPreview : null}
+          >
+            <CopilotChatHost
+              key={`chat-host-${sessionId ?? "new"}`}
+              droppedFiles={droppedFiles}
+              onDroppedFilesConsumed={() => setDroppedFiles([])}
+              floatingControls="newLayout"
+            />
+          </SubSessionPreviewContext.Provider>
           {/* Owns the session-entry reset that forgets the previous chat's
               artifact. */}
           <ContextPanelAutoOpen
@@ -124,6 +150,13 @@ function MainArea({
       </div>
       {!isMobile && sessionId && <ContextPanel sessionId={sessionId} />}
       {!isMobile && sessionId && <ArtifactPanel sessionId={sessionId} />}
+      {preview && (
+        <SubSessionPanel
+          preview={preview}
+          mobile={isMobile}
+          onClose={closeSubSessionPreview}
+        />
+      )}
     </div>
   );
 }

@@ -19,6 +19,8 @@ import { asObject, inline, resultItemKey, str } from "./resultHelpers";
 import { SubSessionLive, useSubSessionEffectiveStatus } from "./SubSessionLive";
 import { BackgroundSubtaskStop } from "./BackgroundSubtaskStop";
 import { Text } from "@/components/atoms/Text/Text";
+import { SubSessionLink } from "../SubSessionPanel/SubSessionLink";
+import { childSessionID } from "./subSessionRows";
 
 function agentHref(agent: Record<string, unknown>): string | null {
   const id = str(agent, "id");
@@ -208,17 +210,18 @@ export function AgentPreviewCard({ output }: OutputCardProps) {
 
 interface SubSessionCardProps extends OutputCardProps {
   minimal?: boolean;
+  readOnly?: boolean;
 }
 
 export function SubSessionCard({
   output,
   minimal = false,
+  readOnly = false,
 }: SubSessionCardProps) {
   const { t, locale } = useTranslation();
   const frozenStatus = str(output, "status");
   const response = str(output, "response");
-  const link = str(output, "sub_autopilot_session_link");
-  const subSessionId = str(output, "sub_session_id");
+  const subSessionId = readOnly ? null : childSessionID(output);
   const background = !!str(output, "background_task_id");
   const status = useSubSessionEffectiveStatus(
     subSessionId,
@@ -229,6 +232,7 @@ export function SubSessionCard({
     typeof output.elapsed_seconds === "number" ? output.elapsed_seconds : null;
   const expert = asObject(output.expert);
   const avatarUrl = expert && str(expert, "avatar_url");
+  const color = expert && str(expert, "color");
   const name = expert
     ? getExpertDisplayTitle(
         { jobTitle: str(expert, "job_title"), role: str(expert, "role") },
@@ -236,7 +240,7 @@ export function SubSessionCard({
       )
     : background
       ? t("Background subtask", "后台子任务")
-      : t("Expert", "专家");
+      : t("Sub-agent", "子智能体");
   return (
     <div className={cn(CARD, "w-full rounded-2xl p-2.5")}>
       <div className="flex items-center gap-2.5">
@@ -264,8 +268,19 @@ export function SubSessionCard({
           ["running", "queued", "unknown"].includes(status ?? "") && (
             <BackgroundSubtaskStop sessionId={subSessionId} />
           )}
-        {link && (
-          <CardLink href={link} label={t("Open sub-session", "打开子对话")} />
+        {subSessionId && (
+          <SubSessionLink
+            preview={{
+              sessionID: subSessionId,
+              name,
+              avatarURL: avatarUrl,
+              color,
+            }}
+            label={t("Open sub-session", "打开子对话")}
+            className="shrink-0 rounded-full p-1 text-foreground-subtle transition-colors hover:bg-surface-hover hover:text-foreground-body"
+          >
+            <Icon icon={LinkSquare01Icon} size={14} />
+          </SubSessionLink>
         )}
       </div>
       {!minimal && response && (

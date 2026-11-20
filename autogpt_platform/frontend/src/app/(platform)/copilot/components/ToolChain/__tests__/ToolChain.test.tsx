@@ -94,6 +94,62 @@ function getRowToggle(name: RegExp): HTMLElement {
 }
 
 describe("ToolChain", () => {
+  it.each([false, true])(
+    "keeps a named child session reachable outside the tool window (streaming: %s)",
+    (isStreaming) => {
+      render(
+        <ToolChain
+          parts={[
+            toolPart("run_capability", "output-available", {
+              input: { id: "tool:delegate_to_expert", input: {} },
+              output: {
+                status: "completed",
+                sub_session_id: "curie-session",
+                expert: { name: "Curie" },
+              },
+            }),
+            toolPart("bash_exec", "output-available", { output: "files" }),
+            toolPart("web_search", "output-available", {
+              output: { results: [] },
+            }),
+          ]}
+          isStreaming={isStreaming}
+        />,
+      );
+
+      const entry = screen.getByRole("link", { name: "Curie completed" });
+      expect(entry.getAttribute("href")).toBe(
+        "/copilot?sessionId=curie-session",
+      );
+      expect(entry.closest("[inert]")).toBeNull();
+    },
+  );
+
+  it("keeps the expert identity on the latest result for a delegation", () => {
+    render(
+      <LanguageProvider>
+        <ToolChain
+          parts={[
+            toolPart("delegate_to_expert", "output-available", {
+              output: {
+                status: "running",
+                sub_autopilot_session_id: "curie-chat",
+                expert: { name: "Curie" },
+              },
+            }),
+            toolPart("get_sub_session_result", "output-available", {
+              output: { status: "completed", sub_session_id: "curie-chat" },
+            }),
+          ]}
+          isStreaming={false}
+        />
+      </LanguageProvider>,
+    );
+
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "Curie 已完成" })).toBeDefined();
+  });
+
   it("renders Chinese summary, reasoning and completion labels", async () => {
     const user = userEvent.setup();
     render(
