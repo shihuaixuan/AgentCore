@@ -65,7 +65,7 @@ describe("SettingsMobileNav", () => {
     expect(trigger.textContent).toContain("Billing");
   });
 
-  it("opens popover listing all 8 current sections on click", async () => {
+  it("opens the settings sections without an API keys option", async () => {
     render(<SettingsMobileNav />);
 
     fireEvent.click(
@@ -77,9 +77,8 @@ describe("SettingsMobileNav", () => {
       "Account",
       "Memory",
       "Billing",
-      "AI connections",
+      "Chat models",
       "Bots",
-      "AutoGPT API Keys",
       "Creator Dashboard",
     ];
     for (const label of labels) {
@@ -87,6 +86,7 @@ describe("SettingsMobileNav", () => {
         await screen.findByRole("link", { name: new RegExp(label, "i") }),
       ).toBeDefined();
     }
+    expect(screen.queryByRole("link", { name: "AutoGPT API Keys" })).toBeNull();
   });
 
   it("localizes the current section and keeps the AI connections destination", async () => {
@@ -101,7 +101,7 @@ describe("SettingsMobileNav", () => {
     );
 
     expect(
-      (await screen.findByRole("link", { name: "AI 连接" })).getAttribute(
+      (await screen.findByRole("link", { name: "聊天模型" })).getAttribute(
         "href",
       ),
     ).toBe("/settings/ai-connections");

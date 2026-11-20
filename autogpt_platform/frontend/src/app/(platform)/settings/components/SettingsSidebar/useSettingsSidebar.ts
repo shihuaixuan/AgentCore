@@ -10,7 +10,6 @@ const NAV_LABELS: Record<string, string> = {
   Billing: "账单",
   "Chat models": "聊天模型",
   Bots: "机器人",
-  "AutoGPT API Keys": "AutoGPT API 密钥",
   "Creator Dashboard": "创作者面板",
 };
 

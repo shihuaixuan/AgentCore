@@ -24,10 +24,11 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 
 interface Props {
   user: User;
+  emailSettingsEnabled: boolean;
   index?: number;
 }
 
-export function AccountCard({ user, index = 0 }: Props) {
+export function AccountCard({ user, emailSettingsEnabled, index = 0 }: Props) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
@@ -66,15 +67,19 @@ export function AccountCard({ user, index = 0 }: Props) {
       <div className="flex flex-col divide-y divide-border-base rounded-large border border-border-base bg-surface shadow-message-table">
         <div className="flex items-center justify-between gap-4 px-4 py-4">
           <Text variant="body-medium" as="span">
-            {username ? t("Username", "用户名") : t("Email", "电子邮箱")}
+            {emailSettingsEnabled
+              ? t("Email", "电子邮箱")
+              : username
+                ? t("Username", "用户名")
+                : t("Account ID", "账号 ID")}
           </Text>
 
           <div className="flex min-w-0 items-center gap-3">
             <Text variant="body" as="span" className="min-w-0 truncate">
-              {username ?? currentEmail}
+              {emailSettingsEnabled ? currentEmail : (username ?? user.id)}
             </Text>
 
-            {!username && (
+            {emailSettingsEnabled && (
               <Dialog
                 title={t("Update email", "更新邮箱")}
                 styling={{ maxWidth: "420px" }}
@@ -156,16 +161,12 @@ export function AccountCard({ user, index = 0 }: Props) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4 px-4 py-4">
-          <Text variant="body-medium" as="span">
-            {t("Password", "密码")}
-          </Text>
-
-          {username ? (
-            <Text variant="body" tone="muted">
-              {t("No recovery email", "未设置邮箱找回")}
+        {emailSettingsEnabled && (
+          <div className="flex items-center justify-between gap-4 px-4 py-4">
+            <Text variant="body-medium" as="span">
+              {t("Password", "密码")}
             </Text>
-          ) : (
+
             <Button
               as="NextLink"
               href="/reset-password"
@@ -174,8 +175,8 @@ export function AccountCard({ user, index = 0 }: Props) {
             >
               {t("Reset password", "重置密码")}
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </motion.section>
   );

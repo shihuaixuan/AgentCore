@@ -2,7 +2,6 @@ import {
   BrainIcon,
   ChartIncreaseIcon,
   CreditCardIcon,
-  Key01Icon,
   MessageMultiple01Icon,
   PlugSocketIcon,
   SlidersHorizontalIcon,
@@ -35,7 +34,6 @@ export const settingsNavItems: SettingsNavItem[] = [
     Icon: PlugSocketIcon,
   },
   { label: "Bots", href: "/settings/bots", Icon: MessageMultiple01Icon },
-  { label: "AutoGPT API Keys", href: "/settings/api-keys", Icon: Key01Icon },
   {
     label: "Creator Dashboard",
     href: "/settings/creator-dashboard",

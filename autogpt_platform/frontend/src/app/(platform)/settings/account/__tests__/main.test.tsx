@@ -12,6 +12,7 @@ import type { NotificationPreferenceDTO } from "@/app/api/__generated__/models/n
 import { http, HttpResponse } from "msw";
 
 import { server } from "@/mocks/mock-server";
+import { usernameIdentity } from "@/lib/auth/local-username";
 import {
   act,
   fireEvent,
@@ -114,7 +115,10 @@ function setupBaseHandlers(
 }
 
 describe("SettingsPreferencesPage", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
   beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_AUTH_USERNAME_SIGNUP", "false");
     mockUseAuth.mockReturnValue({
       user: testUser,
       isLoggedIn: true,
@@ -140,6 +144,48 @@ describe("SettingsPreferencesPage", () => {
 
     const resetLink = screen.getByRole("link", { name: "Reset password" });
     expect(resetLink.getAttribute("href")).toBe("/reset-password");
+  });
+
+  test("shows username and time zone without requesting email preferences for a username account", async () => {
+    mockUseAuth.mockReturnValue({
+      user: { ...testUser, email: usernameIdentity("小明") },
+    });
+    const getPreferences = vi.fn(() => HttpResponse.error());
+    server.use(
+      http.get("/api/proxy/api/auth/user/preferences", getPreferences),
+      getGetV1GetUserTimezoneMockHandler({ timezone: "Asia/Shanghai" }),
+    );
+
+    render(<SettingsPreferencesPage />);
+
+    expect(await screen.findByText("小明")).toBeDefined();
+    expect(
+      screen.getByRole("combobox", { name: "Timezone" }).textContent,
+    ).toContain("Shanghai");
+    expect(screen.queryByRole("combobox", { name: "Briefing" })).toBeNull();
+    expect(getPreferences).not.toHaveBeenCalled();
+  });
+
+  test("omits email settings for an existing email account in username signup mode", async () => {
+    vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "LOCAL");
+    vi.stubEnv("NEXT_PUBLIC_AUTH_USERNAME_SIGNUP", "true");
+    const getPreferences = vi.fn(() => HttpResponse.error());
+    server.use(
+      http.get("/api/proxy/api/auth/user/preferences", getPreferences),
+      getGetV1GetUserTimezoneMockHandler({ timezone: "Asia/Shanghai" }),
+    );
+
+    render(<SettingsPreferencesPage />);
+
+    expect(
+      await screen.findByRole("combobox", { name: "Timezone" }),
+    ).toBeDefined();
+    expect(screen.getByText(testUser.id)).toBeDefined();
+    expect(screen.queryByText(testUser.email)).toBeNull();
+    expect(screen.queryByRole("button", { name: "Edit email" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Reset password" })).toBeNull();
+    expect(screen.queryByRole("combobox", { name: "Briefing" })).toBeNull();
+    expect(getPreferences).not.toHaveBeenCalled();
   });
 
   test("opens email update dialog and closes on Cancel", async () => {

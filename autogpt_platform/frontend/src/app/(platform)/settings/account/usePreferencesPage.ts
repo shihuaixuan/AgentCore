@@ -17,6 +17,10 @@ import type { UpdateTimezoneRequestTimezone } from "@/app/api/__generated__/mode
 import { okData } from "@/app/api/helpers";
 import { toast } from "@/components/molecules/Toast/use-toast";
 import { useAuth } from "@/lib/auth/hooks/useAuth";
+import {
+  isUsernameIdentity,
+  usernameSignupEnabled,
+} from "@/lib/auth/local-username";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import {
@@ -40,6 +44,10 @@ const DEFAULT_SETTINGS: NotificationSettings = {
 export function usePreferencesPage() {
   const { t, locale } = useTranslation();
   const { user } = useAuth();
+  const emailSettingsEnabled =
+    !usernameSignupEnabled() &&
+    !!user?.email &&
+    !isUsernameIdentity(user.email);
   const queryClient = useQueryClient();
   // The Briefing footer's volume knob links here with
   // ?f=daily|weekly|monthly|alerts|off. The design calls these "live one-click
@@ -52,14 +60,14 @@ export function usePreferencesPage() {
   // getting them to follow a link. The backend verifies an HMAC that binds the
   // choice to the recipient, so an unsigned or tampered link does nothing.
   const searchParams = useSearchParams();
-  const footerChoice = searchParams.get("f");
+  const footerChoice = emailSettingsEnabled ? searchParams.get("f") : null;
   const footerToken = searchParams.get("t");
   const router = useRouter();
   const pathname = usePathname();
 
   const preferencesQuery = useGetV1GetNotificationPreferences({
     query: {
-      enabled: !!user,
+      enabled: emailSettingsEnabled,
       select: okData,
     },
   });
@@ -73,9 +81,8 @@ export function usePreferencesPage() {
 
   const isLoading =
     !user ||
-    preferencesQuery.isLoading ||
     timezoneQuery.isLoading ||
-    !preferencesQuery.data;
+    (emailSettingsEnabled && !preferencesQuery.data);
 
   const serverTimezone = timezoneQuery.data ?? "not-set";
   const formTimezone =
@@ -147,13 +154,14 @@ export function usePreferencesPage() {
   useEffect(
     function syncFormStateOnce() {
       if (hasInitializedFormState.current) return;
-      if (!preferencesQuery.isSuccess) return;
+      if (emailSettingsEnabled && !preferencesQuery.isSuccess) return;
       if (!timezoneQuery.isSuccess) return;
       setFormState(initialFormState);
       setSavedState(initialSavedState);
       hasInitializedFormState.current = true;
     },
     [
+      emailSettingsEnabled,
       initialFormState,
       initialSavedState,
       preferencesQuery.isSuccess,
@@ -298,11 +306,16 @@ export function usePreferencesPage() {
 
   return {
     user,
+    emailSettingsEnabled,
     isLoading,
-    isError: preferencesQuery.isError || timezoneQuery.isError,
-    error: preferencesQuery.error ?? timezoneQuery.error,
+    isError:
+      (emailSettingsEnabled && preferencesQuery.isError) ||
+      timezoneQuery.isError,
+    error:
+      (emailSettingsEnabled ? preferencesQuery.error : null) ??
+      timezoneQuery.error,
     refetch: () => {
-      void preferencesQuery.refetch();
+      if (emailSettingsEnabled) void preferencesQuery.refetch();
       void timezoneQuery.refetch();
     },
     formState,

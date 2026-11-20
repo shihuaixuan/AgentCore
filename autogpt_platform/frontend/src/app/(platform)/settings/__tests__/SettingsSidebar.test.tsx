@@ -65,7 +65,6 @@ const expectedItems = [
   { label: "Account", href: "/settings/account" },
   { label: "Billing", href: "/settings/billing" },
   { label: "Chat models", href: "/settings/ai-connections" },
-  { label: "AutoGPT API Keys", href: "/settings/api-keys" },
   { label: "Creator Dashboard", href: "/settings/creator-dashboard" },
 ];
 
@@ -92,11 +91,12 @@ describe("SettingsSidebar", () => {
     expect(screen.getByRole("link", { name: /Chat models/i })).toBeDefined();
   });
 
-  it("renders a Back link to /copilot and all 6 nav items with correct hrefs", () => {
+  it("renders the settings links without an API keys option", () => {
     render(<SettingsSidebar />);
 
     const back = screen.getByRole("link", { name: /back/i });
     expect(back.getAttribute("href")).toBe("/copilot");
+    expect(screen.queryByRole("link", { name: "AutoGPT API Keys" })).toBeNull();
 
     for (const { label, href } of expectedItems) {
       const link = screen.getByRole("link", { name: new RegExp(label, "i") });

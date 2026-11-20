@@ -27,6 +27,7 @@ export default function SettingsPreferencesPage() {
 
   const {
     user,
+    emailSettingsEnabled,
     isLoading,
     isError,
     error,
@@ -42,7 +43,8 @@ export default function SettingsPreferencesPage() {
     savePreferences,
   } = usePreferencesPage();
 
-  const showNotifications = useGetFlag(Flag.SETTINGS_NOTIFICATIONS);
+  const showNotifications =
+    useGetFlag(Flag.SETTINGS_NOTIFICATIONS) && emailSettingsEnabled;
   const showAccountDeletion = useCanDeleteAccount();
   const showCookieSettings = isConsentManagerConfigured();
   const browserCardIndex = showNotifications ? 3 : 2;
@@ -70,7 +72,7 @@ export default function SettingsPreferencesPage() {
     <div className="flex flex-col gap-6 pb-8">
       <PreferencesHeader />
 
-      <AccountCard user={user} index={0} />
+      <AccountCard user={user} emailSettingsEnabled={emailSettingsEnabled} />
 
       <TimezoneCard
         value={formState.timezone}
