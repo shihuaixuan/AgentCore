@@ -40,7 +40,7 @@ export function BeatControl({ beat, flow }: Props) {
       return (
         <JobTitleStep
           selectedTitle={flow.jobTitle}
-          suggestions={jobTitleSuggestionsFor(flow.category)}
+          suggestions={jobTitleSuggestionsFor(flow.category, locale)}
           color={flow.color}
           onSubmit={flow.submitJobTitle}
           onSkip={flow.skipJobTitle}

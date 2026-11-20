@@ -57,7 +57,9 @@ class ExpertOnboardingTool(BaseTool):
             f"a one-line greeting plus {MIN_STEPS}-{MAX_STEPS} short "
             "multiple-choice questions that settle what the user wants from "
             "you and which services you need. Ask for nothing else on that "
-            "turn, and do not start work until the answers come back."
+            "turn, and do not start work until the answers come back. Write the "
+            "greeting, questions, choices and labels in the kickoff's requested "
+            "language, regardless of the language of the expert's charter."
         )
 
     @property

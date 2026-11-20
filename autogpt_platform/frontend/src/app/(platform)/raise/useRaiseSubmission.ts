@@ -40,6 +40,7 @@ export function useRaiseSubmission() {
       const response = await createRaisedExpert({
         data: {
           name,
+          locale,
           role,
           job_title: jobTitle,
           color: draft.color,

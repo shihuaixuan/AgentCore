@@ -396,6 +396,7 @@ def test_create_raised_expert_returns_expert(
         avatar_url=None,
         color=None,
         about=None,
+        locale="en",
         weekly_budget=None,
         attachments=[],
     )
@@ -430,6 +431,7 @@ def test_create_raised_expert_passes_role_voice_budget_and_attachments(
             "name": "Nova",
             "role": "Research Assistant",
             "job_title": "  Market Research Analyst  ",
+            "locale": "zh-CN",
             "voice_preferences": "Warm and detailed.",
             "weekly_budget": 250,
             "attachments": [
@@ -454,6 +456,7 @@ def test_create_raised_expert_passes_role_voice_budget_and_attachments(
         avatar_url=None,
         color=None,
         about=None,
+        locale="zh-CN",
         weekly_budget=250,
         attachments=[
             RaiseAttachment(
@@ -503,7 +506,7 @@ def test_create_raised_expert_forwards_about(
 
     response = client.post(
         "/experts/raise",
-        json={"name": "Nova", "about": "  Always cites a source.  "},
+        json={"name": "Nova", "about": "  Always cites a source.  ", "locale": "zh-CN"},
     )
 
     assert response.status_code == 200
@@ -516,6 +519,7 @@ def test_create_raised_expert_forwards_about(
         avatar_url=None,
         color=None,
         about="Always cites a source.",
+        locale="zh-CN",
         weekly_budget=None,
         attachments=[],
     )
@@ -568,6 +572,7 @@ def test_create_raised_expert_reports_attachment_installation_failure(
         avatar_url=None,
         color=None,
         about=None,
+        locale="en",
         weekly_budget=None,
         attachments=[
             RaiseAttachment(
@@ -632,6 +637,7 @@ def test_create_raised_expert_passes_avatar_and_color(
         avatar_url="https://storage.googleapis.com/bucket/nova.png",
         color="sky-300",
         about=None,
+        locale="en",
         weekly_budget=None,
         attachments=[],
     )
@@ -708,6 +714,7 @@ def test_create_raised_expert_treats_blank_avatar_and_color_as_unset(
         "avatar_url": None,
         "color": None,
         "about": None,
+        "locale": "en",
         "weekly_budget": None,
         "attachments": [],
     }

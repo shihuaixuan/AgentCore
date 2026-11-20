@@ -1,4 +1,5 @@
 import logging
+from typing import Literal
 
 import autogpt_libs.auth as autogpt_auth_lib
 import fastapi
@@ -112,6 +113,7 @@ class AssignPodRequest(BaseModel):
 
 class CreateRaisedExpertRequest(BaseModel):
     name: str = Field(min_length=1, max_length=100)
+    locale: Literal["en", "zh-CN"] = "en"
     role: str | None = Field(default=None, max_length=100)
     job_title: str | None = Field(default=None, max_length=100)
     avatar_url: str | None = Field(
@@ -230,6 +232,7 @@ async def create_raised_expert(
             avatar_url=request.avatar_url,
             color=request.color,
             about=request.about,
+            locale=request.locale,
             weekly_budget=request.weekly_budget,
             attachments=request.attachments,
         )

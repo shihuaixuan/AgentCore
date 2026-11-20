@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from test import load_store_agents as store_assets
 from types import SimpleNamespace
-from typing import cast
+from typing import Literal, cast
 from unittest.mock import AsyncMock, MagicMock, patch
 from zoneinfo import ZoneInfo
 
@@ -1107,6 +1107,7 @@ async def test_raise_expert_stores_about_as_identity(server: SpinTestServer):
         role=None,
         voice_preferences=None,
         about="Keeps replies short and always cites a source.",
+        locale="zh-CN",
     )
     assert raised.expert.identity == "Keeps replies short and always cites a source."
 
@@ -1115,9 +1116,13 @@ async def test_raise_expert_stores_about_as_identity(server: SpinTestServer):
     assert reloaded.identity == "Keeps replies short and always cites a source."
 
 
+@pytest.mark.parametrize(
+    "locale,expected",
+    [("zh-CN", "我是 Otto"), ("en", "I'm Otto")],
+)
 @pytest.mark.asyncio(loop_scope="session")
 async def test_raise_expert_falls_back_to_default_identity_without_about(
-    server: SpinTestServer,
+    server: SpinTestServer, locale: Literal["en", "zh-CN"], expected: str
 ):
     owner = await _create_seed_user()
     raised = await experts_db.create_raised_expert(
@@ -1125,8 +1130,11 @@ async def test_raise_expert_falls_back_to_default_identity_without_about(
         name="Otto",
         role=None,
         voice_preferences=None,
+        locale=locale,
     )
-    assert raised.expert.identity == experts_db._raised_identity("Otto")
+    reloaded = await experts_db.get_expert(owner.id, raised.expert.id)
+    assert reloaded is not None
+    assert reloaded.identity.startswith(expected)
 
 
 @pytest.mark.asyncio(loop_scope="session")

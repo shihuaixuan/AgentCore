@@ -99,19 +99,19 @@ export function AutopilotCard({ scheduleCount, workflowCount }: Props) {
             <CardStat
               icon={Calendar03Icon}
               label={t("Schedules", "计划")}
-              singular="schedule"
+              singular={t("schedule", "计划")}
               count={scheduleCount}
             />
             <CardStat
               icon={SparklesIcon}
               label={t("Skills", "技能")}
-              singular="skill"
+              singular={t("skill", "技能")}
               count={skillsQuery.data?.length ?? 0}
             />
             <CardStat
               icon={FlashIcon}
               label={t("Workflows", "工作流")}
-              singular="workflow"
+              singular={t("workflow", "工作流")}
               count={workflowCount}
             />
           </CardStats>

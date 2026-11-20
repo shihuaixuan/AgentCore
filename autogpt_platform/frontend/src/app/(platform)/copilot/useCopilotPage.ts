@@ -621,7 +621,7 @@ function useCopilotPageChat(
     isClientThreadEmpty: messages.every(isKickoffMessage),
     onAdoptSession: setSessionId,
     async onKickoff(id, attemptToken) {
-      const kickoffMessage = buildKickoffMessage(id, attemptToken);
+      const kickoffMessage = buildKickoffMessage(id, attemptToken, locale);
       await sendNewMessage(
         kickoffMessage.text,
         undefined,

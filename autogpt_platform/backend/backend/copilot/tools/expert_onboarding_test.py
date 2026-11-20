@@ -57,6 +57,34 @@ def steps(count: int = 2) -> list[dict]:
 
 
 @pytest.mark.asyncio
+async def test_chinese_card_is_in_tool_result_before_rendering(
+    tool: ExpertOnboardingTool, session: ChatSession
+):
+    greeting = "你好，我是你的内容编辑。"
+    question = "你想先做什么？"
+    options = ["撰写简报", "检查 GitHub 文档"]
+    result = await tool.execute(
+        user_id="test-user",
+        session=session,
+        tool_call_id="onboarding",
+        greeting=greeting,
+        steps=[{"question": question, "options": options, "keyword": "目标"}],
+    )
+    card = json.loads(result.output)
+    assert card["type"] == "expert_onboarding"
+    assert card["greeting"] == greeting
+    assert card["message"] == question
+    assert card["steps"] == [
+        {
+            "question": question,
+            "options": options,
+            "keyword": "目标",
+            "allow_multiple": False,
+        }
+    ]
+
+
+@pytest.mark.asyncio
 async def test_returns_greeting_and_steps(
     tool: ExpertOnboardingTool, session: ChatSession
 ):

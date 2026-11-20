@@ -149,40 +149,22 @@ export function roleFor(
 
 export function jobTitleSuggestionsFor(
   category: ExpertAvatarRequestCategory | null,
+  locale: Locale = "en",
 ) {
-  return category ? CATEGORY_DETAILS[category].jobTitleSuggestions : [];
+  if (!category) return [];
+  return locale === "zh-CN"
+    ? CHINESE_JOB_TITLES[category]
+    : CATEGORY_DETAILS[category].jobTitleSuggestions;
 }
 
-const JOB_TITLE_LABELS_ZH: Record<string, string> = {
-  "Executive Assistant": "行政助理",
-  "Personal Assistant": "个人助理",
-  "Marketing Manager": "市场营销经理",
-  "Growth Marketer": "增长营销专员",
-  "Content Marketer": "内容营销专员",
-  "Sales Development Rep": "销售开发代表",
-  "Account Executive": "客户经理",
-  "Sales Manager": "销售经理",
-  "Financial Analyst": "财务分析师",
-  "Data Analyst": "数据分析师",
-  "Business Analyst": "业务分析师",
-  "Support Specialist": "客户支持专员",
-  "Customer Success Manager": "客户成功经理",
-  "Support Engineer": "技术支持工程师",
-  "Operations Manager": "运营经理",
-  Recruiter: "招聘专员",
-  "Research Analyst": "研究分析师",
-  "Market Researcher": "市场研究员",
-  "UX Researcher": "用户体验研究员",
-  "Content Writer": "内容写作者",
-  Copywriter: "文案",
-  "Technical Writer": "技术写作者",
-  "Software Engineer": "软件工程师",
-  "Full-Stack Developer": "全栈开发者",
-  "DevOps Engineer": "DevOps 工程师",
+const CHINESE_JOB_TITLES: Record<ExpertAvatarRequestCategory, string[]> = {
+  general: ["行政助理", "个人助理"],
+  marketing: ["市场营销经理", "增长营销专员", "内容营销专员"],
+  sales: ["销售开发代表", "客户经理", "销售经理"],
+  finance: ["财务分析师", "数据分析师", "业务分析师"],
+  support: ["客户支持专员", "客户成功经理", "技术支持工程师"],
+  operations: ["运营经理", "行政助理", "招聘专员"],
+  research: ["研究分析师", "市场研究员", "用户体验研究员"],
+  content: ["内容写作者", "文案", "技术写作者"],
+  development: ["软件工程师", "全栈开发者", "DevOps 工程师"],
 };
-
-export function jobTitleLabelFor(title: string): string {
-  return Object.hasOwn(JOB_TITLE_LABELS_ZH, title)
-    ? JOB_TITLE_LABELS_ZH[title]
-    : title;
-}

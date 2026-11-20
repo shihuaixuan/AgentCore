@@ -98,6 +98,7 @@ class RaiseExpertTool(BaseTool):
     def description(self) -> str:
         return (
             EXPERT_CREATION_COPY_POLICY
+            + " Write the proposed title, role, tagline and charter in the user's language. Preserve names and wording the user supplied."
             + " Preview if no template fits; never hires. Collect job title, role, tagline, color and charter (ownership, success criteria, boundaries). Card shows charter; add at most one short line. Returns one-time confirmation_id; await user approval before tool:confirm_expert_change. For a task already in the chat, pass handoff_title + handoff_task."
         )
 

@@ -31985,6 +31985,15 @@
             "minLength": 1,
             "title": "Name"
           },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "zh-CN"
+            ],
+            "title": "Locale",
+            "default": "en"
+          },
           "role": {
             "anyOf": [
               {

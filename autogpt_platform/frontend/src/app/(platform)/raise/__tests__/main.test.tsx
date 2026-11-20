@@ -253,37 +253,42 @@ test("refreshes the expert roster before opening the kickoff thread", async () =
   );
 });
 
-test("localizes a skipped title's category role without translating the API name", async () => {
-  let captured: unknown = null;
-  server.use(
-    getCreateRaisedExpertMockHandler(async (info) => {
-      captured = await info.request.json();
-      return raiseResult();
-    }),
-  );
+test.each(["", "软件工程师", "My Custom Engineer"])(
+  "posts the selected profession verbatim in Chinese creation: %s",
+  async (jobTitle) => {
+    let captured: unknown = null;
+    server.use(
+      getCreateRaisedExpertMockHandler(async (info) => {
+        captured = await info.request.json();
+        return raiseResult();
+      }),
+    );
 
-  seedAtSkills();
-  saveDraft({ ...loadDraft(), jobTitle: "" });
-  render(
-    <LanguageProvider initialLocale="zh-CN">
-      <RaisePage />
-    </LanguageProvider>,
-  );
-  expect(
-    await screen.findByRole("heading", { name: "营销专员", level: 2 }),
-  ).toBeDefined();
-  await userEvent.click(
-    await screen.findByRole("button", { name: "创建 营销专员" }),
-  );
+    seedAtSkills();
+    saveDraft({ ...loadDraft(), category: "development", jobTitle });
+    const title = jobTitle || "开发者";
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <RaisePage />
+      </LanguageProvider>,
+    );
+    expect(
+      await screen.findByRole("heading", { name: title, level: 2 }),
+    ).toBeDefined();
+    await userEvent.click(
+      await screen.findByRole("button", { name: `创建 ${title}` }),
+    );
 
-  await waitFor(() =>
-    expect(captured).toMatchObject({
-      name: "Marketer",
-      role: "Marketer",
-      job_title: null,
-    }),
-  );
-});
+    await waitFor(() =>
+      expect(captured).toMatchObject({
+        name: title,
+        locale: "zh-CN",
+        role: "开发者",
+        job_title: jobTitle || null,
+      }),
+    );
+  },
+);
 
 test("posts a chosen weekly budget", async () => {
   let captured: unknown = null;

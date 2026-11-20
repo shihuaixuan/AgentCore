@@ -167,19 +167,19 @@ export function ExpertTeamCard({
             <CardStat
               icon={Calendar03Icon}
               label={t("Schedules", "计划")}
-              singular="schedule"
+              singular={t("schedule", "计划")}
               count={schedules.length}
             />
             <CardStat
               icon={SparklesIcon}
               label={t("Skills", "技能")}
-              singular="skill"
+              singular={t("skill", "技能")}
               count={expert.skills.length}
             />
             <CardStat
               icon={FlashIcon}
               label={t("Workflows", "工作流")}
-              singular="workflow"
+              singular={t("workflow", "工作流")}
               count={expert.workflows.length}
             />
           </CardStats>

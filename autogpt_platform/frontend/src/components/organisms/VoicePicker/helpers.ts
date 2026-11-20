@@ -1,4 +1,5 @@
 import type { VoiceSample } from "@/app/api/__generated__/models/voiceSample";
+import type { Locale } from "@/lib/i18n/locale";
 
 export type VoicePickChoice = "a" | "b" | "custom";
 
@@ -18,14 +19,19 @@ export interface VoicePickResult {
 export function buildVoicePreferences(
   result: VoicePickResult,
   samples: VoiceSample[],
+  locale: Locale = "en",
 ): string | null {
   if (result.choice === "custom") {
     const text = (result.customText ?? "").trim();
     if (!text) return null;
+    if (locale === "zh-CN")
+      return `写作风格：参考用户提供的写作示例。\n\n示例：\n\n${text}`;
     return `Preferred writing style: match the user's own writing sample below.\n\nExample to match:\n\n${text}`;
   }
   const sample = result.choice === "a" ? samples[0] : samples[1];
   if (!sample) return null;
+  if (locale === "zh-CN")
+    return `写作风格：${sample.label}。\n\n示例：\n\n${sample.text}`;
   return `Preferred writing style: ${sample.label}.\n\nExample to match:\n\n${sample.text}`;
 }
 

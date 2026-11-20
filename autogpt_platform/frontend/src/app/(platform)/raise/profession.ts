@@ -1,20 +1,16 @@
 import type { Locale } from "@/lib/i18n/locale";
-import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
-import { jobTitleLabelFor, roleFor } from "./components/CategoryStep/helpers";
+import { roleFor } from "./components/CategoryStep/helpers";
 import type { RaiseDraft } from "./helpers";
 
 export function getRaiseProfession(draft: RaiseDraft, locale: Locale) {
   const jobTitle = draft.jobTitle || null;
   const legacyRole = draft.legacyRole?.trim();
-  const role = legacyRole || roleFor(draft.category);
-  const categoryTitle = legacyRole ? null : roleFor(draft.category, locale);
+  const role = legacyRole || roleFor(draft.category, locale);
+  const title =
+    jobTitle ?? role ?? (locale === "zh-CN" ? "AI 专家" : "AI Expert");
   return {
-    name: jobTitle ?? role ?? "AI Expert",
-    title: jobTitle
-      ? locale === "zh-CN"
-        ? jobTitleLabelFor(jobTitle)
-        : jobTitle
-      : (categoryTitle ?? getExpertDisplayTitle({ role }, locale)),
+    name: title,
+    title,
     role,
     jobTitle,
   };

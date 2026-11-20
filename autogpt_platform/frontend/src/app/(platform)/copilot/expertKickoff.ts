@@ -1,3 +1,4 @@
+import { parseLocale, type Locale } from "@/lib/i18n/locale";
 import { isValidUUID } from "@/lib/utils";
 import type { UIMessage } from "ai";
 import { v4 as uuidv4 } from "uuid";
@@ -12,7 +13,7 @@ const PENDING_TTL_MS = 2 * 60 * 1000;
 // asks what the user actually wants before touching anything. Never instruct it
 // to start a workflow here — one click on Hire ran a Gmail send (SECRT-2622) —
 // so any redesign of this message, including this one, stays ask-first.
-const KICKOFF_PROMPT =
+const KICKOFF_EN =
   "You were just hired. Call expert_onboarding once, and nothing else, this " +
   "turn: a one-sentence greeting introducing yourself in your voice, with " +
   "no dashes, then " +
@@ -23,7 +24,15 @@ const KICKOFF_PROMPT =
   "connected to, naming the real providers rather than asking in the " +
   "abstract. Do not ask about work outside your role, whatever else you " +
   "know about the user or their team. Do not run a workflow, create a " +
-  "schedule, or start any other work before the answers come back.";
+  "schedule, or start any other work before the answers come back. Write " +
+  "the greeting, questions, options and step labels in English. Keep names as supplied.";
+
+const KICKOFF_ZH =
+  "你刚被聘用。本轮只调用一次 expert_onboarding，不要调用其他工具。" +
+  "直接用简体中文撰写 greeting、每一步的 question、options 和 keyword；用户给定的名称和服务商名称保留原文。" +
+  "先用符合你身份的一句话介绍自己，不用破折号。再提两到三个简短的问题，提供可点选的答案。" +
+  "问题和选项只围绕你的职责和已安装的工作流：询问用户想先达成什么目标，以及需要连接哪些具体服务。" +
+  "不要询问职责以外的事情。在用户回答前，不要运行工作流、创建计划或开始其他工作。";
 
 export interface ExpertKickoffMetadata {
   kind: typeof EXPERT_KICKOFF_KIND;
@@ -48,9 +57,12 @@ export function expertKickoffHref(expertId: string) {
 export function buildKickoffMessage(
   expertId: string,
   attemptToken?: KickoffAttemptToken,
+  locale: Locale = parseLocale(
+    typeof document === "undefined" ? undefined : document.documentElement.lang,
+  ),
 ): ExpertKickoffSend {
   return {
-    text: KICKOFF_PROMPT,
+    text: locale === "zh-CN" ? KICKOFF_ZH : KICKOFF_EN,
     metadata: {
       kind: EXPERT_KICKOFF_KIND,
       expertId,

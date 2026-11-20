@@ -49,8 +49,18 @@ function assistantMessage(
 }
 
 describe("buildKickoffMessage", () => {
+  it("requests Chinese in the actual tool call, not in the card renderer", () => {
+    const message = buildKickoffMessage(EXPERT_ID, "attempt-1", "zh-CN");
+    expect(message.text).toContain("简体中文");
+    for (const field of ["greeting", "question", "options", "keyword"]) {
+      expect(message.text).toContain(field);
+    }
+    expect(message.text).toContain("expert_onboarding");
+    expect(message.text).toContain("不要运行工作流");
+  });
+
   it("keeps routing data in metadata and sends a clean day-one prompt", () => {
-    const message = buildKickoffMessage(EXPERT_ID, "attempt-1");
+    const message = buildKickoffMessage(EXPERT_ID, "attempt-1", "en");
 
     expect(message.metadata).toEqual({
       kind: "expert_kickoff",
@@ -61,6 +71,7 @@ describe("buildKickoffMessage", () => {
       "attempt-1",
     );
     expect(message.text).toContain("You were just hired.");
+    expect(message.text).toContain("in English");
     expect(message.text).toContain("expert_onboarding");
     // The hire's first turn is an intake, not a first job.
     expect(message.text).toContain("Do not run a workflow");

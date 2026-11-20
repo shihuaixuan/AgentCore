@@ -8,6 +8,7 @@ import { BEAT_KEYS, buildFlowItems } from "../flowItems";
 import { EMPTY_DRAFT } from "../helpers";
 import { SoulPreviewPanel } from "../components/SoulPreviewPanel/SoulPreviewPanel";
 import { getRaiseProfession } from "../profession";
+import { jobTitleSuggestionsFor } from "../components/CategoryStep/helpers";
 
 function Conversation() {
   const { t, locale, setLocale } = useTranslation();
@@ -203,14 +204,34 @@ test("localizes the category role used as the preview's only title", () => {
   fireEvent.click(screen.getByRole("button", { name: "English" }));
   expect(screen.getByRole("heading", { name: "Marketer" })).toBeDefined();
 });
-test("uses the translated suggestion in the preview and conversation while preserving the stored profession", () => {
-  const draft = { ...EMPTY_DRAFT, jobTitle: "Research Analyst" };
-  expect(getRaiseProfession(draft, "zh-CN")).toMatchObject({
-    title: "研究分析师",
-    jobTitle: "Research Analyst",
+test("selecting 软件工程师 stores the actual Chinese title and role", () => {
+  const onSubmit = vi.fn();
+  render(
+    <LanguageProvider>
+      <JobTitleStep
+        selectedTitle={null}
+        suggestions={jobTitleSuggestionsFor("development", "zh-CN")}
+        color={null}
+        onSubmit={onSubmit}
+        onSkip={vi.fn()}
+      />
+    </LanguageProvider>,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "软件工程师" }));
+  expect(onSubmit).toHaveBeenCalledWith("软件工程师");
+  const draft = {
+    ...EMPTY_DRAFT,
+    category: "development" as const,
+    jobTitle: onSubmit.mock.calls[0][0],
+  };
+  expect(getRaiseProfession(draft, "zh-CN")).toEqual({
+    name: "软件工程师",
+    title: "软件工程师",
+    role: "开发者",
+    jobTitle: "软件工程师",
   });
-  expect(getRaiseProfession(draft, "en").title).toBe("Research Analyst");
   expect(
-    getRaiseProfession({ ...draft, jobTitle: "My Analyst" }, "zh-CN").title,
-  ).toBe("My Analyst");
+    getRaiseProfession({ ...draft, jobTitle: "Software Engineer" }, "zh-CN")
+      .jobTitle,
+  ).toBe("Software Engineer");
 });

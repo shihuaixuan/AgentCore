@@ -19,7 +19,7 @@ import {
   resolveVoicePreferences,
   saveDraft,
   voiceSummaryLabel,
-  VOICE_SAMPLES,
+  voiceSamplesFor,
   VOICE_SKIPPED_LABEL,
   type RaiseAttachmentDraft,
   type RaiseDraft,
@@ -93,14 +93,15 @@ export function useRaisePage() {
   }
 
   function pickVoice(result: VoicePickResult) {
-    const preferences = resolveVoicePreferences(result, VOICE_SAMPLES);
+    const samples = voiceSamplesFor(locale);
+    const preferences = resolveVoicePreferences(result, samples, locale);
     if (preferences === null) {
       skipVoice();
       return;
     }
     update({
       voicePreferences: preferences,
-      voiceLabel: voiceSummaryLabel(result, VOICE_SAMPLES),
+      voiceLabel: voiceSummaryLabel(result, samples),
       step: "budget",
     });
   }

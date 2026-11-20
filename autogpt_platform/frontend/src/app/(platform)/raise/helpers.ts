@@ -70,7 +70,6 @@ const VOICE_SAMPLES_ZH: VoiceSample[] = [
   },
 ];
 
-/** The stored voice guidance stays canonical; only the picker copy changes. */
 export function voiceSamplesFor(locale: Locale): VoiceSample[] {
   return locale === "zh-CN" ? VOICE_SAMPLES_ZH : VOICE_SAMPLES;
 }
@@ -303,8 +302,9 @@ export function voiceDisplayLabel(
 export function resolveVoicePreferences(
   result: VoicePickResult,
   samples: VoiceSample[],
+  locale: Locale = "en",
 ): string | null {
-  return buildVoicePreferences(result, samples);
+  return buildVoicePreferences(result, samples, locale);
 }
 
 export function raisedIdentity(name: string): string {

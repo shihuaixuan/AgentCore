@@ -146,9 +146,11 @@ _SETUP_ATTEMPTS = 3
 _SETUP_RETRY_DELAY_SECONDS = 5
 
 
-def _raised_identity(name: str) -> str:
+def _raised_identity(name: str, locale: Literal["en", "zh-CN"] = "en") -> str:
     # f-string, not str.format on a template: user names may contain { or },
     # which str.format would choke on.
+    if locale == "zh-CN":
+        return f"我是 {name}，是你创建的 AI 专家。我会按你的指示协助你完成工作。"
     return f"I'm {name}, an AI Expert created by you. I use your instructions to help with your work."
 
 
@@ -1436,6 +1438,7 @@ async def create_raised_expert(
     role: str | None,
     voice_preferences: str | None,
     *,
+    locale: Literal["en", "zh-CN"] = "en",
     job_title: str | None = None,
     avatar_url: str | None = None,
     color: str | None = None,
@@ -1462,7 +1465,7 @@ async def create_raised_expert(
         avatar_url=avatar_url or DEFAULT_RAISED_PORTRAIT_URL,
         color=color,
         tagline=tagline,
-        about=about,
+        about=about or _raised_identity(name, locale),
         boundaries=boundaries,
         weekly_budget=weekly_budget,
         skills=resolved.skill_names,
@@ -1548,7 +1551,7 @@ async def _create_raised_expert_row(
     avatar_url: str | None,
     color: str | None,
     tagline: str | None = None,
-    about: str | None,
+    about: str,
     boundaries: str | None = None,
     weekly_budget: int | None = None,
     skills: list[str] | None = None,
@@ -1574,7 +1577,7 @@ async def _create_raised_expert_row(
                 "role": role or "",
                 "jobTitle": job_title,
                 "tagline": tagline,
-                "identity": about or _raised_identity(name),
+                "identity": about,
                 "voicePreferences": voice_preferences or "",
                 "boundaries": boundaries or "",
                 "weeklyBudget": weekly_budget,
