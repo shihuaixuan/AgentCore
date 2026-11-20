@@ -287,7 +287,7 @@ async def _start_codex_login(
     )
 
 
-MCPAuthScheme = Literal["basic", "bearer"]
+MCPAuthScheme = Literal["basic", "bearer", "query_key"]
 
 
 class CredentialsMetaResponse(BaseModel):

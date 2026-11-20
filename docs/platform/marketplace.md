@@ -17,6 +17,8 @@ The AutoGPT Marketplace is a public catalog of experts, skills, workflows, and c
 
 To connect your own MCP server, sign in and open **Marketplace → Connectors → Add custom MCP**. Enter the server's HTTPS URL and its authentication details, then select **Test and save**. Open **My connections** to edit, disable, or remove the connection. AI subscriptions for chats are managed under **Settings → AI connections**.
 
+For a recognized endpoint, the form shows its available connection methods. For an unknown URL, use **Manual configuration** and select the method documented by the provider. For DingTalk Mail you can sign in with OAuth or paste the full **API Key URL** from DingTalk's MCP market. The form separates the key from the server address; you do not need to copy it into a Bearer token field. Treat the original link like a password.
+
 ### Agent Detail Page
 
 Each agent in the marketplace has a dedicated page that includes:

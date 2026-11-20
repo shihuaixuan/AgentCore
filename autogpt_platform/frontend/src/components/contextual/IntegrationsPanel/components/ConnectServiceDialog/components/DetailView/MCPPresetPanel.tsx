@@ -14,16 +14,18 @@ import {
 } from "@/components/molecules/TabsLine/TabsLine";
 import { McpConnectPanel } from "./McpConnectPanel";
 import { PublicMCPPanel } from "./PublicMCPPanel";
+import { DingTalkKeyURLPanel } from "./DingTalkKeyURLPanel";
 
 type AuthMethod = NonNullable<
   ProviderMetadata["mcp_server"]
 >["auth_methods"][number];
 
-const METHOD_LABELS: Record<AuthMethod, string> = {
-  none: "No sign-in",
-  oauth: "Sign in",
-  bearer: "API token",
-  basic: "Basic authentication",
+const METHOD_LABELS: Record<AuthMethod, [string, string]> = {
+  none: ["No sign-in", "无需登录"],
+  oauth: ["Sign in", "登录"],
+  bearer: ["API token", "API 令牌"],
+  basic: ["Basic authentication", "基本身份验证"],
+  query_key: ["API Key URL", "API Key 链接"],
 };
 
 interface Props {
@@ -57,7 +59,7 @@ export function MCPPresetPanel({ server, onSuccess, actions }: Props) {
           <TabsLineList aria-label={t("Connection method", "连接方式")}>
             {methods.map((method) => (
               <TabsLineTrigger key={method} value={method}>
-                {METHOD_LABELS[method]}
+                {t(...METHOD_LABELS[method])}
               </TabsLineTrigger>
             ))}
           </TabsLineList>
@@ -83,6 +85,9 @@ function PresetMethod({
   method,
   actions,
 }: Props & { method: AuthMethod }) {
+  if (method === "query_key") {
+    return <DingTalkKeyURLPanel onSuccess={onSuccess} actions={actions} />;
+  }
   if (method === "none") {
     return server.server_url ? (
       <PublicMCPPanel serverURL={server.server_url} actions={actions} />

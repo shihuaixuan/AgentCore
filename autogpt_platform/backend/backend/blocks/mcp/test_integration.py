@@ -168,6 +168,10 @@ class TestMCPClientIntegration:
         with (
             patch("backend.data.db.is_connected", return_value=True),
             patch(
+                "backend.copilot.tools.session_registry.list_custom_mcp_connections",
+                return_value=[row],
+            ),
+            patch(
                 "backend.data.custom_mcp.get_custom_mcp_connection", return_value=row
             ),
             patch("backend.copilot.tools.run_mcp_tool.validate_url_host"),

@@ -8,11 +8,13 @@ from collections.abc import Iterable
 from io import BytesIO
 from typing import Any, Callable, Optional
 from urllib.parse import ParseResult as URL
-from urllib.parse import quote, urljoin, urlparse
+from urllib.parse import quote, quote_plus, urljoin, urlparse
 
 import aiohttp
 import idna
 from aiohttp import FormData, abc
+from multidict import CIMultiDict, CIMultiDictProxy
+from pydantic import SecretStr
 from tenacity import (
     RetryCallState,
     retry,
@@ -20,6 +22,7 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential_jitter,
 )
+from yarl import URL as ClientURL
 
 from backend.util.json import loads
 from backend.util.settings import Config
@@ -644,6 +647,7 @@ class Requests:
         max_redirects: int = 10,
         drop_headers: frozenset[str] = frozenset(),
         max_body_bytes: int | None = None,
+        sensitive_query_key: SecretStr | None = None,
         **kwargs,
     ) -> Response:
         """Send a request, following redirects through the same SSRF checks.
@@ -651,6 +655,9 @@ class Requests:
         ``max_body_bytes`` caps how much of a response body is read, counted
         after decompression; a longer body comes back cut to that many bytes
         plus one, so the caller can tell it was cut.
+
+        ``sensitive_query_key`` sends a SecretStr as the single ``key`` query
+        parameter. It requires a clean HTTPS endpoint and disabled redirects.
         """
         retry_kwargs: dict[str, Any] = {
             "wait": wait_exponential_jitter(max=self.retry_max_wait),
@@ -661,6 +668,9 @@ class Requests:
         if self.retry_max_attempts is not None:
             retry_kwargs["stop"] = stop_after_attempt(self.retry_max_attempts)
             retry_kwargs["retry_error_callback"] = _return_last_result
+
+        if sensitive_query_key is not None:
+            kwargs["sensitive_query_key"] = sensitive_query_key
 
         @retry(**retry_kwargs)
         async def _make_request() -> Response:
@@ -693,6 +703,7 @@ class Requests:
         max_redirects: int = 10,
         drop_headers: frozenset[str] = frozenset(),
         max_body_bytes: int | None = None,
+        sensitive_query_key: SecretStr | None = None,
         **kwargs,
     ) -> Response:
         # Convert auth tuple to aiohttp.BasicAuth if necessary
@@ -742,6 +753,17 @@ class Requests:
             raise ValueError(f"Invalid URL: Unable to determine hostname of {url}")
 
         original_url = parsed_url.geturl()
+        if sensitive_query_key is not None and (
+            parsed_url.scheme != "https"
+            or parsed_url.query
+            or parsed_url.fragment
+            or allow_redirects
+            or kwargs
+        ):
+            raise ValueError(
+                "Query credentials require a clean HTTPS URL, redirects disabled, "
+                "and no extra request options."
+            )
         connector: Optional[aiohttp.TCPConnector] = None
         if not is_trusted:
             # Replace hostname with IP for connection but preserve SNI via resolver
@@ -775,7 +797,31 @@ class Requests:
         # Default is 8190 bytes, we increase to 16KB to accommodate legitimate large headers
         session_kwargs["max_field_size"] = 16384
 
+        if sensitive_query_key is not None:
+            session_kwargs["cookie_jar"] = aiohttp.DummyCookieJar()
         async with aiohttp.ClientSession(**session_kwargs) as session:
+            if sensitive_query_key is not None:
+                try:
+                    buffered = await _send_with_query_key(
+                        session,
+                        method,
+                        original_url,
+                        sensitive_query_key,
+                        req_headers,
+                        data,
+                        json,
+                        self.max_response_bytes,
+                        max_body_bytes,
+                    )
+                except asyncio.CancelledError:
+                    failure: BaseException = asyncio.CancelledError()
+                except Exception:
+                    failure = ValueError("Request with query credential failed.")
+                else:
+                    if self.raise_for_status:
+                        buffered.raise_for_status()
+                    return buffered
+                raise failure
             # Perform the request with redirects disabled for manual handling
             async with session.request(
                 method,
@@ -891,6 +937,75 @@ class Requests:
 
     async def patch(self, url: str, *args, **kwargs) -> Response:
         return await self.request("PATCH", url, *args, **kwargs)
+
+
+async def _send_with_query_key(
+    session: aiohttp.ClientSession,
+    method: str,
+    url: str,
+    key: SecretStr,
+    headers: dict,
+    data: Any,
+    json: Any,
+    limit: int,
+    cut_at: int | None,
+) -> Response:
+    """Unwrap only after SSRF checks, on a dedicated, untraced session.
+
+    Sentry installs TraceConfigs during session construction. Clear them here,
+    then add the key in middleware so even wrappers around session.request()
+    see only the clean URL. Neither wire exceptions nor RequestInfo may escape.
+    """
+
+    async def authenticate(
+        request: aiohttp.ClientRequest, send: aiohttp.ClientHandlerType
+    ) -> aiohttp.ClientResponse:
+        request.url = request.url.with_query(key=key.get_secret_value())
+        return await send(request)
+
+    session.trace_configs.clear()
+    async with session.request(
+        method,
+        url,
+        middlewares=(authenticate,),
+        headers=headers,
+        data=data,
+        json=json,
+        allow_redirects=False,
+    ) as response:
+        if 300 <= response.status < 400:
+            raise ValueError("Redirect refused.")
+        body = (
+            b""
+            if response.status >= 400 and response.status not in (400, 404)
+            else await _read_body(response, limit, cut_at)
+        )
+        secret = key.get_secret_value()
+        echoes = {
+            secret.encode(),
+            quote(secret, safe="").encode(),
+            quote_plus(secret).encode(),
+            response.request_info.url.raw_query_string.removeprefix("key=").encode(),
+        }
+        if any(value in body for value in echoes):
+            if response.status < 400:
+                raise ValueError("Server reflected query credential.")
+            body = b""
+        result = Response(response=response, url=url, body=body)
+        result.request_info = aiohttp.RequestInfo(
+            ClientURL(url), method, response.request_info.headers
+        )
+        result.reason = None
+        result.headers = CIMultiDictProxy(
+            CIMultiDict(
+                (name, value)
+                for name, value in response.headers.items()
+                if not any(
+                    echo in value.encode() or echo in name.encode() for echo in echoes
+                )
+            )
+        )
+        return result
 
 
 async def _read_body(

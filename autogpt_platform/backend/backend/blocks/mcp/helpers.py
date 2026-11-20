@@ -7,6 +7,8 @@ import logging
 from typing import Any
 from urllib.parse import urlparse
 
+from pydantic import SecretStr
+
 from backend.data.model import OAuth2Credentials
 from backend.integrations.creds_manager import IntegrationCredentialsManager
 from backend.integrations.providers import ProviderName
@@ -61,13 +63,22 @@ def is_manual_mcp_credential(credentials: OAuth2Credentials) -> bool:
     )
 
 
-def mcp_authorization_header(credentials: OAuth2Credentials) -> str:
+def mcp_query_key(credentials: OAuth2Credentials) -> SecretStr | None:
+    """Return the opaque saved key only for a query-key credential."""
+    if (credentials.metadata or {}).get("mcp_auth_scheme") == "query_key":
+        return credentials.access_token
+    return None
+
+
+def mcp_authorization_header(credentials: OAuth2Credentials) -> str | None:
     """Build the Authorization value for a *stored* MCP credential.
 
     Reads the scheme from metadata and never re-parses the secret.  Rows with
-    ``mcp_auth_scheme`` hold a canonical ``"<Scheme> <credential>"``; older
-    rows hold a bare token that was always sent as Bearer.
+    a header scheme hold a canonical ``"<Scheme> <credential>"``; older rows
+    hold a bare Bearer token. A query key must never become a header.
     """
+    if mcp_query_key(credentials) is not None:
+        return None
     token = credentials.access_token.get_secret_value()
     if (credentials.metadata or {}).get("mcp_auth_scheme"):
         return token

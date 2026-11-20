@@ -32,8 +32,8 @@ class MCPServerMetadata(BaseModel):
     documentation_url: str
     setup_instructions: str
     connection_mode: Literal["hosted", "custom"]
-    auth_methods: list[Literal["oauth", "bearer", "basic", "none"]] = Field(
-        min_length=1
+    auth_methods: list[Literal["oauth", "bearer", "basic", "none", "query_key"]] = (
+        Field(min_length=1)
     )
     server_url_options: list[MCPServerURLPreset] = Field(default_factory=list)
     allow_custom_url: bool = Field(

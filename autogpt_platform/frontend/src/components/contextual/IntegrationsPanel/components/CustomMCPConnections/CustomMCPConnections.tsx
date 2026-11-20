@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/atoms/Button/Button";
 import { Input } from "@/components/atoms/Input/Input";
-import { Select } from "@/components/atoms/Select/Select";
 import { Switch } from "@/components/atoms/Switch/Switch";
 import { Text } from "@/components/atoms/Text/Text";
 import {
@@ -13,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/molecules/Dialog/components/DialogPrimitives";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import type { ConnectionInput } from "@/app/api/__generated__/models/connectionInput";
+import { EndpointFields } from "./EndpointFields";
 import { useCustomMCPConnections } from "./useCustomMCPConnections";
 
 interface Props {
@@ -33,8 +32,8 @@ export function CustomMCPConnections({ state }: Props) {
             </DialogTitle>
             <DialogDescription>
               {t(
-                "Use the HTTPS address that serves MCP tools. Services with separate OAuth and tool addresses are not supported here.",
-                "请输入提供 MCP 工具的 HTTPS 地址。此处暂不支持授权地址与工具地址分离的服务。",
+                "Enter the HTTPS server URL supplied by your MCP provider.",
+                "请输入 MCP 服务商提供的 HTTPS 服务器地址。",
               )}
             </DialogDescription>
           </DialogHeader>
@@ -43,7 +42,7 @@ export function CustomMCPConnections({ state }: Props) {
             label={t("Name", "名称")}
             value={state.form.name}
             onChange={(event) =>
-              state.setForm({ ...state.form, name: event.target.value })
+              state.updateFields({ name: event.target.value })
             }
           />
           <Input
@@ -51,56 +50,14 @@ export function CustomMCPConnections({ state }: Props) {
             label={t("Description", "描述")}
             value={state.form.description ?? ""}
             onChange={(event) =>
-              state.setForm({ ...state.form, description: event.target.value })
+              state.updateFields({ description: event.target.value })
             }
           />
-          <Input
-            id="custom-mcp-url"
-            label={t("Server URL", "服务器地址")}
-            type="url"
-            value={state.form.server_url}
-            onChange={(event) =>
-              state.setForm({
-                ...state.form,
-                server_url: event.target.value,
-                credential_id: null,
-              })
-            }
-          />
-          <Select
-            id="custom-mcp-auth"
-            label={t("Authentication", "身份验证")}
-            value={state.form.auth_type}
-            onValueChange={(value) =>
-              state.setForm({
-                ...state.form,
-                auth_type: value as ConnectionInput["auth_type"],
-                credential_id: null,
-              })
-            }
-            options={[
-              { value: "none", label: t("None", "无需认证") },
-              { value: "oauth", label: "OAuth" },
-              { value: "bearer", label: "Bearer" },
-              { value: "basic", label: "Basic" },
-            ]}
-          />
-          {(state.form.auth_type === "basic" ||
-            state.form.auth_type === "bearer") && (
-            <Input
-              id="custom-mcp-token"
-              label={t("Credential", "凭据")}
-              type="password"
-              value={state.token}
-              onChange={(event) => state.setToken(event.target.value)}
-            />
-          )}
+          <EndpointFields state={state} />
           {state.form.auth_type === "oauth" && state.form.credential_id && (
             <Button
               variant="secondary"
-              onClick={() =>
-                state.setForm({ ...state.form, credential_id: null })
-              }
+              onClick={() => state.updateFields({ credential_id: null })}
             >
               {t("Reconnect", "重新授权")}
             </Button>
@@ -108,9 +65,7 @@ export function CustomMCPConnections({ state }: Props) {
           <label className="flex items-center gap-2">
             <Switch
               checked={state.form.enabled ?? true}
-              onCheckedChange={(enabled) =>
-                state.setForm({ ...state.form, enabled })
-              }
+              onCheckedChange={(enabled) => state.updateFields({ enabled })}
             />{" "}
             {t("Enabled", "启用")}
           </label>
@@ -123,6 +78,7 @@ export function CustomMCPConnections({ state }: Props) {
             variant="primary"
             onClick={() => void state.save()}
             loading={state.busy}
+            disabled={!state.canSave}
           >
             {state.form.enabled === false
               ? t("Save", "保存")

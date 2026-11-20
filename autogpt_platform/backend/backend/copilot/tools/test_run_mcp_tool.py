@@ -243,11 +243,66 @@ async def test_discover_tools_with_credentials():
                 )
                 # Verify MCPClient was created with the resolved auth header
                 MockMCPClient.assert_called_once_with(
-                    _SERVER_URL, authorization="Bearer test-token-abc"
+                    _SERVER_URL, authorization="Bearer test-token-abc", query_key=None
                 )
 
     assert isinstance(response, MCPToolsDiscoveredResponse)
     assert len(response.tools) == 1
+
+
+@pytest.mark.parametrize("custom", [False, True])
+async def test_saved_query_key_executes_with_clean_url(custom):
+    url = "https://mcp-gw.dingtalk.com/server/test"
+    key = SecretStr("synthetic-test-key")
+    credential = OAuth2Credentials(
+        provider="mcp",
+        scopes=[],
+        access_token=key,
+        metadata={"mcp_server_url": url, "mcp_auth_scheme": "query_key"},
+    )
+    rpc = AsyncMock()
+    rpc.call_tool.return_value = MCPCallResult()
+    with (
+        patch(
+            "backend.copilot.tools.run_mcp_tool.validate_url_host",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "backend.copilot.tools.run_mcp_tool.auto_lookup_mcp_credential",
+            new_callable=AsyncMock,
+            return_value=credential,
+        ),
+        patch("backend.data.db.is_connected", return_value=True),
+        patch(
+            "backend.data.custom_mcp.get_custom_mcp_connection",
+            new_callable=AsyncMock,
+            return_value={
+                "enabled": True,
+                "serverUrl": url,
+                "credentialId": credential.id,
+            },
+        ),
+        patch(
+            "backend.integrations.creds_manager.IntegrationCredentialsManager.get",
+            new_callable=AsyncMock,
+            return_value=credential,
+        ),
+        patch(
+            "backend.copilot.tools.run_mcp_tool.MCPClient", return_value=rpc
+        ) as constructor,
+    ):
+        response = await RunMCPToolTool()._execute(
+            user_id=_USER_ID,
+            session=make_session(_USER_ID),
+            server_url=url,
+            tool_name="test",
+            custom_connection_id="test-connection" if custom else None,
+            custom_credential_id=credential.id if custom else None,
+        )
+    constructor.assert_called_once_with(url, authorization=None, query_key=key)
+    assert isinstance(response, MCPToolOutputResponse)
+    assert response.server_url == url
+    assert key.get_secret_value() not in response.model_dump_json()
 
 
 # ---------------------------------------------------------------------------
@@ -1202,16 +1257,20 @@ def test_tool_parameters_schema():
 
 
 @pytest.mark.asyncio(loop_scope="session")
-async def test_query_in_url_returns_error():
+@pytest.mark.parametrize("dry_run", [False, True])
+async def test_query_in_url_returns_error(dry_run):
     """server_url with query parameters must be rejected."""
     tool = RunMCPToolTool()
     session = make_session(_USER_ID)
+    session.metadata.dry_run = dry_run
     response = await tool._execute(
         user_id=_USER_ID,
         session=session,
         server_url="https://mcp.example.com/mcp?key=val",
+        tool_name="test",
     )
     assert isinstance(response, ErrorResponse)
+    assert "key=val" not in response.model_dump_json()
     assert "query" in response.message.lower() or "fragment" in response.message.lower()
 
 

@@ -2,6 +2,7 @@ import type { ConnectionResponse } from "@/app/api/__generated__/models/connecti
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { readServerInput } from "./endpointAuth";
 
 interface Props {
   connection: ConnectionResponse;
@@ -32,7 +33,7 @@ export function CustomMCPConnectionRow({
           </Text>
         </div>
         <Text variant="small" tone="body" className="break-all">
-          {connection.server_url}
+          {readServerInput(connection.server_url).serverURL}
         </Text>
       </div>
       <div className="flex gap-2">

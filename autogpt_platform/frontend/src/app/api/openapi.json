@@ -30887,7 +30887,7 @@
           },
           "auth_type": {
             "type": "string",
-            "enum": ["none", "oauth", "bearer", "basic"],
+            "enum": ["none", "oauth", "bearer", "basic", "query_key"],
             "title": "Auth Type"
           },
           "credential_id": {
@@ -30931,7 +30931,7 @@
           },
           "auth_type": {
             "type": "string",
-            "enum": ["none", "oauth", "bearer", "basic"],
+            "enum": ["none", "oauth", "bearer", "basic", "query_key"],
             "title": "Auth Type"
           },
           "credential_id": {
@@ -32641,7 +32641,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "enum": ["basic", "bearer"]
+                "enum": ["basic", "bearer", "query_key"]
               },
               {
                 "type": "null"
@@ -42584,7 +42584,7 @@
           "auth_methods": {
             "items": {
               "type": "string",
-              "enum": ["oauth", "bearer", "basic", "none"]
+              "enum": ["oauth", "bearer", "basic", "none", "query_key"]
             },
             "type": "array",
             "minItems": 1,
@@ -42709,12 +42709,19 @@
             "title": "Token",
             "description": "Bare Bearer token, Basic/Bearer value, or complete Authorization header",
             "writeOnly": true
+          },
+          "auth_type": {
+            "type": "string",
+            "enum": ["header", "query_key"],
+            "title": "Auth Type",
+            "description": "How to send the manual credential.",
+            "default": "header"
           }
         },
         "type": "object",
         "required": ["server_url", "token"],
         "title": "MCPStoreTokenRequest",
-        "description": "Request to store a manual Basic/Bearer credential or Authorization header."
+        "description": "A manual MCP credential, stored separately from the server URL."
       },
       "MCPToolInfo": {
         "properties": {

@@ -7,6 +7,7 @@ from autogpt_libs.auth import get_user_id
 from fastapi import Security
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from backend.blocks.mcp.client import is_dingtalk_key_endpoint
 from backend.blocks.mcp.helpers import normalize_mcp_url
 from backend.data import db
 from backend.data.model import OAuth2Credentials
@@ -22,7 +23,7 @@ class ConnectionInput(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     description: str = Field(default="", max_length=1000)
     server_url: str = Field(min_length=1, max_length=2048)
-    auth_type: Literal["none", "oauth", "bearer", "basic"]
+    auth_type: Literal["none", "oauth", "bearer", "basic", "query_key"]
     credential_id: str | None = None
     enabled: bool = True
 
@@ -45,7 +46,7 @@ class ConnectionResponse(ConnectionInput):
     server_url: str = Field(
         validation_alias="serverUrl", serialization_alias="server_url"
     )
-    auth_type: Literal["none", "oauth", "bearer", "basic"] = Field(
+    auth_type: Literal["none", "oauth", "bearer", "basic", "query_key"] = Field(
         validation_alias="authType", serialization_alias="auth_type"
     )
     credential_id: str | None = Field(
@@ -76,6 +77,8 @@ async def validate_connection(user_id: str, data: ConnectionInput) -> str:
             400,
             "Use an HTTPS server URL without credentials, query parameters or a fragment.",
         )
+    if data.auth_type == "query_key" and not is_dingtalk_key_endpoint(url):
+        raise fastapi.HTTPException(400, "Use a clean DingTalk API key server URL.")
     try:
         await request.validate_url_host(url)
     except ValueError as exc:
@@ -94,7 +97,10 @@ async def validate_connection(user_id: str, data: ConnectionInput) -> str:
                 400, "The selected credential does not belong to this server."
             )
         scheme = (credential.metadata or {}).get("mcp_auth_scheme")
-        if data.auth_type in ("basic", "bearer") and scheme != data.auth_type:
+        if (
+            data.auth_type in ("basic", "bearer", "query_key")
+            and scheme != data.auth_type
+        ):
             raise fastapi.HTTPException(
                 400, "The selected credential uses a different authentication method."
             )

@@ -15,14 +15,9 @@ import { connectMCPOAuth } from "@/lib/mcp-oauth";
 import { getAPIResponseError, getErrorMessage } from "@/lib/mcp-errors";
 import { invalidateConnectionQueries } from "@/lib/react-query/invalidateConnections";
 import { storeMCPToken } from "../ConnectServiceDialog/components/DetailView/storeMCPToken";
-
-const blank: ConnectionInput = {
-  name: "",
-  description: "",
-  server_url: "",
-  auth_type: "none",
-  enabled: true,
-};
+import { useCustomMCPForm } from "./useCustomMCPForm";
+import { isDingTalkKeyEndpoint, isValidQueryKey } from "./dingTalkKeyURL";
+import { probeWithQueryKey, storeQueryKey } from "./queryKeyRequests";
 
 export function useCustomMCPConnections({
   enabled = true,
@@ -30,35 +25,31 @@ export function useCustomMCPConnections({
   const queryClient = useQueryClient();
   const query = useGetV2ListConnections({ query: { enabled } });
   const { t } = useTranslation();
-  const [form, setForm] = useState<ConnectionInput>(blank);
   const [editingID, setEditingID] = useState<string | null>(null);
   const [pendingRemove, setPendingRemove] = useState<ConnectionResponse | null>(
     null,
   );
-  const [open, setOpen] = useState(false);
-  const [token, setToken] = useState("");
+  const [open, showDialog] = useState(false);
+  const editor = useCustomMCPForm(open);
+  const { token } = editor;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function setOpen(open: boolean) {
+    if (!open) editor.reset();
+    showDialog(open);
+  }
+
   function create() {
-    setForm(blank);
+    editor.reset();
     setEditingID(null);
-    setToken("");
     setError(null);
     setOpen(true);
   }
 
   function edit(connection: ConnectionResponse) {
-    setForm({
-      name: connection.name,
-      description: connection.description,
-      server_url: connection.server_url,
-      auth_type: connection.auth_type,
-      credential_id: connection.credential_id,
-      enabled: connection.enabled,
-    });
+    editor.reset(connection);
     setEditingID(connection.id);
-    setToken("");
     setError(null);
     setOpen(true);
   }
@@ -70,6 +61,33 @@ export function useCustomMCPConnections({
   }
 
   async function save() {
+    if (busy || !editor.canSave || !editor.form.auth_type) return;
+    const form: ConnectionInput = {
+      ...editor.form,
+      auth_type: editor.form.auth_type,
+    };
+    if (
+      form.auth_type === "query_key" &&
+      (!isDingTalkKeyEndpoint(form.server_url) ||
+        (token && !isValidQueryKey(token)))
+    ) {
+      setError(
+        t(
+          "Enter a valid DingTalk server URL and key.",
+          "请输入有效的钉钉服务器地址和密钥。",
+        ),
+      );
+      return;
+    }
+    if (
+      form.auth_type !== "none" &&
+      form.auth_type !== "oauth" &&
+      !form.credential_id &&
+      !token
+    ) {
+      setError(t("A credential is required.", "请输入凭据。"));
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -92,11 +110,6 @@ export function useCustomMCPConnections({
         setOpen(false);
         return;
       }
-      if (!form.server_url.trim().toLowerCase().startsWith("https://")) {
-        throw new Error(
-          t("Enter an HTTPS server URL.", "请输入 HTTPS 服务器地址。"),
-        );
-      }
       let credentialID = form.credential_id ?? null;
       const controller = new AbortController();
       if (form.auth_type === "oauth" && !credentialID) {
@@ -107,6 +120,11 @@ export function useCustomMCPConnections({
         });
         if ("reason" in credential) throw new Error(credential.reason);
         credentialID = credential.id;
+      } else if (form.auth_type === "query_key" && token) {
+        const stored = await storeQueryKey(form.server_url, token);
+        if (stored.status !== 200)
+          throw getAPIResponseError(stored.status, stored.data);
+        credentialID = stored.data.id;
       } else if (
         (form.auth_type === "basic" || form.auth_type === "bearer") &&
         token
@@ -123,7 +141,11 @@ export function useCustomMCPConnections({
       }
       if (form.auth_type !== "none" && !credentialID)
         throw new Error(t("A credential is required.", "请输入凭据。"));
-      const probe = await postV2DiscoverAvailableToolsOnAnMcpServer({
+      const discover =
+        form.auth_type === "query_key"
+          ? probeWithQueryKey
+          : postV2DiscoverAvailableToolsOnAnMcpServer;
+      const probe = await discover({
         server_url: form.server_url,
         credential_id: credentialID,
         use_saved_credentials: false,
@@ -141,7 +163,14 @@ export function useCustomMCPConnections({
       await refresh();
       setOpen(false);
     } catch (cause) {
-      setError(getErrorMessage(cause));
+      setError(
+        form.auth_type === "query_key"
+          ? t(
+              "Could not save this connection. Check the server URL and key, then try again.",
+              "无法保存此连接。请检查服务器地址和密钥后重试。",
+            )
+          : getErrorMessage(cause),
+      );
     } finally {
       setBusy(false);
     }
@@ -170,10 +199,7 @@ export function useCustomMCPConnections({
     connections: query.data?.status === 200 ? query.data.data : [],
     listError:
       query.isError || (query.data !== undefined && query.data.status !== 200),
-    form,
-    setForm,
-    token,
-    setToken,
+    ...editor,
     open,
     setOpen,
     busy,

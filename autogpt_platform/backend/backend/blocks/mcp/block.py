@@ -21,6 +21,7 @@ from backend.blocks._base import (
 from backend.blocks.mcp.client import MCPClient, MCPClientError
 from backend.blocks.mcp.helpers import (
     mcp_authorization_header,
+    mcp_query_key,
     normalize_mcp_url,
     parse_mcp_content,
 )
@@ -177,9 +178,10 @@ class MCPToolBlock(Block):
         arguments: dict[str, Any],
         authorization: str | None = None,
         input_schema: dict[str, Any] | None = None,
+        query_key: SecretStr | None = None,
     ) -> Any:
         """Call a tool on the MCP server. Extracted for easy mocking in tests."""
-        client = MCPClient(server_url, authorization=authorization)
+        client = MCPClient(server_url, authorization=authorization, query_key=query_key)
         try:
             await client.initialize()
             result = await client.call_tool(
@@ -302,6 +304,7 @@ class MCPToolBlock(Block):
                 tool_name=input_data.selected_tool,
                 arguments=input_data.tool_arguments,
                 authorization=authorization,
+                query_key=mcp_query_key(credentials) if credentials else None,
                 input_schema=input_data.tool_input_schema or None,
             )
             yield "result", result

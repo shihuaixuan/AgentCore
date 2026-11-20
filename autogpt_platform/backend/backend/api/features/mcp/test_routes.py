@@ -729,9 +729,8 @@ class TestOAuthLogin:
             )
 
         assert response.status_code == 400
-        assert (
-            "does not match where the metadata was published"
-            in (response.json()["detail"])
+        assert "does not match where the metadata was published" in (
+            response.json()["detail"]
         )
         mock_cm.store.store_state_token.assert_not_awaited()
 
@@ -1221,6 +1220,72 @@ def _accepting_server():
 
 
 class TestStoreToken:
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_dingtalk_query_key_round_trip(self, client):
+        url = "https://mcp-gw.dingtalk.com/server/" + "a" * 64
+        token = "fixture-only-secret"
+        with (
+            _accepting_server() as probe,
+            patch("backend.api.features.mcp.routes.creds_manager") as manager,
+        ):
+            manager.store.get_creds_by_provider = AsyncMock(return_value=[])
+            manager.create = AsyncMock()
+            response = await client.post(
+                "/token",
+                json={"server_url": url, "token": token, "auth_type": "query_key"},
+            )
+            assert response.status_code == 200
+            assert response.json()["mcp_auth_scheme"] == "query_key"
+            assert token not in response.text
+            credential = manager.create.await_args.args[1]
+            assert credential.metadata["mcp_server_url"] == url
+            assert credential.access_token.get_secret_value() == token
+            manager.get = AsyncMock(return_value=credential)
+            probe.return_value.initialize = AsyncMock(return_value={})
+            probe.return_value.list_tools = AsyncMock(return_value=[])
+            response = await client.post(
+                "/discover-tools",
+                json={"server_url": url, "credential_id": credential.id},
+            )
+            assert response.status_code == 200
+            assert probe.call_args.kwargs["query_key"].get_secret_value() == token
+            assert not probe.call_args.kwargs.get("authorization")
+
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_query_key_disallowed_for_other_endpoints(self, client):
+        with patch("backend.api.features.mcp.routes.MCPClient") as probe:
+            response = await client.post(
+                "/token",
+                json={
+                    "server_url": "https://other.example/mcp",
+                    "token": "fixture",
+                    "auth_type": "query_key",
+                },
+            )
+            assert response.status_code == 400
+            probe.assert_not_called()
+
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_query_key_not_stored_if_discovery_fails(self, client):
+        with (
+            _accepting_server() as probe,
+            patch("backend.api.features.mcp.routes.creds_manager") as manager,
+        ):
+            probe.return_value.list_tools = AsyncMock(
+                side_effect=RuntimeError("fixture-secret")
+            )
+            response = await client.post(
+                "/token",
+                json={
+                    "server_url": "https://mcp-gw.dingtalk.com/server/mail-fixture",
+                    "token": "fixture-secret",
+                    "auth_type": "query_key",
+                },
+            )
+            assert response.status_code == 502
+            assert "fixture-secret" not in response.text
+            manager.create.assert_not_called()
+
     @pytest.mark.asyncio(loop_scope="session")
     async def test_store_token_success(self, client):
         with (

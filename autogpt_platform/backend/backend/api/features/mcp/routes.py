@@ -7,7 +7,7 @@ frontend can list available tools on an MCP server before placing a block.
 
 import asyncio
 import logging
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 from urllib.parse import urlparse
 
 import fastapi
@@ -32,12 +32,14 @@ from backend.api.features.mcp.oauth_registration import (
 from backend.blocks.mcp.client import (
     MCPClient,
     MCPClientError,
+    is_dingtalk_key_endpoint,
     normalize_mcp_authorization,
 )
 from backend.blocks.mcp.helpers import (
     auto_lookup_mcp_credential,
     is_manual_mcp_credential,
     mcp_authorization_header,
+    mcp_query_key,
     normalize_mcp_url,
     server_host,
 )
@@ -149,6 +151,7 @@ async def discover_tools(
         raise fastapi.HTTPException(status_code=400, detail=f"Invalid server URL: {e}")
 
     authorization: str | None = None
+    query_key: SecretStr | None = None
     explicit_token = (
         request.auth_token.get_secret_value() if request.auth_token else None
     )
@@ -174,6 +177,7 @@ async def discover_tools(
                 status_code=404, detail="Credential not found for this server."
             )
         authorization = mcp_authorization_header(credential)
+        query_key = mcp_query_key(credential)
     elif explicit_token:
         try:
             authorization = normalize_mcp_authorization(explicit_token)
@@ -186,8 +190,13 @@ async def discover_tools(
         )
         if stored_credential:
             authorization = mcp_authorization_header(stored_credential)
+            query_key = mcp_query_key(stored_credential)
 
-    client = MCPClient(request.server_url, authorization=authorization)
+    client = (
+        MCPClient(normalize_mcp_url(request.server_url), query_key=query_key)
+        if query_key is not None
+        else MCPClient(request.server_url, authorization=authorization)
+    )
     hostname = server_host(request.server_url)
 
     try:
@@ -709,7 +718,7 @@ async def mcp_oauth_callback(
 
 
 class MCPStoreTokenRequest(BaseModel):
-    """Request to store a manual Basic/Bearer credential or Authorization header."""
+    """A manual MCP credential, stored separately from the server URL."""
 
     server_url: str = Field(
         description="MCP server URL the credential authenticates against"
@@ -724,6 +733,9 @@ class MCPStoreTokenRequest(BaseModel):
         description=(
             "Bare Bearer token, Basic/Bearer value, or complete Authorization header"
         ),
+    )
+    auth_type: Literal["header", "query_key"] = Field(
+        default="header", description="How to send the manual credential."
     )
 
 
@@ -749,10 +761,24 @@ async def mcp_store_token(
     ``run_capability`` MCP calls will automatically pick up the credential via
     ``auto_lookup_mcp_credential``.
     """
-    try:
-        authorization = normalize_mcp_authorization(request.token.get_secret_value())
-    except ValueError as e:
-        raise fastapi.HTTPException(status_code=422, detail=str(e)) from e
+    query_key = request.auth_type == "query_key"
+    if query_key:
+        if not is_dingtalk_key_endpoint(request.server_url):
+            raise fastapi.HTTPException(400, "Use a clean DingTalk API key server URL.")
+        secret = request.token.get_secret_value()
+        if (
+            not secret.isascii()
+            or not secret.isprintable()
+            or any(c.isspace() for c in secret)
+        ):
+            raise fastapi.HTTPException(422, "Invalid API key.")
+        auth_scheme = "query_key"
+    else:
+        try:
+            secret = normalize_mcp_authorization(request.token.get_secret_value())
+        except ValueError as e:
+            raise fastapi.HTTPException(status_code=422, detail=str(e)) from e
+        auth_scheme = secret.split(" ", 1)[0].lower()
 
     # Validate URL to prevent SSRF — blocks loopback and private IP ranges.
     try:
@@ -786,14 +812,20 @@ async def mcp_store_token(
     # Redirects are not followed: a cross-host hop either carries the
     # credential somewhere the user never named, or drops it and earns a 401
     # we would wrongly report as "you mistyped this".
-    probe_client = MCPClient(
-        server_url, authorization=authorization, follow_redirects=False
+    probe_client = (
+        MCPClient(server_url, query_key=request.token, follow_redirects=False)
+        if query_key
+        else MCPClient(server_url, authorization=secret, follow_redirects=False)
     )
     try:
         # MCPClient sets no timeout and no retry ceiling of its own.
         await asyncio.wait_for(
             probe_client.initialize(), timeout=_PROBE_TIMEOUT_SECONDS
         )
+        if query_key:
+            await asyncio.wait_for(
+                probe_client.list_tools(), timeout=_PROBE_TIMEOUT_SECONDS
+            )
     except (HTTPClientError, HTTPServerError) as e:
         if e.status_code in CREDENTIAL_REJECTED_STATUS_CODES:
             raise fastapi.HTTPException(
@@ -801,12 +833,20 @@ async def mcp_store_token(
                 detail=f"{hostname} rejected this credential. "
                 "Please check that you copied it correctly and try again.",
             )
+        if query_key:
+            raise fastapi.HTTPException(
+                502, "Could not verify the DingTalk connection."
+            ) from None
         logger.info(
             "Could not verify MCP credential against %s (HTTP %s) — storing anyway",
             hostname,
             e.status_code,
         )
     except Exception as e:
+        if query_key:
+            raise fastapi.HTTPException(
+                502, "Could not verify the DingTalk connection."
+            ) from None
         # No ``exc_info``: the error text embeds a server-controlled body.
         logger.info(
             "Could not verify MCP credential against %s (%s) — storing anyway",
@@ -840,7 +880,10 @@ async def mcp_store_token(
                 != server_url
             ):
                 continue
-            if is_manual_mcp_credential(old):
+            if is_manual_mcp_credential(old) and (
+                ((old.metadata or {}).get("mcp_auth_scheme") == "query_key")
+                == query_key
+            ):
                 manual_credentials.append(old)
     except Exception as e:
         logger.exception("Could not query existing MCP credentials")
@@ -849,7 +892,6 @@ async def mcp_store_token(
             detail="Could not safely update the MCP credential. Please try again.",
         ) from e
 
-    auth_scheme = authorization.split(" ", 1)[0].lower()
     metadata: dict[str, Any] = {
         "mcp_server_url": server_url,
         "mcp_auth_scheme": auth_scheme,
@@ -864,7 +906,7 @@ async def mcp_store_token(
             update={
                 "title": f"MCP: {hostname}",
                 "username": None,
-                "access_token": SecretStr(authorization),
+                "access_token": SecretStr(secret),
                 "access_token_expires_at": None,
                 "scopes": [],
                 "metadata": metadata,
@@ -875,7 +917,7 @@ async def mcp_store_token(
         credentials = OAuth2Credentials(
             provider=ProviderName.MCP.value,
             title=f"MCP: {hostname}",
-            access_token=SecretStr(authorization),
+            access_token=SecretStr(secret),
             scopes=[],
             metadata=metadata,
         )

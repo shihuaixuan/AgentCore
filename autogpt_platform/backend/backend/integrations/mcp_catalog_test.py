@@ -21,6 +21,18 @@ def test_catalog_loads_validated_entries():
     assert get_mcp_catalog()
 
 
+def test_dingtalk_mail_offers_oauth_and_service_specific_key_url():
+    oauth_url = "https://mcp-gw.dingtalk.com/oauth/server/mail"
+    entry = get_mcp_catalog_entry_for_url(oauth_url)
+
+    assert entry is not None and entry.name == "mcp_dingtalk_mail"
+    server = entry.mcp_server
+    assert server.server_url == oauth_url
+    assert server.connection_mode == "hosted" and not server.allow_custom_url
+    assert server.auth_methods == ["oauth", "query_key"]
+    assert not server.server_url_options
+
+
 def test_mcp_catalog_uses_database_snapshot_when_set():
     bundled = get_mcp_catalog()
     entry = bundled[0]

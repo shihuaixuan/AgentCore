@@ -20,12 +20,13 @@ References:
 
 import json
 import logging
+import re
 from typing import Any, NoReturn
-from urllib.parse import urlparse, urlsplit
+from urllib.parse import parse_qsl, unquote_plus, urlparse, urlsplit
 from urllib.request import parse_http_list
 
 from aiohttp import ClientError
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, SecretStr
 
 from backend.blocks.mcp.protocol import (
     CLIENT_INFO,
@@ -72,6 +73,14 @@ _SUPPORTED_AUTH_SCHEMES = {
     "basic": "Basic",
     "bearer": "Bearer",
 }
+_DINGTALK_KEY_ENDPOINT = re.compile(
+    r"(?ai:https://mcp-gw\.dingtalk\.com)(?::443)?/server/[A-Za-z0-9_-]+"
+)
+
+
+def is_dingtalk_key_endpoint(url: str) -> bool:
+    """Match the raw endpoint, before URL parsers can discard unsafe characters."""
+    return _DINGTALK_KEY_ENDPOINT.fullmatch(url) is not None
 
 
 def _bearer_resource_metadata_url(headers: list[str]) -> str | None:
@@ -216,7 +225,8 @@ class MCPClient:
     (see :meth:`initialize`) and remembered per server URL.
 
     ``authorization`` is sent verbatim as the ``Authorization`` header; callers
-    pass an already-canonical value.
+    pass an already-canonical value. ``query_key`` is an alternative for a
+    clean DingTalk endpoint; it is never applied to OAuth metadata requests.
     """
 
     def __init__(
@@ -224,6 +234,8 @@ class MCPClient:
         server_url: str,
         authorization: str | None = None,
         follow_redirects: bool = True,
+        *,
+        query_key: SecretStr | None = None,
     ):
         """*follow_redirects* exists for credential verification.
 
@@ -235,9 +247,24 @@ class MCPClient:
         """
         from backend.blocks.mcp.helpers import normalize_mcp_url
 
-        self.server_url = normalize_mcp_url(server_url)
+        if query_key is not None:
+            if not is_dingtalk_key_endpoint(server_url):
+                raise ValueError(
+                    "Query-key authentication requires a clean DingTalk MCP endpoint."
+                )
+            if authorization is not None or not query_key:
+                raise ValueError(
+                    "Provide a nonempty query key without an Authorization header."
+                )
+        elif "?" in server_url and any(
+            name.casefold() == "key"
+            for name, _ in parse_qsl(urlsplit(server_url).query, keep_blank_values=True)
+        ):
+            raise ValueError("Pass the MCP query key as a credential, not in the URL.")
+        self._server_url = normalize_mcp_url(server_url)
+        self._query_key = query_key
         self.authorization = authorization
-        self.follow_redirects = follow_redirects
+        self.follow_redirects = follow_redirects and query_key is None
         self._request_id = 0
         self._session_id: str | None = None
         self.era: MCPProtocolEra | None = None
@@ -245,6 +272,10 @@ class MCPClient:
         self.server_info: dict[str, Any] = {}
         self.server_capabilities: dict[str, Any] = {}
         self._header_params: dict[str, list[HeaderParam]] = {}
+
+    @property
+    def server_url(self) -> str:
+        return self._server_url
 
     def _next_id(self) -> int:
         self._request_id += 1
@@ -322,7 +353,10 @@ class MCPClient:
             extra_headers=headers,
         )
         return await requests.post(
-            self.server_url, json=payload, allow_redirects=self.follow_redirects
+            self.server_url,
+            json=payload,
+            allow_redirects=self.follow_redirects,
+            sensitive_query_key=self._query_key,
         )
 
     def _decode_reply(self, response: Response, *, strict: bool) -> _Reply:
@@ -347,6 +381,13 @@ class MCPClient:
                 raise MCPClientError(
                     f"MCP server returned non-JSON response: {e}"
                 ) from e
+        if (
+            self._query_key is not None
+            and b"\\" in response.content
+            and _reflects_key(body, self._query_key)
+        ):
+            del body
+            raise MCPClientError("MCP response contained the query credential.")
         if strict and not isinstance(body, dict):
             raise MCPClientError(
                 f"MCP server returned unexpected JSON type: {type(body).__name__}"
@@ -390,16 +431,7 @@ class MCPClient:
 
     async def _send_notification(self, method: str) -> None:
         """Send a JSON-RPC notification (no id, no response expected)."""
-        headers = self._build_headers()
-        notification = {"jsonrpc": "2.0", "method": method}
-        requests = Requests(
-            raise_for_status=False,
-            retry_max_attempts=_HTTP_RETRY_ATTEMPTS,
-            extra_headers=headers,
-        )
-        await requests.post(
-            self.server_url, json=notification, allow_redirects=self.follow_redirects
-        )
+        await self._post({"jsonrpc": "2.0", "method": method}, self._build_headers())
 
     async def _legacy_initialize(self) -> dict[str, Any]:
         result = await self._send_legacy(
@@ -892,7 +924,9 @@ class MCPClient:
                 extra_headers=headers,
             )
             await requests.delete(
-                self.server_url, allow_redirects=self.follow_redirects
+                self.server_url,
+                allow_redirects=self.follow_redirects,
+                sensitive_query_key=self._query_key,
             )
         except Exception:
             pass
@@ -1040,3 +1074,21 @@ class MCPClient:
             structured_content=result.get("structuredContent"),
             is_error=bool(result.get("isError", False)),
         )
+
+
+def _reflects_key(body: Any, key: SecretStr) -> bool:
+    """JSON escaping can hide an echo from the transport's byte-level check."""
+    pending = [body]
+    while pending:
+        item = pending.pop()
+        if isinstance(item, dict):
+            pending.extend(item.keys())
+            pending.extend(item.values())
+        elif isinstance(item, list):
+            pending.extend(item)
+        elif isinstance(item, str) and (
+            key.get_secret_value() in item
+            or key.get_secret_value() in unquote_plus(item)
+        ):
+            return True
+    return False

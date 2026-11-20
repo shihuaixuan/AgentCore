@@ -637,6 +637,21 @@
     }
   },
   {
+    "name": "mcp_dingtalk_mail",
+    "display_name": "钉钉邮箱",
+    "description": "搜索、读取和发送钉钉邮件。",
+    "mcp_server": {
+      "server_url": "https://mcp-gw.dingtalk.com/oauth/server/mail",
+      "documentation_url": "https://aihub.dingtalk.com/",
+      "setup_instructions": "选择登录以通过 OAuth 授权。也可以在钉钉 AI 应用服务市场打开「钉钉邮箱」，启用服务，在 API Key 配置中复制完整的 Streamable HTTP 链接，粘贴到「API Key 链接」。请使用邮箱服务的链接，不要填写其他服务的链接或单独的密钥。",
+      "connection_mode": "hosted",
+      "auth_methods": [
+        "oauth",
+        "query_key"
+      ]
+    }
+  },
+  {
     "name": "mcp_dingtalk_todo",
     "display_name": "钉钉待办",
     "description": "查询个人待办，创建行动项，更新待办完成状态。",

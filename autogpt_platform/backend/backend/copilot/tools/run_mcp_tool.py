@@ -11,6 +11,7 @@ from backend.blocks.mcp.helpers import (
     auto_lookup_mcp_credential,
     invalidate_mcp_credential,
     mcp_authorization_header,
+    mcp_query_key,
     normalize_mcp_url,
     parse_mcp_content,
     server_host,
@@ -156,23 +157,6 @@ class RunMCPToolTool(BaseTool):
         tool_name = tool_name.strip()
         session_id = session.session_id
 
-        # Session-level dry_run prevents real MCP tool execution.
-        # Discovery (no tool_name) is still allowed so the agent can inspect
-        # available tools, but actual execution is blocked.
-        if session.dry_run and tool_name:
-            return MCPToolOutputResponse(
-                message=(
-                    f"[dry-run] MCP tool '{tool_name}' on "
-                    f"{server_host(server_url)} was not executed "
-                    "because the session is in dry-run mode."
-                ),
-                server_url=server_url,
-                tool_name=tool_name,
-                result=None,
-                success=True,
-                session_id=session_id,
-            ).from_outside()
-
         if tool_arguments is not None and not isinstance(tool_arguments, dict):
             return ErrorResponse(
                 message="tool_arguments must be a JSON object.",
@@ -188,7 +172,12 @@ class RunMCPToolTool(BaseTool):
                 session_id=session_id,
             ).from_outside()
 
-        _parsed = urlparse(server_url)
+        try:
+            _parsed = urlparse(server_url)
+        except ValueError:
+            return ErrorResponse(
+                message="Invalid MCP server URL.", session_id=session_id
+            ).from_outside()
         if _parsed.username or _parsed.password:
             return ErrorResponse(
                 message=(
@@ -203,6 +192,20 @@ class RunMCPToolTool(BaseTool):
                     "Do not include query parameters or fragments in server_url. "
                     "Use the MCP credential setup flow instead."
                 ),
+                session_id=session_id,
+            ).from_outside()
+
+        if session.dry_run and tool_name:
+            return MCPToolOutputResponse(
+                message=(
+                    f"[dry-run] MCP tool '{tool_name}' on "
+                    f"{server_host(server_url)} was not executed "
+                    "because the session is in dry-run mode."
+                ),
+                server_url=server_url,
+                tool_name=tool_name,
+                result=None,
+                success=True,
                 session_id=session_id,
             ).from_outside()
 
@@ -313,11 +316,21 @@ class RunMCPToolTool(BaseTool):
                         "tool:grant_expert_credential."
                     ),
                 )
-        client = (
-            MCPClient(server_url, authorization=mcp_authorization_header(creds))
-            if creds is not None
-            else None
-        )
+        try:
+            client = (
+                MCPClient(
+                    server_url,
+                    authorization=mcp_authorization_header(creds),
+                    query_key=mcp_query_key(creds),
+                )
+                if creds is not None
+                else None
+            )
+        except ValueError:
+            return ErrorResponse(
+                message="The saved credential cannot be used with this MCP endpoint.",
+                session_id=session_id,
+            ).from_outside()
 
         # "Just connect" intent: return only the setup card so the user
         # gets a visible Connect/Reconnect affordance even when there's
