@@ -6,7 +6,7 @@ export function pickedFile(path: string, data: BlobPart = "") {
   return file;
 }
 
-export async function makeQwenWorkFixture(update?: (db: Database) => void) {
+async function snapshot(populate: (db: Database) => void) {
   const sqlite = await initSqlJs();
   const db = new sqlite.Database();
   try {
@@ -20,17 +20,27 @@ export async function makeQwenWorkFixture(update?: (db: Database) => void) {
         id TEXT PRIMARY KEY, chat_id TEXT, sub_chat_id TEXT, sequence INTEGER,
         role TEXT, parts TEXT, created_at INTEGER
       );
+    `);
+    populate(db);
+    return new Uint8Array(db.export()).buffer;
+  } finally {
+    db.close();
+  }
+}
+
+export function makeQwenWorkFixture(update?: (db: Database) => void) {
+  return snapshot((db) => {
+    db.run(`
       INSERT INTO chats VALUES
         ('source-first', 'Local fixture', 'D:/Project', 1788264000, 1788264010, NULL),
         ('source-second', 'Leave this out', NULL, 1788264000, 1788264000, NULL),
         ('source-deleted', 'Deleted fixture', NULL, 1788264000, 1788264020, 1);
       INSERT INTO sub_chats VALUES
-        ('sub-later','source-first',1788264001),
         ('sub-earlier','source-first',1788264000),
         ('sub-other','source-second',1788264000),
         ('sub-deleted','source-deleted',1788264000);
       INSERT INTO messages VALUES
-        ('fourth','source-first','sub-later',0,'assistant','[{"type":"text","text":"Second sub-chat"}]',NULL),
+        ('fourth','source-first','sub-earlier',3,'assistant','[{"type":"text","text":"Second sub-chat"}]',NULL),
         ('third','source-first','sub-earlier',2,'assistant','[{"type":"tool-Bash","input":{"command":"PRIVATE TOOL INPUT"}}]',NULL),
         ('second','source-first','sub-earlier',1,'assistant','[{"type":"text","text":"<img src=example>"},{"type":"data-file","data":{"filePath":"D:/Project/output/report.pdf"}}]',1788264001000),
         ('first','source-first','sub-earlier',0,'user','[{"type":"text","text":"A local question"}]',1788264000),
@@ -39,10 +49,7 @@ export async function makeQwenWorkFixture(update?: (db: Database) => void) {
         ('mismatch','source-second','sub-earlier',3,'user','[{"type":"text","text":"Invalid membership"}]',NULL);
     `);
     update?.(db);
-    return new Uint8Array(db.export()).buffer;
-  } finally {
-    db.close();
-  }
+  });
 }
 
 export function addRecentToolOnlyConversations(db: Database) {
@@ -53,4 +60,81 @@ export function addRecentToolOnlyConversations(db: Database) {
     INSERT INTO messages SELECT 'msg-'||id,id,'sub-'||id,0,'assistant','[{"type":"tool-example"}]',NULL
       FROM chats WHERE id LIKE 'tools-%';
   `);
+}
+
+export function makeProjectedFixture(populate: (db: Database) => void) {
+  return snapshot((db) => {
+    db.run(`
+      ALTER TABLE chats ADD COLUMN source_chat_id TEXT;
+      ALTER TABLE chats ADD COLUMN ext TEXT;
+      ALTER TABLE sub_chats ADD COLUMN name TEXT;
+      ALTER TABLE sub_chats ADD COLUMN session_id TEXT;
+      ALTER TABLE messages ADD COLUMN metadata TEXT;
+      ALTER TABLE messages ADD COLUMN message_id TEXT;
+      CREATE TABLE agent_turn_inputs (chat_id TEXT, sub_chat_id TEXT, message_id TEXT, source TEXT, state TEXT);
+      CREATE TABLE task_run_logs (chat_id TEXT);
+    `);
+    populate(db);
+  });
+}
+
+export function addChat(
+  db: Database,
+  chat: string,
+  subs: string[],
+  ext: object = {},
+  parent: string | null = null,
+) {
+  db.run("INSERT INTO chats (id,name,ext,source_chat_id) VALUES (?,?,?,?)", [
+    chat,
+    chat,
+    JSON.stringify(ext),
+    parent,
+  ]);
+  for (const [index, sub] of subs.entries()) {
+    db.run("INSERT INTO sub_chats VALUES (?,?,?,?,?)", [
+      sub,
+      chat,
+      index,
+      "Same display name",
+      `session-${sub}`,
+    ]);
+  }
+}
+
+export function addRow(
+  db: Database,
+  chat: string,
+  sub: string,
+  sequence: number,
+  role: "assistant" | "user",
+  parts: object[],
+  metadata: object = {},
+  inputSource?: string,
+) {
+  const key = `${sub}-${sequence}`;
+  db.run("INSERT INTO messages VALUES (?,?,?,?,?,?,?,?,?)", [
+    `row-${key}`,
+    chat,
+    sub,
+    sequence,
+    role,
+    JSON.stringify(parts),
+    100 - sequence,
+    JSON.stringify({
+      source: "sdk-projection",
+      sessionId: `session-${sub}`,
+      ...metadata,
+    }),
+    `message-${key}`,
+  ]);
+  if (inputSource) {
+    db.run("INSERT INTO agent_turn_inputs VALUES (?,?,?,?,?)", [
+      chat,
+      sub,
+      `message-${key}`,
+      inputSource,
+      "consumed",
+    ]);
+  }
 }

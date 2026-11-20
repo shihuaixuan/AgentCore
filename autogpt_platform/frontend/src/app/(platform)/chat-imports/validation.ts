@@ -47,6 +47,7 @@ export type NativeChatDraft = {
   conversation: ImportConversation;
   references: AttachmentReference[];
   cwd?: string;
+  omittedUnattributed?: boolean;
 };
 
 export class ImportValidationError extends Error {
@@ -62,6 +63,7 @@ export class ImportValidationError extends Error {
       | "selection"
       | "hosted-upload-size"
       | "archive-destination"
+      | "history-changed"
       | "workbuddy-folder"
       | "qwenwork-folder"
       | "qwenwork-database"

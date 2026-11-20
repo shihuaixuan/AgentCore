@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { nativeSourceID } from "./nativeSourceID";
-import { cleanNativeUserText } from "./nativeUserText";
+import { workBuddyContent } from "./workbuddyContent";
+import { collectWorkBuddyHistory } from "./workbuddyHistory";
 import {
   encodeImport,
   ImportValidationError,
@@ -11,24 +12,9 @@ import {
   type ImportMessage,
   type NativeChatDraft,
 } from "./validation";
-import { extractAttachmentPaths } from "./workbuddyAttachments";
 
 const MAX_FILES = 25;
 export const MAX_WORKBUDDY_FILE_BYTES = 32 * 1024 * 1024;
-const eventSchema = z.object({
-  type: z.string(),
-  sessionId: z
-    .string()
-    .regex(/^[a-zA-Z0-9_-]{1,128}$/)
-    .optional(),
-  aiTitle: z.unknown(),
-  id: z.unknown(),
-  role: z.unknown(),
-  content: z.unknown(),
-  timestamp: z.unknown(),
-  cwd: z.string().max(1024).optional().catch(undefined),
-});
-const contentSchema = z.object({ type: z.string(), text: z.string() });
 const timestampSchema = z.string().datetime({ offset: true });
 
 export async function readWorkBuddyFiles(files: File[]) {
@@ -40,7 +26,7 @@ export async function readWorkBuddyFiles(files: File[]) {
   const entries: NativeChatDraft[] = [];
   for (const file of files) {
     if (/\.jsonl$/i.test(file.name)) {
-      entries.push(parseWorkBuddyDraft(await file.text()));
+      entries.push(await readWorkBuddyTranscriptDraftFile(file));
     } else if (/\.json$/i.test(file.name)) {
       entries.push(
         ...parseWorkBuddyBundle(await file.text()).map((conversation) => ({
@@ -59,49 +45,61 @@ export function parseWorkBuddyTranscript(text: string) {
   return parseWorkBuddyDraft(text).conversation;
 }
 
+export function isWorkBuddyTranscriptFile(file: File) {
+  const directories = (file.webkitRelativePath || "")
+    .split(/[\\/]/)
+    .slice(0, -1);
+  return (
+    /\.jsonl$/i.test(file.name) &&
+    !/^agent-/i.test(file.name) &&
+    !directories.some((part) =>
+      /^(?:subagents|tool-results|workflows)$/i.test(part),
+    )
+  );
+}
+
+export async function readWorkBuddyTranscriptDraftFile(
+  file: File,
+): Promise<NativeChatDraft> {
+  if (!isWorkBuddyTranscriptFile(file))
+    throw new ImportValidationError("file-type");
+  if (file.size > MAX_WORKBUDDY_FILE_BYTES)
+    throw new ImportValidationError("file-size");
+  return parseWorkBuddyDraft(await file.text());
+}
+
 function parseWorkBuddyDraft(text: string): NativeChatDraft {
-  const messages = new Map<string, ImportMessage>();
+  const history = collectWorkBuddyHistory(text);
+  const { sessionID, title, candidates, speakers } = history;
+  let { omittedUnattributed } = history;
+  const ordered: ImportMessage[] = [];
   const references = new Map<string, AttachmentReference>();
   let cwd: string | undefined;
-  let sessionID: string | undefined;
-  let title = "";
-
-  for (const [index, line] of text
-    .replace(/^\uFEFF/, "")
-    .split("\n")
-    .entries()) {
-    if (!line.trim()) continue;
-    const event = readEvent(line, index + 1);
-    if (event.sessionId && sessionID && event.sessionId !== sessionID) {
-      throw new ImportValidationError("transcript", index + 1);
+  for (const item of candidates) {
+    const attribution = speakers.attribution(item.speaker);
+    if (attribution !== "public") {
+      if (attribution === "uncertain") omittedUnattributed = true;
+      continue;
     }
-    sessionID ??= event.sessionId;
-    if (event.type === "ai-title" && typeof event.aiTitle === "string") {
-      title = event.aiTitle.trim() || title;
+    const { role } = item.speaker;
+    const { text, paths, uncertain } = workBuddyContent(
+      item.content,
+      item.speaker,
+    );
+    omittedUnattributed ||= uncertain;
+    if (text) {
+      const timestamp = normalizeTimestamp(item.timestamp);
+      ordered.push({ role, text, ...(timestamp ? { timestamp } : {}) });
+      if (ordered.length > MAX_MESSAGES)
+        throw new ImportValidationError("transcript");
     }
-    const message = readMessage(event, index + 1);
-    if (message) messages.set(...message);
-    if (
-      event.type === "message" &&
-      (event.role === "user" || event.role === "assistant") &&
-      Array.isArray(event.content)
-    ) {
-      cwd ??= event.cwd;
-      for (const path of extractAttachmentPaths(event.content)) {
-        if (references.size >= 100) break;
-        references.set(JSON.stringify([path, event.cwd]), {
-          path,
-          cwd: event.cwd,
-        });
-      }
+    if (text || paths.length) cwd ??= item.cwd;
+    for (const path of paths) {
+      if (references.size >= 100) break;
+      references.set(JSON.stringify([path, item.cwd]), { path, cwd: item.cwd });
     }
-    if (messages.size > MAX_MESSAGES)
-      throw new ImportValidationError("transcript");
   }
-
-  if (!sessionID || !messages.size)
-    throw new ImportValidationError("transcript");
-  const ordered = [...messages.values()];
+  if (!ordered.length) throw new ImportValidationError("transcript");
   const heading =
     title || ordered.find(({ role }) => role === "user")?.text || "WorkBuddy";
   const conversation = validateWorkBuddyConversation({
@@ -111,68 +109,12 @@ function parseWorkBuddyDraft(text: string): NativeChatDraft {
     messages: ordered,
   });
   encodeImport([conversation]);
-  return { conversation, references: [...references.values()], cwd };
-}
-
-function readEvent(line: string, lineNumber: number) {
-  let input: unknown;
-  try {
-    input = JSON.parse(line);
-  } catch {
-    throw new ImportValidationError("transcript", lineNumber);
-  }
-  const result = eventSchema.safeParse(input);
-  if (!result.success)
-    throw new ImportValidationError("transcript", lineNumber);
-  const event = result.data;
-  if (
-    event.type === "message" &&
-    event.role === "user" &&
-    Array.isArray(event.content)
-  ) {
-    event.content = event.content.map(cleanUserBlock);
-  }
-  return event;
-}
-
-function cleanUserBlock(block: unknown) {
-  const parsed = contentSchema.safeParse(block);
-  if (!parsed.success) return block;
-  const { type, text } = parsed.data;
-  if (type !== "input_text" && type !== "text") return block;
-  const cleaned = cleanNativeUserText(text);
-  return cleaned === text ? block : { type, text: cleaned };
-}
-
-function readMessage(
-  event: z.infer<typeof eventSchema>,
-  lineNumber: number,
-): [string, ImportMessage] | undefined {
-  const { role, id, content } = event;
-  if (event.type !== "message" || (role !== "user" && role !== "assistant"))
-    return;
-  if (
-    !event.sessionId ||
-    typeof id !== "string" ||
-    !id ||
-    !Array.isArray(content)
-  ) {
-    throw new ImportValidationError("transcript", lineNumber);
-  }
-  const blockType = role === "user" ? "input_text" : "output_text";
-  const text = content
-    .flatMap(function textBlock(block: unknown) {
-      const parsed = contentSchema.safeParse(block);
-      if (!parsed.success) return [];
-      const { type, text } = parsed.data;
-      return (type === blockType || type === "text") && text.trim()
-        ? [text]
-        : [];
-    })
-    .join("\n");
-  if (!text) return;
-  const timestamp = normalizeTimestamp(event.timestamp);
-  return [id, { role, text, ...(timestamp ? { timestamp } : {}) }];
+  return {
+    conversation,
+    references: [...references.values()],
+    cwd,
+    ...(omittedUnattributed ? { omittedUnattributed } : {}),
+  };
 }
 
 function normalizeTimestamp(value: unknown): string | undefined {

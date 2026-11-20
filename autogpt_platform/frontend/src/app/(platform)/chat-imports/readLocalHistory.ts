@@ -1,53 +1,28 @@
 import { findQwenWorkDatabase } from "./qwenWorkDirectory";
 import { openQwenWorkReader } from "./readQwenWorkInWorker";
-import { ImportValidationError, type ImportConversation } from "./validation";
+import {
+  ImportValidationError,
+  type ImportConversation,
+  type NativeChatDraft,
+} from "./validation";
 import {
   findWorkBuddyTranscripts,
-  readWorkBuddyTranscriptFile,
+  readWorkBuddyTranscriptDraftFile,
 } from "./workbuddyDirectory";
 
 export type NativeImportSource = ImportConversation["source"];
 
-type HistoryPage = { chats: ImportConversation[]; skipped: number };
+type HistoryPage = {
+  entries: NativeChatDraft[];
+  skipped: number;
+  hasOlder: boolean;
+};
 
 type LocalHistory = {
   total: number;
-  pages: AsyncGenerator<HistoryPage>;
+  readPage: (page: number) => Promise<HistoryPage>;
   close?: () => void;
 };
-
-async function* workBuddyPages(files: File[], signal: AbortSignal) {
-  for (const file of files) {
-    signal.throwIfAborted();
-    let conversation: ImportConversation;
-    try {
-      conversation = await readWorkBuddyTranscriptFile(file);
-    } catch {
-      signal.throwIfAborted();
-      yield { chats: [], skipped: 1 };
-      continue;
-    }
-    signal.throwIfAborted();
-    yield { chats: [conversation], skipped: 0 };
-  }
-}
-
-async function* qwenWorkPages(
-  reader: Awaited<ReturnType<typeof openQwenWorkReader>>,
-  signal: AbortSignal,
-) {
-  if (!reader.total) return;
-  for (let page = 0; ; page++) {
-    signal.throwIfAborted();
-    const result = await reader.readPage(page);
-    signal.throwIfAborted();
-    yield {
-      chats: result.entries.map(({ conversation }) => conversation),
-      skipped: result.skipped,
-    };
-    if (!result.hasOlder) return;
-  }
-}
 
 export async function openLocalHistory(
   source: NativeImportSource,
@@ -60,7 +35,19 @@ export async function openLocalHistory(
     if (!candidates.length) throw new ImportValidationError("workbuddy-folder");
     return {
       total: candidates.length,
-      pages: workBuddyPages(candidates, signal),
+      async readPage(page) {
+        signal.throwIfAborted();
+        const hasOlder = page + 1 < candidates.length;
+        try {
+          const entry = await readWorkBuddyTranscriptDraftFile(
+            candidates[page],
+          );
+          return { entries: [entry], skipped: 0, hasOlder };
+        } catch {
+          signal.throwIfAborted();
+          return { entries: [], skipped: 1, hasOlder };
+        }
+      },
     };
   }
 
@@ -69,10 +56,5 @@ export async function openLocalHistory(
     throw new ImportValidationError("qwenwork-reader");
   });
   signal.throwIfAborted();
-  const reader = await openQwenWorkReader(raw, signal);
-  return {
-    total: reader.total,
-    pages: qwenWorkPages(reader, signal),
-    close: () => reader.close(),
-  };
+  return openQwenWorkReader(raw, signal);
 }
