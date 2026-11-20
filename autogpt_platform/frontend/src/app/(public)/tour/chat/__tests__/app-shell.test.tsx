@@ -89,7 +89,7 @@ describe("Tour chat app shell", () => {
 
     expect(document.querySelector("[aria-pressed]")).toBeNull();
     expect(screen.queryByText("Recent chats")).toBeNull();
-    expect(screen.queryByText("Try Otto")).toBeNull();
+    expect(screen.queryByText("Try 通用办公助手")).toBeNull();
     for (const label of [
       "Daily brief",
       "Call prep",

@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTutorialStore } from "@/app/(platform)/build/stores/tutorialStore";
 import { TabIntroCard } from "@/app/(platform)/components/TabIntroCard/TabIntroCard";
 import { useTabIntroCard } from "@/app/(platform)/components/TabIntroCard/useTabIntroCard";
@@ -47,11 +48,14 @@ export function BuildTabIntro() {
       icon={FlowIcon}
       title={t("Create your own workflows.", "创建你自己的工作流。")}
       body={t(
-        "Wire blocks into a workflow that runs exactly how you want — or let Otto build it.",
-        "连接模块，构建按你所想运行的工作流，也可以让 Otto 帮你构建。",
+        `Wire blocks into a workflow that runs exactly how you want — or let ${AUTOPILOT_NAME} build it.`,
+        `连接模块，构建按你所想运行的工作流，也可以让 ${AUTOPILOT_NAME} 帮你构建。`,
       )}
       cta={{
-        label: t("Ask Otto to build it", "让 Otto 帮我构建"),
+        label: t(
+          `Ask ${AUTOPILOT_NAME} to build it`,
+          `让 ${AUTOPILOT_NAME} 帮我构建`,
+        ),
         onClick: askAutoPilot,
       }}
       altAction={{

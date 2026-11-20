@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import { Select } from "@/components/atoms/Select/Select";
 import { AUTOPILOT_MEMORY_SCOPE } from "./useMemoryScope";
@@ -33,7 +34,7 @@ export function MemoryScopeSelector({
   const options = [
     {
       value: AUTOPILOT_MEMORY_SCOPE,
-      label: t("Otto (account memory)", "Otto（账户记忆）"),
+      label: t(`${AUTOPILOT_NAME} (account memory)`, `${AUTOPILOT_NAME}（账户记忆）`),
     },
     ...expertOptions.map(({ value, label }) => ({
       value,

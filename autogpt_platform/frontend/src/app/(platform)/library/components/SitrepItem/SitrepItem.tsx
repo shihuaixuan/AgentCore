@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { OverflowText } from "@/components/atoms/OverflowText/OverflowText";
 import { Text } from "@/components/atoms/Text/Text";
@@ -160,7 +161,7 @@ export function SitrepItem({ item }: Props) {
         >
           <Icon icon={Chatting01Icon} size={14} className="shrink-0" />
 
-          {t("Ask Otto", "询问 Otto")}
+          {t(`Ask ${AUTOPILOT_NAME}`, `询问 ${AUTOPILOT_NAME}`)}
         </button>
       </div>
     </div>

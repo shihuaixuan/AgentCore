@@ -332,7 +332,7 @@ describe("MemoryVisualizer — memory scope", () => {
     expect(
       (await screen.findByRole("combobox", { name: "Memory scope" }))
         .textContent,
-    ).toContain("Otto");
+    ).toContain("通用办公助手");
     await screen.findByText("12");
     await waitFor(() => {
       expect(overviewScopes).toEqual([null]);
@@ -437,7 +437,9 @@ describe("MemoryVisualizer — memory scope", () => {
     await screen.findByText("Expert memory is read-only.");
 
     fireEvent.click(selector);
-    fireEvent.click(await screen.findByRole("option", { name: /Otto/i }));
+    fireEvent.click(
+      await screen.findByRole("option", { name: /通用办公助手/i }),
+    );
 
     const activeButton = await screen.findByRole("button", {
       name: /consolidate…/i,
@@ -481,7 +483,7 @@ describe("MemoryVisualizer — memory scope", () => {
     await screen.findByText("Failed to load experts.");
     const selector = screen.getByRole("combobox", { name: "Memory scope" });
     expect((selector as HTMLButtonElement).disabled).toBe(false);
-    expect(selector.textContent).toContain("Otto");
+    expect(selector.textContent).toContain("通用办公助手");
     await screen.findByText("12");
   });
 
@@ -506,11 +508,11 @@ describe("MemoryVisualizer — memory scope", () => {
       screen.getByRole("button", { name: "Refetch experts" }),
     );
 
-    await waitFor(() => expect(selector.textContent).toContain("Otto"));
+    await waitFor(() => expect(selector.textContent).toContain("通用办公助手"));
     expect(screen.queryByText("Expert memory is read-only.")).toBeNull();
     expect(toastMock).toHaveBeenCalledWith({
       title: "Expert no longer available",
-      description: "Showing Otto account memory instead.",
+      description: "Showing 通用办公助手 account memory instead.",
     });
   });
 
@@ -668,7 +670,9 @@ describe("MemoryVisualizer — memory scope", () => {
     ).toBeNull();
 
     fireEvent.click(selector);
-    fireEvent.click(await screen.findByRole("option", { name: /Otto/i }));
+    fireEvent.click(
+      await screen.findByRole("option", { name: /通用办公助手/i }),
+    );
 
     await screen.findByRole("button", { name: "AutoPilotFact (1)" });
     expect(
@@ -709,7 +713,9 @@ describe("MemoryVisualizer — memory scope", () => {
     expect(screen.queryByText("dream: running (consolidate)")).toBeNull();
 
     fireEvent.click(selector);
-    fireEvent.click(await screen.findByRole("option", { name: /Otto/i }));
+    fireEvent.click(
+      await screen.findByRole("option", { name: /通用办公助手/i }),
+    );
 
     await screen.findByText("dream: running (consolidate)");
   });
@@ -994,7 +1000,9 @@ describe("MemoryVisualizer — 202 + polling contract", () => {
     );
 
     fireEvent.click(selector);
-    fireEvent.click(await screen.findByRole("option", { name: /Otto/i }));
+    fireEvent.click(
+      await screen.findByRole("option", { name: /通用办公助手/i }),
+    );
     await userEvent.click(episodes);
     await userEvent.click(
       await screen.findByRole("button", { name: /dream pass/i }),

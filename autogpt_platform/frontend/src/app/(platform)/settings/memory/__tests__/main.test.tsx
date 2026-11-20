@@ -182,7 +182,10 @@ describe("Settings memory page", () => {
     expect(confirm.hasAttribute("disabled")).toBe(true);
     expect(screen.getByText(/214 memories/)).toBeDefined();
 
-    await user.type(screen.getByPlaceholderText("Otto"), "Otto");
+    await user.type(
+      screen.getByPlaceholderText("通用办公助手"),
+      "通用办公助手",
+    );
     await waitFor(() => expect(confirm.hasAttribute("disabled")).toBe(false));
 
     await user.click(confirm);
@@ -366,7 +369,7 @@ describe("Settings memory page", () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "View my summary" }));
 
-    expect(await screen.findByText("Otto's memory")).toBeDefined();
+    expect(await screen.findByText("通用办公助手's memory")).toBeDefined();
     await waitFor(() => expect(createBodies.length).toBe(1));
     await waitFor(() => expect(streamBodies.length).toBe(1));
     expect(streamBodies[0]).toContain(

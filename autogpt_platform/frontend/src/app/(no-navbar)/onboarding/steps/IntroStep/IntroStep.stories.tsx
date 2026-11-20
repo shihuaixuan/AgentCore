@@ -65,6 +65,7 @@ export const Team: Story = {
 };
 
 export const Otto: Story = {
+  name: "通用办公助手",
   render: () => (
     <OnboardingFrame step={2}>
       <IntroStep slide="autopilot" />

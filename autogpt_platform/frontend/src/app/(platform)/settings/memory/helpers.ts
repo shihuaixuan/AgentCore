@@ -1,3 +1,4 @@
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
@@ -37,7 +38,7 @@ export function getScopeName(
   experts: Expert[] | undefined,
   locale: Locale = "en",
 ) {
-  if (!scopeExpertID) return "Otto";
+  if (!scopeExpertID) return AUTOPILOT_NAME;
   const expert = experts?.find((e) => e.id === scopeExpertID);
   return expert
     ? getExpertDisplayTitle(expert, locale)
@@ -57,7 +58,7 @@ export function learningSheetScope(
     : undefined;
   return {
     expertId: expert ? expert.id : null,
-    name: expertId ? getExpertDisplayTitle(expert, locale) : "Otto",
+    name: expertId ? getExpertDisplayTitle(expert, locale) : AUTOPILOT_NAME,
     avatarUrl: expert ? expert.avatar_url : null,
     color: expert ? expert.color : null,
   };

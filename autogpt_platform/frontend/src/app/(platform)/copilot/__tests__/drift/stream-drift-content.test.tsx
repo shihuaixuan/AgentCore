@@ -167,7 +167,7 @@ describe.each(STREAM_PATHS)("on the %s path", (path) => {
 
         const labelled = await screen
           .findByText(
-            'Approval answered: Read "mcp.example.com". Result sent to Otto.',
+            'Approval answered: Read "mcp.example.com". Result sent to 通用办公助手.',
             undefined,
             { timeout: 15_000 },
           )

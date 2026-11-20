@@ -1,4 +1,5 @@
 "use client";
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { useState } from "react";
@@ -71,12 +72,12 @@ export function AIConnectionsSection() {
       <Text variant="body" tone="body" className="mt-2 max-w-[600px]">
         {hasChoice
           ? t(
-              "These power Otto and your experts. Pick the one new chats should start on — you can still change it per conversation, and nothing switches on its own.",
-              "这些订阅为 Otto 和专家提供模型能力。请选择新聊天默认使用的连接；您仍可在每段对话中更改，系统不会自动切换。",
+              `These power ${AUTOPILOT_NAME} and your experts. Pick the one new chats should start on — you can still change it per conversation, and nothing switches on its own.`,
+              `这些订阅为 ${AUTOPILOT_NAME} 和专家提供模型能力。请选择新聊天默认使用的连接；您仍可在每段对话中更改，系统不会自动切换。`,
             )
           : t(
-              "These power Otto and your experts. Link a subscription and you can choose which one new chats start on.",
-              "这些订阅为 Otto 和专家提供模型能力。关联订阅后，即可选择新聊天默认使用的连接。",
+              `These power ${AUTOPILOT_NAME} and your experts. Link a subscription and you can choose which one new chats start on.`,
+              `这些订阅为 ${AUTOPILOT_NAME} 和专家提供模型能力。关联订阅后，即可选择新聊天默认使用的连接。`,
             )}
       </Text>
 

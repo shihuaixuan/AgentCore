@@ -151,7 +151,11 @@ describe("copilot UI store readers", () => {
     writeUnrelatedField();
     expect(counter.renders).toBe(before);
 
-    act(() => useCopilotUIStore.getState().setInitialPrompt("Hello Otto"));
-    await waitFor(() => expect(result.current.value).toBe("Hello Otto"));
+    act(() =>
+      useCopilotUIStore.getState().setInitialPrompt("Hello 通用办公助手"),
+    );
+    await waitFor(() =>
+      expect(result.current.value).toBe("Hello 通用办公助手"),
+    );
   });
 });

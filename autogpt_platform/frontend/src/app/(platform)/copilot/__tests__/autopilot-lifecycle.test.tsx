@@ -167,7 +167,7 @@ describe.each(STREAM_PATHS)("on the %s path", (path) => {
             background_task_notice: "background-task",
             background_task_stage: "followup",
             display_content:
-              "Background subtask completed. Otto is following up.",
+              "Background subtask completed. 通用办公助手 is following up.",
           },
         },
       ];
@@ -190,7 +190,7 @@ describe.each(STREAM_PATHS)("on the %s path", (path) => {
           }),
         );
         await screen.findByText(
-          "Background subtask completed. Otto is following up.",
+          "Background subtask completed. 通用办公助手 is following up.",
           undefined,
           { timeout: 6000 },
         );

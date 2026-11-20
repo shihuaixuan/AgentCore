@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { PlugSocketIcon } from "@hugeicons/core-free-icons";
 import { useCopilotModal } from "../../useCopilotModal";
@@ -41,8 +42,8 @@ export function ConnectionsSection({ rows, mcp }: Props) {
           </Text>
           <Text variant="body-tight" tone="muted" className="mt-1">
             {t(
-              "Choose the accounts Otto should use.",
-              "选择供 Otto 使用的账户。",
+              `Choose the accounts ${AUTOPILOT_NAME} should use.`,
+              `选择供 ${AUTOPILOT_NAME} 使用的账户。`,
             )}
           </Text>
         </div>
@@ -76,12 +77,12 @@ export function ConnectionsSection({ rows, mcp }: Props) {
         <Text variant="body-tight" tone="muted">
           {remaining.length
             ? t(
-                "Once these apps are connected, Otto will continue.",
-                "连接这些应用后，Otto 将继续处理。",
+                `Once these apps are connected, ${AUTOPILOT_NAME} will continue.`,
+                `连接这些应用后，${AUTOPILOT_NAME} 将继续处理。`,
               )
             : t(
-                "Connections are ready. Otto can continue setting up your workflow.",
-                "连接已就绪，Otto 可以继续配置你的工作流。",
+                `Connections are ready. ${AUTOPILOT_NAME} can continue setting up your workflow.`,
+                `连接已就绪，${AUTOPILOT_NAME} 可以继续配置你的工作流。`,
               )}
         </Text>
         <Text variant="body-tight" as="span" tone="muted">

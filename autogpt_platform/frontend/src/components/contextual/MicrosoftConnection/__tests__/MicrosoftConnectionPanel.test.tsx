@@ -145,7 +145,7 @@ describe("Microsoft connection", () => {
     ).toBeTruthy();
     expect(
       screen.getByText(
-        /Connecting lets Otto read and send your email, manage your calendar and work with your OneDrive files when you ask\./,
+        /Connecting lets 通用办公助手 read and send your email, manage your calendar and work with your OneDrive files when you ask\./,
       ),
     ).toBeTruthy();
   });
@@ -234,11 +234,13 @@ describe("Microsoft connection", () => {
       name: "Microsoft services",
     });
     expect(
-      within(list).getByText("Lets Otto read, draft and send your email"),
+      within(list).getByText(
+        "Lets 通用办公助手 read, draft and send your email",
+      ),
     ).toBeTruthy();
     expect(
       within(list).getByText(
-        "Lets Otto read and send messages in your Teams chats",
+        "Lets 通用办公助手 read and send messages in your Teams chats",
       ),
     ).toBeTruthy();
     expect(within(list).getByText("Needs your permission")).toBeTruthy();

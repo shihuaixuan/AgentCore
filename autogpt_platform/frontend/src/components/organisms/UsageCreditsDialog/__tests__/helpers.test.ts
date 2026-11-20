@@ -78,7 +78,7 @@ describe("getUsageCreditsAnswers", () => {
     // copilot/credit_billing.py: AutoPilot block turns spend the allowance
     // first and fall back to the credit balance only once it is out.
     expect(answer(paidCapped, CREDITS)).toContain(
-      "A workflow step where Otto does the work uses your chat usage first, and your credits only once chat usage runs out.",
+      "A workflow step where 通用办公助手 does the work uses your chat usage first, and your credits only once chat usage runs out.",
     );
   });
 

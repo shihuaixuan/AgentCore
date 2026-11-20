@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { PauseIcon, PlayIcon, RefreshIcon } from "@hugeicons/core-free-icons";
@@ -21,8 +22,8 @@ export function WorkflowsMovedWalkthrough() {
     >
       <p id={descriptionID} className="sr-only">
         {t(
-          "In the sidebar, open Team. Select Otto, then select the Workflows tab to find your existing workflows. Select a workflow name to see its details. Choose Setup your task to review the inputs and start or schedule a run. This video has no sound.",
-          "在侧边栏打开“团队”，选择 Otto，再选择“工作流”标签页，即可找到现有工作流。选择工作流名称查看详情。选择“设置任务”以检查输入，并立即运行或安排定时运行。此视频没有声音。",
+          `In the sidebar, open Team. Select ${AUTOPILOT_NAME}, then select the Workflows tab to find your existing workflows. Select a workflow name to see its details. Choose Setup your task to review the inputs and start or schedule a run. This video has no sound.`,
+          `在侧边栏打开“团队”，选择 ${AUTOPILOT_NAME}，再选择“工作流”标签页，即可找到现有工作流。选择工作流名称查看详情。选择“设置任务”以检查输入，并立即运行或安排定时运行。此视频没有声音。`,
         )}
       </p>
       {player.playback === "failed" ? (
@@ -34,8 +35,8 @@ export function WorkflowsMovedWalkthrough() {
             className="max-w-sm text-center text-body leading-relaxed text-foreground-secondary outline-none"
           >
             {t(
-              "The walkthrough couldn't load. Open Team, select Otto, then choose Workflows.",
-              "无法加载演示。请打开“团队”，选择 Otto，再选择“工作流”。",
+              `The walkthrough couldn't load. Open Team, select ${AUTOPILOT_NAME}, then choose Workflows.`,
+              `无法加载演示。请打开“团队”，选择 ${AUTOPILOT_NAME}，再选择“工作流”。`,
             )}
           </p>
         </div>
@@ -68,8 +69,8 @@ export function WorkflowsMovedWalkthrough() {
               className="border-t border-border-base px-4 py-3 text-caption leading-relaxed text-foreground-secondary"
             >
               {t(
-                "The video couldn't start. Try playing it again, or open Team, select Otto, then choose Workflows.",
-                "视频无法开始播放。请重试，或打开“团队”，选择 Otto，再选择“工作流”。",
+                `The video couldn't start. Try playing it again, or open Team, select ${AUTOPILOT_NAME}, then choose Workflows.`,
+                `视频无法开始播放。请重试，或打开“团队”，选择 ${AUTOPILOT_NAME}，再选择“工作流”。`,
               )}
             </p>
           )}

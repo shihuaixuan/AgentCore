@@ -88,7 +88,7 @@ describe("What Otto knows about your work", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: "What Otto knows about your work",
+        name: "What 通用办公助手 knows about your work",
       }),
     ).toBeDefined();
     expect(screen.getByText("Harbor Bikes")).toBeDefined();
@@ -143,7 +143,9 @@ describe("What Otto knows about your work", () => {
     await screen.findByText(/Nothing remembered yet/);
     await waitFor(() => expect(served).toBe(1));
     await settle();
-    expect(screen.queryByText("What Otto knows about your work")).toBeNull();
+    expect(
+      screen.queryByText("What 通用办公助手 knows about your work"),
+    ).toBeNull();
   });
 
   it("forgets it after a confirmation", async () => {
@@ -209,7 +211,9 @@ describe("What Otto knows about your work", () => {
 
     await screen.findByText("Q4 campaign brief is due Friday");
     await settle();
-    expect(screen.queryByText("What Otto knows about your work")).toBeNull();
+    expect(
+      screen.queryByText("What 通用办公助手 knows about your work"),
+    ).toBeNull();
   });
 });
 

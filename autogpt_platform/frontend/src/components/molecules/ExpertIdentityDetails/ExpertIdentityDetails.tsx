@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { Text } from "@/components/atoms/Text/Text";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { getExpertDisplayTitle } from "@/services/experts/expert-role-label";
@@ -31,7 +32,7 @@ export function ExpertIdentityDetails({
   const compact = size === "compact";
   const Container = compact ? "span" : "div";
   const profession = getExpertDisplayTitle({ jobTitle, role }, locale);
-  const title = isOtto ? (name ?? "Otto") : profession;
+  const title = isOtto ? (name ?? AUTOPILOT_NAME) : profession;
 
   return (
     <Container

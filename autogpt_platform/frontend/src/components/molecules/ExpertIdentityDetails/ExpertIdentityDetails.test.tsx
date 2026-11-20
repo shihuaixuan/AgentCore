@@ -89,7 +89,7 @@ test.each(["compact", "card", "page"] as const)(
 );
 
 test("keeps Otto's disclosure without a role or title", () => {
-  render(<ExpertIdentityDetails name="Otto" isOtto />);
+  render(<ExpertIdentityDetails name="通用办公助手" isOtto />);
   expect(screen.getByText("Your personal Head of AI")).toBeDefined();
   expect(screen.queryByText("AI Expert")).toBeNull();
 });
@@ -104,11 +104,11 @@ test("shows only the profession for a compact specialist", () => {
 });
 
 test.each(["compact", "card", "page"] as const)(
-  "avoids repeating Otto's role in %s size",
+  "avoids repeating 通用办公助手's role in %s size",
   (size) => {
     render(
       <ExpertIdentityDetails
-        name="Otto"
+        name="通用办公助手"
         isOtto
         role="Head of AI"
         size={size}
@@ -120,12 +120,12 @@ test.each(["compact", "card", "page"] as const)(
 );
 
 test.each(["compact", "card", "page"] as const)(
-  "localizes Otto's default role and title in Chinese in %s size",
+  "localizes 通用办公助手's default role and title in Chinese in %s size",
   (size) => {
     render(
       <LanguageProvider initialLocale="zh-CN">
         <ExpertIdentityDetails
-          name="Otto"
+          name="通用办公助手"
           isOtto
           role="Head of AI"
           size={size}
@@ -133,7 +133,7 @@ test.each(["compact", "card", "page"] as const)(
       </LanguageProvider>,
     );
 
-    expect(screen.getByText("Otto")).toBeDefined();
+    expect(screen.getByText("通用办公助手")).toBeDefined();
     expect(screen.getByTitle("AI 负责人").textContent).toContain("AI 负责人");
     expect(screen.queryByText(/Head of AI/)).toBeNull();
   },

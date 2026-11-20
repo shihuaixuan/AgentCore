@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useEffect, useState } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
@@ -39,7 +40,10 @@ export function useMemoryScope() {
       setSelectedScope(AUTOPILOT_MEMORY_SCOPE);
       toast({
         title: t("Expert no longer available", "工作流已不可用"),
-        description: t("Showing Otto account memory instead.", "正在改为显示 Otto 账户记忆。"),
+        description: t(
+          `Showing ${AUTOPILOT_NAME} account memory instead.`,
+          `正在改为显示 ${AUTOPILOT_NAME} 账户记忆。`,
+        ),
       });
     }
   }, [

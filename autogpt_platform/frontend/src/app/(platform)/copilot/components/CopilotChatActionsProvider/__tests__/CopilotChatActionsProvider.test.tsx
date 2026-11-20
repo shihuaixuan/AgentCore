@@ -24,7 +24,7 @@ describe("CopilotChatActionsProvider", () => {
         onSend={onSend}
         onBackendTurn={() => undefined}
         sessionId="s1"
-        assistantName="Otto"
+        assistantName="通用办公助手"
       >
         {card}
       </CopilotChatActionsProvider>,
@@ -36,7 +36,7 @@ describe("CopilotChatActionsProvider", () => {
         onSend={onSend}
         onBackendTurn={latest}
         sessionId="s1"
-        assistantName="Otto"
+        assistantName="通用办公助手"
       >
         {card}
       </CopilotChatActionsProvider>,

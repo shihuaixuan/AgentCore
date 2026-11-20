@@ -1,4 +1,5 @@
 "use client";
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
@@ -23,7 +24,9 @@ export function WorkGroup({ group, timezone }: Props) {
   const title =
     actor.kind === "expert"
       ? getExpertDisplayTitle(actor.expert, locale)
-      : actor.name;
+      : actor.kind === "autopilot"
+        ? AUTOPILOT_NAME
+        : actor.name;
   const chip = getActorChip(actor.kind);
   const runs = group.runs ?? [];
   const items = group.items ?? [];
@@ -53,7 +56,7 @@ export function WorkGroup({ group, timezone }: Props) {
               ? "专家"
               : actor.kind === "workflow"
                 ? "工作流"
-                : "Otto",
+                : AUTOPILOT_NAME,
           )}
         </Text>
       </span>

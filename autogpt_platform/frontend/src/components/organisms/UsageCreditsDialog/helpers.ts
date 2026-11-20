@@ -1,3 +1,4 @@
+import { AUTOPILOT_NAME } from "@/lib/branding";
 export type ChatAllowance =
   | "unknown"
   | "no-plan"
@@ -63,11 +64,11 @@ export function getUsageCreditsAnswers({
     return [
       {
         question: "对话用量涵盖哪些内容？",
-        answer: `你与 Otto 及专家的对话，包括他们为你完成的研究和写作。${allowances[allowance]}`,
+        answer: `你与 ${AUTOPILOT_NAME} 及专家的对话，包括他们为你完成的研究和写作。${allowances[allowance]}`,
       },
       {
         question: "自动化积分有什么用途？",
-        answer: `用于工作流运行和生成图片等付费步骤。由 Otto 执行的工作流步骤会优先消耗对话额度，耗尽后才使用积分。${paymentEnabled ? "你可以购买积分、完成设置任务赚取积分，或开启自动充值。" : "你可以完成设置任务赚取积分。"}`,
+        answer: `用于工作流运行和生成图片等付费步骤。由 ${AUTOPILOT_NAME} 执行的工作流步骤会优先消耗对话额度，耗尽后才使用积分。${paymentEnabled ? "你可以购买积分、完成设置任务赚取积分，或开启自动充值。" : "你可以完成设置任务赚取积分。"}`,
       },
       ...(paymentEnabled
         ? [
@@ -87,13 +88,13 @@ export function getUsageCreditsAnswers({
   return [
     {
       question: "What does chat usage cover?",
-      answer: `Your chats with Otto and your experts, including the research and writing they do for you. ${describeAllowance(allowance, isTrial)}`,
+      answer: `Your chats with ${AUTOPILOT_NAME} and your experts, including the research and writing they do for you. ${describeAllowance(allowance, isTrial)}`,
     },
     {
       question: "What are automation credits for?",
       // An Otto (AutoPilot) step bills the allowance first and the credit
       // balance only once it is out: copilot/credit_billing.py.
-      answer: `Workflow runs and paid steps, like making images. A workflow step where Otto does the work uses your chat usage first, and your credits only once chat usage runs out. ${
+      answer: `Workflow runs and paid steps, like making images. A workflow step where ${AUTOPILOT_NAME} does the work uses your chat usage first, and your credits only once chat usage runs out. ${
         paymentEnabled
           ? "You can buy credits, earn them by finishing setup steps or turn on auto-refill to top them up."
           : "You can earn them by finishing setup steps."

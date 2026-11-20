@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import type { LearningHistoryItem } from "@/app/api/__generated__/models/learningHistoryItem";
@@ -50,7 +51,7 @@ export function LearningHistoryCard({
     invalidated: "已归档（来源不可用）",
   };
   function expertTitle(expertId: string | null | undefined) {
-    if (!expertId) return "Otto";
+    if (!expertId) return AUTOPILOT_NAME;
     return getExpertDisplayTitle(
       experts.find((expert) => expert.id === expertId),
       locale,

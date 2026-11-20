@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import {
   File02Icon,
   Image01Icon,
@@ -22,8 +23,8 @@ export function FilesEmptyState() {
       ]}
       title={t("No files yet", "暂无文件")}
       description={t(
-        "Files you attach and documents Otto creates in this chat will show up here.",
-        "你添加的附件和 Otto 在此对话中创建的文档会显示在这里。",
+        `Files you attach and documents ${AUTOPILOT_NAME} creates in this chat will show up here.`,
+        `你添加的附件和 ${AUTOPILOT_NAME} 在此对话中创建的文档会显示在这里。`,
       )}
     />
   );

@@ -9,7 +9,8 @@ const wake = {
   metadata: {
     background_task_notice: "task",
     background_task_stage: "followup",
-    display_content: "Background subtask completed. Otto is following up.",
+    display_content:
+      "Background subtask completed. 通用办公助手 is following up.",
   },
 };
 
@@ -36,7 +37,7 @@ describe("background subtask delivery", () => {
       expect(result.messages[0].role).toBe("assistant");
       expect(JSON.stringify(result.messages)).not.toContain("Internal prompt");
       expect(JSON.stringify(result.messages)).toContain(
-        "Otto is following up.",
+        "通用办公助手 is following up.",
       );
     },
   );

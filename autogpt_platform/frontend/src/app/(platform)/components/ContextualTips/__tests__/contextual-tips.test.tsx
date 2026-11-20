@@ -136,7 +136,7 @@ describe("contextual tips — when a cost comes up", () => {
     "Automation credits pay for scheduled runs.",
     "That leaves 40% of your allowance for the week.",
     "You have 120 credits left.",
-  ])("counts Otto's billing words: %s", (text) => {
+  ])("counts 通用办公助手's billing words: %s", (text) => {
     expect(mentionsCost(text)).toBe(true);
   });
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { Button } from "@/components/atoms/Button/Button";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -35,7 +36,9 @@ export function WorkflowsMovedContent({ titleRef, onDismiss }: Props) {
               {t("workflows", "工作流")}
             </strong>
             {t(". Find yours under ", "”。你可以在团队页面的 ")}
-            <strong className="font-medium text-foreground-strong">Otto</strong>
+            <strong className="font-medium text-foreground-strong">
+              {AUTOPILOT_NAME}
+            </strong>
             {t(" in Team.", " 下找到你的工作流。")}
           </Dialog.Description>
           <WorkflowLocation />
@@ -80,7 +83,7 @@ function WorkflowLocation() {
       aria-label={t("Where to find your workflows", "工作流位置")}
       className="mt-3 flex w-fit flex-wrap items-center gap-2 rounded-full border border-border-base/80 bg-surface-muted px-3 py-1 text-caption text-foreground-secondary"
     >
-      {[t("Team", "团队"), "Otto", t("Workflows", "工作流")].map(
+      {[t("Team", "团队"), AUTOPILOT_NAME, t("Workflows", "工作流")].map(
         (label, index) => (
           <li key={label} className="flex items-center gap-2">
             {index > 0 && (

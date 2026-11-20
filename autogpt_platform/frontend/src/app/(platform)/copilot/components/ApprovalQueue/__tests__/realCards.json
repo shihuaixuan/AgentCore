@@ -15,7 +15,7 @@
           "to": ["dana@acme.com"],
           "cc": ["finance@acme.com"],
           "subject": "Q3 invoices missing PO numbers",
-          "body": "Hi Dana,\n\nThe Q3 invoice pack is in the shared Invoices folder. Three of them are still missing a PO number:\n\n- INV-2041\n- INV-2044\n- INV-2051\n\nCould you look before Friday?\n\nThanks,\nOtto"
+          "body": "Hi Dana,\n\nThe Q3 invoice pack is in the shared Invoices folder. Three of them are still missing a PO number:\n\n- INV-2041\n- INV-2044\n- INV-2051\n\nCould you look before Friday?\n\nThanks,\n通用办公助手"
         },
         "clipped": [],
         "fields": [
@@ -1614,7 +1614,7 @@
           "to": ["dana@acme.com"],
           "cc": ["finance@acme.com"],
           "subject": "Q3 invoices missing PO numbers",
-          "body": "Hi Dana,\n\nThe Q3 invoice pack is in the shared Invoices folder. Three of them are still missing a PO number:\n\n- INV-2041\n- INV-2044\n- INV-2051\n\nCould you look before Friday?\n\nThanks,\nOtto"
+          "body": "Hi Dana,\n\nThe Q3 invoice pack is in the shared Invoices folder. Three of them are still missing a PO number:\n\n- INV-2041\n- INV-2044\n- INV-2051\n\nCould you look before Friday?\n\nThanks,\n通用办公助手"
         },
         "clipped": [],
         "fields": [

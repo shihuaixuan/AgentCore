@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { Button } from "@/components/atoms/Button/Button";
 import { createIconComponent, Icon } from "@/components/atoms/Icon/Icon";
 import { Alert, AlertDescription } from "@/components/molecules/Alert/Alert";
@@ -21,8 +22,8 @@ export function NotificationBanner() {
       <div className="flex flex-wrap items-center gap-3">
         <AlertDescription className="min-w-[12rem] flex-1">
           {t(
-            "Get a notification when Otto or your experts finish, even when you switch tabs.",
-            "即使切换标签页，也能在 Otto 或你的专家完成任务时收到通知。",
+            `Get a notification when ${AUTOPILOT_NAME} or your experts finish, even when you switch tabs.`,
+            `即使切换标签页，也能在 ${AUTOPILOT_NAME} 或你的专家完成任务时收到通知。`,
           )}
         </AlertDescription>
         <Button variant="primary" size="small" onClick={handleTurnOn}>

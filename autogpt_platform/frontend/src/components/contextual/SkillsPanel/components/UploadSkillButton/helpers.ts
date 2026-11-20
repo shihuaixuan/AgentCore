@@ -1,6 +1,7 @@
 // Mirrors backend limits in backend/copilot/tools/skills.py — kept in sync
 // manually. These bound the per-turn `<available_skills>` index the copilot
 // sees, so the cap is deliberate (see backend MAX_DESCRIPTION_CHARS).
+import { AUTOPILOT_NAME } from "@/lib/branding";
 export const MAX_SKILL_DESCRIPTION_CHARS = 1024;
 
 const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---/;
@@ -54,7 +55,7 @@ export function getSkillUploadError(
     const over = descriptionLength - MAX_SKILL_DESCRIPTION_CHARS;
     return t(
       `Description is ${descriptionLength}/${MAX_SKILL_DESCRIPTION_CHARS} characters — trim at least ${over}. It appears in the copilot's per-turn skills index, so it's kept short.`,
-      `描述共 ${descriptionLength} 个字符，上限为 ${MAX_SKILL_DESCRIPTION_CHARS} 个，请至少删减 ${over} 个字符。描述会出现在 Otto 每轮使用的技能索引中，因此需要保持简短。`,
+      `描述共 ${descriptionLength} 个字符，上限为 ${MAX_SKILL_DESCRIPTION_CHARS} 个，请至少删减 ${over} 个字符。描述会出现在 ${AUTOPILOT_NAME} 每轮使用的技能索引中，因此需要保持简短。`,
     );
   }
 

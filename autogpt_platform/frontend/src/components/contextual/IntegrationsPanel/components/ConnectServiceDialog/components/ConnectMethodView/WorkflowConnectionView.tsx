@@ -1,4 +1,5 @@
 "use client";
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { Text } from "@/components/atoms/Text/Text";
@@ -52,8 +53,8 @@ export function WorkflowConnectionView({
         </h3>
         <Text variant="body-tight" tone="muted" className="mt-2">
           {t(
-            "Choose the account Otto should use for this workflow.",
-            "选择 Otto 应为此工作流使用的账户。",
+            `Choose the account ${AUTOPILOT_NAME} should use for this workflow.`,
+            `选择 ${AUTOPILOT_NAME} 应为此工作流使用的账户。`,
           )}
         </Text>
       </div>

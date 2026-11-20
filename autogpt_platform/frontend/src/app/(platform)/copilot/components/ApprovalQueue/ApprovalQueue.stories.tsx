@@ -104,7 +104,10 @@ export const RuleMenu: Story = {
   args: { ...queueOf([mcpTool()]), expertName: "Frankie" },
 };
 
-export const RuleMenuWithOtto: Story = { args: queueOf([mcpTool()]) };
+export const RuleMenuWithOtto: Story = {
+  name: "Rule Menu With 通用办公助手",
+  args: queueOf([mcpTool()]),
+};
 
 // A bare tool's card rules on the tool itself.
 export const RuleMenuOnATool: Story = { args: queueOf([createAgent()]) };
@@ -426,7 +429,7 @@ export const HomeRowBefore: StoryObj = {
   render: () =>
     homeRow(
       "Create library folder — Ask First is on for this chat, so this action needs your approval.",
-      "Otto is waiting for your approval.",
+      "通用办公助手 is waiting for your approval.",
       "Review",
     ),
 };
@@ -435,7 +438,7 @@ export const HomeRowAfter: StoryObj = {
   render: () =>
     homeRow(
       "Create library folder “Q3 reports”",
-      "Otto is waiting for your approval.",
+      "通用办公助手 is waiting for your approval.",
       "Open chat",
       { ask: "Create library folder", object: "Q3 reports" },
     ),

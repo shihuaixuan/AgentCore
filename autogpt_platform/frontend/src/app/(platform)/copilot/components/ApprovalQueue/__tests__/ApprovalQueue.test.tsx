@@ -126,7 +126,7 @@ test("the mode's reason is said once, in the header, and on no card", async () =
   await queue();
   expect(
     screen.getAllByText(
-      /Ask First is on, so Otto asks before he changes anything outside his workspace/,
+      /Ask First is on, so 通用办公助手 asks before he changes anything outside his workspace/,
     ),
   ).toHaveLength(1);
   expect(screen.queryByText(/so this action needs your approval/)).toBeNull();
@@ -197,7 +197,7 @@ test("the approve menu offers the rules the server allows", async () => {
   expect(
     await screen.findByText("Approve Gmail Send from now on"),
   ).toBeDefined();
-  expect(screen.queryByText(/^Let Otto judge/)).toBeNull();
+  expect(screen.queryByText(/^Let 通用办公助手 judge/)).toBeNull();
   expect(screen.queryByText(/Always allow/)).toBeNull();
 });
 

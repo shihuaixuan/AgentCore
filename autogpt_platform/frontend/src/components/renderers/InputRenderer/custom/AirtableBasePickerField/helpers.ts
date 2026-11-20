@@ -1,3 +1,4 @@
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 
 export const AIRTABLE_PICKER_FORMAT = "airtable-base-picker";
@@ -59,19 +60,19 @@ export function pickerHint(
     "Airtable 中的数据库是一组数据表，类似于包含多个工作表的电子表格文件。";
   if (needed === "read") {
     return t(
-      `${base} Otto only reads from the one you pick; nothing in it changes.`,
-      `${chineseBase} Otto 只读取你选择的数据库，不会修改其内容。`,
+      `${base} ${AUTOPILOT_NAME} only reads from the one you pick; nothing in it changes.`,
+      `${chineseBase} ${AUTOPILOT_NAME} 只读取你选择的数据库，不会修改其内容。`,
     );
   }
   if (needed === "edit") {
     return t(
-      `${base} Otto changes records in the one you pick.`,
-      `${chineseBase} Otto 会修改你选择的数据库中的记录。`,
+      `${base} ${AUTOPILOT_NAME} changes records in the one you pick.`,
+      `${chineseBase} ${AUTOPILOT_NAME} 会修改你选择的数据库中的记录。`,
     );
   }
   return t(
-    `${base} Otto adds what it needs to the one you pick, and you'll see what it adds before anything changes.`,
-    `${chineseBase} Otto 会在你选择的数据库中添加所需内容，并在实际更改前让你查看要添加的内容。`,
+    `${base} ${AUTOPILOT_NAME} adds what it needs to the one you pick, and you'll see what it adds before anything changes.`,
+    `${chineseBase} ${AUTOPILOT_NAME} 会在你选择的数据库中添加所需内容，并在实际更改前让你查看要添加的内容。`,
   );
 }
 
@@ -86,8 +87,8 @@ export function noUsableBaseText(
         "此步骤需要数据库的创建者权限，Airtable 会将该权限授予建立数据库的人。请所有者为你授予创建者权限，或新建数据库。",
       )
     : t(
-        "You can only view these bases, so Otto can't change records in them. Ask the owner to make you an editor, or start a new one.",
-        "你只有这些数据库的查看权限，因此 Otto 无法修改其中的记录。请所有者为你授予编辑者权限，或新建数据库。",
+        `You can only view these bases, so ${AUTOPILOT_NAME} can't change records in them. Ask the owner to make you an editor, or start a new one.`,
+        `你只有这些数据库的查看权限，因此 ${AUTOPILOT_NAME} 无法修改其中的记录。请所有者为你授予编辑者权限，或新建数据库。`,
       );
 }
 

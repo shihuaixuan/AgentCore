@@ -2,6 +2,16 @@ import { describe, expect, it } from "vitest";
 import { auditUICopy } from "./audit-ui-copy";
 
 describe("localization source audit", () => {
+  it("flags retired assistant copy even inside translations, not protocol identifiers", () => {
+    const findings = auditUICopy(
+      'const View = () => <p data-testid="otto-reply">{t("Ask Otto", "询问 Otto")} {person.name}</p>;',
+    );
+    expect(findings.map(({ kind, text }) => [kind, text])).toEqual([
+      ["legacy-assistant-name", "Ask Otto"],
+      ["legacy-assistant-name", "询问 Otto"],
+    ]);
+  });
+
   it("detects app-owned JSX, attributes, fallback text and dynamic templates", () => {
     const findings = auditUICopy(
       'const View = () => <div><button>Chat with</button><input placeholder="What else can I help with?" />{name ?? "Unnamed expert"}<p>{`Completed ${count} tasks`}</p></div>',

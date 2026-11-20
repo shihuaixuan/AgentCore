@@ -142,10 +142,10 @@ test("a decision advances to the next undecided item, wrapping, and moves focus 
   expect(requests).toEqual([[a1.review!.node_exec_id]]);
   expect(
     within(dialog).getByRole("button", {
-      name: /Create library folder Beta\s*, Approved · Otto is on it$/,
+      name: /Create library folder Beta\s*, Approved · 通用办公助手 is on it$/,
     }),
   ).toBeDefined();
-  expect(screen.getByText("· Approved · Otto is on it")).toBeDefined();
+  expect(screen.getByText("· Approved · 通用办公助手 is on it")).toBeDefined();
   await waitFor(() =>
     expect(document.activeElement?.textContent).toBe(
       "Create library folder Alpha",
@@ -307,7 +307,7 @@ test("a long held passage scrolls inside the body while the footer keeps the dec
   expect(body.className).toMatch(/\bmin-h-0\b/);
   expect(body.className).toMatch(/\boverflow-y-auto\b/);
   expect(
-    within(footer).getByRole("button", { name: "Release to Otto" }),
+    within(footer).getByRole("button", { name: "Release to 通用办公助手" }),
   ).toBeDefined();
   expect(
     within(footer).getByRole("button", { name: "Keep it out" }),

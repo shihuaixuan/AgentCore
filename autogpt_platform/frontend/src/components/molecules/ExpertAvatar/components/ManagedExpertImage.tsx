@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import Image from "next/image";
 import { useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
@@ -32,7 +33,10 @@ export function ManagedExpertImage({
     portrait ? "portrait" : "webp",
   );
   const label = isOtto
-    ? t("Otto, your personal Head of AI", "Otto，你的专属 AI 负责人")
+    ? t(
+        `${AUTOPILOT_NAME}, your personal Head of AI`,
+        `${AUTOPILOT_NAME}，你的专属 AI 负责人`,
+      )
     : t(`${name}, AI Expert`, `${name}，AI 专家`);
   const classes = cn(
     "inline-flex shrink-0 overflow-hidden rounded-xl",

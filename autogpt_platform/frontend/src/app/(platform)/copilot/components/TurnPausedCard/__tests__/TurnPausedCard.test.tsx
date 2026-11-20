@@ -182,7 +182,7 @@ function cardTree(
   data: Record<string, unknown>,
   {
     current = true,
-    name = "Otto",
+    name = "通用办公助手",
     sessionId = SESSION_ID,
     live = false,
     rowKey = "seq-7",
@@ -248,28 +248,28 @@ describe("TurnPausedCard — what it says and offers", () => {
       "a daily budget pause",
       pause(),
       "Paused · out of today's budget",
-      "Otto saved its progress above. Your budget resets at 1:00 AM, in 4 h 12 min.",
+      "通用办公助手 saved its progress above. Your budget resets at 1:00 AM, in 4 h 12 min.",
       ["Resume at 1:00 AM", "Upgrade"],
     ],
     [
       "a weekly budget pause",
       pause({ reason: "weekly", resets_at: WEDNESDAY_1AM.toISOString() }),
       "Paused · out of this week's budget",
-      "Otto saved its progress above. Your budget resets Wednesday at 1:00 AM, in 2 days.",
+      "通用办公助手 saved its progress above. Your budget resets Wednesday at 1:00 AM, in 2 days.",
       ["Resume Wednesday at 1:00 AM", "Upgrade"],
     ],
     [
       "a pause stopped before its checkpoint",
       pause({ checkpoint_saved: false }),
       "Paused · out of today's budget",
-      "Otto was stopped before it could summarize its progress. Your budget resets at 1:00 AM, in 4 h 12 min.",
+      "通用办公助手 was stopped before it could summarize its progress. Your budget resets at 1:00 AM, in 4 h 12 min.",
       ["Resume at 1:00 AM", "Upgrade"],
     ],
     [
       "a turn refused before it ran",
       pause({ started: false }),
       "Not started · out of today's budget",
-      "Otto didn't start this because you're out of today's budget. It resets at 1:00 AM, in 4 h 12 min.",
+      "通用办公助手 didn't start this because you're out of today's budget. It resets at 1:00 AM, in 4 h 12 min.",
       ["Resume at 1:00 AM", "Upgrade"],
     ],
     // No plan (a trial that is over): the backend sends "weekly" with no
@@ -278,35 +278,35 @@ describe("TurnPausedCard — what it says and offers", () => {
       "a budget with no plan behind it, which never refills",
       pause({ reason: "weekly", resets_at: null }),
       "Paused · out of budget",
-      "Otto saved its progress above.",
+      "通用办公助手 saved its progress above.",
       ["Upgrade"],
     ],
     [
       "a turn refused on a budget that never refills",
       pause({ reason: "weekly", resets_at: null, started: false }),
       "Not started · out of budget",
-      "Otto didn't start this because you're out of budget.",
+      "通用办公助手 didn't start this because you're out of budget.",
       ["Upgrade"],
     ],
     [
       "a spent trial",
       pause({ reason: "trial", resets_at: null }),
       "Paused · trial allowance used",
-      "Otto saved its progress above.",
+      "通用办公助手 saved its progress above.",
       ["Upgrade"],
     ],
     [
       "a task at its size limit",
       pause({ reason: "task", resets_at: null }),
       "Paused · this task reached its size limit",
-      "Otto saved its progress above.",
+      "通用办公助手 saved its progress above.",
       ["Keep going", "Stop here"],
     ],
     [
       "a step check-in",
       pause({ reason: "steps", resets_at: null, steps: 450 }),
       "Paused · checking in after a long run",
-      "Otto has taken 450 steps on this and summarized its progress above.",
+      "通用办公助手 has taken 450 steps on this and summarized its progress above.",
       ["Keep going", "Stop here"],
     ],
   ])("%s", async (_, data, title, body, buttons) => {
@@ -331,7 +331,7 @@ describe("TurnPausedCard — what it says and offers", () => {
     expect(
       within(card).getByText(
         phrase(
-          "Otto saved its progress above. Your budget resets at 1:00 AM, in 24 h.",
+          "通用办公助手 saved its progress above. Your budget resets at 1:00 AM, in 24 h.",
         ),
       ),
     ).toBeDefined();
@@ -348,7 +348,7 @@ describe("TurnPausedCard — what it says and offers", () => {
       expect(buttonsIn(card)).toEqual(["Continue on ChatGPT", "Upgrade"]),
     );
     expect(
-      within(card).getByText("Otto saved its progress above."),
+      within(card).getByText("通用办公助手 saved its progress above."),
     ).toBeDefined();
     expect(calls.listed).toBe(0);
   });
@@ -522,7 +522,7 @@ describe("TurnPausedCard — Keep going", () => {
     expect(
       within(card).getByText(
         phrase(
-          "Otto saved its progress above. Your budget resets at 1:00 AM, in 4 h 12 min.",
+          "通用办公助手 saved its progress above. Your budget resets at 1:00 AM, in 4 h 12 min.",
         ),
       ),
     ).toBeDefined();
@@ -539,7 +539,9 @@ describe("TurnPausedCard — Keep going", () => {
     );
 
     expect(
-      screen.getByText("Otto saved its progress above. Your budget has reset."),
+      screen.getByText(
+        "通用办公助手 saved its progress above. Your budget has reset.",
+      ),
     ).toBeDefined();
     expect(screen.getByRole("button", { name: "Keep going" })).toBeDefined();
     expect(screen.queryByRole("button", { name: /^Resume/ })).toBeNull();
@@ -566,7 +568,7 @@ describe("TurnPausedCard — Keep going", () => {
     expect(
       within(card).getByText(
         phrase(
-          "Otto saved its progress above. Your budget resets at 1:00 AM, in 4 h 2 min.",
+          "通用办公助手 saved its progress above. Your budget resets at 1:00 AM, in 4 h 2 min.",
         ),
       ),
     ).toBeDefined();
@@ -578,7 +580,7 @@ describe("TurnPausedCard — Keep going", () => {
 
     expect(
       within(card).getByText(
-        "Otto saved its progress above. Your budget has reset.",
+        "通用办公助手 saved its progress above. Your budget has reset.",
       ),
     ).toBeDefined();
     expect(buttonsIn(card)).toEqual(["Keep going", "Upgrade"]);
@@ -638,7 +640,9 @@ describe("TurnPausedCard — Resume at the reset", () => {
       await screen.findByRole("button", { name: "Keep going" }),
     ).toBeDefined();
     expect(
-      screen.getByText("Otto saved its progress above. Your budget has reset."),
+      screen.getByText(
+        "通用办公助手 saved its progress above. Your budget has reset.",
+      ),
     ).toBeDefined();
   });
 

@@ -435,7 +435,11 @@ export const CARD_FIXTURES: Record<string, CardFixture> = Object.fromEntries([
     },
   ],
   card("hire_expert", expertProposal("hire", "Zara", "Designer"), "Designer"),
-  card("raise_expert", expertProposal("raise", "Otto", "Engineer"), "Engineer"),
+  card(
+    "raise_expert",
+    expertProposal("raise", "通用办公助手", "Engineer"),
+    "Engineer",
+  ),
   card(
     "update_expert",
     expertProposal("update", "Mira", "Researcher"),

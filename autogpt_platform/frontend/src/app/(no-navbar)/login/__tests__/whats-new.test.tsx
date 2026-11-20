@@ -42,7 +42,7 @@ const RELEASES = [
     "October 8 – October 14",
     "october-8-october-14-2026",
     "Redesigned wallet, trial cancel keeps access, verified email at signup",
-    "A clearer wallet, a kinder trial, and shorter replies from Otto",
+    "A clearer wallet, a kinder trial, and shorter replies from 通用办公助手",
   ),
   release(
     "September 24 – September 30",
@@ -86,7 +86,7 @@ describe("LoginPage What's new", () => {
     const panel = await findWhatsNew();
 
     const latest = await panel.findByRole("link", {
-      name: "A clearer wallet, a kinder trial, and shorter replies from Otto, October 8 – October 14, latest release (opens in a new tab)",
+      name: "A clearer wallet, a kinder trial, and shorter replies from 通用办公助手, October 8 – October 14, latest release (opens in a new tab)",
     });
     expect(latest.getAttribute("href")).toBe(
       `${CHANGELOG_URL}/october-8-october-14-2026`,

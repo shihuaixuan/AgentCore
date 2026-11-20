@@ -64,18 +64,23 @@ test("a held call drawn outside the chain renders its real card once answered", 
 // The card and the wake's label read the same result row; each says what the
 // answer did. Bodies are what held._outcome writes for a held action.
 test.each([
-  ["approved", heldConfirm.result.content, true, "Result sent to Otto."],
+  [
+    "approved",
+    heldConfirm.result.content,
+    true,
+    "Result sent to 通用办公助手.",
+  ],
   [
     "rejected",
     "Nothing ran: the user declined this action. Do not retry it or reach the same effect another way.",
     false,
-    "Declined; nothing was sent to Otto.",
+    "Declined; nothing was sent to 通用办公助手.",
   ],
   [
     "expired",
     "Nothing ran: the approval expired an hour after it was given. Propose the call again if it is still needed.",
     false,
-    "Expired; nothing was sent to Otto.",
+    "Expired; nothing was sent to 通用办公助手.",
   ],
   [
     "closed",

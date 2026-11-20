@@ -1,3 +1,4 @@
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import type { MicrosoftCapabilityService } from "@/app/api/__generated__/models/microsoftCapabilityService";
 import type { MicrosoftCapabilityStatus } from "@/app/api/__generated__/models/microsoftCapabilityStatus";
 import type { Locale } from "@/lib/i18n/locale";
@@ -41,14 +42,13 @@ export const MICROSOFT_SERVICE_PURPOSES: Record<
   MicrosoftCapabilityService,
   string
 > = {
-  mail: "Lets Otto read, draft and send your email",
-  calendar: "Lets Otto see, add and change your calendar events",
-  files: "Lets Otto open, create and edit your OneDrive files",
-  teams: "Lets Otto read and send messages in your Teams chats",
+  mail: `Lets ${AUTOPILOT_NAME} read, draft and send your email`,
+  calendar: `Lets ${AUTOPILOT_NAME} see, add and change your calendar events`,
+  files: `Lets ${AUTOPILOT_NAME} open, create and edit your OneDrive files`,
+  teams: `Lets ${AUTOPILOT_NAME} read and send messages in your Teams chats`,
   copilot:
     "Lets Copilot answer your chats from the mail, files, meetings and messages you can open",
-  work_iq:
-    "Lets Otto ask Work IQ, which can read and change your Microsoft 365 content",
+  work_iq: `Lets ${AUTOPILOT_NAME} ask Work IQ, which can read and change your Microsoft 365 content`,
 };
 
 export type MicrosoftSetupReason =
@@ -92,12 +92,12 @@ export function getMicrosoftServicePurpose(
   locale: Locale = "en",
 ) {
   const purposes: Record<MicrosoftCapabilityService, string> = {
-    mail: "允许 Otto 读取、起草和发送你的电子邮件",
-    calendar: "允许 Otto 查看、添加和修改你的日历活动",
-    files: "允许 Otto 打开、创建和编辑你的 OneDrive 文件",
-    teams: "允许 Otto 读取和发送你的 Teams 聊天消息",
+    mail: `允许 ${AUTOPILOT_NAME} 读取、起草和发送你的电子邮件`,
+    calendar: `允许 ${AUTOPILOT_NAME} 查看、添加和修改你的日历活动`,
+    files: `允许 ${AUTOPILOT_NAME} 打开、创建和编辑你的 OneDrive 文件`,
+    teams: `允许 ${AUTOPILOT_NAME} 读取和发送你的 Teams 聊天消息`,
     copilot: "允许 Copilot 根据你有权访问的邮件、文件、会议和消息回答问题",
-    work_iq: "允许 Otto 向 Work IQ 提问，并读取和修改你的 Microsoft 365 内容",
+    work_iq: `允许 ${AUTOPILOT_NAME} 向 Work IQ 提问，并读取和修改你的 Microsoft 365 内容`,
   };
   return locale === "zh-CN"
     ? purposes[service]

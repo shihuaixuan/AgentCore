@@ -49,7 +49,7 @@ describe("Chinese tour chrome", () => {
       screen.getByRole("heading", { name: "聊聊天，就能构建 AI 工作流" }),
     ).toBeDefined();
     expect(screen.getByText("实时演示，无需注册")).toBeDefined();
-    expect(screen.getByText(/Otto.*端木软件/)).toBeDefined();
+    expect(screen.getByText(/通用办公助手.*端木软件/)).toBeDefined();
     expect(
       screen.getByRole("link", { name: "体验演示" }).getAttribute("href"),
     ).toBe("/tour/chat");
@@ -133,7 +133,7 @@ describe("Chinese tour chrome", () => {
         <TourPromptBar prompt={null} isStreaming onSend={onSend} />
       </LanguageProvider>,
     );
-    const busy = screen.getByRole("button", { name: "Otto 正在工作" });
+    const busy = screen.getByRole("button", { name: "通用办公助手 正在工作" });
     expect(busy.getAttribute("aria-disabled")).toBe("true");
     fireEvent.keyDown(busy, { key: "Enter" });
     expect(onSend).toHaveBeenCalledOnce();

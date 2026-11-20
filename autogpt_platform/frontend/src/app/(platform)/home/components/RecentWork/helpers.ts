@@ -1,3 +1,4 @@
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import type { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { File01Icon, PlugIcon, RepeatIcon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
@@ -49,7 +50,7 @@ const ACTOR_CHIPS: Record<HomeWorkActorKind, ActorChip> = {
       "border-warning-border bg-warning-surface text-yellow-foreground shadow-[0_0_8px_-1px_rgba(247,205,51,0.9)]",
   },
   autopilot: {
-    label: "Otto",
+    label: AUTOPILOT_NAME,
     className: "border-border-base bg-surface text-foreground-tertiary",
   },
 };

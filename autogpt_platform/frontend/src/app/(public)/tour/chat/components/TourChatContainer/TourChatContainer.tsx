@@ -1,4 +1,5 @@
 "use client";
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTourStore } from "../../tourStore";
 import type { useTourCopilot } from "../../useTourCopilot";
 import { TourEndCard } from "../TourEndCard/TourEndCard";
@@ -37,8 +38,8 @@ export function TourChatContainer({ chat }: Props) {
             <p className="mt-2 flex items-center justify-center gap-1 text-body text-foreground-subtle">
               <Icon icon={FlashIcon} className="size-3.5 shrink-0" />
               {t(
-                "Simulated demo — sign up to put Otto to work on your own tasks.",
-                "模拟演示 — 注册后，让 Otto 处理你的真实任务。",
+                `Simulated demo — sign up to put ${AUTOPILOT_NAME} to work on your own tasks.`,
+                `模拟演示 — 注册后，让 ${AUTOPILOT_NAME} 处理你的真实任务。`,
               )}
             </p>
           </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { Button } from "@/components/atoms/Button/Button";
@@ -39,8 +40,8 @@ export function MicrosoftSignIn({
     <div className="flex flex-col gap-4">
       <Text variant="body">
         {t(
-          "Connecting lets Otto read and send your email, manage your calendar and work with your OneDrive files when you ask. Work or school accounts can also add Teams chats, Microsoft 365 Copilot and Work IQ.",
-          "连接后，Otto 可按您的要求读取和发送邮件、管理日历以及处理 OneDrive 文件。工作或学校账户还可添加 Teams 聊天、Microsoft 365 Copilot 和 Work IQ。",
+          `Connecting lets ${AUTOPILOT_NAME} read and send your email, manage your calendar and work with your OneDrive files when you ask. Work or school accounts can also add Teams chats, Microsoft 365 Copilot and Work IQ.`,
+          `连接后，${AUTOPILOT_NAME} 可按您的要求读取和发送邮件、管理日历以及处理 OneDrive 文件。工作或学校账户还可添加 Teams 聊天、Microsoft 365 Copilot 和 Work IQ。`,
         )}
       </Text>
       {browserAvailable ? (

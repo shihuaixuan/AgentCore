@@ -59,11 +59,11 @@ const TOOL = "“Create a workflow”";
 
 test.each([
   [`Approve ${MAIL} from now on`, "allow", mail("m1")],
-  [`Let Otto judge ${MAIL} from now on`, "judge", mail("m1")],
+  [`Let 通用办公助手 judge ${MAIL} from now on`, "judge", mail("m1")],
   [`Approve ${MCP} from now on`, "allow", mcpTool("m1")],
-  [`Let Otto judge ${MCP} from now on`, "judge", mcpTool("m1")],
+  [`Let 通用办公助手 judge ${MCP} from now on`, "judge", mcpTool("m1")],
   [`Approve ${TOOL} from now on`, "allow", createAgent("m1")],
-  [`Let Otto judge ${TOOL} from now on`, "judge", createAgent("m1")],
+  [`Let 通用办公助手 judge ${TOOL} from now on`, "judge", createAgent("m1")],
 ])(
   "choosing %s approves the call and sets the %s rule for the Expert by default",
   async (item, rule, review) => {
@@ -99,7 +99,7 @@ test("a plain approve sets no rule", async () => {
 
 test.each([
   ["Frankie", "Frankie, every chat"],
-  [null, "Otto, every chat"],
+  [null, "通用办公助手, every chat"],
 ])(
   "the scope picker starts on the chat's own Expert (%s)",
   async (expertName, label) => {
@@ -150,7 +150,7 @@ test.each([
     expect(screen.getByText(judgeDetail)).toBeDefined();
     // Otto is the supervisor in every Expert's chat.
     expect(
-      screen.getByText(`Let Otto judge ${MAIL} from now on`),
+      screen.getByText(`Let 通用办公助手 judge ${MAIL} from now on`),
     ).toBeDefined();
     expect(screen.queryByText(/Let Frankie judge/)).toBeNull();
     await userEvent.click(screen.getByText(`Approve ${MAIL} from now on`));
@@ -167,12 +167,17 @@ const STEP = realCards().find((card) => card.story === "Workflow Step")!.review;
 
 test.each([
   ["This chat", "chat", `Approve ${MAIL} from now on`, "allow"],
-  ["Otto, every chat", "expert", `Let Otto judge ${MAIL} from now on`, "judge"],
+  [
+    "通用办公助手, every chat",
+    "expert",
+    `Let 通用办公助手 judge ${MAIL} from now on`,
+    "judge",
+  ],
   ["Every Expert on my team", "team", `Approve ${MAIL} from now on`, "allow"],
   [
     "Every Expert on my team",
     "team",
-    `Let Otto judge ${MAIL} from now on`,
+    `Let 通用办公助手 judge ${MAIL} from now on`,
     "judge",
   ],
 ])(

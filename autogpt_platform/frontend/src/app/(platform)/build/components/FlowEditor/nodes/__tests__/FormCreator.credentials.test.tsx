@@ -66,7 +66,7 @@ function makeNode(schema: RJSFSchema): CustomNode {
     position: { x: 0, y: 0 },
     data: {
       hardcodedValues: {},
-      title: "Otto",
+      title: "通用办公助手",
       description: "Run an autopilot task",
       inputSchema: schema,
       outputSchema: {},

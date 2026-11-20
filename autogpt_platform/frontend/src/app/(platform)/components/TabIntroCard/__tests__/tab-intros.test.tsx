@@ -147,7 +147,7 @@ describe("BuildTabIntro", () => {
     expect(await screen.findByText("Create your own workflows.")).toBeDefined();
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Ask Otto to build it" }),
+      screen.getByRole("button", { name: "Ask 通用办公助手 to build it" }),
     );
 
     expect(push).toHaveBeenCalledWith("/copilot?new=1");

@@ -1,12 +1,6 @@
-export const AUTOPILOT_NAME = "Otto";
+export { AUTOPILOT_NAME } from "@/lib/branding";
 
-export const AUTOPILOT_AVATAR_URL =
-  "/autogpt-characters/v1.1/otto/neutral/128.webp";
-
-export const AUTOPILOT_TRANSPARENT_AVATAR_URL =
-  "/experts/transparent/otto.webp";
-
-export const AUTOPILOT_COVER_URL = "/experts/covers/otto-cover-3.png";
+export { DEFAULT_ASSISTANT_AVATAR_URL as AUTOPILOT_AVATAR_URL } from "@/services/experts/default-assistant";
 
 /** Light and mid lavender, for effects drawn around Otto — the voice aura's
  *  comets and the dots that collapse into him. */

@@ -1,3 +1,4 @@
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import {
   BubbleChatIcon,
   Folder01Icon,
@@ -41,7 +42,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "chats",
     icon: BubbleChatIcon,
     title: "Every task gets its own chat",
-    body: "Ask Otto for something and it starts a new chat. They all stay here, so you can pick any of them back up.",
+    body: `Ask ${AUTOPILOT_NAME} for something and it starts a new chat. They all stay here, so you can pick any of them back up.`,
     targets: ["chats"],
     inSidebar: true,
   },
@@ -49,7 +50,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "team",
     icon: UserGroupIcon,
     title: "Experts take tasks off your plate",
-    body: "Otto can add experts to your team to own a task from start to finish. Team shows who's on what.",
+    body: `${AUTOPILOT_NAME} can add experts to your team to own a task from start to finish. Team shows who's on what.`,
     targets: ["team", "workspace"],
     inSidebar: true,
   },
@@ -81,13 +82,12 @@ export const TOUR_STEPS: TourStep[] = [
     id: "start",
     icon: Rocket01Icon,
     title: "Start with one task",
-    body: "Pick a suggestion and Otto gets going. Or describe your own in the box below.",
+    body: `Pick a suggestion and ${AUTOPILOT_NAME} gets going. Or describe your own in the box below.`,
     targets: ["first-tasks", "composer"],
     bodyFor: {
-      composer: "Tell Otto what you need, in your own words.",
+      composer: `Tell ${AUTOPILOT_NAME} what you need, in your own words.`,
     },
-    bodyWhenMissing:
-      "Otto is getting your first tasks ready. They'll show up here in a moment.",
+    bodyWhenMissing: `${AUTOPILOT_NAME} is getting your first tasks ready. They'll show up here in a moment.`,
   },
 ];
 

@@ -37,7 +37,7 @@ describe("WorkflowsMovedDialog", () => {
     expect(descriptionID).toBeTruthy();
     const description = document.getElementById(descriptionID!);
     expect(description?.textContent).toContain("Agents are now workflows");
-    expect(description?.textContent).toContain("Otto");
+    expect(description?.textContent).toContain("通用办公助手");
     const destination = within(dialog).getByRole("list", {
       name: "Where to find your workflows",
     });
@@ -45,7 +45,7 @@ describe("WorkflowsMovedDialog", () => {
       within(destination)
         .getAllByRole("listitem")
         .map((item) => item.textContent),
-    ).toEqual(["Team", "Otto", "Workflows"]);
+    ).toEqual(["Team", "通用办公助手", "Workflows"]);
   });
 
   test("links directly to Otto's workflows and records acknowledgment on click", async () => {

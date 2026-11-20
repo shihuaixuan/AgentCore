@@ -72,7 +72,7 @@ it("localizes rejection confirmation and keeps the action callbacks intact", () 
     </LanguageProvider>,
   );
   expect(screen.getByRole("alert").textContent).toBe(
-    "拒绝全部 3 项？将告知 Otto 这些操作均未执行。",
+    "拒绝全部 3 项？将告知 通用办公助手 这些操作均未执行。",
   );
   fireEvent.click(screen.getByRole("button", { name: "全部拒绝" }));
   expect(confirm).toHaveBeenCalledOnce();

@@ -35,7 +35,7 @@ test("localizes Microsoft access explanations while preserving names and scopes"
   expect(screen.getByText("需要 Microsoft 管理员批准访问。")).toBeDefined();
   expect(screen.getByText("需要你的授权")).toBeDefined();
   expect(
-    screen.getByText("允许 Otto 读取、起草和发送你的电子邮件"),
+    screen.getByText("允许 通用办公助手 读取、起草和发送你的电子邮件"),
   ).toBeDefined();
   fireEvent.click(
     screen.getByRole("button", { name: "允许 Original mail service" }),

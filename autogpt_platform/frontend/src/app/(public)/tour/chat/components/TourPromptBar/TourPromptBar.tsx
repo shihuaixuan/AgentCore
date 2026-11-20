@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useMountEffect } from "@/hooks/useMountEffect";
 import { cn } from "@/lib/utils";
 import { useRef } from "react";
@@ -52,7 +53,7 @@ export function TourPromptBar({ prompt, isStreaming, onSend }: Props) {
       aria-label={
         prompt
           ? t(`Send: ${prompt}`, `发送：${prompt}`)
-          : t("Otto is working", "Otto 正在工作")
+          : t(`${AUTOPILOT_NAME} is working`, `${AUTOPILOT_NAME} 正在工作`)
       }
       aria-disabled={isDisabled}
       onKeyDown={handleKeyDown}

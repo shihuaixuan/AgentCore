@@ -1,3 +1,4 @@
+import { AUTOPILOT_NAME } from "@/lib/branding";
 export function backgroundRefreshInterval(
   session: { background_pending?: boolean | null } | null | undefined,
 ) {
@@ -9,5 +10,5 @@ export function backgroundNotice(metadata: Record<string, unknown> | null) {
   return typeof metadata.display_content === "string" &&
     metadata.display_content
     ? metadata.display_content
-    : "Otto is following up.";
+    : `${AUTOPILOT_NAME} is following up.`;
 }

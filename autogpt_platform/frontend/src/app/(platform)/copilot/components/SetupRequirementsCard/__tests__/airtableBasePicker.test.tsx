@@ -198,8 +198,8 @@ describe("Airtable base picker in the setup card", () => {
 
   it.each([
     ["create", /you'll see what it adds before anything changes/],
-    ["edit", /Otto changes records in the one you pick/],
-    ["read", /Otto only reads from the one you pick/],
+    ["edit", /通用办公助手 changes records in the one you pick/],
+    ["read", /通用办公助手 only reads from the one you pick/],
   ] as const)(
     "the hint says what a %s step does to the base, and no more",
     async (access, words) => {
@@ -266,7 +266,7 @@ describe("Airtable base picker in the setup card", () => {
     );
 
     expect(
-      await screen.findByText(/so Otto can't change records in them/),
+      await screen.findByText(/so 通用办公助手 can't change records in them/),
     ).toBeDefined();
     expect(screen.queryByText(/add/)).toBeNull();
   });

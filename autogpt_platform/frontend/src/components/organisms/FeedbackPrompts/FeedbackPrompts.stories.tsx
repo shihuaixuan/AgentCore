@@ -83,7 +83,7 @@ function ReplyTurn({
 
 function OttoTurn({ children }: { children: React.ReactNode }) {
   return (
-    <ReplyTurn name="Otto" avatarUrl={AUTOPILOT_AVATAR_URL}>
+    <ReplyTurn name="通用办公助手" avatarUrl={AUTOPILOT_AVATAR_URL}>
       {children}
     </ReplyTurn>
   );
@@ -91,7 +91,7 @@ function OttoTurn({ children }: { children: React.ReactNode }) {
 
 function OttoLeadsChat() {
   return (
-    <MockPage title="Otto">
+    <MockPage title="通用办公助手">
       <div className="flex flex-col gap-6">
         <UserBubble>
           Find 10 dental practices in Austin with 3+ locations, with the
@@ -104,7 +104,7 @@ function OttoLeadsChat() {
             on their site.
           </Text>
           <WorkCheckCard
-            name="Otto"
+            name="通用办公助手"
             avatarUrl={AUTOPILOT_AVATAR_URL}
             note="Quick check-in on your first finished task"
           />
@@ -140,7 +140,7 @@ function MariaPricingChat({ rating }: { rating: "bad" | "okay" | null }) {
 }
 
 export const WorkCheckFirstOtto: Story = {
-  name: "3a. Work check: Otto's first finished task",
+  name: "3a. Work check: 通用办公助手's first finished task",
   render: () => <OttoLeadsChat />,
 };
 
@@ -160,9 +160,9 @@ export const WorkCheckOkay: Story = {
 };
 
 export const OttoMistake: Story = {
-  name: "4. Otto senses it got something wrong",
+  name: "4. 通用办公助手 senses it got something wrong",
   render: () => (
-    <MockPage title="Otto">
+    <MockPage title="通用办公助手">
       <div className="flex flex-col gap-6">
         <UserBubble>
           Find me 20 dentists in Austin with their emails.

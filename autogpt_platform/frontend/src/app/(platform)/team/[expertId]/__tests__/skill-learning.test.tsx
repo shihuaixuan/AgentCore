@@ -486,7 +486,9 @@ describe("Expert skills — learning", () => {
       name: "csv-import-checks",
     });
     const notice = await within(panel).findByTestId("source-removed-notice");
-    expect(notice.textContent).toContain("Otto stopped using this skill");
+    expect(notice.textContent).toContain(
+      "通用办公助手 stopped using this skill",
+    );
     expect(notice.textContent).toContain("Resume using this skill");
     expect(
       within(panel).getByRole("button", { name: "Resume using this skill" }),

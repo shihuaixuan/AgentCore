@@ -10,7 +10,7 @@ function Harness() {
   return (
     <>
       <button onClick={() => setLocale("en")}>English</button>
-      <SecretPasteNotice visible assistantName="Otto" />
+      <SecretPasteNotice visible assistantName="通用办公助手" />
       <ToolResult
         row={{
           key: "result",

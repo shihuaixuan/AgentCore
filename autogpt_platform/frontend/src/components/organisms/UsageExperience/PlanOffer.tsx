@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import {
   ArrowRight02Icon,
   SparklesIcon,
@@ -48,8 +49,8 @@ export function PlanOffer({
                 "付款成功后即可获得完整的每日和每周额度",
               )
             : t(
-                "Experts for content, sales and research, with Otto coordinating",
-                "由 Otto 协调的内容、销售和研究专家",
+                `Experts for content, sales and research, with ${AUTOPILOT_NAME} coordinating`,
+                `由 ${AUTOPILOT_NAME} 协调的内容、销售和研究专家`,
               ),
           freshUsage
             ? t(

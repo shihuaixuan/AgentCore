@@ -18,10 +18,10 @@ describe("Microsoft setup page", () => {
       </LanguageProvider>,
     );
     expect(
-      screen.getByText("允许 Otto 读取、起草和发送你的电子邮件"),
+      screen.getByText("允许 通用办公助手 读取、起草和发送你的电子邮件"),
     ).toBeDefined();
     expect(
-      screen.getByText("允许 Otto 打开、创建和编辑你的 OneDrive 文件"),
+      screen.getByText("允许 通用办公助手 打开、创建和编辑你的 OneDrive 文件"),
     ).toBeDefined();
     expect(screen.getByText("Microsoft 365 Copilot")).toBeDefined();
     expect(
@@ -31,7 +31,7 @@ describe("Microsoft setup page", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "English" }));
     expect(
-      screen.getByText("Lets Otto read, draft and send your email"),
+      screen.getByText("Lets 通用办公助手 read, draft and send your email"),
     ).toBeDefined();
   });
 
@@ -39,7 +39,7 @@ describe("Microsoft setup page", () => {
     render(<MicrosoftSetupPage />);
 
     expect(
-      screen.getByText("Lets Otto read, draft and send your email"),
+      screen.getByText("Lets 通用办公助手 read, draft and send your email"),
     ).toBeTruthy();
     const step = screen
       .getAllByRole("listitem")

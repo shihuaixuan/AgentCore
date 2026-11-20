@@ -32,7 +32,9 @@ describe("legacy credits page usage", () => {
     );
 
     render(<CreditsPage />);
-    fireEvent.click(await screen.findByRole("button", { name: "Open Otto" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Open 通用办公助手" }),
+    );
 
     expect(routerPush).toHaveBeenCalledWith("/copilot");
   });

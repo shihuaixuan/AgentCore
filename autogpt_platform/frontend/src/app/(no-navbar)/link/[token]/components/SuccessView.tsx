@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -56,7 +57,7 @@ export function SuccessView({
             {t(
               detail,
               forUser
-                ? `现在可以在 ${platform} 私信中与 Otto 聊天。`
+                ? `现在可以在 ${platform} 私信中与 ${AUTOPILOT_NAME} 聊天。`
                 : "共享空间中的所有成员现在都可以开始使用 AutoGPT。",
             )}
           </Text>

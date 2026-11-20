@@ -39,7 +39,7 @@ describe("RecentChats — navigation in progress", () => {
         sessions: [
           {
             id: "autopilot-1",
-            title: "Otto chat",
+            title: "通用办公助手 chat",
             is_processing: false,
             created_at: "2026-06-30T10:00:00",
             updated_at: "2026-06-30T10:00:00",
@@ -57,7 +57,7 @@ describe("RecentChats — navigation in progress", () => {
     );
 
     const link = await screen.findByRole("link", {
-      name: "Otto chat",
+      name: "通用办公助手 chat",
     });
     expect(link.querySelector("svg.animate-spin")).not.toBeNull();
   });

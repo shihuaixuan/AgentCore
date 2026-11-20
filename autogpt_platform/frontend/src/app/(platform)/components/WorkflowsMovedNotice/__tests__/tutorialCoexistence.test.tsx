@@ -169,7 +169,7 @@ describe("migration notice with production first-visit tutorials", () => {
       "/build",
       BuildTabIntro,
       "Create your own workflows.",
-      "Ask Otto to build it",
+      "Ask 通用办公助手 to build it",
       "BUILD_TAB_INTRO",
     ],
   ] as const)(
@@ -195,7 +195,7 @@ describe("migration notice with production first-visit tutorials", () => {
     context.pathname = "/build";
     const { refresh, queryClient } = renderTogether(BuildTabIntro);
     await userEvent.click(
-      screen.getByRole("button", { name: "Ask Otto to build it" }),
+      screen.getByRole("button", { name: "Ask 通用办公助手 to build it" }),
     );
     expect(context.push).toHaveBeenCalledExactlyOnceWith("/copilot?new=1");
     const destination = new URL(

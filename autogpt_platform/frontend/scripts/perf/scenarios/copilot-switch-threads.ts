@@ -18,7 +18,9 @@ export const copilotSwitchThreads: Scenario = {
     await openLongSession({ ctx });
     const expand = page.getByRole("button", { name: "Expand sidebar" });
     if (await expand.isVisible()) await expand.click();
-    const loadAll = page.getByRole("button", { name: "Load all Otto chats" });
+    const loadAll = page.getByRole("button", {
+      name: "Load all 通用办公助手 chats",
+    });
     if (await loadAll.isVisible()) await loadAll.click();
     // The AppSidebar lists chats as links, the copilot's own ChatSidebar as
     // buttons whose name also carries the date.

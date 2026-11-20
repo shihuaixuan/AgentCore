@@ -1,4 +1,5 @@
 "use client";
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { FileInput } from "@/components/atoms/FileInput/FileInput";
@@ -24,8 +25,8 @@ export default function ExternalWorkflowTab({
     <TabsLineContent value="platform">
       <p className="mb-4 text-body text-foreground-tertiary">
         {t(
-          "Upload a workflow exported from n8n, Make.com, Zapier, or any other platform. Otto will convert it into an AutoGPT workflow for you.",
-          "上传从 n8n、Make.com、Zapier 或其他平台导出的工作流，Otto 会将其转换为 AutoGPT 工作流。",
+          `Upload a workflow exported from n8n, Make.com, Zapier, or any other platform. ${AUTOPILOT_NAME} will convert it into an AutoGPT workflow for you.`,
+          `上传从 n8n、Make.com、Zapier 或其他平台导出的工作流，${AUTOPILOT_NAME} 会将其转换为 AutoGPT 工作流。`,
         )}
       </p>
       <FileInput
@@ -54,7 +55,7 @@ export default function ExternalWorkflowTab({
             <span>{t("Importing...", "正在导入…")}</span>
           </div>
         ) : (
-          t("Import to Otto", "导入至 Otto")
+          t(`Import to ${AUTOPILOT_NAME}`, `导入至 ${AUTOPILOT_NAME}`)
         )}
       </Button>
 

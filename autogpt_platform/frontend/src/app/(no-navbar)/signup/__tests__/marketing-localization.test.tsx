@@ -22,7 +22,7 @@ it("localizes signup marketing and switches back to English", () => {
   expect(screen.getByText("他们会学习你的方式")).toBeDefined();
   expect(screen.getByText("你始终掌握决定权")).toBeDefined();
   expect(screen.getByText("连接你已经在用的工具")).toBeDefined();
-  expect(screen.getByText(/Otto 是你的 AI 负责人/)).toBeDefined();
+  expect(screen.getByText(/通用办公助手 是你的 AI 负责人/)).toBeDefined();
   fireEvent.click(screen.getByRole("button", { name: "English" }));
   expect(screen.getByText("Your ambition")).toBeDefined();
   expect(screen.getByText("A specialist for every job")).toBeDefined();

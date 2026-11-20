@@ -19,7 +19,6 @@ const TECHNICAL_COPY = new Set([
   "AutoGPT",
   "AutoPilot",
   "Copilot",
-  "Otto",
   "ChatGPT",
   "Claude",
   "OpenAI",
@@ -202,6 +201,25 @@ export function auditUICopy(
       expression(node.right);
   }
   function visit(node: ts.Node) {
+    if (
+      (ts.isStringLiteralLike(node) ||
+        ts.isTemplateMiddleOrTemplateTail(node) ||
+        node.kind === ts.SyntaxKind.TemplateHead ||
+        ts.isJsxText(node)) &&
+      "text" in node &&
+      typeof node.text === "string" &&
+      /\bOtto\b/.test(node.text) &&
+      !isCode(node)
+    ) {
+      findings.push({
+        file,
+        line:
+          source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1,
+        kind: "legacy-assistant-name",
+        text: node.text.trim(),
+      });
+      return;
+    }
     if (ts.isJsxText(node)) add(node, node.text, "text");
     if (
       ts.isJsxAttribute(node) &&

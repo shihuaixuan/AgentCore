@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { DecisionRequestAction } from "@/app/api/__generated__/models/decisionRequestAction";
 import type { Expert } from "@/app/api/__generated__/models/expert";
@@ -68,7 +69,7 @@ export function OpenDecisionsCard({
                       ),
                       locale,
                     )
-                  : "Otto"}
+                  : AUTOPILOT_NAME}
               </Text>
               <Text variant="small" as="p" tone="secondary">
                 {proposal.summary || proposal.description} —{" "}

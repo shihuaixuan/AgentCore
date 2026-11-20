@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { BillingPlanOffer } from "./BillingPlanOffer";
 import { SupportOffer } from "./SupportOffer";
@@ -110,8 +111,8 @@ export function BillingOffer({ controller }: Props) {
         ]
       : [
           t(
-            "Experts for content, sales and research, with Otto coordinating",
-            "由 Otto 协调的内容、销售和研究专家",
+            `Experts for content, sales and research, with ${AUTOPILOT_NAME} coordinating`,
+            `由 ${AUTOPILOT_NAME} 协调的内容、销售和研究专家`,
           ),
           t(
             "Workflows that keep working in the background on a schedule",

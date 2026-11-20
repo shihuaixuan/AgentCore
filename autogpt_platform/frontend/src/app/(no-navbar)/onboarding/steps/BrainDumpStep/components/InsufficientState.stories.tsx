@@ -66,12 +66,15 @@ function typed(heardText: string, replyKind: OttoReplyKind | null): Story {
 }
 
 export const MicCheck = voice("Um, okay. Hi. Is this working?", "mic_check");
-export const Greeting = voice("Hi Otto, nice to meet you.", "greeting");
+export const Greeting = voice("Hi 通用办公助手, nice to meet you.", "greeting");
 export const Unsure = voice("Hmm. I don't know.", "unsure");
 export const Reluctant = voice("I don't want to do this.", "reluctant");
 export const WhatToSay = voice("What am I supposed to say?", "what_to_say");
 export const WantsToSkip = voice("Can I skip this?", "wants_to_skip");
-export const AboutOtto = voice("What is this?", "about_otto");
+export const AboutOtto: Story = {
+  ...voice("What is this?", "about_otto"),
+  name: "About 通用办公助手",
+};
 export const Busy = voice("Hang on, one second.", "busy");
 export const Annoyed = voice("This is pointless.", "annoyed");
 export const SomeWork = voice("I do marketing.", "some_work");

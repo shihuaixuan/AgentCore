@@ -32,7 +32,7 @@ it("localizes plan features and paused schedules while preserving plan keys", ()
   );
   expect(screen.getByRole("group", { name: "计费周期" })).toBeDefined();
   expect(
-    screen.getByText("由 Otto 协调内容、销售和研究领域的专家"),
+    screen.getByText("由 通用办公助手 协调内容、销售和研究领域的专家"),
   ).toBeDefined();
   expect(
     screen.getByText("你的 3 个定时工作流已暂停，订阅后即可恢复。"),

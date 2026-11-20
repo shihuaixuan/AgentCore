@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -83,7 +84,7 @@ export function ReadyView({
               <li>
                 {t(
                   `Anyone in the ${serverNoun} can give AutoGPT tasks`,
-                  "共享空间中的所有人都可以向 Otto 分配任务",
+                  `共享空间中的所有人都可以向 ${AUTOPILOT_NAME} 分配任务`,
                 )}
               </li>
               <li>

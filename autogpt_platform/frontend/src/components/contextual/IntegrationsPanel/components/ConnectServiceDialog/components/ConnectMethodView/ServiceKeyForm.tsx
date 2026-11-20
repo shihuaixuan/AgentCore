@@ -1,4 +1,5 @@
 "use client";
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
@@ -50,8 +51,8 @@ export function ServiceKeyForm({ provider, service, onConnected }: Props) {
       <div className="space-y-2 rounded-xl bg-surface-muted p-4 text-body text-foreground-tertiary">
         <p>
           {t(
-            `This workflow needs an API key for ${service.name}. Otto will use it only for requests to ${service.host}.`,
-            `此工作流需要 ${service.name} 的 API 密钥。Otto 仅会在向 ${service.host} 发送请求时使用此密钥。`,
+            `This workflow needs an API key for ${service.name}. ${AUTOPILOT_NAME} will use it only for requests to ${service.host}.`,
+            `此工作流需要 ${service.name} 的 API 密钥。${AUTOPILOT_NAME} 仅会在向 ${service.host} 发送请求时使用此密钥。`,
           )}
         </p>
         <p>

@@ -43,7 +43,7 @@ describe("WorkflowsMovedWalkthrough", () => {
       video.getAttribute("aria-describedby")!,
     );
     expect(description?.textContent).toContain("Team");
-    expect(description?.textContent).toContain("Otto");
+    expect(description?.textContent).toContain("通用办公助手");
     expect(description?.textContent).toContain("Workflows");
     expect(description?.textContent).toContain("Select a workflow name");
     expect(description?.textContent).toContain("Setup your task");
@@ -207,7 +207,7 @@ describe("WorkflowsMovedWalkthrough", () => {
     fireEvent.error(getVideo());
     const fallback = await screen.findByRole("status");
     expect(fallback.textContent).toContain("Team");
-    expect(fallback.textContent).toContain("Otto");
+    expect(fallback.textContent).toContain("通用办公助手");
     expect(fallback.textContent).toContain("Workflows");
     expect(screen.queryByRole("button", { name: /walkthrough/ })).toBeNull();
     await waitFor(() => expect(document.activeElement).toBe(fallback));

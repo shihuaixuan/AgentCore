@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -26,8 +27,8 @@ export function SummaryCard({
         <Text variant="small" as="span" tone="muted">
           {isAutoPilot
             ? t(
-                "Ask Otto what it knows about you. Opens a chat — you can correct or forget anything from there.",
-                "询问 Otto 对你的了解。这会打开聊天，你可以在其中纠正内容或让 Otto 忘记任何信息。",
+                `Ask ${AUTOPILOT_NAME} what it knows about you. Opens a chat — you can correct or forget anything from there.`,
+                `询问 ${AUTOPILOT_NAME} 对你的了解。这会打开聊天，你可以在其中纠正内容或让 ${AUTOPILOT_NAME} 忘记任何信息。`,
               )
             : t(
                 `Ask ${scopeName} what they know about you and their work. Opens a chat.`,

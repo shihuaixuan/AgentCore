@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Text } from "@/components/atoms/Text/Text";
@@ -28,8 +29,8 @@ export function ChangelogFallback() {
         </Text>
         <Text as="span" variant="body" tone="secondary">
           {t(
-            "Release notes for Otto, your Experts and the AutoGPT Platform",
-            "Otto、专家团队和 AutoGPT 平台的更新说明",
+            `Release notes for ${AUTOPILOT_NAME}, your Experts and the AutoGPT Platform`,
+            `${AUTOPILOT_NAME}、专家团队和 AutoGPT 平台的更新说明`,
           )}
           <span className="sr-only">
             {t("(opens in a new tab)", "（在新标签页中打开）")}

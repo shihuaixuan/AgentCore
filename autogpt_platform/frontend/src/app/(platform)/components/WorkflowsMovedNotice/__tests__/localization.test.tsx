@@ -47,7 +47,7 @@ describe("workflow migration localization", () => {
     expect(dialog.getByText("工作区更新")).toBeDefined();
     expect(dialog.getByText("无需重新设置。")).toBeDefined();
     expect(dialog.getByRole("list", { name: "工作流位置" }).textContent).toBe(
-      "团队Otto工作流",
+      "团队通用办公助手工作流",
     );
     const destination = dialog.getByRole("link", { name: "前往我的工作流" });
     expect(destination.getAttribute("href")).toBe(
@@ -99,7 +99,7 @@ describe("workflow migration localization", () => {
     );
     fireEvent.error(screen.getByLabelText("如何找到工作流"));
     expect(screen.getByRole("status").textContent).toBe(
-      "无法加载演示。请打开“团队”，选择 Otto，再选择“工作流”。",
+      "无法加载演示。请打开“团队”，选择 通用办公助手，再选择“工作流”。",
     );
   });
 
@@ -115,7 +115,7 @@ describe("workflow migration localization", () => {
     await userEvent.click(screen.getByRole("button", { name: "播放演示" }));
     await waitFor(() =>
       expect(screen.getByRole("status").textContent).toBe(
-        "视频无法开始播放。请重试，或打开“团队”，选择 Otto，再选择“工作流”。",
+        "视频无法开始播放。请重试，或打开“团队”，选择 通用办公助手，再选择“工作流”。",
       ),
     );
     expect(screen.getByRole("button", { name: "播放演示" })).toBeDefined();

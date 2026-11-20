@@ -143,7 +143,7 @@ const dashboard: HomeDashboardResponse = {
     failed_count: 1,
     routine_count: 13,
     outcomes: [cameraResearch, schedulingFailure],
-    author: { kind: "autopilot", name: "Otto", role: "Head of AI" },
+    author: { kind: "autopilot", name: "通用办公助手", role: "Head of AI" },
   },
   active_tasks: [
     {
@@ -627,7 +627,7 @@ test("bylines the briefing to Otto, not to the expert it reports on", async () =
   render(<HomeRecap />);
 
   const byline = within(await screen.findByTestId("briefing-byline"));
-  expect(byline.getByText("Otto")).toBeDefined();
+  expect(byline.getByText("通用办公助手")).toBeDefined();
   expect(byline.getByText("Head of AI")).toBeDefined();
   // Maria's run is reported all over the page; the byline is the one place
   // she must not appear as the author of.

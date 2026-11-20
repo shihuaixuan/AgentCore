@@ -24,7 +24,8 @@ vi.mock("@/services/environment", () => ({
   },
 }));
 
-const BANNER_TEXT = /get a notification when otto or your experts finish/i;
+const BANNER_TEXT =
+  /get a notification when 通用办公助手 or your experts finish/i;
 const DISMISSED_KEY = "copilot-notification-banner-dismissed";
 const ENABLED_KEY = "copilot-notifications-enabled";
 

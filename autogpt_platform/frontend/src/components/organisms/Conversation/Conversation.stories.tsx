@@ -81,7 +81,7 @@ export const EmptyState: Story = {
         <ConversationContent className="h-full">
           <ConversationEmptyState
             title="No messages yet"
-            description="Ask Otto anything to start the conversation"
+            description="Ask 通用办公助手 anything to start the conversation"
             icon={<Icon icon={BubbleChatIcon} size={32} />}
           />
         </ConversationContent>

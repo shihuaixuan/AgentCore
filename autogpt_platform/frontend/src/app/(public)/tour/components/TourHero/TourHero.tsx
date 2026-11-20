@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { AutoGPTLogo } from "@/components/atoms/AutoGPTLogo/AutoGPTLogo";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -45,8 +46,8 @@ export function TourHero() {
             className="mt-5 max-w-xl text-balance"
           >
             {t(
-              "Describe a goal and watch Otto build and run a working workflow on Duanmu Software, right in your browser.",
-              "用日常语言描述目标，Otto 就能在端木软件平台上为你构建并运行工作流，全程都在浏览器中完成。",
+              `Describe a goal and watch ${AUTOPILOT_NAME} build and run a working workflow on Duanmu Software, right in your browser.`,
+              `用日常语言描述目标，${AUTOPILOT_NAME} 就能在端木软件平台上为你构建并运行工作流，全程都在浏览器中完成。`,
             )}
           </Text>
 

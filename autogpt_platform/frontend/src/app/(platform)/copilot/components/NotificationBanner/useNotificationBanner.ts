@@ -1,3 +1,4 @@
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import {
   readPermission,
   subscribeToPermission,
@@ -40,8 +41,8 @@ export function useNotificationBanner() {
       toast({
         title: t("Notifications are on", "通知已开启"),
         description: t(
-          "We'll let you know when Otto or your experts finish.",
-          "Otto 或你的专家完成任务时，我们会通知你。",
+          `We'll let you know when ${AUTOPILOT_NAME} or your experts finish.`,
+          `${AUTOPILOT_NAME} 或你的专家完成任务时，我们会通知你。`,
         ),
       });
     }

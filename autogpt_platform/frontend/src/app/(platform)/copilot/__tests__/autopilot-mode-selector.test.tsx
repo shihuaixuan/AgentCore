@@ -135,7 +135,7 @@ describe("AutoPilot mode selector", { timeout: 15_000 }, () => {
     ).toBeNull();
     expect(
       await screen.findByText(
-        /^Otto will not ask before anything in this chat\./,
+        /^通用办公助手 will not ask before anything in this chat\./,
       ),
     ).toBeDefined();
     await user.click(

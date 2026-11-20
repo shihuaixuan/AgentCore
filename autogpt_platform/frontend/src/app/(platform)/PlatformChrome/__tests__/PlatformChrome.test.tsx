@@ -100,7 +100,7 @@ describe("PlatformChrome", () => {
       </PlatformChrome>,
     );
 
-    expect(screen.queryByText("Try Otto")).toBeNull();
+    expect(screen.queryByText("Try 通用办公助手")).toBeNull();
     expect(screen.queryByText("Recent chats")).toBeNull();
     for (const label of [
       "Daily brief",

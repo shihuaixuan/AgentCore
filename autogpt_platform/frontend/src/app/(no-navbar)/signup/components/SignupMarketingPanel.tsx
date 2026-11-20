@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { AuthMarketingPanel } from "@/components/auth/AuthSplitLayout/AuthMarketingPanel";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
@@ -21,8 +22,8 @@ export function SignupMarketingPanel() {
         </span>,
       ]}
       description={t(
-        "Hire AI experts who research, write, sell and take work off your plate. Otto, your Head of AI, hands out the jobs and reports back to you.",
-        "聘用 AI 专家，帮你调研、写作、销售并分担工作。Otto 是你的 AI 负责人，负责分配任务并向你汇报。",
+        `Hire AI experts who research, write, sell and take work off your plate. ${AUTOPILOT_NAME}, your Head of AI, hands out the jobs and reports back to you.`,
+        `聘用 AI 专家，帮你调研、写作、销售并分担工作。${AUTOPILOT_NAME} 是你的 AI 负责人，负责分配任务并向你汇报。`,
       )}
       footerText={t(
         "Connects with the tools you already use",

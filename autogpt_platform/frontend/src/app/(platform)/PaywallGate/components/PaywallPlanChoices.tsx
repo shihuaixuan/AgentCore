@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { SparklesIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/atoms/Button/Button";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -128,8 +129,8 @@ function PlanChoice({
   const features = isPro
     ? [
         t(
-          "Experts for content, sales and research, with Otto coordinating",
-          "由 Otto 协调内容、销售和研究领域的专家",
+          `Experts for content, sales and research, with ${AUTOPILOT_NAME} coordinating`,
+          `由 ${AUTOPILOT_NAME} 协调内容、销售和研究领域的专家`,
         ),
         t(
           "Workflows that keep working in the background on a schedule",

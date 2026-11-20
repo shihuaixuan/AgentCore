@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import type { Expert } from "@/app/api/__generated__/models/expert";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -39,7 +40,7 @@ export function ScopeSelect({ scopeExpertID, experts, onSelect }: Props) {
     : undefined;
   const selectedTitle = scopeExpertID
     ? getExpertDisplayTitle(selectedExpert, locale)
-    : "Otto";
+    : AUTOPILOT_NAME;
 
   return (
     <DropdownMenu>
@@ -81,7 +82,7 @@ export function ScopeSelect({ scopeExpertID, experts, onSelect }: Props) {
           <AutopilotAvatar size={28} />
           <span className="flex min-w-0 flex-col leading-snug">
             <span className="text-body font-medium text-foreground-base">
-              Otto
+              {AUTOPILOT_NAME}
             </span>
             <span className="text-caption text-foreground-tertiary">
               {t(

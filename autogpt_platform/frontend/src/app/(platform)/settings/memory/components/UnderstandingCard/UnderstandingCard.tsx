@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
@@ -27,7 +28,10 @@ export function UnderstandingCard() {
     return (
       <ErrorCard
         responseError={error || undefined}
-        context={t("what Otto knows about your work", "Otto 对你工作的了解")}
+        context={t(
+          `what ${AUTOPILOT_NAME} knows about your work`,
+          `${AUTOPILOT_NAME} 对你工作的了解`,
+        )}
         onRetry={refetch}
       />
     );
@@ -41,19 +45,22 @@ export function UnderstandingCard() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-col">
           <Text variant="body-medium" as="h2" id="understanding-title">
-            {t("What Otto knows about your work", "Otto 对你工作的了解")}
+            {t(
+              `What ${AUTOPILOT_NAME} knows about your work`,
+              `${AUTOPILOT_NAME} 对你工作的了解`,
+            )}
           </Text>
           <Text variant="small" as="span" tone="muted">
             {t(
-              "From your onboarding and your chats. Every new chat with Otto starts with this.",
-              "来自你的引导设置和聊天。每次与 Otto 开始新聊天时都会参考这些内容。",
+              `From your onboarding and your chats. Every new chat with ${AUTOPILOT_NAME} starts with this.`,
+              `来自你的引导设置和聊天。每次与 ${AUTOPILOT_NAME} 开始新聊天时都会参考这些内容。`,
             )}
           </Text>
         </div>
         <Dialog
           title={t(
-            "Forget what Otto knows about your work",
-            "忘记 Otto 对你工作的了解",
+            `Forget what ${AUTOPILOT_NAME} knows about your work`,
+            `忘记 ${AUTOPILOT_NAME} 对你工作的了解`,
           )}
           styling={{ maxWidth: "440px" }}
           controlled={{ isOpen: isConfirmOpen, set: setIsConfirmOpen }}
@@ -67,8 +74,8 @@ export function UnderstandingCard() {
             <div className="flex flex-col gap-4">
               <Text variant="small" as="p" tone="secondary">
                 {t(
-                  "Otto stops starting new chats with this. Your recent memories stay.",
-                  "Otto 将不再在新聊天中使用这些内容。近期记忆会保留。",
+                  `${AUTOPILOT_NAME} stops starting new chats with this. Your recent memories stay.`,
+                  `${AUTOPILOT_NAME} 将不再在新聊天中使用这些内容。近期记忆会保留。`,
                 )}
               </Text>
               <div className="flex justify-end gap-2">

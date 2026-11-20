@@ -57,7 +57,7 @@ describe("Chinese scripted tour playback", () => {
     );
     expect(screen.getByText("竞品监测")).toBeDefined();
     expect(
-      screen.getByText("模拟演示 — 注册后，让 Otto 处理你的真实任务。"),
+      screen.getByText("模拟演示 — 注册后，让 通用办公助手 处理你的真实任务。"),
     ).toBeDefined();
     await advancePlayback(1_600);
     fireEvent.keyDown(screen.getByRole("button", { name: /^发送：/ }), {

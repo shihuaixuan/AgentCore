@@ -151,7 +151,9 @@ test("a decided row stays as a receipt after the refetch drops it, and the count
   await userEvent.click(
     screen.getByRole("button", { name: `Approve: ${decided.title}` }),
   );
-  expect(await screen.findByText("· Approved · Otto is on it")).toBeDefined();
+  expect(
+    await screen.findByText("· Approved · 通用办公助手 is on it"),
+  ).toBeDefined();
   expect(badge().textContent).toBe("1");
 
   refetch([next]);
@@ -160,7 +162,7 @@ test("a decided row stays as a receipt after the refetch drops it, and the count
     .getAllByText(/^(Q3 reports|Invoices)$/)
     .map((el) => el.textContent);
   expect(objects).toEqual(["Q3 reports", "Invoices"]);
-  expect(screen.getByText("· Approved · Otto is on it")).toBeDefined();
+  expect(screen.getByText("· Approved · 通用办公助手 is on it")).toBeDefined();
   await waitFor(() => expect(document.activeElement?.id).toContain("f2"));
 });
 
@@ -277,11 +279,11 @@ test.each([
       await userEvent.click(
         screen.getByRole("button", { name: `Approve: ${item.title}` }),
       );
-      await screen.findByText("· Approved · Otto is on it");
+      await screen.findByText("· Approved · 通用办公助手 is on it");
     }
     refetch([]);
     await screen.findByText(
-      /^· (Approved · Otto is on it|Answered elsewhere)$/,
+      /^· (Approved · 通用办公助手 is on it|Answered elsewhere)$/,
     );
 
     // The gate deletes a decided row; the same call recreates it under the same id.
@@ -291,7 +293,9 @@ test.each([
       await screen.findByRole("button", { name: `Approve: ${item.title}` }),
     ).toBeDefined();
     expect(
-      screen.queryByText(/^· (Approved · Otto is on it|Answered elsewhere)$/),
+      screen.queryByText(
+        /^· (Approved · 通用办公助手 is on it|Answered elsewhere)$/,
+      ),
     ).toBeNull();
     expect(badge().textContent).toBe("1");
   },
@@ -359,7 +363,9 @@ test("a burst of decisions refetches the dashboard once", async () => {
     );
 
   await waitFor(() =>
-    expect(screen.getAllByText("· Approved · Otto is on it")).toHaveLength(3),
+    expect(
+      screen.getAllByText("· Approved · 通用办公助手 is on it"),
+    ).toHaveLength(3),
   );
   await waitFor(() => expect(refetches()).toBe(1));
   await new Promise((resolve) => setTimeout(resolve, 600));

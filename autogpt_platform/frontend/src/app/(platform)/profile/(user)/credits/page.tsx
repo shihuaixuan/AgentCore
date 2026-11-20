@@ -1,4 +1,5 @@
 "use client";
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useEffect, useState } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
@@ -72,7 +73,7 @@ function CoPilotUsageSection() {
         className="w-full"
         onClick={() => router.push("/copilot")}
       >
-        {t("Open Otto", "打开 Otto")}
+        {t(`Open ${AUTOPILOT_NAME}`, `打开 ${AUTOPILOT_NAME}`)}
       </Button>
     </div>
   );

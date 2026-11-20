@@ -63,7 +63,7 @@ function Composer({
           <div className="relative min-w-0 flex-1 max-md:order-first max-md:w-full max-md:basis-full">
             <PromptInputTextarea
               aria-label="Message"
-              placeholder="Ask Otto anything"
+              placeholder="Ask 通用办公助手 anything"
               value={value}
               disabled={textareaDisabled}
               onChange={(event) => setValue(event.target.value)}

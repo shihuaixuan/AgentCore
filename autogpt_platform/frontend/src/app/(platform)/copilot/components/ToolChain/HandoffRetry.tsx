@@ -1,5 +1,6 @@
 "use client";
 
+import { AUTOPILOT_NAME } from "@/lib/branding";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
@@ -26,7 +27,10 @@ export function HandoffRetry({ title, name, expertId, onSend }: Props) {
   if (asked) {
     return (
       <Text variant="body-tight" as="span" tone="muted">
-        {t("Asked Otto to try again.", "已请 Otto 重试。")}
+        {t(
+          `Asked ${AUTOPILOT_NAME} to try again.`,
+          `已请 ${AUTOPILOT_NAME} 重试。`,
+        )}
       </Text>
     );
   }
