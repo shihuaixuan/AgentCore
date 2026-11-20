@@ -1610,6 +1610,7 @@ class TestGetOrCreateUserProfile:
         # name defaults to the email local-part
         assert created["name"] == "alice"
         assert created["username"]
+        assert created["description"] == ""
 
     @pytest.mark.asyncio
     async def test_does_not_create_profile_when_one_exists(self):

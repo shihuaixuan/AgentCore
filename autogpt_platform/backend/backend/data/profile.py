@@ -76,7 +76,7 @@ async def ensure_profile(user_id: str, email: Optional[str]) -> None:
                     userId=user_id,
                     name=name,
                     username=await _generate_profile_username(),
-                    description="I'm new here",
+                    description="",
                     links=[],
                     avatarUrl="",
                 )
