@@ -62,8 +62,8 @@ function discoveryMessage(code: number, t: (en: string, zh: string) => string) {
   switch (code) {
     case 422:
       return t(
-        "Check the public HTTPS Base URL and API key.",
-        "请检查公网 HTTPS Base URL 和 API Key。",
+        "Check the public HTTP or HTTPS Base URL and API key.",
+        "请检查公网 HTTP 或 HTTPS Base URL 和 API Key。",
       );
     case 424:
       return t(

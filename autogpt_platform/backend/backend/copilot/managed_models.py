@@ -15,7 +15,7 @@ _FIELDS = 'id, name, model, "baseUrl" AS base_url, enabled'
 def validate_base_url(value: str) -> str:
     parsed = urlsplit(value)
     if (
-        parsed.scheme != "https"
+        parsed.scheme not in {"http", "https"}
         or not parsed.hostname
         or parsed.username is not None
         or parsed.password is not None
@@ -25,7 +25,7 @@ def validate_base_url(value: str) -> str:
         or any(character.isspace() for character in value)
     ):
         raise ValueError(
-            "Use an HTTPS API base URL without credentials, query or fragment."
+            "Use an HTTP or HTTPS API base URL without credentials, query or fragment."
         )
     if parsed.port == 0 or parsed.path.rstrip("/").endswith("/chat/completions"):
         raise ValueError("Use the API base URL, not the Chat Completions endpoint.")

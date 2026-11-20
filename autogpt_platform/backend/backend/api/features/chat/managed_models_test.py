@@ -30,6 +30,16 @@ def test_rejects_unsafe_base_url(base_url):
         )
 
 
+def test_http_base_url_is_supported():
+    data = managed_models.ModelCreate(
+        name="My model",
+        model="model-id",
+        base_url="http://162.35.169.105:8080/v1/",
+        api_key="test-only",
+    )
+    assert data.base_url == "http://162.35.169.105:8080/v1"
+
+
 @pytest.mark.asyncio
 async def test_disabled_or_unknown_model_cannot_be_resolved(monkeypatch):
     query = AsyncMock(return_value=[])
@@ -81,6 +91,16 @@ def test_transport_preserves_tls_identity_on_validated_ip():
         public_request(
             httpx.Request("GET", "https://other.example"), "ai.example", "1.1.1.1"
         )
+
+
+def test_http_transport_preserves_host_without_tls_identity():
+    original = httpx.Request("GET", "http://ai.example:8080/v1/models")
+    original.extensions["sni_hostname"] = "stale.example"
+    request = public_request(original, hostname="ai.example", ip_address="1.1.1.1")
+    assert request.url.host == "1.1.1.1"
+    assert request.url.port == 8080
+    assert request.headers["Host"] == "ai.example:8080"
+    assert "sni_hostname" not in request.extensions
 
 
 def test_non_admin_cannot_change_model_availability(monkeypatch):

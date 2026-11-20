@@ -10,14 +10,19 @@ from backend.util.request import validate_url_host
 def public_request(
     request: httpx.Request, hostname: str, ip_address: str
 ) -> httpx.Request:
-    if request.url.scheme != "https" or request.url.host != hostname:
+    if request.url.scheme not in {"http", "https"} or request.url.host != hostname:
         raise ValueError("Managed chat requests must stay on the configured host.")
+    extensions = dict(request.extensions)
+    if request.url.scheme == "https":
+        extensions["sni_hostname"] = hostname
+    else:
+        extensions.pop("sni_hostname", None)
     return httpx.Request(
         request.method,
         request.url.copy_with(host=ip_address),
         headers=request.headers,
         stream=request.stream,
-        extensions={**request.extensions, "sni_hostname": hostname},
+        extensions=extensions,
     )
 
 

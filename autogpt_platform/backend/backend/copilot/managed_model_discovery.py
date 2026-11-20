@@ -17,7 +17,7 @@ class ModelDiscoveryRequest(BaseModel):
 
 
 class DiscoveryFailure(StrEnum):
-    INVALID_CONNECTION = "Use a public HTTPS Base URL and a valid API key."
+    INVALID_CONNECTION = "Use a public HTTP or HTTPS Base URL and a valid API key."
     REJECTED_KEY = "The provider rejected the API key for model listing."
     NOT_SUPPORTED = "This Base URL does not offer an OpenAI-compatible model list."
     UNAVAILABLE = "The provider did not return a valid model list."

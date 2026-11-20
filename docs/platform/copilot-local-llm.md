@@ -16,8 +16,9 @@ endpoint you control**.
 ## Configure chat models in Settings
 
 For the main web chat, an administrator can instead configure models in
-**Settings → Chat models → Add model**. Enter a public HTTPS API base URL
-(for example `https://api.example.com/v1`) and an API key, then click
+**Settings → Chat models → Add model**. Enter a public HTTP or HTTPS API base URL
+(for example `https://api.example.com/v1` or
+`http://api.example.com:8080/v1`) and an API key, then click
 **Fetch models**. AutoGPT queries the provider's `GET /models` endpoint
 with the key. Pick a model from the list, or enter the upstream model ID
 manually if the provider does not offer a list. Enter a display name and

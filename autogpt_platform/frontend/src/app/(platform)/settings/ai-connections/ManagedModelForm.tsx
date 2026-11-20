@@ -68,7 +68,7 @@ export function ManagedModelForm({ model, saving, onCancel, onSave }: Props) {
         id={`${id}-url`}
         type="url"
         label="Base URL"
-        placeholder="https://api.example.com/v1"
+        placeholder="https://api.example.com/v1 or http://api.example.com:8080/v1"
         value={baseURL}
         onChange={(event) => {
           setBaseURL(event.currentTarget.value);
