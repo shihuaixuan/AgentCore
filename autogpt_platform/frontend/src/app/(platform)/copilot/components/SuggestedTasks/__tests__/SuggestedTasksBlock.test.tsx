@@ -1,4 +1,5 @@
 import type { SuggestedTask } from "@/app/api/__generated__/models/suggestedTask";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import {
   render,
   screen,
@@ -172,6 +173,47 @@ afterEach(() => {
 });
 
 describe("SuggestedTasksBlock — Hide and Show", () => {
+  it("shows Chinese template copy after expanding both levels without changing the task sent", async () => {
+    const titles = [
+      "Build a list of 25 companies that look like your best customers",
+      "Draft next week's posts and a newsletter in your voice",
+      "Custom task",
+      "Write a one-page pitch for your next investor or partner call",
+      "Research three competitors and what they charge",
+    ];
+    const tasks = titles.map((title, i) => ({
+      id: `task-${i}`,
+      title,
+      prompt: `Prompt ${i}`,
+      why: i === 0 ? "Most founders start here." : null,
+      expert_id: MARIA.id,
+    }));
+    const suggestions = makeSuggestions(tasks);
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <Harness suggestions={suggestions} initiallyCollapsed />
+      </LanguageProvider>,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "5 个任务 · 显示" }),
+    );
+    expect(
+      await screen.findByText("列出 25 家与你的优质客户相似的公司"),
+    ).toBeDefined();
+    expect(screen.getByText("大多数创始人都从这里开始。")).toBeDefined();
+    expect(screen.getByText("Custom task")).toBeDefined();
+    await userEvent.click(
+      screen.getByRole("button", { name: "还有 2 个任务" }),
+    );
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: "与 记账员 开始：调研三家竞争对手及其定价",
+      }),
+    );
+    expect(suggestions.sendTask).toHaveBeenCalledWith(tasks[4]);
+  });
+
   it("shows the tasks under their header with a Hide toggle", () => {
     render(<Harness />);
 
