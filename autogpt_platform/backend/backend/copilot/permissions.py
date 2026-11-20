@@ -93,11 +93,9 @@ if TYPE_CHECKING:
 # Constants — single source of truth for all accepted tool names
 # ---------------------------------------------------------------------------
 
-# Literal type combining all valid tool names — used by AutoPilotBlock.Input
-# so the frontend renders a multi-select dropdown.
-# This is the SINGLE SOURCE OF TRUTH.  All other name sets are derived from it.
+# AutoPilotBlock.Input uses this literal for the workflow's tool selector.
 ToolName = Literal[
-    # Platform tools (must match keys in TOOL_REGISTRY)
+    # Platform tools selectable in workflows
     "add_understanding",
     "ask_question",
     "bash_exec",
@@ -203,8 +201,10 @@ ToolName = Literal[
     "Write",
 ]
 
-# Frozen set of all valid tool names — derived from the Literal.
-ALL_TOOL_NAMES: frozenset[str] = frozenset(get_args(ToolName))
+GENERATE_OPENAI_IMAGE_TOOL = "generate_openai_image"
+ALL_TOOL_NAMES: frozenset[str] = frozenset(get_args(ToolName)) | {
+    GENERATE_OPENAI_IMAGE_TOOL
+}
 
 # Capability gates: names a permission list may deny to withhold every block
 # (``run_block``) or every MCP server (``run_mcp_tool``) from ``run_capability``.
@@ -706,7 +706,7 @@ def _assert_tool_names_consistent() -> None:
             parts.append(f"  Missing from PLATFORM_TOOL_NAMES: {sorted(missing)}")
         if extra:
             parts.append(f"  Extra in PLATFORM_TOOL_NAMES: {sorted(extra)}")
-        parts.append("  Update the ToolName Literal to match.")
+        parts.append("  Update the tool names in permissions.py to match.")
         raise AssertionError("\n".join(parts))
 
 
