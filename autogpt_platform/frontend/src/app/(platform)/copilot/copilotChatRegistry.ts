@@ -12,6 +12,7 @@ import type { ChatModelChoice } from "./managedModelSelection";
 
 interface CopilotChatRuntime {
   chat: Chat<UIMessage>;
+  wireTimeRemaining: () => number;
   copilotModelRef: MutableValue<ChatModelChoice | undefined>;
   onFinish?: (args: {
     isDisconnect?: boolean;
@@ -78,12 +79,10 @@ export function getOrCreateCopilotChatRuntime(sessionId: string) {
   };
   const callbacks: Pick<CopilotChatRuntime, "onFinish" | "onError" | "onData"> =
     {};
+  const transport = createCopilotTransport({ sessionId, copilotModelRef });
   const chat = new Chat<UIMessage>({
     id: sessionId,
-    transport: createCopilotTransport({
-      sessionId,
-      copilotModelRef,
-    }),
+    transport,
     onFinish: (args) => {
       if (args.isDisconnect) {
         markChatRuntimeDisconnected(sessionId);
@@ -92,6 +91,7 @@ export function getOrCreateCopilotChatRuntime(sessionId: string) {
       return callbacks.onFinish?.(args);
     },
     onError: (error) => {
+      transport.clearWireActivity();
       if (isTransientStreamDisconnect(error)) {
         markChatRuntimeDisconnected(sessionId);
       }
@@ -103,6 +103,7 @@ export function getOrCreateCopilotChatRuntime(sessionId: string) {
   });
   const runtime = {
     chat,
+    wireTimeRemaining: transport.wireTimeRemaining,
     copilotModelRef,
     get onData() {
       return callbacks.onData;

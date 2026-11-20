@@ -57,6 +57,7 @@ import { useCopilotReconnect } from "./useCopilotReconnect";
 import { sdkStopStream, useCopilotStop } from "./useCopilotStop";
 import { useHydrateOnStreamEnd } from "./useHydrateOnStreamEnd";
 import { RESTORE_STALL_TIMEOUT_MS } from "./restoreConstants";
+import { scheduleSilenceCheck } from "./streamSilenceTimer";
 import { useStreamActivityWatchdog } from "./useStreamActivityWatchdog";
 import { useFollowBackendTurn } from "./useFollowBackendTurn";
 import { useWakeResync } from "./useWakeResync";
@@ -745,6 +746,7 @@ export function useCopilotStream({
     sessionId,
     status,
     activityToken: streamActivityToken,
+    wireTimeRemaining: chatRuntime?.wireTimeRemaining,
     isReconnectScheduled,
     isUserStoppingRef,
     handleReconnectRef,
@@ -889,10 +891,7 @@ export function useCopilotStream({
   // Restore watchdog: if we reopened a session with an active backend stream
   // but still have not connected after 6 s of zero replay activity, verify
   // the backend still reports that stream as active and then kick the
-  // reconnect cascade. This covers both "status stayed ready / no replay
-  // chunks ever appeared" and "resume fetch is alive but only heartbeats are
-  // flowing" — the latter never trips the normal stream-activity watchdog
-  // because heartbeats do not mutate `messages`.
+  // reconnect cascade.
   useEffect(() => {
     if (!sessionId) return;
     if (!hasActiveStream) return;
@@ -901,31 +900,37 @@ export function useCopilotStream({
     if (isUserStoppingRef.current) return;
 
     let cancelled = false;
-    const timeout = setTimeout(async () => {
-      if (cancelled) return;
-      if (!isMountedRef.current) return;
-      if (sessionIdRef.current !== sessionId) return;
-      if (hasConnectedThisMountRef.current) return;
-      if (isUserStoppingRef.current) return;
+    const cancelCheck = scheduleSilenceCheck(
+      RESTORE_STALL_TIMEOUT_MS,
+      chatRuntime?.wireTimeRemaining,
+      async () => {
+        if (cancelled) return;
+        if (!isMountedRef.current) return;
+        if (sessionIdRef.current !== sessionId) return;
+        if (hasConnectedThisMountRef.current) return;
+        if (isUserStoppingRef.current) return;
 
-      const result = await refetchSession();
-      if (!isMountedRef.current) return;
-      if (sessionIdRef.current !== sessionId) return;
-      if (hasConnectedThisMountRef.current) return;
-      if (isUserStoppingRef.current) return;
-      if (!hasActiveBackendStream(result)) return;
+        const result = await refetchSession();
+        if (cancelled || chatRuntime?.wireTimeRemaining()) return;
+        if (!isMountedRef.current) return;
+        if (sessionIdRef.current !== sessionId) return;
+        if (hasConnectedThisMountRef.current) return;
+        if (isUserStoppingRef.current) return;
+        if (!hasActiveBackendStream(result)) return;
 
-      handleReconnectRef.current();
-    }, RESTORE_STALL_TIMEOUT_MS);
+        handleReconnectRef.current();
+      },
+    );
 
     return () => {
       cancelled = true;
-      clearTimeout(timeout);
+      cancelCheck();
     };
   }, [
     sessionId,
     hasActiveStream,
     streamActivityToken,
+    chatRuntime,
     isReconnectScheduled,
     reconnectExhausted,
     refetchSession,

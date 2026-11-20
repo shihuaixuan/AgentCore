@@ -146,9 +146,7 @@ describe.each(STREAM_PATHS)("on the %s path", (path) => {
 
         expectDrift(
           await reportDrift({ sim, turns: [], painted, toast: toastMock }),
-          // AI SDK: the 6 s restore watchdog sees no content, reconnects three
-          // times and ends on "Unable to reconnect. Please refresh the page."
-          { today: path === "stream runtime" ? [] : ["connectionToast"] },
+          {},
         );
       },
     );

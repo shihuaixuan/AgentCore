@@ -187,10 +187,9 @@ describe.each(STREAM_PATHS)("on the %s path", (path) => {
             painted,
             toast: toastMock,
           }),
-          // AI SDK: the 60 s stall watchdog reads the silence as a dead stream
-          // and reconnects with a toast.
-          { today: path === "stream runtime" ? [] : ["connectionToast"] },
+          {},
         );
+        expect(sim.connections).toHaveLength(1);
       },
     );
   });

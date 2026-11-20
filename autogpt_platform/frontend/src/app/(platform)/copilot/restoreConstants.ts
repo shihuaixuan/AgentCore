@@ -1,1 +1,2 @@
 export const RESTORE_STALL_TIMEOUT_MS = 6_000;
+export const STREAM_STALL_TIMEOUT_MS = 60_000;

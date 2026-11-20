@@ -10,6 +10,7 @@ import { createSmoothingTransform } from "./copilotStreamSmoothing";
 import { getKickoffExpertIdFromMetadata } from "./expertKickoff";
 import { getCopilotAuthHeaders } from "./helpers";
 import { createShadowFetch } from "./stream/turnShadow";
+import { STREAM_STALL_TIMEOUT_MS } from "./restoreConstants";
 import { isVoiceTurn } from "./voice/pendingVoiceStart";
 import { isTokenDevtoolEnabled } from "./tokenDevtool/gate";
 import { createUsageCapturingFetch } from "./tokenDevtool/usageTap";
@@ -46,6 +47,38 @@ interface CreateTransportArgs {
  * typing already-produced history would be worse than a single jump.
  */
 class SmoothedCopilotChatTransport extends DefaultChatTransport<UIMessage> {
+  private connection: { lastByteAt: number } | null = null;
+
+  clearWireActivity() {
+    this.connection = null;
+  }
+
+  readonly wireTimeRemaining = () =>
+    this.connection
+      ? Math.max(
+          0,
+          this.connection.lastByteAt + STREAM_STALL_TIMEOUT_MS - Date.now(),
+        )
+      : 0;
+
+  protected override processResponseStream(stream: ReadableStream<Uint8Array>) {
+    const connection = { lastByteAt: Date.now() };
+    this.connection = connection;
+    return super.processResponseStream(
+      stream.pipeThrough(
+        new TransformStream<Uint8Array, Uint8Array>({
+          transform(bytes, controller) {
+            if (bytes.byteLength) connection.lastByteAt = Date.now();
+            controller.enqueue(bytes);
+          },
+          flush: () => {
+            if (this.connection === connection) this.connection = null;
+          },
+        }),
+      ),
+    );
+  }
+
   // A resume replays the turn from its first chunk (see
   // `prepareReconnectToStreamRequest`), so the SDK must rebuild the reply
   // from that chunk rather than append the replay onto a partial it kept.
