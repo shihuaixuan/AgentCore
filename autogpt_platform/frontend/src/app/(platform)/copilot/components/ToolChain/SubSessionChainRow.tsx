@@ -31,6 +31,7 @@ interface Activity {
   status: string;
   named: boolean;
   canStop?: boolean;
+  prompt?: string | null;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -55,6 +56,7 @@ export function SubSessionChainRow({ row, isLast, readOnly }: Props) {
   return output ? (
     <SettledActivity
       output={output}
+      prompt={str(asObject(target?.input) ?? {}, "prompt")}
       held={row.held}
       readOnly={readOnly}
       isLast={isLast}
@@ -85,6 +87,7 @@ function PendingActivity({ row, readOnly, isLast }: Props) {
         color: expert?.color,
         status: row.state === "running" ? "running" : "unknown",
         named: !!expert,
+        prompt: str(args, "prompt"),
       }}
     />
   );
@@ -92,11 +95,13 @@ function PendingActivity({ row, readOnly, isLast }: Props) {
 
 function SettledActivity({
   output,
+  prompt,
   held,
   readOnly,
   isLast,
 }: Omit<Props, "row"> & {
   output: Record<string, unknown>;
+  prompt: string | null;
   held?: HeldRowInfo;
 }) {
   const { t, locale } = useTranslation();
@@ -131,6 +136,7 @@ function SettledActivity({
         color: expert && str(expert, "color"),
         named: !!name,
         status,
+        prompt,
         canStop:
           background && ["running", "queued", "unknown"].includes(status),
       }}
@@ -148,7 +154,7 @@ function ActivityLine({
   isLast: boolean;
 }) {
   const { t } = useTranslation();
-  const { sessionID, name, avatarURL, color, named, status, canStop } =
+  const { sessionID, name, avatarURL, color, named, status, canStop, prompt } =
     activity;
   const identity = (
     <>
@@ -191,7 +197,7 @@ function ActivityLine({
       <div className="flex min-h-7 items-center gap-2">
         {sessionID ? (
           <SubSessionLink
-            preview={{ sessionID, name, avatarURL, color }}
+            preview={{ sessionID, name, avatarURL, color, prompt }}
             className={cn(
               identityClass,
               "transition-colors outline-none hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-focus",

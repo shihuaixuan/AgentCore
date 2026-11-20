@@ -9,13 +9,13 @@ import { FullscreenDialog } from "@/components/molecules/FullscreenDialog/Fullsc
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { ArrowUpRight01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import type { ReactNode } from "react";
-import { convertChatSessionMessagesToUiMessages } from "../../helpers/convertChatSessionToUiMessages";
 import { resolveExpertIdentity, useExpertMap } from "../../useExpertMap";
 import { ChatMessagesContainer } from "../ChatMessagesContainer/ChatMessagesContainer";
 import { CopilotChatActionsProvider } from "../CopilotChatActionsProvider/CopilotChatActionsProvider";
 import { isSessionLive } from "../ToolChain/subSessionStatus";
 import { subSessionHref } from "./SubSessionLink";
 import type { SubSessionPreview } from "./SubSessionPreviewContext";
+import { useSubSessionTranscript } from "./useSubSessionTranscript";
 
 interface Props {
   preview: SubSessionPreview;
@@ -29,7 +29,7 @@ export function SubSessionPanel({ preview, mobile, onClose }: Props) {
   const content = (
     <>
       <PanelHeader preview={preview} onClose={onClose} />
-      <ChildTranscript key={preview.sessionID} sessionID={preview.sessionID} />
+      <ChildTranscript key={preview.sessionID} preview={preview} />
     </>
   );
 
@@ -88,9 +88,9 @@ function PanelHeader({ preview, onClose }: Omit<Props, "mobile">) {
   );
 }
 
-function ChildTranscript({ sessionID }: { sessionID: string }) {
+function ChildTranscript({ preview }: { preview: SubSessionPreview }) {
   const { t } = useTranslation();
-  const query = useGetV2GetSession(sessionID, undefined, {
+  const query = useGetV2GetSession(preview.sessionID, undefined, {
     query: {
       retry: false,
       refetchInterval: ({ state }) =>
@@ -106,7 +106,7 @@ function ChildTranscript({ sessionID }: { sessionID: string }) {
     return (
       <TranscriptNotice text={t("Opening conversation…", "正在打开会话…")} />
     );
-  if (!session || query.isError) {
+  if (!session) {
     return (
       <TranscriptNotice
         text={t("Couldn't load this conversation.", "无法加载此会话。")}
@@ -123,11 +123,23 @@ function ChildTranscript({ sessionID }: { sessionID: string }) {
     );
   }
 
-  return <TranscriptContent session={session} />;
+  return (
+    <TranscriptContent session={session} prompt={preview.prompt ?? null} />
+  );
 }
 
-function TranscriptContent({ session }: { session: SessionDetailResponse }) {
+function TranscriptContent({
+  session,
+  prompt,
+}: {
+  session: SessionDetailResponse;
+  prompt: string | null;
+}) {
   const { t } = useTranslation();
+  const { messages, stats, status, notice } = useSubSessionTranscript(
+    session,
+    prompt,
+  );
   const expertID = session.expert_id ?? null;
   const { expertsById, hasExpertsSettled, hasExpertsErrored } =
     useExpertMap(!!expertID);
@@ -135,17 +147,10 @@ function TranscriptContent({ session }: { session: SessionDetailResponse }) {
     settled: hasExpertsSettled,
     errored: hasExpertsErrored,
   });
-  const isLive = isSessionLive(session);
-  const { messages, stats } = convertChatSessionMessagesToUiMessages(
-    session.id,
-    session.messages,
-    {
-      isComplete: !isLive,
-      activeTurnStartedAt: session.active_stream?.started_at,
-    },
-  );
   if (messages.length === 0)
-    return <TranscriptNotice text={t("No messages yet", "暂无消息")} />;
+    return (
+      <TranscriptNotice text={notice ?? t("No messages yet", "暂无消息")} />
+    );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -162,7 +167,7 @@ function TranscriptContent({ session }: { session: SessionDetailResponse }) {
           sessionID={session.id}
           messages={messages}
           turnStats={stats}
-          status={isLive ? "streaming" : "ready"}
+          status={status}
           error={undefined}
           isLoading={false}
           expertIdentity={expertIdentity}
@@ -173,6 +178,16 @@ function TranscriptContent({ session }: { session: SessionDetailResponse }) {
           showThreadHeader={false}
         />
       </CopilotChatActionsProvider>
+      {notice && (
+        <Text
+          variant="small"
+          tone="secondary"
+          role="status"
+          className="mx-4 mb-3"
+        >
+          {notice}
+        </Text>
+      )}
     </div>
   );
 }

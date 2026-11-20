@@ -7,12 +7,37 @@ import {
 } from "@/tests/integrations/test-utils";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { server } from "@/mocks/mock-server";
+import {
+  assistantTextChunks,
+  createStreamHold,
+  streamSseResponse,
+} from "@/tests/integrations/copilot-sse";
 import userEvent from "@testing-library/user-event";
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse, type HttpResponseResolver } from "msw";
+import type { UIMessageChunk } from "ai";
 import { useCopilotUIStore } from "../store";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CopilotPage } from "../CopilotPage";
 import type { ChatContainerProps } from "../components/ChatContainer/ChatContainer";
+
+const TEST_STREAM_ORIGIN = "http://localhost:18006";
+
+vi.mock("@/services/environment", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/services/environment")>();
+  return {
+    ...actual,
+    environment: {
+      ...actual.environment,
+      getAGPTServerBaseUrl: () => TEST_STREAM_ORIGIN,
+    },
+  };
+});
+
+vi.mock("../helpers", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../helpers")>()),
+  getCopilotAuthHeaders: async () => ({ "x-test-auth": "yes" }),
+}));
 
 vi.mock("@/providers/onboarding/onboarding-provider", () => ({
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -191,30 +216,160 @@ afterEach(() => {
 });
 
 describe("CopilotPage child conversation", () => {
+  it("shows a running child's task and unpersisted stream, then the saved answer once", async () => {
+    const user = userEvent.setup();
+    const sessionID = "analyst-child";
+    const turnID = "analysis-turn";
+    const prompt = "Compare the data from this week";
+    const liveAnswer = "I found three changes.";
+    const finalAnswer = `${liveAnswer} Here is the comparison.`;
+    const textChunks = assistantTextChunks(liveAnswer);
+    const chunks: UIMessageChunk[] = [
+      ...textChunks.slice(0, 5),
+      {
+        type: "tool-input-available",
+        toolCallId: "child-command",
+        toolName: "bash_exec",
+        input: { command: "pwd" },
+      },
+      {
+        type: "tool-output-available",
+        toolCallId: "child-command",
+        output: "workspace",
+      },
+      ...textChunks.slice(5),
+    ];
+    const startReply = Promise.withResolvers<void>();
+    const heldFinish = createStreamHold(chunks.length - 1);
+    let completed = false;
+    const stream = vi.fn<HttpResponseResolver>(async ({ request }) => {
+      await startReply.promise;
+      return streamSseResponse(chunks, {
+        turnId: turnID,
+        hold: heldFinish.hold,
+        abortSignal: request.signal,
+      });
+    });
+    server.use(
+      http.get(`/api/proxy/api/chat/sessions/${sessionID}`, () =>
+        HttpResponse.json({
+          id: sessionID,
+          chat_status: completed ? "idle" : "running",
+          active_stream: completed
+            ? null
+            : { turn_id: turnID, last_message_id: "8-0" },
+          has_more_messages: false,
+          messages: completed
+            ? [
+                { role: "user", content: prompt, sequence: 0 },
+                { role: "assistant", content: finalAnswer, sequence: 1 },
+              ]
+            : [],
+        }),
+      ),
+      http.get(
+        `${TEST_STREAM_ORIGIN}/api/chat/sessions/${sessionID}/stream`,
+        stream,
+      ),
+    );
+    mockSessionIdForQueryState = "parent-chat";
+    mockUseCopilotPage.mockReturnValue({
+      ...basePageState,
+      sessionId: "parent-chat",
+      status: "streaming",
+      messages: [
+        {
+          id: "parent-turn",
+          role: "assistant",
+          parts: [
+            {
+              type: "tool-run_sub_session",
+              toolCallId: "analysis-call",
+              state: "input-available",
+              input: { prompt, system_context: "Test-only internal context" },
+            },
+            {
+              type: "data-tool-display",
+              data: { toolCallId: "analysis-call", subSessionId: sessionID },
+            },
+          ],
+        },
+      ],
+    });
+
+    try {
+      render(<CopilotPage />);
+      const parent = screen.getByTestId("chat-container");
+      await user.click(
+        within(parent).getByRole("link", { name: "Sub-agent running" }),
+      );
+      const drawer = within(
+        await screen.findByRole("complementary", {
+          name: "Sub-agent's conversation",
+        }),
+      );
+      expect(await drawer.findByText(prompt)).toBeDefined();
+      expect(
+        drawer.getByText("Waiting for the sub-agent's reply…"),
+      ).toBeDefined();
+      expect(drawer.queryByText("Test-only internal context")).toBeNull();
+      startReply.resolve();
+      expect(await drawer.findByText(liveAnswer)).toBeDefined();
+      expect(
+        drawer.getByRole("button", { name: /ran commands/i }),
+      ).toBeDefined();
+      expect(stream).toHaveBeenCalledTimes(1);
+      const request = stream.mock.calls[0][0].request;
+      expect(request.headers.get("x-test-auth")).toBe("yes");
+      expect(new URL(request.url).searchParams.get("turn")).toBe(turnID);
+
+      completed = true;
+      heldFinish.release();
+      expect(await drawer.findByText(finalAnswer)).toBeDefined();
+      expect(drawer.getAllByText(prompt)).toHaveLength(1);
+      expect(drawer.queryByText(liveAnswer)).toBeNull();
+      expect(within(parent).queryByText(finalAnswer)).toBeNull();
+    } finally {
+      startReply.resolve();
+      heldFinish.release();
+    }
+  });
+
   it("opens the matching running child of two calls to the same expert", async () => {
     const user = userEvent.setup();
     mockSessionIdForQueryState = "parent-chat";
-    const getSession = vi.fn(({ params }) =>
-      HttpResponse.json({
+    const getSession = vi.fn<HttpResponseResolver>(({ params }) => {
+      const first = params.sessionId === "harper-a";
+      return HttpResponse.json({
         id: params.sessionId,
         expert_id: "harper",
-        chat_status: "running",
+        chat_status: first ? "running" : "queued",
+        active_stream: first
+          ? { turn_id: "harper-turn", last_message_id: "0-0" }
+          : null,
         messages: [
           {
             role: "user",
             content: `Task for ${params.sessionId}`,
             sequence: 0,
           },
-          {
-            role: "assistant",
-            content: "正在整理招聘要求。",
-            sequence: 1,
-          },
         ],
+      });
+    });
+    const parked = createStreamHold(5);
+    const stream = vi.fn<HttpResponseResolver>(({ request }) =>
+      streamSseResponse(assistantTextChunks("正在整理招聘要求。"), {
+        turnId: "harper-turn",
+        hold: parked.hold,
+        abortSignal: request.signal,
       }),
     );
     server.use(
       http.get("/api/proxy/api/chat/sessions/:sessionId", getSession),
+      http.get(
+        `${TEST_STREAM_ORIGIN}/api/chat/sessions/harper-a/stream`,
+        stream,
+      ),
       http.get("/api/proxy/api/experts/identities", () =>
         HttpResponse.json([
           {
@@ -262,49 +417,65 @@ describe("CopilotPage child conversation", () => {
       ],
     });
 
-    render(
-      <LanguageProvider initialLocale="zh-CN">
-        <CopilotPage />
-      </LanguageProvider>,
-    );
-    const parent = screen.getByTestId("chat-container");
-    const entries = await within(parent).findAllByRole("link", {
-      name: "招聘专员 运行中",
-    });
-    expect(entries).toHaveLength(2);
-    await user.click(entries[0]);
+    try {
+      render(
+        <LanguageProvider initialLocale="zh-CN">
+          <CopilotPage />
+        </LanguageProvider>,
+      );
+      const parent = screen.getByTestId("chat-container");
+      const entries = await within(parent).findAllByRole("link", {
+        name: "招聘专员 运行中",
+      });
+      expect(entries).toHaveLength(2);
+      await user.click(entries[0]);
 
-    const panel = await screen.findByRole("complementary", {
-      name: "招聘专员 的会话",
-    });
-    expect(await within(panel).findByText("Task for harper-a")).toBeDefined();
-    const author = await within(panel).findByTestId(
-      "expert-assistant-identity",
-    );
-    expect(await within(author).findByText("招聘专员")).toBeDefined();
-    expect(within(author).getByAltText("招聘专员").getAttribute("src")).toBe(
-      "/experts/professional/expert-harper.webp",
-    );
-    expect(within(author).queryByText("通用办公助手")).toBeNull();
-    expect(getSession).not.toHaveBeenCalledWith(
-      expect.objectContaining({ params: { sessionId: "harper-b" } }),
-    );
-    expect(useCopilotUIStore.getState().subSessionPreview).toMatchObject({
-      parentSessionID: "parent-chat",
-      sessionID: "harper-a",
-    });
-    expect(screen.getByTestId("chat-container")).toBe(parent);
+      const panel = await screen.findByRole("complementary", {
+        name: "招聘专员 的会话",
+      });
+      const child = within(panel);
+      expect(await child.findByText("Task for harper-a")).toBeDefined();
+      expect(await child.findByText("正在整理招聘要求。")).toBeDefined();
+      const author = await child.findByTestId("expert-assistant-identity");
+      expect(await within(author).findByText("招聘专员")).toBeDefined();
+      expect(within(author).getByAltText("招聘专员").getAttribute("src")).toBe(
+        "/experts/professional/expert-harper.webp",
+      );
+      expect(within(author).queryByText("通用办公助手")).toBeNull();
+      expect(getSession).not.toHaveBeenCalledWith(
+        expect.objectContaining({ params: { sessionId: "harper-b" } }),
+      );
+      expect(useCopilotUIStore.getState().subSessionPreview).toMatchObject({
+        parentSessionID: "parent-chat",
+        sessionID: "harper-a",
+      });
+      expect(screen.getByTestId("chat-container")).toBe(parent);
 
-    await user.click(
-      within(parent).getAllByRole("link", { name: "招聘专员 运行中" })[1],
-    );
-    expect(await within(panel).findByText("Task for harper-b")).toBeDefined();
-    expect(within(panel).queryByText("Task for harper-a")).toBeNull();
-    await user.click(within(panel).getByRole("button", { name: "关闭子对话" }));
-    expect(
-      screen.queryByRole("complementary", { name: "招聘专员 的会话" }),
-    ).toBeNull();
-    expect(screen.getByTestId("chat-container")).toBe(parent);
+      const { request } = stream.mock.calls[0][0];
+      await user.click(entries[1]);
+      expect(await child.findByText("Task for harper-b")).toBeDefined();
+      expect(child.getByText("任务排队中")).toBeDefined();
+      expect(child.queryByText("Task for harper-a")).toBeNull();
+      expect(child.queryByText("正在整理招聘要求。")).toBeNull();
+      expect(request.signal.aborted).toBe(true);
+      await user.click(child.getByRole("button", { name: "关闭子对话" }));
+      expect(panel.isConnected).toBe(false);
+      expect(screen.getByTestId("chat-container")).toBe(parent);
+
+      await user.click(entries[0]);
+      const reopened = within(
+        await screen.findByRole("complementary", { name: "招聘专员 的会话" }),
+      );
+      expect(await reopened.findByText("正在整理招聘要求。")).toBeDefined();
+      expect(reopened.queryByText("Task for harper-b")).toBeNull();
+      expect(stream).toHaveBeenCalledTimes(2);
+      const resumedRequest = stream.mock.calls[1][0].request;
+      await user.click(reopened.getByRole("button", { name: "关闭子对话" }));
+      expect(resumedRequest.signal.aborted).toBe(true);
+      expect(screen.getByTestId("chat-container")).toBe(parent);
+    } finally {
+      parked.release();
+    }
   });
 
   it.each([false, true])(

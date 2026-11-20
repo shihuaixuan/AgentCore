@@ -374,6 +374,7 @@ export class TurnRuntime {
    * of a running turn the server no longer runs.
    */
   observe(view: SessionView) {
+    if (this.disposed) return;
     const rows = persistedRows(view.messages);
     const last = rows[rows.length - 1]?.sequence;
     if (typeof last === "number") this.lastViewMaxSequence = last;
@@ -720,6 +721,7 @@ export class TurnRuntime {
    * is visible and online reaches the one alarming toast.
    */
   private retry(lost: Lost, end: ConnectionEnd = { kind: "closed" }) {
+    if (this.disposed) return;
     const running = this.runningTurn();
     if (!running && lost.turnId !== null) return;
     const offline =
@@ -1004,6 +1006,7 @@ export class TurnRuntime {
    * become a reconnect storm.
    */
   private async resync(key: string, checkpoint: TurnCheckpoint | null) {
+    if (this.disposed) return;
     const book = this.bookkeeping(key);
     if (book.resyncs >= MAX_RESYNCS_PER_TURN) {
       void this.freeze(key);
@@ -1012,6 +1015,7 @@ export class TurnRuntime {
     book.resyncs += 1;
     this.abortSlot();
     const view = await this.recover(() => this.fetchView());
+    if (this.disposed) return;
     const seg = this.segmentByKey(key);
     if (seg?.kind !== "turn" || !seg.log.turnId) return;
     if (!view) {
@@ -1048,6 +1052,7 @@ export class TurnRuntime {
   // stopped mid-part renders as interrupted.
   private async expire(key: string, known: SessionView | null = null) {
     const view = known ?? (await this.recover(() => this.fetchView()));
+    if (this.disposed) return;
     const seg = this.segmentByKey(key);
     if (seg?.kind !== "turn") return;
     if (!view) {
@@ -1098,6 +1103,7 @@ export class TurnRuntime {
     this.abortSlot();
     this.clearRetry();
     const view = await this.fetchView();
+    if (this.disposed) return;
     this.updateTurn(key, (seg) => {
       const persisted = view
         ? turnRows(
@@ -1476,7 +1482,7 @@ export class TurnRuntime {
   }
 
   private emit() {
-    if (this.emitTimer) return;
+    if (this.disposed || this.emitTimer) return;
     this.emitTimer = setTimeout(() => {
       this.emitTimer = null;
       this.emitNow();
@@ -1547,6 +1553,18 @@ export function getTurnRuntime(
 export function resetTurnRuntimes() {
   for (const runtime of runtimes.values()) runtime.dispose();
   runtimes.clear();
+}
+
+export function createTranscriptRuntime(
+  sessionId: string,
+  fetchSession: RuntimeDeps["fetchSession"],
+): Pick<TurnRuntime, "observe" | "subscribe" | "getSnapshot" | "dispose"> {
+  return new TurnRuntime(sessionId, {
+    ...defaultDeps(sessionId),
+    fetchSession,
+    fetch: (input, init) => fetch(input, init),
+    toast: () => {},
+  });
 }
 
 function defaultDeps(sessionId: string): RuntimeDeps {

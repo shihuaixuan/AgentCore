@@ -5,6 +5,7 @@ export interface SubSessionPreview {
   name: string;
   avatarURL: string | null;
   color?: string | null;
+  prompt?: string | null;
 }
 
 export const SubSessionPreviewContext = createContext<
