@@ -12,7 +12,6 @@ import { getExpertTopicHex } from "@/components/molecules/ExpertAvatar/colors";
 import { ExpertPod } from "@/app/api/__generated__/models/expertPod";
 import { ExpertWorkflowRef } from "@/app/api/__generated__/models/expertWorkflowRef";
 import { GraphExecutionJobInfo } from "@/app/api/__generated__/models/graphExecutionJobInfo";
-import { CopilotSkillInfo } from "@/app/api/__generated__/models/copilotSkillInfo";
 import { LibraryAgent } from "@/app/api/__generated__/models/libraryAgent";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
@@ -86,21 +85,6 @@ export function getAutopilotWorkflows(
         schedule_id: schedule?.id ?? null,
       };
     });
-}
-
-/** Library skills no hired expert has claimed; Otto falls back to these. */
-export function getAutopilotSkills(
-  experts: Expert[],
-  librarySkills: CopilotSkillInfo[],
-) {
-  const claimed = new Set(
-    experts.flatMap((expert) =>
-      expert.skills.map((name) => name.toLowerCase()),
-    ),
-  );
-  return librarySkills
-    .filter((skill) => !claimed.has(skill.name.toLowerCase()))
-    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /** Sized by the available width, not the viewport, so the roster reflows
@@ -302,13 +286,6 @@ export function getHiredExperts(experts: Expert[]) {
   return experts.filter((expert) => !expert.is_template && !expert.is_archived);
 }
 
-/** Every skill on the team, de-duplicated and alphabetised. */
-export function getTeamSkills(experts: Expert[]) {
-  return Array.from(new Set(experts.flatMap((expert) => expert.skills))).sort(
-    (a, b) => a.localeCompare(b),
-  );
-}
-
 /** Every expert's schedules as one list, soonest-firing first. A schedule
  *  reachable from two experts (shared graph) is listed once. */
 export function getTeamSchedules(
@@ -328,15 +305,11 @@ interface AutopilotSummaryArgs {
   schedulesForExpert: (expert: Expert) => GraphExecutionJobInfo[];
 }
 
-/** Otto works across the whole team, so its card counts the team's
- *  totals. Skills are de-duplicated — two experts who can both write copy is
- *  one skill on the team, not two. */
 export function getAutopilotSummary({
   experts,
   schedulesForExpert,
 }: AutopilotSummaryArgs) {
   return {
-    skillCount: getTeamSkills(experts).length,
     scheduleCount: new Set(
       experts.flatMap(schedulesForExpert).map((schedule) => schedule.id),
     ).size,

@@ -1,7 +1,6 @@
 import { useListExperts } from "@/app/api/__generated__/endpoints/experts/experts";
 import { useGetV2ListLibraryAgentsInfinite } from "@/app/api/__generated__/endpoints/library/library";
 import { useGetV1ListExecutionSchedulesForAUser } from "@/app/api/__generated__/endpoints/schedules/schedules";
-import { useListCopilotSkills } from "@/app/api/__generated__/endpoints/skills/skills";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import {
   getPaginationNextPageNumber,
@@ -10,11 +9,11 @@ import {
 } from "@/app/api/helpers";
 import { useEffect } from "react";
 import {
-  getAutopilotSkills,
   getAutopilotWorkflows,
   getHiredExperts,
   getTeamSchedules,
 } from "../helpers";
+import { useAutopilotSkills } from "./useAutopilotSkills";
 
 export function useAutopilotPage() {
   const expertsQuery = useListExperts({
@@ -27,9 +26,7 @@ export function useAutopilotPage() {
     { page: 1, page_size: 100, is_hidden: false },
     { query: { getNextPageParam: getPaginationNextPageNumber } },
   );
-  const skillsQuery = useListCopilotSkills(undefined, {
-    query: { select: (res) => okData(res) ?? [] },
-  });
+  const skillsQuery = useAutopilotSkills();
 
   // Otto owns every library workflow no expert has claimed, so the
   // whole library has to be in hand before the split is derived.
@@ -45,7 +42,6 @@ export function useAutopilotPage() {
     ? unpaginate(libraryQuery.data, "agents")
     : [];
   const workflows = getAutopilotWorkflows(experts, libraryAgents, allSchedules);
-  const skills = getAutopilotSkills(experts, skillsQuery.data ?? []);
 
   function refetch() {
     return Promise.all([
@@ -60,13 +56,14 @@ export function useAutopilotPage() {
     experts,
     schedules,
     workflows,
-    skills,
+    skills: skillsQuery.data ?? [],
     isLoading:
       expertsQuery.isLoading ||
       schedulesQuery.isLoading ||
       libraryQuery.isLoading ||
       skillsQuery.isLoading,
-    isError: expertsQuery.isError || schedulesQuery.isError,
+    isError:
+      expertsQuery.isError || schedulesQuery.isError || skillsQuery.isError,
     refetch,
   };
 }

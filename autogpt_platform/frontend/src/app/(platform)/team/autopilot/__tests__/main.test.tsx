@@ -334,7 +334,7 @@ describe("AutopilotPage", () => {
     }
   }, 30_000);
 
-  test("lists the library skills no expert has claimed as Otto's", async () => {
+  test("lists Otto's own skills even when experts have same-named skills", async () => {
     render(<AutopilotPage />);
     await screen.findByRole("heading", { name: "General Office Assistant" });
 
@@ -345,9 +345,11 @@ describe("AutopilotPage", () => {
     const rows = within(list).getAllByTestId("expert-skill-row");
     expect(
       rows.map(
-        (row) => within(row).getByText(/^(Bookkeeping|Research)$/).textContent,
+        (row) =>
+          within(row).getByText(/^(Analytics|Bookkeeping|Research|SEO)$/)
+            .textContent,
       ),
-    ).toEqual(["Bookkeeping", "Research"]);
+    ).toEqual(["Analytics", "Bookkeeping", "Research", "SEO"]);
     expect(within(list).getByText("Dig up sources")).toBeDefined();
     expect(within(list).queryByRole("button", { name: /Remove/ })).toBeNull();
   });

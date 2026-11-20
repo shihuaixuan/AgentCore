@@ -32,7 +32,6 @@ export function TeamRoster({
   const summary = getAutopilotSummary({ experts, schedulesForExpert });
   const autopilot = (
     <AutopilotCard
-      skillCount={summary.skillCount}
       scheduleCount={summary.scheduleCount}
       workflowCount={summary.workflowCount}
     />

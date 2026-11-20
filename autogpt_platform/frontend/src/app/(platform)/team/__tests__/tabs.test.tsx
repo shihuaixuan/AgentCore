@@ -5,6 +5,7 @@ import {
 } from "@/app/api/__generated__/endpoints/experts/experts.msw";
 import { getGetV2ListLibraryAgentsMockHandler200 } from "@/app/api/__generated__/endpoints/library/library.msw";
 import { getGetV1ListExecutionSchedulesForAUserMockHandler } from "@/app/api/__generated__/endpoints/schedules/schedules.msw";
+import { getListCopilotSkillsMockHandler200 } from "@/app/api/__generated__/endpoints/skills/skills.msw";
 import { Expert } from "@/app/api/__generated__/models/expert";
 import { ExpertPod } from "@/app/api/__generated__/models/expertPod";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
@@ -69,6 +70,7 @@ beforeEach(() => {
     getGetV1ListExecutionSchedulesForAUserMockHandler([]),
     getListExpertPodsMockHandler([]),
     getListExpertCredentialsMockHandler([]),
+    getListCopilotSkillsMockHandler200([]),
     getGetV2ListLibraryAgentsMockHandler200(),
   );
 });
@@ -203,7 +205,7 @@ describe("TeamRoster toolbar", () => {
 });
 
 describe("AutopilotCard", () => {
-  test("counts the whole team's skills, schedules and workflows", async () => {
+  test("counts Otto's own skills alongside team schedules and workflows", async () => {
     const scheduledMaria = makeExpert({
       ...maria,
       skills: ["Copywriting", "SEO"],
@@ -220,13 +222,15 @@ describe("AutopilotCard", () => {
         },
       ],
     });
-    // Lee shares Copywriting with Maria, so the team has three skills, not four.
     const skilledLee = makeExpert({
       ...lee,
       skills: ["Copywriting", "Analytics"],
     });
     server.use(
       getListExpertsMockHandler([scheduledMaria, skilledLee]),
+      getListCopilotSkillsMockHandler200([
+        { name: "SEO", description: "Personal SEO checklist" },
+      ]),
       getGetV1ListExecutionSchedulesForAUserMockHandler([
         {
           id: "sched-soon",
@@ -248,13 +252,19 @@ describe("AutopilotCard", () => {
     const autopilot = screen.getByRole("region", {
       name: "General Office Assistant",
     });
-    expect(getStatValue(autopilot, "Skills")).toBe("3");
+    await waitFor(() => expect(getStatValue(autopilot, "Skills")).toBe("1"));
     expect(getStatValue(autopilot, "Schedules")).toBe("1");
     expect(getStatValue(autopilot, "Workflows")).toBe("1");
   });
 
-  test("leaves out the totals for a team with nothing set up", async () => {
-    server.use(getListExpertsMockHandler([maria]));
+  test("leaves out empty totals even when an expert has eleven skills", async () => {
+    server.use(
+      getListExpertsMockHandler([
+        makeExpert({
+          skills: Array.from({ length: 11 }, (_, index) => `Skill ${index}`),
+        }),
+      ]),
+    );
 
     render(<TeamPage />);
     expect(await screen.findByText("Marketing Strategist")).toBeDefined();

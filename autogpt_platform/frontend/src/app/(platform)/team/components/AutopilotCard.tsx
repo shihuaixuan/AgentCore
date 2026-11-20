@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { AUTOPILOT_BLURB } from "../helpers";
+import { useAutopilotSkills } from "../autopilot/useAutopilotSkills";
 import {
   CHIP_SHAPE,
   CHIP_SIZE,
@@ -31,18 +32,14 @@ import { ExpertCover } from "./ExpertTeamCard/components/ExpertCover";
 const AUTOPILOT_COVER_COLOR = AUTOPILOT_HEX;
 
 interface Props {
-  skillCount: number;
   scheduleCount: number;
   workflowCount: number;
 }
 
-export function AutopilotCard({
-  skillCount,
-  scheduleCount,
-  workflowCount,
-}: Props) {
+export function AutopilotCard({ scheduleCount, workflowCount }: Props) {
   const { t, locale } = useTranslation();
   const title = getDefaultAssistantTitle(locale);
+  const skillsQuery = useAutopilotSkills();
   return (
     <section
       aria-label={title}
@@ -109,7 +106,7 @@ export function AutopilotCard({
               icon={SparklesIcon}
               label={t("Skills", "技能")}
               singular="skill"
-              count={skillCount}
+              count={skillsQuery.data?.length ?? 0}
             />
             <CardStat
               icon={FlashIcon}
