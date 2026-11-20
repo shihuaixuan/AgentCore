@@ -11,11 +11,9 @@ import { useArchive } from "./useArchive";
 function ArchiveWorkspace({ ownerID }: { ownerID: string }) {
   const archive = useArchive(ownerID);
   return (
-    <div
-      className={`${HIDDEN_FROM_REPLAY} grid min-w-0 items-start gap-6 lg:grid-cols-2`}
-    >
-      <ImportPanel ownerID={ownerID} onSaved={archive.refreshArchive} />
+    <div className={`${HIDDEN_FROM_REPLAY} flex min-w-0 flex-col gap-6`}>
       <ArchivePanel ownerID={ownerID} archive={archive} />
+      <ImportPanel ownerID={ownerID} onSaved={archive.refreshArchive} />
     </div>
   );
 }
@@ -32,8 +30,8 @@ export default function ChatImportsPage() {
         </Text>
         <Text variant="body" tone="secondary">
           {t(
-            "Keep private, read-only copies of chats from WorkBuddy and QwenWork.",
-            "将 WorkBuddy 和千问办公的对话保存为私有的只读副本。",
+            "Browse your saved WorkBuddy and QwenWork chats, or copy one to your chat list to continue.",
+            "查看已归档的 WorkBuddy 和千问办公对话，也可以同步到会话列表继续提问。",
           )}
         </Text>
       </header>

@@ -56,7 +56,12 @@ export function transformDates<T>(obj: T): T {
     if (USER_PAYLOAD_KEYS.has(key)) {
       // User data, not server timestamps: leave untouched
       (transformed as any)[key] = value;
-    } else if (typeof value === "string" && isValidISODate(value)) {
+    } else if (
+      typeof value === "string" &&
+      key !== "title" &&
+      key !== "content" &&
+      isValidISODate(value)
+    ) {
       // Convert ISO date string to Date object
       (transformed as any)[key] = new Date(value);
     } else if (typeof value === "object") {

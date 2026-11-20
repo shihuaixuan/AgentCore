@@ -109,6 +109,10 @@ class ImportConversationsResult(BaseModel):
     duplicates: int
 
 
+class ImportedChatSyncResult(BaseModel):
+    session_id: str
+
+
 class ImportedChatSummary(BaseModel):
     id: str
     source: ChatImportSource

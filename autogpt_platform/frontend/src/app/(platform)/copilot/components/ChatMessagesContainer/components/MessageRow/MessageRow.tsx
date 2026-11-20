@@ -4,11 +4,13 @@ import {
   Message,
   MessageContent,
 } from "@/components/organisms/Message/Message";
+import { HIDDEN_FROM_REPLAY } from "@/lib/replay-privacy";
 import type { TurnStats } from "../../../../helpers/convertChatSessionToUiMessages";
 import {
   getMessageReplyRecipient,
   getReplyProfession,
 } from "../../../../helpers/replyRecipient";
+import { isImportedArchiveMessage } from "../../../../helpers/standaloneMessages";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import {
   DEFAULT_ASSISTANT_AVATAR_URL,
@@ -22,6 +24,7 @@ import {
   WORK_CHECK_PART_TYPE,
 } from "../../../../tools/FeedbackPrompts/helpers";
 import type { ExpertIdentity } from "../../../../useExpertMap";
+import { ImportedChatText } from "../../../ImportedChatText";
 import { TurnStatsBar } from "../../../JobStatsBar/TurnStatsBar";
 import { ScheduledChatNoticeCard } from "../../../ScheduledChatNoticeCard/ScheduledChatNoticeCard";
 import { WorkCard } from "../../../WorkCard/WorkCard";
@@ -37,6 +40,7 @@ import {
   areMessageRowPropsEqual,
   getFeedbackCardTarget,
   getMessageContentClassName,
+  getRunPreview,
 } from "./helpers";
 import { useMessageRow } from "./useMessageRow";
 
@@ -140,6 +144,21 @@ export const MessageRow = memo(function MessageRow({
     readOnly,
     sessionSentFrom,
   });
+
+  if (isImportedArchiveMessage(message.metadata) && message.role !== "system") {
+    return (
+      <div className={HIDDEN_FROM_REPLAY}>
+        <Message from={message.role} data-message-id={message.id}>
+          <MessageContent>
+            <ImportedChatText
+              role={message.role}
+              text={getRunPreview(message.parts)}
+            />
+          </MessageContent>
+        </Message>
+      </div>
+    );
+  }
 
   // A run-post rides structured metadata — render a compact WorkCard
   // instead of the raw markdown wall (legacy posts have no metadata and

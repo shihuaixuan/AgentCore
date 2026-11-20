@@ -206,6 +206,26 @@ describe("proxy route — handler pass-through", () => {
     },
   );
 
+  it("does not sync an archived conversation after the acting account changes", async () => {
+    vi.mocked(getServerAuthToken).mockResolvedValue(
+      await new SignJWT({})
+        .setSubject("new-account")
+        .setProtectedHeader({ alg: "HS256" })
+        .sign(new Uint8Array(32)),
+    );
+    const path = ["api", "chat", "imports", "archive-id", "sync"];
+    const request = new NextRequest(
+      `https://app.test/api/proxy/${path.join("/")}`,
+      {
+        method: "POST",
+        headers: { "x-archive-destination": '["original","original"]' },
+      },
+    );
+    const response = await POST(request, makeParams(path));
+    expect(response.status).toBe(412);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it("relays private archive attachments without changing their bytes or download headers", async () => {
     const bytes = new Uint8Array([0, 42, 255]);
     const contentDisposition = "attachment; filename*=UTF-8''report.bin";

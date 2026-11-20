@@ -8,6 +8,36 @@ import {
 const SESSION_ID = "sess-test";
 
 describe("convertChatSessionMessagesToUiMessages", () => {
+  it("keeps imported history as text in separate bubbles", () => {
+    const metadata = { kind: "imported_archive_message" };
+    const text =
+      "Previous request\n\n[Attached files]\n- report.pdf (application/pdf, 1.0 KB), file_id=7f81e2ec-553d-40b5-9fd9-4471f635c48d";
+    const { messages } = convertChatSessionMessagesToUiMessages(
+      SESSION_ID,
+      [
+        { role: "user", content: text, sequence: 0, metadata },
+        { role: "assistant", content: "First answer.", sequence: 1, metadata },
+        {
+          role: "assistant",
+          content: "Further detail.",
+          sequence: 2,
+          metadata,
+        },
+        { role: "assistant", content: "New answer.", sequence: 3 },
+      ],
+      { isComplete: true },
+    );
+
+    expect(messages).toHaveLength(4);
+    expect(messages[0].parts).toEqual([{ type: "text", text, state: "done" }]);
+    expect(messages.slice(0, 3).map((message) => message.metadata)).toEqual([
+      metadata,
+      metadata,
+      metadata,
+    ]);
+    expect(messages[3].metadata).toBeUndefined();
+  });
+
   it("keeps a run-post as its own bubble carrying run metadata", () => {
     const result = convertChatSessionMessagesToUiMessages(
       SESSION_ID,
