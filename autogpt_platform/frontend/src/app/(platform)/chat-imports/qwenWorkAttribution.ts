@@ -47,6 +47,7 @@ export function rowAttribution(
   messageID: unknown,
   input: unknown,
   legacy: boolean,
+  requireSession = false,
 ): Attribution {
   if (!meta) return "unknown";
   if (nested(meta)) return "nested";
@@ -62,6 +63,7 @@ export function rowAttribution(
   )
     return "internal";
   if (
+    (requireSession && meta.sessionId == null) ||
     (meta.sessionId != null &&
       sessionID != null &&
       meta.sessionId !== sessionID) ||

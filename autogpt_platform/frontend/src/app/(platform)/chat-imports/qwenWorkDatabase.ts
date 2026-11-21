@@ -145,18 +145,19 @@ function readProjectedChats(
 }
 
 function projectChat(
-  [id, name, path, ext, execution]: SqlValue[],
+  [id, name, path, ext, execution, task]: SqlValue[],
   queries: Queries,
 ): NativeChatDraft {
   if (typeof id !== "string") throw new ImportValidationError("conversation");
   requireNativeChat(ext, execution);
-  const thread = queries.publicThread(id);
+  const thread = queries.publicThread(id, task === 1);
   const cwd = typeof path === "string" && path.trim() ? path : undefined;
   const messages: ImportMessage[] = [];
   const references = new Set<string>();
   let textLength = 0;
   let omitted = thread.omitted;
-  const turns = trackPublicTurns(queries.legacy);
+  const activeTurns = trackPublicTurns(queries.legacy);
+  const recoveredTurns = trackPublicTurns(false);
   let previousSequence = -1;
   for (const [
     role,
@@ -167,6 +168,7 @@ function projectChat(
     session,
     message,
     input,
+    largeRow,
   ] of queries.messageRows(id, thread.id)) {
     if (
       typeof sequence !== "number" ||
@@ -177,16 +179,25 @@ function projectChat(
     previousSequence = sequence;
     if (role !== "assistant" && role !== "user") continue;
     const meta = readFields(raw);
+    const recovered =
+      thread.recoveredSession !== undefined &&
+      meta?.sessionId === thread.recoveredSession;
+    const turns = recovered ? recoveredTurns : activeTurns;
     const owner = rowAttribution(
       role,
       meta,
-      session,
+      recovered ? thread.recoveredSession : session,
       message,
       input,
       queries.legacy,
+      thread.recoveredSession !== undefined,
     );
     if (!meta || owner !== "public") {
-      if (role === "user") turns.user(owner, meta?.requestSetId);
+      if (role === "user") {
+        turns.user(owner, meta?.requestSetId);
+        if (thread.recoveredSession !== undefined && meta?.sessionId == null)
+          recoveredTurns.user(owner, meta?.requestSetId);
+      }
       omitted ||= owner === "unknown";
       continue;
     }
@@ -197,23 +208,28 @@ function projectChat(
         continue;
       }
     }
+    const rawParts =
+      largeRow == null ? parts : queries.readLargeParts(largeRow);
     const {
       text,
       omitted: uncertainParts,
       userInput,
-    } = collectQwenWorkParts(parts, references, role, meta, queries.legacy);
+      turns: exchanges,
+    } = collectQwenWorkParts(rawParts, references, role, meta, queries.legacy);
     omitted ||= uncertainParts;
     if (role === "user")
       turns.user(
         userInput ? "public" : uncertainParts ? "unknown" : "internal",
         meta.requestSetId,
       );
-    if (!text) continue;
-    textLength += text.length;
-    if (textLength > MAX_BODY_BYTES || messages.length >= MAX_MESSAGES)
-      throw new ImportValidationError("conversation");
     const timestamp = qwenWorkTimestamp(created);
-    messages.push({ role, text, ...(timestamp ? { timestamp } : {}) });
+    for (const exchange of exchanges ?? [{ role, text }]) {
+      if (!exchange.text) continue;
+      textLength += exchange.text.length;
+      if (textLength > MAX_BODY_BYTES || messages.length >= MAX_MESSAGES)
+        throw new ImportValidationError("conversation");
+      messages.push({ ...exchange, ...(timestamp ? { timestamp } : {}) });
+    }
   }
   const title = typeof name === "string" ? name.trim() : "";
   const conversation = validateNativeConversation({

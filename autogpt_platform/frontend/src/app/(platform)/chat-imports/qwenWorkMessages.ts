@@ -1,4 +1,5 @@
 import { nested, record, type Fields } from "./qwenWorkAttribution";
+import { qwenWorkClarificationReader } from "./qwenWorkClarifications";
 import { qwenWorkUserBody } from "./qwenWorkUserParts";
 import { ImportValidationError } from "./validation";
 import { normalizeLocalPath } from "./workbuddyAttachments";
@@ -46,33 +47,6 @@ function textContent(part: Fields) {
   if (typeof part.text !== "string")
     throw new ImportValidationError("conversation");
   return part.text;
-}
-
-function readClarification(part: Fields) {
-  if (
-    part.type !== "tool-AskUserQuestion" ||
-    (typeof part.toolCallId === "string" && part.toolCallId.includes(":")) ||
-    part.state === "input-streaming" ||
-    part.state === "output-error"
-  )
-    return { questions: [], omitted: false };
-  if (
-    (part.toolName != null && part.toolName !== "AskUserQuestion") ||
-    typeof part.toolCallId !== "string" ||
-    !part.toolCallId.trim() ||
-    !["call", "input-available", "output-available"].includes(
-      String(part.state),
-    )
-  )
-    return { questions: [], omitted: true };
-  const questions = record(part.input)?.questions;
-  if (!Array.isArray(questions) || !questions.length)
-    return { questions: [], omitted: true };
-  const prompts = questions.flatMap((item) => {
-    const question = record(item)?.question;
-    return typeof question === "string" && question.trim() ? [question] : [];
-  });
-  return { questions: prompts, omitted: prompts.length !== questions.length };
 }
 
 function isAnswerPart(part: Fields) {
@@ -130,13 +104,22 @@ function selectedAnswer(parts: Fields[], meta: Fields, legacy: boolean) {
   return { selected: [], omitted: candidates.length > 0 };
 }
 
+type PublicTurn = { role: "user" | "assistant"; text: string };
+
+export type QwenWorkProjection = {
+  text: string;
+  omitted: boolean;
+  userInput?: boolean;
+  turns?: PublicTurn[];
+};
+
 export function collectQwenWorkParts(
   raw: unknown,
   references: Set<string>,
   role: "user" | "assistant",
   meta: Fields,
   legacy: boolean,
-) {
+): QwenWorkProjection {
   const parts = readParts(raw);
   const root = parts.filter(isRootPart);
   if (role === "user") {
@@ -154,14 +137,18 @@ export function collectQwenWorkParts(
   const answer = selectedAnswer(parts, meta, legacy);
   const selected = new Set(answer.selected);
   let omitted = answer.omitted;
-  const output: string[] = [];
+  const turns: PublicTurn[] = [];
+  const readClarification = qwenWorkClarificationReader(parts);
   for (const part of root) {
     if (selected.has(part)) {
       const text = textContent(part);
-      if (text.trim()) output.push(text);
+      if (text.trim()) turns.push({ role: "assistant", text });
     } else if (part.type === "tool-AskUserQuestion") {
       const clarification = readClarification(part);
-      for (const prompt of clarification.questions) output.push(prompt);
+      if (clarification.prompt)
+        turns.push({ role: "assistant", text: clarification.prompt });
+      if (clarification.reply)
+        turns.push({ role: "user", text: clarification.reply });
       omitted ||= clarification.omitted;
     }
   }
@@ -173,7 +160,12 @@ export function collectQwenWorkParts(
       collectReferences(root, references);
     else omitted = true;
   }
-  return { text: output.join("\n"), omitted };
+  const assistant = turns.filter((turn) => turn.role === "assistant");
+  return {
+    text: assistant.map((turn) => turn.text).join("\n"),
+    omitted,
+    ...(assistant.length !== turns.length ? { turns } : {}),
+  };
 }
 
 export function qwenWorkTimestamp(value: unknown) {
