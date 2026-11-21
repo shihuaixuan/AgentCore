@@ -1,11 +1,6 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/atoms/Avatar/Avatar";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
 import { ConnectServiceDialog } from "@/components/contextual/IntegrationsPanel/components/ConnectServiceDialog/ConnectServiceDialog";
@@ -139,19 +134,6 @@ export function SkillPage({ slug }: Props) {
         </p>
 
         <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-body-sm leading-inherit text-foreground-secondary">
-          <span className="inline-flex items-center gap-1.5">
-            <Avatar className="h-5 w-5">
-              {skill.creator_avatar ? (
-                <AvatarImage
-                  src={skill.creator_avatar}
-                  alt={skill.creator ?? "AutoGPT"}
-                />
-              ) : null}
-              <AvatarFallback>{skill.creator ?? "AutoGPT"}</AvatarFallback>
-            </Avatar>
-            {t("by", "作者")} {skill.creator ?? "AutoGPT"}
-          </span>
-          <span aria-hidden>·</span>
           <span>
             {skill.install_count === 0
               ? t("New", "新建")
@@ -166,26 +148,6 @@ export function SkillPage({ slug }: Props) {
               <span>
                 {t("Updated", "更新于")}{" "}
                 {formatTimeAgo(String(skill.updated_at), locale)}
-              </span>
-            </>
-          ) : null}
-          {skill.source_repo ? (
-            <>
-              <span aria-hidden>·</span>
-              <span>
-                {t("From", "来源")}{" "}
-                {skill.source_url ? (
-                  <a
-                    href={skill.source_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="underline decoration-foreground-disabled underline-offset-2 hover:text-foreground-strong"
-                  >
-                    {skill.source_repo}
-                  </a>
-                ) : (
-                  skill.source_repo
-                )}
               </span>
             </>
           ) : null}

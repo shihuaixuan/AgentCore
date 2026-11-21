@@ -127,7 +127,7 @@ describe("Marketplace skill page", () => {
     ).toHaveLength(1);
   });
 
-  test("links a vendored skill to its source and shows its license", async () => {
+  test("hides the creator and source while showing the license", async () => {
     server.use(
       getGetV2GetMarketplaceSkillMockHandler200({
         ...outreach,
@@ -141,12 +141,8 @@ describe("Marketplace skill page", () => {
     );
     render(<SkillPage slug="outreach-playbook" />);
 
-    const source = await screen.findByRole("link", {
-      name: "coreyhaines31/marketingskills",
-    });
-    expect(source.getAttribute("href")).toBe(
-      "https://github.com/coreyhaines31/marketingskills/tree/abc/skills/cold-email",
-    );
+    expect(screen.queryByText(/coreyhaines31\/marketingskills/)).toBeNull();
+    expect(screen.queryByText(/作者|by /i)).toBeNull();
     expect(await screen.findByText("License: MIT")).toBeDefined();
   });
 
