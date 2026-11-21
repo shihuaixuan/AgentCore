@@ -66,6 +66,42 @@ async function openPicker() {
 }
 
 describe("SettingsIntegrationsPage — MCP catalogue", () => {
+  test.each([
+    ["mcp_dida365", "滴答清单", "https://mcp.dida365.com"],
+    [
+      "mcp_zhipu_web_reader",
+      "智谱网页读取",
+      "https://open.bigmodel.cn/api/mcp/web_reader/mcp",
+    ],
+  ])("%s tests and saves a Key without OAuth", async (id, name, url) => {
+    server.use(getGetV1ListProvidersMockHandler([shippedCatalogProvider(id)]));
+    render(<SettingsIntegrationsPage />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: new RegExp(`^${name} `) }),
+    );
+
+    const dialog = within(await screen.findByRole("dialog"));
+    const input = await dialog.findByLabelText<HTMLInputElement>("Server URL");
+    expect(input.value).toBe(url);
+    expect(input.readOnly).toBe(true);
+    fireEvent.change(dialog.getByLabelText("API token"), {
+      target: { value: "example-office-api-key" },
+    });
+    fireEvent.click(dialog.getByRole("button", { name: /save token/i }));
+
+    await waitFor(() =>
+      expect(tokenRequest).toHaveBeenCalledWith({
+        server_url: url,
+        token: "Bearer example-office-api-key",
+      }),
+    );
+    expect(discoveryRequest).toHaveBeenCalledWith({
+      server_url: url,
+      auth_token: "Bearer example-office-api-key",
+    });
+    expect(oauthRequest).not.toHaveBeenCalled();
+  });
+
   test("shows PostHog branding and connection options from the shipped catalog", async () => {
     server.use(
       getGetV1ListProvidersMockHandler([shippedCatalogProvider("mcp_posthog")]),

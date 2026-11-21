@@ -176,6 +176,7 @@ def test_custom_presets_require_authentication_methods():
     data = get_mcp_catalog()[0].mcp_server.model_dump()
     data.update(server_url=None, connection_mode="custom")
     data.pop("auth_methods")
+    data.pop("methods")
     with pytest.raises(ValidationError, match="auth_methods"):
         MCPServerMetadata.model_validate(data)
 

@@ -17,6 +17,7 @@ export interface ConnectableProvider {
   authProviderByType?: Partial<Record<AuthMethod, string>>;
   searchTerms?: string[];
   mcpServer?: ProviderMetadata["mcp_server"];
+  mcpCatalogID?: string;
   iconId?: string;
 }
 
@@ -47,7 +48,7 @@ export function withoutDuplicateKeyMethod(
   nativeMethods: readonly AuthMethod[],
 ): NonNullable<ProviderMetadata["mcp_server"]> {
   if (!nativeMethods.includes(AuthType.api_key)) return server;
-  const authMethods = server.auth_methods.filter(
+  const authMethods = (server.auth_methods ?? []).filter(
     (method) => method !== "bearer",
   );
   return authMethods.length ? { ...server, auth_methods: authMethods } : server;
@@ -57,7 +58,7 @@ export function getSignInFallbackLabel(
   provider: ConnectableProvider,
   t: (english: string, chinese: string) => string = (english) => english,
 ): string {
-  if (provider.mcpServer?.auth_methods.includes("oauth")) {
+  if (provider.mcpServer?.auth_methods?.includes("oauth")) {
     return t(
       `Use the ${provider.name} sign-in instead`,
       `改用 ${provider.name} 登录`,
@@ -99,6 +100,7 @@ export function toConnectableProviders(
     };
     if (item.mcp_server) {
       provider.mcpServer = item.mcp_server;
+      provider.mcpCatalogID = item.name;
       if (existing) {
         provider.searchTerms = Array.from(
           new Set([...(provider.searchTerms ?? []), item.name]),

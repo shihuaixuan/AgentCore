@@ -23,8 +23,7 @@ from sentry_sdk.tracing import Span
 from backend.blocks import get_block, get_blocks
 from backend.blocks._base import BlockSchema
 from backend.blocks.agent import AgentExecutorBlock
-from backend.blocks.mcp.block import MCPToolBlock
-from backend.blocks.mcp.helpers import normalize_mcp_url
+from backend.blocks.mcp.block import MCPToolBlock, resolve_workflow_connection
 from backend.copilot.rate_limit import platform_spend_refusal
 from backend.data import redis_client as redis
 from backend.data.block import BlockInput, BlockOutput, BlockOutputEntry
@@ -664,32 +663,19 @@ async def execute_node(
             and input_data.get("connection_id")
             and not execution_context.dry_run
         ):
-            from backend.data import db
-            from backend.data.custom_mcp import get_custom_mcp_connection
-
-            if execution_context.expert_id:
-                raise ValueError(
-                    "Custom connections are not available to expert workflows yet."
-                )
-            lookup = (
-                get_custom_mcp_connection
-                if db.is_connected()
-                else get_database_manager_async_client().get_custom_mcp_connection
+            connection = await resolve_workflow_connection(
+                user_id, input_data["connection_id"], input_data["server_url"], execution_context
             )
-            connection = await lookup(user_id, input_data["connection_id"])
-            if (
-                not connection
-                or not connection["enabled"]
-                or normalize_mcp_url(connection["serverUrl"])
-                != normalize_mcp_url(input_data.get("server_url", ""))
-            ):
-                raise ValueError(
-                    "This connection is unavailable or its server address changed."
-                )
+            extra_exec_kwargs["connection_revision"] = connection["revision"]
             credential_id = connection["credentialId"]
+            selected_id = (input_data.get("credentials") or {}).get("id")
+            if selected_id and selected_id != credential_id:
+                raise ValueError("This connection's credential changed. Select its tool again.")
             if credential_id:
                 lease = await creds_manager.acquire_lease(user_id, credential_id)
                 credential_leases["credentials"] = lease
+                if not isinstance(lease.credentials, OAuth2Credentials) or lease.credentials.id != credential_id:
+                    raise ValueError("This connection's credential is unavailable.")
                 extra_exec_kwargs["credentials"] = lease.credentials
                 input_data["credentials"] = {
                     "id": credential_id,

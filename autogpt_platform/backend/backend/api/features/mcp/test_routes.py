@@ -5,6 +5,7 @@ to avoid creating blocking portals that can corrupt pytest-asyncio's session eve
 """
 
 import asyncio
+from contextlib import contextmanager
 from http import HTTPStatus
 from unittest.mock import AsyncMock, MagicMock, patch
 from urllib.parse import parse_qs, urlsplit
@@ -73,6 +74,7 @@ class TestDiscoverTools:
 
         with (
             patch("backend.api.features.mcp.routes.MCPClient") as MockClient,
+            patch("backend.blocks.mcp.helpers.MCPClient") as HelperClient,
             patch(
                 "backend.api.features.mcp.routes.auto_lookup_mcp_credential",
                 new_callable=AsyncMock,
@@ -80,6 +82,7 @@ class TestDiscoverTools:
             ),
         ):
             instance = MockClient.return_value
+            HelperClient.return_value = instance
             instance.close = AsyncMock()
             instance.initialize = AsyncMock(
                 return_value={
@@ -146,12 +149,16 @@ class TestDiscoverTools:
         with (
             patch("backend.api.features.mcp.routes.MCPClient") as MockClient,
             patch(
+                "backend.api.features.mcp.routes.mcp_client_for_credential"
+            ) as CredentialClient,
+            patch(
                 "backend.api.features.mcp.routes.auto_lookup_mcp_credential",
                 new_callable=AsyncMock,
                 return_value=stored_cred,
             ) as lookup,
         ):
             instance = MockClient.return_value
+            CredentialClient.return_value = instance
             instance.close = AsyncMock()
             instance.initialize = AsyncMock(
                 return_value={"serverInfo": {}, "protocolVersion": "2025-03-26"}
@@ -164,12 +171,18 @@ class TestDiscoverTools:
             response = await client.post("/discover-tools", json=payload)
 
         assert response.status_code == 200
-        MockClient.assert_called_once_with(
-            "https://mcp.example.com/mcp",
-            authorization=(
-                None if use_saved_credentials is False else "Bearer stored-token-123"
-            ),
-        )
+        if use_saved_credentials is False:
+            MockClient.assert_called_once_with(
+                "https://mcp.example.com/mcp", authorization=None
+            )
+            CredentialClient.assert_not_called()
+        else:
+            MockClient.assert_not_called()
+            CredentialClient.assert_called_once_with(
+                "https://mcp.example.com/mcp",
+                stored_cred,
+                follow_redirects=False,
+            )
         if use_saved_credentials is False:
             lookup.assert_not_awaited()
         else:
@@ -1219,17 +1232,244 @@ def _accepting_server():
     return _probe_server()
 
 
+def _legacy_query_key(**metadata):
+    return OAuth2Credentials(
+        provider="mcp",
+        access_token=SecretStr("fixture-secret"),
+        scopes=[],
+        metadata={
+            "mcp_server_url": "https://mcp-gw.dingtalk.com/server/fixture",
+            "mcp_auth_scheme": "query_key",
+            **metadata,
+        },
+    )
+
+
+@contextmanager
+def _query_key_manager(rows):
+    with (
+        patch("backend.api.features.mcp.routes.creds_manager") as manager,
+        patch(
+            "backend.api.features.mcp.routes._invoke_creds_changed_hook",
+            new_callable=AsyncMock,
+        ),
+    ):
+        manager.store.get_creds_by_provider = AsyncMock(return_value=rows)
+        manager.store.update_creds = AsyncMock()
+        manager.create = AsyncMock()
+        manager.update = AsyncMock()
+        manager.locks = AsyncMock(return_value=MagicMock())
+        yield manager
+
+
 class TestStoreToken:
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_preset_save_never_adopts_a_legacy_row(self, client):
+        legacy = _legacy_query_key()
+        with _accepting_server(), _query_key_manager([legacy]) as manager:
+            body = {
+                "server_url": legacy.metadata["mcp_server_url"],
+                "token": "new-key",
+                "auth_type": "query_key",
+                "catalog_id": "mcp_dingtalk_mail",
+            }
+            response = await client.post("/token", json=body)
+            assert response.status_code == 200
+            bound = manager.create.await_args.args[1]
+            assert bound.id != legacy.id
+            assert bound.metadata["mcp_catalog_id"] == body["catalog_id"]
+            manager.store.get_creds_by_provider.return_value = [legacy, bound]
+            manager.store.get_creds_by_id = AsyncMock(return_value=bound)
+            response = await client.post("/token", json={**body, "token": "rotated"})
+            assert response.json()["id"] == bound.id
+            assert (
+                manager.store.update_creds.await_args.args[
+                    1
+                ].access_token.get_secret_value()
+                == "rotated"
+            )
+            conflict = await client.post(
+                "/token", json={**body, "catalog_id": "mcp_dingtalk_docs"}
+            )
+            assert conflict.status_code == 409
+            without_preset = await client.post(
+                "/token", json={**body, "catalog_id": None}
+            )
+            assert without_preset.status_code == 409
+            manager.create.assert_awaited_once()
+            manager.store.update_creds.assert_awaited_once()
+            manager.delete.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "extra",
+        [
+            {"isolated": True},
+            {"auth_type": "header"},
+            {"catalog_id": "mcp_unknown"},
+            {"catalog_id": "mcp_linear"},
+        ],
+    )
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_invalid_catalog_scope_rejected_before_probe(self, client, extra):
+        with _accepting_server() as probe, _query_key_manager([]) as manager:
+            response = await client.post(
+                "/token",
+                json={
+                    "server_url": _legacy_query_key().metadata["mcp_server_url"],
+                    "token": "fixture",
+                    "auth_type": "query_key",
+                    "catalog_id": "mcp_dingtalk_mail",
+                    **extra,
+                },
+            )
+            assert response.status_code == 400
+            probe.assert_not_called()
+            manager.create.assert_not_called()
+
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_bind_only_selected_legacy_row_without_returning_key(self, client):
+        rows = [
+            _legacy_query_key(),
+            _legacy_query_key(),
+            _legacy_query_key(mcp_isolated=True),
+            _legacy_query_key(mcp_auth_scheme="bearer"),
+            _legacy_query_key(
+                mcp_server_url="https://other.example/?key=fixture-secret"
+            ),
+        ]
+        selected = rows[1]
+        path = "/query-key-bindings/mcp_dingtalk_mail"
+        with _accepting_server() as probe, _query_key_manager(rows) as manager:
+            choices = await client.get(path)
+            assert choices.status_code == 200
+            assert choices.json() == [
+                {"id": row.id, "server_url": row.metadata["mcp_server_url"]}
+                for row in rows[:2]
+            ]
+            manager.store.get_creds_by_id = AsyncMock(return_value=selected)
+            bound = await client.post(path, json={"credential_id": selected.id})
+            assert bound.status_code == 200
+            assert "fixture-secret" not in bound.text
+            manager.store.get_creds_by_id.assert_awaited_with(
+                "test-user-id", selected.id
+            )
+            updated = manager.store.update_creds.await_args.args[1]
+            assert updated == selected.model_copy(
+                update={
+                    "metadata": {
+                        **selected.metadata,
+                        "mcp_catalog_id": "mcp_dingtalk_mail",
+                    }
+                }
+            )
+            probe.return_value.list_tools.assert_awaited_once()
+            manager.create.assert_not_called()
+            manager.delete.assert_not_called()
+            manager.store.get_creds_by_provider.return_value = [rows[0], updated]
+            assert (await client.get(path)).json() == []
+            raced = await client.post(
+                "/query-key-bindings/mcp_dingtalk_docs",
+                json={"credential_id": selected.id},
+            )
+            assert raced.status_code == 409
+            manager.store.update_creds.assert_awaited_once()
+
+    @pytest.mark.parametrize("change", ["token", "catalog", "delete"])
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_bind_rechecks_verified_snapshot_under_row_lock(self, client, change):
+        selected = _legacy_query_key()
+        current = {
+            "token": selected.model_copy(
+                update={"access_token": SecretStr("different")}
+            ),
+            "catalog": selected.model_copy(
+                update={
+                    "metadata": {
+                        **selected.metadata,
+                        "mcp_catalog_id": "mcp_dingtalk_docs",
+                    }
+                }
+            ),
+            "delete": None,
+        }[change]
+        lock = asyncio.Lock()
+
+        async def read_row(user_id, credential_id):
+            assert (user_id, credential_id) == ("test-user-id", selected.id)
+            return current if lock.locked() else selected
+
+        with _accepting_server(), _query_key_manager([selected]) as manager:
+            manager._locked.return_value = lock
+            manager.store.get_creds_by_id = AsyncMock(side_effect=read_row)
+            response = await client.post(
+                "/query-key-bindings/mcp_dingtalk_mail",
+                json={"credential_id": selected.id},
+            )
+            assert response.status_code == 409
+            manager._locked.assert_called_once_with("test-user-id", selected.id)
+            manager.store.update_creds.assert_not_awaited()
+
+    @pytest.mark.parametrize(
+        "extra",
+        [
+            {"token": "different"},
+            {"expert_id": "other"},
+            {"server_url": "https://other.example"},
+        ],
+    )
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_bind_rejects_replacement_key_or_grant_target(self, client, extra):
+        with _accepting_server() as probe, _query_key_manager([]) as manager:
+            response = await client.post(
+                "/query-key-bindings/mcp_dingtalk_mail",
+                json={"credential_id": "existing", **extra},
+            )
+            assert response.status_code == 422
+            probe.assert_not_called()
+            manager.store.update_creds.assert_not_awaited()
+
+    @pytest.mark.parametrize(
+        "row",
+        [
+            None,
+            _legacy_query_key(mcp_isolated=True),
+            _legacy_query_key(
+                mcp_server_url="https://mcp-gw.dingtalk.com/server/unsafe?key=fixture"
+            ),
+            _legacy_query_key().model_copy(update={"provider": "not-mcp"}),
+            _legacy_query_key().model_copy(update={"is_managed": True}),
+            _legacy_query_key().model_copy(
+                update={"refresh_token": SecretStr("oauth-refresh")}
+            ),
+        ],
+    )
+    @pytest.mark.asyncio(loop_scope="session")
+    async def test_bind_rejects_missing_or_ineligible_owner_row(self, client, row):
+        with _accepting_server() as probe, _query_key_manager([]) as manager:
+            manager.store.get_creds_by_id = AsyncMock(return_value=row)
+            response = await client.post(
+                "/query-key-bindings/mcp_dingtalk_mail",
+                json={"credential_id": "selected"},
+            )
+            assert response.status_code == 404
+            manager.store.get_creds_by_id.assert_awaited_once_with(
+                "test-user-id", "selected"
+            )
+            probe.assert_not_called()
+            manager.store.update_creds.assert_not_awaited()
+
     @pytest.mark.asyncio(loop_scope="session")
     async def test_dingtalk_query_key_round_trip(self, client):
         url = "https://mcp-gw.dingtalk.com/server/" + "a" * 64
         token = "fixture-only-secret"
         with (
             _accepting_server() as probe,
-            patch("backend.api.features.mcp.routes.creds_manager") as manager,
+            _query_key_manager([]) as manager,
+            patch(
+                "backend.blocks.mcp.helpers.MCPClient",
+                return_value=probe.return_value,
+            ) as helper_probe,
         ):
-            manager.store.get_creds_by_provider = AsyncMock(return_value=[])
-            manager.create = AsyncMock()
             response = await client.post(
                 "/token",
                 json={"server_url": url, "token": token, "auth_type": "query_key"},
@@ -1248,22 +1488,29 @@ class TestStoreToken:
                 json={"server_url": url, "credential_id": credential.id},
             )
             assert response.status_code == 200
-            assert probe.call_args.kwargs["query_key"].get_secret_value() == token
-            assert not probe.call_args.kwargs.get("authorization")
+            endpoint_auth = helper_probe.call_args.kwargs["endpoint_auth"]
+            assert endpoint_auth.query == "key"
+            assert endpoint_auth.token.get_secret_value() == token
+            assert not helper_probe.call_args.kwargs.get("authorization")
 
     @pytest.mark.asyncio(loop_scope="session")
-    async def test_query_key_disallowed_for_other_endpoints(self, client):
-        with patch("backend.api.features.mcp.routes.MCPClient") as probe:
+    async def test_query_key_accepts_any_clean_https_endpoint_and_parameter(
+        self, client
+    ):
+        with _accepting_server() as probe, _query_key_manager([]) as manager:
             response = await client.post(
                 "/token",
                 json={
                     "server_url": "https://other.example/mcp",
                     "token": "fixture",
                     "auth_type": "query_key",
+                    "auth_parameter": "token",
                 },
             )
-            assert response.status_code == 400
-            probe.assert_not_called()
+            assert response.status_code == 200
+            credential = manager.create.await_args.args[1]
+            assert credential.metadata["mcp_auth_parameter"] == "token"
+            assert probe.call_args.kwargs["endpoint_auth"].query == "token"
 
     @pytest.mark.asyncio(loop_scope="session")
     async def test_query_key_not_stored_if_discovery_fails(self, client):
@@ -1343,7 +1590,7 @@ class TestStoreToken:
             patch(
                 "backend.blocks.mcp.helpers.IntegrationCredentialsManager"
             ) as manager_cls,
-            patch("backend.api.features.mcp.routes.MCPClient") as client_cls,
+            patch("backend.blocks.mcp.helpers.MCPClient") as client_cls,
         ):
             manager = manager_cls.return_value
             manager.store.get_creds_by_provider = AsyncMock(
@@ -1369,7 +1616,9 @@ class TestStoreToken:
 
         assert discover_response.status_code == 200
         client_cls.assert_called_once_with(
-            "https://mcp.example.com/mcp", authorization="Basic encoded-value"
+            "https://mcp.example.com/mcp",
+            authorization="Basic encoded-value",
+            follow_redirects=False,
         )
         mcp_client.close.assert_awaited_once()
         manager.refresh_if_needed.assert_not_awaited()

@@ -20,6 +20,8 @@ interface Args {
   scopes?: string[];
   signal: AbortSignal;
   isolated?: boolean;
+  catalog?: { connector_id: string; method_id: string };
+  toolServerURL?: string;
   exchange?: (
     code: string,
     state: string,
@@ -38,6 +40,8 @@ export async function connectMCPOAuth({
   scopes,
   signal,
   isolated = false,
+  catalog,
+  toolServerURL,
   exchange,
 }: Args) {
   signal.throwIfAborted();
@@ -58,7 +62,9 @@ export async function connectMCPOAuth({
       login = await postV2InitiateOauthLoginForAnMcpServer(
         {
           server_url: serverURL,
-          ...(isolated ? { isolated: true } : {}),
+          ...(isolated || catalog ? { isolated: true } : {}),
+          ...catalog,
+          ...(toolServerURL ? { tool_server_url: toolServerURL } : {}),
           ...(scopes === undefined ? {} : { scopes }),
         },
         { signal },

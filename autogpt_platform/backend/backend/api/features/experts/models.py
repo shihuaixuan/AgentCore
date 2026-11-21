@@ -15,6 +15,7 @@ from pydantic import (
 
 from backend.api.features.experts.avatar_catalog import resolve_avatar_url
 from backend.api.features.experts.copy_policy import expert_display_title
+from backend.api.features.store import local_media
 from backend.copilot.autopilot_mode import AutopilotMode
 from backend.copilot.credential_selection import CredentialPins
 from backend.data.expert_run_output import OutputType
@@ -48,10 +49,9 @@ EXPERT_AVATAR_URL_MAX_LENGTH = 2_000
 # Each repeat time of a routine is one scheduler job.
 MAX_ROUTINE_CRONS = 24
 
-# Avatars come from our own upload (an absolute https URL) or ship with a
-# roster template (a path under /public). Anything else — notably data:,
-# javascript: and plaintext http: — is refused so a stored value can never
-# carry script or be fetched unencrypted.
+# Keep uploaded avatars on HTTPS or a site-relative path. An HTTP self-hosted
+# instance can hand back its own media URL; store that as a site-relative path.
+# Other plaintext HTTP and non-HTTP URLs are refused.
 # Backslashes and tab/CR/LF are refused outright: browsers strip the control
 # characters and treat "\" as "/" for special schemes, so "/\evil.example/a.png"
 # would resolve to a third-party origin despite looking site-relative.
@@ -59,7 +59,7 @@ _AVATAR_URL_FORBIDDEN_CHARS = ("\\", "\t", "\r", "\n")
 
 
 def validate_avatar_url(value: str | None) -> str | None:
-    """Accept an absolute https URL or a site-relative path, else reject."""
+    """Normalize local uploads and accept only HTTPS URLs or site-relative paths."""
     if value is None:
         return None
     stripped = value.strip()
@@ -74,6 +74,10 @@ def validate_avatar_url(value: str | None) -> str | None:
     if stripped.startswith("/"):
         return stripped
     parsed = urlparse(stripped)
+    if parsed.scheme == "http":
+        relative_path = local_media.relative_image_path(stripped)
+        if relative_path is not None:
+            return relative_path
     if parsed.scheme != "https" or not parsed.netloc:
         raise ValueError("Avatar URL must be an https URL or a relative path")
     return stripped

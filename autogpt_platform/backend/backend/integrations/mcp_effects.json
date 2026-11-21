@@ -664,5 +664,16 @@
     "external": [
       "SearchPro"
     ]
+  },
+  "mcp_dida365": {
+    "source": "https://help.dida365.com/articles/7438132116019216384",
+    "review_when_gate_inactive": true
+  },
+  "mcp_zhipu_web_reader": {
+    "source": "https://docs.bigmodel.cn/cn/coding-plan/mcp/reader-mcp-server",
+    "review_when_gate_inactive": true,
+    "external": [
+      "webReader"
+    ]
   }
 }

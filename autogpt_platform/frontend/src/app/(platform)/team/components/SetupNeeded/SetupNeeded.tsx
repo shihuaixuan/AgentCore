@@ -62,6 +62,7 @@ export function SetupNeeded({ experts }: { experts: Expert[] }) {
       </ul>
       {connecting ? (
         <ExpertConnectServiceDialog
+          expertID={connecting.expert_id}
           open
           expertName={expertTitle(connecting.expert_id)}
           initialProviderId={connecting.providers[0] ?? null}

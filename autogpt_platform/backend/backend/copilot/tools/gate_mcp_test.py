@@ -12,21 +12,167 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from prisma.enums import ReviewStatus
+from pydantic import SecretStr
 
 from backend.copilot import usage_activation_fixtures
+from backend.copilot.capabilities.mcp_review import resolve_reviewed_route
 from backend.copilot.gate import chat_rules
 from backend.copilot.gate.classifier import Judgement
 from backend.copilot.gate.headline import Headline
 from backend.copilot.gate.review import payload_headline, review_payload
 from backend.copilot.model import AutopilotMode, ChatSession, ChatSessionMetadata
-from backend.copilot.tools.models import MCPToolOutputResponse
-from backend.copilot.tools.run_capability import RunCapabilityTool
+from backend.copilot.tools.models import ErrorResponse, MCPToolOutputResponse
+from backend.copilot.tools.run_capability import RunCapabilityTool, run_reviewed_mcp
+from backend.data.model import OAuth2Credentials
 
 usage_snapshot = usage_activation_fixtures.usage_snapshot
 _GATE = "backend.copilot.gate"
 _CAP = "backend.copilot.tools.run_capability"
 _GITHUB = "mcp:api.githubcopilot.com"
 _OPEN_WORLD = "https://mcp.example.com/mcp"
+_TODO = "https://mcp-gw.dingtalk.com/oauth/server/todo"
+_PERSONAL = "https://mcp-gw.dingtalk.com/server/personal"
+_REVIEW = "backend.copilot.capabilities.mcp_review"
+
+
+@pytest.fixture
+def saved_key():
+    return OAuth2Credentials(
+        id="account-a",
+        provider="mcp",
+        access_token=SecretStr("never-store-this"),
+        scopes=[],
+        metadata={
+            "mcp_server_url": _PERSONAL,
+            "mcp_auth_scheme": "query_key",
+            "mcp_catalog_id": "mcp_dingtalk_todo",
+        },
+    )
+
+
+@pytest.mark.parametrize("gate_on", [False, True])
+async def test_dingtalk_alias_does_not_inherit_catalog_read(
+    gate, ran, gate_on, saved_key
+):
+    with (
+        patch(f"{_REVIEW}.ENCRYPTION_KEY", "test-key"),
+        patch(f"{_GATE}.is_feature_enabled", AsyncMock(return_value=gate_on)),
+        patch("backend.blocks.mcp.helpers.IntegrationCredentialsManager") as manager,
+    ):
+        manager.return_value.store.get_creds_by_provider = AsyncMock(
+            return_value=[saved_key]
+        )
+        result = await RunCapabilityTool().execute(
+            "user-1",
+            _session(),
+            "call-1",
+            id=_TODO,
+            input={"tool": "get_user_todos"},
+            _args_bound=True,
+            _reviewed_mcp_route={
+                "server_url": _TODO,
+                "endpoint": _TODO,
+                "credential_id": "forged",
+            },
+        )
+    ran.assert_not_awaited()
+    if gate_on:
+        assert _is_held(result)
+        subject = gate.open_review.await_args.args[6]
+        assert "/server/personal" in subject.key
+    else:
+        assert "review_required" in str(result.output)
+        review = gate.own_review.await_args.kwargs["payload"]
+        assert _PERSONAL in review.model_dump_json()
+    assert "never-store-this" not in str(result.output)
+
+
+@pytest.mark.parametrize("gate_on", [True, False])
+async def test_exact_oauth_read_cannot_switch_to_alias_at_execution(
+    gate, gate_on, saved_key
+):
+    oauth = OAuth2Credentials(
+        id="oauth",
+        provider="mcp",
+        access_token=SecretStr("oauth-token"),
+        scopes=[],
+        metadata={"mcp_server_url": _TODO, "mcp_client_id": "oauth-client"},
+    )
+    with (
+        patch(f"{_GATE}.is_feature_enabled", AsyncMock(return_value=gate_on)),
+        patch("backend.blocks.mcp.helpers.IntegrationCredentialsManager") as manager,
+        patch(f"{_CAP}.validate_url_host", new_callable=AsyncMock),
+        patch(f"{_CAP}.MCPClient") as client,
+        patch(f"{_CAP}.RunMCPToolTool._execute_tool", new_callable=AsyncMock) as run,
+    ):
+        manager.return_value.store.get_creds_by_provider = AsyncMock(
+            side_effect=[[oauth], [oauth, saved_key]]
+        )
+        manager.return_value.refresh_if_needed = AsyncMock(return_value=oauth)
+        client.return_value = AsyncMock()
+        run.return_value = MCPToolOutputResponse(
+            message="ran", server_url=_TODO, tool_name="get_user_todos"
+        )
+        result = await _call(_session(), _TODO, "get_user_todos")
+    assert not _is_held(result)
+    gate.open_review.assert_not_awaited()
+    gate.own_review.assert_not_awaited()
+    client.assert_called_once_with(
+        _TODO,
+        authorization="Bearer oauth-token",
+        query_key=None,
+        follow_redirects=False,
+    )
+    run.assert_awaited_once()
+
+
+@pytest.mark.parametrize(
+    "change", ["higher_ranked", "removed", "rebound", "revoked", "replaced_key"]
+)
+async def test_reviewed_execution_uses_only_the_approved_account(change, saved_key):
+    session = _session(expert_id="expert")
+    other = saved_key.model_copy(
+        update={"id": "other", "access_token": SecretStr("other-key")}
+    )
+    store = AsyncMock()
+    store.get_creds_by_provider.return_value = [saved_key]
+    grants = AsyncMock()
+    grants.expert_allowed_credential_ids.return_value = [saved_key.id, other.id]
+    with (
+        patch(f"{_REVIEW}.ENCRYPTION_KEY", "test-key"),
+        patch("backend.blocks.mcp.helpers.IntegrationCredentialsManager") as manager,
+        patch(f"{_REVIEW}.experts_db", return_value=grants),
+        patch(f"{_CAP}.validate_url_host", new_callable=AsyncMock),
+        patch(f"{_CAP}.MCPClient") as client,
+        patch(f"{_CAP}.RunMCPToolTool._execute_tool", new_callable=AsyncMock) as run,
+    ):
+        manager.return_value.store = store
+        client.return_value = AsyncMock()
+        pin = await resolve_reviewed_route("user-1", session.expert_id, _TODO)
+        assert pin.credential_id == saved_key.id
+        if change == "removed":
+            store.get_creds_by_provider.return_value = [other]
+        elif change == "revoked":
+            grants.expert_allowed_credential_ids.return_value = [other.id]
+        elif change == "rebound":
+            saved_key.metadata["mcp_server_url"] = _PERSONAL + "-changed"
+        elif change == "replaced_key":
+            saved_key.access_token = SecretStr("changed-in-place")
+        else:
+            store.get_creds_by_provider.return_value = [saved_key, other]
+        result = await run_reviewed_mcp("user-1", session, pin, "get_user_todos", {})
+    if change == "higher_ranked":
+        client.assert_called_once_with(
+            _PERSONAL,
+            authorization=None,
+            query_key=saved_key.access_token,
+            follow_redirects=False,
+        )
+        run.assert_awaited_once()
+    else:
+        assert isinstance(result, ErrorResponse)
+        client.assert_not_called()
+        run.assert_not_awaited()
 
 
 def _session(

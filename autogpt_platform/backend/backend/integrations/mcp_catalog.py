@@ -2,7 +2,7 @@ import ipaddress
 import json
 from functools import cache, lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 from urllib.parse import urlsplit
 
 from prisma import Prisma
@@ -16,6 +16,7 @@ from pydantic import (
 )
 
 from backend.data import db as database
+from backend.integrations.mcp_methods import MCPMethod, legacy_method, method_endpoint
 
 
 class MCPServerURLPreset(BaseModel):
@@ -32,9 +33,11 @@ class MCPServerMetadata(BaseModel):
     documentation_url: str
     setup_instructions: str
     connection_mode: Literal["hosted", "custom"]
-    auth_methods: list[Literal["oauth", "bearer", "basic", "none", "query_key"]] = (
-        Field(min_length=1)
+    auth_methods: list[Literal["oauth", "bearer", "basic", "header", "none", "query_key"]] = Field(
+        min_length=1
     )
+    methods: list[MCPMethod] = Field(default_factory=list, max_length=32)
+    definition_version: int = Field(default=1, ge=1, strict=True)
     server_url_options: list[MCPServerURLPreset] = Field(default_factory=list)
     allow_custom_url: bool = Field(
         default=False,
@@ -67,6 +70,21 @@ class MCPServerMetadata(BaseModel):
         description="Addresses this server was listed under before, so "
         "connections saved against them still belong to it.",
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def fill_legacy_auth_methods(cls, values: Any) -> Any:
+        if not isinstance(values, dict) or "auth_methods" in values:
+            return values
+        methods = values.get("methods")
+        if not methods:
+            return values
+        copied = dict(values)
+        copied["auth_methods"] = [
+            method.get("auth_type") if isinstance(method, dict) else method.auth_type
+            for method in methods
+        ]
+        return copied
 
     @field_validator("server_url", "documentation_url", "oauth_server_url")
     @classmethod
@@ -107,6 +125,18 @@ class MCPServerMetadata(BaseModel):
             raise ValueError("Only hosted entries can allow a custom URL")
         if len(set(self.auth_methods)) != len(self.auth_methods):
             raise ValueError("Authentication methods must be unique")
+        if not self.methods:
+            if not self.auth_methods:
+                raise ValueError("Provide nonempty methods or legacy auth_methods")
+            object.__setattr__(self, "methods", [legacy_method(auth, self.server_url) for auth in self.auth_methods])
+        if len({method.id for method in self.methods}) != len(self.methods):
+            raise ValueError("Method IDs must be unique")
+        legacy = list(dict.fromkeys(method.auth_type for method in self.methods))
+        if "auth_methods" in self.model_fields_set and self.auth_methods != legacy:
+            raise ValueError("Legacy auth_methods must agree with methods")
+        object.__setattr__(self, "auth_methods", legacy)
+        if any(method.endpoint_path for method in self.methods) and not self.server_url:
+            raise ValueError("Endpoint templates require a fixed catalogued origin")
         if self.oauth_write_scopes and self.oauth_scopes is None:
             raise ValueError("Optional write scopes require explicit default scopes")
         if set(self.oauth_scopes or []) & set(self.oauth_write_scopes):
@@ -247,7 +277,23 @@ def get_mcp_catalog_entry_for_url(server_url: str) -> MCPCatalogEntry | None:
         ]
         if any(url and _catalog_url_key(url) == key for url in urls):
             return entry
+        if any(
+            method.endpoint_path
+            and _matches_catalog_method_endpoint(server, method, server_url)
+            for method in server.methods
+        ):
+            return entry
     return None
+
+
+def _matches_catalog_method_endpoint(
+    server: MCPServerMetadata, method: MCPMethod, server_url: str
+) -> bool:
+    try:
+        method_endpoint(server, method, server_url)
+    except ValueError:
+        return False
+    return True
 
 
 def parse_mcp_catalog(content: str) -> tuple[MCPCatalogEntry, ...]:

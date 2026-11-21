@@ -144,6 +144,8 @@ export function ConnectorsBrowsePage() {
             if (!open) setSelected(null);
           }}
           initialProviderId={selected.id}
+          preferMcp
+          onAccount={() => {setConnectionSearch(""); update({view: "mine"});}}
           onConnected={() => {
             setConnectionSearch("");
             update({ view: "mine" });

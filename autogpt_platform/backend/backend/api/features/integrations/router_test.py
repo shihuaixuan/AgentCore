@@ -337,6 +337,22 @@ class TestRunnableSdkDefaultIsAPlatformKey:
 class TestCreateCredentialNoSecretInResponse:
     """POST /{provider}/credentials must not return secrets."""
 
+    def test_generic_create_cannot_set_mcp_catalog_binding(self):
+        with patch("backend.api.features.integrations.router.creds_manager") as manager:
+            manager.create = AsyncMock()
+            response = client.post(
+                "/mcp/credentials",
+                json={
+                    "type": "oauth2",
+                    "provider": "mcp",
+                    "access_token": "fixture",
+                    "scopes": [],
+                    "metadata": {"mcp_catalog_id": "mcp_dingtalk_mail"},
+                },
+            )
+        assert response.status_code == 400
+        manager.create.assert_not_called()
+
     def test_create_api_key_no_secret_in_response(self):
         with patch(
             "backend.api.features.integrations.router.creds_manager"

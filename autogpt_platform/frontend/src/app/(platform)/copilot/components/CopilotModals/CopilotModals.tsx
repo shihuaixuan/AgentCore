@@ -1,6 +1,7 @@
 "use client";
 
 import { ConnectServiceDialog } from "@/components/contextual/IntegrationsPanel/components/ConnectServiceDialog/ConnectServiceDialog";
+import { CatalogAccountScope } from "@/components/contextual/IntegrationsPanel/components/CatalogAccounts/CatalogAccountScope";
 import { IntegrationsPanel } from "@/components/contextual/IntegrationsPanel/IntegrationsPanel";
 import { SchedulesPanel } from "@/components/contextual/SchedulesPanel/SchedulesPanel";
 import { SkillsPanel } from "@/components/contextual/SkillsPanel/SkillsPanel";
@@ -48,7 +49,7 @@ export function CopilotModals() {
   }
 
   return (
-    <>
+    <CatalogAccountScope.Provider value={{expertID: expert?.id}}>
       <Dialog
         controlled={{ isOpen: modal === "skills", set: handleOpenChange }}
         styling={{ maxWidth: "44rem" }}
@@ -96,6 +97,6 @@ export function CopilotModals() {
         onOpenChange={handleOpenChange}
         onConnected={expert ? handleConnected : undefined}
       />
-    </>
+    </CatalogAccountScope.Provider>
   );
 }

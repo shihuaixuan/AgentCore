@@ -6,17 +6,23 @@ decides on that subject's effect, and the card's headline names it.
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict
 
 from backend.blocks._base import Block, BlockEffect
 from backend.blocks._preview import ChangePreview
+from backend.blocks.mcp.client import is_dingtalk_key_endpoint
+from backend.blocks.mcp.helpers import normalize_mcp_url
 from backend.copilot.constants import AUTOPILOT_NAME
 from backend.copilot.tree import MICRODOLLARS_PER_CREDIT
 from backend.executor.utils import block_usage_cost
-from backend.integrations.mcp_catalog import mcp_tool_effect
+from backend.integrations.mcp_catalog import (
+    get_mcp_catalog_entry_for_url,
+    mcp_tool_effect,
+)
 
 from .effects import JUDGED_BLOCKS, block_effect, graph_effect
 from .policy import Effect
@@ -167,15 +173,27 @@ def workflow_subject(
     return subject
 
 
-def mcp_subject(server_url: str, tool: str) -> Subject:
+def mcp_subject(
+    server_url: str, tool: str, *, account_key: str | None = None
+) -> Subject:
     """Keyed on the server (host and path, since one host can serve many) and
     the tool, so a rule on one tool leaves every other asking. Only the
     server's effect map decides; a tool's name is no evidence of what it does."""
     url = urlsplit(server_url)
     host = url.hostname or server_url
     port = f":{url.port}" if url.port not in (None, 443) else ""
-    mapped = mcp_tool_effect(server_url, tool)
+    personal = is_dingtalk_key_endpoint(normalize_mcp_url(server_url))
+    entry = get_mcp_catalog_entry_for_url(server_url)
+    canonical = bool(
+        entry
+        and entry.mcp_server.server_url
+        and normalize_mcp_url(entry.mcp_server.server_url)
+        == normalize_mcp_url(server_url)
+    )
+    mapped = None if personal or not canonical else mcp_tool_effect(server_url, tool)
     name = f"{tool} on {host}"
+    if personal:
+        name = f"{tool} on {host}{url.path}"
     if mapped is None:
         effect = Effect.EXTERNAL
         reason = f"{AUTOPILOT_NAME} does not know what {name} does, so he asks."
@@ -185,7 +203,11 @@ def mcp_subject(server_url: str, tool: str) -> Subject:
         effect = Effect.EXTERNAL
         reason = f"Runs {name}, which reaches outside the platform."
     return Subject(
-        key=f"mcp:{host}{port}{url.path.rstrip('/')}::{tool}",
+        key=(
+            f"mcp-account:{account_key}:{host}{port}{url.path.rstrip('/')}::{tool}"
+            if account_key
+            else f"mcp:{host}{port}{url.path.rstrip('/')}::{tool}"
+        ),
         name=name,
         effect=effect,
         reason=reason,

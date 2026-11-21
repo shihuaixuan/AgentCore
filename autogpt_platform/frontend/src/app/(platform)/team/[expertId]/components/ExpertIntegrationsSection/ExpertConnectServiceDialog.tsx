@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { CatalogAccountScope } from "@/components/contextual/IntegrationsPanel/components/CatalogAccounts/CatalogAccountScope";
 import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import { ConnectProviderRow } from "@/app/(platform)/copilot/components/ConnectToolsDialog/ConnectProviderRow";
 import { Button } from "@/components/atoms/Button/Button";
@@ -38,6 +39,7 @@ const reducedVariants = {
 };
 
 interface Props {
+  expertID: string;
   open: boolean;
   expertName: string;
   /** Open straight on this provider's connect step instead of the picker. */
@@ -50,6 +52,7 @@ interface Props {
  *  every service is listed, and a successful connect hands the credential
  *  back so the expert is granted it. */
 export function ExpertConnectServiceDialog({
+  expertID,
   open,
   expertName,
   initialProviderId,
@@ -91,6 +94,7 @@ export function ExpertConnectServiceDialog({
   const hasMoreBelow = useBottomScrollShadow(list);
 
   return (
+    <CatalogAccountScope.Provider value={{expertID, onAccount: onClose}}>
     <Dialog
       variant="compact"
       styling={{ maxWidth: "40rem", maxHeight: "85vh" }}
@@ -301,5 +305,6 @@ export function ExpertConnectServiceDialog({
         </div>
       </Dialog.Content>
     </Dialog>
+    </CatalogAccountScope.Provider>
   );
 }

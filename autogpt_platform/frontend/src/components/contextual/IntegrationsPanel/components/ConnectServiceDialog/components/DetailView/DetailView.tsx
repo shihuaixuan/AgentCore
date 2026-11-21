@@ -114,6 +114,7 @@ export function DetailView({
         />
       ) : provider.mcpServer && !showNative ? (
         <McpFirstPanel
+          catalogID={provider.mcpCatalogID}
           server={provider.mcpServer}
           serviceName={provider.name}
           nativeMethods={tabs}

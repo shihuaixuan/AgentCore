@@ -14,22 +14,23 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from backend.blocks import get_block
+from backend.blocks.mcp.helpers import normalize_mcp_url
 from backend.copilot.capabilities.block_meta import get_block_provider
 from backend.copilot.capabilities.mcp_review import (
+    MCPReviewedRoute,
     MCPReviewPayload,
     needs_review,
     open_mcp_review,
 )
+from backend.copilot.capabilities.mcp_routes import requires_route_pin, select_route, selected_id
 from backend.copilot.capabilities.models import (
     SKILL_TOOL,
     CapabilityEntry,
-    Implementation,
 )
 from backend.copilot.capabilities.registry import configured_tool, get_registry
 from backend.copilot.capabilities.resolve import resolve_entry
 from backend.copilot.capabilities.sources import skill_name
-from backend.copilot.capabilities.sources.mcp_catalog import setup_hint
-from backend.copilot.context import args_already_bound, get_current_permissions
+from backend.copilot.context import get_current_permissions
 from backend.copilot.gate import METERED, gate_active
 from backend.copilot.gate.subject import NO_OP, Subject, block_subject, mcp_subject
 from backend.copilot.model import ChatSession
@@ -74,6 +75,7 @@ from .skills import ReadSkillTool
 
 logger = logging.getLogger(__name__)
 _CUSTOM_SNAPSHOT = "_custom_mcp_snapshot"
+_REVIEWED_ROUTE = "_reviewed_mcp_route"
 
 
 class RunCapabilityTool(BaseTool):
@@ -133,9 +135,15 @@ class RunCapabilityTool(BaseTool):
             return NO_OP
         if skill_name(capability_id) is not None or not isinstance(payload or {}, dict):
             return NO_OP
-        snapshot = args.get(_CUSTOM_SNAPSHOT)
-        if args_already_bound() and isinstance(snapshot, dict):
-            return _mcp_subject(str(snapshot.get("server_url") or ""), payload or {})
+        if _REVIEWED_ROUTE in args:
+            route = MCPReviewedRoute.model_validate(args[_REVIEWED_ROUTE])
+            if route.state != "ready" or (payload or {}).get("connect"):
+                return NO_OP
+            return mcp_subject(
+                route.endpoint,
+                str((payload or {}).get("tool") or "").strip(),
+                account_key=route.account_key,
+            )
         entry = await resolve_session_entry(user_id, session, capability_id)
         if entry is None and capability_id.strip().lower().startswith("https://"):
             return _mcp_subject(capability_id.strip(), payload or {})
@@ -182,20 +190,40 @@ class RunCapabilityTool(BaseTool):
         content that runs rather than the reference to it."""
         payload = args.get("input")
         clean_args = {
-            key: value for key, value in args.items() if key != _CUSTOM_SNAPSHOT
+            key: value
+            for key, value in args.items()
+            if key not in (_CUSTOM_SNAPSHOT, _REVIEWED_ROUTE)
         }
-        if user_id and str(args.get("id") or "").startswith("custom_mcp:"):
-            entry = await resolve_session_entry(user_id, session, str(args["id"]))
-            if entry and entry.custom_mcp:
-                return {
-                    **clean_args,
-                    _CUSTOM_SNAPSHOT: {
-                        "server_url": entry.implementations[0].ref,
-                        "credential_id": entry.custom_mcp_credential_id,
-                    },
-                }
+        if (
+            user_id
+            and isinstance(payload, dict)
+            and payload.get("tool")
+            and not args.get("validate_only")
+            and not session.dry_run
+            and not gate_denied(MCP_GATE)
+        ):
+            capability_id = str(args.get("id") or "")
+            connection_id = selected_id(capability_id)
+            if connection_id is not None:
+                route, _, _ = await select_route(user_id, session, "", connection_id=connection_id)
+                return {**clean_args, _REVIEWED_ROUTE: route.model_dump()}
+            entry = resolve_entry(get_registry(), capability_id)
+            server_url = (
+                entry.implementations[0].ref
+                if entry and entry.kind == "mcp_server"
+                else (
+                    capability_id
+                    if not entry
+                    and capability_id.strip().lower().startswith("https://")
+                    else ""
+                )
+            )
+            connector_id = _connector_id(entry)
+            if connector_id or (server_url and requires_route_pin(server_url)):
+                route, _, _ = await select_route(user_id, session, server_url, connector_id=connector_id)
+                return {**clean_args, _REVIEWED_ROUTE: route.model_dump()}
         if len(clean_args) != len(args):
-            return clean_args
+            args = clean_args
         if not user_id or not isinstance(payload, dict) or not payload:
             return args
         if FILE_REF_PREFIX not in json.dumps(payload, default=str):
@@ -256,48 +284,44 @@ class RunCapabilityTool(BaseTool):
                 message="input must be an object", session_id=session_id
             ).from_outside()
         payload: dict[str, Any] = dict(input or {})
-        snapshot = kwargs.pop(_CUSTOM_SNAPSHOT, None)
-        if bound and id.startswith("custom_mcp:") and isinstance(snapshot, dict):
-            from backend.data import db
-            from backend.data.custom_mcp import get_custom_mcp_connection
-            from backend.util.clients import get_database_manager_async_client
-
-            lookup = (
-                get_custom_mcp_connection
-                if db.is_connected()
-                else get_database_manager_async_client().get_custom_mcp_connection
+        route_data = kwargs.pop(_REVIEWED_ROUTE, None) if bound else None
+        route = (
+            MCPReviewedRoute.model_validate(route_data)
+            if route_data is not None
+            else None
+        )
+        connection_id = selected_id(id)
+        if connection_id is not None:
+            if route and route.connection_id != connection_id:
+                return ErrorResponse(message="The approved connection changed.", session_id=session_id).from_outside()
+            return await _run_mcp(None, "", user_id, session, payload, validate_only, route=route, decided=decided, replayed=bound, connection_id=connection_id)
+        entry = await resolve_session_entry(user_id, session, id)
+        if route is not None:
+            server_url = (
+                entry.implementations[0].ref
+                if entry and entry.kind == "mcp_server"
+                else id
             )
-            row = await lookup(user_id, id.removeprefix("custom_mcp:"))
-            if (
-                not row
-                or not row["enabled"]
-                or row["serverUrl"] != snapshot.get("server_url")
-                or row["credentialId"] != snapshot.get("credential_id")
+            if normalize_mcp_url(server_url) != route.server_url or (
+                entry and (entry.kind != "mcp_server" or entry.custom_mcp)
             ):
                 return ErrorResponse(
-                    message="This connection changed or is unavailable. Check its settings in Integrations.",
+                    message="The reviewed connection changed. Request a new approval.",
                     session_id=session_id,
                 ).from_outside()
-            entry = CapabilityEntry(
-                id=id,
-                kind="mcp_server",
-                name=row["name"],
-                purpose=row["name"][:160],
-                implementations=[
-                    Implementation(kind="mcp_server", ref=row["serverUrl"])
-                ],
-                custom_mcp=True,
-                custom_mcp_credential_id=row["credentialId"],
-            )
-            return await _run_mcp(
-                entry, row["serverUrl"], user_id, session, payload, validate_only
-            )
-        entry = await resolve_session_entry(user_id, session, id)
         if entry is None and id.strip().lower().startswith("https://"):
             # Open world: a server URL the catalog does not know.  The MCP
             # path validates the host; writes pause for review.
             return await _run_mcp(
-                None, id.strip(), user_id, session, payload, validate_only
+                None,
+                id.strip(),
+                user_id,
+                session,
+                payload,
+                validate_only,
+                route=route,
+                decided=decided,
+                replayed=bound,
             )
         if entry is None and id.strip().lower().startswith("http://"):
             # Saying "unknown capability" here sent the model looking for a
@@ -335,13 +359,16 @@ class RunCapabilityTool(BaseTool):
             return describe_expert(entry, session_id)
         if entry.kind == "mcp_server":
             server_url = entry.implementations[0].ref
-            if not server_url:
-                return ErrorResponse(
-                    message=setup_hint(entry.schema_ref or entry.id),
-                    session_id=session_id,
-                ).from_outside()
             return await _run_mcp(
-                entry, server_url, user_id, session, payload, validate_only
+                entry,
+                server_url,
+                user_id,
+                session,
+                payload,
+                validate_only,
+                route=route,
+                decided=decided,
+                replayed=bound,
             )
         return ErrorResponse(
             message=f"Capabilities of kind '{entry.kind}' cannot run yet.",
@@ -432,6 +459,12 @@ async def _run_block(
     )
 
 
+def _connector_id(entry: CapabilityEntry | None) -> str | None:
+    if entry and entry.kind == "mcp_server" and entry.schema_ref and entry.schema_ref.startswith("mcp:mcp_"):
+        return entry.schema_ref.removeprefix("mcp:")
+    return None
+
+
 def _mcp_subject(server_url: str, payload: dict[str, Any]) -> Subject:
     """Listing a server's tools runs none of them, and a catalogued server
     that needs its URL answers with setup help."""
@@ -491,6 +524,11 @@ async def _run_mcp(
     session: ChatSession,
     payload: dict[str, Any],
     validate_only: bool,
+    *,
+    route: MCPReviewedRoute | None = None,
+    decided: bool = False,
+    replayed: bool = False,
+    connection_id: str | None = None,
 ) -> ToolResponseBase:
     if gate_denied(MCP_GATE):
         return gate_denied_error("MCP servers", session.session_id)
@@ -513,22 +551,35 @@ async def _run_mcp(
             parameters=MCP_RUN_PARAMETERS,
             session_id=session.session_id,
         ).from_outside()
-    host = urlsplit(server_url).hostname or server_url
+    connector_id = _connector_id(entry)
+    managed = connection_id is not None or connector_id or requires_route_pin(server_url)
+    if managed and not session.dry_run:
+        if route is None:
+            if tool_name and (replayed or decided):
+                return ErrorResponse(
+                    message="This approval did not identify a connection. Request a new approval.",
+                    session_id=session.session_id,
+                ).from_outside()
+            route, _, _ = await select_route(user_id, session, server_url, connector_id=connector_id, connection_id=connection_id)
+        if route.state != "ready" or connect:
+            return RunMCPToolTool().route_card(session, route)
+    host = urlsplit(route.endpoint if route else server_url).hostname or server_url
     # With the gate on it has already decided whether this call needs approval.
     if (
         tool_name
         and not session.dry_run
         and needs_review(
-            server_url,
+            route.endpoint if route else server_url,
             tool_name,
-            catalog_server=entry is not None and not entry.custom_mcp,
+            catalog_server=entry is not None and not entry.custom_mcp and (not route or route.endpoint == route.server_url),
         )
-        and not await gate_active(user_id, session)
+        and not (decided if route else await gate_active(user_id, session))
     ):
         review = MCPReviewPayload(
             server_url=server_url,
             tool=tool_name,
             arguments=dict(arguments or {}),
+            reviewed_route=route,
             connection_id=(
                 entry.id.removeprefix("custom_mcp:")
                 if entry and entry.custom_mcp
@@ -560,6 +611,10 @@ async def _run_mcp(
         ).from_outside()
     if tool_name:
         emit_tool_display_name(f"{host}: {tool_name}")
+    if route is not None:
+        return await run_reviewed_mcp(
+            user_id, session, route, tool_name, dict(arguments or {})
+        )
     return await RunMCPToolTool()._execute(
         user_id,
         session,
@@ -574,3 +629,22 @@ async def _run_mcp(
             entry.custom_mcp_credential_id if entry and entry.custom_mcp else None
         ),
     )
+
+
+async def run_reviewed_mcp(
+    user_id: str,
+    session: ChatSession,
+    route: MCPReviewedRoute,
+    tool: str,
+    arguments: dict[str, Any],
+) -> ToolResponseBase:
+    """Use the checked credential object itself; never re-rank at dispatch."""
+    if session.dry_run:
+        return await RunMCPToolTool()._execute(
+            user_id,
+            session,
+            server_url=route.server_url,
+            tool_name=tool,
+            tool_arguments=arguments,
+        )
+    return await RunMCPToolTool().run_route(user_id, session, route, tool, arguments)

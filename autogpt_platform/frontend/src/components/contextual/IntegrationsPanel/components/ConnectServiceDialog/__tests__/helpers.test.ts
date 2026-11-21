@@ -54,6 +54,7 @@ describe("toConnectableProviders", () => {
       description: "Docs and databases",
       supportedAuthTypes: ["oauth2", "api_key"],
       mcpServer,
+      mcpCatalogID: "mcp_notion",
       iconId: "notion",
     };
 

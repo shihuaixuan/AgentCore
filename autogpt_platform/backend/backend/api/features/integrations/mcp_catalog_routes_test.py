@@ -125,6 +125,28 @@ def test_domestic_office_connectors_have_distinct_setup_cards():
         assert server["connection_mode"] == "hosted"
 
 
+@pytest.mark.parametrize("name", ["mcp_dida365", "mcp_zhipu_web_reader"])
+def test_office_api_token_presets_only_offer_manual_auth(name: str):
+    with (
+        patch("backend.blocks.load_all_blocks"),
+        patch(
+            "backend.api.features.integrations.router.get_all_provider_names",
+            return_value=[],
+        ),
+        TestClient(app) as client,
+    ):
+        response = client.get("/providers")
+
+    assert response.status_code == 200
+    providers = {provider["name"]: provider for provider in response.json()}
+    assert name in providers
+    assert providers[name]["supported_auth_types"] == []
+    server = providers[name]["mcp_server"]
+    assert server["auth_methods"] == ["bearer"]
+    assert server["connection_mode"] == "hosted"
+    assert not server["allow_custom_url"]
+
+
 def test_catalog_entries_do_not_register_credential_providers():
     credential_providers = set(ProviderNamesResponse().providers)
     catalog_names = {entry.name for entry in get_mcp_catalog()}

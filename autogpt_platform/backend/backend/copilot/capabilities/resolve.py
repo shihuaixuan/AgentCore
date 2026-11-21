@@ -11,6 +11,7 @@ from backend.copilot.capabilities.text import normalize_name
 from backend.data.model import Credentials, HostScopedCredentials, OAuth2Credentials
 from backend.integrations.credentials_store import canonical_provider
 from backend.integrations.creds_manager import IntegrationCredentialsManager
+from backend.integrations.mcp_binding import bound_query_key_catalog_entry
 from backend.integrations.providers import ProviderName
 
 logger = logging.getLogger(__name__)
@@ -114,6 +115,9 @@ def connection_state_from(credentials: list[Credentials]) -> ConnectionState:
             url = (credential.metadata or {}).get("mcp_server_url")
             if isinstance(url, str) and url:
                 server_urls.add(url)
+            entry = bound_query_key_catalog_entry(credential)
+            if entry and entry.mcp_server.server_url:
+                server_urls.add(entry.mcp_server.server_url)
     return ConnectionState(
         providers=frozenset(providers),
         server_urls=frozenset(server_urls),

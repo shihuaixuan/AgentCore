@@ -402,6 +402,22 @@ class TestEraDetection:
             era=MCPProtocolEra.MODERN, protocol_version=MODERN_PROTOCOL_VERSION
         )
 
+    async def test_legacy_handshake_rejects_application_error_without_result(self):
+        # Some gateways report invalid credentials in HTTP 200 outside JSON-RPC.
+        rejection = {"code": 401, "msg": "Invalid API key", "success": False}
+        transport = _Transport(
+            {
+                "server/discover": [_FakeResponse(200, rejection)],
+                "initialize": [_FakeResponse(200, rejection)],
+            }
+        )
+        client = _client(transport, authorization="Bearer test-token")
+
+        with pytest.raises(MCPClientError, match="did not return an initialize result"):
+            await client.initialize()
+
+        assert era_cache.get(SERVER_URL) is None
+
     async def test_legacy_server_answering_method_not_found(self):
         """Legacy servers reply 200 + -32601 to an unknown method."""
         transport = _Transport(

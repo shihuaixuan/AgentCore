@@ -51,7 +51,9 @@ export function formatInputsTitle(name: string): string {
  *  platform providers — the hidden MCPSetupCard keeps the OAuth/token state
  *  machine and hands the table row its state + callbacks. */
 export interface McpConnectorRequest {
+  connectLabel?: string;
   id: string;
+  expertId?: string;
   service: string;
   serverUrl: string;
   connected: boolean;

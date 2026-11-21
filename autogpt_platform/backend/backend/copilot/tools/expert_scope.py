@@ -16,9 +16,16 @@ from pydantic import BaseModel, Field
 
 from backend.copilot.model import ChatSession
 from backend.data.db_accessors import experts_db
-from backend.data.model import Credentials, CredentialsFieldInfo, CredentialsType
+from backend.data.model import (
+    Credentials,
+    CredentialsFieldInfo,
+    CredentialsType,
+    OAuth2Credentials,
+)
 from backend.integrations.credentials_store import is_system_credential
 from backend.integrations.creds_manager import IntegrationCredentialsManager
+from backend.integrations.mcp_binding import bound_query_key_catalog_entry
+from backend.integrations.oauth.refresh_failure import reconnect_required
 from backend.integrations.providers import ProviderName
 
 from .models import AgentSavedResponse, ErrorResponse, ToolResponseBase
@@ -338,12 +345,19 @@ def _satisfies_requirement(credential: Credentials, entry: dict[str, Any]) -> bo
     if not provider or not types:
         return False
     scopes = entry.get("scopes") or None
+    targets = set(entry.get("discriminator_values") or [])
+    if provider == ProviderName.MCP and isinstance(credential, OAuth2Credentials):
+        if reconnect_required(credential):
+            return False
+        bound = bound_query_key_catalog_entry(credential)
+        if bound and bound.mcp_server.server_url in targets:
+            targets.add(credential.metadata["mcp_server_url"])
     field_info = CredentialsFieldInfo[ProviderName, CredentialsType](
         credentials_provider=frozenset([cast(ProviderName, provider)]),
         credentials_types=frozenset(cast(CredentialsType, t) for t in types),
         credentials_scopes=frozenset(scopes) if scopes else None,
         discriminator=entry.get("discriminator"),
-        discriminator_values=set(entry.get("discriminator_values") or []),
+        discriminator_values=targets,
     )
     return find_matching_credential([credential], field_info) is not None
 

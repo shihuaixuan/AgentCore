@@ -131,8 +131,13 @@ from backend.data.credit import (
     sync_subscription_from_stripe,
 )
 from backend.data.custom_mcp import (
+    create_catalog_mcp_connection,
+    grant_expert_mcp_connection,
     get_custom_mcp_connection,
+    list_expert_mcp_connection_ids,
     list_custom_mcp_connections,
+    revoke_expert_mcp_connection,
+    resolve_mcp_organization,
 )
 from backend.data.execution import (
     create_graph_execution,
@@ -461,6 +466,11 @@ class DatabaseManager(AppService):
     get_user_integrations = _(get_user_integrations)
     get_custom_mcp_connection = _(get_custom_mcp_connection)
     list_custom_mcp_connections = _(list_custom_mcp_connections)
+    create_catalog_mcp_connection = _(create_catalog_mcp_connection)
+    list_expert_mcp_connection_ids = _(list_expert_mcp_connection_ids)
+    grant_expert_mcp_connection = _(grant_expert_mcp_connection)
+    revoke_expert_mcp_connection = _(revoke_expert_mcp_connection)
+    resolve_mcp_organization = _(resolve_mcp_organization)
     update_user_integrations = _(update_user_integrations)
     get_near_expiry_oauth_credentials = _(get_near_expiry_oauth_credentials)
     get_user_credentials = _(get_user_credentials)
@@ -1057,6 +1067,11 @@ class DatabaseManagerAsyncClient(AppServiceClient):
     get_user_integrations = d.get_user_integrations
     get_custom_mcp_connection = d.get_custom_mcp_connection
     list_custom_mcp_connections = d.list_custom_mcp_connections
+    create_catalog_mcp_connection = d.create_catalog_mcp_connection
+    list_expert_mcp_connection_ids = d.list_expert_mcp_connection_ids
+    grant_expert_mcp_connection = d.grant_expert_mcp_connection
+    revoke_expert_mcp_connection = d.revoke_expert_mcp_connection
+    resolve_mcp_organization = d.resolve_mcp_organization
     update_user_integrations = d.update_user_integrations
     get_near_expiry_oauth_credentials = d.get_near_expiry_oauth_credentials
     get_user_credentials = d.get_user_credentials

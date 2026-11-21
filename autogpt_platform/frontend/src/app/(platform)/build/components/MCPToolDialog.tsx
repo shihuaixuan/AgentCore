@@ -55,6 +55,7 @@ import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 import { Select } from "@/components/atoms/Select/Select";
 import { useGetV2ListConnections } from "@/app/api/__generated__/endpoints/mcp/mcp";
+import { accountLabel } from "@/lib/mcp-catalog-connections";
 
 export type MCPToolDialogResult = {
   connectionID?: string;
@@ -486,7 +487,7 @@ export function MCPToolDialog({
                     },
                     ...savedConnections.data.data
                       .filter((item) => item.enabled)
-                      .map((item) => ({ value: item.id, label: item.name })),
+                      .map((item, _, rows) => ({ value: item.id, label: accountLabel(item, rows) })),
                   ]}
                 />
               )}

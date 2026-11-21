@@ -19,6 +19,8 @@ To connect your own MCP server, sign in and open **Marketplace → Connectors �
 
 For a recognized endpoint, the form shows its available connection methods. For an unknown URL, use **Manual configuration** and select the method documented by the provider. For DingTalk Mail, Calendar, Docs, AI Tables, and To-Do, either sign in with OAuth or paste the full **API Key URL** from that service’s page in DingTalk’s MCP market. The form separates the key from the server address; do not copy it into a Bearer token field. Treat the original link like a password.
 
+If you saved a DingTalk API key before the platform recorded which service it belongs to, open that service’s **API Key URL** tab and select the existing connection you recognize. This one-time association keeps its existing expert permissions; it does not give other experts access. Do not select a connection for a different DingTalk service just because it uses the same gateway.
+
 ### Agent Detail Page
 
 Each agent in the marketplace has a dedicated page that includes:

@@ -61,6 +61,10 @@ export function MentionConnectDialog({
     // would send the half-written message.
     <div className="contents" onSubmit={(e) => e.stopPropagation()}>
       <ConnectServiceDialog
+        expertID={expertId ?? undefined}
+        onAccount={(row) => {
+          if (request && row.credential_id) onConnected(request, row.credential_id);
+        }}
         preferMcp
         open={request !== null}
         initialQuery={request?.query.trim()}

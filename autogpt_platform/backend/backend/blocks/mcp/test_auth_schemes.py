@@ -83,6 +83,20 @@ def test_legacy_row_without_scheme_metadata_is_sent_as_bearer() -> None:
     assert mcp_authorization_header(legacy) == "Bearer basic auth key"
 
 
+def test_oauth_row_without_a_bearer_prefix_is_sent_as_bearer() -> None:
+    oauth = OAuth2Credentials(
+        provider="mcp",
+        title="MCP: mcp.example.com",
+        access_token=SecretStr("oauth-access-token"),
+        scopes=[],
+        metadata={
+            "mcp_server_url": "https://mcp.example.com/mcp",
+            "mcp_auth_scheme": "oauth",
+        },
+    )
+    assert mcp_authorization_header(oauth) == "Bearer oauth-access-token"
+
+
 def test_mcp_client_omits_auth_when_not_provided() -> None:
     client = MCPClient("https://mcp.example.com/mcp")
     assert "Authorization" not in client._build_headers()
@@ -248,7 +262,10 @@ async def test_block_uses_the_credential_it_was_given(server_url: str):
         ]
 
     assert call_tool.await_args is not None
-    assert call_tool.await_args.kwargs["authorization"] == "Basic cWE6YmFzaWM="
+    client = call_tool.await_args.kwargs["client"]
+    assert isinstance(client, MCPClient)
+    assert client._endpoint_auth is None
+    assert client.authorization == "Basic cWE6YmFzaWM="
     assert ("result", "ok") in outputs
 
 
@@ -288,7 +305,7 @@ async def test_block_without_a_selected_credential_sends_no_authorization():
 
     manager.assert_not_called()
     assert call_tool.await_args is not None
-    assert call_tool.await_args.kwargs["authorization"] is None
+    assert call_tool.await_args.kwargs["client"] is None
     assert ("result", "ok") in outputs
 
 

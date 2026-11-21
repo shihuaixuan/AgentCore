@@ -104,6 +104,13 @@ class DescribeCapabilityTool(BaseTool):
             return ErrorResponse(
                 message="Authentication required", session_id=session_id
             )
+        from backend.copilot.capabilities.mcp_routes import selected_id
+
+        connection_id = selected_id(id)
+        if connection_id is not None:
+            if gate_denied(MCP_GATE):
+                return gate_denied_error("MCP servers", session_id)
+            return await RunMCPToolTool()._execute(user_id, session, custom_connection_id=connection_id)
         entry = await resolve_session_entry(user_id, session, id)
         if entry is None:
             return ErrorResponse(message=UNKNOWN_ID_HINT, session_id=session_id)
@@ -230,15 +237,11 @@ async def _describe_mcp(
     entry: CapabilityEntry, user_id: str, session: ChatSession
 ) -> ToolResponseBase:
     server_url = entry.implementations[0].ref
-    if not server_url:
-        return ErrorResponse(
-            message=setup_hint(entry.schema_ref or entry.id),
-            session_id=session.session_id,
-        )
     result = await RunMCPToolTool()._execute(
         user_id,
         session,
         server_url=server_url,
+        connector_id=entry.schema_ref.removeprefix("mcp:") if entry.schema_ref else None,
         custom_connection_id=entry.id.removeprefix("custom_mcp:")
         if entry.custom_mcp
         else None,

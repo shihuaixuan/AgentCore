@@ -16,6 +16,8 @@ from collections import OrderedDict
 
 from backend.api.features.experts.models import ExpertTemplate
 from backend.copilot.capabilities.index import CapabilityIndex
+from backend.copilot.capabilities.mcp_routes import selected_id
+from backend.integrations.mcp_connections import resolve_saved_connection
 from backend.copilot.capabilities.models import (
     CapabilityEntry,
     Connection,
@@ -99,15 +101,10 @@ async def resolve_session_entry(
     the registry's name match would let ``skill:web_search`` resolve to the
     platform tool of that name.
     """
-    if capability_id.startswith("custom_mcp:"):
-        return next(
-            (
-                entry
-                for entry in await session_custom_mcp_entries(user_id, session)
-                if entry.id == capability_id
-            ),
-            None,
-        )
+    connection_id = selected_id(capability_id)
+    if connection_id is not None:
+        resolution = await resolve_saved_connection(user_id, connection_id, expert_id=session.expert_id, organization_id=session.organization_id)
+        return _saved_entry(resolution.connection) if resolution.state == "ready" and resolution.connection else None
     if expert_dispatch(capability_id) is not None:
         key = capability_id.strip().lower()
         return next(
@@ -151,37 +148,26 @@ async def session_custom_mcp_entries(
     except Exception:
         logger.warning("Could not load custom MCP connections", exc_info=True)
         return []
-    allowed_ids = (
-        set(
-            await experts_db().expert_allowed_credential_ids(user_id, session.expert_id)
-        )
-        if session.expert_id
-        else None
-    )
-    rows = [
-        row
-        for row in connections
-        if row["enabled"]
-        and (
-            allowed_ids is None
-            or row["credentialId"] is None
-            or row["credentialId"] in allowed_ids
-        )
-    ]
-    return [
-        CapabilityEntry(
+    entries = []
+    for row in connections:
+        resolution = await resolve_saved_connection(user_id, row["id"], expert_id=session.expert_id, organization_id=session.organization_id)
+        if resolution.state == "ready" and resolution.connection:
+            entries.append(_saved_entry(resolution.connection))
+    return entries
+
+
+def _saved_entry(row: dict) -> CapabilityEntry:
+    return CapabilityEntry(
             id=f"custom_mcp:{row['id']}",
             kind="mcp_server",
             name=row["name"],
-            purpose=clip_purpose(row["description"] or row["name"]),
-            description=row["description"] or row["name"],
+            purpose=clip_purpose(row.get("description") or row["name"]),
+            description=row.get("description") or row["name"],
             implementations=[Implementation(kind="mcp_server", ref=row["serverUrl"])],
             connection=Connection(required=True, connected=True),
             custom_mcp=True,
             custom_mcp_credential_id=row["credentialId"],
         )
-        for row in rows
-    ]
 
 
 async def session_skill_entries(

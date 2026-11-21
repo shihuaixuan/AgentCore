@@ -13,7 +13,7 @@ from backend.blocks.mcp import client, helpers
 from backend.blocks.mcp.block import MCPToolBlock
 from backend.blocks.mcp.client import MCPCallResult, MCPClient, MCPClientError
 from backend.data.model import OAuth2Credentials
-from backend.util.request import HTTPClientError
+from backend.util.request import EndpointAuth, HTTPClientError
 
 ENDPOINT = "https://mcp-gw.dingtalk.com/server/Test_1-id"
 KEY = SecretStr("synthetic+key &value")
@@ -62,7 +62,7 @@ async def test_saved_query_key_reaches_block_client_only_as_a_secret():
     )
     assert helpers.mcp_authorization_header(credential) is None
     assert helpers.mcp_query_key(credential) == KEY
-    with patch("backend.blocks.mcp.block.MCPClient") as constructor:
+    with patch("backend.blocks.mcp.helpers.MCPClient") as constructor:
         constructor.return_value = AsyncMock()
         constructor.return_value.call_tool.return_value = MCPCallResult()
         outputs = [
@@ -74,7 +74,11 @@ async def test_saved_query_key_reaches_block_client_only_as_a_secret():
             )
         ]
     assert outputs == [("result", None)]
-    constructor.assert_called_once_with(ENDPOINT, authorization=None, query_key=KEY)
+    constructor.assert_called_once_with(
+        ENDPOINT,
+        endpoint_auth=EndpointAuth(endpoint=ENDPOINT, token=KEY, query="key"),
+        follow_redirects=False,
+    )
 
 
 def test_no_ambiguous_or_inline_credentials():

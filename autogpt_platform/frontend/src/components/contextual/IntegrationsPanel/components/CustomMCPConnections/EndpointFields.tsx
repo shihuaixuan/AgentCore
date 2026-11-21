@@ -18,13 +18,18 @@ export function EndpointFields({
     oauth: "OAuth",
     bearer: "Bearer",
     basic: "Basic",
-    query_key: t("Query key", "查询密钥"),
+    header: t("Custom header", "自定义请求头"),
+    query_key: t("Query credential", "查询参数凭据"),
   };
+  const hasSecretURL = state.fields.some(
+    (field) => field.type === "secret_url",
+  );
+
   return (
     <>
       <Input
         id="custom-mcp-url"
-        label={t("Server URL", "服务器地址")}
+        label={t("Server URL or credential URL", "服务器地址或凭据链接")}
         inputMode="url"
         autoComplete="off"
         spellCheck={false}
@@ -46,8 +51,8 @@ export function EndpointFields({
       {state.rejectedURL && (
         <Text variant="small" role="alert">
           {t(
-            "This URL was not accepted. Paste a clean HTTPS endpoint or a DingTalk server link with a single key.",
-            "未接受此地址。请粘贴纯 HTTPS 地址，或仅含一个 key 参数的钉钉服务器链接。",
+            "This URL was not accepted. Paste a clean HTTPS endpoint or a supported credential link.",
+            "未接受此地址。请粘贴纯 HTTPS 地址或受支持的凭据链接。",
           )}
         </Text>
       )}
@@ -82,24 +87,58 @@ export function EndpointFields({
       {state.needsEndpoint ? (
         <Text variant="small" role="status">
           {t(
-            "Replace the server URL with the key-based endpoint supplied by DingTalk (/server/<id>).",
-            "请将服务器地址替换为钉钉提供的密钥地址（/server/<id>）。",
+            "Replace the server URL with the endpoint supplied by the service.",
+            "请将服务器地址替换为服务商提供的服务端点。",
           )}
         </Text>
       ) : (
-        (method === "query_key" ||
-          method === "bearer" ||
-          method === "basic") && (
-          <Input
-            key={`${url}:${method}`}
-            id="custom-mcp-token"
-            label={t("Credential", "凭据")}
-            type="password"
-            autoComplete="off"
-            value={state.token}
-            onChange={(event) => state.setToken(event.target.value)}
-          />
-        )
+        method &&
+        method !== "none" &&
+        method !== "oauth" &&
+        (hasSecretURL ? (
+          state.fields.map((field) => (
+            <Input
+              key={`${url}:${field.id}`}
+              id={`custom-mcp-field-${field.id}`}
+              label={field.label}
+              type={field.type === "text" ? "text" : "password"}
+              autoComplete="off"
+              value={state.fieldValues[field.id] ?? ""}
+              onChange={(event) =>
+                state.setFieldValue(field.id, event.target.value)
+              }
+            />
+          ))
+        ) : (
+          <>
+            {state.fields
+              .filter((field) => field.type === "text")
+              .map((field) => (
+                <Input
+                  key={`${url}:${field.id}`}
+                  id={`custom-mcp-field-${field.id}`}
+                  label={field.label}
+                  value={state.fieldValues[field.id] ?? ""}
+                  onChange={(event) =>
+                    state.setFieldValue(field.id, event.target.value)
+                  }
+                />
+              ))}
+            <Input
+              key={`${url}:${method}`}
+              id="custom-mcp-token"
+              label={
+                method === "header" && state.authParameter
+                  ? `${state.authParameter} credential`
+                  : t("Credential", "凭据")
+              }
+              type="password"
+              autoComplete="off"
+              value={state.token}
+              onChange={(event) => state.setToken(event.target.value)}
+            />
+          </>
+        ))
       )}
     </>
   );

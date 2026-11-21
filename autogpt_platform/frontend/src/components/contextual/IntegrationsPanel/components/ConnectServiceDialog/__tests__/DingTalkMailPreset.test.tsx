@@ -1,5 +1,7 @@
 import { getGetV1ListProvidersMockHandler200 } from "@/app/api/__generated__/endpoints/integrations/integrations.msw";
 import {
+  getGetV2ListBindableQueryKeysMockHandler200,
+  getPostV2BindExistingQueryKeyMockHandler200,
   getPostV2DiscoverAvailableToolsOnAnMcpServerMockHandler200,
   getPostV2StoreABearerTokenForAnMcpServerMockHandler200,
   getPostV2StoreABearerTokenForAnMcpServerMockHandler401,
@@ -13,7 +15,7 @@ import {
   waitFor,
 } from "@/tests/integrations/test-utils";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConnectServiceDialog } from "../ConnectServiceDialog";
 
 const oauthURL = "https://mcp-gw.dingtalk.com/oauth/server/mail";
@@ -62,6 +64,44 @@ async function openPreset(id = "mail", name = "DingTalk Mail", url = oauthURL) {
 }
 
 describe("DingTalk presets", () => {
+  beforeEach(() => {
+    server.use(getGetV2ListBindableQueryKeysMockHandler200([]));
+  });
+
+  it("requires an explicit connection and binds only its ID to the selected preset", async () => {
+    const bind = vi.fn();
+    const row = { id: credential.id, server_url: keyEndpoint };
+    server.use(
+      getGetV2ListBindableQueryKeysMockHandler200([
+        { ...row, id: "another-connection" },
+        row,
+      ]),
+      getPostV2BindExistingQueryKeyMockHandler200(
+        async ({ params, request }) => {
+          bind(params.catalogId, await request.json());
+          return credential;
+        },
+      ),
+    );
+    const { user, onConnected } = await openPreset("docs", "钉钉文档");
+    await user.click(screen.getByRole("tab", { name: "API Key URL" }));
+    const confirm = await screen.findByRole<HTMLButtonElement>("button", {
+      name: "Use existing connection for 钉钉文档",
+    });
+    expect(confirm.disabled).toBe(true);
+    await user.click(
+      screen.getByRole("combobox", { name: "Existing DingTalk connection" }),
+    );
+    await user.click(
+      screen.getByRole("option", { name: `${keyEndpoint} · ${row.id}` }),
+    );
+    expect(bind).not.toHaveBeenCalled();
+    await user.click(confirm);
+    await waitFor(() => expect(onConnected).toHaveBeenCalledWith(credential));
+    expect(bind).toHaveBeenCalledExactlyOnceWith("mcp_dingtalk_docs", {
+      credential_id: row.id,
+    });
+  });
   it.each([
     ["calendar", "钉钉日历", "calendar"],
     ["docs", "钉钉文档", "doc"],
@@ -125,6 +165,7 @@ describe("DingTalk presets", () => {
         server_url: keyEndpoint,
         token: "fixture+value=",
         auth_type: "query_key",
+        catalog_id: "mcp_dingtalk_mail",
       },
     ]);
   });

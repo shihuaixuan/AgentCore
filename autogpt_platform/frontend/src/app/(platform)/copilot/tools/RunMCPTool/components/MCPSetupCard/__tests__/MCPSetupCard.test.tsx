@@ -93,6 +93,7 @@ function setMockLiveCreds(
   mockLiveCredsError = opts.isError ?? false;
 }
 vi.mock("@/app/api/__generated__/endpoints/integrations/integrations", () => ({
+  getGetV1ListCredentialsQueryKey: () => ["credentials"],
   useGetV1ListCredentials: () => ({
     data: mockLiveCreds,
     isLoading: false,
@@ -1170,6 +1171,13 @@ describe("MCPSetupCard", () => {
   }
 
   it("offers Grant access when the account already has the server and grants on click", async () => {
+    setMockLiveCreds([
+      {
+        id: "cred-existing",
+        provider: "mcp",
+        host: "https://mcp.example.com/mcp",
+      },
+    ]);
     mockGrant.mockResolvedValue({
       status: 200,
       data: [
@@ -1298,6 +1306,13 @@ describe("MCPSetupCard", () => {
   });
 
   it("grants only once when Grant access is clicked twice", async () => {
+    setMockLiveCreds([
+      {
+        id: "cred-existing",
+        provider: "mcp",
+        host: "https://mcp.example.com/mcp",
+      },
+    ]);
     mockGrant.mockResolvedValue({
       status: 200,
       data: [],
@@ -1420,6 +1435,13 @@ describe("MCPSetupCard", () => {
   });
 
   it("keeps the connection and shows the failure when the grant fails", async () => {
+    setMockLiveCreds([
+      {
+        id: "cred-existing",
+        provider: "mcp",
+        host: "https://mcp.example.com/mcp",
+      },
+    ]);
     mockGrant.mockRejectedValue(new Error("boom"));
     render(
       <MCPSetupCard

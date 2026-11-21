@@ -194,6 +194,7 @@ export function ConnectMethodView({
 
         {showMcp && provider.mcpServer ? (
           <McpFirstPanel
+            catalogID={provider.mcpCatalogID}
             server={provider.mcpServer}
             serviceName={provider.name}
             nativeMethods={methods}

@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict
 
 from backend.data.model import Credentials, OAuth2Credentials
 from backend.integrations.credentials_store import canonical_provider
+from backend.integrations.mcp_binding import bound_query_key_catalog_entry
 from backend.integrations.mcp_catalog import (
     MCPCatalogEntry,
     get_mcp_catalog_entry_for_url,
@@ -67,7 +68,9 @@ def service_for_credential(credential: Credentials) -> ServiceIdentity:
     if not isinstance(url, str) or not url.strip():
         _warn_once(credential.id, "has no server URL")
         return ServiceIdentity(service=UNKNOWN_MCP_SERVICE)
-    entry = get_mcp_catalog_entry_for_url(url)
+    entry = bound_query_key_catalog_entry(credential) or get_mcp_catalog_entry_for_url(
+        url
+    )
     if entry is not None:
         return service_for_catalog_entry(entry)
     host = _hostname(url)

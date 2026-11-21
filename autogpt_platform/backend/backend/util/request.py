@@ -14,7 +14,7 @@ import aiohttp
 import idna
 from aiohttp import FormData, abc
 from multidict import CIMultiDict, CIMultiDictProxy
-from pydantic import SecretStr
+from pydantic import BaseModel, ConfigDict, Field, SecretStr
 from tenacity import (
     RetryCallState,
     retry,
@@ -37,6 +37,19 @@ class HTTPClientError(Exception):
         # The raw response body, so a caller can read a structured error code
         # (e.g. OAuth's ``{"error": "invalid_grant"}``) without parsing the message.
         self.body = body
+
+
+class EndpointAuth(BaseModel):
+    """A validated catalog method's single-request, secret-safe delivery plan."""
+
+    model_config = ConfigDict(frozen=True)
+
+    endpoint: str
+    token: SecretStr | None = None
+    header: str | None = None
+    query: str | None = None
+    prefix: str = ""
+    fixed_params: dict[str, str] = Field(default_factory=dict)
 
 
 class HTTPServerError(Exception):
@@ -648,6 +661,7 @@ class Requests:
         drop_headers: frozenset[str] = frozenset(),
         max_body_bytes: int | None = None,
         sensitive_query_key: SecretStr | None = None,
+        endpoint_auth: EndpointAuth | None = None,
         **kwargs,
     ) -> Response:
         """Send a request, following redirects through the same SSRF checks.
@@ -671,6 +685,8 @@ class Requests:
 
         if sensitive_query_key is not None:
             kwargs["sensitive_query_key"] = sensitive_query_key
+        if endpoint_auth is not None:
+            kwargs["endpoint_auth"] = endpoint_auth
 
         @retry(**retry_kwargs)
         async def _make_request() -> Response:
@@ -704,6 +720,7 @@ class Requests:
         drop_headers: frozenset[str] = frozenset(),
         max_body_bytes: int | None = None,
         sensitive_query_key: SecretStr | None = None,
+        endpoint_auth: EndpointAuth | None = None,
         **kwargs,
     ) -> Response:
         # Convert auth tuple to aiohttp.BasicAuth if necessary
@@ -753,7 +770,14 @@ class Requests:
             raise ValueError(f"Invalid URL: Unable to determine hostname of {url}")
 
         original_url = parsed_url.geturl()
-        if sensitive_query_key is not None and (
+        if sensitive_query_key is not None:
+            if endpoint_auth is not None:
+                raise ValueError("Conflicting request credentials")
+            endpoint_auth = EndpointAuth(endpoint=url, token=sensitive_query_key, query="key")
+        if endpoint_auth is not None and (
+            endpoint_auth.endpoint != url
+            or self.extra_url_validator is not None
+            or
             parsed_url.scheme != "https"
             or parsed_url.query
             or parsed_url.fragment
@@ -797,16 +821,16 @@ class Requests:
         # Default is 8190 bytes, we increase to 16KB to accommodate legitimate large headers
         session_kwargs["max_field_size"] = 16384
 
-        if sensitive_query_key is not None:
+        if endpoint_auth is not None:
             session_kwargs["cookie_jar"] = aiohttp.DummyCookieJar()
         async with aiohttp.ClientSession(**session_kwargs) as session:
-            if sensitive_query_key is not None:
+            if endpoint_auth is not None:
                 try:
-                    buffered = await _send_with_query_key(
+                    buffered = await _send_with_endpoint_auth(
                         session,
                         method,
                         original_url,
-                        sensitive_query_key,
+                        endpoint_auth,
                         req_headers,
                         data,
                         json,
@@ -816,7 +840,7 @@ class Requests:
                 except asyncio.CancelledError:
                     failure: BaseException = asyncio.CancelledError()
                 except Exception:
-                    failure = ValueError("Request with query credential failed.")
+                    failure = ValueError("Endpoint-bound request failed.")
                 else:
                     if self.raise_for_status:
                         buffered.raise_for_status()
@@ -939,11 +963,11 @@ class Requests:
         return await self.request("PATCH", url, *args, **kwargs)
 
 
-async def _send_with_query_key(
+async def _send_with_endpoint_auth(
     session: aiohttp.ClientSession,
     method: str,
     url: str,
-    key: SecretStr,
+    auth: EndpointAuth,
     headers: dict,
     data: Any,
     json: Any,
@@ -960,7 +984,16 @@ async def _send_with_query_key(
     async def authenticate(
         request: aiohttp.ClientRequest, send: aiohttp.ClientHandlerType
     ) -> aiohttp.ClientResponse:
-        request.url = request.url.with_query(key=key.get_secret_value())
+        params = dict(auth.fixed_params)
+        if auth.token is not None:
+            if auth.header:
+                request.headers[auth.header] = auth.prefix + auth.token.get_secret_value()
+            elif auth.query:
+                params[auth.query] = auth.token.get_secret_value()
+            else:
+                raise ValueError("Missing credential destination")
+        if params:
+            request.url = request.url.with_query(params)
         return await send(request)
 
     session.trace_configs.clear()
@@ -980,20 +1013,20 @@ async def _send_with_query_key(
             if response.status >= 400 and response.status not in (400, 404)
             else await _read_body(response, limit, cut_at)
         )
-        secret = key.get_secret_value()
-        echoes = {
-            secret.encode(),
-            quote(secret, safe="").encode(),
-            quote_plus(secret).encode(),
-            response.request_info.url.raw_query_string.removeprefix("key=").encode(),
-        }
+        echoes: set[bytes] = set()
+        if auth.token is not None:
+            secret = auth.token.get_secret_value()
+            echoes.update((secret.encode(), quote(secret, safe="").encode(), quote_plus(secret).encode()))
+            if auth.query:
+                encoded = ClientURL(url).with_query({auth.query: secret}).raw_query_string
+                echoes.add(encoded.partition("=")[2].encode())
         if any(value in body for value in echoes):
             if response.status < 400:
                 raise ValueError("Server reflected query credential.")
             body = b""
         result = Response(response=response, url=url, body=body)
         result.request_info = aiohttp.RequestInfo(
-            ClientURL(url), method, response.request_info.headers
+            ClientURL(url), method, CIMultiDictProxy(CIMultiDict(headers))
         )
         result.reason = None
         result.headers = CIMultiDictProxy(

@@ -7,13 +7,15 @@ frontend can list available tools on an MCP server before placing a block.
 
 import asyncio
 import logging
+import re
 from typing import Annotated, Any, Literal
 from urllib.parse import urlparse
 
 import fastapi
-from autogpt_libs.auth import get_user_id
+from autogpt_libs.auth import RequestContext, get_request_context, get_user_id
+from autogpt_libs.auth.jwt_utils import bearer_jwt_auth, get_jwt_payload
 from fastapi import Security
-from pydantic import BaseModel, Field, SecretStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 
 from backend.api.features.integrations.router import (
     CredentialsMetaResponse,
@@ -32,27 +34,45 @@ from backend.api.features.mcp.oauth_registration import (
 from backend.blocks.mcp.client import (
     MCPClient,
     MCPClientError,
-    is_dingtalk_key_endpoint,
     normalize_mcp_authorization,
 )
 from backend.blocks.mcp.helpers import (
     auto_lookup_mcp_credential,
     is_manual_mcp_credential,
-    mcp_authorization_header,
-    mcp_query_key,
+    mcp_client_for_credential,
     normalize_mcp_url,
     server_host,
 )
 from backend.blocks.mcp.oauth import MCPOAuthHandler, MCPTokenEndpointAuthMethod
 from backend.copilot.rate_limit import enforce_payment_paywall
-from backend.data.model import OAuth2Credentials
-from backend.integrations.credentials_store import provider_matches
-from backend.integrations.creds_manager import IntegrationCredentialsManager
-from backend.integrations.mcp_catalog import get_mcp_catalog_entry_for_url
+from backend.data.model import Credentials, OAuth2Credentials
+from backend.integrations.credentials_store import (
+    is_system_credential,
+    provider_matches,
+)
+from backend.integrations.creds_manager import (
+    IntegrationCredentialsManager,
+    _invoke_creds_changed_hook,
+)
+from backend.integrations.mcp_binding import (
+    query_key_catalog_entry,
+    query_key_catalog_method,
+)
+from backend.integrations.mcp_catalog import (
+    get_mcp_catalog,
+    get_mcp_catalog_entry_for_url,
+)
+from backend.integrations.mcp_connections import (
+    MCPConnectionError,
+    open_connection_client,
+    resolve_saved_connection,
+)
+from backend.integrations.mcp_methods import method_endpoint, resolve_method
 from backend.integrations.providers import ProviderName
 from backend.util.request import (
     AUTH_STATUS_CODES,
     CREDENTIAL_REJECTED_STATUS_CODES,
+    EndpointAuth,
     HTTPClientError,
     HTTPServerError,
     Requests,
@@ -80,6 +100,7 @@ _PROBE_CLOSE_TIMEOUT_SECONDS = 5
 # matching on the prose broke the moment either message was reworded — so the
 # two no-OAuth branches carry this code and the rest stay plain strings.
 NO_OAUTH_CODE = "no_oauth"
+_AUTH_PARAMETER = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{0,63}$")
 
 
 # ====================== Tool Discovery ====================== #
@@ -93,6 +114,8 @@ class DiscoverToolsRequest(BaseModel):
     """Request to discover tools on an MCP server."""
 
     server_url: str = Field(description="URL of the MCP server")
+    connection_id: str | None = Field(default=None, min_length=1, max_length=256)
+    expert_id: str | None = Field(default=None, min_length=1, max_length=256)
     credential_id: str | None = Field(
         default=None, description="Specific credential to use for this server"
     )
@@ -137,6 +160,7 @@ class DiscoverToolsResponse(BaseModel):
 async def discover_tools(
     request: DiscoverToolsRequest,
     user_id: Annotated[str, Security(get_user_id)],
+    http_request: fastapi.Request = None,
 ) -> DiscoverToolsResponse:
     """
     Connect to an MCP server and return its available tools.
@@ -144,14 +168,44 @@ async def discover_tools(
     If the user has a stored MCP credential for this server URL, it will be
     used automatically unless use_saved_credentials is false.
     """
-    # Validate URL to prevent SSRF — blocks loopback and private IP ranges.
+    if request.connection_id is not None:
+        if request.auth_token is not None:
+            raise fastapi.HTTPException(422, "Choose one credential source.")
+        if http_request is None:
+            raise fastapi.HTTPException(401, "Connection discovery requires authentication.")
+        ctx = await _discovery_context(http_request)
+        if ctx.user_id != user_id:
+            raise fastapi.HTTPException(403, "Connection unavailable.")
+        resolution = await resolve_saved_connection(
+            user_id, request.connection_id, expert_id=request.expert_id, organization_id=ctx.org_id
+        )
+        row = resolution.connection
+        if resolution.state != "ready" or row is None:
+            raise _discovery_refusal(resolution.state)
+        if (
+            row["id"] != request.connection_id
+            or normalize_mcp_url(request.server_url) != normalize_mcp_url(row["serverUrl"])
+            or (request.credential_id is not None and request.credential_id != row["credentialId"])
+        ):
+            raise _discovery_refusal("unavailable")
+        try:
+            await validate_url_host(row["serverUrl"])
+            client = await open_connection_client(user_id, row)
+        except MCPConnectionError as exc:
+            raise _discovery_refusal(exc.state) from None
+        except ValueError:
+            raise _discovery_refusal("unavailable") from None
+        return await _discover_with_client(client, row["serverUrl"])
+    if request.expert_id is not None:
+        raise fastapi.HTTPException(422, "Expert discovery requires a saved connection.")
+
     try:
         await validate_url_host(request.server_url)
     except ValueError as e:
         raise fastapi.HTTPException(status_code=400, detail=f"Invalid server URL: {e}")
 
     authorization: str | None = None
-    query_key: SecretStr | None = None
+    client: MCPClient | None = None
     explicit_token = (
         request.auth_token.get_secret_value() if request.auth_token else None
     )
@@ -169,6 +223,7 @@ async def discover_tools(
         credential = await creds_manager.get(user_id, request.credential_id)
         if (
             not isinstance(credential, OAuth2Credentials)
+            or (credential.metadata or {}).get("mcp_method_id") is not None
             or not provider_matches(credential.provider, ProviderName.MCP.value)
             or normalize_mcp_url((credential.metadata or {}).get("mcp_server_url", ""))
             != normalize_mcp_url(request.server_url)
@@ -176,8 +231,9 @@ async def discover_tools(
             raise fastapi.HTTPException(
                 status_code=404, detail="Credential not found for this server."
             )
-        authorization = mcp_authorization_header(credential)
-        query_key = mcp_query_key(credential)
+        client = mcp_client_for_credential(
+            request.server_url, credential, follow_redirects=False
+        )
     elif explicit_token:
         try:
             authorization = normalize_mcp_authorization(explicit_token)
@@ -189,15 +245,30 @@ async def discover_tools(
             user_id, normalize_mcp_url(request.server_url)
         )
         if stored_credential:
-            authorization = mcp_authorization_header(stored_credential)
-            query_key = mcp_query_key(stored_credential)
+            metadata = stored_credential.metadata or {}
+            if metadata.get("mcp_isolated") or "mcp_method_id" in metadata:
+                raise _discovery_refusal("needs_selection")
+            client = mcp_client_for_credential(
+                request.server_url, stored_credential, follow_redirects=False
+            )
 
-    client = (
-        MCPClient(normalize_mcp_url(request.server_url), query_key=query_key)
-        if query_key is not None
-        else MCPClient(request.server_url, authorization=authorization)
-    )
-    hostname = server_host(request.server_url)
+    if client is None:
+        client = MCPClient(request.server_url, authorization=authorization)
+    return await _discover_with_client(client, request.server_url)
+
+
+async def _discovery_context(request: fastapi.Request) -> RequestContext:
+    payload = await get_jwt_payload(await bearer_jwt_auth(request))
+    return await get_request_context(request, payload)
+
+
+def _discovery_refusal(state: str) -> fastapi.HTTPException:
+    status = {"needs_grant": 403, "needs_selection": 409, "reauth_required": 401}
+    return fastapi.HTTPException(status.get(state, 404), detail={"state": state})
+
+
+async def _discover_with_client(client: MCPClient, server_url: str) -> DiscoverToolsResponse:
+    hostname = server_host(server_url)
 
     try:
         init_result = await client.initialize()
@@ -270,6 +341,9 @@ class MCPOAuthLoginRequest(BaseModel):
         description="OAuth scopes to request. Omit or use null to use catalogue or discovered defaults; "
         "an empty list requests no scopes.",
     )
+    connector_id: str | None = Field(default=None, min_length=1, max_length=128)
+    method_id: str | None = Field(default=None, min_length=1, max_length=128)
+    tool_server_url: str | None = Field(default=None, max_length=2048)
 
     @field_validator("scopes")
     @classmethod
@@ -294,6 +368,14 @@ class MCPOAuthLoginResponse(BaseModel):
     state_token: str
 
 
+async def _optional_oauth_context(request: fastapi.Request) -> RequestContext | None:
+    """Resolve tenant context for real requests without breaking route tests."""
+    if not request.headers.get("authorization"):
+        return None
+    payload = await get_jwt_payload(await bearer_jwt_auth(request))
+    return await get_request_context(request, payload)
+
+
 @router.post(
     "/oauth/login",
     summary="Initiate OAuth login for an MCP server",
@@ -301,6 +383,7 @@ class MCPOAuthLoginResponse(BaseModel):
 async def mcp_oauth_login(
     request: MCPOAuthLoginRequest,
     user_id: Annotated[str, Security(get_user_id)],
+    context: Annotated[RequestContext | None, fastapi.Depends(_optional_oauth_context)],
 ) -> MCPOAuthLoginResponse:
     """
     Discover OAuth metadata from the MCP server and return a login URL.
@@ -321,7 +404,38 @@ async def mcp_oauth_login(
     server_url = normalize_mcp_url(request.server_url)
     frontend_base_url = settings.config.frontend_base_url
     catalog_entry = get_mcp_catalog_entry_for_url(server_url)
-    if catalog_entry and "oauth" not in catalog_entry.mcp_server.auth_methods:
+    if request.connector_id is not None:
+        catalog_entry = next(
+            (entry for entry in get_mcp_catalog() if entry.name == request.connector_id),
+            None,
+        )
+        if catalog_entry is None or request.method_id is None:
+            raise fastapi.HTTPException(status_code=400, detail="Unknown MCP connection method.")
+    if catalog_entry and request.method_id is not None:
+        try:
+            catalog_method = resolve_method(catalog_entry.mcp_server, request.method_id)
+        except ValueError as exc:
+            raise fastapi.HTTPException(status_code=400, detail=str(exc)) from exc
+        if catalog_method.kind != "oauth2":
+            raise fastapi.HTTPException(
+                status_code=400,
+                detail={
+                    "code": NO_OAUTH_CODE,
+                    "message": f"{catalog_entry.display_name} does not use OAuth for this connection method.",
+                },
+            )
+        tool_server_url = normalize_mcp_url(
+            request.tool_server_url
+            or catalog_entry.mcp_server.server_url
+            or server_url
+        )
+        try:
+            method_endpoint(catalog_entry.mcp_server, catalog_method, tool_server_url)
+        except ValueError as exc:
+            raise fastapi.HTTPException(status_code=400, detail=str(exc)) from exc
+    else:
+        tool_server_url = server_url
+    if catalog_entry and request.method_id is None and "oauth" not in catalog_entry.mcp_server.auth_methods:
         raise fastapi.HTTPException(
             status_code=400,
             detail={
@@ -530,13 +644,22 @@ async def mcp_oauth_login(
             "token_url": token_url,
             "revoke_url": revoke_url,
             "resource_url": resource_url,
-            "server_url": server_url,
+            "server_url": tool_server_url,
+            "oauth_server_url": server_url,
             "client_id": client_id,
             "client_secret": client_secret,
             "token_endpoint_auth_method": token_endpoint_auth_method,
             "issuer": issuer,
             "iss_required": iss_required,
             "isolated": request.isolated,
+            "mcp_catalog_id": catalog_entry.name if request.connector_id else None,
+            "mcp_method_id": request.method_id if request.connector_id else None,
+            "mcp_definition_version": (
+                catalog_entry.mcp_server.definition_version
+                if request.connector_id and catalog_entry
+                else None
+            ),
+            "mcp_organization_id": context.org_id if context else None,
         },
     )
 
@@ -583,6 +706,7 @@ class MCPOAuthCallbackResponse(BaseModel):
 async def mcp_oauth_callback(
     request: MCPOAuthCallbackRequest,
     user_id: Annotated[str, Security(get_user_id)],
+    context: Annotated[RequestContext | None, fastapi.Depends(_optional_oauth_context)],
 ) -> CredentialsMetaResponse:
     """
     Exchange the authorization code for tokens and store the credential.
@@ -656,7 +780,14 @@ async def mcp_oauth_callback(
     # the sign-in URL made lookup miss: the user completed OAuth, the dialog
     # said connected, and every later call fell back to public limits with
     # nothing reporting a problem. Record the URL the tools actually use.
-    catalog_entry = get_mcp_catalog_entry_for_url(meta["server_url"])
+    catalog_entry = (
+        next(
+            (entry for entry in get_mcp_catalog() if entry.name == meta.get("mcp_catalog_id")),
+            None,
+        )
+        if meta.get("mcp_catalog_id")
+        else get_mcp_catalog_entry_for_url(meta["server_url"])
+    )
     tools_url = (
         catalog_entry.mcp_server.server_url
         if catalog_entry
@@ -679,6 +810,18 @@ async def mcp_oauth_callback(
     credentials.metadata["mcp_resource_url"] = meta.get("resource_url", "")
     credentials.metadata["mcp_issuer"] = expected_issuer
     credentials.metadata["mcp_isolated"] = bool(meta.get("isolated"))
+    if meta.get("mcp_catalog_id"):
+        credentials.metadata["mcp_catalog_id"] = meta["mcp_catalog_id"]
+        credentials.metadata["mcp_method_id"] = meta["mcp_method_id"]
+        credentials.metadata["mcp_definition_version"] = meta[
+            "mcp_definition_version"
+        ]
+        organization_id = meta.get("mcp_organization_id") or (
+            context.org_id if context else None
+        )
+        if organization_id:
+            credentials.metadata["mcp_organization_id"] = organization_id
+        credentials.metadata["mcp_auth_scheme"] = "oauth"
 
     hostname = server_host(meta["server_url"])
     credentials.title = f"MCP: {hostname}"
@@ -696,6 +839,7 @@ async def mcp_oauth_callback(
             if (
                 not meta.get("isolated")
                 and isinstance(old, OAuth2Credentials)
+                and (old.metadata or {}).get("mcp_auth_scheme") != "query_key"
                 and not (old.metadata or {}).get("mcp_isolated")
                 and (old.metadata or {}).get("mcp_server_url")
                 in {tools_url, meta["server_url"]}
@@ -734,9 +878,17 @@ class MCPStoreTokenRequest(BaseModel):
             "Bare Bearer token, Basic/Bearer value, or complete Authorization header"
         ),
     )
-    auth_type: Literal["header", "query_key"] = Field(
+    auth_type: Literal["header", "query_key", "bearer", "basic"] = Field(
         default="header", description="How to send the manual credential."
     )
+    catalog_id: str | None = Field(
+        default=None,
+        max_length=128,
+        description="Selected catalog preset for a non-isolated query key.",
+    )
+    method_id: str | None = Field(default=None, max_length=128)
+    auth_parameter: str | None = Field(default=None, max_length=64)
+    auth_prefix: str = Field(default="", max_length=32)
 
 
 @router.post(
@@ -762,17 +914,41 @@ async def mcp_store_token(
     ``auto_lookup_mcp_credential``.
     """
     query_key = request.auth_type == "query_key"
+    auth_parameter = request.auth_parameter or "key"
+    entry = None
+    catalog_id = None
+    if request.catalog_id is not None:
+        entry = query_key_catalog_entry(request.catalog_id, request.server_url)
+        if not query_key or request.isolated or entry is None:
+            raise fastapi.HTTPException(400, "Invalid query-key preset or endpoint.")
+        catalog_id = entry.name
     if query_key:
-        if not is_dingtalk_key_endpoint(request.server_url):
-            raise fastapi.HTTPException(400, "Use a clean DingTalk API key server URL.")
         secret = request.token.get_secret_value()
         if (
             not secret.isascii()
             or not secret.isprintable()
             or any(c.isspace() for c in secret)
         ):
-            raise fastapi.HTTPException(422, "Invalid API key.")
+            raise fastapi.HTTPException(422, "Invalid query credential.")
+        if not _AUTH_PARAMETER.fullmatch(auth_parameter):
+            raise fastapi.HTTPException(422, "Invalid query credential parameter.")
+        if entry is not None:
+            method = next(
+                method
+                for method in entry.mcp_server.methods
+                if method.auth_type == "query_key"
+            )
+            if method.name != auth_parameter:
+                raise fastapi.HTTPException(400, "The credential parameter does not match the catalog method.")
         auth_scheme = "query_key"
+    elif request.auth_type == "header" and request.auth_parameter:
+        secret = request.token.get_secret_value().strip()
+        if not secret or any(ord(character) < 32 or ord(character) == 127 for character in secret):
+            raise fastapi.HTTPException(422, "Invalid header credential.")
+        if not _AUTH_PARAMETER.fullmatch(request.auth_parameter):
+            raise fastapi.HTTPException(422, "Invalid credential header name.")
+        auth_parameter = request.auth_parameter
+        auth_scheme = "header"
     else:
         try:
             secret = normalize_mcp_authorization(request.token.get_secret_value())
@@ -802,6 +978,53 @@ async def mcp_store_token(
             "cannot be sent over an unencrypted connection.",
         )
 
+    await _verify_manual_credential(
+        server_url,
+        secret,
+        query_key,
+        auth_parameter,
+        auth_scheme,
+        request.auth_prefix,
+    )
+    if query_key and not request.isolated:
+        async with await _query_key_write_lock(user_id):
+            return await _store_manual_credential(
+                user_id,
+                server_url,
+                secret,
+                auth_scheme,
+                False,
+                catalog_id,
+                auth_parameter,
+                request.auth_prefix,
+            )
+    return await _store_manual_credential(
+        user_id,
+        server_url,
+        secret,
+        auth_scheme,
+        request.isolated,
+        None,
+        auth_parameter,
+        request.auth_prefix,
+    )
+
+
+async def _query_key_write_lock(user_id: str):
+    """Serialize endpoint selection and write, including when no row exists yet."""
+    locks = await creds_manager.locks()
+    return locks.locked((f"user:{user_id}", "mcp-query-key-bindings"))
+
+
+async def _verify_manual_credential(
+    server_url: str,
+    secret: str,
+    query_key: bool,
+    auth_parameter: str = "key",
+    auth_scheme: str = "query_key",
+    auth_prefix: str = "",
+):
+    hostname = server_host(server_url)
     # A 2xx from this endpoint is what turns the setup card's pill green, so
     # it has to mean "this credential authenticates against the server" rather
     # than "a row was written". One ``initialize`` round-trip is the cheapest
@@ -812,11 +1035,19 @@ async def mcp_store_token(
     # Redirects are not followed: a cross-host hop either carries the
     # credential somewhere the user never named, or drops it and earns a 401
     # we would wrongly report as "you mistyped this".
-    probe_client = (
-        MCPClient(server_url, query_key=request.token, follow_redirects=False)
-        if query_key
-        else MCPClient(server_url, authorization=secret, follow_redirects=False)
-    )
+    if query_key or auth_scheme == "header":
+        probe_client = MCPClient(
+            server_url,
+            endpoint_auth=EndpointAuth(
+                endpoint=server_url,
+                token=SecretStr(secret),
+                query=auth_parameter if query_key else None,
+                header=auth_parameter if auth_scheme == "header" else None,
+                prefix=auth_prefix,
+            ),
+        )
+    else:
+        probe_client = MCPClient(server_url, authorization=secret, follow_redirects=False)
     try:
         # MCPClient sets no timeout and no retry ceiling of its own.
         await asyncio.wait_for(
@@ -833,9 +1064,9 @@ async def mcp_store_token(
                 detail=f"{hostname} rejected this credential. "
                 "Please check that you copied it correctly and try again.",
             )
-        if query_key:
+        if query_key or auth_scheme == "header":
             raise fastapi.HTTPException(
-                502, "Could not verify the DingTalk connection."
+                502, "Could not verify the MCP connection."
             ) from None
         logger.info(
             "Could not verify MCP credential against %s (HTTP %s) — storing anyway",
@@ -843,9 +1074,9 @@ async def mcp_store_token(
             e.status_code,
         )
     except Exception as e:
-        if query_key:
+        if query_key or auth_scheme == "header":
             raise fastapi.HTTPException(
-                502, "Could not verify the DingTalk connection."
+                502, "Could not verify the MCP connection."
             ) from None
         # No ``exc_info``: the error text embeds a server-controlled body.
         logger.info(
@@ -862,6 +1093,19 @@ async def mcp_store_token(
         except Exception:
             logger.debug("MCP probe close failed for %s", hostname)
 
+
+async def _store_manual_credential(
+    user_id: str,
+    server_url: str,
+    secret: str,
+    auth_scheme: str,
+    isolated: bool,
+    catalog_id: str | None,
+    auth_parameter: str = "key",
+    auth_prefix: str = "",
+) -> CredentialsMetaResponse:
+    hostname = server_host(server_url)
+    query_key = auth_scheme == "query_key"
     # Rotate the existing manual credential in place so saved graphs keep their
     # credential ID.  OAuth rows are left alone: rewriting one would drop its
     # refresh token, and deleting one here would not revoke it.
@@ -870,21 +1114,6 @@ async def mcp_store_token(
         old_creds = await creds_manager.store.get_creds_by_provider(
             user_id, ProviderName.MCP.value
         )
-        for old in old_creds:
-            if (
-                not isinstance(old, OAuth2Credentials)
-                or old.is_managed
-                or request.isolated
-                or (old.metadata or {}).get("mcp_isolated")
-                or normalize_mcp_url((old.metadata or {}).get("mcp_server_url", ""))
-                != server_url
-            ):
-                continue
-            if is_manual_mcp_credential(old) and (
-                ((old.metadata or {}).get("mcp_auth_scheme") == "query_key")
-                == query_key
-            ):
-                manual_credentials.append(old)
     except Exception as e:
         logger.exception("Could not query existing MCP credentials")
         raise fastapi.HTTPException(
@@ -892,11 +1121,53 @@ async def mcp_store_token(
             detail="Could not safely update the MCP credential. Please try again.",
         ) from e
 
+    if not isolated:
+        for old in old_creds:
+            if (
+                not isinstance(old, OAuth2Credentials)
+                or old.is_managed
+                or not is_manual_mcp_credential(old)
+            ):
+                continue
+            meta = old.metadata
+            if (
+                meta.get("mcp_isolated")
+                or (meta.get("mcp_auth_scheme") == "query_key") != query_key
+            ):
+                continue
+            if query_key:
+                if (
+                    _query_key_path(old) != urlparse(server_url).path
+                    or old.metadata.get("mcp_auth_parameter", "key") != auth_parameter
+                ):
+                    continue
+                if "mcp_catalog_id" in meta and meta["mcp_catalog_id"] != catalog_id:
+                    raise fastapi.HTTPException(
+                        409, "This endpoint is already bound to a preset."
+                    )
+            elif normalize_mcp_url(meta.get("mcp_server_url", "")) != server_url:
+                continue
+            if meta.get("mcp_catalog_id") == catalog_id:
+                manual_credentials.append(old)
+    if query_key and len(manual_credentials) > 1:
+        raise fastapi.HTTPException(
+            409, "Multiple credentials match this endpoint and preset."
+        )
+
     metadata: dict[str, Any] = {
         "mcp_server_url": server_url,
         "mcp_auth_scheme": auth_scheme,
     }
-    if request.isolated:
+    if auth_scheme == "query_key":
+        # New rows record the destination parameter. Older rows without this
+        # metadata continue through MCPClient's legacy ``key`` path.
+        metadata["mcp_auth_parameter"] = auth_parameter
+    elif auth_scheme == "header":
+        metadata["mcp_auth_parameter"] = auth_parameter
+        metadata["mcp_auth_prefix"] = auth_prefix
+    if catalog_id is not None:
+        metadata["mcp_catalog_id"] = catalog_id
+    if isolated:
         metadata["mcp_isolated"] = True
     manual_credentials.sort(key=lambda cred: cred.id)
     survivor = manual_credentials[-1] if manual_credentials else None
@@ -912,7 +1183,10 @@ async def mcp_store_token(
                 "metadata": metadata,
             }
         )
-        await creds_manager.update(user_id, credentials)
+        if query_key:
+            await _update_unchanged_query_key(user_id, survivor, credentials)
+        else:
+            await creds_manager.update(user_id, credentials)
     else:
         credentials = OAuth2Credentials(
             provider=ProviderName.MCP.value,
@@ -932,6 +1206,131 @@ async def mcp_store_token(
             logger.debug("Could not clean up superseded MCP credential", exc_info=True)
 
     return to_meta_response(credentials)
+
+
+class MCPQueryKeyChoice(BaseModel):
+    id: str
+    server_url: str
+
+
+async def _update_unchanged_query_key(
+    user_id: str, before: OAuth2Credentials, after: OAuth2Credentials
+) -> None:
+    """Like manager.update, but compare under its row lock before replacing."""
+    async with creds_manager._locked(user_id, before.id):
+        current = await creds_manager.store.get_creds_by_id(user_id, before.id)
+        if current != before:
+            raise fastapi.HTTPException(409, "Connection changed. Select it again.")
+        await creds_manager.store.update_creds(user_id, after)
+    await _invoke_creds_changed_hook(user_id, after.provider)
+
+
+class MCPBindQueryKeyRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    credential_id: str = Field(min_length=1, max_length=256)
+
+
+def _query_key_path(row: Credentials) -> str | None:
+    url = row.metadata.get("mcp_server_url")
+    if (
+        not isinstance(row, OAuth2Credentials)
+        or not provider_matches(row.provider, ProviderName.MCP.value)
+        or row.is_managed
+        or is_system_credential(row.id)
+        or not is_manual_mcp_credential(row)
+        or row.metadata.get("mcp_isolated")
+        or row.metadata.get("mcp_auth_scheme") != "query_key"
+        or not isinstance(url, str)
+        or not _is_clean_query_endpoint(url)
+    ):
+        return None
+    return urlparse(url).path
+
+
+def _is_clean_query_endpoint(url: str) -> bool:
+    parsed = urlparse(url)
+    return (
+        parsed.scheme == "https"
+        and bool(parsed.hostname)
+        and parsed.username is None
+        and parsed.password is None
+        and not parsed.query
+        and not parsed.fragment
+    )
+
+
+def _available_query_keys(
+    rows: list[Credentials], catalog_id: str
+) -> list[MCPQueryKeyChoice]:
+    occupied = {
+        _query_key_path(row) for row in rows if "mcp_catalog_id" in row.metadata
+    }
+    return [
+        MCPQueryKeyChoice(id=row.id, server_url=row.metadata["mcp_server_url"])
+        for row in rows
+        if "mcp_catalog_id" not in row.metadata
+        and (path := _query_key_path(row))
+        and path not in occupied
+        and query_key_catalog_entry(catalog_id, row.metadata["mcp_server_url"])
+        is not None
+    ]
+
+
+@router.get("/query-key-bindings/{catalog_id}", summary="List bindable query keys")
+async def list_bindable_query_keys(
+    catalog_id: str,
+    response: fastapi.Response,
+    user_id: Annotated[str, Security(get_user_id)],
+) -> list[MCPQueryKeyChoice]:
+    response.headers["Cache-Control"] = "no-store"
+    rows = await creds_manager.store.get_creds_by_provider(
+        user_id, ProviderName.MCP.value
+    )
+    return _available_query_keys(rows, catalog_id)
+
+
+@router.post("/query-key-bindings/{catalog_id}", summary="Bind existing query key")
+async def bind_existing_query_key(
+    catalog_id: str,
+    request: MCPBindQueryKeyRequest,
+    user_id: Annotated[str, Security(get_user_id)],
+) -> CredentialsMetaResponse:
+    selected = await creds_manager.store.get_creds_by_id(user_id, request.credential_id)
+    if not isinstance(selected, OAuth2Credentials) or not _query_key_path(selected):
+        raise fastapi.HTTPException(404, "Connection not available.")
+    if "mcp_catalog_id" in selected.metadata:
+        raise fastapi.HTTPException(409, "This connection is already bound.")
+    url = selected.metadata["mcp_server_url"]
+    entry = query_key_catalog_entry(catalog_id, url)
+    if entry is None:
+        raise fastapi.HTTPException(400, "Invalid query-key preset or endpoint.")
+    binding = query_key_catalog_method(catalog_id, url)
+    if binding is None:
+        raise fastapi.HTTPException(400, "Invalid query-key preset or endpoint.")
+    _, method = binding
+    await _verify_manual_credential(
+        url,
+        selected.access_token.get_secret_value(),
+        True,
+        method.name or "key",
+    )
+    async with await _query_key_write_lock(user_id):
+        rows = await creds_manager.store.get_creds_by_provider(
+            user_id, ProviderName.MCP.value
+        )
+        if not any(
+            choice.id == selected.id
+            for choice in _available_query_keys(rows, entry.name)
+        ):
+            raise fastapi.HTTPException(
+                409, "Connection changed. Select an available connection again."
+            )
+        bound = selected.model_copy(
+            update={"metadata": {**selected.metadata, "mcp_catalog_id": entry.name}}
+        )
+        await _update_unchanged_query_key(user_id, selected, bound)
+    return to_meta_response(bound)
 
 
 # ======================== Helpers ======================== #

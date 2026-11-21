@@ -16,12 +16,18 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from backend.blocks.mcp.client import is_dingtalk_key_endpoint
+from backend.blocks.mcp.helpers import normalize_mcp_url
+from backend.copilot.capabilities.mcp_routes import MCPReviewedRoute
 from backend.copilot.constants import (
     COPILOT_NODE_EXEC_ID_SEPARATOR,
     COPILOT_SYNTHETIC_ID_PREFIX,
 )
 from backend.data.db_accessors import review_db
-from backend.integrations.mcp_catalog import mcp_effect_map_for_url
+from backend.integrations.mcp_catalog import (
+    get_mcp_catalog_entry_for_url,
+    mcp_effect_map_for_url,
+)
 from backend.util.json import same_json
 
 COPILOT_MCP_NODE_PREFIX = f"{COPILOT_SYNTHETIC_ID_PREFIX}mcp-"
@@ -47,6 +53,7 @@ class MCPReviewPayload(BaseModel):
     arguments: dict[str, Any]
     connection_id: str | None = None
     credential_id: str | None = None
+    reviewed_route: MCPReviewedRoute | None = None
 
 
 def looks_like_write(tool_name: str) -> bool:
@@ -56,10 +63,19 @@ def looks_like_write(tool_name: str) -> bool:
 
 
 def needs_review(server_url: str, tool_name: str, *, catalog_server: bool) -> bool:
-    effects = mcp_effect_map_for_url(server_url)
+    if is_dingtalk_key_endpoint(normalize_mcp_url(server_url)):
+        return True
+    entry = get_mcp_catalog_entry_for_url(server_url)
+    canonical = bool(
+        entry
+        and entry.mcp_server.server_url
+        and normalize_mcp_url(entry.mcp_server.server_url)
+        == normalize_mcp_url(server_url)
+    )
+    effects = mcp_effect_map_for_url(server_url) if canonical else None
     if effects and effects.review_when_gate_inactive:
         return effects.effect_of(tool_name) != "read"
-    return not catalog_server and looks_like_write(tool_name)
+    return True if catalog_server and not canonical else not catalog_server and looks_like_write(tool_name)
 
 
 def is_mcp_review_id(review_id: str) -> bool:
@@ -108,7 +124,7 @@ async def open_mcp_review(
         chat_session_id=session_id,
         input_data=data,
         message=f"Run MCP tool '{payload.tool}' on {host} with the shown arguments?",
-        editable=True,
+        editable=payload.reviewed_route is None,
         organization_id=organization_id,
         team_id=team_id,
     )

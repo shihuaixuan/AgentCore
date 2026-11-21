@@ -1184,6 +1184,11 @@ async def create_credentials(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Cannot create credentials with a reserved ID",
         )
+    if provider == ProviderName.MCP and "mcp_catalog_id" in credentials.metadata:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Bind this credential through the MCP connector setup.",
+        )
     if provider == ProviderName.CODEX:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

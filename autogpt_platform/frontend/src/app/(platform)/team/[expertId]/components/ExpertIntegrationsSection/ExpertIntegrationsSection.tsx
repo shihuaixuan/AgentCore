@@ -218,6 +218,7 @@ export function ExpertIntegrationsSection({ expertId, expertName }: Props) {
       />
 
       <ExpertConnectServiceDialog
+        expertID={expertId}
         open={isConnecting}
         expertName={expertName}
         onClose={closeConnect}

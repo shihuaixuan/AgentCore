@@ -11,18 +11,31 @@ import { customMutator } from "@/app/api/mutators/custom-mutator";
 export function storeQueryKey(
   serverURL: string,
   token: string,
-  isolated = true,
-  signal?: AbortSignal,
+  options?: {
+    catalogID?: string;
+    authParameter?: string;
+    signal?: AbortSignal;
+  },
 ) {
   const body: MCPStoreTokenRequest = {
     server_url: serverURL,
     token,
     auth_type: "query_key",
-    ...(isolated ? { isolated: true } : {}),
+    ...(options?.catalogID
+      ? { catalog_id: options.catalogID }
+      : { isolated: true }),
+    ...(options?.authParameter
+      ? { auth_parameter: options.authParameter }
+      : {}),
   };
   return customMutator<postV2StoreABearerTokenForAnMcpServerResponse>(
     getPostV2StoreABearerTokenForAnMcpServerUrl(),
-    { method: "POST", body: JSON.stringify(body), redirect: "error", signal },
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+      redirect: "error",
+      signal: options?.signal,
+    },
     { sensitive: true },
   );
 }

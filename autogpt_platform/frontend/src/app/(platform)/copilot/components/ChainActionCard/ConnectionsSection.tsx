@@ -18,10 +18,15 @@ interface Props {
 export function ConnectionsSection({ rows, mcp }: Props) {
   const { t } = useTranslation();
   const { openModal } = useCopilotModal();
-  const mcpRows = mcp.filter(
-    (request, i) =>
-      mcp.findIndex((other) => other.serverUrl === request.serverUrl) === i,
-  );
+  const byTarget = new Map<string, McpConnectorRequest>();
+  for (const request of mcp) {
+    const key = JSON.stringify([request.serverUrl, request.expertId]);
+    const existing = byTarget.get(key);
+    if (!existing || (existing.connected && !request.connected)) {
+      byTarget.set(key, request);
+    }
+  }
+  const mcpRows = [...byTarget.values()];
   const remaining = [
     ...rows
       .filter((row) => !row.selected || row.hasUnansweredTarget)

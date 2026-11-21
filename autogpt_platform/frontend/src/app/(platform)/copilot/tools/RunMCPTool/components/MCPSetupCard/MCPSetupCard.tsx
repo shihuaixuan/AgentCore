@@ -1,7 +1,13 @@
 "use client";
 
 import { useListExpertCredentials } from "@/app/api/__generated__/endpoints/experts/experts";
-import { useGetV1ListCredentials } from "@/app/api/__generated__/endpoints/integrations/integrations";
+import {
+  getGetV1ListCredentialsQueryKey,
+  useGetV1ListCredentials,
+  useGetV1ListProviders,
+} from "@/app/api/__generated__/endpoints/integrations/integrations";
+import type { ProviderMetadata } from "@/app/api/__generated__/models/providerMetadata";
+import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/credentialsMetaResponse";
 import {
   postV2DiscoverAvailableToolsOnAnMcpServer,
   postV2StoreABearerTokenForAnMcpServer,
@@ -9,6 +15,8 @@ import {
 import { okData } from "@/app/api/helpers";
 import type { SetupRequirementsResponse } from "@/app/api/__generated__/models/setupRequirementsResponse";
 import { Button } from "@/components/atoms/Button/Button";
+import { Dialog } from "@/components/molecules/Dialog/Dialog";
+import { MCPPresetPanel } from "@/components/contextual/IntegrationsPanel/components/ConnectServiceDialog/components/DetailView/MCPPresetPanel";
 import { MCPAuthSchemeField } from "@/components/contextual/MCPAuthSchemeField/MCPAuthSchemeField";
 import {
   mcpAuthTokenHint,
@@ -37,6 +45,8 @@ import { CredentialRejectionNotice } from "../../../../components/CredentialReje
 import { coerceExpertGrant } from "../../../../components/SetupRequirementsCard/helpers";
 import { Text } from "@/components/atoms/Text/Text";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { hasCatalogMethods } from "@/lib/mcp-catalog-connections";
+import { CatalogAccountCard } from "./CatalogAccountCard";
 
 interface Props {
   output: SetupRequirementsResponse;
@@ -99,7 +109,57 @@ async function storeManualToken(
  * Fallback: if the server doesn't support MCP OAuth (400), prompts the user
  * to provide an API credential manually.
  */
-export function MCPSetupCard({ output, retryInstruction }: Props) {
+export function MCPSetupCard(props: Props) {
+  const info = props.output.setup_info;
+  const expertGrant = Object.values(
+    info.user_readiness?.missing_credentials ?? {},
+  )
+    .map((entry) =>
+      coerceExpertGrant((entry as { expert_grant?: unknown }).expert_grant),
+    )
+    .find(Boolean);
+  const expertId = info.mcp_expert_id ?? expertGrant?.expertId;
+  const key = JSON.stringify([
+    info.agent_id,
+    info.mcp_catalog_id,
+    expertId,
+    props.output.rejection,
+  ]);
+  return info.mcp_catalog_id ? (
+    <CatalogSetupCard key={key} {...props} expertId={expertId} />
+  ) : (
+    <ConnectionCard key={key} {...props} expertId={expertId} />
+  );
+}
+
+type ScopedProps = Props & { expertId?: string };
+
+function CatalogSetupCard(props: ScopedProps) {
+  const info = props.output.setup_info;
+  const { data: providers } = useGetV1ListProviders({
+    query: { select: (response) => okData(response) ?? [] },
+  });
+  const preset = providers?.find(
+    (provider) =>
+      provider.name === info.mcp_catalog_id &&
+      (hasCatalogMethods(provider.mcp_server) || provider.mcp_server?.auth_methods?.includes("query_key")) &&
+      provider.mcp_server.connection_mode === "hosted" &&
+      !!provider.mcp_server.server_url &&
+      normalizeMcpUrl(provider.mcp_server.server_url) ===
+        normalizeMcpUrl(info.agent_id),
+  );
+  if (preset && hasCatalogMethods(preset.mcp_server)) {
+    return <CatalogAccountCard key={`${preset.name}:${preset.mcp_server.definition_version}`} {...props} server={preset.mcp_server} connectorID={preset.name} />;
+  }
+  return <ConnectionCard {...props} preset={preset} />;
+}
+
+function ConnectionCard({
+  output,
+  retryInstruction,
+  expertId,
+  preset,
+}: ScopedProps & { preset?: ProviderMetadata }) {
   const { t } = useTranslation();
   const { onSend } = useCopilotChatActions();
   const queryClient = useQueryClient();
@@ -114,34 +174,17 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
   // agent_name is computed by the backend as the display name for the service
   const service = output.setup_info.agent_name;
   const rejection = output.rejection ?? null;
-  const expertGrant = Object.values(
-    output.setup_info.user_readiness?.missing_credentials ?? {},
-  )
-    .map((entry) =>
-      coerceExpertGrant((entry as { expert_grant?: unknown }).expert_grant),
-    )
-    .find(Boolean);
+  const catalogId = output.setup_info.mcp_catalog_id;
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  // Initial connection state comes from the backend.  When the model
-  // calls `run_mcp_tool` with `surface_connect_card=true`, the response's
-  // `has_all_credentials` reflects whether the user already has a stored
-  // credential for this server — so we render "Connected — Reconnect"
-  // straight away instead of a bare Connect button.
   const initiallyConnected = Boolean(
     output.setup_info?.user_readiness?.has_all_credentials,
   );
 
-  // The persisted backend state above is a snapshot from the moment the
-  // card was emitted.  On chat refresh that snapshot is stale — the user
-  // may have completed sign-in in a prior session.  Re-fetch the live
-  // cred list and OR it into ``connected`` so a previously-connected
-  // server still renders the "Connected — Reconnect" pill after a
-  // page reload.  We OR rather than override: once the user clicks
-  // Connect successfully in this component, ``localConnected`` stays
-  // true even if the live-cred query is briefly stale.
   const normalizedServer = normalizeMcpUrl(serverUrl);
   const {
     data: liveCredsRes,
+    isFetching: liveCredsFetching,
     isFetchedAfterMount: liveCredsFetched,
     isError: liveCredsError,
   } = useGetV1ListCredentials({
@@ -172,32 +215,45 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
   // access. The grant list follows the same tri-state rule as the cred list.
   const {
     data: expertGrants,
+    isFetching: expertGrantsFetching,
     isFetchedAfterMount: expertGrantsFetched,
     isError: expertGrantsError,
-  } = useListExpertCredentials(expertGrant?.expertId ?? "", {
+  } = useListExpertCredentials(expertId ?? "", {
     query: {
-      enabled: Boolean(expertGrant),
-      select: (res) => okData(res) ?? [],
+      enabled: Boolean(expertId),
+      refetchOnMount: "always",
+      select: (res) => okData(res) ?? null,
     },
   });
-  const grantedIds = expertGrant
+  const grantedIds = expertId
     ? new Set((expertGrants ?? []).map((grant) => grant.credential_id))
     : null;
-  const serverCredentials = !Array.isArray(liveCredsRes)
-    ? []
-    : liveCredsRes.filter(
-        (c) =>
-          c.provider === "mcp" &&
-          typeof c.host === "string" &&
-          normalizeMcpUrl(c.host) === normalizedServer,
-      );
+  function matches(credential: CredentialsMetaResponse) {
+    return (
+      credential.provider === "mcp" &&
+      ((typeof credential.host === "string" &&
+        normalizeMcpUrl(credential.host) === normalizedServer) ||
+        (!!preset &&
+          credential.service ===
+            (preset.service || preset.name.replace(/^mcp_/, ""))))
+    );
+  }
+  const serverCredentials =
+    (catalogId && !preset) || !Array.isArray(liveCredsRes)
+      ? []
+      : liveCredsRes.filter(matches);
   const liveCredential = serverCredentials.find(
     (c) => !grantedIds || grantedIds.has(c.id),
   );
   const grantsUnknown =
-    Boolean(expertGrant) && (!expertGrantsFetched || expertGrantsError);
+    Boolean(expertId) &&
+    (!expertGrantsFetched ||
+      expertGrantsFetching ||
+      expertGrantsError ||
+      !Array.isArray(expertGrants));
   const liveHasCred: boolean | "unknown" =
     !liveCredsFetched ||
+    ((expertId || catalogId) && liveCredsFetching) ||
     liveCredsError ||
     !Array.isArray(liveCredsRes) ||
     grantsUnknown
@@ -235,35 +291,43 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
   const grantInFlight = useRef(false);
   const [grantError, setGrantError] = useState<string | null>(null);
   const [failedGrantId, setFailedGrantId] = useState<string | null>(null);
-  const grantableId = failedGrantId ?? expertGrant?.credentials[0]?.id ?? null;
-  // Combined view:
-  //   1. ``forceDisconnected`` (set by the catch block) wins.
-  //   2. ``localConnected`` (just completed sign-in in this component) wins.
-  //   3. Live API truth wins over the persisted snapshot — a true tells
-  //      us the cred is there, a false tells us it isn't.
-  //   4. When live state is unknown (loading/network/auth error), fall
-  //      back to the persisted ``initiallyConnected`` snapshot rather
-  //      than defaulting to disconnected.
-  const liveSays = liveHasCred === "unknown" ? initiallyConnected : liveHasCred;
-  // A rejected credential never counts as connected, whatever a stale cred
-  // list says — only a sign-in completed in this card does.
+  const liveGrantableId =
+    !rejection && expertId && liveHasCred === false
+      ? serverCredentials[0]?.id
+      : null;
+  const grantableId = liveGrantableId ?? (!catalogId ? failedGrantId : null);
+  const legacyPersonal = !expertId && !catalogId;
+  const liveSays =
+    liveHasCred === "unknown"
+      ? legacyPersonal && initiallyConnected
+      : liveHasCred;
   const connected =
-    !forceDisconnected && (localConnected || (!rejection && liveSays));
-  // Setter compatible with the existing call-sites — they only ever set
-  // ``true`` after a successful flow or ``false`` to drop the pill.
+    !forceDisconnected &&
+    ((localConnected && legacyPersonal) ||
+      ((!rejection || localConnected) && liveSays));
   const setConnected = setLocalConnected;
 
   useEffect(() => () => oauthRequest.current?.abort(), []);
 
-  async function finish(credentialId: string | undefined) {
-    if (expertGrant && credentialId) {
+  async function finish(credentialId: string | undefined, newlyStored = false) {
+    if (expertId) {
+      if (!credentialId) {
+        setGrantError(
+          t(
+            "No credential was returned to grant. Please reconnect.",
+            "未返回可授权的凭据，请重新连接。",
+          ),
+        );
+        setForceDisconnected(true);
+        return;
+      }
       if (grantInFlight.current) return;
       grantInFlight.current = true;
       setGranting(true);
       setGrantError(null);
       const ok = await grantToExpert(
         queryClient,
-        expertGrant.expertId,
+        expertId,
         credentialId,
       ).finally(() => {
         grantInFlight.current = false;
@@ -271,6 +335,7 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
       });
       if (!ok) {
         setFailedGrantId(credentialId);
+        setForceDisconnected(true);
         setGrantError(
           t(
             "Connected, but could not grant access. Try Grant access again.",
@@ -279,7 +344,14 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
         );
         return;
       }
+      if (newlyStored && !catalogId) {
+        await queryClient.invalidateQueries({
+          queryKey: getGetV1ListCredentialsQueryKey(),
+        });
+      }
     }
+    setFailedGrantId(null);
+    setForceDisconnected(false);
     setConnected(true);
     onSend(retryInstruction ?? "I've connected. Please retry.");
   }
@@ -290,6 +362,21 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
 
   async function handleConnect() {
     if (loading || oauthRequest.current) return;
+    if (catalogId) {
+      if (preset) {
+        setError(null);
+        setDialogOpen(true);
+      } else {
+        setError(
+          t(
+            "The requested connection preset is unavailable. Please try again.",
+            "请求的连接预设不可用，请重试。",
+          ),
+        );
+        setForceDisconnected(true);
+      }
+      return;
+    }
     const controller = new AbortController();
     oauthRequest.current = controller;
     const { signal } = controller;
@@ -322,7 +409,7 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
         return;
       }
       setForceDisconnected(false);
-      await finish(credential.id);
+      await finish(credential.id, true);
     } catch (error: unknown) {
       if (signal.aborted) return;
       setConnected(false);
@@ -379,7 +466,7 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
       // Connected pill while the request is still in flight, briefly
       // showing a false "Connected" state to the user.
       setForceDisconnected(false);
-      await finish(credentialId);
+      await finish(credentialId, true);
     } catch (e: unknown) {
       // Keep the force-disconnect override on so the not-connected
       // branch (error banner + manual-token input) stays visible — an
@@ -419,11 +506,12 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
       buildMessage: () => null,
       mcp: {
         id: actionId,
+        expertId,
         service,
         serverUrl,
         connected,
         loading,
-        error: error ?? grantError,
+        error: error ?? grantError ?? rejection?.detail ?? null,
         showManualToken,
         authScheme: manualAuthScheme,
         grantable: Boolean(grantableId),
@@ -444,6 +532,8 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
     loading,
     error,
     grantError,
+    expertId,
+    rejection?.detail,
     grantableId,
     granting,
     showManualToken,
@@ -452,7 +542,37 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
     service,
   ]);
 
-  if (chainActions) return null;
+  const dialog =
+    dialogOpen && preset?.mcp_server ? (
+      <Dialog
+        title={service}
+        controlled={{ isOpen: dialogOpen, set: setDialogOpen }}
+      >
+        <Dialog.Content>
+          <MCPPresetPanel
+            catalogID={preset.name}
+            serviceName={service}
+            server={preset.mcp_server}
+            onSuccess={(credential) => {
+              setDialogOpen(false);
+              if (!credential?.id || !matches(credential)) {
+                setError(
+                  t(
+                    "The new connection does not match this service.",
+                    "新连接与此服务不匹配。",
+                  ),
+                );
+                setForceDisconnected(true);
+                return;
+              }
+              void finish(credential.id);
+            }}
+          />
+        </Dialog.Content>
+      </Dialog>
+    ) : null;
+
+  if (chainActions) return dialog;
 
   // Already-connected state.  Shown when the backend reports
   // ``has_all_credentials=true`` (model called with
@@ -466,6 +586,7 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
     // owns the error display.
     return (
       <div className="mt-2 grid gap-2">
+        {dialog}
         <div className="rounded-lg border border-success/40 bg-success-surface px-3 py-2 text-body text-success-foreground">
           {t(`Connected to ${service}.`, `已连接 ${service}。`)}{" "}
           <button
@@ -485,7 +606,10 @@ export function MCPSetupCard({ output, retryInstruction }: Props) {
 
   return (
     <div className="mt-2 grid gap-2">
-      <ContentMessage>{output.message}</ContentMessage>
+      {dialog}
+      {(!initiallyConnected || rejection || legacyPersonal) && (
+        <ContentMessage>{output.message}</ContentMessage>
+      )}
 
       {rejection && <CredentialRejectionNotice rejection={rejection} />}
 

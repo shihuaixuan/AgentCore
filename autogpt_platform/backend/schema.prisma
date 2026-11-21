@@ -1639,6 +1639,7 @@ model Expert {
 
   Workflows       ExpertWorkflow[]
   Credentials     ExpertCredential[]
+  MCPConnectionGrants ExpertMCPConnectionGrant[]
   ChatSessions    ChatSession[]
   GraphExecutions AgentGraphExecution[]
   AgentPresets    AgentPreset[]
@@ -3222,6 +3223,11 @@ model MCPMarketplaceEntry {
 model CustomMCPConnection {
   id           String   @id @default(uuid())
   userId       String
+  organizationId String?
+  connectorId String?
+  methodId String?
+  definitionVersion Int?
+  revision Int @default(1)
   name         String
   description  String   @default("")
   serverUrl    String
@@ -3232,8 +3238,23 @@ model CustomMCPConnection {
   updatedAt    DateTime @updatedAt
 
   User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  ExpertGrants ExpertMCPConnectionGrant[]
 
   @@index([userId])
+  @@index([userId, organizationId])
+}
+
+model ExpertMCPConnectionGrant {
+  expertId String
+  connectionId String
+  organizationId String
+  Expert Expert @relation(fields: [expertId], references: [id], onDelete: Cascade)
+  Connection CustomMCPConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  Organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@id([expertId, connectionId])
+  @@index([connectionId])
 }
 
 /// One file beside a published version's SKILL.md, snapshotted at submit time
@@ -3559,6 +3580,8 @@ model Organization {
   StoreListings      StoreListing[]               @relation("OrgStoreListings")
   SkillListings      SkillListing[]               @relation("OrgSkillListings")
   Credentials        IntegrationCredential[]
+  CustomMCPConnections CustomMCPConnection[]
+  ExpertMCPConnectionGrants ExpertMCPConnectionGrant[]
   Profile            OrganizationProfile?
   Subscription       OrganizationSubscription?
   SeatAssignments    OrganizationSeatAssignment[]

@@ -15,6 +15,7 @@ from backend.blocks._base import BlockType
 from backend.copilot.capabilities.index import CapabilityIndex
 from backend.copilot.capabilities.mcp_review import (
     COPILOT_MCP_NODE_PREFIX,
+    MCPReviewedRoute,
     mcp_review_node_id,
 )
 from backend.copilot.capabilities.ranking import ConnectionState
@@ -804,6 +805,12 @@ async def test_run_mcp_domestic_connector_reviews_external_or_unknown_tools(
 ):
     out = MCPToolOutputResponse(message="ran", server_url="u", tool_name=tool)
     with (
+        patch(
+            "backend.copilot.tools.run_capability.resolve_reviewed_route",
+            side_effect=lambda user_id, expert_id, url: MCPReviewedRoute(
+                server_url=url, endpoint=url, credential_id="oauth-account"
+            ),
+        ),
         patch("backend.copilot.tools.run_capability.gate_active", return_value=False),
         patch(
             "backend.copilot.tools.run_capability.RunMCPToolTool._execute",
@@ -831,7 +838,13 @@ async def test_run_mcp_dingtalk_known_read_does_not_require_legacy_review():
     with (
         patch("backend.copilot.tools.run_capability.gate_active", return_value=False),
         patch(
-            "backend.copilot.tools.run_capability.RunMCPToolTool._execute",
+            "backend.copilot.tools.run_capability.resolve_reviewed_route",
+            return_value=MCPReviewedRoute(
+                server_url=url, endpoint=url, credential_id="oauth-account"
+            ),
+        ),
+        patch(
+            "backend.copilot.tools.run_capability.run_reviewed_mcp",
             AsyncMock(return_value=out),
         ) as run,
         patch(
@@ -846,7 +859,7 @@ async def test_run_mcp_dingtalk_known_read_does_not_require_legacy_review():
         )
 
     assert result is out
-    assert run.await_args.kwargs["server_url"] == url
+    assert run.await_args.args[2].endpoint == url
     review.assert_not_awaited()
 
 
@@ -1035,6 +1048,59 @@ async def test_resume_mcp_review_replays_the_approved_call():
     assert result is out
     assert run.await_args.kwargs["tool_arguments"] == arguments
     db.delete_review_by_node_exec_id.assert_awaited_once_with(review_id, USER)
+
+
+@pytest.mark.parametrize("state", ["unpinned", "approved", "override"])
+async def test_resume_dingtalk_never_reselects_an_account(state):
+    url = "https://mcp-gw.dingtalk.com/oauth/server/todo"
+    route = MCPReviewedRoute(
+        server_url=url,
+        endpoint="https://mcp-gw.dingtalk.com/server/personal",
+        credential_id="reviewed-account",
+        key_revision="reviewed-revision",
+    )
+    review_id = f"{COPILOT_MCP_NODE_PREFIX}mcp-gw.dingtalk.com:abcd"
+    session = make_session(USER)
+    data = {"server_url": url, "tool": "get_user_todos", "arguments": {}}
+    if state != "unpinned":
+        data["reviewed_route"] = route.model_dump()
+    db = AsyncMock()
+    db.get_reviews_by_node_exec_ids.return_value = {
+        review_id: _review(review_id, ReviewStatus.APPROVED, data, session.session_id)
+    }
+    db.claim_approved_review.return_value = True
+    with (
+        patch("backend.copilot.tools.resume_capability.review_db", return_value=db),
+        patch("backend.copilot.tools.continue_run_block.review_db", return_value=db),
+        patch(
+            "backend.copilot.tools.resume_capability.run_reviewed_mcp",
+            new_callable=AsyncMock,
+        ) as pinned,
+        patch(
+            "backend.copilot.tools.resume_capability.RunMCPToolTool._execute",
+            new_callable=AsyncMock,
+        ) as unpinned,
+        patch(
+            "backend.copilot.tools.resume_capability.open_mcp_review",
+            return_value="fresh",
+        ) as fresh,
+    ):
+        result = await ResumeCapabilityTool()._execute(
+            USER,
+            session,
+            review_id=review_id,
+            input_overrides={"changed": True} if state == "override" else None,
+        )
+    unpinned.assert_not_awaited()
+    if state == "approved":
+        pinned.assert_awaited_once_with(USER, session, route, "get_user_todos", {})
+    else:
+        pinned.assert_not_awaited()
+        db.claim_approved_review.assert_not_awaited()
+        if state == "override":
+            assert fresh.await_args.kwargs["payload"].reviewed_route == route
+        else:
+            assert isinstance(result, ErrorResponse)
 
 
 async def test_resume_mcp_review_reopens_when_overrides_change_a_write():

@@ -305,6 +305,65 @@ async def test_saved_query_key_executes_with_clean_url(custom):
     assert key.get_secret_value() not in response.model_dump_json()
 
 
+@pytest.mark.parametrize("state", ["granted", "account_only", "never_connected"])
+async def test_mail_preset_routes_to_the_granted_key_or_requests_setup(state):
+    catalog_url = "https://mcp-gw.dingtalk.com/oauth/server/mail"
+    saved_url = "https://mcp-gw.dingtalk.com/server/synthetic-personal-mail"
+    key = SecretStr("offline-fixture")
+    credential = OAuth2Credentials(
+        provider="mcp",
+        scopes=[],
+        access_token=key,
+        metadata={
+            "mcp_server_url": saved_url,
+            "mcp_auth_scheme": "query_key",
+            "mcp_catalog_id": "mcp_dingtalk_mail",
+        },
+    )
+    store = AsyncMock()
+    store.get_creds_by_provider.return_value = (
+        [] if state == "never_connected" else [credential]
+    )
+    experts = AsyncMock()
+    experts.expert_allowed_credential_ids.return_value = (
+        [credential.id] if state == "granted" else []
+    )
+    with (
+        patch("backend.copilot.tools.run_mcp_tool.experts_db", return_value=experts),
+        patch(
+            "backend.integrations.creds_manager.IntegrationCredentialsStore",
+            return_value=store,
+        ),
+        patch(
+            "backend.copilot.tools.run_mcp_tool.validate_url_host",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "backend.copilot.tools.run_mcp_tool.annotate_expert_grants",
+            new=AsyncMock(side_effect=lambda user, expert, missing: missing),
+        ),
+        patch("backend.copilot.tools.run_mcp_tool.MCPClient") as client,
+    ):
+        client.return_value = AsyncMock()
+        client.return_value.list_tools.return_value = _make_tool_list("mail_list")
+        response = await RunMCPToolTool()._execute(
+            _USER_ID,
+            make_session(_USER_ID, expert_id="expert-1"),
+            server_url=catalog_url,
+        )
+    assert key.get_secret_value() not in response.model_dump_json()
+    if state == "granted":
+        client.assert_called_once_with(saved_url, authorization=None, query_key=key)
+        assert isinstance(response, MCPToolsDiscoveredResponse)
+    else:
+        client.assert_not_called()
+        assert isinstance(response, SetupRequirementsResponse)
+        assert not response.setup_info.user_readiness.ready_to_run
+        assert response.setup_info.mcp_expert_id == "expert-1"
+        assert response.setup_info.mcp_catalog_id == "mcp_dingtalk_mail"
+        assert response.setup_info.agent_name == "钉钉邮箱"
+
+
 # ---------------------------------------------------------------------------
 # Stage 2 — Execution
 # ---------------------------------------------------------------------------

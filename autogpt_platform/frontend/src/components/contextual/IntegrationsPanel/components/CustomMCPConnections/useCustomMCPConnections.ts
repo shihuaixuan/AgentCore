@@ -16,8 +16,8 @@ import { getAPIResponseError, getErrorMessage } from "@/lib/mcp-errors";
 import { invalidateConnectionQueries } from "@/lib/react-query/invalidateConnections";
 import { storeMCPToken } from "../ConnectServiceDialog/components/DetailView/storeMCPToken";
 import { useCustomMCPForm } from "./useCustomMCPForm";
-import { isDingTalkKeyEndpoint, isValidQueryKey } from "./dingTalkKeyURL";
 import { probeWithQueryKey, storeQueryKey } from "./queryKeyRequests";
+import { saveCatalogAccount } from "@/lib/mcp-catalog-connections";
 
 export function useCustomMCPConnections({
   enabled = true,
@@ -66,16 +66,9 @@ export function useCustomMCPConnections({
       ...editor.form,
       auth_type: editor.form.auth_type,
     };
-    if (
-      form.auth_type === "query_key" &&
-      (!isDingTalkKeyEndpoint(form.server_url) ||
-        (token && !isValidQueryKey(token)))
-    ) {
+    if (form.auth_type === "query_key" && !token) {
       setError(
-        t(
-          "Enter a valid DingTalk server URL and key.",
-          "请输入有效的钉钉服务器地址和密钥。",
-        ),
+        t("Enter a valid query credential.", "请输入有效的查询参数凭据。"),
       );
       return;
     }
@@ -112,16 +105,66 @@ export function useCustomMCPConnections({
       }
       let credentialID = form.credential_id ?? null;
       const controller = new AbortController();
-      if (form.auth_type === "oauth" && !credentialID) {
+      const catalogMethod = editor.catalogID && editor.methodID;
+      if (catalogMethod) {
+        let credentialID: string | undefined = form.credential_id ?? undefined;
+        if (form.auth_type === "oauth") {
+          const credential = await connectMCPOAuth({
+            serverURL: editor.authEndpoint ?? form.server_url,
+            toolServerURL: editor.toolEndpoint,
+            signal: controller.signal,
+            isolated: true,
+            catalog: {
+              connector_id: editor.catalogID!,
+              method_id: editor.methodID!,
+            },
+          });
+          if ("reason" in credential) throw new Error(credential.reason);
+          credentialID = credential.id;
+        }
+        await saveCatalogAccount(
+          {
+            connector_id: editor.catalogID!,
+            method_id: editor.methodID!,
+            values: editor.fieldValues,
+            ...(editor.usesCompleteURL
+              ? {}
+              : { server_url: editor.toolEndpoint }),
+            ...(credentialID ? { credential_id: credentialID } : {}),
+            name: form.name,
+          },
+          controller.signal,
+        );
+        await refresh();
+        setOpen(false);
+        return;
+      }
+      if (!credentialID && form.auth_type === "oauth") {
         const credential = await connectMCPOAuth({
-          serverURL: form.server_url,
+          serverURL: editor.authEndpoint ?? form.server_url,
+          toolServerURL: editor.toolEndpoint,
           signal: controller.signal,
           isolated: true,
+          ...(editor.catalogID && editor.methodID
+            ? {
+                catalog: {
+                  connector_id: editor.catalogID,
+                  method_id: editor.methodID,
+                },
+              }
+            : {}),
         });
         if ("reason" in credential) throw new Error(credential.reason);
         credentialID = credential.id;
-      } else if (form.auth_type === "query_key" && token) {
-        const stored = await storeQueryKey(form.server_url, token);
+      } else if (
+        !credentialID &&
+        form.auth_type === "query_key" &&
+        token &&
+        !catalogMethod
+      ) {
+        const stored = await storeQueryKey(form.server_url, token, {
+          authParameter: editor.authParameter,
+        });
         if (stored.status !== 200)
           throw getAPIResponseError(stored.status, stored.data);
         credentialID = stored.data.id;
@@ -138,6 +181,21 @@ export function useCustomMCPConnections({
             true,
           )
         ).id;
+      } else if (form.auth_type === "header" && token) {
+        credentialID = (
+          await storeMCPToken(
+            form.server_url,
+            token,
+            "bearer",
+            controller.signal,
+            true,
+            {
+              authType: "header",
+              authParameter: editor.authParameter,
+              authPrefix: editor.authPrefix,
+            },
+          )
+        ).id;
       }
       if (form.auth_type !== "none" && !credentialID)
         throw new Error(t("A credential is required.", "请输入凭据。"));
@@ -146,7 +204,7 @@ export function useCustomMCPConnections({
           ? probeWithQueryKey
           : postV2DiscoverAvailableToolsOnAnMcpServer;
       const probe = await discover({
-        server_url: form.server_url,
+        server_url: editor.toolEndpoint ?? form.server_url,
         credential_id: credentialID,
         use_saved_credentials: false,
       });

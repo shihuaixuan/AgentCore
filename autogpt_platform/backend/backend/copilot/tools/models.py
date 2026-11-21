@@ -344,6 +344,10 @@ class SetupInfo(BaseModel):
         },
     )
     user_readiness: UserReadiness = Field(default_factory=UserReadiness)
+    mcp_catalog_id: str | None = None
+    mcp_expert_id: str | None = None
+    mcp_connection_state: str | None = None
+    mcp_connection_choices: list[dict[str, str]] = Field(default_factory=list)
 
 
 class CredentialRejection(BaseModel):

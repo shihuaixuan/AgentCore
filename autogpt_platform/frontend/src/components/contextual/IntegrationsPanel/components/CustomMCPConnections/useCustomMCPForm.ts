@@ -20,39 +20,53 @@ const blank = {
 export function useCustomMCPForm(open: boolean) {
   const catalog = useGetV1ListProviders({ query: { enabled: open } });
   const [fields, setFields] = useState(blank);
-  const [secret, setSecret] = useState<{
-    method: AuthMethod;
-    value: string;
-  } | null>(null);
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [manualAuthParameter, setManualAuthParameter] = useState<string>();
   const [manualOpen, setManualOpen] = useState(false);
-  const [selected, setSelected] = useState<AuthMethod | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const [legacy, setLegacy] = useState<AuthMethod | null>(null);
   const [rejectedURL, setRejectedURL] = useState(false);
-  const options = endpointAuthOptions(
-    fields.server_url,
-    catalog.data?.data ?? [],
-  );
+  const providers = catalog.data?.data ?? [];
+  const options = endpointAuthOptions(fields.server_url, providers);
   const manual = !options.length;
   const methods = manual ? manualMethods : options.map(({ method }) => method);
   const choices =
     legacy && !methods.includes(legacy) ? [...methods, legacy] : methods;
-  const preferred = options.find(
-    (option) => option.endpoint === fields.server_url,
-  );
+  const selectedOption =
+    options.find((option) => option.methodID === selected) ??
+    options.find((option) => option.method === selected) ??
+    options.find((option) => option.endpoint === fields.server_url) ??
+    options[0];
   const method =
-    selected && choices.includes(selected)
-      ? selected
-      : (preferred?.method ?? null);
+    selectedOption?.method ??
+    (selected && choices.includes(selected as AuthMethod)
+      ? (selected as AuthMethod)
+      : null);
   const needsEndpoint =
     method !== legacy &&
+    method !== "oauth" &&
     options.some(
       (option) =>
-        option.method === method && option.endpoint !== fields.server_url,
+        option.method === method &&
+        option.endpoint !== null &&
+        option.endpoint !== fields.server_url,
     );
-  const token = secret && secret.method === method ? secret.value : "";
+  const secretField = selectedOption?.fields?.find(
+    (field) => field.type !== "text",
+  );
+  const credentialField =
+    secretField ??
+    (method && method !== "none" && method !== "oauth"
+      ? { id: "token", type: "secret" as const }
+      : undefined);
+  const token = credentialField ? (values[credentialField.id] ?? "") : "";
+  const fieldsReady = selectedOption?.fields
+    ? Boolean(fields.credential_id) ||
+      selectedOption.fields.every((field) => Boolean(values[field.id]?.trim()))
+    : method === "none" || method === "oauth" || Boolean(token.trim());
 
   function reset(connection?: ConnectionResponse) {
-    const input = readServerInput(connection?.server_url ?? "");
+    const input = readServerInput(connection?.server_url ?? "", providers);
     setFields(
       connection
         ? {
@@ -68,41 +82,57 @@ export function useCustomMCPForm(open: boolean) {
         : blank,
     );
     setRejectedURL(input.rejected);
+    setManualAuthParameter(input.authParameter);
     setLegacy(
       input.token || input.rejected ? null : (connection?.auth_type ?? null),
     );
-    setSelected(input.token ? "query_key" : (connection?.auth_type ?? null));
-    setSecret(input.token ? { method: "query_key", value: input.token } : null);
+    setSelected(
+      input.methodID ??
+        connection?.method_id ??
+        (input.token ? "query_key" : (connection?.auth_type ?? null)),
+    );
+    setValues(
+      input.values ?? (input.token ? { token: input.token } : {}),
+    );
     setManualOpen(Boolean(connection));
   }
 
   function changeURL(raw: string) {
-    const input = readServerInput(raw);
+    const input = readServerInput(raw, providers);
     setFields({ ...fields, server_url: input.serverURL, credential_id: null });
     setRejectedURL(input.rejected);
-    setSelected(input.token ? "query_key" : null);
+    setManualAuthParameter(input.authParameter);
+    setSelected(
+      input.methodID ?? (input.token ? "query_key" : null),
+    );
     setLegacy(null);
-    setSecret(input.token ? { method: "query_key", value: input.token } : null);
-    setManualOpen(false);
+    setValues(
+      input.values ?? (input.token ? { token: input.token } : {}),
+    );
+    setManualOpen(Boolean(input.token || input.authParameter || input.methodID));
   }
 
-  function choose(method: AuthMethod) {
-    const endpoint = options.find(
-      (option) => option.method === method,
-    )?.endpoint;
+  function choose(nextMethod: AuthMethod) {
+    const option = options.find((item) => item.method === nextMethod);
+    const endpoint = option?.endpoint;
     setFields({
       ...fields,
       server_url:
         endpoint && isCleanServerURL(endpoint) ? endpoint : fields.server_url,
       credential_id: null,
     });
-    setSecret(null);
-    setSelected(method);
+    setValues({});
+    setManualAuthParameter(undefined);
+    setSelected(option?.methodID ?? nextMethod);
     setLegacy(null);
   }
 
   function setToken(value: string) {
-    if (method) setSecret({ method, value });
+    if (credentialField) setValues({ ...values, [credentialField.id]: value });
+  }
+
+  function setFieldValue(fieldID: string, value: string) {
+    setValues({ ...values, [fieldID]: value });
   }
 
   return {
@@ -119,6 +149,7 @@ export function useCustomMCPForm(open: boolean) {
       isCleanServerURL(fields.server_url) &&
       Boolean(method) &&
       !needsEndpoint &&
+      fieldsReady &&
       !rejectedURL,
     choices,
     manual,
@@ -127,7 +158,22 @@ export function useCustomMCPForm(open: boolean) {
     needsEndpoint,
     rejectedURL,
     token,
+    fieldValues: values,
+    catalogValues: selectedOption?.fields?.length ? values : undefined,
+    authParameter: selectedOption?.authParameter ?? manualAuthParameter,
+    authPrefix: selectedOption?.authPrefix,
+    authEndpoint: selectedOption?.authEndpoint,
+    catalogID: selectedOption?.catalogID,
+    methodID: selectedOption?.methodID,
+    toolEndpoint:
+      selectedOption?.toolEndpoint ?? selectedOption?.endpoint ?? fields.server_url,
+    fixedParams: selectedOption?.fixedParams,
+    fields: selectedOption?.fields ?? [],
+    usesCompleteURL: Boolean(
+      selectedOption?.fields?.some((field) => field.type === "secret_url"),
+    ),
     setToken,
+    setFieldValue,
     reset,
     changeURL,
     choose,

@@ -1,5 +1,8 @@
 "use client";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { useContext } from "react";
+import { CatalogAccountScope } from "../CatalogAccounts/CatalogAccountScope";
+import type { CatalogAccount } from "@/lib/mcp-catalog-connections";
 
 import {
   AnimatePresence,
@@ -18,6 +21,8 @@ import { useConnectServiceDialog } from "./useConnectServiceDialog";
 import { useMeasuredHeight } from "./useMeasuredHeight";
 
 interface Props {
+  expertID?: string;
+  onAccount?: (row: CatalogAccount) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title?: React.ReactNode;
@@ -52,6 +57,8 @@ const reducedVariants = {
 };
 
 export function ConnectServiceDialog({
+  expertID,
+  onAccount,
   open,
   onOpenChange,
   title,
@@ -62,6 +69,7 @@ export function ConnectServiceDialog({
   preferMcp,
 }: Props) {
   const { t } = useTranslation();
+  const parent = useContext(CatalogAccountScope);
   const {
     query,
     setQuery,
@@ -90,6 +98,7 @@ export function ConnectServiceDialog({
   const [contentRef, contentHeight] = useMeasuredHeight<HTMLDivElement>();
 
   return (
+    <CatalogAccountScope.Provider value={{expertID: expertID ?? parent.expertID, onAccount: (row) => { (onAccount ?? parent.onAccount)?.(row); onOpenChange(false); }}}>
     <Dialog
       title={title ?? t(DEFAULT_TITLE, "连接服务")}
       styling={{ maxWidth: "40rem" }}
@@ -168,5 +177,6 @@ export function ConnectServiceDialog({
         </MotionConfig>
       </Dialog.Content>
     </Dialog>
+    </CatalogAccountScope.Provider>
   );
 }

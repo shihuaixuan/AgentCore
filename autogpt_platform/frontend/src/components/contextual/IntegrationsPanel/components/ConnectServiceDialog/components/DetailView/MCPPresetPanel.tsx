@@ -5,7 +5,10 @@ import type { CredentialsMetaResponse } from "@/app/api/__generated__/models/cre
 import type { ProviderMetadata } from "@/app/api/__generated__/models/providerMetadata";
 import { Link } from "@/components/atoms/Link/Link";
 import { Text } from "@/components/atoms/Text/Text";
-import type { ReactNode } from "react";
+import { useContext, type ReactNode } from "react";
+import { hasCatalogMethods } from "@/lib/mcp-catalog-connections";
+import { CatalogAccountPanel } from "../../../CatalogAccounts/CatalogAccountPanel";
+import { CatalogAccountScope } from "../../../CatalogAccounts/CatalogAccountScope";
 import {
   TabsLine,
   TabsLineList,
@@ -14,21 +17,24 @@ import {
 } from "@/components/molecules/TabsLine/TabsLine";
 import { McpConnectPanel } from "./McpConnectPanel";
 import { PublicMCPPanel } from "./PublicMCPPanel";
-import { DingTalkKeyURLPanel } from "./DingTalkKeyURLPanel";
+import { QueryCredentialPanel } from "./QueryCredentialPanel";
+import { UnsupportedNotice } from "./UnsupportedNotice";
 
 type AuthMethod = NonNullable<
-  ProviderMetadata["mcp_server"]
->["auth_methods"][number];
+  NonNullable<ProviderMetadata["mcp_server"]>["auth_methods"]
+>[number];
 
 const METHOD_LABELS: Record<AuthMethod, [string, string]> = {
   none: ["No sign-in", "无需登录"],
   oauth: ["Sign in", "登录"],
   bearer: ["API token", "API 令牌"],
   basic: ["Basic authentication", "基本身份验证"],
+  header: ["Custom header", "自定义请求头"],
   query_key: ["API Key URL", "API Key 链接"],
 };
 
 interface Props {
+  catalogID?: string;
   serviceName: string;
   server: NonNullable<ProviderMetadata["mcp_server"]>;
   onSuccess: (credential?: CredentialsMetaResponse) => void;
@@ -37,14 +43,37 @@ interface Props {
 }
 
 export function MCPPresetPanel({
+  catalogID,
   server,
   serviceName,
   onSuccess,
   actions,
 }: Props) {
   const { t } = useTranslation();
+  const scope = useContext(CatalogAccountScope);
+  if (catalogID && hasCatalogMethods(server)) {
+    return (
+      <>
+        <CatalogAccountPanel
+          key={JSON.stringify([
+            catalogID,
+            server.definition_version,
+            scope.expertID,
+          ])}
+          connectorID={catalogID}
+          server={server}
+          expertID={scope.expertID}
+          onDone={(row) => {
+            if (scope.onAccount) scope.onAccount(row);
+            else onSuccess();
+          }}
+        />
+        {actions}
+      </>
+    );
+  }
 
-  const methods = server.auth_methods;
+  const methods = server.auth_methods ?? [];
   return (
     <div className="flex flex-col gap-4">
       <Text variant="body" tone="secondary">
@@ -55,6 +84,7 @@ export function MCPPresetPanel({
       </Link>
       {methods.length === 1 ? (
         <PresetMethod
+          catalogID={catalogID}
           serviceName={serviceName}
           server={server}
           onSuccess={onSuccess}
@@ -73,6 +103,7 @@ export function MCPPresetPanel({
           {methods.map((method) => (
             <TabsLineContent key={method} value={method}>
               <PresetMethod
+                catalogID={catalogID}
                 serviceName={serviceName}
                 server={server}
                 onSuccess={onSuccess}
@@ -88,6 +119,7 @@ export function MCPPresetPanel({
 }
 
 function PresetMethod({
+  catalogID,
   server,
   serviceName,
   onSuccess,
@@ -95,19 +127,24 @@ function PresetMethod({
   actions,
 }: Props & { method: AuthMethod }) {
   if (method === "query_key") {
-    return (
-      <DingTalkKeyURLPanel
-        key={serviceName}
+    return catalogID ? (
+      <QueryCredentialPanel
+        key={catalogID}
+        catalogID={catalogID}
+        server={server}
         serviceName={serviceName}
         onSuccess={onSuccess}
         actions={actions}
       />
-    );
+    ) : null;
   }
   if (method === "none") {
     return server.server_url ? (
       <PublicMCPPanel serverURL={server.server_url} actions={actions} />
     ) : null;
+  }
+  if (method === "header") {
+    return <UnsupportedNotice providerName={serviceName} />;
   }
   return (
     <McpConnectPanel

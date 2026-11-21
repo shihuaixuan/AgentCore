@@ -56,7 +56,7 @@ from backend.blocks.mcp.protocol import (
     name_header_for,
     negotiate_version,
 )
-from backend.util.request import HTTPClientError, Requests, Response
+from backend.util.request import EndpointAuth, HTTPClientError, Requests, Response
 
 logger = logging.getLogger(__name__)
 
@@ -225,8 +225,9 @@ class MCPClient:
     (see :meth:`initialize`) and remembered per server URL.
 
     ``authorization`` is sent verbatim as the ``Authorization`` header; callers
-    pass an already-canonical value. ``query_key`` is an alternative for a
-    clean DingTalk endpoint; it is never applied to OAuth metadata requests.
+    pass an already-canonical value. ``query_key`` is the legacy ``key`` query
+    credential carrier; declared catalog methods use ``endpoint_auth`` so the
+    parameter name and fixed parameters remain connector-defined.
     """
 
     def __init__(
@@ -236,6 +237,7 @@ class MCPClient:
         follow_redirects: bool = True,
         *,
         query_key: SecretStr | None = None,
+        endpoint_auth: EndpointAuth | None = None,
     ):
         """*follow_redirects* exists for credential verification.
 
@@ -247,11 +249,39 @@ class MCPClient:
         """
         from backend.blocks.mcp.helpers import normalize_mcp_url
 
+        if endpoint_auth is not None and (
+            authorization is not None or query_key is not None or endpoint_auth.endpoint != server_url
+        ):
+            raise ValueError("Conflicting MCP endpoint or credentials")
         if query_key is not None:
-            if not is_dingtalk_key_endpoint(server_url):
-                raise ValueError(
-                    "Query-key authentication requires a clean DingTalk MCP endpoint."
+            parsed = urlsplit(server_url)
+            if (
+                not is_dingtalk_key_endpoint(server_url)
+                or
+                parsed.scheme != "https"
+                or not parsed.hostname
+                or parsed.username is not None
+                or parsed.password is not None
+                or parsed.query
+                or parsed.fragment
+                or "\\" in server_url
+                or any(character.isspace() for character in server_url)
+                or any(
+                    segment in {".", ".."}
+                    for segment in parsed.path.split("/")
                 )
+                or re.search(r"%(?:2f|2e|5c)", parsed.path, re.IGNORECASE)
+            ):
+                raise ValueError(
+                    "Query-key authentication requires a clean HTTPS MCP endpoint."
+                )
+            try:
+                if parsed.port == 0:
+                    raise ValueError
+            except ValueError as exc:
+                raise ValueError(
+                    "Query-key authentication requires a clean HTTPS MCP endpoint."
+                ) from exc
             if authorization is not None or not query_key:
                 raise ValueError(
                     "Provide a nonempty query key without an Authorization header."
@@ -261,10 +291,12 @@ class MCPClient:
             for name, _ in parse_qsl(urlsplit(server_url).query, keep_blank_values=True)
         ):
             raise ValueError("Pass the MCP query key as a credential, not in the URL.")
-        self._server_url = normalize_mcp_url(server_url)
+        self._server_url = server_url if endpoint_auth is not None else normalize_mcp_url(server_url)
         self._query_key = query_key
+        self._endpoint_auth = endpoint_auth
+        self._response_secret = endpoint_auth.token if endpoint_auth is not None else query_key
         self.authorization = authorization
-        self.follow_redirects = follow_redirects and query_key is None
+        self.follow_redirects = follow_redirects and query_key is None and endpoint_auth is None
         self._request_id = 0
         self._session_id: str | None = None
         self.era: MCPProtocolEra | None = None
@@ -357,6 +389,7 @@ class MCPClient:
             json=payload,
             allow_redirects=self.follow_redirects,
             sensitive_query_key=self._query_key,
+            endpoint_auth=self._endpoint_auth,
         )
 
     def _decode_reply(self, response: Response, *, strict: bool) -> _Reply:
@@ -381,10 +414,8 @@ class MCPClient:
                 raise MCPClientError(
                     f"MCP server returned non-JSON response: {e}"
                 ) from e
-        if (
-            self._query_key is not None
-            and b"\\" in response.content
-            and _reflects_key(body, self._query_key)
+        if self._response_secret is not None and _reflects_key(
+            body, self._response_secret
         ):
             del body
             raise MCPClientError("MCP response contained the query credential.")
@@ -442,9 +473,13 @@ class MCPClient:
                 "clientInfo": dict(CLIENT_INFO),
             },
         )
+        if not isinstance(result, dict):
+            raise MCPClientError(
+                "MCP server did not return an initialize result. "
+                "Check the server URL and any required credential."
+            )
         # Send initialized notification (no response expected)
         await self._send_notification("notifications/initialized")
-        result = result or {}
         self.protocol_version = result.get("protocolVersion") or LEGACY_PROTOCOL_VERSION
         self.server_info = result.get("serverInfo") or {}
         self.server_capabilities = result.get("capabilities") or {}
@@ -927,6 +962,7 @@ class MCPClient:
                 self.server_url,
                 allow_redirects=self.follow_redirects,
                 sensitive_query_key=self._query_key,
+                endpoint_auth=self._endpoint_auth,
             )
         except Exception:
             pass

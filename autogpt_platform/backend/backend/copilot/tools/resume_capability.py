@@ -13,12 +13,13 @@ from typing import Any
 from prisma.enums import ReviewStatus
 
 from backend.blocks import get_block
-from backend.blocks.mcp.helpers import server_host
+from backend.blocks.mcp.helpers import normalize_mcp_url, server_host
 from backend.copilot.capabilities.mcp_review import (
     MCPReviewPayload,
     is_mcp_review_id,
     open_mcp_review,
 )
+from backend.copilot.capabilities.mcp_routes import requires_route_pin
 from backend.copilot.constants import (
     COPILOT_NODE_PREFIX,
     SPEND_REVIEW_MARKER,
@@ -36,6 +37,7 @@ from .helpers import block_run_refusal
 from .models import ErrorResponse, ReviewRequiredResponse, ToolResponseBase
 from .review_card import review_card_location
 from .run_block import RunBlockTool
+from .run_capability import run_reviewed_mcp
 from .run_mcp_tool import RunMCPToolTool
 
 logger = logging.getLogger(__name__)
@@ -176,6 +178,21 @@ async def _resume_mcp(
             session_id=session.session_id,
         ).from_outside()
     arguments = {**payload.arguments, **(input_overrides or {})}
+    route = payload.reviewed_route
+    if (
+        route
+        and (
+            route.server_url != normalize_mcp_url(payload.server_url)
+            or payload.connection_id
+        )
+    ) or (
+        not route
+        and (payload.connection_id is not None or requires_route_pin(payload.server_url))
+    ):
+        return ErrorResponse(
+            message="This approval did not identify the current connection. Request a new approval.",
+            session_id=session.session_id,
+        ).from_outside()
     if not same_json(arguments, payload.arguments):
         # The user approved one call, not a family of them. This review only
         # exists because the original call needed approving, so the changed
@@ -184,13 +201,7 @@ async def _resume_mcp(
         # replay -- which a prompt injection can steer -- into an unreviewed
         # call on arguments nobody ever saw.
         host = server_host(payload.server_url)
-        fresh = MCPReviewPayload(
-            server_url=payload.server_url,
-            tool=payload.tool,
-            arguments=arguments,
-            connection_id=payload.connection_id,
-            credential_id=payload.credential_id,
-        )
+        fresh = payload.model_copy(update={"arguments": arguments})
         new_id = await open_mcp_review(
             user_id=user_id,
             session_id=session.session_id,
@@ -213,6 +224,13 @@ async def _resume_mcp(
             review_id=new_id,
             input_data=fresh.model_dump(),
         ).from_outside()
+    if route:
+        return await run_claimed(
+            review_id,
+            user_id,
+            session,
+            lambda: run_reviewed_mcp(user_id, session, route, payload.tool, arguments),
+        )
     return await run_claimed(
         review_id,
         user_id,

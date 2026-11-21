@@ -20,17 +20,22 @@ from backend.blocks._base import (
 )
 from backend.blocks.mcp.client import MCPClient, MCPClientError
 from backend.blocks.mcp.helpers import (
-    mcp_authorization_header,
-    mcp_query_key,
+    mcp_client_for_credential,
     normalize_mcp_url,
     parse_mcp_content,
 )
 from backend.data.block import BlockInput, BlockOutput
+from backend.data.execution import ExecutionContext
 from backend.data.model import (
     CredentialsField,
     CredentialsMetaInput,
     OAuth2Credentials,
     SchemaField,
+)
+from backend.integrations.mcp_connections import (
+    MCPConnectionError,
+    open_connection_client,
+    resolve_saved_connection,
 )
 from backend.integrations.providers import ProviderName
 from backend.util.request import HTTPClientError
@@ -55,6 +60,33 @@ TEST_CREDENTIALS_INPUT = {
 
 
 MCPCredentials = CredentialsMetaInput[Literal[ProviderName.MCP], Literal["oauth2"]]
+
+
+async def resolve_workflow_connection(
+    user_id: str, connection_id: str, server_url: str, context: ExecutionContext | None
+) -> dict:
+    result = await resolve_saved_connection(
+        user_id,
+        connection_id,
+        expert_id=context.expert_id if context else None,
+        organization_id=context.organization_id if context else None,
+    )
+    row = result.connection
+    # Rows written before catalog bindings existed do not have a revision or
+    # connector identity.  Keep those explicitly selected legacy connections
+    # runnable; managed catalog rows must still pass the strict resolver.
+    if row is not None and not any(
+        key in row for key in ("connectorId", "methodId", "definitionVersion")
+    ):
+        return row
+    if (
+        result.state != "ready"
+        or row is None
+        or row["id"] != connection_id
+        or normalize_mcp_url(row["serverUrl"]) != normalize_mcp_url(server_url)
+    ):
+        raise ValueError("This connection is unavailable. Select its tool again.")
+    return row
 
 
 class MCPToolBlock(Block):
@@ -179,9 +211,11 @@ class MCPToolBlock(Block):
         authorization: str | None = None,
         input_schema: dict[str, Any] | None = None,
         query_key: SecretStr | None = None,
+        client: MCPClient | None = None,
     ) -> Any:
         """Call a tool on the MCP server. Extracted for easy mocking in tests."""
-        client = MCPClient(server_url, authorization=authorization, query_key=query_key)
+        if client is None:
+            client = MCPClient(server_url, authorization=authorization, query_key=query_key)
         try:
             await client.initialize()
             result = await client.call_tool(
@@ -208,55 +242,10 @@ class MCPToolBlock(Block):
         *,
         user_id: str,
         credentials: OAuth2Credentials | None = None,
+        execution_context: ExecutionContext | None = None,
+        connection_revision: int | None = None,
         **kwargs,
     ) -> BlockOutput:
-        if input_data.connection_id:
-            from backend.data import db
-            from backend.data.custom_mcp import get_custom_mcp_connection
-            from backend.util.clients import get_database_manager_async_client
-
-            execution_context = kwargs.get("execution_context")
-            if execution_context and execution_context.expert_id:
-                yield (
-                    "error",
-                    "Custom connections are not available to expert workflows yet.",
-                )
-                return
-            lookup = (
-                get_custom_mcp_connection
-                if db.is_connected()
-                else get_database_manager_async_client().get_custom_mcp_connection
-            )
-            connection = await lookup(user_id, input_data.connection_id)
-            if not connection or not connection["enabled"]:
-                yield (
-                    "error",
-                    "This connection is unavailable. Select another connection.",
-                )
-                return
-            if normalize_mcp_url(connection["serverUrl"]) != normalize_mcp_url(
-                input_data.server_url
-            ):
-                yield (
-                    "error",
-                    "This connection's server address changed. Select its tool again.",
-                )
-                return
-            credential_id = connection["credentialId"]
-            if credential_id:
-                if (
-                    not isinstance(credentials, OAuth2Credentials)
-                    or credentials.id != credential_id
-                ):
-                    yield "error", "This connection's credential is unavailable."
-                    return
-            else:
-                if credentials is not None:
-                    yield (
-                        "error",
-                        "This connection's credentials changed. Run it again.",
-                    )
-                    return
         if not input_data.server_url:
             yield "error", "MCP server URL is required"
             return
@@ -284,6 +273,12 @@ class MCPToolBlock(Block):
 
         # Only the credential selected for this node or run is used, and only at
         # the server it was connected for.
+        if not input_data.connection_id and credentials and (
+            (credentials.metadata or {}).get("mcp_isolated")
+            or (credentials.metadata or {}).get("mcp_method_id")
+        ):
+            yield "error", "Select the saved connection for this credential."
+            return
         if credentials and normalize_mcp_url(
             (credentials.metadata or {}).get("mcp_server_url") or ""
         ) != normalize_mcp_url(input_data.server_url):
@@ -296,18 +291,40 @@ class MCPToolBlock(Block):
             )
             return
 
-        authorization = mcp_authorization_header(credentials) if credentials else None
-
         try:
+            if input_data.connection_id:
+                row = await resolve_workflow_connection(
+                    user_id, input_data.connection_id, input_data.server_url, execution_context
+                )
+                if (
+                    connection_revision is not None
+                    and row.get("revision", 1) != connection_revision
+                ) or row["credentialId"] != (credentials.id if credentials else None):
+                    yield "error", "This connection changed. Select its tool again."
+                    return
+                client = await open_connection_client(user_id, row, credential=credentials)
+                result = await self._call_mcp_tool(
+                    row["serverUrl"], input_data.selected_tool, input_data.tool_arguments,
+                    input_schema=input_data.tool_input_schema or None, client=client,
+                )
+                yield "result", result
+                return
             result = await self._call_mcp_tool(
                 server_url=input_data.server_url,
                 tool_name=input_data.selected_tool,
                 arguments=input_data.tool_arguments,
-                authorization=authorization,
-                query_key=mcp_query_key(credentials) if credentials else None,
+                client=(
+                    mcp_client_for_credential(input_data.server_url, credentials)
+                    if credentials
+                    else None
+                ),
                 input_schema=input_data.tool_input_schema or None,
             )
             yield "result", result
+        except MCPConnectionError as e:
+            yield "error", f"Saved connection: {e.state}."
+        except ValueError as e:
+            yield "error", str(e)
         except MCPClientError as e:
             yield "error", str(e)
         except HTTPClientError as e:

@@ -191,6 +191,7 @@ function IntegrationsTabContent({ expert }: { expert: ContextPanelExpert }) {
         onClose={closeUseExisting}
       />
       <ExpertConnectServiceDialog
+        expertID={expert.id}
         open={isConnecting}
         expertName={expert.name}
         onClose={closeConnect}

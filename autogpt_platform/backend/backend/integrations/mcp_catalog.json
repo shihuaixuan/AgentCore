@@ -592,6 +592,21 @@
     }
   },
   {
+    "name": "mcp_dida365",
+    "display_name": "滴答清单",
+    "description": "查看和管理待办及清单，把会议行动项变成任务，跟踪截止时间与完成进度。",
+    "mcp_server": {
+      "server_url": "https://mcp.dida365.com",
+      "documentation_url": "https://help.dida365.com/articles/7438132116019216384",
+      "setup_instructions": "在滴答清单网页版打开头像 → 设置 → 账户与安全 → API 口令，创建并复制口令。在这里粘贴口令即可，无需添加 Bearer 前缀或跳转授权。任务和清单的访问范围以该账号的权限为准。",
+      "connection_mode": "hosted",
+      "auth_methods": [
+        "bearer"
+      ],
+      "icon_id": "dida365"
+    }
+  },
+  {
     "name": "mcp_dingtalk_aitable",
     "display_name": "钉钉 AI 表格",
     "description": "查询和更新钉钉 AI 表格记录，维护项目台账、客户清单和进度看板。",
@@ -605,6 +620,11 @@
         "query_key"
       ],
       "icon_id": "dingtalk_aitable"
+      ,"definition_version": 1,
+      "methods": [
+        {"id": "oauth", "kind": "oauth2", "label": "登录", "fields": [], "auth_type": "oauth"},
+        {"id": "query_key", "kind": "user_input", "label": "API Key 链接", "fields": [{"id": "url", "label": "完整链接", "type": "secret_url"}], "endpoint_path": "/server/{instance}", "auth_type": "query_key", "name": "key"}
+      ]
     }
   },
   {
@@ -621,6 +641,11 @@
         "query_key"
       ],
       "icon_id": "dingtalk_calendar"
+      ,"definition_version": 1,
+      "methods": [
+        {"id": "oauth", "kind": "oauth2", "label": "登录", "fields": [], "auth_type": "oauth"},
+        {"id": "query_key", "kind": "user_input", "label": "API Key 链接", "fields": [{"id": "url", "label": "完整链接", "type": "secret_url"}], "endpoint_path": "/server/{instance}", "auth_type": "query_key", "name": "key"}
+      ]
     }
   },
   {
@@ -637,6 +662,11 @@
         "query_key"
       ],
       "icon_id": "dingtalk_docs"
+      ,"definition_version": 1,
+      "methods": [
+        {"id": "oauth", "kind": "oauth2", "label": "登录", "fields": [], "auth_type": "oauth"},
+        {"id": "query_key", "kind": "user_input", "label": "API Key 链接", "fields": [{"id": "url", "label": "完整链接", "type": "secret_url"}], "endpoint_path": "/server/{instance}", "auth_type": "query_key", "name": "key"}
+      ]
     }
   },
   {
@@ -647,6 +677,11 @@
       "server_url": "https://mcp-gw.dingtalk.com/oauth/server/mail",
       "documentation_url": "https://aihub.dingtalk.com/",
       "setup_instructions": "选择登录以通过 OAuth 授权。也可以在钉钉 AI 应用服务市场打开「钉钉邮箱」，启用服务，在 API Key 配置中复制完整的 Streamable HTTP 链接，粘贴到「API Key 链接」。请使用邮箱服务的链接，不要填写其他服务的链接或单独的密钥。",
+      "definition_version": 1,
+      "methods": [
+        {"id": "oauth", "kind": "oauth2", "label": "登录", "fields": [], "auth_type": "oauth"},
+        {"id": "query_key", "kind": "user_input", "label": "API Key 链接", "fields": [{"id": "url", "label": "完整链接", "type": "secret_url"}], "endpoint_path": "/server/{instance}", "auth_type": "query_key", "name": "key"}
+      ],
       "connection_mode": "hosted",
       "auth_methods": [
         "oauth",
@@ -668,6 +703,11 @@
         "query_key"
       ],
       "icon_id": "dingtalk_todo"
+      ,"definition_version": 1,
+      "methods": [
+        {"id": "oauth", "kind": "oauth2", "label": "登录", "fields": [], "auth_type": "oauth"},
+        {"id": "query_key", "kind": "user_input", "label": "API Key 链接", "fields": [{"id": "url", "label": "完整链接", "type": "secret_url"}], "endpoint_path": "/server/{instance}", "auth_type": "query_key", "name": "key"}
+      ]
     }
   },
   {
@@ -682,7 +722,11 @@
       "auth_methods": [
         "bearer"
       ],
-      "icon_id": "gitee"
+      "icon_id": "gitee",
+      "definition_version": 1,
+      "methods": [
+        {"id": "bearer", "kind": "user_input", "label": "个人访问令牌", "fields": [{"id": "token", "label": "个人访问令牌", "type": "secret"}], "auth_type": "bearer"}
+      ]
     }
   },
   {
@@ -1375,6 +1419,21 @@
         "bearer"
       ],
       "icon_id": "zapier"
+    }
+  },
+  {
+    "name": "mcp_zhipu_web_reader",
+    "display_name": "智谱网页读取",
+    "description": "提取公开网页的正文、标题和链接，方便将公告、产品文档和参考资料整理成报告。",
+    "mcp_server": {
+      "server_url": "https://open.bigmodel.cn/api/mcp/web_reader/mcp",
+      "documentation_url": "https://docs.bigmodel.cn/cn/coding-plan/mcp/reader-mcp-server",
+      "setup_instructions": "在智谱开放平台的 GLM Coding Plan 个人或团队套餐中创建 API Key，再将 Key 粘贴到这里。需有套餐或体验卡权益，普通模型 API Key 不一定适用。调用使用套餐的 MCP 额度。",
+      "connection_mode": "hosted",
+      "auth_methods": [
+        "bearer"
+      ],
+      "icon_id": "zhipu_web_reader"
     }
   }
 ]

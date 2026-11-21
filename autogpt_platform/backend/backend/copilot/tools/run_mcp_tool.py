@@ -10,13 +10,13 @@ from backend.blocks.mcp.client import MCPClient, MCPClientError
 from backend.blocks.mcp.helpers import (
     auto_lookup_mcp_credential,
     invalidate_mcp_credential,
-    mcp_authorization_header,
-    mcp_query_key,
+    mcp_client_for_credential,
     normalize_mcp_url,
     parse_mcp_content,
     server_host,
 )
 from backend.copilot.model import ChatSession
+from backend.copilot.capabilities.mcp_routes import MCPReviewedRoute, open_reviewed_client, requires_route_pin, select_route
 from backend.copilot.sdk.file_ref import (
     FILE_REF_PREFIX,
     FileRefExpansionError,
@@ -29,7 +29,10 @@ from backend.copilot.tools.utils import (
 from backend.data.db_accessors import experts_db
 from backend.data.model import OAuth2Credentials
 from backend.integrations.credentials_store import provider_matches
+from backend.integrations.mcp_binding import bound_query_key_catalog_entry
+from backend.integrations.mcp_catalog import get_mcp_catalog_entry_for_url
 from backend.integrations.providers import ProviderName
+from backend.integrations.mcp_connections import MCPConnectionError
 from backend.util.request import (
     AUTH_STATUS_CODES,
     CREDENTIAL_REJECTED_STATUS_CODES,
@@ -151,6 +154,7 @@ class RunMCPToolTool(BaseTool):
         surface_connect_card: bool = False,
         custom_connection_id: str | None = None,
         custom_credential_id: str | None = None,
+        connector_id: str | None = None,
         **kwargs,
     ) -> ToolResponseBase:
         server_url = server_url.strip()
@@ -166,7 +170,7 @@ class RunMCPToolTool(BaseTool):
             tool_arguments if isinstance(tool_arguments, dict) else {}
         )
 
-        if not server_url:
+        if not server_url and custom_connection_id is None and connector_id is None:
             return ErrorResponse(
                 message="Please provide a server_url for the MCP server.",
                 session_id=session_id,
@@ -215,6 +219,10 @@ class RunMCPToolTool(BaseTool):
                 session_id=session_id,
             ).from_outside()
 
+        if custom_connection_id is not None or connector_id or requires_route_pin(server_url):
+            route, _, _ = await select_route(user_id, session, server_url, connector_id=connector_id, connection_id=custom_connection_id)
+            return await self.run_route(user_id, session, route, tool_name, resolved_tool_arguments, connect=surface_connect_card)
+
         # Validate URL to prevent SSRF — blocks loopback and private IP ranges
         try:
             await validate_url_host(server_url)
@@ -232,6 +240,16 @@ class RunMCPToolTool(BaseTool):
         # Fast DB lookup — no network call.
         # Normalize for matching because stored credentials use normalized URLs.
         normalized_url = normalize_mcp_url(server_url)
+        preset = (
+            get_mcp_catalog_entry_for_url(normalized_url)
+            if not custom_connection_id
+            else None
+        )
+        catalog_lookup = (
+            {"match_catalog": True}
+            if preset and "query_key" in preset.mcp_server.auth_methods
+            else {}
+        )
         # Narrow before ranking, not after: an ungranted manual token outranks a
         # granted OAuth row, so checking the single best match would refuse an
         # expert that does have usable access to this server.
@@ -296,10 +314,12 @@ class RunMCPToolTool(BaseTool):
                 ).from_outside()
         else:
             creds = await auto_lookup_mcp_credential(
-                user_id, normalized_url, allowed_ids=allowed_ids
+                user_id, normalized_url, allowed_ids=allowed_ids, **catalog_lookup
             )
         if creds is None and allowed_ids is not None and not custom_connection_id:
-            ungranted = await auto_lookup_mcp_credential(user_id, normalized_url)
+            ungranted = await auto_lookup_mcp_credential(
+                user_id, normalized_url, **catalog_lookup
+            )
             if ungranted is not None:
                 # The card rather than a bare error: the expert can ask for the
                 # credential from it, which is what this PR adds.
@@ -317,12 +337,21 @@ class RunMCPToolTool(BaseTool):
                     ),
                 )
         try:
+            bound_entry = (
+                bound_query_key_catalog_entry(creds)
+                if creds is not None and catalog_lookup
+                else None
+            )
+            endpoint = (
+                (creds.metadata or {})["mcp_server_url"]
+                if creds is not None
+                and bound_entry
+                and preset
+                and bound_entry.name == preset.name
+                else server_url
+            )
             client = (
-                MCPClient(
-                    server_url,
-                    authorization=mcp_authorization_header(creds),
-                    query_key=mcp_query_key(creds),
-                )
+                mcp_client_for_credential(endpoint, creds)
                 if creds is not None
                 else None
             )
@@ -351,7 +380,9 @@ class RunMCPToolTool(BaseTool):
         # the server refused access.  Other HTTP errors (timeouts, 5xx) are
         # treated as "unknown, optimistically connected" — the next
         # real tool call will self-correct via the same invalidate path.
-        if surface_connect_card:
+        if surface_connect_card and not (
+            not creds and preset and "none" in preset.mcp_server.auth_methods
+        ):
             connected = creds is not None
             rejection: CredentialRejection | None = None
             refused_message: str | None = None
@@ -416,6 +447,15 @@ class RunMCPToolTool(BaseTool):
             # judges it like any other outside content.
             return response.from_outside(refused_detail) if refused_detail else response
 
+        if (
+            client is None
+            and catalog_lookup
+            and preset
+            and "none" not in preset.mcp_server.auth_methods
+        ):
+            return await self._build_setup_requirements(
+                server_url, session_id, user_id=user_id, expert_id=session.expert_id
+            )
         if client is None:
             client = MCPClient(server_url)
 
@@ -521,6 +561,33 @@ class RunMCPToolTool(BaseTool):
         finally:
             # Release any legacy session; a no-op on stateless servers.
             await client.close()
+
+    async def run_route(self, user_id: str, session: ChatSession, route: MCPReviewedRoute, tool: str, arguments: dict[str, Any], *, connect: bool = False) -> ToolResponseBase:
+        if route.state != "ready" or connect:
+            return self.route_card(session, route)
+        try:
+            client = await open_reviewed_client(user_id, session, route)
+            if client is None:
+                return self.route_card(session, route.model_copy(update={"state":"unavailable"}))
+            try:
+                await client.initialize()
+                if tool:
+                    return await self._execute_tool(client, route.endpoint, tool, arguments, session.session_id, user_id, session)
+                return await self._discover_tools(client, route.endpoint, session.session_id)
+            finally:
+                await client.close()
+        except MCPConnectionError as exc:
+            return self.route_card(session, route.model_copy(update={"state":exc.state}))
+        except HTTPClientError as exc:
+            if exc.status_code in CREDENTIAL_REJECTED_STATUS_CODES:
+                return self.route_card(session, route.model_copy(update={"state":"reauth_required"}))
+            return ErrorResponse(message=f"The connection refused this request (HTTP {exc.status_code}).", session_id=session.session_id).from_outside()
+        except (ValueError, OSError, MCPClientError):
+            return ErrorResponse(message="Could not use the reviewed connection.", session_id=session.session_id).from_outside()
+
+    def route_card(self, session: ChatSession, route: MCPReviewedRoute) -> SetupRequirementsResponse:
+        messages = {"needs_grant":"Grant this expert access to the connection in Integrations.", "needs_selection":"Choose one saved account. Run its custom:<connection ID> capability, or manage the accounts in Integrations.", "needs_connection":"Connect an account in Integrations to continue.", "reauth_required":"Reconnect the saved account in Integrations.", "ready":"This connection is ready.", "unavailable":"The reviewed connection changed or is unavailable. Select a connection again."}
+        return SetupRequirementsResponse(message=messages.get(route.state, messages["unavailable"]), session_id=session.session_id, setup_info=SetupInfo(agent_id=route.server_url or route.endpoint or route.connector_id or "mcp", agent_name=route.connector_id or server_host(route.endpoint) or "MCP", mcp_catalog_id=route.connector_id, mcp_expert_id=session.expert_id, mcp_connection_state=route.state, mcp_connection_choices=route.choices, user_readiness=UserReadiness(ready_to_run=route.state=="ready", has_all_credentials=route.state=="ready")), graph_id=None, graph_version=None).from_outside()
 
     async def _discover_tools(
         self,
@@ -756,7 +823,11 @@ class RunMCPToolTool(BaseTool):
         missing_creds_list = list(missing_creds_dict.values())
 
         host = server_host(server_url)
-        service = _service_name(host)
+        preset = get_mcp_catalog_entry_for_url(normalize_mcp_url(server_url))
+        catalog_card = (
+            preset if preset and "query_key" in preset.mcp_server.auth_methods else None
+        )
+        service = catalog_card.display_name if catalog_card else _service_name(host)
         if message is None:
             if rejection:
                 status = (
@@ -780,13 +851,19 @@ class RunMCPToolTool(BaseTool):
                     f"You're connected to {service}. Use Reconnect to swap accounts."
                 )
             else:
-                message = f"To continue, sign in to {service} and approve access."
+                message = (
+                    f"Choose a connection method for {service} to continue."
+                    if catalog_card
+                    else f"To continue, sign in to {service} and approve access."
+                )
         return SetupRequirementsResponse(
             message=message,
             session_id=session_id,
             setup_info=SetupInfo(
                 agent_id=server_url,
                 agent_name=service,
+                mcp_catalog_id=catalog_card.name if catalog_card else None,
+                mcp_expert_id=expert_id if catalog_card else None,
                 user_readiness=UserReadiness(
                     has_all_credentials=connected,
                     missing_credentials={} if connected else missing_creds_dict,

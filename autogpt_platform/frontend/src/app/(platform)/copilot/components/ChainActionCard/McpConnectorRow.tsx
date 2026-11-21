@@ -115,7 +115,7 @@ export function McpConnectorRow({ request }: { request: McpConnectorRequest }) {
           >
             {request.loading
               ? t("Connecting…", "正在连接…")
-              : t("Connect", "连接")}
+              : (request.connectLabel ?? t("Connect", "连接"))}
           </Button>
         )}
       </div>

@@ -69,6 +69,22 @@ and user credentials. If the database has no project tables, restore the intende
 local runtime before publishing; do not initialize a different database merely to
 import connector metadata.
 
+## Office presets with API tokens
+
+These two presets use HTTPS Streamable HTTP and send the pasted credential as
+`Authorization: Bearer ...`. The connection form does not start OAuth.
+
+| Service | Catalog ID | Where to get the credential |
+| --- | --- | --- |
+| [滴答清单](https://help.dida365.com/articles/7438132116019216384) | `mcp_dida365` | In the web app, open 头像 → 设置 → 账户与安全 → API 口令 and create a token. The preset uses it for task and list management. |
+| [智谱网页读取](https://docs.bigmodel.cn/cn/coding-plan/mcp/reader-mcp-server) | `mcp_zhipu_web_reader` | Create a Key under an eligible GLM Coding Plan account (individual, team, or trial). The `webReader` tool extracts webpage text and metadata and uses the plan's MCP quota. |
+
+Without a valid credential, 滴答清单 returned HTTP 401 and 智谱 returned HTTP 200
+with an error body and no MCP initialize result. The connection test rejects
+both responses. Discovery and tool calls with real account credentials have not
+been verified. Otto asks for review before using the quota-consuming `webReader`
+tool and unclassified 滴答清单 tools, including when the Auto Mode gate is off.
+
 ## DingTalk marketplace connections
 
 Open Settings → Integrations → Browse connectors and search for `钉钉`.

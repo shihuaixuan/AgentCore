@@ -4,16 +4,44 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from typing import Any
 from urllib.parse import urlparse
 
 from pydantic import SecretStr
 
+from backend.blocks.mcp.client import MCPClient
 from backend.data.model import OAuth2Credentials
 from backend.integrations.creds_manager import IntegrationCredentialsManager
+from backend.integrations.mcp_binding import bound_query_key_catalog_entry
+from backend.integrations.mcp_catalog import MCPServerMetadata
+from backend.integrations.mcp_methods import (
+    method_endpoint,
+    resolve_method,
+    runtime_token,
+)
 from backend.integrations.providers import ProviderName
+from backend.util.request import EndpointAuth
 
 logger = logging.getLogger(__name__)
+_AUTH_PARAMETER = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{0,63}$")
+
+
+def catalog_mcp_client(
+    server: MCPServerMetadata, method_id: str, server_url: str, secret: SecretStr | None
+) -> MCPClient:
+    method = resolve_method(server, method_id)
+    endpoint = method_endpoint(server, method, server_url)
+    scheme = {"basic": "Basic ", "bearer": "Bearer ", "oauth": "Bearer "}.get(method.auth_type, "")
+    auth = EndpointAuth(
+        endpoint=endpoint,
+        token=runtime_token(method, secret),
+        header="Authorization" if scheme else method.name if method.auth_type == "header" else None,
+        query=method.name if method.auth_type == "query_key" else None,
+        prefix=scheme or method.auth_prefix,
+        fixed_params=method.fixed_params,
+    )
+    return MCPClient(endpoint, endpoint_auth=auth, follow_redirects=False)
 
 
 def normalize_mcp_url(url: str) -> str:
@@ -44,7 +72,7 @@ def server_host(server_url: str) -> str:
     try:
         parsed = urlparse(server_url)
         return parsed.hostname or server_url
-    except Exception:
+    except (ValueError, TypeError):
         return server_url
 
 
@@ -80,9 +108,84 @@ def mcp_authorization_header(credentials: OAuth2Credentials) -> str | None:
     if mcp_query_key(credentials) is not None:
         return None
     token = credentials.access_token.get_secret_value()
-    if (credentials.metadata or {}).get("mcp_auth_scheme"):
+    scheme = (credentials.metadata or {}).get("mcp_auth_scheme")
+    if scheme in {"bearer", "basic"}:
+        return token
+    if scheme == "header":
+        return token
+    if token.startswith("Bearer "):
         return token
     return f"Bearer {token}"
+
+
+def mcp_endpoint_auth(
+    credentials: OAuth2Credentials, endpoint: str
+) -> EndpointAuth:
+    """Build the endpoint-bound delivery plan for a stored MCP credential."""
+    metadata = credentials.metadata or {}
+    scheme = metadata.get("mcp_auth_scheme") or "oauth"
+    parameter = metadata.get("mcp_auth_parameter")
+    if parameter is not None and (
+        not isinstance(parameter, str) or not _AUTH_PARAMETER.fullmatch(parameter)
+    ):
+        raise ValueError("Stored MCP credential has an invalid delivery parameter")
+    if scheme == "query_key":
+        return EndpointAuth(
+            endpoint=endpoint,
+            token=credentials.access_token,
+            query=parameter if isinstance(parameter, str) and parameter else "key",
+        )
+    if scheme == "header":
+        return EndpointAuth(
+            endpoint=endpoint,
+            token=credentials.access_token,
+            header=parameter if isinstance(parameter, str) and parameter else "Authorization",
+            prefix=str(metadata.get("mcp_auth_prefix") or ""),
+        )
+    prefix = "Basic " if scheme == "basic" else "Bearer "
+    token = credentials.access_token
+    value = token.get_secret_value()
+    if value.startswith(prefix):
+        token = SecretStr(value.removeprefix(prefix))
+    return EndpointAuth(
+        endpoint=endpoint,
+        token=token,
+        header="Authorization",
+        prefix=prefix,
+    )
+
+
+def has_mcp_endpoint_auth(credentials: OAuth2Credentials) -> bool:
+    """Whether this row uses a declaration-driven delivery target.
+
+    Older query-key rows do not have ``mcp_auth_parameter`` because the only
+    supported destination used to be ``key``.  Treat those rows as the same
+    declaration with the historical default so they continue working without
+    taking the legacy DingTalk-only client path.
+    """
+    metadata = credentials.metadata or {}
+    return metadata.get("mcp_auth_scheme") in {"query_key", "header"}
+
+
+def mcp_client_for_credential(
+    endpoint: str, credentials: OAuth2Credentials, *, follow_redirects: bool = False
+) -> MCPClient:
+    """Open a client using the credential's declared delivery plan."""
+    if has_mcp_endpoint_auth(credentials):
+        return MCPClient(
+            endpoint,
+            endpoint_auth=mcp_endpoint_auth(credentials, endpoint),
+            follow_redirects=follow_redirects,
+        )
+    authorization = mcp_authorization_header(credentials)
+    query_key = mcp_query_key(credentials)
+    if query_key is not None:
+        return MCPClient(
+            endpoint,
+            query_key=query_key,
+            follow_redirects=follow_redirects,
+        )
+    return MCPClient(endpoint, authorization=authorization, follow_redirects=follow_redirects)
 
 
 def parse_mcp_content(
@@ -168,7 +271,11 @@ async def invalidate_mcp_credential(user_id: str, credential_id: str) -> None:
 
 
 async def auto_lookup_mcp_credential(
-    user_id: str, server_url: str, allowed_ids: set[str] | None = None
+    user_id: str,
+    server_url: str,
+    allowed_ids: set[str] | None = None,
+    *,
+    match_catalog: bool = False,
 ) -> OAuth2Credentials | None:
     """Look up the best stored MCP credential for *server_url*.
 
@@ -206,9 +313,14 @@ async def auto_lookup_mcp_credential(
             if (
                 isinstance(cred, OAuth2Credentials)
                 and not (cred.metadata or {}).get("mcp_isolated")
-                and (cred.metadata or {}).get("mcp_server_url") == server_url
                 and (allowed_ids is None or cred.id in allowed_ids)
             ):
+                if (cred.metadata or {}).get("mcp_server_url") != server_url:
+                    entry = (
+                        bound_query_key_catalog_entry(cred) if match_catalog else None
+                    )
+                    if not entry or entry.mcp_server.server_url != server_url:
+                        continue
                 if best is None or rank(cred) >= rank(best):
                     best = cred
         # Manual credentials have no token endpoint to refresh against.

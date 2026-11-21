@@ -190,7 +190,9 @@ async def test_missing_credentials_are_annotated_with_expert_grants(experts):
     from backend.copilot.tools.expert_scope import annotate_expert_grants
 
     def cred(id: str, type: str, scopes: list[str]):
-        return MagicMock(id=id, provider="github", title=id, type=type, scopes=scopes)
+        return MagicMock(
+            id=id, provider="github", title=id, type=type, scopes=scopes, metadata={}
+        )
 
     store = MagicMock()
     store.get_all_creds = AsyncMock(
@@ -295,3 +297,55 @@ async def test_agent_built_by_expert_settles_grants_before_install(experts):
     experts.install_workflow.side_effect = lambda *_, **__: order.append("install")
     await install_saved_agent("user-1", _expert_session(), _saved())
     assert order == ["settle", "install"]
+
+
+async def test_mcp_grant_accepts_only_a_validated_binding_to_requested_preset():
+    from backend.copilot.tools.expert_scope import (
+        CredentialScopeSnapshot,
+        annotate_expert_grants,
+    )
+    from backend.data.model import OAuth2Credentials
+
+    canonical = "https://mcp-gw.dingtalk.com/oauth/server/mail"
+    opaque = "https://mcp-gw.dingtalk.com/server/fixture"
+
+    def saved(identifier, catalog_id, url=opaque, **metadata):
+        return OAuth2Credentials(
+            id=identifier,
+            provider="mcp",
+            scopes=[],
+            access_token=SecretStr("fixture"),
+            metadata={
+                "mcp_server_url": url,
+                "mcp_catalog_id": catalog_id,
+                "mcp_auth_scheme": "query_key",
+                **metadata,
+            },
+        )
+
+    scope = CredentialScopeSnapshot(
+        owned=[
+            saved("mail", "mcp_dingtalk_mail"),
+            saved("docs", "mcp_dingtalk_docs"),
+            saved("custom", None),
+            saved("granted", "mcp_dingtalk_mail"),
+            saved("isolated", "mcp_dingtalk_mail", mcp_isolated=True),
+            saved("foreign", "mcp_dingtalk_mail", "https://other.test/server/fixture"),
+        ],
+        allowed_ids={"granted"},
+    )
+    for target, expected in [(canonical, ["mail"]), (canonical + "/other", [])]:
+        annotated = await annotate_expert_grants(
+            "user",
+            "expert",
+            {
+                "mcp": {
+                    "provider": "mcp",
+                    "type": "oauth2",
+                    "discriminator_values": [target],
+                }
+            },
+            scope,
+        )
+        offered = annotated["mcp"]["expert_grant"]["credentials"]
+        assert [row["id"] for row in offered] == expected

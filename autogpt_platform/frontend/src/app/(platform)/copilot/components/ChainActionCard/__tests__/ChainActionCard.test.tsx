@@ -378,6 +378,18 @@ describe("ChainActionCard", () => {
       expect(request.onConnect).toHaveBeenCalledOnce();
     });
 
+    it("does not hide an unready request behind a connected duplicate or another expert", () => {
+      renderCard({
+        mcp: [
+          mcpRequest({ id: "old", connected: true, expertId: "mail" }),
+          mcpRequest({ id: "rejected", connected: false, expertId: "mail" }),
+          mcpRequest({ id: "other", connected: true, expertId: "docs" }),
+        ],
+      });
+      expect(screen.getByText("1 of 2 ready")).toBeDefined();
+      expect(screen.getByRole("button", { name: "Connect" })).toBeDefined();
+    });
+
     it("omits the host line when the server URL is not parseable", () => {
       renderCard({ mcp: [mcpRequest({ serverUrl: "not-a-url" })] });
 
