@@ -26,6 +26,7 @@ import {
   isNetworkError,
   retryTransient,
 } from "@/lib/transient-errors";
+import { environment } from "@/services/environment";
 import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
@@ -186,6 +187,8 @@ export default function OnboardingProvider({
     isOnAuthRoute,
     isExempt: isOnExemptRoute,
   } = getOnboardingRoute(pathname);
+  const requiresOnboarding = environment.isCloud();
+  const wasOnOnboardingRoute = useRef(isOnOnboardingRoute);
 
   const fetchOnboarding = useCallback(async () => {
     const requestUserID = latestUserID.current;
@@ -219,12 +222,16 @@ export default function OnboardingProvider({
     }
   }, [isLoggedIn, isOnAuthRoute]);
 
-  // An unfinished user who left the wizard (Back, a link) is sent back on
-  // their next page, as a full page load would.
+  // Recheck when leaving the wizard, or on any route change while it is
+  // still required. Optional onboarding must not refetch on every page.
   const isKnownUnfinished = isOnboardingComplete === false;
   useEffect(() => {
-    if (isKnownUnfinished) hasInitialized.current = false;
-  }, [isKnownUnfinished, pathname]);
+    const leftWizard = wasOnOnboardingRoute.current && !isOnOnboardingRoute;
+    wasOnOnboardingRoute.current = isOnOnboardingRoute;
+    if (isKnownUnfinished && (requiresOnboarding || leftWizard)) {
+      hasInitialized.current = false;
+    }
+  }, [isKnownUnfinished, isOnOnboardingRoute, pathname, requiresOnboarding]);
 
   // At commit, with the URL: a navigation's passive effects can run a task
   // later, and an answer landing in between must see the new page.
@@ -295,6 +302,7 @@ export default function OnboardingProvider({
         const redirectTarget = current.isExempt
           ? null
           : decideOnboardingRedirect({
+              requiresOnboarding,
               isCompleted,
               isOnOnboardingRoute: current.isOnOnboardingRoute,
               isOnAuthRoute: current.isOnAuthRoute,
@@ -405,6 +413,7 @@ export default function OnboardingProvider({
     isLoggedIn,
     pathname,
     isOnExemptRoute,
+    requiresOnboarding,
     initRetry,
     userID,
     setCompletion,

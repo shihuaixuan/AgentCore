@@ -11,6 +11,7 @@ import {
   EMAIL_NOT_VERIFIED_CODE,
   getEmailVerificationCallbackURL,
 } from "@/lib/auth/email-verification";
+import { getDefaultAuthLandingPath } from "@/lib/auth/server/getDefaultAuthLandingPath";
 import { recordSignupConsent } from "@/lib/auth/server/recordSignupConsent";
 import { rollbackSession } from "@/lib/auth/server/rollbackSession";
 import { markAccountCreated } from "@/services/analytics/account-created-server";
@@ -22,7 +23,6 @@ import { loginFormSchema } from "@/types/auth";
 import * as Sentry from "@sentry/nextjs";
 import { APIError } from "better-auth/api";
 import { headers } from "next/headers";
-import { getOnboardingStatus } from "../../api/helpers";
 
 export async function login(
   email: string,
@@ -99,11 +99,9 @@ export async function login(
       await recordSignupConsent({ userID, marketingOptOut: false });
     }
 
-    const { shouldShowOnboarding } = await getOnboardingStatus();
-
     return {
       success: true,
-      next: shouldShowOnboarding ? "/onboarding" : "/home",
+      next: await getDefaultAuthLandingPath(),
     };
   } catch (err) {
     Sentry.captureException(err);

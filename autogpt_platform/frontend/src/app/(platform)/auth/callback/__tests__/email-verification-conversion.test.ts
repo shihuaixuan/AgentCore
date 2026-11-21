@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // The sign_up conversion across the email verification round trip: the
 // sign-up action (no session yet) must not count the account, the verify link
@@ -73,48 +73,57 @@ function clickVerificationLink(callbackURL: string) {
 
 describe("sign_up conversion across email verification", () => {
   beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "CLOUD");
     vi.clearAllMocks();
     mocks.provisionedUserIDs.clear();
   });
+  afterEach(() => vi.unstubAllEnvs());
 
-  it("fires once, when the verification link signs the new user in", async () => {
-    mocks.signUpEmail.mockResolvedValue({ token: null, user: { id: "u-1" } });
-    mocks.getServerSession.mockResolvedValue(null);
+  it.each([
+    ["CLOUD", "/onboarding"],
+    ["LOCAL", "/home"],
+  ])(
+    "fires once when the verification link signs in a %s user",
+    async (mode, target) => {
+      vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", mode);
+      mocks.signUpEmail.mockResolvedValue({ token: null, user: { id: "u-1" } });
+      mocks.getServerSession.mockResolvedValue(null);
 
-    const signupResult = await signup(
-      "new@example.com",
-      password,
-      password,
-      true,
-    );
+      const signupResult = await signup(
+        "new@example.com",
+        password,
+        password,
+        true,
+      );
 
-    expect(signupResult).toMatchObject({ verificationRequired: true });
-    expect(mocks.scheduleAccountCreatedGoal).not.toHaveBeenCalled();
-    expect(mocks.cookieSet).not.toHaveBeenCalled();
+      expect(signupResult).toMatchObject({ verificationRequired: true });
+      expect(mocks.scheduleAccountCreatedGoal).not.toHaveBeenCalled();
+      expect(mocks.cookieSet).not.toHaveBeenCalled();
 
-    // Better Auth's /verify-email signs the user in, then redirects to the
-    // callbackURL the sign-up action gave it.
-    const callbackURL = mocks.signUpEmail.mock.calls[0][0].body.callbackURL;
-    mocks.getServerSession.mockResolvedValue({ user: { id: "u-1" } });
+      // Better Auth's /verify-email signs the user in, then redirects to the
+      // callbackURL the sign-up action gave it.
+      const callbackURL = mocks.signUpEmail.mock.calls[0][0].body.callbackURL;
+      mocks.getServerSession.mockResolvedValue({ user: { id: "u-1" } });
 
-    const landing = await clickVerificationLink(callbackURL);
+      const landing = await clickVerificationLink(callbackURL);
 
-    expect(landing.headers.get("location")).toBe(`${origin}/onboarding`);
-    expect(mocks.scheduleAccountCreatedGoal).toHaveBeenCalledOnce();
-    expect(mocks.scheduleAccountCreatedGoal).toHaveBeenCalledWith("email");
-    expect(mocks.cookieSet).toHaveBeenCalledOnce();
-    expect(mocks.cookieSet).toHaveBeenCalledWith(
-      "agpt_account_created",
-      "email",
-      expect.anything(),
-    );
+      expect(landing.headers.get("location")).toBe(`${origin}${target}`);
+      expect(mocks.scheduleAccountCreatedGoal).toHaveBeenCalledOnce();
+      expect(mocks.scheduleAccountCreatedGoal).toHaveBeenCalledWith("email");
+      expect(mocks.cookieSet).toHaveBeenCalledOnce();
+      expect(mocks.cookieSet).toHaveBeenCalledWith(
+        "agpt_account_created",
+        "email",
+        expect.anything(),
+      );
 
-    // A second click (or a reload of the landing) finds the user provisioned.
-    await clickVerificationLink(callbackURL);
+      // A second click (or a reload of the landing) finds the user provisioned.
+      await clickVerificationLink(callbackURL);
 
-    expect(mocks.scheduleAccountCreatedGoal).toHaveBeenCalledOnce();
-    expect(mocks.cookieSet).toHaveBeenCalledOnce();
-  });
+      expect(mocks.scheduleAccountCreatedGoal).toHaveBeenCalledOnce();
+      expect(mocks.cookieSet).toHaveBeenCalledOnce();
+    },
+  );
 
   it.each([true, false])(
     "records the sign-up's marketing opt-out (%s) from the link, opened in any browser",

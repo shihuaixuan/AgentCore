@@ -67,6 +67,7 @@ function userResponse(created: boolean, status = 200) {
 }
 
 beforeEach(() => {
+  vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "CLOUD");
   signInEmailMock.mockReset();
   rollbackSessionMock.mockReset();
   createUserMock.mockReset();
@@ -79,10 +80,24 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.unstubAllEnvs();
   vi.restoreAllMocks();
 });
 
 describe("login", () => {
+  it("provisions the self-hosted account and goes Home without waiting on onboarding", async () => {
+    vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "LOCAL");
+    signInEmailMock.mockResolvedValue({ user: { id: "user-1" } });
+    createUserMock.mockResolvedValue(userResponse(false));
+    getOnboardingStatusMock.mockResolvedValue({ shouldShowOnboarding: true });
+
+    const result = await login("new@example.com", "ValidPassword123!");
+
+    expect(result).toEqual({ success: true, next: "/home" });
+    expect(createUserMock).toHaveBeenCalledOnce();
+    expect(getOnboardingStatusMock).not.toHaveBeenCalled();
+  });
+
   it("signs in, provisions the backend user, and points new users at onboarding", async () => {
     signInEmailMock.mockResolvedValue({ user: { id: "user-1" } });
     createUserMock.mockResolvedValue(userResponse(false));

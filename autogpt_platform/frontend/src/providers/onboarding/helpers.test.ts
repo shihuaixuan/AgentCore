@@ -28,6 +28,7 @@ describe("shouldRedirectFromOnboarding", () => {
 describe("decideOnboardingRedirect", () => {
   // Defaults — most tests vary one bit at a time.
   const base = {
+    requiresOnboarding: true,
     isCompleted: false,
     isOnOnboardingRoute: false,
     isOnAuthRoute: false,

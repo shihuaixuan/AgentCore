@@ -65,9 +65,13 @@ vi.mock("@/app/api/__generated__/endpoints/onboarding/onboarding", () => ({
 }));
 
 describe("OnboardingProvider routing — logged-in user", () => {
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
 
   beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "CLOUD");
     routerReplace.mockClear();
     toast.mockClear();
     completionError = null;
@@ -167,6 +171,29 @@ describe("OnboardingProvider routing — logged-in user", () => {
       expect(routerReplace).toHaveBeenCalledWith("/onboarding"),
     );
   });
+
+  test.each(["/login", "/signup"])(
+    "a signed-in self-hosted user on %s goes Home even if onboarding is incomplete",
+    async (pathname) => {
+      vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "LOCAL");
+      mockPathname = pathname;
+      window.history.replaceState(
+        null,
+        "",
+        `${pathname}?next=%2Fhome%3Fref%3Dinvite`,
+      );
+
+      render(
+        <OnboardingProvider>
+          <div />
+        </OnboardingProvider>,
+      );
+
+      await waitFor(() =>
+        expect(routerReplace).toHaveBeenCalledWith("/home?ref=invite"),
+      );
+    },
+  );
 
   test("completed user on /signup is redirected to /home", async () => {
     mockPathname = "/signup";

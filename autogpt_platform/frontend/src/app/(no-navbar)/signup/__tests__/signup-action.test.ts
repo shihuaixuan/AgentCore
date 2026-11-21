@@ -74,6 +74,7 @@ function signupWithValidPayload() {
 }
 
 beforeEach(() => {
+  vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "CLOUD");
   signUpEmailMock.mockReset();
   rollbackSessionMock.mockReset();
   postV1GetOrCreateUserMock.mockReset();
@@ -87,10 +88,32 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.unstubAllEnvs();
   vi.restoreAllMocks();
 });
 
 describe("signup", () => {
+  it("provisions a new self-hosted account and goes straight to Home", async () => {
+    vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "LOCAL");
+    vi.stubEnv("NEXT_PUBLIC_AUTH_USERNAME_SIGNUP", "true");
+    signUpEmailMock.mockResolvedValue({
+      token: "session-token",
+      user: { id: "user-1" },
+    });
+    postV1GetOrCreateUserMock.mockResolvedValue({
+      status: 200,
+      data: { id: "user-1" },
+    });
+    getOnboardingStatusMock.mockResolvedValue({ shouldShowOnboarding: true });
+
+    const password = "ValidPassword123!";
+    const result = await signup("小林42", password, password, false);
+
+    expect(result).toEqual({ success: true, next: "/home" });
+    expect(postV1GetOrCreateUserMock).toHaveBeenCalledOnce();
+    expect(getOnboardingStatusMock).not.toHaveBeenCalled();
+  });
+
   it("creates the account, provisions the backend user, and routes to onboarding", async () => {
     signUpEmailMock.mockResolvedValue({
       token: "session-token",

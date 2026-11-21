@@ -49,11 +49,9 @@ export function isDefaultLanding(next: string): boolean {
 }
 
 /**
- * The page an auth flow must send the user to, or `null` to route by
- * onboarding state. A default landing is `null` too, so a user who hasn't
- * finished onboarding is never sent to Home first. Every place that decides
- * whether a deep link is pending must use this, or one waits on a redirect
- * the other never makes.
+ * The page an auth flow must send the user to, or `null` for its default
+ * landing. Every place that decides whether a deep link is pending must use
+ * this, or one waits on a redirect the other never makes.
  */
 export function getAuthDeepLink(
   rawNext: string | null | undefined,
@@ -65,8 +63,8 @@ export function getAuthDeepLink(
 
 /**
  * `destination` with the tracking params of a default-landing `next` added,
- * so a campaign or ad visit keeps its attribution when an auth flow routes
- * by onboarding state instead of following `next`.
+ * so a campaign or ad visit keeps its attribution when an auth flow uses
+ * its default landing instead of following `next`.
  */
 export function withAuthTracking(
   destination: string,

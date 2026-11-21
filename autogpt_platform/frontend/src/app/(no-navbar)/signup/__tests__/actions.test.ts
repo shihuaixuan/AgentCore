@@ -1,6 +1,6 @@
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { TERMS_VERSION } from "@/lib/legal";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { signup } from "../actions";
 
 const mocks = vi.hoisted(() => ({
@@ -44,6 +44,9 @@ vi.mock("@/services/analytics/datafast-server", async (importOriginal) => {
 vi.mock("@sentry/nextjs", () => ({
   captureException: mocks.captureException,
 }));
+
+beforeEach(() => vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "CLOUD"));
+afterEach(() => vi.unstubAllEnvs());
 
 describe("email signup account creation tracking", () => {
   beforeEach(() => {

@@ -8,7 +8,7 @@ import {
 } from "../pages/library.page";
 
 // A self-hoster's first hour on a fresh install with no model keys and no
-// hosted services: sign up, onboard, build and run an agent, look around
+// hosted services: sign up, build and run an agent, look around
 // Settings. Nothing hosted-only may show up on the way, and the browser may
 // talk to no host but the instance itself.
 //
@@ -50,11 +50,11 @@ test("selfhost journey: a self-hoster's first hour has nothing hosted-only in it
       .toHaveCount(0);
   });
 
-  await test.step("sign up and finish onboarding with no paywall", async () => {
+  await test.step("sign up and land directly on Home with no wizard or paywall", async () => {
     await submitSignup(page, `selfhost-${runID}@${EMAIL_DOMAIN}`);
-    await page.waitForURL((url) => !url.pathname.startsWith("/signup"));
-    await finishOnboarding(page);
-    await expect(page).toHaveURL(/\/(home|copilot)/);
+    await expect(page).toHaveURL(/\/home(?:\?|$)/);
+    await expect(page.getByTestId("profile-popout-menu-trigger")).toBeVisible();
+    await expect(page.getByTestId("first-run-tour")).toHaveCount(0);
   });
 
   await test.step("home shows no credits, billing or developer tooling", async () => {
@@ -198,33 +198,6 @@ async function submitSignup(page: Page, email: string) {
   await page.locator("#password").fill(PASSWORD);
   await page.locator("#confirmPassword").fill(PASSWORD);
   await page.getByRole("button", { name: "Sign up" }).click();
-}
-
-// Role, pain points and the self-hosted "connect" step, then the workspace
-// is prepared and the app lands on Home. A plan or paywall step fails here.
-async function finishOnboarding(page: Page) {
-  await expect(
-    page.getByRole("heading", { name: "What best describes you?" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Engineering", exact: true }).click();
-  await page.getByRole("button", { name: "Next", exact: true }).click();
-
-  await expect(
-    page.getByRole("heading", { name: /What's eating your time\?/ }),
-  ).toBeVisible();
-  await page.getByText("Research", { exact: true }).click();
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
-
-  await expect(
-    page.getByRole("heading", {
-      name: "Already paying for an AI subscription?",
-    }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Next", exact: true }).click();
-
-  await page.waitForURL((url) => !url.pathname.startsWith("/onboarding"), {
-    timeout: 60_000,
-  });
 }
 
 async function expectNoHostedOnlyChrome(page: Page) {

@@ -1,5 +1,4 @@
 import { postV1GetOrCreateUser } from "@/app/api/__generated__/endpoints/auth/auth";
-import { getOnboardingStatus } from "@/app/api/helpers";
 import {
   getAuthDeepLink,
   sanitizeAuthNext,
@@ -14,6 +13,7 @@ import {
   type EmailVerificationNotice,
   hasMarketingOptOutParam,
 } from "@/lib/auth/email-verification";
+import { getDefaultAuthLandingPath } from "@/lib/auth/server/getDefaultAuthLandingPath";
 import { getServerSession } from "@/lib/auth/server/getServerSession";
 import { recordSignupConsent } from "@/lib/auth/server/recordSignupConsent";
 import { rollbackSession } from "@/lib/auth/server/rollbackSession";
@@ -77,8 +77,6 @@ export async function GET(request: Request) {
   const publicOrigin = getPublicOrigin(requestOrigin);
   const signupMethod = getSignupMethod(searchParams);
 
-  let next = "/copilot";
-
   const session = await getServerSession();
 
   if (session?.user) {
@@ -113,21 +111,18 @@ export async function GET(request: Request) {
         });
       }
 
-      const { shouldShowOnboarding } = await getOnboardingStatus();
+      const defaultLanding = await getDefaultAuthLandingPath("/copilot");
       // Prefer a sanitized ?next (relative paths only — getAuthDeepLink drops
       // absolute and protocol-relative values, so a crafted ?next can't
-      // open-redirect the user off-site); otherwise route by onboarding state.
+      // open-redirect the user off-site); otherwise use the default landing.
       // Resolve the final target BEFORE revalidating so we revalidate the page
       // the user actually lands on.
       const rawNext = searchParams.get("next");
-      next =
-        getAuthDeepLink(rawNext) ??
-        withAuthTracking(
-          shouldShowOnboarding ? "/onboarding" : "/copilot",
-          rawNext,
-        );
+      const next =
+        getAuthDeepLink(rawNext) ?? withAuthTracking(defaultLanding, rawNext);
       // A cache tag is the path alone; a query would make this a no-op.
       revalidatePath(next.split(/[?#]/)[0], "layout");
+      return NextResponse.redirect(`${publicOrigin}${next}`);
     } catch (createUserError) {
       // An account its owner deleted: signing in is how they keep it, so the
       // session stays and they see when it will be erased.
@@ -183,8 +178,6 @@ export async function GET(request: Request) {
         `${publicOrigin}/error?message=user-creation-failed`,
       );
     }
-
-    return NextResponse.redirect(`${publicOrigin}${next}`);
   }
 
   if (signupMethod === "email") {

@@ -137,11 +137,13 @@ let releaseHeld = () => {};
 describe("OnboardingProvider isOnboardingComplete", () => {
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllEnvs();
     releaseHeld();
     ImpersonationState.clear();
   });
 
   beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "CLOUD");
     routerReplace.mockClear();
     notificationHandlers.length = 0;
     window.history.replaceState(null, "", "/");
@@ -157,6 +159,22 @@ describe("OnboardingProvider isOnboardingComplete", () => {
     backend.stateHoldOnce = null;
     backend.stateFailsOnceWith = null;
     releaseHeld = () => {};
+  });
+
+  test("an unfinished self-hosted user can use Home and navigate without restarting onboarding checks", async () => {
+    vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "LOCAL");
+    const view = render(tree());
+
+    await waitFor(() => expect(completion()).toBe("false"));
+    expect(backend.stateReads).toBe(1);
+    expect(routerReplace).not.toHaveBeenCalled();
+
+    mockPathname = "/library";
+    view.rerender(tree());
+    await act(async () => {});
+
+    expect(routerReplace).not.toHaveBeenCalled();
+    expect(backend.completionChecks).toBe(1);
   });
 
   test("is null until the check answers, then false for an unfinished user on Home", async () => {
@@ -218,21 +236,25 @@ describe("OnboardingProvider isOnboardingComplete", () => {
     );
   });
 
-  test("finishing the wizard is picked up on the next page even without the websocket notice", async () => {
-    mockPathname = "/onboarding";
-    const view = render(tree());
-    await waitFor(() => expect(completion()).toBe("false"));
+  test.each(["CLOUD", "LOCAL"])(
+    "finishing the wizard in %s is picked up on the next page even without the websocket notice",
+    async (mode) => {
+      vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", mode);
+      mockPathname = "/onboarding";
+      const view = render(tree());
+      await waitFor(() => expect(completion()).toBe("false"));
 
-    // The wizard posted ONBOARDING_COMPLETE and sends the user to /home.
-    backend.isCompleted = true;
-    backend.completedSteps = ["ONBOARDING_COMPLETE"];
-    mockPathname = "/home";
-    view.rerender(tree());
+      // The wizard posted ONBOARDING_COMPLETE and sends the user to /home.
+      backend.isCompleted = true;
+      backend.completedSteps = ["ONBOARDING_COMPLETE"];
+      mockPathname = "/home";
+      view.rerender(tree());
 
-    await waitFor(() => expect(completion()).toBe("true"));
-    expect(backend.completionChecks).toBe(2);
-    expect(routerReplace).not.toHaveBeenCalled();
-  });
+      await waitFor(() => expect(completion()).toBe("true"));
+      expect(backend.completionChecks).toBe(2);
+      expect(routerReplace).not.toHaveBeenCalled();
+    },
+  );
 
   test.each(["/marketplace", "/home", "/library"])(
     "an unfinished user who leaves the wizard for %s is sent back to it",

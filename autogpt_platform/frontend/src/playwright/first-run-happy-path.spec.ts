@@ -11,6 +11,7 @@ test("first run: a new user is walked through the real UI and can replay it", as
   test.setTimeout(120000);
 
   await signupTestUser(page, undefined, undefined, false);
+  await page.goto("/onboarding");
   await expect(page).toHaveURL(/\/onboarding/);
   await completeOnboardingWizard(page, { role: "Engineering" });
 

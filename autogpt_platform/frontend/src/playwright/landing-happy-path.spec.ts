@@ -26,6 +26,7 @@ test("landing happy path: a user finishing onboarding lands on /home", async ({
   test.setTimeout(60000);
 
   await signupTestUser(page, undefined, undefined, false);
+  await page.goto("/onboarding");
   await expect(page).toHaveURL(/\/onboarding/);
 
   const copilotRequests = recordCopilotNavigations(page);

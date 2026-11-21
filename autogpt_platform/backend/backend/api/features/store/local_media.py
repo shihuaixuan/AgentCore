@@ -23,6 +23,7 @@ EXTENSION_CONTENT_TYPES = {
     for content_type, extension in CONTENT_TYPE_EXTENSIONS.items()
 } | {".jpg": "image/jpeg"}
 _SAFE_PATH_COMPONENT = re.compile(r"^[A-Za-z0-9_.-]+$")
+_MEDIA_URL_PREFIX = "/api/store/media/"
 
 
 async def store_media(
@@ -117,10 +118,30 @@ def media_root() -> Path:
 def media_url(user_id: str, media_type: str, filename: str) -> str:
     """Return a public backend URL or a same-origin path for local installations."""
     path = (
-        f"/api/store/media/{validate_path_component(user_id)}"
+        f"{_MEDIA_URL_PREFIX}{validate_path_component(user_id)}"
         f"/{media_type}/{validate_path_component(filename)}"
     )
     return f"{Settings().config.platform_base_url.rstrip('/')}{path}"
+
+
+def relative_image_path(url: str) -> str | None:
+    """Map an absolute HTTP URL from local storage to the frontend media route."""
+    base_url = Settings().config.platform_base_url.rstrip("/")
+    prefix = base_url + _MEDIA_URL_PREFIX
+    if not base_url.startswith("http://") or not url.startswith(prefix):
+        return None
+
+    try:
+        user_id, media_type, filename = url[len(prefix) :].split("/")
+        validate_path_component(user_id)
+        validate_path_component(filename)
+    except ValueError:
+        return None
+
+    content_type = content_type_for_filename(filename)
+    if media_type != "images" or not (content_type or "").startswith("image/"):
+        return None
+    return f"{_MEDIA_URL_PREFIX}{user_id}/images/{filename}"
 
 
 def validate_path_component(value: str) -> str:

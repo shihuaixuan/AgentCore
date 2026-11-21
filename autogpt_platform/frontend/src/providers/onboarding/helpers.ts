@@ -102,23 +102,27 @@ export function shouldRedirectFromOnboarding(
  * `null` covers two distinct cases:
  *   1. A pending `?next=…` deep link — the auth page will handle it, so we
  *      must not race it.
- *   2. The user is already on the right surface (incomplete on /onboarding,
- *      completed on any non-auth/non-onboarding page).
+ *   2. The user is already on the right surface (including a self-hosted
+ *      user on a workspace page, regardless of completion).
  */
 export function decideOnboardingRedirect({
+  requiresOnboarding,
   isCompleted,
   isOnOnboardingRoute,
   isOnAuthRoute,
   hasPendingAuthDeepLink,
 }: {
+  requiresOnboarding: boolean;
   isCompleted: boolean;
   isOnOnboardingRoute: boolean;
   isOnAuthRoute: boolean;
   hasPendingAuthDeepLink: boolean;
 }): "/onboarding" | "/home" | null {
   if (hasPendingAuthDeepLink) return null;
-  if (!isCompleted && !isOnOnboardingRoute) return "/onboarding";
-  if (isCompleted && (isOnOnboardingRoute || isOnAuthRoute)) return "/home";
+  if (requiresOnboarding && !isCompleted && !isOnOnboardingRoute) {
+    return "/onboarding";
+  }
+  if (isOnAuthRoute || (isCompleted && isOnOnboardingRoute)) return "/home";
   return null;
 }
 

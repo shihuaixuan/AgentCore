@@ -100,6 +100,7 @@ function loggedInWithCompletedSetup() {
 }
 
 beforeEach(() => {
+  vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "CLOUD");
   getServerSessionMock.mockReset();
   postV1GetOrCreateUserMock.mockReset();
   getOnboardingStatusMock.mockReset();
@@ -435,6 +436,32 @@ describe("auth callback GET — email verification link", () => {
 });
 
 describe("auth callback GET — redirect target resolution", () => {
+  it.each([
+    ["/home?utm_source=signup", "/home?utm_source=signup"],
+    ["/library", "/library"],
+    ["//offsite.example", "/home"],
+  ])(
+    "honours only safe self-hosted destinations (%s)",
+    async (next, target) => {
+      vi.stubEnv("NEXT_PUBLIC_BEHAVE_AS", "LOCAL");
+      getServerSessionMock.mockResolvedValue({ user: { id: "user-1" } });
+      postV1GetOrCreateUserMock.mockResolvedValue(provisioningResponse(true));
+      getOnboardingStatusMock.mockResolvedValue({ shouldShowOnboarding: true });
+
+      const response = await GET(
+        makeCallbackRequest(`/auth/callback?next=${encodeURIComponent(next)}`),
+      );
+
+      expect(response.headers.get("location")).toBe(`${origin}${target}`);
+      expect(revalidatePathMock).toHaveBeenCalledWith(
+        target.split("?")[0],
+        "layout",
+      );
+      expect(postV1GetOrCreateUserMock).toHaveBeenCalledOnce();
+      expect(getOnboardingStatusMock).not.toHaveBeenCalled();
+    },
+  );
+
   it("uses the canonical HTTPS origin and ignores a malicious forwarded host", async () => {
     vi.stubEnv("NODE_ENV", "development");
     vi.stubEnv("BETTER_AUTH_URL", "https://autogpt.example.com");

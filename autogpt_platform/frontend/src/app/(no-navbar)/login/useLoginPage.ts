@@ -68,11 +68,8 @@ export function useLoginPage() {
   const signInErrorNotice = getSignInErrorNotice(searchParams.get("error"));
   const showBannedNotice = isBannedNotice(searchParams);
 
-  // Only honour explicit `?next=` deep links here. Generic "already logged in
-  // on /login, get me out" is handled by OnboardingProvider so the user lands
-  // straight on /onboarding or /copilot. Otherwise we'd bounce
-  // /login → / → /copilot → /onboarding, and each hop renders before the next
-  // redirect — that intermediate /copilot render is the flash users see.
+  // Only honour explicit `?next=` deep links here. OnboardingProvider handles
+  // the default landing for users who are already signed in.
   useEffect(() => {
     if (isLoggedIn && !isLoggingIn && nextUrl) {
       router.replace(nextUrl);

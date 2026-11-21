@@ -1,13 +1,13 @@
 "use server";
 
 import { postV1GetOrCreateUser } from "@/app/api/__generated__/endpoints/auth/auth";
-import { getOnboardingStatus } from "@/app/api/helpers";
 import { auth } from "@/lib/auth/auth";
 import {
   usernameIdentity,
   usernameSignupEnabled,
 } from "@/lib/auth/local-username";
 import { getEmailVerificationCallbackURL } from "@/lib/auth/email-verification";
+import { getDefaultAuthLandingPath } from "@/lib/auth/server/getDefaultAuthLandingPath";
 import { recordSignupConsent } from "@/lib/auth/server/recordSignupConsent";
 import { rollbackSession } from "@/lib/auth/server/rollbackSession";
 import { markAccountCreated } from "@/services/analytics/account-created-server";
@@ -125,11 +125,9 @@ export async function signup(
       };
     }
 
-    const { shouldShowOnboarding } = await getOnboardingStatus();
-
     return {
       success: true,
-      next: shouldShowOnboarding ? "/onboarding" : "/home",
+      next: await getDefaultAuthLandingPath(),
     };
   } catch (err) {
     Sentry.captureException(err);

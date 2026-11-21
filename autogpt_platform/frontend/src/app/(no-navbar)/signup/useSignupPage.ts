@@ -69,11 +69,8 @@ export function useSignupPage() {
     }
   }, [isUserLoading]);
 
-  // Only honour explicit `?next=` deep links here. Generic "already logged in
-  // on /signup, get me out" is handled by OnboardingProvider so the user lands
-  // straight on /onboarding or /copilot. Otherwise we'd bounce
-  // /signup → / → /copilot → /onboarding, and each hop renders before the next
-  // redirect — that intermediate /copilot render is the flash users see.
+  // Only honour explicit `?next=` deep links here. OnboardingProvider handles
+  // the default landing for users who are already signed in.
   useEffect(() => {
     if (isLoggedIn && !isSigningUp && nextUrl) {
       router.replace(nextUrl);
@@ -223,7 +220,7 @@ export function useSignupPage() {
         return;
       }
 
-      // Prefer the URL's next parameter, then result.next (for onboarding), then default
+      // Prefer an explicit deep link, then the server's default landing.
       const redirectTo =
         nextUrl || withAuthTracking(result.next || "/", rawNext);
       router.replace(redirectTo);

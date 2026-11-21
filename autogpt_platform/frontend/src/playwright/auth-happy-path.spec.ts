@@ -17,15 +17,15 @@ const ROLE_LABELS = [
   "Other",
 ];
 
-test("auth happy path: user can sign up with a fresh account", async ({
+test("auth happy path: self-hosted signup lands directly on Home", async ({
   page,
 }) => {
   test.setTimeout(60000);
 
   await signupTestUser(page, undefined, undefined, false);
-  await expect(page).toHaveURL(/\/onboarding/);
-  await advanceToRoleStep(page);
-  await expect(page.getByText("What best describes you")).toBeVisible();
+  await expect(page).toHaveURL(/\/home(?:\?|$)/);
+  await expect(page.getByTestId("profile-popout-menu-trigger")).toBeVisible();
+  await expect(page.getByTestId("first-run-tour")).toHaveCount(0);
 });
 
 test("auth happy path: user can sign up, enter the app, and log out", async ({
@@ -34,12 +34,8 @@ test("auth happy path: user can sign up, enter the app, and log out", async ({
   test.setTimeout(90000);
 
   await signupTestUser(page, undefined, undefined, false);
-  await expect(page).toHaveURL(/\/onboarding/);
-  await advanceToRoleStep(page);
-  await expect(page.getByText("What best describes you")).toBeVisible();
-
   await skipOnboardingIfPresent(page, "/marketplace");
-  await expect(page).toHaveURL(/\/marketplace/);
+  await expect(page).toHaveURL(/\/(home|marketplace)(?:\?|$)/);
   await expect(page.getByTestId("profile-popout-menu-trigger")).toBeVisible();
 
   await page.getByTestId("profile-popout-menu-trigger").click();
@@ -58,6 +54,7 @@ test("auth happy path: on a phone, every onboarding role is on screen", async ({
   await page.setViewportSize(PHONE);
 
   await signupTestUser(page, undefined, undefined, false);
+  await page.goto("/onboarding");
   await expect(page).toHaveURL(/\/onboarding/);
   await advanceToRoleStep(page);
 
@@ -135,7 +132,6 @@ test("auth happy path: multi-tab logout clears shared builder sessions", async (
   page2.on("console", recordWebSocketErrors("page2"));
 
   await signupTestUser(page1, undefined, undefined, false);
-  await expect(page1).toHaveURL(/\/onboarding/);
   await skipOnboardingIfPresent(page1, "/build");
 
   await page1.goto("/build");
