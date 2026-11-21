@@ -24,15 +24,6 @@ import { BRAND_NAME } from "@/lib/branding";
 import Script from "next/script";
 import { getSiteUrl } from "@/lib/metadata";
 
-const isDev = environment.isDev();
-const isLocal = environment.isLocal();
-
-const faviconPath = isDev
-  ? "/favicon-dev.ico"
-  : isLocal
-    ? "/favicon-local.ico"
-    : "/favicon.ico";
-
 const SITE_TITLE = `${BRAND_NAME.zh}平台`;
 const SITE_DESCRIPTION = "一站式创建 AI 专家、构建工作流并自动完成任务";
 
@@ -42,8 +33,8 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: faviconPath,
-    apple: "/apple-touch-icon.png",
+    icon: "/duanmu-icon.png",
+    apple: "/duanmu-icon.png",
   },
   openGraph: {
     title: SITE_TITLE,
