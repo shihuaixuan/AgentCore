@@ -21,7 +21,7 @@ const getRequirementsHtml = (t: TutorialTranslate = englishTutorialText) => `
         <span class="req-icon">○</span>${t(" Enter a number in field <strong>B</strong> (e.g., 5)", " 在字段 <strong>B</strong> 中输入数字（例如 5）")}
       </li>
       <li id="req-op" class="flex items-center gap-2">
-        <span class="req-icon">○</span>${t(" Select an <strong>Operation</strong> (Add, Multiply, etc.)", " 选择 <strong>Operation</strong>（Add、Multiply 等）")}
+        <span class="req-icon">○</span>${t(" Select an <strong>Operation</strong> (Add, Multiply, etc.)", " 选择<strong>运算</strong>（例如加法或乘法）")}
       </li>
     </ul>
   </div>

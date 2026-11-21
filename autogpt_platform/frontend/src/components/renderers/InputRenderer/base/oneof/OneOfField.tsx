@@ -8,6 +8,7 @@ import {
   getTemplate,
   getUiOptions,
   getWidget,
+  type RJSFSchema,
 } from "@rjsf/utils";
 import { useEffect, useRef, useState } from "react";
 import { AnyOfField } from "../anyof/AnyOfField";
@@ -53,22 +54,21 @@ function DiscriminatedUnionField({
 
   const field_id = props.fieldPathId.$id;
 
-  // Resolve variant schemas from $refs
-  const variants = useRef(
-    (schema.oneOf || []).map((opt: any) =>
-      schemaUtils.retrieveSchema(opt, formData),
-    ),
-  );
+  const initialOptions = useRef<RJSFSchema[]>(props.options);
+  const variants: RJSFSchema[] = formContext.isBuilderNode
+    ? props.options
+    : initialOptions.current;
 
   // Build dropdown options from variant titles and discriminator const values
-  const enumOptions = variants.current.map((variant: any, index: number) => {
+  const enumOptions = variants.map((variant: any, index: number) => {
     const discValue = (variant.properties?.[discriminatorProp] as any)?.const;
     return {
       value: index,
       label:
         variant.title ||
-        discValue ||
-        t(`Option ${index + 1}`, `选项 ${index + 1}`),
+        (discValue != null
+          ? String(discValue)
+          : t(`Option ${index + 1}`, `选项 ${index + 1}`)),
       discriminatorValue: discValue,
     };
   });
@@ -104,7 +104,7 @@ function DiscriminatedUnionField({
 
   // Get selected variant schema with discriminator property filtered out
   // and sub-fields inheriting the parent's advanced value
-  const selectedVariant = variants.current[selectedIndex];
+  const selectedVariant = variants[selectedIndex];
   const parentAdvanced = (schema as any).advanced;
 
   function getFilteredSchema() {
@@ -133,8 +133,8 @@ function DiscriminatedUnionField({
     const newIndex = option !== undefined ? parseInt(option, 10) : -1;
     if (newIndex === selectedIndex || newIndex < 0) return;
 
-    const newVariant = variants.current[newIndex];
-    const oldVariant = variants.current[selectedIndex];
+    const newVariant = variants[newIndex];
+    const oldVariant = variants[selectedIndex];
     const discValue = (newVariant.properties?.[discriminatorProp] as any)
       ?.const;
 

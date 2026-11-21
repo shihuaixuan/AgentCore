@@ -44,6 +44,7 @@ vi.mock(
 );
 
 import { PublishToMarketplace } from "../PublishToMarketplace";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 const testUser = {
   id: "user-1",
@@ -135,6 +136,18 @@ describe("PublishToMarketplace (builder)", () => {
     expect(screen.queryByText(/choose a workflow/i)).toBeNull();
 
     expect(await screen.findByDisplayValue(AGENT_NAME)).toBeDefined();
+  });
+
+  test("names the publish action even when the graph has no version to publish", () => {
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <PublishToMarketplace flowID={FLOW_ID} flowVersion={null} />
+      </LanguageProvider>,
+    );
+    expect(
+      screen.getByRole<HTMLButtonElement>("button", { name: "发布到市场" })
+        .disabled,
+    ).toBe(true);
   });
 
   test("closes the modal when going back from the pre-scoped listing form", async () => {

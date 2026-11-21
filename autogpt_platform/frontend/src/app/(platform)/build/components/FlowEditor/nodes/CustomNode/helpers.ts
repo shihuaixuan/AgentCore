@@ -1,6 +1,7 @@
 import { AgentExecutionStatus } from "@/app/api/__generated__/models/agentExecutionStatus";
 import { NodeResolutionData } from "@/app/(platform)/build/stores/types";
-import { beautifyString } from "@/lib/utils";
+import { getBuilderBlockText } from "@/app/(platform)/build/helpers/blockCopy";
+import type { Locale } from "@/lib/i18n/locale";
 import { RJSFSchema } from "@rjsf/utils";
 import { CustomNodeData } from "./CustomNode";
 
@@ -39,16 +40,17 @@ export function getNodeDisplayTitle(data: CustomNodeData): string {
  * Agent names and custom names are shown as-is; generic block names get
  * beautified and have the trailing " Block" suffix stripped.
  */
-export function formatNodeDisplayTitle(data: CustomNodeData): string {
+export function formatNodeDisplayTitle(
+  data: CustomNodeData,
+  locale: Locale = "en",
+): string {
   const title = getNodeDisplayTitle(data);
   const isAgentOrCustom = !!(
     data.metadata?.customized_name || data.hardcodedValues?.agent_name
   );
   return isAgentOrCustom
     ? title
-    : beautifyString(title)
-        .replace(/ Block$/, "")
-        .trim();
+    : getBuilderBlockText({ id: data.block_id, name: title }, locale).name;
 }
 
 export const nodeStyleBasedOnStatus: Record<AgentExecutionStatus, string> = {

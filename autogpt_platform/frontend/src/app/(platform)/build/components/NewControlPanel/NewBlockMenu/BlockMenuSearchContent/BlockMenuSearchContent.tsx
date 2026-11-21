@@ -10,10 +10,12 @@ import { useBlockMenuStore } from "@/app/(platform)/build/stores/blockMenuStore"
 import { cn } from "@/lib/utils";
 import { blockMenuContainerStyle } from "../style";
 import { NoSearchResult } from "../NoSearchResult";
+import { LocalizedBlockMatches } from "./LocalizedBlockMatches";
 
 export const BlockMenuSearchContent = () => {
   const {
     searchResults,
+    localizedBlocks,
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
@@ -39,74 +41,81 @@ export const BlockMenuSearchContent = () => {
     );
   }
 
-  if (searchResults.length === 0) {
+  if (searchResults.length === 0 && localizedBlocks.length === 0) {
     return <NoSearchResult />;
   }
 
   const keys = getSearchItemKeys(searchResults);
 
   return (
-    <InfiniteScroll
-      isFetchingNextPage={isFetchingNextPage}
-      fetchNextPage={fetchNextPage}
-      hasNextPage={hasNextPage}
-      loader={<LoadingSpinner className="size-[1em]" />}
-      className="space-y-2.5"
-    >
-      {searchResults.map(
-        (item: SearchResponse["items"][number], index: number) => {
-          const { type, data } = getSearchItemType(item);
-          // backend give support to these 3 types only [right now] - we need to give support to integration and ai agent types in follow up PRs
-          switch (type) {
-            case "store_agent":
-              return (
-                <MarketplaceAgentBlock
-                  key={keys[index]}
-                  slug={data.slug}
-                  highlightedText={searchQuery}
-                  title={data.agent_name}
-                  image_url={data.agent_image}
-                  creator_name={data.creator}
-                  number_of_runs={data.runs}
-                  loading={addingMarketplaceAgentSlug === data.slug}
-                  onClick={() =>
-                    handleAddMarketplaceAgent({
-                      creator_name: data.creator,
-                      slug: data.slug,
-                    })
-                  }
-                />
-              );
-            case "block":
-              return (
-                <Block
-                  key={keys[index]}
-                  title={data.name}
-                  highlightedText={searchQuery}
-                  description={data.description}
-                  blockData={data}
-                />
-              );
-
-            case "library_agent":
-              return (
-                <UGCAgentBlock
-                  key={keys[index]}
-                  title={data.name}
-                  highlightedText={searchQuery}
-                  image_url={data.image_url}
-                  version={data.graph_version}
-                  edited_time={data.updated_at}
-                  isLoading={addingLibraryAgentId === data.id}
-                  onClick={() => handleAddLibraryAgent(data)}
-                />
-              );
-
-            default:
-              return null;
-          }
-        },
+    <>
+      {localizedBlocks.length > 0 && (
+        <LocalizedBlockMatches
+          key={searchQuery}
+          blocks={localizedBlocks}
+          query={searchQuery}
+        />
       )}
-    </InfiniteScroll>
+      <InfiniteScroll
+        isFetchingNextPage={isFetchingNextPage}
+        fetchNextPage={fetchNextPage}
+        hasNextPage={hasNextPage}
+        loader={<LoadingSpinner className="size-[1em]" />}
+        className="space-y-2.5"
+      >
+        {searchResults.map(
+          (item: SearchResponse["items"][number], index: number) => {
+            const { type, data } = getSearchItemType(item);
+            // backend give support to these 3 types only [right now] - we need to give support to integration and ai agent types in follow up PRs
+            switch (type) {
+              case "store_agent":
+                return (
+                  <MarketplaceAgentBlock
+                    key={keys[index]}
+                    slug={data.slug}
+                    highlightedText={searchQuery}
+                    title={data.agent_name}
+                    image_url={data.agent_image}
+                    creator_name={data.creator}
+                    number_of_runs={data.runs}
+                    loading={addingMarketplaceAgentSlug === data.slug}
+                    onClick={() =>
+                      handleAddMarketplaceAgent({
+                        creator_name: data.creator,
+                        slug: data.slug,
+                      })
+                    }
+                  />
+                );
+              case "block":
+                return (
+                  <Block
+                    key={keys[index]}
+                    highlightedText={searchQuery}
+                    blockData={data}
+                  />
+                );
+
+              case "library_agent":
+                return (
+                  <UGCAgentBlock
+                    key={keys[index]}
+                    title={data.name}
+                    highlightedText={searchQuery}
+                    image_url={data.image_url}
+                    version={data.graph_version}
+                    edited_time={data.updated_at}
+                    isLoading={addingLibraryAgentId === data.id}
+                    onClick={() => handleAddLibraryAgent(data)}
+                  />
+                );
+
+              default:
+                return null;
+            }
+          },
+        )}
+      </InfiniteScroll>
+    </>
   );
 };

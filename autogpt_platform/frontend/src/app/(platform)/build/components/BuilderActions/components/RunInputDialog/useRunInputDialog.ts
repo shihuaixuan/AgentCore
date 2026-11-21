@@ -13,6 +13,10 @@ import { useToast } from "@/components/molecules/Toast/use-toast";
 import { useReactFlow } from "@xyflow/react";
 import type { CredentialField } from "@/components/contextual/CredentialsInput/components/CredentialsGroupedView/helpers";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import {
+  getGraphErrorMessage,
+  getGraphValidationMessage,
+} from "../../../../helpers/graphErrorMessage";
 
 export const useRunInputDialog = ({
   setIsOpen,
@@ -77,9 +81,7 @@ export const useRunInputDialog = ({
             }
 
             toast({
-              title:
-                errorData?.message ||
-                t("Workflow validation failed", "工作流校验失败"),
+              title: getGraphValidationMessage(errorData?.message, t),
               description: t(
                 "Please fix the validation errors on the highlighted nodes and try again.",
                 "请修复高亮节点中的校验错误后重试。",
@@ -118,9 +120,7 @@ export const useRunInputDialog = ({
           } else {
             toast({
               title: t("Error running workflow", "运行工作流时出错"),
-              description:
-                (error as Error).message ||
-                t("An unexpected error occurred.", "发生意外错误。"),
+              description: getGraphErrorMessage(error, t),
               variant: "destructive",
             });
             setIsOpen(false);

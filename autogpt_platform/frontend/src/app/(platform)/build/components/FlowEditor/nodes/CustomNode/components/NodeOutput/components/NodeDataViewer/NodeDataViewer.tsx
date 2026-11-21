@@ -29,6 +29,7 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 export interface NodeDataViewerProps {
   data?: any;
   pinName: string;
+  pinLabel?: string;
   nodeId?: string;
   execId?: string;
   isViewMoreData?: boolean;
@@ -38,6 +39,7 @@ export interface NodeDataViewerProps {
 export const NodeDataViewer: FC<NodeDataViewerProps> = ({
   data,
   pinName,
+  pinLabel,
   nodeId,
   execId = "N/A",
   isViewMoreData = false,
@@ -135,7 +137,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
               <div>
                 {t("Pin: ", "连接点：")}
                 <Text variant="body-semibold-tight" as="span" tone="inherit">
-                  {beautifyString(pinName)}
+                  {pinLabel ?? beautifyString(pinName)}
                 </Text>
               </div>
             ) : (
@@ -161,7 +163,7 @@ export const NodeDataViewer: FC<NodeDataViewerProps> = ({
                 <div className="mt-2">
                   {t("Pin: ", "连接点：")}
                   <Text variant="body-semibold-tight" as="span" tone="inherit">
-                    {beautifyString(pinName)}
+                    {pinLabel ?? beautifyString(pinName)}
                   </Text>
                 </div>
               </>

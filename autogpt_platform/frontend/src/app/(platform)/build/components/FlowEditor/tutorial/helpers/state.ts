@@ -1,4 +1,5 @@
 import { Key, storage } from "@/services/storage/local-storage";
+import type { Tour } from "shepherd.js";
 import { closeBlockMenu } from "./menu";
 import { closeSaveControl, forceSaveOpen } from "./save";
 import { removeAllHighlights, enableAllBlocks } from "./highlights";
@@ -18,24 +19,24 @@ const clearTutorialIntervals = () => {
   });
 };
 
-export const handleTutorialCancel = (_tour?: any) => {
+const skippedTours = new WeakSet<Tour>();
+
+export const handleTutorialCancel = (tour: Tour) => {
   clearTutorialIntervals();
   closeBlockMenu();
   closeSaveControl();
   forceSaveOpen(false);
   removeAllHighlights();
   enableAllBlocks();
-  storage.set(Key.SHEPHERD_TOUR, "canceled");
+  storage.set(
+    Key.SHEPHERD_TOUR,
+    skippedTours.delete(tour) ? "skipped" : "canceled",
+  );
 };
 
-export const handleTutorialSkip = (_tour?: any) => {
-  clearTutorialIntervals();
-  closeBlockMenu();
-  closeSaveControl();
-  forceSaveOpen(false);
-  removeAllHighlights();
-  enableAllBlocks();
-  storage.set(Key.SHEPHERD_TOUR, "skipped");
+export const handleTutorialSkip = (tour: Tour) => {
+  skippedTours.add(tour);
+  return tour.cancel();
 };
 
 export const handleTutorialComplete = () => {

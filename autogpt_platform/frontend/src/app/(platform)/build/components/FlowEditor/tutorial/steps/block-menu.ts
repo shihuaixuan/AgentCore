@@ -86,8 +86,8 @@ export const createBlockMenuSteps = (
     title: t("Search for a Block", "搜索模块"),
     text: `
       <div class="text-body text-foreground-emphasis">
-        <p class="text-body font-normal text-foreground-emphasis m-0">${t("Let's add a Calculator block to start.", "先添加一个 Calculator 模块。")}</p>
-        ${banner(ICONS.Keyboard, t("Type Calculator in the search bar", "在搜索栏中输入 Calculator"), "action")}
+        <p class="text-body font-normal text-foreground-emphasis m-0">${t("Let's add a Calculator block to start.", "先添加一个计算器模块。")}</p>
+        ${banner(ICONS.Keyboard, t(`Type ${TUTORIAL_CONFIG.SEARCH_TERM_CALCULATOR} in the search bar`, "在搜索栏中输入「计算器」"), "action")}
         <p class="text-caption font-normal text-foreground-tertiary m-0" style="margin-top: 0.5rem;">${t("The search will filter blocks as you type.", "输入时，搜索结果会同步筛选模块。")}</p>
       </div>
     `,
@@ -101,7 +101,7 @@ export const createBlockMenuSteps = (
       show: () => {
         forceBlockMenuOpen(true);
         setTimeout(() => {
-          focusElement(TUTORIAL_SELECTORS.BLOCKS_SEARCH_INPUT_BOX);
+          focusElement(TUTORIAL_SELECTORS.BLOCKS_SEARCH_INPUT);
         }, 100);
 
         const checkForCalculator = setInterval(() => {
@@ -144,11 +144,11 @@ export const createBlockMenuSteps = (
 
   {
     id: "select-calculator",
-    title: t("Add the Calculator Block", "添加 Calculator 模块"),
+    title: t("Add the Calculator Block", "添加计算器模块"),
     text: `
       <div class="text-body text-foreground-emphasis">
-        <p class="text-body font-normal text-foreground-emphasis m-0">${t("You should see the <strong>Calculator</strong> block in the results.", "你应该能在结果中看到 <strong>Calculator</strong> 模块。")}</p>
-        ${banner(ICONS.ClickIcon, t("Click on the Calculator block to add it", "点击 Calculator 模块进行添加"), "action")}
+        <p class="text-body font-normal text-foreground-emphasis m-0">${t("You should see the <strong>Calculator</strong> block in the results.", "你应该能在结果中看到<strong>计算器</strong>模块。")}</p>
+        ${banner(ICONS.ClickIcon, t("Click on the Calculator block to add it", "点击计算器模块进行添加"), "action")}
         
         <div class="bg-surface-hover ring-1 ring-border-base rounded-2xl p-2 px-4 mt-2 flex items-start gap-2 text-body leading-5 font-medium text-foreground-secondary">  
           <span class="flex-shrink-0">${ICONS.Drag}</span>

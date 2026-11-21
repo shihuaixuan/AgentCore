@@ -10,6 +10,7 @@ import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { useCronSchedulerDialog } from "./useCronSchedulerDialog";
+import { LanguageProvider, useTranslation } from "@/lib/i18n/LanguageProvider";
 
 function makeWrapper(searchParams: string) {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -185,6 +186,37 @@ test("editing a rejected name clears the inline error", async () => {
     result.current.setScheduleName("Weekly report");
   });
   expect(result.current.scheduleNameError).toBe("");
+});
+
+test("an existing schedule error follows the locale without resetting the expression", async () => {
+  const Providers = makeWrapper("?flowID=graph-ID&flowVersion=7");
+  function Wrapper({ children }: { children: ReactNode }) {
+    return (
+      <Providers>
+        <LanguageProvider initialLocale="en">{children}</LanguageProvider>
+      </Providers>
+    );
+  }
+  const { result } = renderHook(
+    () => ({
+      ...useCronSchedulerDialog({
+        open: true,
+        setOpen: vi.fn(),
+        inputs: {},
+        credentials: {},
+        defaultCronExpression: "0 9 * * *",
+      }),
+      setLocale: useTranslation().setLocale,
+    }),
+    { wrapper: Wrapper },
+  );
+  await act(async () => {
+    await result.current.handleCreateSchedule();
+  });
+  expect(result.current.scheduleNameError).toBe("Schedule name is required");
+  act(() => result.current.setLocale("zh-CN"));
+  expect(result.current.scheduleNameError).toBe("请填写计划名称");
+  expect(result.current.cronExpression).toBe("0 9 * * *");
 });
 
 test("changing the default cron does not erase a typed schedule name", () => {

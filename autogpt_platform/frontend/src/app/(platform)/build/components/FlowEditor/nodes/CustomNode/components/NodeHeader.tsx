@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { CustomNodeData } from "../CustomNode";
 import { formatNodeDisplayTitle, getNodeDisplayTitle } from "../helpers";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { NodeBadges } from "./NodeBadges";
 import { NodeContextMenu } from "./NodeContextMenu";
 import { NodeCost } from "./NodeCost";
@@ -23,8 +24,9 @@ type Props = {
 export const NodeHeader = ({ data, nodeId }: Props) => {
   const updateNodeData = useNodeStore((state) => state.updateNodeData);
 
-  const title = getNodeDisplayTitle(data);
-  const displayTitle = formatNodeDisplayTitle(data);
+  const { locale } = useTranslation();
+  const displayTitle = formatNodeDisplayTitle(data, locale);
+  const title = locale === "en" ? getNodeDisplayTitle(data) : displayTitle;
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);

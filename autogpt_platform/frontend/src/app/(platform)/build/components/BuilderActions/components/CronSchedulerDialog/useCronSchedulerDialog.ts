@@ -1,4 +1,5 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getGraphErrorMessage } from "../../../../helpers/graphErrorMessage";
 import type { ScheduleCreationRequest } from "@/app/api/__generated__/models/scheduleCreationRequest";
 import { usePostV1CreateExecutionSchedule } from "@/app/api/__generated__/endpoints/schedules/schedules";
 import { useToast } from "@/components/molecules/Toast/use-toast";
@@ -27,7 +28,7 @@ export function useCronSchedulerDialog({
   const queryClient = useQueryClient();
   const [cronExpression, setCronExpression] = useState<string>("");
   const [scheduleName, setScheduleName] = useState<string>("");
-  const [scheduleNameError, setScheduleNameError] = useState<string>("");
+  const [nameMissing, setNameMissing] = useState(false);
 
   const [{ flowID, flowVersion }] = useQueryStates({
     flowID: parseAsString,
@@ -55,9 +56,7 @@ export function useCronSchedulerDialog({
           toast({
             variant: "destructive",
             title: t("Failed to create schedule", "创建计划失败"),
-            description:
-              (error.detail as string) ??
-              t("An unexpected error occurred.", "发生意外错误。"),
+            description: getGraphErrorMessage(error, t),
           });
         },
       },
@@ -72,20 +71,20 @@ export function useCronSchedulerDialog({
   useEffect(() => {
     if (open) {
       setScheduleName("");
-      setScheduleNameError("");
+      setNameMissing(false);
     }
   }, [open]);
 
   function handleScheduleNameChange(name: string) {
     setScheduleName(name);
     if (name.trim() !== "") {
-      setScheduleNameError("");
+      setNameMissing(false);
     }
   }
 
   async function handleCreateSchedule() {
     if (!scheduleName || scheduleName.trim() === "") {
-      setScheduleNameError(t("Schedule name is required", "请填写计划名称"));
+      setNameMissing(true);
       toast({
         variant: "destructive",
         title: t("Invalid schedule", "计划无效"),
@@ -126,7 +125,9 @@ export function useCronSchedulerDialog({
     handleCreateSchedule,
     setScheduleName: handleScheduleNameChange,
     scheduleName,
-    scheduleNameError,
+    scheduleNameError: nameMissing
+      ? t("Schedule name is required", "请填写计划名称")
+      : "",
     isCreatingSchedule,
   };
 }

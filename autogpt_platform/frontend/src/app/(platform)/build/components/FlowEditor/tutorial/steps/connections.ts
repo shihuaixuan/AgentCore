@@ -129,14 +129,14 @@ export const createConnectionSteps = (
       title: t("Connect the Blocks: Output", "连接模块：输出"),
       text: `
         <div class="text-body text-foreground-emphasis">
-          <p class="text-body font-normal text-foreground-emphasis m-0">${t("Now, let's connect the <strong>Result output</strong> of the first Calculator to the <strong>input (A)</strong> of the second Calculator.", "现在将第一个 Calculator 的 <strong>Result 输出</strong>连接到第二个 Calculator 的<strong>输入 (A)</strong>。")}</p>
+          <p class="text-body font-normal text-foreground-emphasis m-0">${t("Now, let's connect the <strong>Result output</strong> of the first Calculator to the <strong>input (A)</strong> of the second Calculator.", "现在将第一个计算器的<strong>结果输出</strong>连接到第二个计算器的<strong>输入 A</strong>。")}</p>
           
           <div class="mt-3 p-3 bg-info-surface ring-1 ring-info/30 rounded-2xl">
-            <p class="text-body leading-5 font-medium text-info-foreground m-0 mb-2">${t("Drag from the Result output:", "从 Result 输出处拖动：")}</p>
-            <p class="text-body-sm leading-inherit text-info-foreground m-0">${t("Click and drag from the <strong>Result</strong> output pin (right side) of the <strong>first Calculator block</strong>.", "按住<strong>第一个 Calculator 模块</strong>右侧的 <strong>Result</strong> 输出连接点并拖动。")}</p>
+            <p class="text-body leading-5 font-medium text-info-foreground m-0 mb-2">${t("Drag from the Result output:", "从结果输出处拖动：")}</p>
+            <p class="text-body-sm leading-inherit text-info-foreground m-0">${t("Click and drag from the <strong>Result</strong> output pin (right side) of the <strong>first Calculator block</strong>.", "按住<strong>第一个计算器模块</strong>右侧的<strong>结果</strong>输出连接点并拖动。")}</p>
           </div>
           ${getConnectionStatusHtml("connection-status-output", false, t)}
-          ${banner(ICONS.Drag, t("Drag from the Result output pin", "从 Result 输出连接点拖动"), "action")}
+          ${banner(ICONS.Drag, t("Drag from the Result output pin", "从结果输出连接点拖动"), "action")}
         </div>
       `,
       attachTo: {
@@ -224,11 +224,11 @@ export const createConnectionSteps = (
       title: t("Connect the Blocks: Input", "连接模块：输入"),
       text: `
         <div class="text-body text-foreground-emphasis">
-          <p class="text-body font-normal text-foreground-emphasis m-0">${t("Now, connect to the <strong>input (A)</strong> of the second Calculator block.", "现在连接到第二个 Calculator 模块的<strong>输入 (A)</strong>。")}</p>
+          <p class="text-body font-normal text-foreground-emphasis m-0">${t("Now, connect to the <strong>input (A)</strong> of the second Calculator block.", "现在连接到第二个计算器模块的<strong>输入 A</strong>。")}</p>
           
           <div class="mt-3 p-3 bg-info-surface ring-1 ring-info/30 rounded-2xl">
             <p class="text-body leading-5 font-medium text-info-foreground m-0 mb-2">${t("Drop on the A input:", "松开到 A 输入处：")}</p>
-            <p class="text-body-sm leading-inherit text-info-foreground m-0">${t("Drag to the <strong>A</strong> input handle (left side) of the <strong>second Calculator block</strong>.", "拖动到<strong>第二个 Calculator 模块</strong>左侧的 <strong>A</strong> 输入连接点。")}</p>
+            <p class="text-body-sm leading-inherit text-info-foreground m-0">${t("Drag to the <strong>A</strong> input handle (left side) of the <strong>second Calculator block</strong>.", "拖动到<strong>第二个计算器模块</strong>左侧的 <strong>A</strong> 输入连接点。")}</p>
           </div>
           ${getConnectionStatusHtml("connection-status-input", false, t)}
         </div>
@@ -317,15 +317,15 @@ export const createConnectionSteps = (
       title: t("Blocks Connected! 🎉", "模块已连接！🎉"),
       text: `
         <div class="text-body text-foreground-emphasis">
-          <p class="text-body font-normal text-foreground-emphasis m-0">${t("Excellent! Your Calculator blocks are now connected:", "很好！你的 Calculator 模块现已连接：")}</p>
+          <p class="text-body font-normal text-foreground-emphasis m-0">${t("Excellent! Your Calculator blocks are now connected:", "很好！你的计算器模块现已连接：")}</p>
           
           <div class="mt-3 p-3 bg-success-surface ring-1 ring-success/40 rounded-2xl">
             <div class="flex items-center justify-center gap-2 text-body leading-5 font-medium text-success">
-              <span>Calculator 1</span>
+              <span>${t("Calculator 1", "计算器 1")}</span>
               <span>→</span>
-              <span>Calculator 2</span>
+              <span>${t("Calculator 2", "计算器 2")}</span>
             </div>
-            <p class="text-caption leading-inherit text-success m-0 mt-2 text-center italic">${t("The result of Calculator 1 flows into Calculator 2's input A", "Calculator 1 的结果流入 Calculator 2 的输入 A")}</p>
+            <p class="text-caption leading-inherit text-success m-0 mt-2 text-center italic">${t("The result of Calculator 1 flows into Calculator 2's input A", "计算器 1 的结果传入计算器 2 的输入 A")}</p>
           </div>
           
           <p class="text-body font-normal text-foreground-emphasis m-0" style="margin-top: 0.75rem;">${t("Now let's save and run your workflow!", "现在保存并运行工作流！")}</p>

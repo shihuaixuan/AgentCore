@@ -1,10 +1,11 @@
 import { Text } from "@/components/atoms/Text/Text";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
-import { beautifyString, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { blockMenuButtonBase } from "./style";
 import Image from "next/image";
 import React, { ButtonHTMLAttributes } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getIntegrationLabel } from "./integrationCopy";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   name?: string;
@@ -21,7 +22,7 @@ export const IntegrationChip: IntegrationChipComponent = ({
   className,
   ...rest
 }) => {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   return (
     <button
       type="button"
@@ -46,7 +47,7 @@ export const IntegrationChip: IntegrationChipComponent = ({
       </div>
       {name && (
         <Text variant="body" as="span" tone="emphasis" className="truncate">
-          {beautifyString(name)}
+          {getIntegrationLabel(name, locale)}
         </Text>
       )}
     </button>

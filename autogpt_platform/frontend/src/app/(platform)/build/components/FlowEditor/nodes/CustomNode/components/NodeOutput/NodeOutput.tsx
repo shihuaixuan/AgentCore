@@ -7,7 +7,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/molecules/Accordion/Accordion";
-import { beautifyString } from "@/lib/utils";
+import type { RJSFSchema } from "@rjsf/utils";
+import { getOutputPinLabel } from "./pinLabel";
 import { NodeDataViewer } from "./components/NodeDataViewer/NodeDataViewer";
 import { ContentRenderer } from "./components/ContentRenderer";
 import { useNodeOutput } from "./useNodeOutput";
@@ -15,8 +16,14 @@ import { ViewMoreData } from "./components/ViewMoreData";
 import { Copy01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
 
-export const NodeDataRenderer = ({ nodeId }: { nodeId: string }) => {
-  const { t } = useTranslation();
+export const NodeDataRenderer = ({
+  nodeId,
+  builtInOutputSchema,
+}: {
+  nodeId: string;
+  builtInOutputSchema?: RJSFSchema;
+}) => {
+  const { t, locale } = useTranslation();
   const {
     latestOutputData,
     copiedKey,
@@ -51,6 +58,7 @@ export const NodeDataRenderer = ({ nodeId }: { nodeId: string }) => {
                 <div className="mt-1 flex justify-end gap-1">
                   <NodeDataViewer
                     pinName="Input"
+                    pinLabel={t("Input", "输入")}
                     nodeId={nodeId}
                     execId={executionResultId}
                     dataType="input"
@@ -81,7 +89,7 @@ export const NodeDataRenderer = ({ nodeId }: { nodeId: string }) => {
                           {t("Pin:", "端口：")}
                         </Text>
                         <Text variant="small" tone="body">
-                          {beautifyString(key)}
+                          {getOutputPinLabel(key, builtInOutputSchema, locale)}
                         </Text>
                       </div>
                       <div className="w-full space-y-2">
@@ -101,6 +109,11 @@ export const NodeDataRenderer = ({ nodeId }: { nodeId: string }) => {
                           <div className="mt-1 flex justify-end gap-1">
                             <NodeDataViewer
                               pinName={key}
+                              pinLabel={getOutputPinLabel(
+                                key,
+                                builtInOutputSchema,
+                                locale,
+                              )}
                               nodeId={nodeId}
                               execId={executionResultId}
                             />
@@ -130,7 +143,10 @@ export const NodeDataRenderer = ({ nodeId }: { nodeId: string }) => {
                   );
                 })}
             </div>
-            <ViewMoreData nodeId={nodeId} />
+            <ViewMoreData
+              nodeId={nodeId}
+              builtInOutputSchema={builtInOutputSchema}
+            />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

@@ -19,22 +19,17 @@ import {
 } from "@/app/(platform)/build/components/MCPToolDialog";
 import { PlusSignIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
+import { getBuilderBlockText } from "@/app/(platform)/build/helpers/blockCopy";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
-  title?: string;
-  description?: string;
   highlightedText?: string;
   blockData: BlockInfo;
 }
 
-function BlockCard({
-  title,
-  description,
-  highlightedText,
-  className,
-  blockData,
-  ...rest
-}: Props) {
+function BlockCard({ highlightedText, className, blockData, ...rest }: Props) {
+  const { locale } = useTranslation();
+  const { name, description } = getBuilderBlockText(blockData, locale);
   const setBlockMenuOpen = useControlPanelStore(
     (state) => state.setBlockMenuOpen,
   );
@@ -87,7 +82,12 @@ function BlockCard({
       return;
     }
     const customNode = addBlockWithPlacement(blockData);
-    if (customNode && blockData.id === SpecialBlockID.AGENT) {
+    if (
+      customNode &&
+      blockData.id === SpecialBlockID.AGENT &&
+      blockData.name !== "AgentExecutorBlock" &&
+      !customNode.data.metadata?.customized_name
+    ) {
       updateNodeData(customNode.id, {
         metadata: {
           ...customNode.data.metadata,
@@ -107,10 +107,7 @@ function BlockCard({
     const dragPreview = document.createElement("div");
     dragPreview.style.cssText = blockDragPreviewStyle;
     dragPreview.className = blockDragPreviewClassName;
-    dragPreview.textContent = beautifyString(title || "").replace(
-      / Block$/,
-      "",
-    );
+    dragPreview.textContent = name;
 
     document.body.appendChild(dragPreview);
     e.dataTransfer.setDragImage(dragPreview, 0, 0);
@@ -140,17 +137,14 @@ function BlockCard({
         {...rest}
       >
         <div className="flex flex-1 flex-col items-start gap-0.5">
-          {title && (
+          {name && (
             <Text
               variant="body-medium"
               as="span"
               tone={rest.disabled ? "subtle" : "emphasis"}
               className="line-clamp-1"
             >
-              {highlightText(
-                beautifyString(title).replace(/ Block$/, ""),
-                highlightedText,
-              )}
+              {highlightText(name, highlightedText)}
             </Text>
           )}
           {description && (

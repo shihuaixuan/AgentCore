@@ -81,6 +81,12 @@ export default function TextWidget(props: WidgetProps) {
   };
 
   const config = (mapped && inputConfig[mapped]) || defaultConfig;
+  const inputPlaceholder =
+    placeholder ||
+    (registry.formContext.isBuilderNode &&
+    typeof schema.placeholder === "string"
+      ? schema.placeholder
+      : config.placeholder);
 
   const displayValue =
     typeof props.value === "number" && !Number.isFinite(props.value)
@@ -144,7 +150,7 @@ export default function TextWidget(props: WidgetProps) {
           wrapperClassName="mb-0 flex-1"
           value={displayValue}
           onChange={handleChange}
-          placeholder={placeholder || config.placeholder}
+          placeholder={inputPlaceholder}
           required={props.required}
           disabled={props.disabled}
           className={showExpandButton ? "pr-8" : ""}
@@ -176,7 +182,7 @@ export default function TextWidget(props: WidgetProps) {
         title={schema.title || t("Edit value", "编辑值")}
         description={schema.description || ""}
         defaultValue={displayValue}
-        placeholder={placeholder || config.placeholder}
+        placeholder={inputPlaceholder}
       />
     </>
   );

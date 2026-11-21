@@ -32,7 +32,7 @@ import { Text } from "@/components/atoms/Text/Text";
 
 export const AgentOutputs = ({ flowID }: { flowID: string | null }) => {
   const { t } = useTranslation();
-  const hasOutputs = useGraphStore(useShallow((state) => state.hasOutputs));
+  const hasOutputs = useGraphStore((state) => state.hasOutputs());
   const nodes = useNodeStore(useShallow((state) => state.nodes));
 
   const outputs = useMemo(() => {
@@ -68,27 +68,29 @@ export const AgentOutputs = ({ flowID }: { flowID: string | null }) => {
         return {
           nodeID: node.id,
           metadata: {
-            name: node.data.hardcodedValues?.name || t("Output", "输出"),
-            description:
-              node.data.hardcodedValues?.description ||
-              t("Output from the workflow", "工作流输出"),
+            name: node.data.hardcodedValues?.name,
+            description: node.data.hardcodedValues?.description,
           },
           items,
         };
       })
       .filter((group): group is NonNullable<typeof group> => group !== null);
-  }, [nodes, t]);
+  }, [nodes]);
 
   const actionItems = useMemo(() => {
     return outputs.flatMap((group) =>
       group.items.map((item) => ({
         value: item.value,
-        metadata: group.metadata,
+        metadata: {
+          name: group.metadata.name || "Output",
+          description: group.metadata.description || "Output from the workflow",
+        },
         renderer: item.renderer,
       })),
     );
   }, [outputs]);
 
+  const outputsLabel = t("Workflow Outputs", "工作流输出");
   return (
     <Sheet>
       <TooltipProvider>
@@ -99,14 +101,16 @@ export const AgentOutputs = ({ flowID }: { flowID: string | null }) => {
                 variant="outline"
                 size="icon"
                 data-id="agent-outputs-button"
-                disabled={!flowID || !hasOutputs()}
+                aria-label={outputsLabel}
+                withTooltip={false}
+                disabled={!flowID || !hasOutputs}
               >
                 <Icon icon={BookOpen01Icon} className="size-4" />
               </Button>
             </SheetTrigger>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{t("Workflow Outputs", "工作流输出")}</p>
+            <p>{outputsLabel}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -161,21 +165,19 @@ export const AgentOutputs = ({ flowID }: { flowID: string | null }) => {
                           as="span"
                           tone="inherit"
                         >
-                          {group.metadata.name ||
-                            t("Unnamed Output", "未命名输出")}
+                          {group.metadata.name || t("Output", "输出")}
                         </Text>
                       </Label>
-                      {group.metadata.description && (
-                        <Label className="mt-1 block text-foreground-secondary">
-                          <Text
-                            variant="body-medium-tight"
-                            as="span"
-                            tone="inherit"
-                          >
-                            {group.metadata.description}
-                          </Text>
-                        </Label>
-                      )}
+                      <Label className="mt-1 block text-foreground-secondary">
+                        <Text
+                          variant="body-medium-tight"
+                          as="span"
+                          tone="inherit"
+                        >
+                          {group.metadata.description ||
+                            t("Output from the workflow", "工作流输出")}
+                        </Text>
+                      </Label>
                     </div>
 
                     {group.items.map((item) => (
@@ -190,7 +192,12 @@ export const AgentOutputs = ({ flowID }: { flowID: string | null }) => {
                 ))
               ) : (
                 <div className="flex h-full items-center justify-center text-foreground-tertiary">
-                  <p>{t("No output blocks available.", "暂无输出模块。")}</p>
+                  <p>
+                    {t(
+                      "No run outputs to display yet.",
+                      "暂无可显示的运行输出。",
+                    )}
+                  </p>
                 </div>
               )}
             </div>

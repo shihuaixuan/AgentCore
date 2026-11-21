@@ -28,7 +28,7 @@ export function ReadOnlyBanner() {
       <div className="px-2">
         <Text variant="body" tone="body">
           {t(
-            "You&apos;re viewing a read-only copy of this workflow.",
+            "You're viewing a read-only copy of this workflow.",
             "你正在查看此工作流的只读副本。",
           )}
           <br />

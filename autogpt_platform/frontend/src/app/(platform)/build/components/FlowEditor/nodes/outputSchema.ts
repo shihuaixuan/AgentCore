@@ -54,7 +54,7 @@ function withOutputPath(
   let child = exists ? properties[key] : (field.additionalProperties ?? true);
   if (!exists) {
     if (child !== true && !isSchemaObject(child)) return;
-    child = { title: key, ...(child === true ? {} : child) };
+    child = { ...(child === true ? {} : child), title: key };
   }
   if (index < segments.length - 1) {
     const expanded = withOutputPath(child, segments, index + 1);

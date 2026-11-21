@@ -11,7 +11,11 @@ import { useShallow } from "zustand/react/shallow";
 import { useEffect, useState } from "react";
 import { useSaveGraph } from "@/app/(platform)/build/hooks/useSaveGraph";
 import { useNodeStore } from "@/app/(platform)/build/stores/nodeStore";
-import { ApiError } from "@/lib/autogpt-server-api/helpers"; // Check if this exists
+import { ApiError } from "@/lib/autogpt-server-api/helpers";
+import {
+  getGraphErrorMessage,
+  getGraphValidationMessage,
+} from "../../../../helpers/graphErrorMessage";
 import { useTutorialStore } from "@/app/(platform)/build/stores/tutorialStore";
 
 export const useRunGraph = () => {
@@ -86,7 +90,7 @@ export const useRunGraph = () => {
             flowExecutionID: id,
           });
         },
-        onError: (error: any) => {
+        onError: (error) => {
           setIsGraphRunning(false);
           if (error instanceof ApiError && error.isGraphValidationError?.()) {
             const errorData = error.response?.detail;
@@ -110,9 +114,7 @@ export const useRunGraph = () => {
             }
 
             toast({
-              title:
-                errorData?.message ||
-                t("Workflow validation failed", "工作流验证失败"),
+              title: getGraphValidationMessage(errorData?.message, t),
               description: t(
                 "Please fix the validation errors on the highlighted nodes and try again.",
                 "请修复高亮节点上的验证错误后重试。",
@@ -121,10 +123,8 @@ export const useRunGraph = () => {
             });
           } else {
             toast({
-              title:
-                (error.detail as string) ??
-                t("An unexpected error occurred.", "发生意外错误。"),
-              description: t("An unexpected error occurred.", "发生意外错误。"),
+              title: t("Error running workflow", "运行工作流时出错"),
+              description: getGraphErrorMessage(error, t),
               variant: "destructive",
             });
           }
@@ -136,12 +136,10 @@ export const useRunGraph = () => {
     usePostV1StopGraphExecution({
       mutation: {
         onSuccess: () => {},
-        onError: (error: any) => {
+        onError: (error) => {
           toast({
-            title:
-              (error.detail as string) ??
-              t("An unexpected error occurred.", "发生意外错误。"),
-            description: t("An unexpected error occurred.", "发生意外错误。"),
+            title: t("Error stopping workflow", "停止工作流时出错"),
+            description: getGraphErrorMessage(error, t),
             variant: "destructive",
           });
         },

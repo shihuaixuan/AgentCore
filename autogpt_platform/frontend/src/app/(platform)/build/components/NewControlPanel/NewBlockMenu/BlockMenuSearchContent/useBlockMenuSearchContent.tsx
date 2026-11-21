@@ -26,6 +26,7 @@ import { getQueryClient } from "@/lib/react-query/queryClient";
 import { useToast } from "@/components/molecules/Toast/use-toast";
 import * as Sentry from "@sentry/nextjs";
 import { CategoryCounts } from "../BlockMenuFilters/types";
+import { useLocalizedBlockMatches } from "./useLocalizedBlockMatches";
 
 export const useBlockMenuSearchContent = () => {
   const { t } = useTranslation();
@@ -153,6 +154,14 @@ export const useBlockMenuSearchContent = () => {
     () => (searchQueryData ? unpaginate(searchQueryData, "items") : []),
     [searchQueryData],
   );
+  const { matches: localizedBlocks, isLoading: catalogLoading } =
+    useLocalizedBlockMatches({
+      searchQuery,
+      filters,
+      creators,
+      serverItems: searchResults,
+      searchSucceeded: !!okData(searchQueryData?.pages[0]),
+    });
 
   const handleAddLibraryAgent = async (agent: LibraryAgent) => {
     setAddingLibraryAgentId(agent.id);
@@ -225,10 +234,11 @@ export const useBlockMenuSearchContent = () => {
 
   return {
     searchResults,
+    localizedBlocks,
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-    searchLoading,
+    searchLoading: searchLoading || (!searchResults.length && catalogLoading),
     handleAddLibraryAgent,
     handleAddMarketplaceAgent,
     addingLibraryAgentId,

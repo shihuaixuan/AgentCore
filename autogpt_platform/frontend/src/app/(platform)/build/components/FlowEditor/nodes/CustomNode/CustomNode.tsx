@@ -3,6 +3,10 @@ import { BlockCost } from "@/app/api/__generated__/models/blockCost";
 import { BlockInfoCategoriesItem } from "@/app/api/__generated__/models/blockInfoCategoriesItem";
 import { NodeExecutionResult } from "@/app/api/__generated__/models/nodeExecutionResult";
 import { NodeModelMetadata } from "@/app/api/__generated__/models/nodeModelMetadata";
+import {
+  getBuilderSchemaText,
+  hasBuilderBlockCopy,
+} from "../../../../helpers/blockCopy";
 import { preprocessInputSchema } from "@/components/renderers/InputRenderer/utils/input-schema-pre-processor";
 import { cn } from "@/lib/utils";
 import { RJSFSchema } from "@rjsf/utils";
@@ -59,11 +63,14 @@ export const CustomNode: React.FC<NodeProps<CustomNode>> = React.memo(
     // xyflow re-renders the node on every drag frame (position props), so a
     // fresh clone here would defeat FormCreator's memo and re-run RJSF.
     const formSchema = useMemo(
-      () => preprocessInputSchema(inputSchema),
+      () => preprocessInputSchema(inputSchema, true),
       [inputSchema],
     );
 
     const isAgent = data.uiType === BlockUIType.AGENT;
+    const builtIn =
+      !isAgent && !isMCPWithTool && hasBuilderBlockCopy(data.block_id);
+    const schemaText = builtIn ? getBuilderSchemaText : undefined;
 
     if (data.uiType === BlockUIType.NOTE) {
       return (
@@ -114,6 +121,7 @@ export const CustomNode: React.FC<NodeProps<CustomNode>> = React.memo(
             nodeId={nodeId}
             uiType={data.uiType}
             isMCPWithTool={isMCPWithTool}
+            schemaText={schemaText}
             className={cn(
               "bg-surface px-4",
               isWebhook && "pointer-events-none opacity-50",
@@ -129,10 +137,14 @@ export const CustomNode: React.FC<NodeProps<CustomNode>> = React.memo(
             <OutputHandler
               uiType={data.uiType}
               outputSchema={outputSchema}
+              schemaText={schemaText}
               nodeId={nodeId}
             />
           )}
-          <NodeDataRenderer nodeId={nodeId} />
+          <NodeDataRenderer
+            nodeId={nodeId}
+            builtInOutputSchema={builtIn ? data.outputSchema : undefined}
+          />
         </div>
         <NodeExecutionBadge nodeId={nodeId} />
       </NodeContainer>

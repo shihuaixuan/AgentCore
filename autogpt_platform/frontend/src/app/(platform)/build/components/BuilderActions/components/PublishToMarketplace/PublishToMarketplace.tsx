@@ -1,10 +1,5 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Button } from "@/components/atoms/Button/Button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/atoms/Tooltip/BaseTooltip";
 import { PublishAgentModal } from "@/components/contextual/PublishAgentModal/PublishAgentModal";
 import { usePublishToMarketplace } from "./usePublishToMarketplace";
 import { Share01Icon } from "@hugeicons/core-free-icons";
@@ -24,21 +19,15 @@ export function PublishToMarketplace({ flowID, flowVersion }: Props) {
 
   return (
     <>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handlePublishToMarketplace}
-            disabled={isDisabled}
-          >
-            <Icon icon={Share01Icon} className="size-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          {t("Publish to Marketplace", "发布到市场")}
-        </TooltipContent>
-      </Tooltip>
+      <Button
+        variant="outline"
+        size="icon"
+        aria-label={t("Publish to Marketplace", "发布到市场")}
+        onClick={handlePublishToMarketplace}
+        disabled={isDisabled}
+      >
+        <Icon icon={Share01Icon} className="size-4" />
+      </Button>
 
       <PublishAgentModal
         targetState={publishState}

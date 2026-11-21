@@ -1,6 +1,7 @@
 import { useDeferredValue, useMemo, useState } from "react";
 import { CustomNode } from "../../../FlowEditor/nodes/CustomNode/CustomNode";
-import { beautifyString } from "@/lib/utils";
+import { getNodeDisplayTitle } from "../../../FlowEditor/nodes/CustomNode/helpers";
+import { getNodeBlockText } from "../GraphMenuContent/helpers";
 import jaro from "jaro-winkler";
 
 export type SearchableNode = CustomNode & {
@@ -61,17 +62,19 @@ function calculateNodeScore(
   }
 
   // Prepare searchable text with defensive checks
-  const nodeTitle = (node.data?.title || "").toLowerCase(); // This includes the ID
   const nodeID = (node.id || "").toLowerCase();
-  const nodeDescription = (node.data?.description || "").toLowerCase();
-  const blockType = (node.data?.title || "").toLowerCase();
-  const beautifiedBlockType = beautifyString(blockType).toLowerCase();
-  const customizedName = String(
-    node.data?.metadata?.customized_name || "",
-  ).toLowerCase();
-  const agentName = String(
-    node.data?.hardcodedValues?.agent_name || "",
-  ).toLowerCase();
+  const chinese = getNodeBlockText(node.data, "zh-CN");
+  const english = getNodeBlockText(node.data, "en");
+  const titles = [
+    node.data.title,
+    getNodeDisplayTitle(node.data),
+    node.data.hardcodedValues?.agent_name,
+    english.name,
+    chinese.name,
+  ].map((title) => String(title || "").toLowerCase());
+  const descriptions = [english.description, chinese.description].map((text) =>
+    text.toLowerCase(),
+  );
 
   // Get input and output names with defensive checks
   const inputNames = Object.keys(node.data?.inputSchema?.properties || {}).map(
@@ -82,27 +85,14 @@ function calculateNodeScore(
   ).map((key) => key.toLowerCase());
 
   // 1. Check exact match in customized name, title (includes ID), node ID, or block type (highest priority)
-  if (
-    customizedName.includes(query) ||
-    agentName.includes(query) ||
-    nodeTitle.includes(query) ||
-    nodeID.includes(query) ||
-    blockType.includes(query) ||
-    beautifiedBlockType.includes(query)
-  ) {
+  if (nodeID.includes(query) || titles.some((title) => title.includes(query))) {
     score = 4;
     matchedFields.push("title");
   }
 
   // 2. Check all query words in customized name, title or block type
   else if (
-    queryWords.every(
-      (word) =>
-        customizedName.includes(word) ||
-        agentName.includes(word) ||
-        nodeTitle.includes(word) ||
-        beautifiedBlockType.includes(word),
-    )
+    queryWords.every((word) => titles.some((title) => title.includes(word)))
   ) {
     score = 3.5;
     matchedFields.push("title");
@@ -133,10 +123,8 @@ function calculateNodeScore(
   // 5. Similarity matching using Jaro-Winkler
   else {
     const titleSimilarity = Math.max(
-      jaro(customizedName, query),
-      jaro(nodeTitle, query),
       jaro(nodeID, query),
-      jaro(beautifiedBlockType, query),
+      ...titles.map((title) => jaro(title, query)),
     );
 
     if (titleSimilarity > 0.7) {
@@ -165,7 +153,7 @@ function calculateNodeScore(
   }
 
   // 6. Check description (lower priority)
-  if (score === 0 && nodeDescription.includes(query)) {
+  if (score === 0 && descriptions.some((text) => text.includes(query))) {
     score = 0.5;
     matchedFields.push("description");
   }
@@ -173,7 +161,7 @@ function calculateNodeScore(
   // 7. Check if all query words appear in description
   if (
     score === 0 &&
-    queryWords.every((word) => nodeDescription.includes(word))
+    queryWords.every((word) => descriptions.some((text) => text.includes(word)))
   ) {
     score = 0.3;
     matchedFields.push("description");

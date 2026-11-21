@@ -12,6 +12,7 @@ import {
 } from "@/components/molecules/MultiSelect/MultiSelect";
 import { cn } from "@/lib/utils";
 import { useMultiSelectField } from "./useMultiSelectField";
+import { distinctOptionLabels } from "../../utils/option-labels";
 
 export const MultiSelectField = (props: FieldProps) => {
   const { t } = useTranslation();
@@ -27,13 +28,33 @@ export const MultiSelectField = (props: FieldProps) => {
   const handleValuesChange = createChangeHandler(onChange, fieldPathId);
 
   const displayName = schema.title;
+  const isBuilderNode = props.registry.formContext.isBuilderNode;
+  const items = distinctOptionLabels(
+    options.map((key) => ({
+      value: key,
+      label: optionSchema[key].title || key,
+    })),
+  );
+  const labels = new Map(items.map(({ value, label }) => [value, label]));
+  const keys = new Map(items.map(({ value, label }) => [label, value]));
 
   return (
     <div className={cn("flex flex-col", uiOptions.className)}>
       <MultiSelector
         className="nodrag"
-        values={selection}
-        onValuesChange={handleValuesChange}
+        values={
+          isBuilderNode
+            ? selection.map((key) => labels.get(key) ?? key)
+            : selection
+        }
+        onValuesChange={
+          isBuilderNode
+            ? (selected) =>
+                handleValuesChange(
+                  selected.map((label) => keys.get(label) ?? label),
+                )
+            : handleValuesChange
+        }
       >
         <MultiSelectorTrigger className="rounded-3xl border border-border-base bg-surface px-2 shadow-none">
           <MultiSelectorInput
@@ -47,13 +68,15 @@ export const MultiSelectField = (props: FieldProps) => {
         </MultiSelectorTrigger>
         <MultiSelectorContent className="nowheel">
           <MultiSelectorList>
-            {options
-              .map((key) => ({ ...optionSchema[key], key }))
-              .map(({ key, title, description }) => (
-                <MultiSelectorItem key={key} value={key} title={description}>
-                  {title ?? key}
-                </MultiSelectorItem>
-              ))}
+            {items.map(({ value, label }) => (
+              <MultiSelectorItem
+                key={value}
+                value={isBuilderNode ? label : value}
+                title={optionSchema[value].description}
+              >
+                {isBuilderNode ? label : (optionSchema[value].title ?? value)}
+              </MultiSelectorItem>
+            ))}
           </MultiSelectorList>
         </MultiSelectorContent>
       </MultiSelector>

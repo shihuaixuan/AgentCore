@@ -173,6 +173,7 @@ export default function FieldTemplate(props: FieldTemplateProps) {
           {!parentAccessibility && (
             <FieldError
               nodeId={nodeId}
+              isBuilderNode={registry.formContext.isBuilderNode}
               fieldId={cleanUpHandleId(id)}
               id={errorId}
             />

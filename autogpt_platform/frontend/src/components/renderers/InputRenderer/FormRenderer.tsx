@@ -11,6 +11,7 @@ import { ExtendedFormContextType } from "./types";
 import { customValidator } from "./utils/custom-validator";
 import { generateUiSchemaForCustomFields } from "./utils/generate-ui-schema";
 import { preprocessInputSchema } from "./utils/input-schema-pre-processor";
+import { translateBuilderErrors } from "./utils/builder-validation";
 
 type FormRendererProps = {
   jsonSchema: RJSFSchema;
@@ -29,11 +30,12 @@ export function FormRenderer({
   formContext,
   className,
 }: FormRendererProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const domIdPrefix = `${useId()}-`;
+  const isBuilderNode = formContext.isBuilderNode;
   const preprocessedSchema = useMemo(() => {
-    return preprocessInputSchema(jsonSchema);
-  }, [jsonSchema]);
+    return preprocessInputSchema(jsonSchema, isBuilderNode);
+  }, [jsonSchema, isBuilderNode]);
 
   // Merge custom field ui:field settings with existing uiSchema
   const mergedUiSchema = useMemo(() => {
@@ -72,6 +74,18 @@ export function FormRenderer({
       [TranslatableString.OptionPrefix]: "选项 %1",
       [TranslatableString.TitleOptionPrefix]: "%1 选项 %2",
       [TranslatableString.KeyLabel]: "%1 键",
+      ...(isBuilderNode && {
+        [TranslatableString.UnknownFieldType]: "未知字段类型 %1",
+        [TranslatableString.InvalidObjectField]:
+          "对象字段“%1”的配置无效：_%2_。",
+        [TranslatableString.UnsupportedField]: "不支持此字段定义。",
+        [TranslatableString.UnsupportedFieldWithId]: "不支持字段 `%1` 的定义。",
+        [TranslatableString.UnsupportedFieldWithReason]:
+          "不支持此字段定义：_%1_。",
+        [TranslatableString.UnsupportedFieldWithIdAndReason]:
+          "不支持字段 `%1` 的定义：_%2_。",
+        [TranslatableString.FilesInfo]: "**%1**（%2，%3 字节）",
+      }),
     };
     const text = t(
       stringToTranslate,
@@ -88,6 +102,11 @@ export function FormRenderer({
         idSeparator="_%_"
         schema={preprocessedSchema}
         validator={customValidator}
+        transformErrors={
+          isBuilderNode && locale === "zh-CN"
+            ? translateBuilderErrors
+            : undefined
+        }
         translateString={translateString}
         onChange={handleChange}
         uiSchema={mergedUiSchema}

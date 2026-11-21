@@ -40,10 +40,10 @@ const getSecondCalcRequirementsHtml = (
         <span class="req-icon">○</span>${t(" Enter a number in field <strong>B</strong> (e.g., 2)", " 在字段 <strong>B</strong> 中输入数字（例如 2）")}
       </li>
       <li id="req2-op" class="flex items-center gap-2">
-        <span class="req-icon">○</span>${t(" Select an <strong>Operation</strong> (e.g., Multiply)", " 选择 <strong>Operation</strong>（例如 Multiply）")}
+        <span class="req-icon">○</span>${t(" Select an <strong>Operation</strong> (e.g., Multiply)", " 选择<strong>运算</strong>（例如乘法）")}
       </li>
     </ul>
-    <p class="text-caption leading-inherit text-warning m-0 mt-2 italic">${t("Note: Field A will be connected from the first Calculator's output", "提示：字段 A 将连接到第一个 Calculator 的输出")}</p>
+    <p class="text-caption leading-inherit text-warning m-0 mt-2 italic">${t("Note: Field A will be connected from the first Calculator's output", "提示：字段 A 将连接到第一个计算器的输出")}</p>
   </div>
 `;
 
@@ -94,15 +94,15 @@ export const createSecondCalculatorSteps = (
 ): StepOptions[] => [
   {
     id: "adding-second-calculator",
-    title: t("Adding Second Calculator", "添加第二个 Calculator"),
+    title: t("Adding Second Calculator", "添加第二个计算器"),
     text: `
       <div class="text-body text-foreground-emphasis">
-        <p class="text-body font-normal text-foreground-emphasis m-0">${t("Great job configuring the first Calculator!", "你已完成第一个 Calculator 的配置！")}</p>
-        <p class="text-body font-normal text-foreground-emphasis m-0" style="margin-top: 0.5rem;">${t("Now let's add a <strong>second Calculator block</strong> and connect them together.", "现在添加<strong>第二个 Calculator 模块</strong>，并将它们连接起来。")}</p>
+        <p class="text-body font-normal text-foreground-emphasis m-0">${t("Great job configuring the first Calculator!", "你已完成第一个计算器的配置！")}</p>
+        <p class="text-body font-normal text-foreground-emphasis m-0" style="margin-top: 0.5rem;">${t("Now let's add a <strong>second Calculator block</strong> and connect them together.", "现在添加<strong>第二个计算器模块</strong>，并将它们连接起来。")}</p>
         
         <div class="mt-3 p-3 bg-info-surface ring-1 ring-info/30 rounded-2xl">
           <p class="text-body leading-5 font-medium text-info-foreground m-0 mb-1">${t("We'll create a chain:", "我们将创建如下链路：")}</p>
-          <p class="text-body-sm leading-inherit text-info-foreground m-0">${t("Calculator 1 → Calculator 2", "Calculator 1 → Calculator 2")}</p>
+          <p class="text-body-sm leading-inherit text-info-foreground m-0">${t("Calculator 1 → Calculator 2", "计算器 1 → 计算器 2")}</p>
           <p class="text-caption leading-inherit text-info m-0 mt-1 italic">${t("The output of the first will feed into the second!", "第一个模块的输出将作为第二个模块的输入！")}</p>
         </div>
       </div>
@@ -114,7 +114,7 @@ export const createSecondCalculatorSteps = (
         classes: "shepherd-button-secondary",
       },
       {
-        text: t("Add Second Calculator", "添加第二个 Calculator"),
+        text: t("Add Second Calculator", "添加第二个计算器"),
         action: () => tour.next(),
       },
     ],
@@ -122,14 +122,14 @@ export const createSecondCalculatorSteps = (
 
   {
     id: "second-calculator-added",
-    title: t("Second Calculator Added! ✅", "第二个 Calculator 已添加！✅"),
+    title: t("Second Calculator Added! ✅", "第二个计算器已添加！✅"),
     text: `
       <div class="text-body text-foreground-emphasis">
-        <p class="text-body font-normal text-foreground-emphasis m-0">${t("I've added a <strong>second Calculator block</strong> to your canvas.", "已在画布中添加<strong>第二个 Calculator 模块</strong>。")}</p>
+        <p class="text-body font-normal text-foreground-emphasis m-0">${t("I've added a <strong>second Calculator block</strong> to your canvas.", "已在画布中添加<strong>第二个计算器模块</strong>。")}</p>
         <p class="text-body font-normal text-foreground-emphasis m-0" style="margin-top: 0.5rem;">${t("Now let's configure it and connect them together.", "接下来配置它，并连接两个模块。")}</p>
         
         <div class="mt-3 p-3 bg-success-surface ring-1 ring-success/40 rounded-2xl">
-          <p class="text-body leading-5 font-medium text-success m-0">${t("You now have 2 Calculator blocks!", "现在你有两个 Calculator 模块了！")}</p>
+          <p class="text-body leading-5 font-medium text-success m-0">${t("You now have 2 Calculator blocks!", "现在你有两个计算器模块了！")}</p>
         </div>
       </div>
     `,
@@ -149,12 +149,12 @@ export const createSecondCalculatorSteps = (
 
   {
     id: "configure-second-calculator",
-    title: t("Configure Second Calculator", "配置第二个 Calculator"),
+    title: t("Configure Second Calculator", "配置第二个计算器"),
     text: `
       <div class="text-body text-foreground-emphasis">
-        <p class="text-body font-normal text-foreground-emphasis m-0">${t("Now configure the <strong>second Calculator block</strong>.", "现在配置<strong>第二个 Calculator 模块</strong>。")}</p>
+        <p class="text-body font-normal text-foreground-emphasis m-0">${t("Now configure the <strong>second Calculator block</strong>.", "现在配置<strong>第二个计算器模块</strong>。")}</p>
         ${getSecondCalcRequirementsHtml(t)}
-        ${banner(ICONS.ClickIcon, t("Fill in field B and select an Operation", "填写字段 B 并选择 Operation"), "action")}
+        ${banner(ICONS.ClickIcon, t("Fill in field B and select an Operation", "填写字段 B 并选择运算"), "action")}
       </div>
     `,
     beforeShowPromise: async () => {

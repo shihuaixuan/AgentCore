@@ -1,10 +1,11 @@
 import { Text } from "@/components/atoms/Text/Text";
 import { Skeleton } from "@/components/atoms/Skeleton/Skeleton";
-import { beautifyString, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { blockMenuButtonBase } from "./style";
 import Image from "next/image";
 import React, { ButtonHTMLAttributes } from "react";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getIntegrationLabel } from "./integrationCopy";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   title?: string;
@@ -25,7 +26,14 @@ export const Integration: IntegrationComponent = ({
   number_of_blocks,
   ...rest
 }) => {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
+  const countDescription =
+    number_of_blocks == null
+      ? ""
+      : t(
+          `${number_of_blocks} available block${number_of_blocks === 1 ? "" : "s"}`,
+          `${number_of_blocks} 个可用模块`,
+        );
   return (
     <button
       type="button"
@@ -57,7 +65,7 @@ export const Integration: IntegrationComponent = ({
               tone={rest.disabled ? "subtle" : "body"}
               className="line-clamp-1 flex-1"
             >
-              {beautifyString(title)}
+              {getIntegrationLabel(title, locale)}
             </Text>
           )}
           <span className="flex h-[1.375rem] w-[1.6875rem] items-center justify-center rounded-full bg-surface-hover p-1.5">
@@ -77,7 +85,7 @@ export const Integration: IntegrationComponent = ({
           tone={rest.disabled ? "subtle" : "muted"}
           className="line-clamp-1"
         >
-          {description}
+          {description || countDescription}
         </Text>
       </div>
     </button>

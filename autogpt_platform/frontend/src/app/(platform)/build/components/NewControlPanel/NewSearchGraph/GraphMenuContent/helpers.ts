@@ -1,8 +1,21 @@
-import { SearchableNode } from "../GraphMenuSearchBar/useGraphMenuSearchBar";
+import { getBuilderBlockText } from "@/app/(platform)/build/helpers/blockCopy";
+import type { Locale } from "@/lib/i18n/locale";
+import type { SearchableNode } from "../GraphMenuSearchBar/useGraphMenuSearchBar";
 import {
   englishDisplayText,
   type DisplayTranslate,
 } from "../../../../helpers/translation";
+
+export function getNodeBlockText(data: SearchableNode["data"], locale: Locale) {
+  return getBuilderBlockText(
+    {
+      id: data.block_id,
+      name: data.title || "",
+      description: data.description,
+    },
+    locale,
+  );
+}
 
 export function getNodeInputOutputSummary(
   node: SearchableNode,

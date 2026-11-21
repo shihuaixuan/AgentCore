@@ -89,6 +89,7 @@ export function BuilderChatPanel({ className }: Props) {
                     variant="body-tight"
                     tone="secondary"
                     as="div"
+                    role="alert"
                     className="flex flex-1 flex-col items-center justify-center gap-3 text-center"
                   >
                     <Text variant="body-medium-tight" tone="body">
@@ -117,7 +118,12 @@ export function BuilderChatPanel({ className }: Props) {
                 </div>
               ) : isBootstrapping ? (
                 <div className="flex flex-1 items-center justify-center px-4 py-6">
-                  <Text variant="body-tight" tone="muted" as="div">
+                  <Text
+                    variant="body-tight"
+                    tone="muted"
+                    as="div"
+                    role="status"
+                  >
                     {t("Preparing builder chat…", "正在准备构建助手对话…")}
                   </Text>
                 </div>

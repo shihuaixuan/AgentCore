@@ -3,7 +3,9 @@ import { useFieldAccessibility } from "../../../../field-accessibility";
 import {
   enumOptionsIndexForValue,
   enumOptionsValueForIndex,
+  getUiOptions,
 } from "@rjsf/utils";
+import { distinctOptionLabels } from "../../../../utils/option-labels";
 import type { EnumOptionsType, RJSFSchema, WidgetProps } from "@rjsf/utils";
 import {
   InputType,
@@ -37,8 +39,16 @@ function getEnumNames(schema: RJSFSchema) {
 }
 
 function getFieldSchema(props: WidgetProps) {
+  if (
+    props.registry?.formContext?.isBuilderNode &&
+    props.id !== `agpt_%_${props.name}`
+  )
+    return props.schema;
   const rootProperty = props.registry?.rootSchema?.properties?.[props.name];
-  return isSchema(rootProperty) ? rootProperty : props.schema;
+  return isSchema(rootProperty) &&
+    Object.hasOwn(props.registry.rootSchema.properties!, props.name)
+    ? rootProperty
+    : props.schema;
 }
 
 export function SelectWidget(props: WidgetProps) {
@@ -57,7 +67,21 @@ export function SelectWidget(props: WidgetProps) {
   } = props;
   const rawEnumOptions: EnumOptionsType[] = options.enumOptions || [];
   const fieldSchema = getFieldSchema(props);
-  const enumNames = getEnumNames(fieldSchema);
+  const isBuilderNode = (formContext ?? props.registry?.formContext)
+    ?.isBuilderNode;
+  const type = mapJsonSchemaTypeToInputType(props.schema);
+  const optionUiSchema =
+    type === InputType.MULTI_SELECT ? props.uiSchema?.items : props.uiSchema;
+  const enumNames = isBuilderNode
+    ? (getUiOptions(
+        typeof optionUiSchema === "function" ? undefined : optionUiSchema,
+      ).enumNames ??
+      getEnumNames(
+        type === InputType.MULTI_SELECT && isSchema(fieldSchema.items)
+          ? fieldSchema.items
+          : fieldSchema,
+      ))
+    : getEnumNames(fieldSchema);
   const uiTitle = props.uiSchema?.["ui:title"];
   const resolvedLabel =
     typeof uiTitle === "string"
@@ -80,9 +104,13 @@ export function SelectWidget(props: WidgetProps) {
       ? { ...option, label: enumNames[index] }
       : option,
   );
-  const enumOptions = labelledEnumOptions.filter(
+  const nonEmptyOptions = labelledEnumOptions.filter(
     (option) => option.value !== "",
   );
+  const enumOptions =
+    isBuilderNode && type === InputType.MULTI_SELECT
+      ? distinctOptionLabels(nonEmptyOptions)
+      : nonEmptyOptions;
   const droppedEmptyOptionCount = rawEnumOptions.length - enumOptions.length;
   if (process.env.NODE_ENV === "development" && droppedEmptyOptionCount > 0) {
     console.warn(
@@ -93,7 +121,6 @@ export function SelectWidget(props: WidgetProps) {
       },
     );
   }
-  const type = mapJsonSchemaTypeToInputType(props.schema);
   const { size = "small" } = formContext || {};
   const selectedIndexes = enumOptionsIndexForValue(
     value,

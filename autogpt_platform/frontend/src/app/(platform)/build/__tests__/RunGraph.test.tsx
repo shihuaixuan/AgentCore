@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { screen, fireEvent, cleanup } from "@testing-library/react";
 import { render } from "@/tests/integrations/test-utils";
 import React from "react";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { useGraphStore } from "../stores/graphStore";
 
 vi.mock(
@@ -60,6 +61,38 @@ function getButtonByDataId(dataId: string): HTMLButtonElement {
 }
 
 describe("RunGraph", () => {
+  it("names the run, simulation, stop and busy controls in Chinese before opening a tooltip", () => {
+    const run = vi.fn();
+    const stop = vi.fn();
+    mockUseRunGraph.mockReturnValue(
+      createMockReturnValue({ handleRunGraph: run, handleStopGraph: stop }),
+    );
+    function controls() {
+      return (
+        <LanguageProvider initialLocale="zh-CN">
+          <RunGraph flowID="graph-ID" />
+        </LanguageProvider>
+      );
+    }
+    const { rerender } = render(controls());
+    fireEvent.click(screen.getByRole("button", { name: "模拟工作流" }));
+    expect(run).toHaveBeenCalledWith({ dryRun: true });
+    fireEvent.click(screen.getByRole("button", { name: "运行工作流" }));
+    expect(run).toHaveBeenLastCalledWith();
+    useGraphStore.getState().setIsGraphRunning(true);
+    rerender(controls());
+    fireEvent.click(screen.getByRole("button", { name: "停止工作流" }));
+    expect(stop).toHaveBeenCalledOnce();
+    mockUseRunGraph.mockReturnValue(
+      createMockReturnValue({ isTerminatingGraph: true }),
+    );
+    rerender(controls());
+    expect(
+      screen.getByRole<HTMLButtonElement>("button", { name: "处理中…" })
+        .disabled,
+    ).toBe(true);
+  });
+
   beforeEach(() => {
     cleanup();
     mockUseRunGraph.mockReturnValue(createMockReturnValue());

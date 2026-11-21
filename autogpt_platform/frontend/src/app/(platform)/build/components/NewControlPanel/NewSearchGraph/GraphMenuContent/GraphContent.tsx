@@ -1,10 +1,10 @@
 import { formatNodeDisplayTitle } from "@/app/(platform)/build/components/FlowEditor/nodes/CustomNode/helpers";
 import { Separator } from "@/components/atoms/Separator/Separator";
 import { ScrollArea } from "@/components/molecules/ScrollArea/ScrollArea";
-import { beautifyString, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { SearchableNode } from "../GraphMenuSearchBar/useGraphMenuSearchBar";
 import { GraphMenuSearchBar } from "../GraphMenuSearchBar/GraphMenuSearchBar";
-import { getNodeInputOutputSummary } from "./helpers";
+import { getNodeBlockText, getNodeInputOutputSummary } from "./helpers";
 import { useGraphContent } from "./useGraphContent";
 import { CornerUpRightIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/atoms/Icon/Icon";
@@ -24,7 +24,7 @@ export function GraphSearchContent({
   filteredNodes,
   onNodeSelect,
 }: Props) {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const { selectedIndex, setSelectedIndex, setItemRef, handleKeyDown } =
     useGraphContent({
       searchQuery,
@@ -72,15 +72,10 @@ export function GraphSearchContent({
               filteredNodes.map((node, index) => {
                 if (!node?.data) return null;
 
-                const nodeTitle = formatNodeDisplayTitle(node.data);
-                const nodeType = beautifyString(node.data.title || "").replace(
-                  / Block$/,
-                  "",
-                );
+                const nodeTitle = formatNodeDisplayTitle(node.data, locale);
+                const block = getNodeBlockText(node.data, locale);
                 const description =
-                  getNodeInputOutputSummary(node, t) ||
-                  node.data.description ||
-                  "";
+                  getNodeInputOutputSummary(node, t) || block.description;
 
                 const hasCustomName = !!(
                   node.data.metadata?.customized_name ||
@@ -121,7 +116,7 @@ export function GraphSearchContent({
                               tone="muted"
                               className="block"
                             >
-                              {nodeType}
+                              {block.name}
                             </Text>
                           </span>
                         )}

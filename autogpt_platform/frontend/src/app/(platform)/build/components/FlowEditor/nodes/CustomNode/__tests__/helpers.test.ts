@@ -62,6 +62,30 @@ describe("getNodeDisplayTitle", () => {
 });
 
 describe("formatNodeDisplayTitle", () => {
+  it("localizes the built-in title, but never an explicit rename or a linked workflow", () => {
+    const data = makeNodeData({
+      title: "CalculatorBlock",
+      block_id: "b1ab9b19-67a6-406d-abf5-2dba76d00c79",
+    });
+    expect(formatNodeDisplayTitle(data, "zh-CN")).toBe("计算器");
+    expect(getNodeDisplayTitle(data)).toBe("CalculatorBlock");
+    expect(
+      formatNodeDisplayTitle(
+        { ...data, metadata: { customized_name: "CalculatorBlock" } },
+        "zh-CN",
+      ),
+    ).toBe("CalculatorBlock");
+    expect(
+      formatNodeDisplayTitle(
+        {
+          ...data,
+          hardcodedValues: { agent_name: "Report EN", graph_version: 0 },
+        },
+        "zh-CN",
+      ),
+    ).toBe("Report EN v0");
+  });
+
   it("returns custom name as-is without beautifying", () => {
     const data = makeNodeData({
       metadata: { customized_name: "my_custom_name" } as any,

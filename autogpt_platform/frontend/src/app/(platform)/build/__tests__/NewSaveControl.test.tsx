@@ -12,6 +12,7 @@ import * as z from "zod";
 import { renderHook } from "@testing-library/react";
 import { useControlPanelStore } from "../stores/controlPanelStore";
 import { TooltipProvider } from "@/components/atoms/Tooltip/BaseTooltip";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { NewSaveControl } from "../components/NewControlPanel/NewSaveControl/NewSaveControl";
 import { useNewSaveControl } from "../components/NewControlPanel/NewSaveControl/useNewSaveControl";
 
@@ -86,6 +87,36 @@ afterEach(() => {
 });
 
 describe("NewSaveControl", () => {
+  it("names the save control and displays a Chinese validation error without replacing the form values", async () => {
+    setupMock({ description: "Original description" });
+    render(
+      <LanguageProvider initialLocale="zh-CN">
+        <TooltipProvider>
+          <NewSaveControl />
+        </TooltipProvider>
+      </LanguageProvider>,
+    );
+    const trigger = screen.getByRole("button", { name: "保存" });
+    fireEvent.focus(trigger);
+    const tooltip = await screen.findByRole("tooltip");
+    expect(tooltip.textContent).toContain("Ctrl/⌘ + S");
+    expect(trigger.parentElement?.contains(tooltip)).toBe(false);
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole("button", { name: "保存工作流" }));
+    expect(await screen.findByText("请填写名称")).toBeDefined();
+    expect(mockHandleSave).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByRole("textbox", { name: "名称" }), {
+      target: { value: "Original name" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存工作流" }));
+    await waitFor(() =>
+      expect(mockHandleSave).toHaveBeenCalledWith(
+        { name: "Original name", description: "Original description" },
+        expect.anything(),
+      ),
+    );
+  });
+
   it("renders save button trigger", () => {
     setupMock({});
     render(

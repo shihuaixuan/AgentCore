@@ -2,7 +2,8 @@ import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { Dialog } from "@/components/molecules/Dialog/Dialog";
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
-import { beautifyString } from "@/lib/utils";
+import type { RJSFSchema } from "@rjsf/utils";
+import { getOutputPinLabel } from "../pinLabel";
 import { ContentRenderer } from "./ContentRenderer";
 import { ScrollArea } from "@/components/molecules/ScrollArea/ScrollArea";
 import { useState } from "react";
@@ -21,11 +22,13 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 export const ViewMoreData = ({
   nodeId,
   dataType = "output",
+  builtInOutputSchema,
 }: {
   nodeId: string;
   dataType?: NodeDataType;
+  builtInOutputSchema?: RJSFSchema;
 }) => {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const { toast } = useToast();
   const executionResults = useNodeStore(
@@ -110,6 +113,13 @@ export const ViewMoreData = ({
                     {getExecutionEntries(result, dataType).map(
                       ([key, value]) => {
                         const normalizedValue = normalizeToArray(value);
+                        const label = getOutputPinLabel(
+                          key,
+                          dataType === "output"
+                            ? builtInOutputSchema
+                            : undefined,
+                          locale,
+                        );
                         return (
                           <div key={key} className="flex flex-col gap-2">
                             <div className="flex items-center gap-2">
@@ -117,7 +127,7 @@ export const ViewMoreData = ({
                                 {t("Pin:", "连接点：")}
                               </Text>
                               <Text variant="body-medium" tone="body">
-                                {beautifyString(key)}
+                                {label}
                               </Text>
                             </div>
                             <div className="w-full space-y-2">
@@ -138,6 +148,7 @@ export const ViewMoreData = ({
                                   <NodeDataViewer
                                     data={normalizedValue}
                                     pinName={key}
+                                    pinLabel={label}
                                     execId={result.node_exec_id}
                                     isViewMoreData={true}
                                     dataType={dataType}

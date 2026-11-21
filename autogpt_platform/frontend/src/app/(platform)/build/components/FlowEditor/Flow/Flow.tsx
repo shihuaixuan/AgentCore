@@ -4,6 +4,7 @@ import { ErrorBoundary } from "@/components/molecules/ErrorBoundary/ErrorBoundar
 import { FloatingReviewsPanel } from "@/components/organisms/FloatingReviewsPanel/FloatingReviewsPanel";
 import { BuilderChatPanel } from "../../BuilderChatPanel/BuilderChatPanel";
 import { Background, ReactFlow } from "@xyflow/react";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { parseAsString, useQueryStates } from "nuqs";
 import { MouseEvent, ReactNode, useCallback, useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
@@ -23,6 +24,12 @@ import { RunningBackground } from "./components/RunningBackground";
 import { TriggerAgentBanner } from "./components/TriggerAgentBanner";
 import { retryUnlessClientError } from "../../../helpers/graphLoadError";
 import { resolveCollisions } from "./helpers/resolve-collision";
+import {
+  chineseCanvasEdges,
+  chineseCanvasNodes,
+  chineseFlowLabels,
+  defaultFlowLabels,
+} from "./helpers/flowAria";
 import { useCopyPaste } from "./useCopyPaste";
 import { useFlow } from "./useFlow";
 import { useFlowRealtime } from "./useFlowRealtime";
@@ -134,6 +141,7 @@ function FlowCanvas({
   isGraphRunning,
   children,
 }: FlowCanvasProps) {
+  const { locale, t } = useTranslation();
   const nodes = useNodeStore((state) => state.nodes);
   const setNodes = useNodeStore((state) => state.setNodes);
   const onNodesChange = useNodeStore((state) => state.onNodesChange);
@@ -161,11 +169,15 @@ function FlowCanvas({
 
   return (
     <ReactFlow
-      nodes={nodes}
+      aria-label={t("Workflow canvas", "工作流画布")}
+      ariaLabelConfig={
+        locale === "zh-CN" ? chineseFlowLabels : defaultFlowLabels
+      }
+      nodes={locale === "zh-CN" ? chineseCanvasNodes(nodes) : nodes}
       onNodesChange={onNodesChange}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
-      edges={edges}
+      edges={locale === "zh-CN" ? chineseCanvasEdges(edges) : edges}
       onConnect={onConnect}
       onEdgesChange={onEdgesChange}
       onNodeDragStop={onNodeDragStop}

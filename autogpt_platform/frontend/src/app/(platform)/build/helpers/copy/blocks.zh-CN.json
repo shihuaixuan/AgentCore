@@ -1,0 +1,4142 @@
+{
+  "0045649e-3aed-4d25-aba8-b00cff03f32c": {
+    "type": "ExaDeleteSearchMonitorBlock",
+    "name": "Exa · 删除搜索监控任务",
+    "source": "Permanently delete an Exa Search Monitor, stopping its runs",
+    "description": "永久删除搜索监控任务，并停止其后续运行。"
+  },
+  "0082d712-ff1b-4c3d-8a8d-6c7721883b83": {
+    "type": "PostToYouTubeBlock",
+    "name": "发布到 YouTube",
+    "source": "Post to YouTube using Ayrshare",
+    "description": "通过 Ayrshare 发布到 YouTube。"
+  },
+  "00aae2a1-caf6-4a74-8175-39a0615d44e1": {
+    "type": "Slant3DEstimateShippingBlock",
+    "name": "Slant 3D · 估算运费",
+    "source": "Estimate delivery costs for physical 3D-printed parts by creating an uncharged Slant3D order draft. Requires real customer shipping details and an account payment method. For printing-only quotes without an address or billing setup, use Slant3D Slicer instead. Returns shipping cost and the draft ID; does not charge or submit the order.",
+    "description": "创建不扣款的订单草稿，估算实体零件的运费。需提供真实配送信息和账户支付方式；仅查打印价格可改用「模型切片」。返回运费和草稿 ID，不会扣款或提交订单。"
+  },
+  "01489100-35da-45aa-8a01-9540ba0e9a21": {
+    "type": "AgentMailListEntriesBlock",
+    "name": "AgentMail · 列出名单条目",
+    "source": "List all entries in an AgentMail allow/block list. Choose send/receive direction and allow/block type.",
+    "description": "列出允许或阻止名单中的全部条目，可选择收发方向及名单类型。"
+  },
+  "017de31f-f2ce-429d-8d71-a2447d76b544": {
+    "type": "ConductorManageRoutineBlock",
+    "name": "Conductor · 管理例行任务",
+    "source": "Create a Conductor routine (a saved prompt that runs a fresh agent in a project whenever its webhook URL is called) or rotate a routine's webhook secret. Returns the webhook URL.",
+    "description": "创建导体器常规( 保存的提示，每当项目在项目中运行新鲜剂时，都会在项目中运行新剂 )WebhookURL调用)或旋转常规Webhook秘密。返回WebhookURL."
+  },
+  "020a35d8-8a53-4e60-8b60-1de5cbab1df3": {
+    "type": "ExaCreateImportBlock",
+    "name": "Exa · 创建导入任务",
+    "source": "Import CSV data to use with websets for targeted searches",
+    "description": "进口 CSV 数据，用于针对性搜索的网盘"
+  },
+  "029ec3b8-1cfd-46d3-b6aa-28e4a706efd1": {
+    "type": "GithubCreateRepositoryBlock",
+    "name": "GitHub · 创建仓库",
+    "source": "This block creates a new GitHub repository.",
+    "description": "此模块创建了一个新的 GitHub 仓库。"
+  },
+  "03d8acf6-a62f-11ef-b17f-b72b04a09e79": {
+    "type": "TwitterFollowListBlock",
+    "name": "Twitter · 关注列表",
+    "source": "This block follows a specified Twitter list for the authenticated user.",
+    "description": "通过Twitter,该区块是指一个已认证的用户的Twitter列表。"
+  },
+  "03eda5df-8080-4ed1-bfdf-212f543d657e": {
+    "type": "GoogleSheetsInsertRowBlock",
+    "name": "Google 表格 · 插入行",
+    "source": "Insert a single row at a specific position. Existing rows shift down.",
+    "description": "在特定位置插入单行。现有排行下移。"
+  },
+  "0443fdbc-ebb0-49a4-a3ea-6ace9c14da22": {
+    "type": "GoogleDocsInsertPlainTextBlock",
+    "name": "Google 文档 · 插入纯文本",
+    "source": "Insert plain text at a specific position in a Google Doc (no formatting applied)",
+    "description": "在Google文档中将直文插入到特定位置 (没有格式化)"
+  },
+  "046050c6-96cd-44fa-b73f-af5d790a43b6": {
+    "type": "GithubGetUserInfoBlock",
+    "name": "GitHub · 获取用户信息",
+    "source": "This block fetches information about a GitHub user, or about the authenticated user (yourself) if no username is given.",
+    "description": "通过此区块，可以获取有关GitHub用户的信息，或者有关身份验证用户 (你自己) 的信息，"
+  },
+  "04b0d996-0908-4a4b-89dd-b9697ff253d3": {
+    "type": "GmailGetProfileBlock",
+    "name": "Gmail · 获取个人资料",
+    "source": "Get the authenticated user's Gmail profile details including email address and message statistics.",
+    "description": "获取验证用户的Gmail个人资料，包括电子邮件地址和消息统计数据。"
+  },
+  "04c38a7e-7ee5-4e1a-86c1-9727123577bc": {
+    "type": "GoogleDocsFormatTextBlock",
+    "name": "Google 文档 · 设置格式：文本",
+    "source": "Apply formatting (bold, italic, color, etc.) to text in a Google Doc",
+    "description": "应用格式化 (大胆，斜体，颜色等) 在Google文档中的文本"
+  },
+  "0518625e-5c08-40d4-b1fe-7953250cbe80": {
+    "type": "StripeLinkGetPaymentChallengeBlock",
+    "name": "Stripe Link · 获取支付验证请求",
+    "source": "MPP step 1 of 3: read a merchant's HTTP 402 payment challenge to learn its network ID and amount. Step 2 is Create Spend Request with credential type 'shared_payment_token' and that network ID; step 3 is MPP Pay. Returns supports_mpp=false for ordinary merchants — use the virtual-card flow for those.",
+    "description": "MPP 第 1 步（共 3 步）：读取商户的 HTTP 402 支付验证信息，获取网络 ID 和金额。第 2 步使用该网络 ID 和 shared_payment_token 请求授权，第 3 步通过 MPP 付款。普通商户会返回 supports_mpp=false，此时应使用虚拟卡流程。"
+  },
+  "05309873-9d61-447e-96b5-b804e2511829": {
+    "type": "ListDifferenceBlock",
+    "name": "列表差集",
+    "source": "Computes the difference between two lists. Returns elements in the first list not found in the second, or symmetric difference.",
+    "description": "返回仅在第一个列表中的元素，也可计算两个列表的对称差集。"
+  },
+  "05f409e8-a631-11ef-ae89-93de863ee30d": {
+    "type": "TwitterGetBlockedUsersBlock",
+    "name": "Twitter · 获取已屏蔽用户",
+    "source": "This block retrieves a list of users blocked by the authenticating user.",
+    "description": "此模块检索了验证用户阻止的用户列表。"
+  },
+  "06b6a4c4-9d71-4992-9e9c-cf3b352763b5": {
+    "type": "AgentMailGetThreadAttachmentBlock",
+    "name": "AgentMail · 获取会话附件",
+    "source": "Download a file attachment from a conversation thread. Returns base64-encoded file content.",
+    "description": "从邮件会话中下载附件，返回 Base64 编码的文件内容。"
+  },
+  "07d58b3e-a630-11ef-a030-93701d1a465e": {
+    "type": "TwitterHideReplyBlock",
+    "name": "Twitter · 隐藏回复",
+    "source": "This block hides a reply to a tweet.",
+    "description": "此模块隐藏了一个回复推文。"
+  },
+  "080cc84b-a94a-4fb4-90e3-dcc55ee783af": {
+    "type": "GoogleSheetsGetRowCountBlock",
+    "name": "Google 表格 · 获取行数",
+    "source": "Get row count and dimensions of a Google Sheet. Useful for knowing where data ends.",
+    "description": "查看Google表的行数和尺寸。对于知道数据的终点有用。"
+  },
+  "082602d3-a74d-4600-9e9c-15b3af7eae98": {
+    "type": "ListLibraryAgentsBlock",
+    "name": "列出库中的工作流",
+    "source": "List all agents in your personal library",
+    "description": "列出个人库中的所有工作流。"
+  },
+  "0a57b1b4-87c1-4758-91fc-badedcf338dd": {
+    "type": "GithubUnsubscribeNotificationThreadBlock",
+    "name": "GitHub · 退订通知会话",
+    "source": "This block unsubscribes you from a GitHub notification thread, muting future notifications unless you are mentioned again.",
+    "description": "此模块从 a 中取消您订阅GitHub通知线，修改未来通知，除非再次提及。"
+  },
+  "0afc0526-aba1-4b2b-888e-a22b7c3f359d": {
+    "type": "GmailRemoveLabelBlock",
+    "name": "Gmail · 移除标签",
+    "source": "A block that removes a label from a specific email message in a Gmail account.",
+    "description": "封锁，从 Gmail 账户中的特定电子邮件信息中删除标签。"
+  },
+  "0b02b072-abe7-11ef-8372-fb5d162dd712": {
+    "type": "ExecuteCodeBlock",
+    "name": "执行代码",
+    "source": "Executes code in a sandbox environment with internet access. Python and JavaScript code can take up to 10 MB of input data through `variables`.",
+    "description": "在可访问互联网的沙箱中执行代码。Python 和 JavaScript 可通过 `variables` 接收最多 10 MB 的输入数据。"
+  },
+  "0b706e86-de15-11ef-a113-32d3674e8b7e": {
+    "type": "TodoistGetTasksBlock",
+    "name": "Todoist · 获取任务",
+    "source": "Get active tasks from Todoist",
+    "description": "从 Todoist 获取活动任务"
+  },
+  "0cda29ff-c549-4a19-8805-c982b7d4ec34": {
+    "type": "ExaCreateWebsetBlock",
+    "name": "Exa · 创建网页集合",
+    "source": "Create a new Exa Webset for persistent web search collections with optional waiting for initial results",
+    "description": "创建可长期保存网页搜索结果的 Exa 网页集合，可选择等待首批结果。"
+  },
+  "0d0e684f-5cb9-4c4b-b8d1-47a0860e0c07": {
+    "type": "ZipListsBlock",
+    "name": "按位置组合列表",
+    "source": "Zips multiple lists together into a list of grouped elements. Supports padding to longest or truncating to shortest.",
+    "description": "将多个列表中相同位置的元素组合起来。长度不同时，可补齐到最长列表或截断到最短列表。"
+  },
+  "0d4130f7-e0ab-4d55-adc3-0a40225e80f4": {
+    "type": "GithubDeleteBranchBlock",
+    "name": "GitHub · 删除分支",
+    "source": "This block deletes a specified branch.",
+    "description": "通过此模块删除指定分支。"
+  },
+  "0d755311-d01c-4cd9-a1cc-196a78590a18": {
+    "type": "RMFGCreateDFMReportBlock",
+    "name": "RMFG · 创建可制造性报告",
+    "source": "Runs an RMFG manufacturability (DFM) check on a configured design. A blocked finding such as a hole close to a bend can be accepted with accepted_risks once the customer agrees; requires_input means a material or profile is still missing",
+    "description": "检查设计的可制造性（DFM）。仅在客户确认后，才能使用 accepted_risks 接受阻止生产的问题（如孔位离折弯处过近）。requires_input 表示仍缺少材料或型材配置。"
+  },
+  "0d7c4a91-5e28-4b6f-8a03-1c9e6f2b4d75": {
+    "type": "AllQuietUpdateIncidentBlock",
+    "name": "AllQuiet · 更新事件",
+    "source": "Investigates, resolves, escalates or comments on an All Quiet incident",
+    "description": "调查，解决，升级或评论\"无声\"事件"
+  },
+  "0d8cf328-ff84-4bc6-b4ae-fa6b9a728d5d": {
+    "type": "ExaListAgentRunEventsBlock",
+    "name": "Exa · 列出智能体任务事件",
+    "source": "List an Exa Agent run's stored events (created, started, completed, failed, cancelled, plus progress). Not available for Zero Data Retention teams.",
+    "description": "列出一个Exa Agent运行的存储事件 (创建，启动，完成，失败，取消，加上进展).没有为零数据保留团队提供。"
+  },
+  "0e1db79a-a419-4cc9-ab52-0a3133043198": {
+    "type": "ExaGetWebsetsTeamInfoBlock",
+    "name": "Exa · 获取网页集合团队信息",
+    "source": "Get your team's Websets concurrency usage and limits, to check capacity before launching large websets",
+    "description": "获取团队的Websets同时使用和限制，以检查容量，然后启动大型Websets"
+  },
+  "0e50422c-6dee-4145-83d6-3a5a392f65de": {
+    "type": "FindInDictionaryBlock",
+    "name": "在字典中查找",
+    "source": "A block that looks up a value in a dictionary, list, or object by key or index and returns the corresponding value.",
+    "description": "按键或索引在字典、列表或对象中查找并返回相应的值。"
+  },
+  "0f296c0b-6b6e-4280-b96e-ae1459b98dff": {
+    "type": "GoogleSheetsGetUniqueValuesBlock",
+    "name": "Google 表格 · 获取不重复值",
+    "source": "Get unique values from a column. Useful for building dropdown options or finding distinct categories.",
+    "description": "从一列中得到独特的值。对于构建下载选项或找到不同的类别来说有用。"
+  },
+  "0f3e4635-e810-43d9-9e81-49e6f4e83b7c": {
+    "type": "AIScreenshotToVideoAdBlock",
+    "name": "将截图转为视频广告",
+    "source": "Turns a screenshot into an engaging, avatar‑narrated video advert.",
+    "description": "将截图转为由数字人解说的视频广告。"
+  },
+  "0f4ecc72-b958-47b2-b65e-76d6d26b9b27": {
+    "type": "GoogleSheetsFindBlock",
+    "name": "Google 表格 · 查找值",
+    "source": "Find text in a Google Sheets spreadsheet. Returns locations and count of occurrences. Can find all occurrences or just the first one.",
+    "description": "查找文本Google Sheets电子表格。返回位置和事件数量。能找到所有事件，或者只是第一例。"
+  },
+  "0f6a2d8c-9e3b-4a17-85d2-b1c7e4f9a362": {
+    "type": "TregFindLinkedInFromEmailBlock",
+    "name": "Treg · 通过邮箱查找 LinkedIn 资料",
+    "source": "Find the LinkedIn profile behind a work email, through Treg.",
+    "description": "通过Treg找到工作电子邮件背后的LinkedIn个人资料。"
+  },
+  "0f9d81b5-a145-4c23-b87f-01d6bf37b677": {
+    "type": "GetLatestMemoryBlock",
+    "name": "获取最新记忆",
+    "source": "Retrieve the latest memory from Mem0 with optional key filtering",
+    "description": "从 Mem0 读取最近的记忆，可按键筛选。"
+  },
+  "100bc806-acbf-4dc5-a3a2-998026b96516": {
+    "type": "GoogleDocsGetMetadataBlock",
+    "name": "Google 文档 · 获取元数据",
+    "source": "Get metadata about a Google Doc",
+    "description": "获取有关Google文档的元数据"
+  },
+  "108d911f-e109-47fb-addc-2259792ee850": {
+    "type": "GoogleSheetsGetColumnBlock",
+    "name": "Google 表格 · 获取列",
+    "source": "Extract all values from a specific column. Useful for getting a list of emails, IDs, or any single field.",
+    "description": "从特定列中提取所有值。很有用，可以找到电子邮件，身份证或任何单个字段的列表。"
+  },
+  "12bf5a24-9b90-4f40-9090-4e86e6995e60": {
+    "type": "GmailReplyBlock",
+    "name": "Gmail · 回复邮件",
+    "source": "Reply to Gmail threads with automatic HTML detection and proper text formatting. Plain text replies maintain natural paragraph flow without 78-character line wrapping. HTML content is automatically detected and sent with correct MIME type.",
+    "description": "答复答复Gmailthreads自动自动HTML和适当的文本格式化。简体文本答案保持自然的段落流动，没有78字符的线条包装。通过正确的MIME类型，HTML内容会自动检测和发送。"
+  },
+  "12c57fbe-c270-4877-a2b6-d2d05529ba79": {
+    "type": "ExaDeleteWebsetItemBlock",
+    "name": "Exa · 删除网页集合条目",
+    "source": "Delete a specific item from a webset",
+    "description": "从网盘删除特定项"
+  },
+  "12fd7a3e-51ad-4b20-97c1-0391f207f517": {
+    "type": "AgentMailListPodDraftsBlock",
+    "name": "AgentMail · 列出租户草稿",
+    "source": "List all drafts across all inboxes within a pod. View pending emails for a customer.",
+    "description": "列出指定租户空间内所有收件箱的草稿，查看该客户的待发邮件。"
+  },
+  "1355f863-2db3-4d75-9fba-f91e8a8ca400": {
+    "type": "GithubReadFolderBlock",
+    "name": "GitHub · 读取文件夹",
+    "source": "This block reads the content of a specified folder from a GitHub repository.",
+    "description": "此模块读取指定文件夹的内容GitHub 仓库。"
+  },
+  "14da21ae-40a1-41bc-a111-c8e5c9ef012b": {
+    "type": "ExaWaitForSearchBlock",
+    "name": "Exa · 等待搜索任务",
+    "source": "Wait for a specific webset search to complete with progress tracking",
+    "description": "跟踪进度并等待指定的网页集合搜索完成。"
+  },
+  "15911223-52e9-47ec-ab95-0581f36c8092": {
+    "type": "GithubListNotificationsBlock",
+    "name": "GitHub · 列出通知",
+    "source": "This block lists GitHub notifications for the authenticated user, e.g. mentions, review requests, and updates on subscribed threads.",
+    "description": "此模块列表GitHub为经认证的用户发出的通知，例如，提及、审查请求和订阅通知的最新情况threads."
+  },
+  "166f3083-51da-4cfc-9f7a-57f47b1ba590": {
+    "type": "ModQueueBlock",
+    "name": "查看 Reddit 审核队列",
+    "source": "Fetches the mod queue for a subreddit. Scalar outputs fan out once per queued post or comment; items emits the full batch once. Requires moderator access.",
+    "description": "找一个小编的模特队伍。排列输出每次发帖或评论一次；项目发出全部批次一次。需要调节者访问。"
+  },
+  "168b919c-0e06-471d-bd46-eb354ed3d278": {
+    "type": "SendModMailBlock",
+    "name": "发送 Reddit 版主邮件",
+    "source": "Sends a modmail message from a subreddit to a user. Requires 'modmail' scope. Reddit scopes are account-wide, so this grants the ability across every subreddit you moderate, not only the one set here.",
+    "description": "通过一个微博向用户发送一个模特邮件。所需要求'modmail'范围。Reddit范围是整个账户范围的，因此这赋予了您的能力每一个子重组，你温和，而不仅仅是这里的一组。"
+  },
+  "16d7dc8c-de15-11ef-8ace-32d3674e8b7e": {
+    "type": "TodoistGetTaskBlock",
+    "name": "Todoist · 获取任务",
+    "source": "Get an active task from Todoist",
+    "description": "通过 Todoist 获取一个活跃任务"
+  },
+  "18cd5f6f-4ff6-45da-8300-25a50ea7fb75": {
+    "type": "AgentMailDeleteInboxThreadBlock",
+    "name": "AgentMail · 删除邮件会话",
+    "source": "Permanently delete a conversation thread and all its messages. This action cannot be undone.",
+    "description": "永久删除邮件会话及其中的所有邮件。此操作不可撤销。"
+  },
+  "1aae6a5e-a631-11ef-a090-435900c6d429": {
+    "type": "TwitterFollowUserBlock",
+    "name": "Twitter · 关注用户",
+    "source": "This block follows a specified Twitter user.",
+    "description": "通过Twitter,您可以访问此页面。"
+  },
+  "1aff59ef-e8a2-413e-9410-4ce7e4849337": {
+    "type": "StripeLinkRetrieveCardBlock",
+    "name": "Stripe Link · 获取银行卡",
+    "source": "Get the one-time virtual card number and CVC for an approved spend request, to type into a normal checkout form. Both are stored in clear text with the execution record — do not use this where PCI compliance matters. Self-hosted only; on AutoGPT Cloud use the Shared Payment Token flow with the MPP blocks instead.",
+    "description": "获取已授权支付请求的一次性虚拟卡号和 CVC，用于普通结账表单。两者都会以明文保存在运行记录中，请勿在要求符合 PCI 标准的场景使用。仅支持自托管部署；AutoGPT Cloud 请使用 MPP 共享支付令牌流程。"
+  },
+  "1b4c6bd1-4f28-4bad-9ae9-e7034a0f61ff": {
+    "type": "GetRedditUserInfoBlock",
+    "name": "获取 Reddit 用户资料",
+    "source": "Get information about a Reddit user including karma, account age, and verification status.",
+    "description": "获取有关Reddit用户的信息，包括卡玛，账户年龄和验证状态。"
+  },
+  "1bba7e54-2310-4a31-8e6f-54d5f9ab7459": {
+    "type": "TodoistCreateCommentBlock",
+    "name": "Todoist · 创建评论",
+    "source": "Creates a new comment on a Todoist task or project",
+    "description": "创建一个新评论 Todoist 任务或项目"
+  },
+  "1c1f8d0e-3e57-4c4a-9b7a-2f6a0f4d9e21": {
+    "type": "RMFGGetImageBlock",
+    "name": "RMFG · 获取图像",
+    "source": "Downloads RMFG's rendered picture of a design or part, with holes and bends labelled",
+    "description": "下载RMFG被贴有孔和弯曲标签的某个设计或部分的图片。"
+  },
+  "1d055e55-a2b9-4547-8311-907d05b0304d": {
+    "type": "PersistInformationBlock",
+    "name": "持久化保存数据",
+    "source": "Persists a key-value pair for use across multiple runs of an agent. Use this when\nyou need memory that persists between executions, e.g. last-seen state, counters,\naccumulated data.\n\nBeware of read->write race conditions for parallel use of the same key.",
+    "description": "保存键值对，供同一工作流在不同运行之间读取，例如上次处理的位置、计数器或累计数据。并行读写同一键可能产生竞态。"
+  },
+  "1d34db7f-10c1-45c1-9d43-749f743c8bd4": {
+    "type": "GithubGetPRReviewCommentsBlock",
+    "name": "GitHub · 获取拉取请求审阅评论",
+    "source": "This block gets all review comments from a GitHub pull request or from a specific review.",
+    "description": "此模块从GitHub拉取请求或特定的评论中获得所有评论。"
+  },
+  "1d9e6b3a-8f2c-4e57-b9a1-4c6f0e8d2b75": {
+    "type": "TregGoogleMapsSearchBlock",
+    "name": "Treg · 搜索 Google 地图",
+    "source": "Find businesses and places on Google Maps through Treg.",
+    "description": "寻找企业和地点Google Maps至Treg."
+  },
+  "1dcd8fd6-c13f-4e6f-bd4c-654428fa4757": {
+    "type": "ExaListWebsetsBlock",
+    "name": "Exa · 列出网页集合",
+    "source": "List all Websets with pagination support, optionally filtered by ID, external ID or title",
+    "description": "分页列出网页集合，可按 ID、外部 ID 或标题筛选。"
+  },
+  "1deaf67c-0407-457f-989d-323198073f74": {
+    "type": "LockRedditPostBlock",
+    "name": "锁定 Reddit 帖子",
+    "source": "Locks or unlocks a Reddit post or comment to prevent or allow replies. Requires 'modposts' scope. Reddit scopes are account-wide, so this grants the ability across every subreddit you moderate, not only the one set here.",
+    "description": "锁定或解锁Reddit帖子或评论以阻止或允许回复。所需要求'modposts'范围。Reddit范围是整个账户范围的，因此这赋予了您的能力每一个子重组，你温和，而不仅仅是这里的一组。"
+  },
+  "1ed5eab8-a630-11ef-8e21-cbbbc80cbb85": {
+    "type": "TwitterUnlikeTweetBlock",
+    "name": "Twitter · 取消点赞推文",
+    "source": "This block unlikes a tweet.",
+    "description": "此模块不喜欢推文。"
+  },
+  "1eee6d32-de15-11ef-a2ff-32d3674e8b7e": {
+    "type": "TodoistUpdateTaskBlock",
+    "name": "Todoist · 更新任务",
+    "source": "Updates an existing task in Todoist",
+    "description": "在 Todoist 中更新现有任务"
+  },
+  "1f292d4a-41a4-4977-9684-7c8d560b9f91": {
+    "type": "AITextGeneratorBlock",
+    "name": "AI 文本生成",
+    "source": "A block that produces text responses using a Large Language Model (LLM) based on customizable prompts and system instructions.",
+    "description": "让大语言模型根据提示词和系统指令生成文本回复。"
+  },
+  "1f43310a-a62f-11ef-8276-2b06a1bbae1a": {
+    "type": "TwitterUnfollowListBlock",
+    "name": "Twitter · 取消关注列表",
+    "source": "This block unfollows a specified Twitter list for the authenticated user.",
+    "description": "此模块不跟踪已确认的用户的指定Twitter列表。"
+  },
+  "1ff065e9-88e8-4358-9d82-8dc91f622ba9": {
+    "type": "StoreValueBlock",
+    "name": "存储值",
+    "source": "Holds or receives a value and outputs it statically so that it can be used multiple\ntimes within the same agent run. Whenever consumed, the output value reflects the\nlast input value that was received.\n\nNOTE: The value is NOT persisted across runs. To store data that survives between\nruns, use PersistInformationBlock and RetrieveInformationBlock instead.",
+    "description": "在当前工作流运行中保存并重复使用一个值。每次读取时都会返回最近一次收到的输入值。\n\n该值不会在运行结束后保留。如需跨次运行保存数据，请使用「持久化保存数据」和「读取已保存的数据」。"
+  },
+  "2052dd1b-74e1-46ac-9c87-c7a0e057b60b": {
+    "type": "GithubReleaseTriggerBlock",
+    "name": "GitHub · 版本发布触发器",
+    "source": "This block triggers on GitHub release events. Perfect for automating announcements to Discord, Twitter, or other platforms.",
+    "description": "此模块会触发GitHub发布事件。自动发布通知到Discord,Twitter或其他平台。"
+  },
+  "214542b6-3603-4bea-bc07-f51c2871cbd9": {
+    "type": "ExaCreateOrFindWebsetBlock",
+    "name": "Exa · 创建或查找网页集合",
+    "source": "Create a new webset or return existing one by external_id (idempotent operation)",
+    "description": "创建一个新的网盘或返回一个现有的external_id(无力运行)"
+  },
+  "21a79166-9df7-4b5f-9f36-96f639d86112": {
+    "type": "GmailGetThreadBlock",
+    "name": "Gmail · 获取邮件会话",
+    "source": "A block that retrieves an entire Gmail thread (email conversation) by ID, returning all messages with decoded bodies for reading complete conversations.",
+    "description": "通过ID检索整个Gmail线程 (电子邮件对话),返回所有信息，以解码器体用于阅读完整的对话。"
+  },
+  "222aa36c-fa70-4879-8e8a-37d100175f5c": {
+    "type": "GetSubredditRulesBlock",
+    "name": "获取子版块规则",
+    "source": "Get the rules for a subreddit to ensure compliance before posting.",
+    "description": "在发布之前，请确保一个子网的规则。"
+  },
+  "236663c8-a8dc-45f7-a050-2676bb0a3dd2": {
+    "type": "ExaGetImportBlock",
+    "name": "Exa · 获取导入任务",
+    "source": "Get the status and details of an import",
+    "description": "获取进口情况和详细信息"
+  },
+  "2410943a-0e63-47d9-a205-9f0dc8fc9b9b": {
+    "type": "ConductorListWorkspacesBlock",
+    "name": "Conductor · 列出工作区",
+    "source": "List Conductor workspaces, optionally filtered by project, state, name, repository, creator or activity date. When filtering within a project, a page can be empty while has_more is true; continue with next_offset until has_more is false.",
+    "description": "列表导体工作空间，可选用项目、状态、名称、存储处、创建者或活动日期过滤。在工程中过滤时，页面可以是空的has_more继续说next_offset在has_more没有任何证据。"
+  },
+  "245102c3-6af3-4515-a308-c2210b7939d2": {
+    "type": "ExaUpdateMonitorBlock",
+    "name": "Exa · 更新监控任务",
+    "source": "Update a monitor's status, schedule, search settings or metadata",
+    "description": "更新显示器状态，时间表，搜索设置或元数据"
+  },
+  "24bcd490-b02d-44c6-847d-b62a2319f5eb": {
+    "type": "GoogleSheetsDeleteRowsBlock",
+    "name": "Google 表格 · 删除行",
+    "source": "Delete specific rows from a Google Sheet by their row indices. Works well with FilterRowsBlock output.",
+    "description": "按行索引删除 Google 表格中的行，可搭配「筛选行」模块的输出。"
+  },
+  "25310c70-b89b-43ba-b25c-4dfa7e2a481c": {
+    "type": "GmailReadBlock",
+    "name": "Gmail · 读取",
+    "source": "A block that retrieves and reads emails from a Gmail account based on search criteria, returning detailed message information including subject, sender, body, and attachments.",
+    "description": "基于搜索标准，检索和阅读Gmail账户的电子邮件，返回详细的信息信息，包括主题，发送者，体格和附件。"
+  },
+  "2570e8fe-8447-43ed-84c7-70d657923231": {
+    "type": "TextDecoderBlock",
+    "name": "文本解码",
+    "source": "Decodes a string containing escape sequences into actual text",
+    "description": "将含转义序列的字符串还原为实际文本。"
+  },
+  "25ac9086-69fd-48b8-b910-9dbe04b8f3bd": {
+    "type": "AgentMailCreateDraftBlock",
+    "name": "AgentMail · 创建草稿",
+    "source": "Create a draft email for review or scheduled sending. Use send_at for automatic future delivery.",
+    "description": "起草邮件供审阅或定时发送。可通过 send_at 指定发送时间。"
+  },
+  "2602a7b1-3f4d-4e5f-9c8b-1a2b3c4d5e6f": {
+    "type": "AddToLibraryFromStoreBlock",
+    "name": "将市场工作流添加到工作流库",
+    "source": "Add an agent from the store to your personal library",
+    "description": "将市场中的工作流添加到个人工作流库。"
+  },
+  "2617e68a-43b3-441f-8b11-66bb041105b8": {
+    "type": "GoogleSheetsExportCsvBlock",
+    "name": "Google 表格 · 导出CSV",
+    "source": "Export a Google Sheet as CSV data",
+    "description": "作为 CSV 数据出口 Google Sheet"
+  },
+  "262ca24c-1025-43cf-a578-534e23234e97": {
+    "type": "GetListItemBlock",
+    "name": "获取列表项",
+    "source": "Returns the element at the given index.",
+    "description": "返回指定索引处的列表元素。"
+  },
+  "2646956e-96d5-4754-a3df-034017e7ed96": {
+    "type": "GithubListPRReviewersBlock",
+    "name": "GitHub · 列出拉取请求审阅人",
+    "source": "This block lists the requested reviewers for a specified GitHub pull request, optionally including users who have already submitted a review.",
+    "description": "本块列出了被指定GitHubPull 请求，包括已提交审查的用户。"
+  },
+  "264a399c-a631-11ef-a97d-bfde4ca91173": {
+    "type": "TwitterGetFollowingBlock",
+    "name": "Twitter · 获取正在关注的用户",
+    "source": "This block retrieves the users that a specified Twitter user is following.",
+    "description": "通过此区块检索特定的Twitter用户正在关注的用户。"
+  },
+  "2650584d-434f-46db-81ef-26c8d8d41f81": {
+    "type": "DeleteRedditCommentBlock",
+    "name": "删除 Reddit 评论",
+    "source": "Delete a Reddit comment that you own.",
+    "description": "删除您拥有的Reddit评论。"
+  },
+  "270f2384-8089-4b5b-b2e3-fe2ea3d87c02": {
+    "type": "GoogleSheetsFormatBlock",
+    "name": "Google 表格 · 设置单元格格式",
+    "source": "Format a range in a Google Sheet (sheet optional)",
+    "description": "在Google表格中格式化范围 (页面可选)"
+  },
+  "2788bdfa-1527-4603-a5e4-a455c05c032f": {
+    "type": "AgentMailGetMessageBlock",
+    "name": "AgentMail · 获取消息",
+    "source": "Retrieve a specific email message by ID. Includes extracted_text for clean reply content without quoted history.",
+    "description": "按 ID 读取邮件；extracted_text 提供不含引用历史的回复正文。"
+  },
+  "27e31876-18b6-44f3-ab97-f6226d8b3889": {
+    "type": "ReplaceDictionaryValueBlock",
+    "name": "替换字典值",
+    "source": "Replaces the value for a specified key in a dictionary.",
+    "description": "替换字典中指定键对应的值。"
+  },
+  "281a1730-e414-4773-8a20-7c3472cc267d": {
+    "type": "RMFGGetOrderBlock",
+    "name": "RMFG · 获取订单",
+    "source": "Fetches an RMFG order's status and shipment tracking",
+    "description": "获取RMFG订单的状态和货物跟踪"
+  },
+  "286380af-9529-4b55-8be0-1d7c854abdb5": {
+    "type": "XMLParserBlock",
+    "name": "解析 XML",
+    "source": "Parses XML using gravitasml to tokenize and coverts it to dict",
+    "description": "使用 gravitasml 解析 XML，并将结果转换为字典。"
+  },
+  "2867f7c4-cff9-4559-b7bf-9ced299ca50e": {
+    "type": "ExaGetSearchMonitorBlock",
+    "name": "Exa · 获取搜索监控任务",
+    "source": "Get an Exa Search Monitor's query, schedule, webhook and status",
+    "description": "获取指定搜索监控的查询、运行计划、Webhook 和状态。"
+  },
+  "292e7c78-a630-11ef-9f40-df5dffaca106": {
+    "type": "TwitterGetLikedTweetsBlock",
+    "name": "Twitter · 获取已点赞推文",
+    "source": "This block gets information about tweets liked by a user.",
+    "description": "区块可以获取用户喜欢的推特信息。"
+  },
+  "29b27ff0-0098-4859-90e7-f7190c9204b7": {
+    "type": "ExaTriggerSearchMonitorBlock",
+    "name": "Exa · 触发搜索监控任务",
+    "source": "Run an Exa Search Monitor now; results go to its webhook and can also be read with List/Get Search Monitor Runs",
+    "description": "运行Exa立即搜索监视监视器；结果将转到Webhook并且可以阅读List/Get搜索监视器运行"
+  },
+  "29fac798-de15-11ef-b839-32d3674e8b7e": {
+    "type": "TodoistCloseTaskBlock",
+    "name": "Todoist · 关闭任务",
+    "source": "Closes a task in Todoist",
+    "description": "在 Todoist 中关闭任务"
+  },
+  "2a1c757e-86cf-4c7e-aacf-060dc382e434": {
+    "type": "AgentTimeInputBlock",
+    "name": "时间输入",
+    "source": "Block for time input.",
+    "description": "接收时间。"
+  },
+  "2a6f8d13-4b70-4e29-8c5d-9e1b3f7a0c48": {
+    "type": "AllQuietListTeamsBlock",
+    "name": "AllQuiet · 列出团队",
+    "source": "Lists All Quiet teams and their IDs",
+    "description": "清单所有安静团队及其身份证"
+  },
+  "2b6bdb26-a62f-11ef-a9ce-ff89c2568726": {
+    "type": "TwitterGetOwnedListsBlock",
+    "name": "Twitter · 获取自建列表",
+    "source": "This block retrieves all Lists owned by a specified Twitter user.",
+    "description": "此模块检索了所有属于特定Twitter用户的列表。"
+  },
+  "2b8d57f1-1c9e-470f-a70b-5991c80fad5f": {
+    "type": "AgentMailDeleteListEntryBlock",
+    "name": "AgentMail · 删除名单条目",
+    "source": "Remove an email address or domain from an allow/block list to stop filtering it.",
+    "description": "从允许或阻止名单中移除邮箱地址或域名，不再对其应用该筛选规则。"
+  },
+  "2b8f6e1a-4c3d-4a95-b7e0-5d1c9a8f3e46": {
+    "type": "TregSearchCompaniesBlock",
+    "name": "Treg · 搜索公司",
+    "source": "Find companies by description, name, industry or the technology they use. Treg routes the search across many company-data providers.",
+    "description": "根据公司的描述，名称，行业或使用的技术来找到公司。Treg许多公司-数据提供者都通过搜索进行搜索。"
+  },
+  "2b935639-65bc-48fd-9f88-823cd706fcd9": {
+    "type": "JSONDecoderBlock",
+    "name": "JSON 解码",
+    "source": "Decodes a JSON string into the value or data structure, it represents, e.g. an object, list, string, or number.",
+    "description": "将 JSON 字符串解码为其表示的对象、列表、字符串、数字等值。"
+  },
+  "2c38c783-c484-4503-9280-ef5d1d345a7e": {
+    "type": "PostToGMBBlock",
+    "name": "发布到 Google 商家资料",
+    "source": "Post to Google My Business using Ayrshare",
+    "description": "通过 Ayrshare 发布到 Google 商家资料。"
+  },
+  "2cc58467-90a9-4ef8-a7a7-700784f93b76": {
+    "type": "GoogleDocsReplaceContentWithMarkdownBlock",
+    "name": "Google 文档 · 用 Markdown 替换内容",
+    "source": "Find text and replace it with formatted Markdown - ideal for LLM/AI output and templates",
+    "description": "找出文本，并用格式化的Markdown来取代它 - - 理想的LLM/AI输出和模板"
+  },
+  "2e468217-7ca0-4201-9553-36e93eb9357a": {
+    "type": "GithubSubmitPendingReviewBlock",
+    "name": "GitHub · 提交待提交的审阅",
+    "source": "This block submits a pending (draft) review on a GitHub pull request.",
+    "description": "通过GitHub拉取请求，该区块提交正在待定的 (草稿) 审查。"
+  },
+  "2e4faa8c-6086-4546-ba77-172d1d560186": {
+    "type": "GithubCompareBranchesBlock",
+    "name": "GitHub · 比较分支",
+    "source": "This block compares two branches or commits in a GitHub repository.",
+    "description": "此模块将两个分支或 GitHub 仓库中的提交进行比较。"
+  },
+  "2e6bf6f8-de15-11ef-ae7c-32d3674e8b7e": {
+    "type": "TodoistReopenTaskBlock",
+    "name": "Todoist · 重新打开任务",
+    "source": "Reopens a task in Todoist",
+    "description": "在 Todoist 中重新打开任务"
+  },
+  "2f45e89a-3b7d-4f22-b89e-6c4f5c7e1234": {
+    "type": "GithubCreateCheckRunBlock",
+    "name": "GitHub · 创建检查任务",
+    "source": "Creates a new check run for a specific commit in a GitHub repository",
+    "description": "在 GitHub 仓库中创建一个新的特定提交的检查运行"
+  },
+  "3060088f-6ed9-4928-9ba7-9c92823a7ccd": {
+    "type": "MatchTextPatternBlock",
+    "name": "匹配文本模式",
+    "source": "Matches text against a regex pattern and forwards data to positive or negative output based on the match.",
+    "description": "使用正则表达式匹配文本，并将数据发送到「匹配」或「不匹配」的输出端口。"
+  },
+  "30be12a4-57cb-4aa4-baf5-fcc68d136076": {
+    "type": "GithubUpdateFileBlock",
+    "name": "GitHub · 更新文件",
+    "source": "This block updates an existing file in a GitHub repository.",
+    "description": "此模块更新了GitHub 仓库中的现有文件。"
+  },
+  "30f66410-a631-11ef-8fe7-d7f888b4f43c": {
+    "type": "TwitterGetFollowersBlock",
+    "name": "Twitter · 获取关注者",
+    "source": "This block retrieves followers of a specified Twitter user.",
+    "description": "通过此区块，获取指定Twitter用户的追随者。"
+  },
+  "313515dd-9848-46ea-9cd6-3c627c892c56": {
+    "type": "NotionSearchBlock",
+    "name": "Notion · 搜索",
+    "source": "Search your Notion workspace for pages and databases by text query.",
+    "description": "通过文本查询搜索Notion 工作空间，查找页面和数据库。"
+  },
+  "3146e4fe-2cdd-4f29-bd12-0c9d5bb4deb0": {
+    "type": "ExtractTextInformationBlock",
+    "name": "提取文本信息",
+    "source": "This block extracts the text from the given text using the pattern (regex).",
+    "description": "使用正则表达式从输入文本中提取匹配内容。"
+  },
+  "3150fc1d-f7bc-46be-bdbe-2650ff7b2d62": {
+    "type": "HackerNewsGetItemBlock",
+    "name": "Hacker News · 获取条目",
+    "source": "Get a Hacker News story, comment, poll or job by its id or link, with its comments as a list in reading order. Each comment is followed by its replies, and direct replies come in Hacker News's ranking.",
+    "description": "获得 aHacker News其故事、评论、民调或工作ID或链接，并按阅读顺序列出其评论意见。每项评论之后都作出答复，直接答复。Hacker News排名。"
+  },
+  "31d1064e-7446-4693-a7d4-65e5ca1180d1": {
+    "type": "AddToDictionaryBlock",
+    "name": "添加键值对",
+    "source": "Adds a new key-value pair to a dictionary. If no dictionary is provided, a new one is created.",
+    "description": "向字典添加一个键值对；如未传入字典，将创建新字典。"
+  },
+  "32a87eab-381e-4dd4-bdb8-4c47151be35a": {
+    "type": "AIConversationBlock",
+    "name": "AI 多轮对话",
+    "source": "A block that facilitates multi-turn conversations with a Large Language Model (LLM), maintaining context across message exchanges.",
+    "description": "与大语言模型进行多轮对话，并在消息之间保留上下文。"
+  },
+  "32f80b6c-02e2-455f-af93-493514a19903": {
+    "type": "CompanyEnrichmentBlock",
+    "name": "补全公司资料",
+    "source": "Look up and enrich a company using DataForB2B's B2B database — firmographics, headcount/size, industry, domain and social profiles from a company domain, name or LinkedIn URL. Account enrichment for B2B sales and CRM.",
+    "description": "向上寻找并丰富使用DataForB2BB2B数据库 - 公司，headcount/size公司域名，名称或LinkedInURL的域名和社交个人资料。对于B2B销售和CRM的账户丰富化。"
+  },
+  "3352f512-3524-49ed-a08f-003042da2fc1": {
+    "type": "PostToFacebookBlock",
+    "name": "发布到 Facebook",
+    "source": "Post to Facebook using Ayrshare",
+    "description": "通过 Ayrshare 发布到 Facebook。"
+  },
+  "33a4c12a-b81b-4a95-90b1-ba2ebc52299d": {
+    "type": "ExaWaitForAgentRunBlock",
+    "name": "Exa · 等待智能体任务",
+    "source": "Wait for an Exa Agent run to finish, then return its answer, structured output, citations and cost",
+    "description": "等待Exa代理运行完成，然后返回答案，结构化输出，引用和成本"
+  },
+  "33c29ada-de15-11ef-bcbb-32d3674e8b7e": {
+    "type": "TodoistDeleteTaskBlock",
+    "name": "Todoist · 删除任务",
+    "source": "Deletes a task in Todoist",
+    "description": "在 Todoist 中删除任务"
+  },
+  "34077c5f-f962-49f2-9ec6-97c67077013a": {
+    "type": "AirtableUpdateTableBlock",
+    "name": "Airtable · 更新表",
+    "source": "Update table properties",
+    "description": "更新 Airtable 表的属性。"
+  },
+  "34275000-a630-11ef-b01e-5f00d9077c08": {
+    "type": "TwitterGetLikingUsersBlock",
+    "name": "Twitter · 获取点赞用户",
+    "source": "This block gets information about users who liked a tweet.",
+    "description": "此模块可以获取喜欢推文的用户信息。"
+  },
+  "342ff776-2e2c-4cdb-b392-4eeb34b21d5f": {
+    "type": "ExaCreateWebsetSearchBlock",
+    "name": "Exa · 创建网页集合搜索任务",
+    "source": "Add a new search to an existing webset to find more items",
+    "description": "添加一个新的搜索到现有网盘找到更多项目"
+  },
+  "3460367a-6ba7-4645-8ce6-47b05d040b92": {
+    "type": "GithubListReleasesBlock",
+    "name": "GitHub · 列出发布版本",
+    "source": "This block lists releases for a specified GitHub repository, optionally filtered by type and date range.",
+    "description": "本块列表指定GitHub仓库，可选按类型和日期范围过滤。"
+  },
+  "348c7833-4e97-41a3-b81d-ddc9d51cfe1d": {
+    "type": "AnySearchBlock",
+    "name": "AnySearch 搜索",
+    "source": "Searches the web using AnySearch - general queries plus vertical domains (finance, academic, health, legal, and more) via domain/sub_domain filters",
+    "description": "使用AnySearch搜索网 - 查询一般问题以及垂直域 (金融，学术，健康，法律等) 通过domain/sub_domain过滤器"
+  },
+  "34ebc80a-a62f-11ef-9c2a-3fcab6c07079": {
+    "type": "TwitterGetListBlock",
+    "name": "Twitter · 获取列表",
+    "source": "This block retrieves information about a specified Twitter List.",
+    "description": "此模块检索了关于指定Twitter列表的信息。"
+  },
+  "3503748d-62b6-4425-91d6-725b064af509": {
+    "type": "AddAudioToVideoBlock",
+    "name": "为视频添加音轨",
+    "source": "Block to attach an audio file to a video file using moviepy.",
+    "description": "使用 MoviePy 将音频添加到视频中。"
+  },
+  "351f6e51-695a-421a-9032-46a587b10336": {
+    "type": "AgentMailUpdateDraftBlock",
+    "name": "AgentMail · 更新草稿",
+    "source": "Update a draft's content, recipients, or scheduled send time. Use to reschedule or edit before sending.",
+    "description": "发送前修改草稿的内容、收件人或定时发送时间。"
+  },
+  "358924e7-9a11-4d1a-a0f2-13c67fe59e2e": {
+    "type": "GithubListTagsBlock",
+    "name": "GitHub · 列出标签",
+    "source": "This block lists all tags for a specified GitHub repository.",
+    "description": "此模块列出了指定GitHub 仓库的所有标签。"
+  },
+  "361697fb-0c4f-4feb-aed3-8320c88c771b": {
+    "type": "AIShortformVideoCreatorBlock",
+    "name": "AI 短视频生成",
+    "source": "Creates a shortform video using revid.ai",
+    "description": "使用 revid.ai 生成短视频。"
+  },
+  "363ae599-353e-4804-937e-b2ee3cef3da4": {
+    "type": "AgentOutputBlock",
+    "name": "工作流输出",
+    "source": "A block that records and formats workflow results for display to users, with optional Jinja2 template formatting support.",
+    "description": "记录工作流结果并展示给用户；可选用 Jinja2 模板指定输出格式。"
+  },
+  "363bb641-2147-47a0-9aaf-caae26b06dcb": {
+    "type": "TavilySearchBlock",
+    "name": "Tavily · 搜索",
+    "source": "Searches the web using Tavily's AI-native search API",
+    "description": "通过 Tavily 的 AI 搜索 API 查询网页。"
+  },
+  "36e6a259-168c-4032-83ec-b2935d0e4584": {
+    "type": "GetRedditPostBlock",
+    "name": "获取 Reddit 帖子",
+    "source": "Get detailed information about a specific Reddit post by its ID.",
+    "description": "获取关于特定Reddit中ID."
+  },
+  "3735a31f-7e18-4aca-9e90-08a7120674bc": {
+    "type": "FileReadBlock",
+    "name": "读取文件",
+    "source": "Reads a file and returns its content as a string, with optional chunking by delimiter and size limits",
+    "description": "读取文件并以字符串返回其内容，可按分隔符或大小限制分块。"
+  },
+  "377d1a6a-a99b-46cf-9af3-1d1b12758e04": {
+    "type": "BaasBotJoinMeetingBlock",
+    "name": "Meeting BaaS · 加入会议",
+    "source": "Deploy a bot to join and record a meeting",
+    "description": "让机器人加入并录制会议。"
+  },
+  "37c39e83-475d-4b3d-843a-d923d001b85a": {
+    "type": "AgentMailSendDraftBlock",
+    "name": "AgentMail · 发送草稿",
+    "source": "Send a draft immediately, converting it into a delivered message. The draft is deleted after sending.",
+    "description": "立即发送草稿；成功发送后，该草稿将被删除。"
+  },
+  "37e386a4-a631-11ef-b7bd-b78204b35fa4": {
+    "type": "TwitterUnfollowUserBlock",
+    "name": "Twitter · 取消关注用户",
+    "source": "This block unfollows a specified Twitter user.",
+    "description": "禁止关注特定的Twitter用户。"
+  },
+  "38997608-a57a-4e11-971c-b83a5332e80b": {
+    "type": "SendEmailToMeBlock",
+    "name": "给自己发邮件",
+    "source": "Email yourself: sends a message to your own inbox, at your account's email address, from the platform, with no email account to sign in to. Use it for \"email me\" or \"send it to myself\": a result, a summary or a recurring digest. It can't send to anyone else; to email other people, use Gmail or SMTP.",
+    "description": "通过平台向你注册账户时使用的邮箱发邮件，无需另行登录邮箱。适合将结果、摘要或定期简报发给自己。不能发给他人；如需给他人发邮件，请使用 Gmail 或 SMTP。"
+  },
+  "389eee51-a95e-4230-9bed-92167a327802": {
+    "type": "GithubMultiFileCommitBlock",
+    "name": "GitHub · 提交多个文件",
+    "source": "This block creates a single commit with multiple file upsert/delete operations using the Git Trees API.",
+    "description": "此模块创建一个单个提交，多个文件upsert/delete使用 Git Trees API 的操作。"
+  },
+  "3923754c-2198-4925-a1eb-06757eb7c4d0": {
+    "type": "ConductorManageSessionBlock",
+    "name": "Conductor · 管理会话",
+    "source": "Rename, cancel or archive a Conductor agent session. Cancel stops the running turn and drops queued prompts.",
+    "description": "调用名称，取消或存档导演代理会议。停止运行转折并减少队列提示。"
+  },
+  "39524701-026c-4328-87cc-1b88c8e2cb4c": {
+    "type": "SearchStoreAgentsBlock",
+    "name": "搜索市场工作流",
+    "source": "Search for agents in the store",
+    "description": "在市场中搜索工作流。"
+  },
+  "395d074c-3ddd-4f85-81a6-0344c280032a": {
+    "type": "ExaListWebsetEventsBlock",
+    "name": "Exa · 列出网页集合事件",
+    "source": "List Exa Websets events (new items, finished searches, monitor runs and more) from the last 60 days",
+    "description": "列出过去60天的Exa Websets事件 (新项目，完成搜索，监控运行等)"
+  },
+  "39aaae31-3eb1-44c6-9e37-5a44a4529649": {
+    "type": "AgentMailGetOrgThreadBlock",
+    "name": "AgentMail · 获取组织邮件会话",
+    "source": "Retrieve a conversation thread by ID from anywhere in the organization, without needing the inbox ID.",
+    "description": "按会话 ID 从组织中的任意收件箱读取会话，无需指定收件箱 ID。"
+  },
+  "39ccf704-62fb-4f03-b3b2-b4e2f0575e44": {
+    "type": "ParallelScoreDecisionBlock",
+    "name": "Parallel 评分判断",
+    "source": "Rate something on an ordered scale you define, using current web evidence from Parallel.",
+    "description": "根据你定义的顺序尺度，根据平行的当前网络证据来评价某个东西。"
+  },
+  "3a7c4b8d-6e2f-4a5d-b9c1-f8d23c5a9b0e": {
+    "type": "ScreenshotWebPageBlock",
+    "name": "网页截图",
+    "source": "Takes a screenshot of a specified website using ScreenshotOne API",
+    "description": "通过 ScreenshotOne API 截取指定网页的画面。"
+  },
+  "3a835db4-e60d-4e5f-aa7b-3b1ef14ff4a6": {
+    "type": "SmartSearchBlock",
+    "name": "智能搜索",
+    "source": "Natural-language search for people, leads or companies using DataForB2B's B2B database — describe your ideal lead or ICP in plain English and get matching profiles. Handles clarifying questions.",
+    "description": "使用 DataForB2B 的B2B数据库的自然语言搜索，描述您的理想的领导或ICP,处理澄清问题。"
+  },
+  "3ae02219-d540-47cd-9c78-3ad6c7d9820a": {
+    "type": "HubSpotCompanyBlock",
+    "name": "HubSpot · 管理公司",
+    "source": "Manages HubSpot companies - create, update, and retrieve company information",
+    "description": "管理HubSpot公司 - 创建，更新和获取公司信息"
+  },
+  "3b18d46c-3db6-42ae-a228-0ba441bdd176": {
+    "type": "GetPersonDetailBlock",
+    "name": "获取个人详情",
+    "source": "Get detailed person data with Apollo API, including email reveal",
+    "description": "通过Apollo API获取详细的个人数据，包括电子邮件披露"
+  },
+  "3b191d9f-356f-482d-8238-ba04b6d18381": {
+    "type": "OrchestratorBlock",
+    "name": "AI 工具调度",
+    "source": "Uses AI to intelligently decide what tool to use.",
+    "description": "使用 AI 根据任务选择合适的工具。"
+  },
+  "3b1d6b0e-4f0a-4b6e-9a51-6d2f8c7e0a11": {
+    "type": "FirecrawlFindDataToolsBlock",
+    "name": "Firecrawl · 查找数据工具",
+    "source": "Finds structured-data tools in Firecrawl Alexandria, free of charge: people and company search and enrichment (work emails, job titles, firmographics via Apollo, People Data Labs, FullEnrich), jobs, finance and filings, public records, places, retail and thousands more. Pass a tool's provider, capability and options to 'Firecrawl Run Data Tool'.",
+    "description": "查找结构化数据工具Firecrawl亚历山大免费：人和公司搜索和充实(工作电子邮件、职称、通过阿波罗的公司制图、人民数据实验室、人口数据实验室、人的数据实验室、人口资料实验室、个人资料数据库、个人资料实验室、工作邮件、职务称、公司地图、个人资料、个人资料和档案、个人资料资料、个人档案、个人档案和档案、档案、档案和档案等)FullEnrich工作、财务和档案、公共记录、场所、零售和数千多家。将工具的提供者、能力和选项传送给'Firecrawl Run Data Tool'."
+  },
+  "3b9fc742-06d4-49c7-b5ce-7e302dd7c8a7": {
+    "type": "LinkedinRoleLookupBlock",
+    "name": "查找 LinkedIn 职位",
+    "source": "Look up LinkedIn profiles by role in a company using Enrichlayer",
+    "description": "使用Enrichlayer查找公司职位的LinkedIn个人资料"
+  },
+  "3c9c2f42-b0c3-435f-ba35-05f7a25c772a": {
+    "type": "CountItemsBlock",
+    "name": "统计元素数量",
+    "source": "Counts the number of items in a collection.",
+    "description": "统计集合中的元素数量。"
+  },
+  "3ca46e05-dbaa-4afb-9e95-5a429c4177e6": {
+    "type": "PostToPinterestBlock",
+    "name": "发布到 Pinterest",
+    "source": "Post to Pinterest using Ayrshare",
+    "description": "通过 Ayrshare 发布到 Pinterest。"
+  },
+  "3cf9298b-5817-4141-9d80-7c2cc5199c8e": {
+    "type": "ConcatenateListsBlock",
+    "name": "合并列表",
+    "source": "Concatenates multiple lists into a single list. All elements from all input lists are combined in order. Supports optional deduplication and None removal.",
+    "description": "按顺序合并多个列表，可选择去重或移除空值（None）。"
+  },
+  "3d036b53-859c-4b17-9826-ca340f736e0e": {
+    "type": "VideoNarrationBlock",
+    "name": "视频配音",
+    "source": "Generate AI narration and add to video",
+    "description": "生成 AI 旁白并添加到视频。"
+  },
+  "3d4b2ccb-d654-4b5d-9750-e67f393f53f0": {
+    "type": "ConductorCreateSessionBlock",
+    "name": "Conductor · 创建会话",
+    "source": "Start a new agent session (chat) in an existing Conductor workspace, optionally with a first prompt, and optionally wait for the agent's reply.",
+    "description": "在现有Conductor工作空间中启动一个新的代理会话 (聊天),选择性是通过第一个提示，选择性是等待代理的回复。"
+  },
+  "3d67f123-a4b5-4c89-9d01-2e34f5c67890": {
+    "type": "GithubCreateStatusBlock",
+    "name": "GitHub · 创建状态",
+    "source": "Creates a new commit status in a GitHub repository",
+    "description": "在 GitHub 仓库中创建一个新的提交状态"
+  },
+  "3d71270d-599e-4148-9b95-71b35d2f44f0": {
+    "type": "SearchOrganizationsBlock",
+    "name": "搜索组织",
+    "source": "Search for organizations in Apollo",
+    "description": "在阿波罗搜索组织"
+  },
+  "3e1c2c1c-c689-4520-b956-1f3bf4e02bb7": {
+    "type": "GmailListLabelsBlock",
+    "name": "Gmail · 列出标签",
+    "source": "A block that retrieves all labels (categories) from a Gmail account for organizing and categorizing emails.",
+    "description": "封锁，从 Gmail 账户中获取所有标签 (类别) 来组织和分类电子邮件。"
+  },
+  "3e47e8ac-511a-4eb6-89c5-a6bcedc4236f": {
+    "type": "GoogleSheetsShareSpreadsheetBlock",
+    "name": "Google 表格 · 分享电子表格",
+    "source": "Share a Google Spreadsheet with users or get shareable link",
+    "description": "与指定用户分享 Google 电子表格，或获取分享链接。"
+  },
+  "3e5b9d7f-2a1c-4b84-8e6d-0f4a7c2e9b31": {
+    "type": "TregExtractWebPageBlock",
+    "name": "Treg · 提取网页",
+    "source": "Read a web page's main content as clean text, through Treg's cheapest working page extractor.",
+    "description": "通过Treg最便宜的工作页面提取器，"
+  },
+  "3e9bb152-0505-4a4e-91a8-a30f0cc3dbfb": {
+    "type": "RMFGGetQuoteBlock",
+    "name": "RMFG · 获取报价",
+    "source": "Fetches an RMFG quote by ID",
+    "description": "获取RMFG引引引引自ID"
+  },
+  "3ee8284e-a62f-11ef-84e4-8f6e2cbf0ddb": {
+    "type": "TwitterAddListMemberBlock",
+    "name": "Twitter · 添加列表成员",
+    "source": "This block adds a specified user to a Twitter List owned by the authenticated user.",
+    "description": "此模块将指定用户添加到验证用户拥有的Twitter列表中。"
+  },
+  "3ef1a419-3d76-4e07-b761-de9dad4d51d7": {
+    "type": "GithubListDiscussionsBlock",
+    "name": "GitHub · 列出讨论",
+    "source": "This block lists recent discussions for a specified GitHub repository.",
+    "description": "此模块列出了针对特定 GitHub 仓库的最近讨论。"
+  },
+  "3f7b2dcb-4a78-4e3f-b0f1-88132e1b89df": {
+    "type": "PublishToMediumBlock",
+    "name": "发布到 Medium",
+    "source": "Publishes a post to Medium.",
+    "description": "将文章发布到 Medium。"
+  },
+  "3f8a2c7e-9d14-4e5b-b806-7a2f1c4e9d63": {
+    "type": "AllQuietGetIncidentBlock",
+    "name": "AllQuiet · 获取事件",
+    "source": "Fetches a single All Quiet incident by ID",
+    "description": "由ID"
+  },
+  "3fd9c73d-4370-4925-a1ff-1b86b99fabfa": {
+    "type": "AIImageEditorBlock",
+    "name": "AI 图像编辑",
+    "source": "Edit images using Flux Kontext or Google Nano Banana models. Provide a prompt and optional reference image to generate a modified image.",
+    "description": "使用 Flux Kontext 或 Google Nano Banana 编辑图像。提供提示词，也可附上参考图。"
+  },
+  "3ff9bdf5-9613-4d21-8a60-90eb8b69c414": {
+    "type": "ExaGetNewItemsBlock",
+    "name": "Exa · 获取新增条目",
+    "source": "Get items added since a cursor - enables incremental processing without reprocessing",
+    "description": "从线索中添加项目 - 允许不需要再处理的增量处理"
+  },
+  "4041c618-b7b8-4b74-aa3d-5b7cb07d6b1d": {
+    "type": "CompanySearchBlock",
+    "name": "搜索公司",
+    "source": "Search companies and accounts by structured filters — industry, headcount/size, location, funding, keywords — using DataForB2B's database. Build target-account lists for B2B sales and account-based marketing. Accepts LinkedIn URLs as identifiers.",
+    "description": "由结构化过滤器——工业、工业、headcount/size通过使用 DataForB2B 的数据库。建立B2B销售和基于账户的营销目标账户清单。接受LinkedIn URL作为标识符。"
+  },
+  "40458504-a631-11ef-940b-eff92be55422": {
+    "type": "TwitterUnmuteUserBlock",
+    "name": "Twitter · 取消静音用户",
+    "source": "This block unmutes a specified Twitter user.",
+    "description": "通过此封闭，可以解除Twitter用户的声音。"
+  },
+  "40d71a5a-e268-4060-9ee0-38ae6f225682": {
+    "type": "SendDiscordDMBlock",
+    "name": "发送 Discord 私信",
+    "source": "Sends a direct message to a Discord user using their user ID.",
+    "description": "根据用户 ID 向 Discord 用户发送私信。"
+  },
+  "4193cb94-677c-48b0-9eec-6ac72fffd0f2": {
+    "type": "KeywordSuggestionExtractorBlock",
+    "name": "提取关键词建议",
+    "source": "Extract individual fields from a KeywordSuggestion object",
+    "description": "从关键字Suggestion对象中提取单个字段"
+  },
+  "420a2b3c-5db2-4bda-82bc-a68a862a3d55": {
+    "type": "GoogleDocsReadBlock",
+    "name": "Google 文档 · 读取",
+    "source": "Read text content from a Google Doc",
+    "description": "从Google文档读取文本内容"
+  },
+  "42283bf5-8a32-4fb4-92a2-60a9ea48e105": {
+    "type": "Slant3DGetOrdersBlock",
+    "name": "Slant 3D · 获取订单",
+    "source": "Get all orders for the account",
+    "description": "收到所有订单"
+  },
+  "422cb708-3109-4277-bfe3-bc2ae5812777": {
+    "type": "ReverseListOrderBlock",
+    "name": "反转列表",
+    "source": "Reverses the order of elements in a list",
+    "description": "反转列表中元素的顺序。"
+  },
+  "42527e98-47b6-44ce-ac0e-86b4883721d3": {
+    "type": "AirtableCreateRecordsBlock",
+    "name": "Airtable · 创建记录",
+    "source": "Create records in an Airtable table",
+    "description": "在 Airtable 表中创建记录。"
+  },
+  "42866290-1479-4153-83e7-550b703e9da2": {
+    "type": "AgentMailGetInboxThreadBlock",
+    "name": "AgentMail · 获取邮件会话",
+    "source": "Retrieve a conversation thread with all its messages. Use for getting full conversation context before replying.",
+    "description": "读取邮件会话中的所有消息，方便在回复前了解完整上下文。"
+  },
+  "428d56d4-52d0-47d9-8544-836d13d196c0": {
+    "type": "BanSubredditUserBlock",
+    "name": "封禁子版块用户",
+    "source": "Bans a user from a subreddit. Requires 'modcontributors' scope. Reddit scopes are account-wide, so this grants the ability across every subreddit you moderate, not only the one set here.",
+    "description": "禁止用户从一个子网上。所需要求'modcontributors'范围。Reddit范围是整个账户范围的，因此这赋予了您的能力每一个子重组，你温和，而不仅仅是这里的一组。"
+  },
+  "4302f685-7fab-4396-abbb-f7421f2ad511": {
+    "type": "RMFGCreateCartBlock",
+    "name": "RMFG · 创建购物车",
+    "source": "Creates an RMFG cart with a website checkout link for one or more configured designs, priced live with shipping and tax once an address is set. A cart is not an order; the person pays on the link or Pay Cart charges the saved card after approval",
+    "description": "为一个或多个已配置的设计创建 RMFG 购物车和结账链接；设置地址后可查看含运费和税费的实时报价。创建购物车不会下单。用户可在链接中付款，也可在获得批准后用「支付购物车」从已保存的银行卡扣款。"
+  },
+  "4335878a-394e-4e67-adf2-919877ff49ae": {
+    "type": "SendEmailBlock",
+    "name": "发送电子邮件",
+    "source": "This block sends an email using the provided SMTP credentials.",
+    "description": "使用提供的 SMTP 凭据发送电子邮件。"
+  },
+  "436c3984-57fd-4b85-8e9a-459b356883bd": {
+    "type": "ExtractWebsiteContentBlock",
+    "name": "提取网页内容",
+    "source": "This block scrapes the content from the given web URL.",
+    "description": "提取给定 URL 对应的网页内容。"
+  },
+  "4435e4e0-df6e-4301-8f35-ad70b12fc9ec": {
+    "type": "TelegramMessageTriggerBlock",
+    "name": "Telegram 消息触发器",
+    "source": "Triggers when a message is received or edited in your Telegram bot. Supports text, photos, voice messages, audio files, documents, and videos.",
+    "description": "在 Telegram 机器人收到消息或消息被编辑时触发，支持文本、图片、语音、音频、文档和视频。"
+  },
+  "446a1d35-9d8f-4ac5-83ea-7684ec50e6af": {
+    "type": "LinearSearchProjectsBlock",
+    "name": "Linear · 搜索项目",
+    "source": "Searches for projects on Linear",
+    "description": "搜索项目Linear"
+  },
+  "44f6c8ad-d75c-4ae1-8209-aad1c0326928": {
+    "type": "AIMusicGeneratorBlock",
+    "name": "AI 音乐生成",
+    "source": "This block generates music using Meta's MusicGen model on Replicate.",
+    "description": "通过 Replicate 调用 Meta 的 MusicGen 模型生成音乐。"
+  },
+  "454afb97-46c4-43ca-b54a-543d647a9113": {
+    "type": "GithubGetNotificationThreadBlock",
+    "name": "GitHub · 获取通知会话",
+    "source": "This block fetches a single GitHub notification thread.",
+    "description": "此模块带来了一个GitHub通知线程。"
+  },
+  "45aee5bf-4767-45d1-a28b-e01c5aae9fc1": {
+    "type": "GetAllMemoriesBlock",
+    "name": "获取全部记忆",
+    "source": "Retrieve all memories from Mem0 with optional conversation filtering",
+    "description": "从 Mem0 读取全部记忆，可按会话筛选。"
+  },
+  "45e78db5-03e9-447f-9395-308d712f5f08": {
+    "type": "BlockInstallationBlock",
+    "name": "安装模块",
+    "source": "Given a code string, this block allows the verification and installation of a block code into the system.",
+    "description": "验证给定的模块代码字符串，并将模块安装到系统中。"
+  },
+  "46afe2ea-c613-43f8-95ff-6692c3ef6876": {
+    "type": "RemoveFromDictionaryBlock",
+    "name": "删除键值对",
+    "source": "Removes a key-value pair from a dictionary.",
+    "description": "从字典中移除指定键值对。"
+  },
+  "46e6429c-a62f-11ef-81c0-2b55bc7823ba": {
+    "type": "TwitterGetListMembershipsBlock",
+    "name": "Twitter · 获取所属列表",
+    "source": "This block retrieves all Lists that a specified user is a member of.",
+    "description": "此模块检索了指定用户是成员的所有列表。"
+  },
+  "475024da-a631-11ef-9ccd-f724b8b03cda": {
+    "type": "TwitterGetMutedUsersBlock",
+    "name": "Twitter · 获取已静音用户",
+    "source": "This block gets a list of users muted by the authenticating user.",
+    "description": "通过验证用户，该区块得到了用户的清单。"
+  },
+  "477f2168-cd91-475a-8146-9499a5982434": {
+    "type": "PineconeInsertBlock",
+    "name": "向 Pinecone 写入向量",
+    "source": "Upload data to a Pinecone index",
+    "description": "将数据上传到Pinecone指数"
+  },
+  "47bc74eb-4af2-452c-b933-af377c7287df": {
+    "type": "PostToTelegramBlock",
+    "name": "发布到 Telegram",
+    "source": "Post to Telegram using Ayrshare",
+    "description": "通过 Ayrshare 发布到 Telegram。"
+  },
+  "47cc3cd8-840f-4ec4-8d40-fcaba75fbe1a": {
+    "type": "ExaWebsetStatusBlock",
+    "name": "Exa · 查看网页集合状态",
+    "source": "Get a quick status overview of a webset",
+    "description": "快速查看一个网盘的状态"
+  },
+  "47f94891-a2b1-4f1c-b5f2-573c043f721e": {
+    "type": "GithubSearchCodeBlock",
+    "name": "GitHub · 搜索代码",
+    "source": "This block searches for code in GitHub repositories.",
+    "description": "在 GitHub 仓库中搜索代码。"
+  },
+  "48356027-25ee-4711-ae2e-5204e5a5f717": {
+    "type": "RMFGListTubeProfilesBlock",
+    "name": "RMFG · 列出管材截面",
+    "source": "Lists the tube stock profiles RMFG can laser-cut",
+    "description": "列出RMFG可以激光切割的管材配置文件"
+  },
+  "48d8fdab-8f03-41f3-8407-8107ba11ec9b": {
+    "type": "PineconeInitBlock",
+    "name": "初始化 Pinecone 索引",
+    "source": "Initializes a Pinecone index",
+    "description": "启动Pinecone指数"
+  },
+  "4a0c975e-807b-4d5e-83c9-1619864a4b1a": {
+    "type": "SearchRedditBlock",
+    "name": "搜索 Reddit",
+    "source": "Search Reddit for posts matching a query. Can search all of Reddit or a specific subreddit.",
+    "description": "搜索Reddit上符合查询的帖子。搜索所有Reddit或特定的子网。"
+  },
+  "4a448883-71fa-49cf-91cf-70d793bd7d87": {
+    "type": "DataSamplingBlock",
+    "name": "数据采样",
+    "source": "This block samples data from a given dataset using various sampling methods.",
+    "description": "按所选抽样方法从数据集中抽取样本。"
+  },
+  "4a72f115-17a1-4843-899f-fdbeb480903e": {
+    "type": "RMFGPayCartBlock",
+    "name": "RMFG · 支付购物车",
+    "source": "Pays an RMFG cart with the saved card and places a real production order",
+    "description": "使用已保存的银行卡支付 RMFG 购物车，并提交真实的生产订单。"
+  },
+  "4a92261b-701e-4ffb-8970-675fd28e261f": {
+    "type": "PostRedditCommentBlock",
+    "name": "发布 Reddit 评论",
+    "source": "This block posts a Reddit comment on a specified Reddit post.",
+    "description": "此模块块发布了Reddit评论，"
+  },
+  "4ab3381b-0c07-4201-89b3-fa2ec264f154": {
+    "type": "RedditGetMyPostsBlock",
+    "name": "获取我发布的 Reddit 帖子",
+    "source": "Fetch posts created by the authenticated Reddit user (you).",
+    "description": "带来由身份验证的Reddit用户 (您) 创建的帖子。"
+  },
+  "4ace99c4-5b0d-4f2d-a371-397c65acfcd2": {
+    "type": "StripeLinkGetShippingAddressBlock",
+    "name": "Stripe Link · 获取配送地址",
+    "source": "Get the delivery addresses saved on the user's Link wallet, with the default one resolved for you. Use it for any purchase that ships something.",
+    "description": "读取用户在 Link 钱包中保存的配送地址，并识别默认地址。适用于需要配送实物的购买操作。"
+  },
+  "4bd8d466-ed5d-4e44-8083-97f25a8044e7": {
+    "type": "AirtableListBasesBlock",
+    "name": "Airtable · 列出数据库",
+    "source": "List all bases in Airtable",
+    "description": "列出 Airtable 中的所有数据库。"
+  },
+  "4c9a1e7f-8b2d-4e63-a5f0-2d7c9b1e8a34": {
+    "type": "TregFindPersonalEmailBlock",
+    "name": "Treg · 查找个人邮箱",
+    "source": "Find a person's personal email (Gmail, Outlook and so on) from their LinkedIn URL or work email, through Treg.",
+    "description": "在他们的LinkedInURL或工作电子邮件中，通过Treg找到一个人的个人电子邮件 (Gmail,Outlook等)."
+  },
+  "4d0b4c5c-a630-11ef-8e08-1b14c507b347": {
+    "type": "TwitterLikeTweetBlock",
+    "name": "Twitter · 点赞推文",
+    "source": "This block likes a tweet.",
+    "description": "此模块喜欢推文。"
+  },
+  "4d1919d0-a631-11ef-90ab-3b73af9ce8f1": {
+    "type": "TwitterMuteUserBlock",
+    "name": "Twitter · 静音用户",
+    "source": "This block mutes a specified Twitter user.",
+    "description": "此模块哑哑指定Twitter用户。"
+  },
+  "4dba046e-a62f-11ef-b69a-87240c84b4c7": {
+    "type": "TwitterGetListMembersBlock",
+    "name": "Twitter · 获取列表成员",
+    "source": "This block retrieves the members of a specified Twitter List.",
+    "description": "通过此区块，可以查找指定Twitter列表的成员。"
+  },
+  "4dc35c0f-4fd8-465e-9616-5a216f1ba2bc": {
+    "type": "SQLQueryBlock",
+    "name": "SQL 查询",
+    "source": "Execute a SQL query. Read-only by default for safety -- disable to allow write operations. Supports PostgreSQL, MySQL, and MSSQL via SQLAlchemy.",
+    "description": "执行 SQL 查询。默认只读；关闭只读模式后才允许写入。通过 SQLAlchemy 支持 PostgreSQL、MySQL 和 MSSQL。"
+  },
+  "4dd0f5c1-aaa6-4c20-b942-613aea6528c9": {
+    "type": "RMFGListOrdersBlock",
+    "name": "RMFG · 列出订单",
+    "source": "Lists the RMFG account's manufacturing orders",
+    "description": "列出RMFG账户的制造订单"
+  },
+  "4e34f4a5-9b89-4326-ba77-2dd6750b7194": {
+    "type": "ClaudeCodeBlock",
+    "name": "运行 Claude Code",
+    "source": "Execute tasks using Claude Code in an E2B sandbox. Claude Code can create files, install tools, run commands, and perform complex coding tasks autonomously.",
+    "description": "在 E2B 沙箱中使用 Claude Code 执行编程任务，可创建文件、安装工具和运行命令。"
+  },
+  "4e7ec771-4cc8-4eb7-ae3d-46377ecdb5d2": {
+    "type": "GoogleDocsShareBlock",
+    "name": "Google 文档 · 分享文档",
+    "source": "Share a Google Doc with specific users",
+    "description": "与特定用户共享Google文档"
+  },
+  "4f22dbe5-2855-498a-ab82-6857441ea4b1": {
+    "type": "ConductorSendMessageBlock",
+    "name": "Conductor · 发送消息",
+    "source": "Send a prompt to a Conductor agent session and, by default, wait for the agent to finish and return its reply.",
+    "description": "发送提示给导演代理会议，默认，等待代理完成并返回答案。"
+  },
+  "4fa3e627-a0ff-485f-8732-52148051646c": {
+    "type": "ExaGetWebsetSearchBlock",
+    "name": "Exa · 获取网页集合搜索任务",
+    "source": "Get the status and details of a webset search",
+    "description": "获取网站搜索的状态和详细信息"
+  },
+  "4ff1ff6d-cc40-4caa-ae69-011daa20c378": {
+    "type": "UnrealTextToSpeechBlock",
+    "name": "Unreal 文字转语音",
+    "source": "Converts text to speech using the Unreal Speech API",
+    "description": "使用 Unreal Speech API 将文本转换为语音。"
+  },
+  "50cf5290-ec87-4ca1-b7d7-b8b4ef772f6d": {
+    "type": "SendSlackMessageBlock",
+    "name": "发送 Slack 消息",
+    "source": "Send a text message to any Slack channel, DM, or thread. Required bot token scope: chat:write.",
+    "description": "向 Slack 频道、私信或会话串发送文本消息。机器人令牌需具备 chat:write 权限。"
+  },
+  "5185f32e-4b65-4ecf-8fbb-873f003f09d6": {
+    "type": "TextEncoderBlock",
+    "name": "文本编码",
+    "source": "Encodes a string by converting special characters into escape sequences",
+    "description": "将字符串中的特殊字符转换为转义序列。"
+  },
+  "5246cc1d-34b7-452b-8fc5-3fb25fd8f542": {
+    "type": "NotionReadPageBlock",
+    "name": "Notion · 读取页面",
+    "source": "Read a Notion page by its ID and return its raw JSON.",
+    "description": "读aNotion以其页数ID并原生地返回JSON."
+  },
+  "5267326e-c4c1-4016-9f54-4e72ad02f813": {
+    "type": "HubSpotContactBlock",
+    "name": "HubSpot · 管理联系人",
+    "source": "Manages HubSpot contacts - create, update, and retrieve contact information",
+    "description": "管理HubSpot联系人 - 创建，更新和检索联系信息"
+  },
+  "529b586b-38e7-4ba8-a564-89542075f633": {
+    "type": "JevRouteBlock",
+    "name": "Jev 路由分流",
+    "source": "Route data using Jev's typed choice. Plain-language option descriptions define each route; only the winning pin fires.",
+    "description": "通过Jev的输入选择进行路线数据。普通语言选项描述定义了每一条路线；只有胜者针火。"
+  },
+  "530cf046-2ce0-4854-ae2c-659db17c7a46": {
+    "type": "AIVideoGeneratorBlock",
+    "name": "AI 视频生成",
+    "source": "Generate videos using FAL AI models.",
+    "description": "使用 FAL AI 模型生成视频。"
+  },
+  "530d5158-34f7-4ea1-a91b-134f5eabc3b8": {
+    "type": "GithubMarkNotificationThreadAsReadBlock",
+    "name": "GitHub · 将通知会话标记为已读",
+    "source": "This block marks a single GitHub notification thread as read.",
+    "description": "此模块标记一个单个GitHub通知线程作为读取。"
+  },
+  "531d50c0-d6b9-4cf9-a013-7bf783d313c7": {
+    "type": "GoogleSheetsAppendRowBlock",
+    "name": "Google 表格 · 追加行",
+    "source": "Append or Add a single row to the end of a Google Sheet. The row is added after the last row with data.",
+    "description": "添加或添加一个行在 Google 页面的最后。列后添加最后一行，包含数据。"
+  },
+  "53e5cf8e-a630-11ef-ba85-df6d666fa5d5": {
+    "type": "TwitterSearchRecentTweetsBlock",
+    "name": "Twitter · 搜索最近推文",
+    "source": "This block searches all public Tweets in Twitter history.",
+    "description": "此模块查找Twitter历史上的所有公开推文。"
+  },
+  "5446db8e-a631-11ef-812a-cf315d373ee9": {
+    "type": "TwitterGetUserBlock",
+    "name": "Twitter · 获取用户",
+    "source": "This block retrieves information about a specified Twitter user.",
+    "description": "通过此区块获取有关特定Twitter用户的信息。"
+  },
+  "54de35e1-407f-450b-b5fa-3b5e2eba8185": {
+    "type": "Slant3DCancelOrderBlock",
+    "name": "Slant 3D · 取消订单",
+    "source": "Cancel an order before production starts",
+    "description": "在开始生产前取消订单。"
+  },
+  "551e0a35-100b-49b7-89b8-3031322239b6": {
+    "type": "GithubStarTriggerBlock",
+    "name": "GitHub · 加星触发器",
+    "source": "This block triggers on GitHub star events. Useful for celebrating milestones (e.g., 1k, 10k stars) or tracking engagement.",
+    "description": "此模块会触发GitHub星级事件。适用于庆祝里程碑 (例如1k,10k星) 或跟踪参与。"
+  },
+  "553361bc-bb1b-4322-9ad4-0c226200217e": {
+    "type": "AgentMailGetPodBlock",
+    "name": "AgentMail · 获取租户空间",
+    "source": "Retrieve details of an existing pod including its client_id mapping and metadata.",
+    "description": "获取租户空间的 client_id 映射和元数据。"
+  },
+  "553ec5b8-6c45-4299-8d75-b394d05f72ff": {
+    "type": "AIConditionBlock",
+    "name": "AI 条件判断",
+    "source": "Uses AI to evaluate natural language conditions and provide conditional outputs",
+    "description": "使用 AI 判断自然语言描述的条件，并按判断结果输出。"
+  },
+  "554b0945-a2f7-4ee0-bee5-1ffb298a2e30": {
+    "type": "SearchFilterTypeaheadBlock",
+    "name": "搜索筛选条件建议",
+    "source": "Resolve the exact filter value (company, industry, job title, skill, school, investor, location, category) for people and company searches with DataForB2B.",
+    "description": "确定人员和公司搜索的确切过滤价值(公司、行业、职称、技能、学校、投资者、地点、类别)DataForB2B."
+  },
+  "554f4bad-4c99-48ba-9d1c-75840b71c5ad": {
+    "type": "SendTelegramDocumentBlock",
+    "name": "发送 Telegram 文档",
+    "source": "Send a document (any file type) to a Telegram chat.",
+    "description": "向 Telegram 会话发送文档，支持任意文件类型。"
+  },
+  "55fba510-de15-11ef-aed2-32d3674e8b7e": {
+    "type": "TodoistGetSharedLabelsBlock",
+    "name": "Todoist · 获取共享标签",
+    "source": "Gets all shared labels from Todoist",
+    "description": "得到所有所有共享标签从 Todoist"
+  },
+  "5603b273-f41e-4020-af7d-fbc9c6a8d928": {
+    "type": "AgentTableInputBlock",
+    "name": "表格输入",
+    "source": "Block for table data input with customizable headers.",
+    "description": "接收表格数据，并支持自定义表头。"
+  },
+  "5724e902-3635-47e9-a108-aaa0263a4988": {
+    "type": "GoogleSheetsReadBlock",
+    "name": "Google 表格 · 读取",
+    "source": "A block that reads data from a Google Sheets spreadsheet using A1 notation range selection.",
+    "description": "使用A1符号范围选择，读取Google Sheets表中的数据。"
+  },
+  "582195c2-ccee-4fc2-b646-18f72eb9906c": {
+    "type": "GoogleSheetsFilterRowsBlock",
+    "name": "Google 表格 · 筛选行",
+    "source": "Filter rows in a Google Sheet based on a column condition. Returns matching rows and their indices.",
+    "description": "过滤列Google基于列条件的工作表。返回匹配的行列和它们的指数。"
+  },
+  "588a9fde-5733-4da7-b03c-35f5671e960f": {
+    "type": "AirtableListRecordsBlock",
+    "name": "Airtable · 列出记录",
+    "source": "List records from an Airtable table",
+    "description": "列出指定 Airtable 表中的记录。"
+  },
+  "589af4e4-507f-42fd-b9ac-a67ecef25811": {
+    "type": "PostToLinkedInBlock",
+    "name": "发布到 LinkedIn",
+    "source": "Post to LinkedIn using Ayrshare",
+    "description": "通过 Ayrshare 发布到 LinkedIn。"
+  },
+  "58bd2a19-115d-4fd1-8ca4-13b9e37fa6a0": {
+    "type": "AIAdMakerVideoCreatorBlock",
+    "name": "AI 广告视频生成",
+    "source": "Creates an AI‑generated 30‑second advert (text + images)",
+    "description": "根据文字和图片生成 30 秒的 AI 广告视频。"
+  },
+  "592f815e-35c3-4fed-96cd-a69966b45c8f": {
+    "type": "DiscordChannelInfoBlock",
+    "name": "获取 Discord 频道信息",
+    "source": "Resolves Discord channel names to IDs and vice versa.",
+    "description": "在 Discord 频道名称与 ID 之间进行转换。"
+  },
+  "59b266b6-5cce-4661-a1d3-c417e64d68e9": {
+    "type": "GoogleSheetsDeleteColumnBlock",
+    "name": "Google 表格 · 删除列",
+    "source": "Delete a column by header name or column letter.",
+    "description": "按表头名称或列字母删除指定列。"
+  },
+  "59b49f59-a6d1-4203-94c0-3908adac50b6": {
+    "type": "AgentMailUpdateInboxBlock",
+    "name": "AgentMail · 更新收件箱",
+    "source": "Update the display name of an AgentMail inbox. Changes the 'From' name shown when emails are sent.",
+    "description": "修改收件箱的显示名称，即收件人看到的发件人名称。"
+  },
+  "59d4f241-968a-4040-95da-348ac5c5ce27": {
+    "type": "GithubGetRepositoryInfoBlock",
+    "name": "GitHub · 获取仓库信息",
+    "source": "This block retrieves metadata about a GitHub repository.",
+    "description": "此模块检索了GitHub 仓库的元数据。"
+  },
+  "5a0e3c9d-7b14-4f2e-86a1-c4d9e2b7f051": {
+    "type": "TregSearchPeopleBlock",
+    "name": "Treg · 搜索人员",
+    "source": "Find people by description, company, job title or name. Treg routes the search across many people-data providers, cheapest first.",
+    "description": "根据描述，公司，职位或姓名找到人。通过Treg,搜索通过许多人数据提供商，最便宜的首选。"
+  },
+  "5a2d1f0c-01fb-43ea-bad7-2260d269c930": {
+    "type": "GetSubredditInfoBlock",
+    "name": "获取子版块信息",
+    "source": "Get information about a subreddit including subscriber count, description, and rules.",
+    "description": "获取有关 subreddit 的信息，包括订阅者数量，描述和规则。"
+  },
+  "5a3d1320-a62f-11ef-b7ce-a79e7656bcb0": {
+    "type": "TwitterRemoveListMemberBlock",
+    "name": "Twitter · 移除列表成员",
+    "source": "This block removes a specified user from a Twitter List owned by the authenticated user.",
+    "description": "通过此区块将指定用户从身份验证用户拥有的Twitter列表中删除。"
+  },
+  "5a91bb34-7ffe-4b9e-957b-9d4f8fe8dbc9": {
+    "type": "GetRedditInboxBlock",
+    "name": "获取 Reddit 收件箱",
+    "source": "Get messages, mentions, and comment replies from your Reddit inbox.",
+    "description": "收到来自Reddit的邮箱的消息，提及和评论回复。"
+  },
+  "5abc857c-a631-11ef-8cfc-f7b79354f7a1": {
+    "type": "TwitterGetUsersBlock",
+    "name": "Twitter · 获取用户",
+    "source": "This block retrieves information about multiple Twitter users.",
+    "description": "通过此区块，可以获取有关多个Twitter用户的信息。"
+  },
+  "5c7e1a9f-4d6b-4f38-92c0-8a3e5b1d7f69": {
+    "type": "TregMapWebsiteBlock",
+    "name": "Treg · 生成网站地图",
+    "source": "List the pages on a website, through Treg.",
+    "description": "通过Treg列出网站上的页面。"
+  },
+  "5c852a2d-d505-4a56-b711-7def8dd14e72": {
+    "type": "ExaGetMonitorBlock",
+    "name": "Exa · 获取监控任务",
+    "source": "Get the details and status of a webset monitor",
+    "description": "获取网盘显示器的详细信息和状态"
+  },
+  "5da9d0fd-4b5b-4318-8302-8f71d0ccce9d": {
+    "type": "ExaExportWebsetBlock",
+    "name": "Exa · 导出网页集合",
+    "source": "Export webset data in JSON, CSV, or JSON Lines format",
+    "description": "输出JSON,CSV或JSON Lines格式的网集数据"
+  },
+  "5e2c6d0a-1e37-489f-b1d0-8e1812b23333": {
+    "type": "FindInListBlock",
+    "name": "在列表中查找",
+    "source": "Finds the index of the value in the list.",
+    "description": "查找指定值在列表中的索引。"
+  },
+  "5e7315d1-af61-4a0c-9350-7c868fa7438a": {
+    "type": "ExaFindSimilarBlock",
+    "name": "Exa · 搜索相似网页",
+    "source": "Deprecated by Exa: prefer the Exa Search block with a query describing the source page. Finds pages similar to a URL using Exa's findSimilar API.",
+    "description": "通过 Exa 减轻：更喜欢 Exa 搜索区块，其中描述源页面的查询。通过Exa的 findSimilar API找到类似URL的页面。"
+  },
+  "5ea02a85-c529-4060-b06f-7f702478dd5c": {
+    "type": "ExaCreateSearchMonitorBlock",
+    "name": "Exa · 创建搜索监控任务",
+    "source": "Create an Exa Search Monitor that re-runs a search on a schedule and posts only new results to a webhook (pair it with the Exa Search Monitor Trigger block)",
+    "description": "创建Exa监视器，该监视器在时间表上重新运行搜索，仅将新结果张贴到Webhook(与Exa搜索监视器触发块)"
+  },
+  "5ebe6768-8e5d-41e3-9134-1c7bd89a8d52": {
+    "type": "ReadRSSFeedBlock",
+    "name": "读取 RSS 订阅",
+    "source": "Reads RSS feed entries from a given URL.",
+    "description": "读取给定 URL 对应的 RSS 订阅条目。"
+  },
+  "5f3e1d5b-6bc5-40e3-97ee-1318b3f38813": {
+    "type": "TodoistListProjectsBlock",
+    "name": "Todoist · 列出项目",
+    "source": "Gets all projects and their details from Todoist",
+    "description": "得到所有项目和他们的细节从 Todoist"
+  },
+  "5f9f9fa4-9071-4028-97c2-9d15fb422dc5": {
+    "type": "GoogleDocsDeleteContentBlock",
+    "name": "Google 文档 · 删除内容",
+    "source": "Delete a range of content from a Google Doc",
+    "description": "从Google文档删除内容范围"
+  },
+  "60854b69-ecbd-4188-bd89-f7966a4d3b38": {
+    "type": "GoogleDocsAppendMarkdownBlock",
+    "name": "Google 文档 · 追加Markdown 内容",
+    "source": "Append Markdown content to the end of a Google Doc with full formatting - ideal for LLM/AI output",
+    "description": "添加Markdown内容到 Google 文件的最后，以完整的格式化 - 理想的LLM/AI输出"
+  },
+  "60c1f7cf-1f66-4c0d-877c-7e96298657ef": {
+    "type": "ExaListSearchMonitorsBlock",
+    "name": "Exa · 列出搜索监控任务",
+    "source": "List Exa Search Monitors, filtered by status, name or metadata",
+    "description": "列出搜索监控任务，可按状态、名称或元数据筛选。"
+  },
+  "61095bbe-4de0-44b9-aad5-d4a14c0badb6": {
+    "type": "ExaUpdateImportBlock",
+    "name": "Exa · 更新导入任务",
+    "source": "Update the title or metadata of an Exa Websets import",
+    "description": "更新Exa Websets进口的标题或元数据"
+  },
+  "611523ee-ba2e-43b5-bd62-4fe1b2c42044": {
+    "type": "AnySearchParallelSearchBlock",
+    "name": "AnySearch 并行搜索",
+    "source": "Runs several AnySearch queries in parallel (client-side concurrency via asyncio)",
+    "description": "运行多个 AnySearch 查询并行 (通过 asyncio 实现客户端的同时)"
+  },
+  "619d71e8-b72a-434d-8bd4-23376dd0342c": {
+    "type": "ExaWaitForWebsetBlock",
+    "name": "Exa · 等待网页集合",
+    "source": "Wait for a webset to reach a specific status with progress tracking",
+    "description": "跟踪进度并等待网页集合达到指定状态。"
+  },
+  "62d795f3-174f-4ec6-a68c-4747b0e5f99f": {
+    "type": "ExaListSearchMonitorRunsBlock",
+    "name": "Exa · 列出搜索监控运行记录",
+    "source": "List an Exa Search Monitor's runs, newest first, with status and output",
+    "description": "列出Exa搜索监视器的运行，最新的，首先，状态和输出"
+  },
+  "62db5c4c-186e-43d3-8078-886b2c29848a": {
+    "type": "RMFGEventTriggerBlock",
+    "name": "RMFG · 事件触发器",
+    "source": "Triggers when an RMFG design, quote, cart or order changes",
+    "description": "引发RMFG设计，报价，货车或订单变化时"
+  },
+  "62dd0198-36aa-4586-bbd1-83318c185ac6": {
+    "type": "ExaGetAgentRunBlock",
+    "name": "Exa · 获取智能体任务",
+    "source": "Get an Exa Agent run's status and, once it has finished, its answer, structured output, citations and cost",
+    "description": "获取Exa代理运行状态，一旦完成，其答案，结构化输出，引用和成本"
+  },
+  "63dd9e2d-ef81-405c-b034-c031f0437334": {
+    "type": "AgentMailListInboxThreadsBlock",
+    "name": "AgentMail · 列出收件箱会话",
+    "source": "List all conversation threads in an AgentMail inbox. Filter by labels for campaign tracking or status management.",
+    "description": "列出收件箱中的所有会话，可按标签筛选以跟踪营销活动或管理状态。"
+  },
+  "64291d3c-99b5-47b7-a976-6d94293cdb2d": {
+    "type": "AirtableListSchemaBlock",
+    "name": "Airtable · 列出表结构",
+    "source": "Get the complete schema of an Airtable base",
+    "description": "获取 Airtable 数据库的完整表结构。"
+  },
+  "6443c75d-032a-4772-9c08-230c707c8acc": {
+    "type": "GithubReadIssueBlock",
+    "name": "GitHub · 读取议题",
+    "source": "A block that retrieves information about a specific GitHub issue, including its title, body content, and creator.",
+    "description": "检索有关特定GitHub问题的信息，包括其标题，内容和创作者。"
+  },
+  "6496ec49-0a6d-4b74-9d2f-573bb09e735d": {
+    "type": "RMFGListHardwareBlock",
+    "name": "RMFG · 列出五金件",
+    "source": "Lists the taps, studs, nuts or standoffs RMFG can install",
+    "description": "列出水龙头、螺丝、坚果或对接RMFG可以安装"
+  },
+  "64d2301c-b3f5-4174-8ac0-111ca1e1a7c0": {
+    "type": "GmailForwardBlock",
+    "name": "Gmail · 转发邮件",
+    "source": "Forward Gmail messages to other recipients with automatic HTML detection and proper formatting. Preserves original message threading and attachments.",
+    "description": "将 Gmail 邮件转发给其他收件人，自动处理 HTML 和文本格式，并保留原有会话和附件。"
+  },
+  "65323630-f7e9-4692-a624-184ba14c0686": {
+    "type": "ExaListImportsBlock",
+    "name": "Exa · 列出导入任务",
+    "source": "List all imports with pagination support",
+    "description": "列出所有页面支持的进口"
+  },
+  "655d6fdf-a334-421c-b733-520549c07cd1": {
+    "type": "AgentDropdownInputBlock",
+    "name": "下拉选择输入",
+    "source": "Block for dropdown text selection.",
+    "description": "让用户从下拉列表中选择文本选项。"
+  },
+  "6595ae1f-b924-42cb-9a41-551a0611c4b4": {
+    "type": "SendWebRequestBlock",
+    "name": "发送 HTTP 请求",
+    "source": "Make an HTTP request (JSON / form / multipart).",
+    "description": "发送 HTTP 请求，支持 JSON、表单和 multipart 格式。"
+  },
+  "6657edb0-a62f-11ef-8c10-0326d832467d": {
+    "type": "TwitterGetListTweetsBlock",
+    "name": "Twitter · 获取列表推文",
+    "source": "This block retrieves tweets from a specified Twitter list.",
+    "description": "通过此区块，可以从特定的Twitter列表中检索推文。"
+  },
+  "6741c2a7-283e-4b3a-a912-9cfd0f66785d": {
+    "type": "ExaSearchMonitorTriggerBlock",
+    "name": "Exa · 搜索监控触发器",
+    "source": "Triggers when an Exa Search Monitor reports new results. Paste this block's webhook URL into Exa Create Search Monitor, then paste the monitor's webhook secret here.",
+    "description": "在 Exa 搜索监控报告新结果时触发。将本模块的 Webhook URL 填入创建搜索监控的模块，再将监控提供的 Webhook 密钥填入此处。"
+  },
+  "68d5a942-9b3f-4e9a-b7c1-d96ea4321f0d": {
+    "type": "GetLinkedinProfilePictureBlock",
+    "name": "获取 LinkedIn 头像",
+    "source": "Get LinkedIn profile pictures using Enrichlayer",
+    "description": "使用Enrichlayer获取LinkedIn个人资料图片"
+  },
+  "691dad47-f494-44c3-a1e8-05b7990f2dab": {
+    "type": "GithubMakeIssueBlock",
+    "name": "GitHub · 创建议题",
+    "source": "A block that creates new issues on GitHub repositories with a title and body content.",
+    "description": "创建GitHub 仓库中新问题，包含标题和内容。"
+  },
+  "694ff816-4c89-4a5e-a552-8c31be187735": {
+    "type": "AgentMailUpdateMessageBlock",
+    "name": "AgentMail · 更新消息",
+    "source": "Add or remove labels on an email message. Use for read/unread tracking, campaign tagging, or state management.",
+    "description": "为邮件添加或移除标签，用于跟踪已读状态、标记营销活动或管理状态。"
+  },
+  "6a0be6ee-7a0d-4c92-819b-500630846ad0": {
+    "type": "GoogleSheetsMetadataBlock",
+    "name": "Google 表格 · 获取元数据",
+    "source": "This block retrieves metadata about a Google Sheets spreadsheet including sheet names and properties.",
+    "description": "此模块检索了Google Sheets表的元数据，包括表名和属性。"
+  },
+  "6ab085e2-20b3-4055-bc3e-08036e01eca6": {
+    "type": "IdeogramModelBlock",
+    "name": "使用 Ideogram 生成图像",
+    "source": "This block runs Ideogram models with both simple and advanced settings.",
+    "description": "此模块运行了以简单和高级设置的Ideogram模型。"
+  },
+  "6ab8e12a-132c-41bf-b5f3-d662620fa832": {
+    "type": "ExaGetWebsetBlock",
+    "name": "Exa · 获取网页集合",
+    "source": "Retrieve a Webset by ID or external ID",
+    "description": "通过ID或外部ID检索Webset"
+  },
+  "6b1f0e2a-8c4d-4a17-9f3e-2d5b7c9a1e40": {
+    "type": "AllQuietCreateIncidentBlock",
+    "name": "AllQuiet · 创建事件",
+    "source": "Creates an incident in All Quiet and pages the on-call responder",
+    "description": "创建了\"安静\"中的事件，并将电话响应者页面"
+  },
+  "6b45f0e9-78d2-49ce-9de9-da655b070a03": {
+    "type": "ExaListWebsetWebhooksBlock",
+    "name": "Exa · 列出网页集合 Webhook",
+    "source": "List your team's active Exa Websets webhooks",
+    "description": "列出您团队的活跃的Exa Websets网络链接"
+  },
+  "6b5eaff2-aded-47c4-9acc-e2047c76e72e": {
+    "type": "ProfileEnrichmentBlock",
+    "name": "补全个人资料",
+    "source": "Look up and enrich a professional profile from a LinkedIn URL using DataForB2B's B2B database — returns the full profile (current role, experience and skills) plus work email, personal email and GitHub. Works as an email finder for lead enrichment, contact enrichment, cold outreach and CRM. Disable enrich_profile if you only need the email/GitHub lookups.",
+    "description": "查查并丰富一个专业档案LinkedInURL使用DataForB2BB2B 数据库 - 返回完整简介(当前角色、经验和技能)加上工作电子邮件、个人电子邮件和GitHub.充当铅浓缩、接触浓缩、冷冷推广和客户关系管理等电子邮件查找器。禁用enrich_profile如果您只需要email/GitHub查看。"
+  },
+  "6c27abc2-e51d-499e-a85f-5a0041ba94f0": {
+    "type": "GmailSendBlock",
+    "name": "Gmail · 发送邮件",
+    "source": "Send emails via Gmail with automatic HTML detection and proper text formatting. Plain text emails are sent without 78-character line wrapping, preserving natural paragraph flow. HTML emails are automatically detected and sent with correct MIME type.",
+    "description": "通过Gmail发送电子邮件，自动检测HTML和正确的文本格式化。简体电子邮件是没有78字符的线条包装的发送，通过正确的MIME类型，HTML电子邮件会自动检测和发送。"
+  },
+  "6c60ec01-8128-419e-988f-96a063ee2fea": {
+    "type": "GithubPullRequestTriggerBlock",
+    "name": "GitHub · 拉取请求触发器",
+    "source": "This block triggers on pull request events and outputs the event type and payload.",
+    "description": "引发拉动请求事件，输出事件类型和有效载荷。"
+  },
+  "6c98a32f-dbf9-45d8-a2a8-5e97e8326351": {
+    "type": "AirtableCreateFieldBlock",
+    "name": "Airtable · 创建字段",
+    "source": "Add a new field to an Airtable table",
+    "description": "向指定的 Airtable 表添加字段。"
+  },
+  "6dbbc4b3-ca6c-42b6-b508-da52d23e13f2": {
+    "type": "IfInputMatchesBlock",
+    "name": "判断输入是否匹配",
+    "source": "Handles conditional logic based on comparison operators",
+    "description": "按指定运算符比较输入，并根据比较结果选择分支。"
+  },
+  "6dd28d43-70ac-4e53-abd3-26131918a005": {
+    "type": "ExaUpdateWebsetWebhookBlock",
+    "name": "Exa · 更新网页集合 Webhook",
+    "source": "Update an Exa Websets webhook's URL, events or metadata",
+    "description": "更新更新Exa网页集合Webhook'sURL、事件或元数据"
+  },
+  "6e7d2590-ac2b-4b5d-b08c-fc039cd77e1f": {
+    "type": "AirtableUpdateRecordsBlock",
+    "name": "Airtable · 更新记录",
+    "source": "Update records in an Airtable table",
+    "description": "更新指定 Airtable 表中的记录。"
+  },
+  "6eacc954-2218-4dc7-a485-5bf21549ecbe": {
+    "type": "StripeLinkListPaymentMethodsBlock",
+    "name": "Stripe Link · 列出支付方式",
+    "source": "List the cards and bank accounts in the user's Link wallet. Use this first to pick a payment method ID for Create Spend Request.",
+    "description": "列出 Link 钱包中的银行卡和银行账户，可从中选择用于支付请求的付款方式 ID。"
+  },
+  "6eb50ff7-205b-400e-8ecc-1ce8d50075be": {
+    "type": "GoogleSheetsRemoveDuplicatesBlock",
+    "name": "Google 表格 · 移除重复项",
+    "source": "Remove duplicate rows based on specified columns. Keeps either the first or last occurrence.",
+    "description": "根据指定列删除复制行。保持了第一次或最后一次发生。"
+  },
+  "6f1c8a3e-b7d2-4e09-95a6-3e8d0c4b7f12": {
+    "type": "TregFindCompanyJobsBlock",
+    "name": "Treg · 查找公司招聘职位",
+    "source": "List a company's open job listings, a strong signal of what it is investing in, through Treg.",
+    "description": "通过Treg列出公司的公开工作名单，"
+  },
+  "6f579efa-df74-4d0c-bda8-d63c8bc37416": {
+    "type": "GithubMarkNotificationThreadAsDoneBlock",
+    "name": "GitHub · 将通知会话标记为完成",
+    "source": "This block marks a GitHub notification thread as done, removing it from the notification inbox.",
+    "description": "通过此区块将 GitHub 通知线程标记为完成，从通知收件箱中删除。"
+  },
+  "6fbe6329-d13e-4d2e-bd4d-b4d921b56161": {
+    "type": "GetUserPostsBlock",
+    "name": "获取用户发布的 Reddit 帖子",
+    "source": "Fetch posts by a specific Reddit user.",
+    "description": "搜索一个特定的Reddit用户的帖子。"
+  },
+  "71146ae8-0cb1-4a15-8cde-eae30de71cb6": {
+    "type": "ExaCreateEnrichmentBlock",
+    "name": "Exa · 创建数据补全任务",
+    "source": "Create enrichments to extract additional structured data from webset items",
+    "description": "创建丰富的数据，从网集项目中提取额外的结构数据"
+  },
+  "715696a0-e1da-45c8-b209-c2fa9c3b0be6": {
+    "type": "ConditionBlock",
+    "name": "条件判断",
+    "source": "Handles conditional logic based on comparison operators",
+    "description": "比较输入值，根据结果选择后续分支。"
+  },
+  "716a67b3-6760-42e7-86dc-18645c6e00fc": {
+    "type": "GetCurrentDateAndTimeBlock",
+    "name": "获取当前日期和时间",
+    "source": "This block outputs the current date and time.",
+    "description": "输出当前日期和时间。"
+  },
+  "71f7d92c-a895-407f-8966-ede134a854b7": {
+    "type": "JevYesNoBlock",
+    "name": "Jev 是非判断",
+    "source": "Ask Jev a plain-language yes/no question and forward data to the chosen pin, or unsure below your confidence threshold.",
+    "description": "问耶夫一个简单的语言yes/no将数据转发到所选的针上，或低于信任阈值的不确定数据。"
+  },
+  "721234df-c7a2-4927-b205-744badbd5844": {
+    "type": "AgentMailListMessagesBlock",
+    "name": "AgentMail · 列出消息",
+    "source": "List messages in an AgentMail inbox. Filter by labels to find unread, campaign-tagged, or categorized messages.",
+    "description": "列出收件箱中的邮件，可按标签查找未读邮件、营销活动邮件或其他分类。"
+  },
+  "7226cb99-6e7b-4672-b6b2-acec95336eec": {
+    "type": "ReplyToDiscordMessageBlock",
+    "name": "回复 Discord 消息",
+    "source": "Replies to a specific Discord message.",
+    "description": "回复指定的 Discord 消息。"
+  },
+  "724148ba-a62f-11ef-89ba-5349b813ef5f": {
+    "type": "TwitterCreateListBlock",
+    "name": "Twitter · 创建列表",
+    "source": "This block creates a new Twitter List for the authenticated user.",
+    "description": "此模块为验证用户创建了一个新的Twitter列表。"
+  },
+  "725431c9-71ba-4fce-b829-5a3e495a8a88": {
+    "type": "GoogleSheetsAddDropdownBlock",
+    "name": "Google 表格 · 添加下拉选项",
+    "source": "Add a dropdown list (data validation) to cells. Useful for enforcing valid inputs.",
+    "description": "加入一个随机列表 (数据验证)适用于执行有效输入。"
+  },
+  "725d4f50-f40e-4dc9-9487-17bf16d34111": {
+    "type": "GithubMarkNotificationsAsReadBlock",
+    "name": "GitHub · 将通知标记为已读",
+    "source": "This block marks all GitHub notifications as read, optionally scoped to a single repository.",
+    "description": "通过此区块标记所有GitHub通知作为读取，可选地将其用于单个存储库。"
+  },
+  "7288a968-de14-11ef-8997-32d3674e8b7e": {
+    "type": "TodoistCreateLabelBlock",
+    "name": "Todoist · 创建标签",
+    "source": "Creates a new label in Todoist, It will not work if same name already exists",
+    "description": "在 Todoist 中创建一个新的标签，如果同一个名称已经存在，它将无法工作"
+  },
+  "72cb311a-5998-4e0a-9bc4-f1b67a97284e": {
+    "type": "GetRedditCommentBlock",
+    "name": "获取 Reddit 评论",
+    "source": "Get details about a specific Reddit comment by its ID.",
+    "description": "获取具体细节Reddit委员会和委员会就ID."
+  },
+  "72e4730a-d66d-4785-8e54-5ab3af450c81": {
+    "type": "DeleteRedditPostBlock",
+    "name": "删除 Reddit 帖子",
+    "source": "Delete a Reddit post that you own.",
+    "description": "删除你拥有的Reddit帖子。"
+  },
+  "73c3e7c4-2b3f-4e9f-9e3e-8f7a5c3e2d45": {
+    "type": "DataForSeoKeywordSuggestionsBlock",
+    "name": "DataForSEO 关键词建议",
+    "source": "Get keyword suggestions from DataForSEO Labs Google API",
+    "description": "获取来自 DataForSEO Labs Google API 的关键词建议"
+  },
+  "740eec3f-2b51-4e95-b87f-22ce2acafdfa": {
+    "type": "GoogleSheetsCopyToSpreadsheetBlock",
+    "name": "Google 表格 · 复制到电子表格",
+    "source": "Copy a sheet from one spreadsheet to another.",
+    "description": "复制一个表格。"
+  },
+  "74243e49-2bec-4916-8bf4-db43d44aead5": {
+    "type": "GithubListBranchesBlock",
+    "name": "GitHub · 列出分支",
+    "source": "This block lists all branches for a specified GitHub repository.",
+    "description": "此模块列出了指定GitHub 仓库的所有分支。"
+  },
+  "74ef9f1e-ae89-4c7f-9d7d-d217214815b4": {
+    "type": "ExaCancelWebsetSearchBlock",
+    "name": "Exa · 取消网页集合搜索任务",
+    "source": "Cancel a running webset search",
+    "description": "取消正在运行的网盘搜索"
+  },
+  "7597e071-1b43-4973-825d-859796660e1d": {
+    "type": "ExaListWebsetWebhookAttemptsBlock",
+    "name": "Exa · 列出网页集合 Webhook 投递记录",
+    "source": "List an Exa Websets webhook's delivery attempts, with status codes and responses, to debug failed deliveries",
+    "description": "列出一个Exa Websets webhook的交付尝试，与状态代码和响应，去调试未成功的交付"
+  },
+  "761babf0-a630-11ef-a03d-abceb082f58f": {
+    "type": "TwitterDeleteTweetBlock",
+    "name": "Twitter · 删除推文",
+    "source": "This block deletes a tweet on Twitter.",
+    "description": "此模块块删除了Twitter上的推文。"
+  },
+  "7635b059-3a9f-4f7d-b499-1b56c4f76f4f": {
+    "type": "ReplyToRedditCommentBlock",
+    "name": "回复 Reddit 评论",
+    "source": "Reply to a specific Reddit comment. Useful for threaded conversations.",
+    "description": "回答一个特定的Reddit评论。对于有线谈话来说很有用。"
+  },
+  "76d7ffff-48de-4bbe-a890-d2ced69b1be3": {
+    "type": "JevFilterBlock",
+    "name": "Jev 筛选",
+    "source": "Filter items with sequential Jev scores, one call per item. Each call receives JSON context and item and emits its own transparency outputs. Levels define the scale: describe concrete evidence for each tier so a very good case does not reach the top. For hiring, distinguish terrible, bad, okay, excellent, brilliant, and one-in-a-thousand by what qualifies.",
+    "description": "带有相继 Jev 分数的过滤项，每个项目一个调用。每次调用接收JSON文本和项目，并发出自己的透明输出。层次定义了规模：描述每个层次的具体证据，因此一个非常好的案例不会达到顶部。为了招聘，区分可怕，坏，好，优秀，聪明，"
+  },
+  "76e94b04-e02f-4981-8cb8-47ece1be18b4": {
+    "type": "GoogleDocsInsertMarkdownAtBlock",
+    "name": "Google 文档 · 在指定位置插入 Markdown",
+    "source": "Insert formatted Markdown at a specific position in a Google Doc - ideal for LLM/AI output",
+    "description": "插入格式化的Markdown在 Google 文件中特定位置 - 理想的LLM/AI输出"
+  },
+  "77456c22-33d8-4fd4-9eef-50b46a35bb48": {
+    "type": "GithubMergePullRequestBlock",
+    "name": "GitHub · 合并拉取请求",
+    "source": "This block merges a pull request using merge, squash, or rebase.",
+    "description": "使用 merge、squash 或 rebase 合并拉取请求。"
+  },
+  "774ac529-74f9-41da-bbba-6a06a51a5d7e": {
+    "type": "GoogleSheetsAddNoteBlock",
+    "name": "Google 表格 · 添加备注",
+    "source": "Add a note to a cell in a Google Sheet",
+    "description": "在 Google 页面中添加一个注释到一个单元中"
+  },
+  "776dd750-de14-11ef-b927-32d3674e8b7e": {
+    "type": "TodoistListLabelsBlock",
+    "name": "Todoist · 列出标签",
+    "source": "Gets all personal labels from Todoist",
+    "description": "得到了所有个人标签从 Todoist"
+  },
+  "77cfb6ba-a083-4c9d-8e18-a28d52ddfc09": {
+    "type": "ExaListAgentRunsBlock",
+    "name": "Exa · 列出智能体任务",
+    "source": "List your Exa Agent runs, newest first, with paging",
+    "description": "列出你的Exa代理运行，最新的首先，"
+  },
+  "780daefe-be88-457d-af4b-c8c931daaad0": {
+    "type": "StripeLinkGetUserInfoBlock",
+    "name": "Stripe Link · 获取用户信息",
+    "source": "Get the Link account holder's name, email and phone. Use it to fill in a checkout that asks who the buyer is. Pairs with Get Shipping Address for anything physical.",
+    "description": "获取 Link 账户持有人的姓名、邮箱和电话，供结账填写购买人信息；购买实物时可搭配获取配送地址的模块。"
+  },
+  "787678ad-1f47-4efc-89df-643f9908621a": {
+    "type": "SendTelegramMessageBlock",
+    "name": "发送 Telegram 消息",
+    "source": "Send a text message to a Telegram chat.",
+    "description": "向 Telegram 会话发送文本消息。"
+  },
+  "78f050c5-3e3a-48c0-9e5b-ef1ceca5589c": {
+    "type": "GithubRemoveLabelBlock",
+    "name": "GitHub · 移除标签",
+    "source": "A block that removes a label from a GitHub issue or pull request.",
+    "description": "删除一个标签的区块，从 GitHub 问题或拉取请求。"
+  },
+  "7921101a-0537-4259-82ea-bc186ca6b1b6": {
+    "type": "SendRedditMessageBlock",
+    "name": "发送 Reddit 私信",
+    "source": "Send a private message (DM) to a Reddit user.",
+    "description": "发送一个私人消息 (DM) 给Reddit用户。"
+  },
+  "7940189d-b137-4ef1-aa18-3dd9a5bde9f3": {
+    "type": "GoogleSheetsManageSheetBlock",
+    "name": "Google 表格 · 管理工作表",
+    "source": "Create, delete, or copy sheets (sheet optional)",
+    "description": "创建，删除或复制文件表 (文件表可选)"
+  },
+  "7a0ef660-1a5b-4951-8642-c13a0c8d6d93": {
+    "type": "SendTelegramVoiceBlock",
+    "name": "发送 Telegram 语音",
+    "source": "Send a voice message to a Telegram chat. Voice must be OGG format with OPUS codec.",
+    "description": "向 Telegram 会话发送语音消息。文件必须为使用 OPUS 编码的 OGG 格式。"
+  },
+  "7a8ac219-c6ec-4eec-a828-81af283ce04c": {
+    "type": "AgentMailCreateInboxBlock",
+    "name": "AgentMail · 创建收件箱",
+    "source": "Create a new email inbox for an AI agent via AgentMail. Each inbox gets a unique address and can send/receive emails.",
+    "description": "为智能体创建具有唯一地址的 AgentMail 收件箱，用于收发邮件。"
+  },
+  "7b3d9f1e-0c5a-4e82-b6d4-8a1f3c9e5b27": {
+    "type": "TregGetToolBlock",
+    "name": "Treg · 获取工具",
+    "source": "Look up one Treg tool before calling it: the inputs it takes, its price, and every other provider of the same job. Free.",
+    "description": "在打电话之前，请查看一个Treg工具：所需的输入，价格，以及其他相同工作的提供者。免费的。"
+  },
+  "7b5e8c9f-01a2-43c4-95e6-f7a8b9c0d1e2": {
+    "type": "ExaListWebsetItemsBlock",
+    "name": "Exa · 列出网页集合条目",
+    "source": "List items in a webset with pagination support",
+    "description": "在网盘中列出页面支持的项目"
+  },
+  "7bb0048a-a630-11ef-aeb8-abc0dadb9b12": {
+    "type": "TwitterPostTweetBlock",
+    "name": "Twitter · 发布推文",
+    "source": "This block posts a tweet on Twitter.",
+    "description": "此模块区在Twitter上发布了一条推文。"
+  },
+  "7c56b3ab-62e7-43a2-a2dc-4ec4245660b6": {
+    "type": "JinaEmbeddingBlock",
+    "name": "Jina 向量嵌入",
+    "source": "Generates embeddings using Jina AI",
+    "description": "使用Jina AI生成嵌入式"
+  },
+  "7c78fe61-29e0-45fe-9613-888ec40ee349": {
+    "type": "HackerNewsGetUserBlock",
+    "name": "Hacker News · 获取用户",
+    "source": "Get a Hacker News user's profile by username: karma, when the account was created, the about text and how many items they have posted. Uses Hacker News's official API, which needs no account.",
+    "description": "根据用户名获取Hacker News用户的个人资料：卡马，账户创建时间，关于的文字以及他们发布的内容。通过Hacker News的官方API,"
+  },
+  "7cc416f4-f305-4606-9b3b-452b8a81031c": {
+    "type": "Slant3DFilamentBlock",
+    "name": "Slant 3D · 查看打印耗材",
+    "source": "Find available materials and colors for quoting or ordering physical 3D-printed parts from Slant3D. Returns filament public IDs, material, color, and availability. Use a specific filament_id when a material or color matches more than one filament. Slant3D Slicer uses default black PLA when no filament is selected.",
+    "description": "找到可用材料和颜色，以从Slant3D中报价或订购物理3D打印部件。返回 filament 公开身份证，材料，颜色和可用性。使用一个特定的filament_id材料或颜色与一个以上的丝相匹配。没有选用 filament 的情况下，Slant3D Slicer 使用默认的黑色 PLA."
+  },
+  "7d12630a-a62f-11ef-90c9-8f5a996612c3": {
+    "type": "TwitterUpdateListBlock",
+    "name": "Twitter · 更新列表",
+    "source": "This block updates a specified Twitter List owned by the authenticated user.",
+    "description": "此模块更新了已认证用户所拥有的指定Twitter列表。"
+  },
+  "7e198b09-4994-47db-8b4d-952d98241817": {
+    "type": "AgentDateInputBlock",
+    "name": "日期输入",
+    "source": "Block for date input.",
+    "description": "让用户输入日期。"
+  },
+  "7e1f8f0f-b6ab-43b3-bd1d-0c534a649295": {
+    "type": "ExaCancelEnrichmentBlock",
+    "name": "Exa · 取消数据补全任务",
+    "source": "Cancel a running enrichment operation",
+    "description": "取消正在运行的丰富化操作"
+  },
+  "7e4c0b9a-1d6f-4b38-a2e5-9c3f7d1b5a80": {
+    "type": "TregGetLinkedInProfileBlock",
+    "name": "Treg · 获取LinkedIn 个人资料",
+    "source": "Read a LinkedIn member's public profile through Treg, without a LinkedIn account or scraper.",
+    "description": "通过Treg阅读LinkedIn成员的公开个人资料，"
+  },
+  "7e7c87ab-3469-4bcc-9abe-67705091b713": {
+    "type": "TextReplaceBlock",
+    "name": "替换文本",
+    "source": "This block is used to replace a text with a new text.",
+    "description": "将文本中指定的内容替换为新内容。"
+  },
+  "7ecccdcf-9879-433e-8325-7ccc6b3b4870": {
+    "type": "RMFGUpdateCartBlock",
+    "name": "RMFG · 更新购物车",
+    "source": "Updates an open RMFG cart's address, shipping option or items",
+    "description": "更新开放的RMFG车的地址，运输选项或物品"
+  },
+  "7f236514-de14-11ef-bd7a-32d3674e8b7e": {
+    "type": "TodoistGetLabelBlock",
+    "name": "Todoist · 获取标签",
+    "source": "Gets a personal label from Todoist by ID",
+    "description": "获得个人标签Todoist按ID"
+  },
+  "7f5d1f15-feec-45fa-95e5-a37f748cb678": {
+    "type": "ConductorManageSectionBlock",
+    "name": "Conductor · 管理分区",
+    "source": "Create or delete a Conductor cloud section. Sections group workspaces in the sidebar; move workspaces with Manage Workspace.",
+    "description": "创建或删除Conductor云部分。在侧边栏中分组工作空间；与管理工作空间一起移动工作空间。"
+  },
+  "7fa83965-7289-432f-98a9-1575f5bcc8f1": {
+    "type": "GetRedditCommentRepliesBlock",
+    "name": "获取 Reddit 评论回复",
+    "source": "Get replies to a specific Reddit comment.",
+    "description": "得到一个特定的Reddit评论的答案。"
+  },
+  "7faf4b27-96b0-4f05-bf64-e0de54ae74e1": {
+    "type": "PostToTikTokBlock",
+    "name": "发布到 TikTok",
+    "source": "Post to TikTok using Ayrshare",
+    "description": "通过 Ayrshare 发布到 TikTok。"
+  },
+  "7fcd3bcb-8e1b-4e69-903d-32d3d4a92158": {
+    "type": "AgentShortTextInputBlock",
+    "name": "单行文本输入",
+    "source": "Block for short text input (single-line).",
+    "description": "接收单行文本。"
+  },
+  "80214f08-8b85-4533-a6b8-f8123bfcb410": {
+    "type": "AgentMailListPodThreadsBlock",
+    "name": "AgentMail · 列出租户邮件会话",
+    "source": "List all conversation threads across all inboxes within a pod. View all email activity for a customer.",
+    "description": "列出单一租户空间内所有收件箱的会话，查看该客户的邮件活动。"
+  },
+  "806fb15e-830f-4796-8692-557d300ff43c": {
+    "type": "JinaChunkingBlock",
+    "name": "Jina 文本分块",
+    "source": "Chunks texts using Jina AI's segmentation service",
+    "description": "通过Jina AI的分类服务进行分类"
+  },
+  "80bc3ed1-e9a4-449e-8163-a8fc86f74f6a": {
+    "type": "GoogleCalendarReadEventsBlock",
+    "name": "Google 日历 · 读取日程",
+    "source": "Retrieves upcoming events from a Google Calendar with filtering options",
+    "description": "从一个Google Calendar带有过滤选项"
+  },
+  "81ae30ed-c7ba-4b5d-8483-b726846e570c": {
+    "type": "ExaDeleteImportBlock",
+    "name": "Exa · 删除导入任务",
+    "source": "Delete an import",
+    "description": "删除进口"
+  },
+  "82525328-9368-4966-8f0c-cd78e80181fd": {
+    "type": "TelegramMessageReactionTriggerBlock",
+    "name": "Telegram 消息回应触发器",
+    "source": "Triggers when a reaction to a message is changed. Works in private chats automatically. In groups, the bot must be an administrator.",
+    "description": "在消息回应发生变化时触发。私聊可直接使用；群组中机器人必须是管理员。"
+  },
+  "82b59b8e-ea10-4d57-9161-8b169b0adba6": {
+    "type": "ExecuteCodeStepBlock",
+    "name": "执行代码步骤",
+    "source": "Execute code in a previously instantiated sandbox.",
+    "description": "在已创建的沙箱中执行代码。"
+  },
+  "840fa616-d3a1-4384-855c-657ff9e8a7e6": {
+    "type": "JevAskManyBlock",
+    "name": "Jev 批量判断",
+    "source": "Ask multiple Choice, Score, or Noul questions of one shared state with Jev in a single call. Levels define the scale: describe concrete evidence for each tier so a very good case does not reach the top. For hiring, distinguish terrible, bad, okay, excellent, brilliant, and one-in-a-thousand by what qualifies.",
+    "description": "在一个通话中，请与Jev一起提出一个共享状态的多个选择，分数或零问题。层次定义了规模：描述每个层次的具体证据，因此一个非常好的案例不会达到顶部。为了招聘，区分可怕，坏，好，优秀，聪明，"
+  },
+  "843c6892-a62f-11ef-a5c8-b71239a78d3b": {
+    "type": "TwitterDeleteListBlock",
+    "name": "Twitter · 删除列表",
+    "source": "This block deletes a specified Twitter List owned by the authenticated user.",
+    "description": "此模块删除了已认证用户所拥有的指定Twitter列表。"
+  },
+  "84754b30-97d2-4c37-a3b8-eb39f268275b": {
+    "type": "GithubCreatePRReviewBlock",
+    "name": "GitHub · 创建拉取请求审阅",
+    "source": "This block creates a review on a GitHub pull request with optional inline comments. You can create it as a draft or post immediately. Note: For inline comments, 'position' should be the line number in the diff (starting from the first @@ hunk header).",
+    "description": "为拉取请求创建审阅，可附行内评论。可保存为草稿或立即提交；行内评论的 position 是从首个 @@ 差异块标头起算的行号。"
+  },
+  "84938266-0fc7-46e5-9369-adb0f6ae8015": {
+    "type": "GoogleSheetsClearBlock",
+    "name": "Google 表格 · 清空数据",
+    "source": "This block clears data from a specified range in a Google Sheets spreadsheet.",
+    "description": "此模块清除了Google Sheets表中的指定范围的数据。"
+  },
+  "86a2a099-30df-47b4-b7e4-34ae5f83e0d5": {
+    "type": "CodeGenerationBlock",
+    "name": "生成代码",
+    "source": "Generate or refactor code using an OpenAI API key or a connected ChatGPT plan through Codex App Server.",
+    "description": "通过 Codex App Server 生成或重构代码，使用 OpenAI API 密钥或已连接的 ChatGPT 套餐。"
+  },
+  "86eba68b-9549-4c0b-a0db-47d85a56cc27": {
+    "type": "StagehandActBlock",
+    "name": "执行 Stagehand 浏览器操作",
+    "source": "Interact with a web page by performing actions on a web page. Use it to build self-healing and deterministic automations that adapt to website chang.",
+    "description": "通过在网页上执行操作来与网页进行互动。通过它来建立自治和确定性自动化，"
+  },
+  "8755614c-de14-11ef-9b56-32d3674e8b7e": {
+    "type": "TodoistUpdateLabelBlock",
+    "name": "Todoist · 更新标签",
+    "source": "Updates a personal label in Todoist",
+    "description": "在 Todoist 中更新个人标签"
+  },
+  "87840993-2053-44b7-8da4-187ad4ee518c": {
+    "type": "SearchTheWebBlock",
+    "name": "搜索网页",
+    "source": "This block searches the internet for the given search query.",
+    "description": "按给定关键词搜索网页。"
+  },
+  "87ce6c27-5752-4bbc-8e26-6da40a3dcfd3": {
+    "type": "GithubReadFileBlock",
+    "name": "GitHub · 读取文件",
+    "source": "This block reads the content of a specified file from a GitHub repository.",
+    "description": "通过GitHub 仓库，该区块读取指定文件的内容。"
+  },
+  "87dbab6f-26ac-4371-9aef-51ad30bc0584": {
+    "type": "RMFGListFinishesBlock",
+    "name": "RMFG · 列出表面处理工艺",
+    "source": "Lists the finishes RMFG can apply to sheet or tube parts",
+    "description": "列表RMFG可以用于纸板或管部件的成品"
+  },
+  "87f847b3-d81a-424e-8e89-acadb5c9d52b": {
+    "type": "GithubDiscussionTriggerBlock",
+    "name": "GitHub · 讨论触发器",
+    "source": "This block triggers on GitHub Discussions events. Great for syncing Q&A to Discord or auto-responding to common questions. Note: Discussions must be enabled on the repository.",
+    "description": "此模块会触发GitHub讨论事件。非常适合同步问答与Discord或自动回答常见问题。注：必须在存储库中启用讨论。"
+  },
+  "8865699f-9188-43c4-89b0-79c84cfaa03e": {
+    "type": "CreateCampaignBlock",
+    "name": "创建营销活动",
+    "source": "Create a campaign in SmartLead",
+    "description": "在 SmartLead 中创建营销活动。"
+  },
+  "8918fea0-ca1b-4df0-bcec-dfc66c66536e": {
+    "type": "RMFGGetDesignBlock",
+    "name": "RMFG · 获取设计",
+    "source": "Fetches an RMFG design and its analyzed parts by ID",
+    "description": "获取RMFG及其分析部件的设计ID"
+  },
+  "896ed73b-27d0-41be-813c-c1c1dc856c03": {
+    "type": "ListIsEmptyBlock",
+    "name": "判断列表是否为空",
+    "source": "Checks if a list is empty.",
+    "description": "检查列表是否为空。"
+  },
+  "89b02b96-a7cb-46f4-9900-c48b32fe1552": {
+    "type": "PostToInstagramBlock",
+    "name": "发布到 Instagram",
+    "source": "Post to Instagram using Ayrshare. Requires a Business or Creator Instagram Account connected with a Facebook Page",
+    "description": "通过 Ayrshare 发布到 Instagram。需要使用已关联 Facebook 公共主页的 Instagram 商业账户或创作者账户。"
+  },
+  "89c5c0ec-172e-4001-a32c-bdfe4d0c9e81": {
+    "type": "GithubGetRepositoryTreeBlock",
+    "name": "GitHub · 获取仓库目录树",
+    "source": "This block lists the entire file tree of a GitHub repository recursively.",
+    "description": "此模块将 GitHub 仓库的整个文件树进行复制列表。"
+  },
+  "89ccd99a-3c2b-4fbf-9e25-0ffa398d0314": {
+    "type": "ExaUpdateWebsetBlock",
+    "name": "Exa · 更新网页集合",
+    "source": "Update the title or metadata of an existing Webset",
+    "description": "更新现有Webset的标题或元数据"
+  },
+  "8a23c567-9d01-4e56-b789-0c12d3e45678": {
+    "type": "GithubUpdateCheckRunBlock",
+    "name": "GitHub · 更新检查任务",
+    "source": "Updates an existing check run in a GitHub repository",
+    "description": "更新GitHub 仓库中的现有检查运行"
+  },
+  "8a74c2ad-0104-4640-962f-26c6b69e58cd": {
+    "type": "Slant3DOrderWebhookBlock",
+    "name": "Slant 3D · 订单 Webhook 触发器",
+    "source": "This block triggers on Slant3D order status updates and outputs the event details, including tracking information when orders are shipped.",
+    "description": "此模块会启动Slant3D订单状态更新，并输出事件详细信息，包括在订单发送时的跟踪信息。"
+  },
+  "8ad9e103-78f2-4fdb-ba12-3571f2c95e98": {
+    "type": "GithubGetCIResultsBlock",
+    "name": "GitHub · 获取持续集成结果",
+    "source": "This block gets CI results for a commit or PR, with optional search for specific errors/warnings in logs.",
+    "description": "此模块获得了承诺或公关的CI结果，errors/warnings在日志中。"
+  },
+  "8b13f579-d8b6-4dc2-a140-f770428805de": {
+    "type": "GithubListCommitsBlock",
+    "name": "GitHub · 列出提交记录",
+    "source": "This block lists commits on a branch in a GitHub repository.",
+    "description": "这一区块列表在 GitHub 仓库中的分支上提交。"
+  },
+  "8b2a7b3c-6e9d-4a5f-8c1b-2e3f4a5b6c7d": {
+    "type": "HumanInTheLoopBlock",
+    "name": "人工审核",
+    "source": "Pause execution for human review. Data flows through approved_data or rejected_data output based on the reviewer's decision. Outputs contain the actual data, not status strings.",
+    "description": "暂停运行以等待人工审核。根据审核结果，将实际数据发送到 approved_data 或 rejected_data，而不是返回状态字符串。"
+  },
+  "8bf9eef6-5451-4213-b265-25306446e94b": {
+    "type": "LoopVideoBlock",
+    "name": "循环视频",
+    "source": "Block to loop a video to a given duration or number of repeats.",
+    "description": "阻止视频循环到给定的时间或重复次数。"
+  },
+  "8c5a3f7d-0e2b-4d61-9a4c-6b8e1f3d7a25": {
+    "type": "TregEnrichCompanyBlock",
+    "name": "Treg · 补全公司资料",
+    "source": "Look up a company (what it does, size, industry, founding year, headquarters and LinkedIn) from its domain, name, LinkedIn page or an employee's email, through Treg.",
+    "description": "根据公司域名、名称等信息，通过 Treg 查询业务、规模、行业、成立年份、总部和 LinkedIn 资料。"
+  },
+  "8c7d0d67-e79c-44f6-92a1-c2600c8aac7f": {
+    "type": "NvidiaDeepfakeDetectBlock",
+    "name": "NVIDIA 深度伪造检测",
+    "source": "Detects potential deepfakes in images using Nvidia's AI API",
+    "description": "使用Nvidia的AI API检测图像中的潜在深度假冒"
+  },
+  "8c7e39b8-4e9d-4f3a-b4e1-2a8c9d5f6e3b": {
+    "type": "DiscordGetCurrentUserBlock",
+    "name": "获取当前 Discord 用户",
+    "source": "Gets information about the currently authenticated Discord user using OAuth2 credentials.",
+    "description": "使用 OAuth2 凭据读取当前已登录的 Discord 用户资料。"
+  },
+  "8dcc4bd7-09d7-4c52-a70a-d09f5ca044af": {
+    "type": "JevScoreBlock",
+    "name": "Jev 评分",
+    "source": "Score evidence with Jev using an explicit ordered scale. Levels define the scale: describe concrete evidence for each tier so a very good case does not reach the top. For hiring, distinguish terrible, bad, okay, excellent, brilliant, and one-in-a-thousand by what qualifies.",
+    "description": "通过使用明确的指令尺度，给Jev提供证据。层次定义了规模：描述每个层次的具体证据，因此一个非常好的案例不会达到顶部。为了招聘，区分可怕，坏，好，优秀，聪明，"
+  },
+  "8e57780d-dc25-43d4-a0f4-1f02877b09fb": {
+    "type": "AgentMailGetDraftBlock",
+    "name": "AgentMail · 获取草稿",
+    "source": "Retrieve a draft email to review its contents, recipients, and scheduled send status.",
+    "description": "获取草稿，以查看邮件内容、收件人及定时发送状态。"
+  },
+  "8e5d3b27-1a94-4c6f-b7e0-5f9c2d8a4b16": {
+    "type": "AllQuietGetOnCallBlock",
+    "name": "AllQuiet · 获取值班人员",
+    "source": "Looks up who is on call in All Quiet, now or at a given time",
+    "description": "现在或某个时候，谁在安静中调用？"
+  },
+  "8e96eb38-32b8-47f6-81c3-2f89aa488b14": {
+    "type": "ExaStopAgentRunBlock",
+    "name": "Exa · 停止智能体任务",
+    "source": "Stop an Exa Agent run early and return the results gathered so far (stop reason 'stopped'). Exa currently supports this for ultra-effort runs only.",
+    "description": "提前停止任务，并返回截至停止时已收集的结果，停止原因为 stopped。目前仅支持 ultra 级任务。"
+  },
+  "8ec16e48-a62f-11ef-9f35-f3d6de43a802": {
+    "type": "TwitterPinListBlock",
+    "name": "Twitter · 置顶列表",
+    "source": "This block allows the authenticated user to pin a specified List.",
+    "description": "此模块允许验证用户将指定列表固定。"
+  },
+  "8ef14de6-cc90-430a-8cfa-3a003be92454": {
+    "type": "VideoTextOverlayBlock",
+    "name": "为视频叠加文字",
+    "source": "Add text overlay/caption to video",
+    "description": "为视频叠加文字或字幕。"
+  },
+  "8f2e4d6a-1b3c-4a5e-9d7f-2c8e6a4b3f1d": {
+    "type": "DataForSeoRelatedKeywordsBlock",
+    "name": "DataForSEO 相关关键词",
+    "source": "Get related keywords from DataForSEO Labs Google API",
+    "description": "从DataForSEO实验室GoogleAPI"
+  },
+  "8f539119-e580-4d86-ad41-86fbcb22abb1": {
+    "type": "VideoClipBlock",
+    "name": "裁剪视频",
+    "source": "Extract a time segment from a video",
+    "description": "按时间范围从视频中截取片段。"
+  },
+  "8f7d3a2e-9b5c-4c6a-8f1d-7c8b3e4a5d6c": {
+    "type": "LinearCreateCommentBlock",
+    "name": "Linear · 创建评论",
+    "source": "Creates a new comment on a Linear issue",
+    "description": "创建对 aLinear问题"
+  },
+  "8f9e0d1c-2b3a-4567-8901-23456789abcd": {
+    "type": "ExaCodeContextBlock",
+    "name": "Exa · 获取代码上下文",
+    "source": "Legacy: Exa no longer documents its code context API; for new workflows use the Exa Search block, which Exa's Code & Docs guide recommends (e.g. type 'lite' with highlights). Searches GitHub repos, docs and Stack Overflow for relevant code examples.",
+    "description": "遗产 :Exa不再记录代码背景API; 对于新的工作流，使用Exa搜索区块Exa代码和文档指南建议(例如类型)'lite'))(带有要点))搜索GitHub 仓库，文件和堆积过度流的相关代码示例。"
+  },
+  "8fa8c167-2002-47ce-aba8-97572fc5d387": {
+    "type": "GenericWebhookTriggerBlock",
+    "name": "通用 Webhook 触发器",
+    "source": "This block will output the contents of the generic input for the webhook.",
+    "description": "收到 Webhook 时输出其输入内容。"
+  },
+  "8fd132ac-b917-428a-8159-d62893e8a3fe": {
+    "type": "GithubCreateFileBlock",
+    "name": "GitHub · 创建文件",
+    "source": "This block creates a new file in a GitHub repository.",
+    "description": "在指定的 GitHub 仓库中创建文件。"
+  },
+  "901b8f86-de14-11ef-98b8-32d3674e8b7e": {
+    "type": "TodoistDeleteLabelBlock",
+    "name": "Todoist · 删除标签",
+    "source": "Deletes a personal label in Todoist",
+    "description": "在 Todoist 中删除个人标签"
+  },
+  "9023eb99-3e2f-4def-808b-d9c584b3d9e7": {
+    "type": "AgentMailDeleteDraftBlock",
+    "name": "AgentMail · 删除草稿",
+    "source": "Delete a draft or cancel a scheduled email. Removes the draft permanently.",
+    "description": "删除草稿或取消定时邮件。草稿将被永久删除。"
+  },
+  "9044829a-7915-4ab4-a50f-89922ba3679f": {
+    "type": "SendTelegramAudioBlock",
+    "name": "发送 Telegram 音频",
+    "source": "Send an audio file to a Telegram chat. The file is displayed in the music player. For voice messages, use the Send Voice block instead.",
+    "description": "向 Telegram 会话发送可在音乐播放器中播放的音频。如需发送语音消息，请改用「发送 Telegram 语音」。"
+  },
+  "90507c72-b0ff-413a-886a-23bbbd66f542": {
+    "type": "GithubAssignIssueBlock",
+    "name": "GitHub · 指派议题",
+    "source": "A block that assigns a GitHub user to an issue for task ownership and tracking.",
+    "description": "区块将 GitHub 用户分配到任务所有权和跟踪问题。"
+  },
+  "90979f47-605e-4478-a417-39da3d7184ef": {
+    "type": "UnbanSubredditUserBlock",
+    "name": "解除子版块用户封禁",
+    "source": "Unbans a user from a subreddit. Requires 'modcontributors' scope. Reddit scopes are account-wide, so this grants the ability across every subreddit you moderate, not only the one set here.",
+    "description": "禁止用户从一个子网。所需要求'modcontributors'范围。Reddit范围是整个账户范围的，因此这赋予了您的能力每一个子重组，你温和，而不仅仅是这里的一组。"
+  },
+  "90a56ffb-7024-4b2b-ab50-e26c5e5ab8ba": {
+    "type": "AgentLongTextInputBlock",
+    "name": "多行文本输入",
+    "source": "Block for long text input (multi-line).",
+    "description": "接收多行文本。"
+  },
+  "90f8c45e-e983-4644-aa0b-b4ebe2f531bc": {
+    "type": "ReplicateFluxAdvancedModelBlock",
+    "name": "运行 Replicate FLUX 高级模型",
+    "source": "This block runs Flux models on Replicate with advanced settings.",
+    "description": "此模块运行了Flux模型在复制中，具有高级设置。"
+  },
+  "916c21ad-f85e-4a08-be83-3a9bffb83404": {
+    "type": "RMFGCreateQuoteBlock",
+    "name": "RMFG · 创建报价",
+    "source": "Gets a live price from RMFG, a manufacturer that laser-cuts, bends and ships real sheet-metal and tube parts, plus manufacturability findings. Quote with the stocked material closest to the part's detected thickness and report any mismatch; quote exactly the quantity the customer asked for, and every unique part of a project at its required quantity; a requires_input result means a selection is missing, blocked means a finding must be resolved or accepted",
+    "description": "向 RMFG 获取钣金或管件的实时报价及可制造性检查结果。选择厚度最接近的库存材料，并说明差异。按客户要求及项目中每种零件的实际数量报价；requires_input 表示配置不全，blocked 表示须解决问题或明确接受风险。"
+  },
+  "91ded371-fe9f-432b-b0bd-d3788af485f8": {
+    "type": "PeopleSearchBlock",
+    "name": "搜索人员",
+    "source": "Search people and B2B leads by structured filters — job title, company, location, industry, seniority, skills — using DataForB2B's database. Find employees at a company, people by job title, who works where, decision-makers and key contacts (owners, founders, C-suite, VPs, directors), and build a prospect or lead list. Accepts LinkedIn URLs as identifiers. The lead-sourcing step of a prospecting or outreach workflow.",
+    "description": "使用结构化过滤器——职称、公司、地点、行业、年资、技能——DataForB2B数据库。找公司的员工，职位名字，谁在哪里工作的人，决策者和关键联系人 (所有者，创始人，主管，副总裁，董事),并建立一个前景或领先名单。接受LinkedIn URL作为标识符。探矿或外联工作流的牵头承包步骤。"
+  },
+  "932c3c12-1e80-4392-8fb3-37824eb8a427": {
+    "type": "StripeLinkCreateCardSpendRequestBlock",
+    "name": "Stripe Link · 创建银行卡支付请求",
+    "source": "Create a Stripe Link spend request for a one-time virtual card. Self-hosted only; on AutoGPT Cloud use Create Token Spend Request with the MPP blocks instead.",
+    "description": "请求授权使用 Stripe Link 一次性虚拟卡。仅支持自托管部署；AutoGPT Cloud 请使用 MPP 模块及「创建令牌支付请求」。"
+  },
+  "93e22b8b-3642-4477-aefb-1c0929a4a3a6": {
+    "type": "AirtableDeleteRecordsBlock",
+    "name": "Airtable · 删除记录",
+    "source": "Delete records from an Airtable table",
+    "description": "从 Airtable 表中删除指定记录。"
+  },
+  "9409dd93-3ce2-4fef-b14d-b70b1ecf6b17": {
+    "type": "RMFGCreateReviewLinkBlock",
+    "name": "RMFG · 创建审阅链接",
+    "source": "Creates an RMFG review link so a person can inspect and adjust a design",
+    "description": "创建一个RMFG审查链接，以便一个人可以检查和调整一个设计"
+  },
+  "944cc076-95e7-4d1b-b6b6-b15d8ee5448d": {
+    "type": "GithubMakeBranchBlock",
+    "name": "GitHub · 创建分支",
+    "source": "This block creates a new branch from a specified source branch.",
+    "description": "通过此模块，从一个指定源分支创建一个新的分支。"
+  },
+  "9464a020-ed1d-49e1-990f-7f2ac924a2b7": {
+    "type": "CompassAITriggerBlock",
+    "name": "Compass AI 转录触发器",
+    "source": "This block will output the contents of the compass transcription.",
+    "description": "输出 Compass 的转录内容。"
+  },
+  "9569d6f5-2ff0-4694-8296-c6bda4a894fa": {
+    "type": "ParallelChoiceDecisionBlock",
+    "name": "Parallel 选择判断",
+    "source": "Pick one of several options using current web evidence from Parallel, with a probability for each option.",
+    "description": "选择一个选项，使用平行的当前的网络证据，"
+  },
+  "95d1b990-ce13-4d88-9737-ba5c2070c97b": {
+    "type": "UniversalTypeConverterBlock",
+    "name": "通用类型转换",
+    "source": "This block is used to convert a value to a universal type.",
+    "description": "将输入值转换为指定类型。"
+  },
+  "95ead23f-8283-4654-aef3-10c053b74a31": {
+    "type": "AgentFileInputBlock",
+    "name": "文件上传输入",
+    "source": "Block for file upload input (string path for example).",
+    "description": "让用户上传文件作为输入，例如文件路径。"
+  },
+  "9637945d-c602-4875-899a-9c22f8fd30de": {
+    "type": "GithubUnassignPRReviewerBlock",
+    "name": "GitHub · 取消指派拉取请求审阅人",
+    "source": "This block unassigns a reviewer from a specified GitHub pull request.",
+    "description": "此模块将一个评论器从一个指定的 GitHub 拉请求中移除。"
+  },
+  "96582ded-a249-4998-8454-eabc8ffc28fc": {
+    "type": "ConductorManageWorkspaceBlock",
+    "name": "Conductor · 管理工作区",
+    "source": "Change a Conductor workspace: rename it, archive, unarchive or sleep it, share or stop sharing a port at its public preview URL, or move it into a section.",
+    "description": "改变Conductor工作空间：将其更名，存档，解档或休息，在公共预览URL上共享或停止共享端口，或将其移动到一个部分。"
+  },
+  "96dae2bb-97a2-41c2-bd2f-13a3b5a8ea98": {
+    "type": "AgentNumberInputBlock",
+    "name": "数字输入",
+    "source": "Block for number input.",
+    "description": "接收数字。"
+  },
+  "97728fa7-7f6f-4789-ba0c-f2c114119536": {
+    "type": "WordPressGetAllPostsBlock",
+    "name": "WordPress · 获取所有文章",
+    "source": "Fetch all posts from WordPress.com or Jetpack sites",
+    "description": "从WordPress.com或Jetpack网站中获取所有帖子"
+  },
+  "979f5dfc-37c8-4372-b401-a62eb8fb20f3": {
+    "type": "ExaGetWebsetMonitorRunBlock",
+    "name": "Exa · 获取网页集合监控运行记录",
+    "source": "Get the status and outcome of one scheduled run of a Websets monitor",
+    "description": "获取一个Websets监控器的计划运行状态和结果"
+  },
+  "97e03aae-a62f-11ef-bc53-5b89cb02888f": {
+    "type": "TwitterGetPinnedListsBlock",
+    "name": "Twitter · 获取置顶列表",
+    "source": "This block returns the Lists pinned by the authenticated user.",
+    "description": "此模块返回了被认证用户固定的列表。"
+  },
+  "98342061-09d2-4952-bf77-0761fc8cc9a8": {
+    "type": "RelatedKeywordExtractorBlock",
+    "name": "提取相关关键词",
+    "source": "Extract individual fields from a RelatedKeyword object",
+    "description": "从相关关键字对象中提取单个字段"
+  },
+  "98422b2c-c3b0-4d70-871f-56bd966f46da": {
+    "type": "GetRedditPostCommentsBlock",
+    "name": "获取 Reddit 帖子评论",
+    "source": "Get top-level comments on a Reddit post.",
+    "description": "让你在Reddit上发表顶级评论。"
+  },
+  "98a270d8-1844-4976-9ec0-fac846137e86": {
+    "type": "ParallelAskManyDecisionsBlock",
+    "name": "Parallel 批量决策",
+    "source": "Ask several yes/no, choice and score questions about one subject in a single Parallel request, answered from shared current web evidence.",
+    "description": "问几个yes/no通过共享现有网上证据，在单个并行请求中对一个主题进行选择和评分。"
+  },
+  "98bd6b77-9506-43d5-b669-6b9733c4b1f1": {
+    "type": "GithubAddLabelBlock",
+    "name": "GitHub · 添加标签",
+    "source": "A block that adds a label to a GitHub issue or pull request for categorization and organization.",
+    "description": "将标签添加到GitHub提出或提出分类和组织要求。"
+  },
+  "98c6f503-8c47-4b1c-a96d-351fc7c87dab": {
+    "type": "CreateTalkingAvatarVideoBlock",
+    "name": "生成数字人口播视频",
+    "source": "This block integrates with D-ID to create video clips and retrieve their URLs.",
+    "description": "通过D-ID整合，创建视频片段并检索它们的URL."
+  },
+  "996cec64-ac40-4dde-982f-b0dc60a5824d": {
+    "type": "ExaSearchBlock",
+    "name": "Exa · 搜索",
+    "source": "Searches the web with Exa and returns ranked pages with their text or highlights. Choose 'lite' for the cheapest, fastest search or 'deep' for multi-step research, and set an Output Schema to get a synthesized, cited answer.",
+    "description": "用 Exa 搜索网页，返回排序后的页面及其正文或重点片段。lite 速度最快且费用最低；deep 可用于多步研究。设置输出结构可获得带引用的综合答案。"
+  },
+  "9972d8ae-ddf2-11ef-a9b8-32d3674e8b7e": {
+    "type": "TodoistGetCommentsBlock",
+    "name": "Todoist · 获取评论",
+    "source": "Get all comments for a Todoist task or project",
+    "description": "获取所有所有评论的 Todoist 任务或项目"
+  },
+  "9a9d20c5-5b4d-4e94-8022-83b6cb72648a": {
+    "type": "JSONEncoderBlock",
+    "name": "JSON 编码",
+    "source": "Encodes any value or data structure into a JSON string.",
+    "description": "将任意值或数据结构编码为 JSON 字符串。"
+  },
+  "9ad93d0f-91b4-4c9c-8eb1-82e26b4a01c5": {
+    "type": "PineconeQueryBlock",
+    "name": "查询 Pinecone 向量",
+    "source": "Queries a Pinecone index",
+    "description": "查询Pinecone指数"
+  },
+  "9aeed32a-6ebf-49b8-a0a3-e2e509d86120": {
+    "type": "DiscordUserInfoBlock",
+    "name": "获取 Discord 用户资料",
+    "source": "Gets information about a Discord user by their ID.",
+    "description": "根据用户 ID 获取 Discord 用户资料。"
+  },
+  "9b0f531a-1118-487f-aeec-3fa63ea8900a": {
+    "type": "VideoConcatBlock",
+    "name": "拼接视频",
+    "source": "Merge multiple video clips into one continuous video",
+    "description": "将多个视频片段拼接成一段连续视频。"
+  },
+  "9c0b0450-d199-458b-a731-072189dd6593": {
+    "type": "AIListGeneratorBlock",
+    "name": "AI 列表生成",
+    "source": "A block that creates lists of items based on prompts using a Large Language Model (LLM), with optional source data for context.",
+    "description": "让大语言模型根据提示词生成列表，也可提供源数据作为上下文。"
+  },
+  "9c2e7b41-3d68-4a05-8f1c-6b4d0e9a2f37": {
+    "type": "AllQuietIncidentTriggerBlock",
+    "name": "AllQuiet · 事件触发器",
+    "source": "Triggers a graph when All Quiet posts an incident to this webhook",
+    "description": "当所有静音都对此事件发布时触发一个图形Webhook"
+  },
+  "9c4f2a7e-1d3b-4e8a-b6c5-2f7a0e9d1c34": {
+    "type": "FirecrawlRunDataToolBlock",
+    "name": "Firecrawl · 运行数据工具",
+    "source": "Runs a Firecrawl Alexandria data tool and returns its typed, sourced records: find people by title and company, get verified work emails, enrich a company from its domain, and thousands more. Find the tool and its inputs with 'Firecrawl Find Data Tools' first. Costs the Firecrawl credits listed on the tool.",
+    "description": "运行aFirecrawl亚历山大数据工具并返回其打字、来源的记录：通过产权和公司找到人，获得经核实的工作电子邮件，从公司领域丰富公司内容，再增加数千个。查找工具及其投入'Firecrawl Find Data Tools'头一次。费用Firecrawl工具上列出的信用额度。"
+  },
+  "9d3725ee-2968-431a-a816-857ab41e1420": {
+    "type": "AgentMailListPodsBlock",
+    "name": "AgentMail · 列出租户空间",
+    "source": "List all tenant pods in your organization. See all customer workspaces at a glance.",
+    "description": "列出组织中的所有租户空间，以查看各客户的工作区。"
+  },
+  "9d3b7f12-6a4e-4c08-b1d5-7e2a9c4f6b13": {
+    "type": "TregVerifyEmailBlock",
+    "name": "Treg · 验证电子邮箱",
+    "source": "Check whether an email address accepts mail before you send to it, through Treg's cheapest available verifier.",
+    "description": "通过Treg最便宜的可用验证器，"
+  },
+  "9d63ad9a-de14-11ef-ab3f-32d3674e8b7e": {
+    "type": "TodoistRenameSharedLabelsBlock",
+    "name": "Todoist · 重命名共享标签",
+    "source": "Renames all instances of a shared label",
+    "description": "共享标签的所有实例的名称更改"
+  },
+  "9e43a905-a918-4da0-8874-dfddd3c46953": {
+    "type": "GoogleDocsReplaceRangeWithMarkdownBlock",
+    "name": "Google 文档 · 用 Markdown 替换指定范围",
+    "source": "Replace a specific index range in a Google Doc with formatted Markdown - ideal for LLM/AI output",
+    "description": "在 Google Doc 中，用格式化的Markdown取代特定的索引范围 - 理想的LLM/AI输出"
+  },
+  "9e8f844e-b4a5-4b25-80f2-9e1dd7d67625": {
+    "type": "PostToXBlock",
+    "name": "发布到 X",
+    "source": "Post to X / Twitter using Ayrshare",
+    "description": "通过 Ayrshare 发布到 X。"
+  },
+  "9eff1710-a49b-490e-b486-197bf8b23c61": {
+    "type": "ExaWebsetSummaryBlock",
+    "name": "Exa · 网页集合摘要",
+    "source": "Get a comprehensive summary of a webset with samples and statistics",
+    "description": "获取一个综合的总结，包括样本和统计数据"
+  },
+  "9f3ddfa5-2ccb-4b49-a745-8244d9e32422": {
+    "type": "ExaAgentRunBlock",
+    "name": "Exa · 执行研究任务",
+    "source": "Run Exa Agent, Exa's research agent, for deep research, list building and enrichment. Returns a cited answer, optionally as JSON matching your schema.",
+    "description": "运行 Exa 研究智能体，开展深入研究、整理列表或补全资料。返回带引用的答案，也可按指定结构返回 JSON。"
+  },
+  "9f616084-1d9f-4f8e-bc00-5b9d2a75cd75": {
+    "type": "InterleaveListsBlock",
+    "name": "交错合并列表",
+    "source": "Interleaves elements from multiple lists in round-robin fashion, alternating between sources.",
+    "description": "轮流从多个列表取值并交错输出。"
+  },
+  "9fbdd208-a630-11ef-9b97-ab7a3a695ca3": {
+    "type": "TwitterGetQuoteTweetsBlock",
+    "name": "Twitter · 获取引用推文",
+    "source": "This block gets quote tweets for a specific tweet.",
+    "description": "此模块可以收到特定的推特的引用。"
+  },
+  "a099c034-a62f-11ef-9622-47d0ceb73555": {
+    "type": "TwitterUnpinListBlock",
+    "name": "Twitter · 取消置顶列表",
+    "source": "This block allows the authenticated user to unpin a specified List.",
+    "description": "此模块允许验证用户打开指定列表。"
+  },
+  "a0a4b1c2-d3e4-4f56-a7b8-c9d0e1f2a3b4": {
+    "type": "MCPToolBlock",
+    "name": "MCP 工具",
+    "source": "Connect to any MCP server and execute its tools. Provide a server URL, select a tool, and pass arguments dynamically.",
+    "description": "连接 MCP 服务器，选择工具并传入参数以执行。"
+  },
+  "a0a69be1-4528-491c-a85a-a4ab6873e3f0": {
+    "type": "AITextSummarizerBlock",
+    "name": "AI 文本摘要",
+    "source": "A block that summarizes long texts using a Large Language Model (LLM), with configurable focus topics and summary styles.",
+    "description": "让大语言模型概括长文本，可指定关注的主题和摘要风格。"
+  },
+  "a11865c3-ac80-4721-8a40-ac4e3b71a558": {
+    "type": "ExaWaitForEnrichmentBlock",
+    "name": "Exa · 等待数据补全任务",
+    "source": "Wait for a webset enrichment to complete with progress tracking",
+    "description": "等一个网盘丰富完成的进展跟踪"
+  },
+  "a1f2e3d4-c5b6-4a78-9012-3456789abcde": {
+    "type": "ExaCreateResearchBlock",
+    "name": "Exa · 创建研究任务",
+    "source": "Create a research task with optional waiting. Legacy: now runs on Exa Agent (Exa retired its Research API); use the 'Exa Agent' block for new workflows.",
+    "description": "创建一个可选的等待任务。遗产：现在运行在Exa代理(Exa退休的研究API; 使用'Exa Agent'用于新工作流的块。"
+  },
+  "a265bd84-c93b-459d-bbe0-94e6addaa38f": {
+    "type": "GoogleSheetsSortBlock",
+    "name": "Google 表格 · 排序",
+    "source": "Sort a Google Sheet by one or two columns. The sheet is sorted in-place.",
+    "description": "排序排序 aGoogle工作表用一栏或两栏制成。工作表是按位置分类的。"
+  },
+  "a2707376-8016-494b-98c4-d0e2752ab9cb": {
+    "type": "GoogleSheetsCreateNamedRangeBlock",
+    "name": "Google 表格 · 创建命名范围",
+    "source": "Create a named range to reference cells by name instead of A1 notation.",
+    "description": "创建一个命名范围，以引用单元的名称而不是A1标记。"
+  },
+  "a283ffc4-8087-4c3d-9135-8f26b86742ec": {
+    "type": "AgentMailGetMessageAttachmentBlock",
+    "name": "AgentMail · 获取邮件附件",
+    "source": "Download a file attachment from an email message. Returns base64-encoded file content.",
+    "description": "下载邮件附件，返回 Base64 编码的文件内容。"
+  },
+  "a28ca1e1-31a3-4f3d-86dc-7ef1042c163a": {
+    "type": "ExaCreateWebsetWebhookBlock",
+    "name": "Exa · 创建网页集合 Webhook",
+    "source": "Create an Exa Websets webhook that sends the chosen events to a URL, and get its one-time signing secret",
+    "description": "创建 Exa 网页集合 Webhook，将所选事件发送到指定 URL，签名密钥仅返回一次。"
+  },
+  "a2db9784-2d17-4f8f-9d6b-0214e6f22101": {
+    "type": "AgentMailCreatePodBlock",
+    "name": "AgentMail · 创建租户空间",
+    "source": "Create a new pod for multi-tenant customer isolation. Use client_id to map to your internal tenant IDs.",
+    "description": "创建用于隔离不同客户的租户空间。可用 client_id 关联内部租户 ID。"
+  },
+  "a3cf3f64-6bb9-4cc6-9900-608a0b3359b0": {
+    "type": "DictionaryIsEmptyBlock",
+    "name": "判断字典是否为空",
+    "source": "Checks if a dictionary is empty.",
+    "description": "检查字典是否为空。"
+  },
+  "a4078584-6fe5-46e0-997e-d5126cdd112a": {
+    "type": "GoogleSheetsBatchOperationsBlock",
+    "name": "Google 表格 · 批量操作",
+    "source": "This block performs multiple operations on a Google Sheets spreadsheet in a single batch request.",
+    "description": "单批量请求中执行一个 Google Sheets 电子表表中的多个操作。"
+  },
+  "a439f2f4-835f-4dae-ba7b-0205ffa70be6": {
+    "type": "GithubForkRepositoryBlock",
+    "name": "GitHub · 派生仓库",
+    "source": "This block forks a GitHub repository to your account or an organization.",
+    "description": "此模块将 GitHub 仓库交给您的账户或组织。"
+  },
+  "a5164551-58d2-4cd3-96c6-82045720cd7d": {
+    "type": "ExaGetSearchMonitorRunBlock",
+    "name": "Exa · 获取搜索监控运行记录",
+    "source": "Get an Exa Search Monitor run's status, new results and synthesized findings",
+    "description": "获取搜索监控某次运行的状态、新结果及综合发现。"
+  },
+  "a66fcc3f-5dee-4680-876b-3b3b8aa5a5c3": {
+    "type": "ExaGetWebsetWebhookBlock",
+    "name": "Exa · 获取网页集合 Webhook",
+    "source": "Get an Exa Websets webhook's URL, events, status and metadata",
+    "description": "获取Exa Websets Webhook的URL,事件，状态和元数据"
+  },
+  "a6c5cbde-de14-11ef-8863-32d3674e8b7e": {
+    "type": "TodoistRemoveSharedLabelsBlock",
+    "name": "Todoist · 移除共享标签",
+    "source": "Removes all instances of a shared label",
+    "description": "删除所有共享标签的实例"
+  },
+  "a809d264-ddf2-11ef-9764-32d3674e8b7e": {
+    "type": "TodoistGetCommentBlock",
+    "name": "Todoist · 获取评论",
+    "source": "Get a single comment from Todoist",
+    "description": "得到一个评论从 Todoist"
+  },
+  "a892b8d9-3e4e-4e9c-9c1e-75f8efcf1bfa": {
+    "type": "GetCurrentTimeBlock",
+    "name": "获取当前时间",
+    "source": "This block outputs the current time.",
+    "description": "输出当前时间。"
+  },
+  "a8c17ce0-b7c1-4bc3-ae39-680e1952e5d0": {
+    "type": "AgentMailListPodInboxesBlock",
+    "name": "AgentMail · 列出租户收件箱",
+    "source": "List all inboxes within a pod. View email accounts scoped to a specific customer.",
+    "description": "列出单一租户空间中的所有收件箱，只显示该客户的邮箱。"
+  },
+  "a8db4d8d-db1c-4a25-a1b0-416a8c33602b": {
+    "type": "GithubCommentBlock",
+    "name": "GitHub · 发表评论",
+    "source": "A block that posts comments on GitHub issues or pull requests using the GitHub API.",
+    "description": "通过GitHub API发布评论或撤回请求的区块。"
+  },
+  "a912d5c7-6e00-4542-b2a9-8034136930e4": {
+    "type": "CreateListBlock",
+    "name": "创建列表",
+    "source": "Creates a list with the specified values. Use this when you know all the values you want to add upfront. This block can also yield the list in batches based on a maximum size or token limit.",
+    "description": "根据给定的值创建列表；也可按最大长度或 Token 数限制分批输出。"
+  },
+  "a9b3e5d1-6c0f-4a28-b4e7-1d8c2f6a9e03": {
+    "type": "TregGetLinkedInCompanyBlock",
+    "name": "Treg · 获取LinkedIn 公司资料",
+    "source": "Read a LinkedIn company page through Treg, without a LinkedIn account or scraper.",
+    "description": "通过Treg阅读LinkedIn公司页面，没有LinkedIn账户或剪辑器。"
+  },
+  "a9d7f854-2c83-4e96-b3a1-7f2e9c5d4b8e": {
+    "type": "PostToSnapchatBlock",
+    "name": "发布到 Snapchat",
+    "source": "Post to Snapchat using Ayrshare",
+    "description": "通过 Ayrshare 发布到 Snapchat。"
+  },
+  "aa46e092-b04f-492a-ae13-bb920f1469c2": {
+    "type": "GithubGetRepositoryTrafficBlock",
+    "name": "GitHub · 获取仓库访问量",
+    "source": "Get a GitHub repository's views and clones over the last 14 days, with unique visitors and cloners, plus its top referring sites and most viewed pages. Views and clones are also broken down by day or week. GitHub only shows traffic to accounts with push access to the repository.",
+    "description": "查看仓库过去 14 天的访问量和克隆量、独立访问及克隆用户数、主要来源网站和热门页面。支持按日或周查看；仅具有仓库推送权限的账户能查看这些数据。"
+  },
+  "aa6994a2-e986-421f-8d4c-7671d3be7b7e": {
+    "type": "ExaDeleteWebsetBlock",
+    "name": "Exa · 删除网页集合",
+    "source": "Delete a Webset and all its items",
+    "description": "删除网页集合及其中的全部条目。"
+  },
+  "aaefdd48-a62f-11ef-a73c-3f44df63e276": {
+    "type": "TwitterSearchSpacesBlock",
+    "name": "Twitter · 搜索空间",
+    "source": "This block searches for Twitter Spaces based on specified terms.",
+    "description": "此模块基于特定的术语搜索Twitter空间。"
+  },
+  "ab2a782d-22cf-4587-8a70-55b59b3f9f90": {
+    "type": "WordCharacterCountBlock",
+    "name": "统计单词数和字符数",
+    "source": "Counts the number of words and characters in a given text.",
+    "description": "统计给定文本中的单词数和字符数。"
+  },
+  "ac444320-cf5e-4697-b586-2604c17a3e75": {
+    "type": "FirecrawlScrapeBlock",
+    "name": "Firecrawl · 抓取网页",
+    "source": "Firecrawl scrapes a website to extract comprehensive data while bypassing blockers.",
+    "description": "Firecrawl在绕过阻塞器的同时，剪切了一个网站，以提取全面数据。"
+  },
+  "accca760-8174-4656-b55e-5f0e82fee986": {
+    "type": "GoogleSheetsFindReplaceBlock",
+    "name": "Google 表格 · 查找并替换",
+    "source": "This block finds and replaces text in a Google Sheets spreadsheet.",
+    "description": "此模块在 Google Sheets 电子表格中找到和替换文本。"
+  },
+  "acf7625e-d2cb-4941-bfeb-2819fc6fc015": {
+    "type": "ReadSpreadsheetBlock",
+    "name": "读取电子表格",
+    "source": "Reads CSV and Excel files and outputs the data as a list of dictionaries and individual rows. Excel files are automatically converted to CSV format.",
+    "description": "读取 CSV 或 Excel 文件，按字典列表和单行记录输出；Excel 将自动转换为 CSV。"
+  },
+  "ad7aa6fa-a630-11ef-a6b0-e7ca640aa030": {
+    "type": "TwitterGetRetweetersBlock",
+    "name": "Twitter · 获取转发用户",
+    "source": "This block gets information about who has retweeted a tweet.",
+    "description": "通过此模块，可以获取有关回复推文的信息。"
+  },
+  "ad89e82c-cdab-4784-bf54-9666ab0d2952": {
+    "type": "TavilyCrawlBlock",
+    "name": "Tavily · 抓取网站",
+    "source": "Crawls a website with Tavily, following links from the root URL and extracting page content",
+    "description": "使用 Tavily 从起始 URL 沿链接抓取网站，并提取页面内容。"
+  },
+  "ada08f34-a7a9-44aa-869f-0638fa4e0a84": {
+    "type": "GetSubredditFlairsBlock",
+    "name": "获取子版块标签",
+    "source": "Get available link flair options for a subreddit.",
+    "description": "让你有机会为一个子网页提供链接。"
+  },
+  "ade60136-de14-11ef-b5e5-32d3674e8b7e": {
+    "type": "TodoistCreateProjectBlock",
+    "name": "Todoist · 创建项目",
+    "source": "Creates a new project in Todoist",
+    "description": "在Todoist创建一个新的项目"
+  },
+  "ade970ae-8428-4a7b-9278-b52054dbf535": {
+    "type": "AgentMailDeleteInboxBlock",
+    "name": "AgentMail · 删除收件箱",
+    "source": "Permanently delete an AgentMail inbox and all its messages, threads, and drafts. This action cannot be undone.",
+    "description": "永久删除 AgentMail 收件箱及其中的邮件、会话和草稿。此操作不可撤销。"
+  },
+  "ae695fcf-e1bf-4900-b06c-3ae21d6edf70": {
+    "type": "ApproveRedditPostBlock",
+    "name": "批准 Reddit 帖子",
+    "source": "Approves a Reddit post or comment from the mod queue. Requires 'modposts' scope. Reddit scopes are account-wide, so this grants the ability across every subreddit you moderate, not only the one set here.",
+    "description": "通过Reddit帖子或评论从调整队列。所需要求'modposts'范围。Reddit范围是整个账户范围的，因此这赋予了您的能力每一个子重组，你温和，而不仅仅是这里的一组。"
+  },
+  "aeb08fc1-2fc1-4141-bc8e-f758f183a822": {
+    "type": "AddToListBlock",
+    "name": "添加列表项",
+    "source": "Adds a new entry to a list. The entry can be of any type. If no list is provided, a new one is created.",
+    "description": "向列表添加任意类型的元素；如未传入列表，将创建新列表。"
+  },
+  "b0c4f8e2-7d3a-4196-a5b8-9e1d6c3f0a47": {
+    "type": "TregExtractStructuredDataBlock",
+    "name": "Treg · 提取结构化数据",
+    "source": "Pull typed data out of a web page, described by a JSON schema or a plain-English instruction, through Treg.",
+    "description": "根据提供的 JSON 结构或自然语言指令，通过 Treg 从网页中提取结构化数据。"
+  },
+  "b12877be-06cd-4a96-bf79-438bb4cb5517": {
+    "type": "StripeLinkCreateTokenSpendRequestBlock",
+    "name": "Stripe Link · 创建令牌支付请求",
+    "source": "MPP step 2 of 3: ask the user to authorize a payment to a merchant that answers HTTP 402, and provision a Shared Payment Token for it. Takes the network ID from the Get Payment Challenge block; step 3 is MPP Pay. For an ordinary checkout form, use Create Card Spend Request instead.",
+    "description": "MPP 第 2 步（共 3 步）：使用上一步获取的网络 ID，请求用户授权向返回 HTTP 402 的商户付款，并签发共享支付令牌。下一步是「通过 MPP 付款」。普通结账表单请改用「创建银行卡支付请求」。"
+  },
+  "b1628cf2-4622-49bf-80cf-10e55826e247": {
+    "type": "SendDiscordFileBlock",
+    "name": "发送 Discord 文件",
+    "source": "Sends a file attachment to a Discord channel.",
+    "description": "向 Discord 频道发送文件附件。"
+  },
+  "b1ab9b19-67a6-406d-abf5-2dba76d00c79": {
+    "type": "CalculatorBlock",
+    "name": "计算器",
+    "source": "Performs a mathematical operation on two numbers.",
+    "description": "对两个数执行数学运算。"
+  },
+  "b219415c-8b36-4f49-937b-f11b1bbddfb2": {
+    "type": "StripeLinkMPPPayBlock",
+    "name": "Stripe Link · 通过 MPP 付款",
+    "source": "MPP step 3 of 3: spend an approved Shared Payment Token at the merchant's endpoint. Follows Get Payment Challenge (step 1) and Create Token Spend Request (step 2). No card number and no checkout form. The token is single-use, so a failed payment needs a fresh spend request.",
+    "description": "MPP 第 3 步（共 3 步）：向商户端点提交已授权的共享支付令牌。前两步为获取支付验证信息、创建令牌支付请求。无需卡号或结账表单。令牌仅能使用一次，付款失败后须重新申请。"
+  },
+  "b250de56-2ca6-4237-a7b8-b5684892189f": {
+    "type": "ExaDeleteEnrichmentBlock",
+    "name": "Exa · 删除数据补全任务",
+    "source": "Delete an enrichment from a webset",
+    "description": "从网盘删除一个缩写"
+  },
+  "b2605464-e486-4bf4-aad3-d8a213c8a48a": {
+    "type": "GithubIssuesTriggerBlock",
+    "name": "GitHub · 议题触发器",
+    "source": "This block triggers on GitHub issues events. Useful for automated triage, notifications, and welcoming first-time contributors.",
+    "description": "此模块会触发GitHub问题事件。对于自动分类，通知和欢迎首次贡献者来说有用。"
+  },
+  "b29c1b50-5d0e-4d9f-8f9d-1b0e6fcbf0b1": {
+    "type": "GetCurrentDateBlock",
+    "name": "获取当前日期",
+    "source": "This block outputs the current date with an optional offset.",
+    "description": "输出当前日期，可指定日期偏移量。"
+  },
+  "b2e3f4a5-6789-4bcd-9012-3456789abcde": {
+    "type": "ExaGetResearchBlock",
+    "name": "Exa · 获取研究任务",
+    "source": "Get status and results of a research task. Legacy: now reads Exa Agent runs; use 'Get Exa Agent Run' for new workflows.",
+    "description": "获取研究任务的状态和结果。遗产：现在读取Exa Agent运行；使用'Get Exa Agent Run'来进行新的工作流。"
+  },
+  "b3f4d747-10e3-4e69-8c51-f2be1d99c9a7": {
+    "type": "GithubUpdateCommentBlock",
+    "name": "GitHub · 更新评论",
+    "source": "A block that updates an existing comment on a GitHub issue or pull request.",
+    "description": "更新一个 GitHub 问题或拉取请求的现有评论的区块。"
+  },
+  "b435b5ea-de14-11ef-8b51-32d3674e8b7e": {
+    "type": "TodoistGetProjectBlock",
+    "name": "Todoist · 获取项目",
+    "source": "Gets details for a specific Todoist project",
+    "description": "获取特定的Todoist项目详细信息"
+  },
+  "b4b8a38c-95ae-4c91-9ef8-c2cffaf2b5d1": {
+    "type": "GithubResolveReviewDiscussionBlock",
+    "name": "GitHub · 解决审阅讨论",
+    "source": "This block resolves or unresolves a review discussion thread on a GitHub pull request.",
+    "description": "此模块解决或不解决 GitHub 拉取请求上的审查讨论线程。"
+  },
+  "b5a2a0e6-26b4-4c5b-8a42-bc79e9cb65c2": {
+    "type": "LinearSearchIssuesBlock",
+    "name": "Linear · 搜索议题",
+    "source": "Searches for issues on Linear",
+    "description": "查找有关Linear"
+  },
+  "b5b99203-5b43-48be-a77b-3906fcfd0ef8": {
+    "type": "ExaCancelAgentRunBlock",
+    "name": "Exa · 取消智能体任务",
+    "source": "Cancel an Exa Agent run immediately. No results are kept; usage so far is still billed. To keep partial results of an ultra run, use 'Stop Exa Agent Run' instead.",
+    "description": "立即取消 Exa 研究任务。不会保留结果，已产生的用量仍会计费。如需保留 ultra 任务的部分结果，请改用「停止智能体任务」。"
+  },
+  "b5ef8aa2-f0bc-424f-b613-c1961ec0028d": {
+    "type": "StripeLinkGetSpendRequestStatusBlock",
+    "name": "Stripe Link · 获取支付请求状态",
+    "source": "Check whether a Stripe Link spend request has been approved yet. Poll this after creating a request and before spending, for both the card and the Shared Payment Token flows. If the status is 'requires_action' the payment method needs attention first — keep polling when `auto_resumes` is true, otherwise resolve the action and create a new request.",
+    "description": "查询 Stripe Link 支付请求是否已获批准。使用银行卡或共享支付令牌前均应轮询。若状态为 requires_action，应先处理支付方式；auto_resumes 为真时继续轮询，否则请处理后发起新请求。"
+  },
+  "b600aaf2-6272-40c6-b973-c3984747c5bd": {
+    "type": "GetTelegramFileBlock",
+    "name": "获取 Telegram 文件",
+    "source": "Download a file from Telegram using its file_id. Use this to process photos, voice messages, or documents received.",
+    "description": "通过 Telegram 下载一个文件file_id.通过此处理收到的照片，语音信息或文件。"
+  },
+  "b604f0ec-6e0d-40a7-bf55-9fd09997cced": {
+    "type": "GetStoreAgentDetailsBlock",
+    "name": "获取市场工作流详情",
+    "source": "Get detailed information about an agent from the store",
+    "description": "查看市场中某个工作流的详细资料。"
+  },
+  "b6650a0a-b113-40cf-8243-ff20f684f9b8": {
+    "type": "AgentMailCreateListEntryBlock",
+    "name": "AgentMail · 创建名单条目",
+    "source": "Add an email address or domain to an allow/block list. Block spam senders or whitelist trusted domains.",
+    "description": "将邮箱地址或域名加入允许或阻止名单，以拦截垃圾邮件或放行可信域名。"
+  },
+  "b67469b2-7748-4d81-a223-4ebd332cca89": {
+    "type": "AgentMailSendMessageBlock",
+    "name": "AgentMail · 发送消息",
+    "source": "Send a new email from an AgentMail inbox. Creates a new conversation thread. Supports HTML, CC/BCC, and labels.",
+    "description": "从指定收件箱发送新邮件并创建新会话。支持 HTML、抄送、密送和标签。"
+  },
+  "b69731e6-a62f-11ef-b2d4-1bf14dd6aee4": {
+    "type": "TwitterGetSpaceTweetsBlock",
+    "name": "Twitter · 获取空间推文",
+    "source": "This block retrieves tweets shared in a Twitter Space.",
+    "description": "通过此区块，可以检索在Twitter空间中分享的推文。"
+  },
+  "b6cfb2de-5f0b-437c-b29d-45aebbda9c00": {
+    "type": "GoogleDocsReplaceAllWithMarkdownBlock",
+    "name": "Google 文档 · 用 Markdown 替换全文",
+    "source": "Replace entire Google Doc content with formatted Markdown - ideal for LLM/AI output",
+    "description": "取代整个Google Doc内容以格式化的Markdown - 理想的LLM/AI输出"
+  },
+  "b6e663f0-a630-11ef-a7f0-8b9b0c542ff8": {
+    "type": "TwitterRemoveRetweetBlock",
+    "name": "Twitter · 移除转发",
+    "source": "This block removes a retweet on Twitter.",
+    "description": "此模块块删除了Twitter上的回复。"
+  },
+  "b6eb08b6-dbe3-411b-b9b4-2508cb311a1f": {
+    "type": "ListIntersectionBlock",
+    "name": "列表交集",
+    "source": "Computes the intersection of two lists, returning only elements present in both.",
+    "description": "仅返回两个列表都包含的元素。"
+  },
+  "b70c7e33-5d66-4f8e-897f-ac73a7bfce82": {
+    "type": "AgentMailForwardMessageBlock",
+    "name": "AgentMail · 转发消息",
+    "source": "Forward an email message to one or more recipients. Supports CC/BCC and optional extra text or subject override.",
+    "description": "将邮件转发给一个或多个收件人。支持抄送、密送、附言和更改主题。"
+  },
+  "b7710ce4-68ef-4e82-9a2f-f0b874ef9c7d": {
+    "type": "AskWolframBlock",
+    "name": "向 Wolfram 提问",
+    "source": "Ask Wolfram Alpha a question",
+    "description": "向 Wolfram Alpha 提问并获取答案。"
+  },
+  "b773c520-ddf2-11ef-9f34-32d3674e8b7e": {
+    "type": "TodoistUpdateCommentBlock",
+    "name": "Todoist · 更新评论",
+    "source": "Updates a Todoist comment",
+    "description": "更新一个 Todoist 评论"
+  },
+  "b79ca4cc-9d5e-47d1-9d4f-e3a2d7f28df5": {
+    "type": "ExaAnswerBlock",
+    "name": "Exa · 回答问题",
+    "source": "Get an LLM answer to a question informed by Exa search results, with citations; optionally as structured JSON",
+    "description": "获取通过 Exa 搜索结果提供的问答，并引用；可选是结构化JSON"
+  },
+  "b7d5e4f2-8c3a-4e6b-9f1d-7a8b9c5e4d3f": {
+    "type": "GithubCreateCommentObjectBlock",
+    "name": "GitHub · 创建评论对象",
+    "source": "Creates a comment object for use with GitHub blocks. Note: For review comments, only path, body, and position are used. Side fields are only for standalone PR comments.",
+    "description": "生成供 GitHub 模块使用的评论对象。审阅评论只使用 path、body 和 position；side 等字段仅供独立的拉取请求评论使用。"
+  },
+  "b7e2d0a4-3f51-4c86-9e1a-6d4b8f2c7a90": {
+    "type": "TregFindWorkEmailBlock",
+    "name": "Treg · 查找工作邮箱",
+    "source": "Find a person's work email from their name and company domain, or their LinkedIn URL. Treg tries providers cheapest first and can check the address before you send to it.",
+    "description": "找个人的工作电子邮件从他们的姓名和公司域名，或他们的LinkedIn URL.首先，Treg试验最便宜的供应商，"
+  },
+  "b81a9d27-3997-4860-9303-cc68086db13a": {
+    "type": "GoogleSheetsListNamedRangesBlock",
+    "name": "Google 表格 · 列出命名范围",
+    "source": "List all named ranges in a spreadsheet.",
+    "description": "在电子表格中列出所有命名范围。"
+  },
+  "b858f62b-6c12-4736-aaf2-dbc5a9281320": {
+    "type": "AgentMailGetInboxBlock",
+    "name": "AgentMail · 获取收件箱",
+    "source": "Retrieve details of an existing AgentMail inbox including its email address, display name, and configuration.",
+    "description": "获取指定收件箱的邮箱地址、显示名称和配置。"
+  },
+  "b8a934d5-fca0-4be3-9fc2-a99bf63bd385": {
+    "type": "GoogleSheetsUpdateRowBlock",
+    "name": "Google 表格 · 更新行",
+    "source": "Update a specific row by its index. Can use list or dict format for values.",
+    "description": "根据其索引更新特定行。能使用列表或指令格式来定义值。"
+  },
+  "b8c9d0e1-f2a3-4567-89ab-cdef01234567": {
+    "type": "ExaGetEnrichmentBlock",
+    "name": "Exa · 获取数据补全任务",
+    "source": "Get the status and details of a webset enrichment",
+    "description": "获取网站集中的状态和详细信息"
+  },
+  "b924ddf4-de4f-4b56-9a85-358930dcbc91": {
+    "type": "CreateDictionaryBlock",
+    "name": "创建字典",
+    "source": "Creates a dictionary with the specified key-value pairs. Use this when you know all the values you want to add upfront.",
+    "description": "根据给定的键值对创建字典。适合已知所有待添加值的情况。"
+  },
+  "b9fe53fa-5026-4547-9570-b54ccb487229": {
+    "type": "AgentMailReplyToMessageBlock",
+    "name": "AgentMail · 回复消息",
+    "source": "Reply to an existing email in the same conversation thread. Use for multi-turn agent conversations.",
+    "description": "在原会话中回复指定邮件，保留多轮往来的上下文。"
+  },
+  "ba41a20a-de14-11ef-91d7-32d3674e8b7e": {
+    "type": "TodoistUpdateProjectBlock",
+    "name": "Todoist · 更新项目",
+    "source": "Updates an existing project in Todoist",
+    "description": "在 Todoist 中更新现有项目"
+  },
+  "bb4fd91a-883e-4d29-9879-b06c4bb79d30": {
+    "type": "DeleteTelegramMessageBlock",
+    "name": "删除 Telegram 消息",
+    "source": "Delete a message from a Telegram chat. Bots can delete their own messages and incoming messages in private chats at any time.",
+    "description": "删除电文Telegram聊天。机器人可以在私人聊天中随时删除自己的消息和接入消息。"
+  },
+  "bc05f7ef-ba6f-4cb7-a899-3913b745ed11": {
+    "type": "StripeSubscriptionTriggerBlock",
+    "name": "Stripe 订阅触发器",
+    "source": "Triggers on Stripe subscription events (new, upgrade, cancel). Uses Stripe webhooks directly — real external customers only, no internal or demo account noise.",
+    "description": "触发Stripe订阅事件 (新，升级，取消).用途Stripe直接(只有真正的外部客户), 没有内部或演示账户噪音。"
+  },
+  "bcbee3ee-4ff4-485b-afa8-a57856ab12b6": {
+    "type": "RMFGAnalyzeDesignBlock",
+    "name": "RMFG · 分析设计",
+    "source": "Uploads a STEP file to RMFG, a manufacturer that makes and ships real sheet-metal and tube-laser parts, and returns its analyzed parts: the first step before a live quote, cart or order. Works on a URL, an attached workspace file or a data URI",
+    "description": "向RMFG上传STEP文件，该公司制造和运输真实金属板和管激光零件，并返回其分析的零件：在实时报价，购物车或订单之前的第一步。在URL,附加的工作空间文件或数据URI上工作"
+  },
+  "bd3afa7d-607e-4b0e-bd24-201c54fa0ad4": {
+    "type": "RMFGListMaterialsBlock",
+    "name": "RMFG · 列出材料",
+    "source": "Lists the sheet-metal stock RMFG can cut and bend, with thickness in mm and inches. Choose the entry closest to a part's detected thickness and pass its id as material_id to quote",
+    "description": "列出单板金属存货RMFG可以切割和弯曲，厚度以毫米和英寸计。选择最接近检测到的零件厚度的输入，然后通过其ID为material_id引用"
+  },
+  "bd700764-53e3-44dd-a969-d1854088458f": {
+    "type": "GithubStarRepositoryBlock",
+    "name": "GitHub · 给仓库加星",
+    "source": "This block stars a GitHub repository.",
+    "description": "此模块是GitHub 仓库的星座。"
+  },
+  "bd7b8d3a-a630-11ef-be96-6f4aa4c3c4f4": {
+    "type": "TwitterRetweetBlock",
+    "name": "Twitter · 转发推文",
+    "source": "This block retweets a tweet on Twitter.",
+    "description": "此模块块在Twitter上回复了推文。"
+  },
+  "bd7c84e3-e073-4b75-810c-600886ec8a5b": {
+    "type": "SearchMemoryBlock",
+    "name": "搜索记忆",
+    "source": "Search memories in Mem0 by user",
+    "description": "按用户在 Mem0 中搜索记忆。"
+  },
+  "bda4c020-ddf2-11ef-b114-32d3674e8b7e": {
+    "type": "TodoistDeleteCommentBlock",
+    "name": "Todoist · 删除评论",
+    "source": "Deletes a Todoist comment",
+    "description": "删除一个 Todoist 评论"
+  },
+  "bdbbaba0-03b7-4971-970e-699e2de6015e": {
+    "type": "FirecrawlCrawlBlock",
+    "name": "Firecrawl · 抓取网站",
+    "source": "Firecrawl crawls websites to extract comprehensive data while bypassing blockers.",
+    "description": "Firecrawl在绕过阻塞器时，浏览网站以提取全面数据。"
+  },
+  "bf77d128-8b25-4280-b5c7-2d553ba7e482": {
+    "type": "BaasBotLeaveMeetingBlock",
+    "name": "Meeting BaaS · 离开会议",
+    "source": "Remove a bot from an ongoing meeting",
+    "description": "让机器人离开正在进行的会议。"
+  },
+  "bf8823d6-b42a-48c7-b558-d7c117f2ae85": {
+    "type": "Slant3DEstimateOrderBlock",
+    "name": "Slant 3D · 估算订单",
+    "source": "Quote a 3D-printed parts order including shipping by creating an uncharged Slant3D draft. Accepts multiple STL files or uploaded file IDs with per-part quantities. Requires real customer shipping details and an account payment method; do not invent an address. For printing-only part or project quotes without shipping details, use Slant3D Slicer for each file instead. Returns a draft ID that Process Order can submit after approval.",
+    "description": "通过未扣款的草稿估算 3D 打印订单总价（含运费）。支持多个 STL 或文件 ID 及各自数量。需要真实配送信息和账户支付方式，不得虚构地址。不提供配送信息时可用「模型切片」逐项询价。返回的草稿 ID 可在获得批准后用于提交订单。"
+  },
+  "bf8d1aa6-42d8-4944-b6bd-6bac554c0d3b": {
+    "type": "BaasBotDeleteRecordingBlock",
+    "name": "Meeting BaaS · 删除录制内容",
+    "source": "Permanently delete a meeting's recorded data",
+    "description": "永久删除指定会议的录制数据。"
+  },
+  "bf94b2a4-1a30-4600-a783-a8a44ee31301": {
+    "type": "GithubReadPullRequestBlock",
+    "name": "GitHub · 读取拉取请求",
+    "source": "This block reads the body, title, user, changes, and full raw object of a specified GitHub pull request.",
+    "description": "此模块读取了指定GitHub拉请求的体格，标题，用户，变更和完整的原始对象。"
+  },
+  "c069dc6b-c3ed-4c12-b6e5-d47361e64ce6": {
+    "type": "AutoPilotBlock",
+    "name": "运行 AutoPilot",
+    "source": "Execute tasks using AutoGPT AutoPilot with full access to platform tools (agent management, workspace files, web fetch, block execution, and more). Enables sub-agent patterns and scheduled autopilot execution.",
+    "description": "使用 AutoGPT AutoPilot 执行任务，可调用工作流管理、工作区文件、网页读取和模块运行等平台工具。支持子工作流和定时执行。"
+  },
+  "c0a8e994-ebf1-4a9c-a4d8-89d09c86741b": {
+    "type": "AgentInputBlock",
+    "name": "工作流输入",
+    "source": "A block that accepts and processes user input values within a workflow, supporting various input types and validation.",
+    "description": "接收并验证工作流的输入，支持多种数据类型。"
+  },
+  "c0d22c5e-e688-43e3-ba43-d5faba7927fd": {
+    "type": "GithubAssignPRReviewerBlock",
+    "name": "GitHub · 指派拉取请求审阅人",
+    "source": "This block assigns a reviewer to a specified GitHub pull request.",
+    "description": "此模块将一个审查器分配给一个指定的 GitHub 拉请求。"
+  },
+  "c10a2234-59b2-46d0-a6af-b6bef3b17455": {
+    "type": "ExaGetWebsetEventBlock",
+    "name": "Exa · 获取网页集合事件",
+    "source": "Get one Exa Websets event and the resource it is about",
+    "description": "获取一个Exa Websets事件和它所涉及的资源"
+  },
+  "c1104739-f8dc-4d7f-a99a-4bb418102287": {
+    "type": "RMFGGetCartBlock",
+    "name": "RMFG · 获取购物车",
+    "source": "Fetches an RMFG cart and its latest quote by ID",
+    "description": "获取RMFG及其最新引号ID"
+  },
+  "c15febe0-66ce-4c6f-aebd-5ab351653804": {
+    "type": "NotionCreatePageBlock",
+    "name": "Notion · 创建页面",
+    "source": "Create a new page in Notion. Requires EITHER a parent_page_id OR parent_database_id. Supports markdown content.",
+    "description": "在Notion中创建一个新的页面。要求任何一个parent_page_idORparent_database_id.支持标记内容。"
+  },
+  "c1c121a8-a62f-11ef-8b0e-d7b85f96a46f": {
+    "type": "TwitterGetSpaceBuyersBlock",
+    "name": "Twitter · 获取空间购票用户",
+    "source": "This block retrieves a list of users who purchased tickets to a Twitter Space.",
+    "description": "此模块检索购买了Twitter空间门票的用户列表。"
+  },
+  "c1e7a3f9-5b2d-4c68-8e0a-6d4f2b9c7e15": {
+    "type": "TregCallToolBlock",
+    "name": "Treg · 调用工具",
+    "source": "Call any of Treg's 4,000+ tools by id (SEO, social, ads, people and company data, scraping, generation), or a tool your Treg team registered. Find tool ids and prices with Treg Search Catalog.",
+    "description": "按 ID 调用 Treg 的 4,000 多种工具或团队自行注册的工具。使用「Treg · 搜索工具目录」查看工具 ID 和价格。"
+  },
+  "c215bfd7-0e57-4573-8f8c-f7d4963dcd74": {
+    "type": "GithubListIssuesBlock",
+    "name": "GitHub · 列出议题",
+    "source": "A block that retrieves a list of issues from a GitHub repository with their titles and URLs.",
+    "description": "区块从 GitHub 仓库中获取问题列表，包含其标题和URL."
+  },
+  "c2893acc-de14-11ef-a113-32d3674e8b7e": {
+    "type": "TodoistDeleteProjectBlock",
+    "name": "Todoist · 删除项目",
+    "source": "Deletes a Todoist project and all its contents",
+    "description": "删除一个 Todoist 项目及其所有内容"
+  },
+  "c29c5cbf-0aff-40f9-bbb5-f26061792d2b": {
+    "type": "AirtableGetRecordBlock",
+    "name": "Airtable · 获取记录",
+    "source": "Get a single record from Airtable",
+    "description": "读取一条 Airtable 记录。"
+  },
+  "c2adb3aa-5aae-488d-8a6e-4eb8c23e2ed6": {
+    "type": "SearchPeopleBlock",
+    "name": "搜索人员",
+    "source": "Search for people in Apollo",
+    "description": "在阿波罗搜索人"
+  },
+  "c2b1c976-844f-4b6c-ab21-4973d2ceab15": {
+    "type": "ReplyToTelegramMessageBlock",
+    "name": "回复 Telegram 消息",
+    "source": "Reply to a specific message in a Telegram chat.",
+    "description": "回复 Telegram 会话中的指定消息。"
+  },
+  "c35daabb-cd60-493b-b9ad-51f1fe4b50c4": {
+    "type": "VideoDownloadBlock",
+    "name": "下载视频",
+    "source": "Download video from URL (YouTube, Vimeo, news sites, direct links)",
+    "description": "从 URL 下载视频，支持 YouTube、Vimeo、新闻网站及视频直链。"
+  },
+  "c36c49da-605f-4f1a-9da0-6f0a2cf9abfd": {
+    "type": "RMFGGetDFMReportBlock",
+    "name": "RMFG · 获取可制造性报告",
+    "source": "Fetches an RMFG DFM report by ID",
+    "description": "通过ID来获取RMFG DFM报告"
+  },
+  "c3d4e5f6-7890-4abc-9012-3456789abcde": {
+    "type": "ExaWaitForResearchBlock",
+    "name": "Exa · 等待研究任务",
+    "source": "Wait for a research task to complete with configurable timeout. Legacy: now waits on Exa Agent runs; use 'Wait for Exa Agent Run' for new workflows.",
+    "description": "等到一个研究任务完成，遗产：现在等待Exa代理运行；使用'Wait for Exa Agent Run'用于新的工作流。"
+  },
+  "c3d81f5e-2a9b-4e70-b6c4-8f1e5a3d9c27": {
+    "type": "TregEnrichPersonBlock",
+    "name": "Treg · 补全个人资料",
+    "source": "Look up a person (name, job title, company, LinkedIn and location) from an email, a LinkedIn URL, or a name and company domain, through Treg.",
+    "description": "根据邮箱、LinkedIn URL，或姓名和公司域名，查询姓名、职务、公司、LinkedIn 资料和所在地。"
+  },
+  "c40d75a2-d0ea-44c9-a4f6-634bb3bdab1a": {
+    "type": "ReplicateModelBlock",
+    "name": "运行 Replicate 模型",
+    "source": "Run Replicate models synchronously",
+    "description": "运行复制模型同步"
+  },
+  "c44c3ef2-a630-11ef-9ff7-eb7b5ea3a5cb": {
+    "type": "TwitterGetUserTweetsBlock",
+    "name": "Twitter · 获取用户推文",
+    "source": "This block retrieves Tweets composed by a single user.",
+    "description": "此模块检索由一个用户编写的推文。"
+  },
+  "c4a7d9e2-8f3b-4a6c-9d8e-a5b6c7d8e9f0": {
+    "type": "ExaGetWebsetItemBlock",
+    "name": "Exa · 获取网页集合条目",
+    "source": "Get a specific item from a webset by its ID",
+    "description": "按条目 ID 从网页集合中读取指定条目。"
+  },
+  "c4b5fb63-0005-4a11-b35a-0c2467bd6b59": {
+    "type": "GithubListCommentsBlock",
+    "name": "GitHub · 列出评论",
+    "source": "A block that retrieves all comments from a GitHub issue or pull request, including comment metadata and content.",
+    "description": "区块从 GitHub 问题或拉取请求中检索所有评论，包括评论元数据和内容。"
+  },
+  "c4be9390-2431-4682-9769-7025b22a5fa7": {
+    "type": "GoogleSheetsGetRowBlock",
+    "name": "Google 表格 · 获取行",
+    "source": "Get a specific row by its index. Returns both list and dict formats.",
+    "description": "根据索引来找到一个特定的行。返回列表和字体格式。"
+  },
+  "c4e91b06-7d3a-4f28-9e51-8b0a2c6d3f97": {
+    "type": "AllQuietListIncidentsBlock",
+    "name": "AllQuiet · 列出事件",
+    "source": "Searches All Quiet incidents by status, severity, team or text",
+    "description": "根据状态，严重程度，团队或文字搜索所有静音事件"
+  },
+  "c52be83f-f8cd-4180-b243-af35f986b461": {
+    "type": "ExaContentsBlock",
+    "name": "Exa · 提取网页内容",
+    "source": "Fetches clean text, highlights or summaries for known URLs with Exa Contents, using cached copies or fresh fetches",
+    "description": "获取已知 URL 的干净文本、亮点或摘要Exa内容，使用缓存副本或新取的"
+  },
+  "c55816a2-37af-4901-ba19-36edcf2acfc1": {
+    "type": "EditTelegramMessageBlock",
+    "name": "编辑 Telegram 消息",
+    "source": "Edit the text of an existing message sent by the bot.",
+    "description": "修改由机器人发送的现有消息的文本。"
+  },
+  "c62c7983-e5c5-4468-b551-c98068610e24": {
+    "type": "ConductorGetWorkspaceBlock",
+    "name": "Conductor · 获取工作区",
+    "source": "Get everything about one Conductor workspace: details, current status, shared preview URL and its agent sessions.",
+    "description": "获取有关一个导体工作空间的所有信息：详细信息，当前状态，共享预览URL和其代理会议。"
+  },
+  "c6524385-7d87-49d6-a470-248bd29ca765": {
+    "type": "HubSpotEngagementBlock",
+    "name": "HubSpot · 管理互动记录",
+    "source": "Manages HubSpot engagements - sends emails and tracks engagement metrics",
+    "description": "管理HubSpot的参与 - 发送电子邮件和追踪参与度指标"
+  },
+  "c6731acb-4285-4ee1-bc9b-03d0766c370f": {
+    "type": "GetRedditPostsBlock",
+    "name": "获取 Reddit 帖子列表",
+    "source": "This block fetches Reddit posts from a defined subreddit name.",
+    "description": "此模块从定义的子网名中获取Reddit帖子。"
+  },
+  "c6862373-1ac6-402e-89e6-7db1fea882af": {
+    "type": "AgentMailCreatePodInboxBlock",
+    "name": "AgentMail · 创建租户收件箱",
+    "source": "Create a new email inbox within a pod. The inbox is scoped to the customer workspace.",
+    "description": "在租户空间内创建邮件收件箱，仅供该客户工作区使用。"
+  },
+  "c76293f4-9ae8-454d-a029-0a3f8c5bc499": {
+    "type": "SendDiscordEmbedBlock",
+    "name": "发送 Discord 嵌入式消息",
+    "source": "Sends a rich embed message to a Discord channel.",
+    "description": "向 Discord 频道发送嵌入式富文本消息。"
+  },
+  "c7733580-3c72-483e-8e47-a8d58754d853": {
+    "type": "PostToRedditBlock",
+    "name": "发布到 Reddit",
+    "source": "Post to Reddit using Ayrshare",
+    "description": "通过 Ayrshare 发布到 Reddit。"
+  },
+  "c79700de-a62f-11ef-ab20-fb32bf9d5a9d": {
+    "type": "TwitterGetSpaceByIdBlock",
+    "name": "Twitter · 获取指定 ID 的空间",
+    "source": "This block retrieves information about a single Twitter Space.",
+    "description": "通过此区块，可以获取关于单个Twitter空间的信息。"
+  },
+  "c7d3a5c2-05fc-450e-8dce-3b0e04626009": {
+    "type": "BannerbearTextOverlayBlock",
+    "name": "使用 Bannerbear 叠加文字",
+    "source": "Add text overlay to images using Bannerbear templates. Perfect for creating social media graphics, marketing materials, and dynamic image content.",
+    "description": "使用 Bannerbear 模板为图片添加文字，可用于社交媒体配图、营销素材和动态图片。"
+  },
+  "c7d3f1e8-45a9-4b2c-9f81-3e6a8d7c5b1a": {
+    "type": "LinearGetProjectIssuesBlock",
+    "name": "Linear · 获取项目议题",
+    "source": "Gets issues from a Linear project filtered by status and assignee",
+    "description": "问题来自Linear由状态和受让人过滤的项目"
+  },
+  "c80f7468-58e5-4638-a82e-bddf3bf2d383": {
+    "type": "NotionUpdatePagePropertiesBlock",
+    "name": "Notion · 更新页面属性",
+    "source": "Update an existing Notion page's properties, its title among them, its icon or cover, or whether it is in the trash. The page's content is left as it is.",
+    "description": "更新现有Notion页面的属性，其中的标题，图标或封面，或者是否在垃圾中。页面的内容仍然是。"
+  },
+  "c8a5f2e9-8b3d-4a7e-9f6c-1d5e3c9b7a4f": {
+    "type": "PerplexityBlock",
+    "name": "使用 Perplexity 问答",
+    "source": "Query Perplexity's sonar models with real-time web search capabilities and receive annotated responses with source citations.",
+    "description": "查询查询Perplexity具有实时网络搜索能力的声纳模型，并收到附加说明的答复和来源引证。"
+  },
+  "c8d4c0d3-c76e-4c2a-8c66-4119817ea3d1": {
+    "type": "GoogleSheetsCreateSpreadsheetBlock",
+    "name": "Google 表格 · 创建电子表格",
+    "source": "This block creates a new Google Sheets spreadsheet with specified sheets.",
+    "description": "创建新的 Google 电子表格，并按指定列表创建工作表。"
+  },
+  "c8d5c5fb-9684-4a29-bd2a-5b38d71776c9": {
+    "type": "ExaUpdateEnrichmentBlock",
+    "name": "Exa · 更新数据补全任务",
+    "source": "Update an existing enrichment configuration",
+    "description": "更新现有丰富配置"
+  },
+  "c99c804e-de14-11ef-9f47-32d3674e8b7e": {
+    "type": "TodoistListCollaboratorsBlock",
+    "name": "Todoist · 列出协作者",
+    "source": "Gets all collaborators for a specific Todoist project",
+    "description": "获取所有具体的合作者Todoist项目"
+  },
+  "cac51050-fc9e-4e63-987a-66c2ba2a127b": {
+    "type": "GoogleSheetsAddColumnBlock",
+    "name": "Google 表格 · 添加列",
+    "source": "Add a new column with a header. Can add at the end or insert at a specific position.",
+    "description": "添加一个新的列，标题。能在最后添加或在特定位置插入。"
+  },
+  "cb992884-1ff2-450a-8f1b-7650d63e3aa0": {
+    "type": "GoogleSheetsImportCsvBlock",
+    "name": "Google 表格 · 导入CSV",
+    "source": "Import CSV data into a Google Sheet",
+    "description": "输入 CSV 数据到 Google 页面"
+  },
+  "cbb50872-625b-42f0-8203-a2ae78242d8a": {
+    "type": "FileStoreBlock",
+    "name": "存储文件",
+    "source": "Downloads and stores a file from a URL, data URI, or local path. Use this to fetch images, documents, or other files for processing. In CoPilot: saves to workspace (use list_workspace_files to see it). In graphs: outputs a data URI to pass to other blocks.",
+    "description": "从 URL、data URI 或本地路径读取并保存文件，支持图像、文档等。在助手中，文件保存到工作区，可用 list_workspace_files 查看；在工作流中，则输出 data URI 供其他模块使用。"
+  },
+  "cbd52c2a-06d2-43ed-9560-6576cc163283": {
+    "type": "PostToBlueskyBlock",
+    "name": "发布到 Bluesky",
+    "source": "Post to Bluesky using Ayrshare",
+    "description": "通过 Ayrshare 发布到 Bluesky。"
+  },
+  "cbdb05ac-cb73-4b03-a493-6d34e9a011da": {
+    "type": "ExaFindOrCreateSearchBlock",
+    "name": "Exa · 查找或创建搜索任务",
+    "source": "Find existing search by query or create new - prevents duplicate searches in workflows",
+    "description": "通过查询找到现有搜索或创建新的 - 防止工作流中重复搜索"
+  },
+  "cbf36ab5-df4a-43b6-8a7f-f7ed8652116e": {
+    "type": "AgentToggleInputBlock",
+    "name": "开关输入",
+    "source": "Block for boolean toggle input.",
+    "description": "使用开关接收布尔值。"
+  },
+  "cc10ff7b-7753-4ff2-9af6-9399b1a7eddc": {
+    "type": "NoteBlock",
+    "name": "便签",
+    "source": "A visual annotation block that displays a sticky note in the workflow editor for documentation and organization purposes.",
+    "description": "在画布上添加便签，用于说明或整理工作流。"
+  },
+  "cc45bb0f-d035-4756-96a7-fe3e36254b4d": {
+    "type": "FlattenListBlock",
+    "name": "展开嵌套列表",
+    "source": "Flattens a nested list structure into a single flat list. Supports configurable maximum flattening depth.",
+    "description": "将嵌套列表展开为一维列表，可设置最大展开深度。"
+  },
+  "cc6a8cf0-583d-461d-a8e6-5400ff8b637c": {
+    "type": "ExaBatchSearchMonitorsBlock",
+    "name": "Exa · 批量处理搜索监控",
+    "source": "Delete, pause or unpause every Exa Search Monitor matching a name, status or metadata filter (previews by default)",
+    "description": "删除、 暂停或取消Exa匹配名称、状态或元数据过滤器的搜索监视器( 默认情况下预览)"
+  },
+  "cda075af-3f31-47b0-baa9-0050b3bd78bd": {
+    "type": "SendTelegramVideoBlock",
+    "name": "发送 Telegram 视频",
+    "source": "Send a video to a Telegram chat.",
+    "description": "向 Telegram 会话发送视频。"
+  },
+  "cdb9df0f-8b1d-433e-873a-ededc1b6479d": {
+    "type": "EditRedditPostBlock",
+    "name": "编辑 Reddit 帖子",
+    "source": "Edit the body text of an existing Reddit post that you own. Only works for self/text posts.",
+    "description": "编辑您拥有的现有Reddit帖子的体格文本。仅适用于self/text员额。"
+  },
+  "ceb9fd95-fd95-49ff-b57b-278957255716": {
+    "type": "SendTelegramPhotoBlock",
+    "name": "发送 Telegram 图片",
+    "source": "Send a photo to a Telegram chat.",
+    "description": "向 Telegram 会话发送图片。"
+  },
+  "cfd84a06-2121-4cef-8d14-8badf52d22f0": {
+    "type": "AgentMailListInboxesBlock",
+    "name": "AgentMail · 列出收件箱",
+    "source": "List all email inboxes in your AgentMail organization with pagination support.",
+    "description": "分页列出组织中的所有邮箱。"
+  },
+  "d0180ce6-ccb9-48c7-8256-b39e93e62801": {
+    "type": "AirtableWebhookTriggerBlock",
+    "name": "Airtable · Webhook 触发器",
+    "source": "Starts a flow whenever Airtable emits a webhook event",
+    "description": "当 Airtable 发出 Webhook 事件时启动工作流。"
+  },
+  "d0204ed8-8b81-408d-8b8d-ed087a546228": {
+    "type": "ExaWebsetWebhookBlock",
+    "name": "Exa · 网页集合 Webhook 触发器",
+    "source": "Triggers when Exa reports a Websets event, such as a new item, a finished search, a completed export or a monitor run",
+    "description": "当Exa报告Websets事件时触发，例如新项目，完成搜索，完成出口或监控运行"
+  },
+  "d0822ab5-9f8a-44a3-8971-531dd0178b6b": {
+    "type": "SendDiscordMessageBlock",
+    "name": "发送 Discord 消息",
+    "source": "Sends a message to a Discord channel using a bot token.",
+    "description": "使用机器人令牌向 Discord 频道发送消息。"
+  },
+  "d08d46cd-088b-4ba7-a545-45050f33b889": {
+    "type": "GoogleSheetsSetPublicAccessBlock",
+    "name": "Google 表格 · 设置公开访问权限",
+    "source": "Make a Google Spreadsheet public or private",
+    "description": "将 Google 电子表格设为公开或私有。"
+  },
+  "d0e4f5d1-76e7-4082-9be8-e656ec1f432d": {
+    "type": "GoogleSheetsProtectRangeBlock",
+    "name": "Google 表格 · 保护范围",
+    "source": "Protect a cell range or entire sheet from editing.",
+    "description": "保护单元格范围或整个工作表，防止编辑。"
+  },
+  "d104f6e1-80af-4fe9-b5a1-3cab20081b6c": {
+    "type": "GoogleDocsSetPublicAccessBlock",
+    "name": "Google 文档 · 设置公开访问权限",
+    "source": "Make a Google Doc public or private",
+    "description": "将 Google 文档设为公开或私有。"
+  },
+  "d118828a-ce11-4f38-9014-ecf6a2654fb5": {
+    "type": "ExaDeleteWebsetWebhookBlock",
+    "name": "Exa · 删除网页集合 Webhook",
+    "source": "Delete an Exa Websets webhook so Exa stops delivering to it",
+    "description": "删除Exa网页集合Webhook苏Exa停止交付给它"
+  },
+  "d1312c4d-fae2-4e70-893d-f4d07cce1d4e": {
+    "type": "NotionReadPageMarkdownBlock",
+    "name": "Notion · 读取页面的 Markdown 内容",
+    "source": "Read a Notion page and convert it to Markdown format with proper formatting for headings, lists, links, and rich text.",
+    "description": "阅读一个Notion页面，并将其转换为Markdown格式，以适当的标题，列表，链接和丰富文本格式。"
+  },
+  "d154002a-38f4-46c2-962d-2488f2b05ece": {
+    "type": "GithubUnassignIssueBlock",
+    "name": "GitHub · 取消指派议题",
+    "source": "A block that removes a user's assignment from a GitHub issue.",
+    "description": "删除用户从GitHub问题中的任务的区块。"
+  },
+  "d1774756-4d9e-40e6-bab1-47ec0ccd81b2": {
+    "type": "FirecrawlExtractBlock",
+    "name": "Firecrawl · 提取数据",
+    "source": "Firecrawl crawls websites to extract comprehensive data while bypassing blockers.",
+    "description": "Firecrawl在绕过阻塞器时，浏览网站以提取全面数据。"
+  },
+  "d222a070-a630-11ef-a18a-3f52f76c6962": {
+    "type": "TwitterGetHomeTimelineBlock",
+    "name": "Twitter · 获取主页时间线",
+    "source": "This block retrieves the authenticated user's home timeline.",
+    "description": "此模块检索了验证用户的家庭时间表。"
+  },
+  "d237a98a-5c4b-4a1c-b9e3-e6f9a6c81df7": {
+    "type": "LinkedinPersonLookupBlock",
+    "name": "查找 LinkedIn 用户",
+    "source": "Look up LinkedIn profiles by person information using Enrichlayer",
+    "description": "使用Enrichlayer查找LinkedIn个人资料"
+  },
+  "d2b65a78-6b22-44a1-90f8-b8fedfdf85af": {
+    "type": "JevChoiceBlock",
+    "name": "Jev 选项判断",
+    "source": "Make a typed choice with Jev. Describe what qualifies for each option in plain language.",
+    "description": "选择用键字来打开。描述每一个选择的条件，用简单的语言。"
+  },
+  "d3863944-0eaf-45c4-a0c9-63e0fe1ee8b9": {
+    "type": "StagehandObserveBlock",
+    "name": "使用 Stagehand 识别页面操作",
+    "source": "Find suggested actions for your workflows",
+    "description": "找到您的工作流的建议行动"
+  },
+  "d38b6c5e-9968-4271-8423-6cfe60d6e7e6": {
+    "type": "FactCheckerBlock",
+    "name": "事实核查",
+    "source": "This block checks the factuality of a given statement using Jina AI's Grounding API.",
+    "description": "通过 Jina AI 的 Grounding API 核查给定陈述。"
+  },
+  "d3a7d896-3b78-4f44-8b4b-48fbf4f0bcd8": {
+    "type": "CodeExtractionBlock",
+    "name": "提取代码",
+    "source": "Extracts code blocks from text and identifies their programming languages",
+    "description": "从文本中提取代码块并识别其编程语言。"
+  },
+  "d3b32f15-6fd7-40e3-be52-e083f51b19a2": {
+    "type": "AgentGoogleDriveFileInputBlock",
+    "name": "Google 云端硬盘文件输入",
+    "source": "Agent-level input for a Google Drive file. REQUIRED for any agent that reads or writes a Drive file (Sheets, Docs, Slides, or generic Drive) — the picker is the only source of the _credentials_id needed at runtime, so consuming blocks cannot receive a hardcoded ID. Set allowed_views to match the consumer: [\"SPREADSHEETS\"] for Sheets, [\"DOCUMENTS\"] for Docs, [\"PRESENTATIONS\"] for Slides (leave default for generic Drive). Wire `result` to the consumer block's Drive field and leave that field unset in the consumer's input_default. Example link to a Google Sheets block: {\"source_name\": \"result\", \"sink_name\": \"spreadsheet\"} (use \"document\" for Docs, \"presentation\" for Slides). Use one input block per distinct file; multiple consumers of the same file share it.",
+    "description": "读取或写入 Google 云端硬盘文件时必须使用此输入模块。只有文件选择器会附带运行时所需的 _credentials_id，不能直接向后续模块传入固定文件 ID。为 allowed_views 指定文件类型：表格用 [\"SPREADSHEETS\"]，文档用 [\"DOCUMENTS\"]，演示文稿用 [\"PRESENTATIONS\"]；通用文件保留默认值。将 result 连到使用该文件的模块，并在其 input_default 中留空对应字段。例如表格的连线是 {\"source_name\": \"result\", \"sink_name\": \"spreadsheet\"}，文档和演示文稿分别使用 document 和 presentation。每个不同的文件需要一个输入模块；同一文件可供多个模块共用。"
+  },
+  "d419c562-873c-4a67-b83f-9bcf11254f3f": {
+    "type": "ConductorCreateWorkspaceBlock",
+    "name": "Conductor · 创建工作区",
+    "source": "Create a Conductor cloud workspace for a project or repository, optionally start its agent with a prompt and wait for the reply. Set base_branch explicitly when the repository's PR target differs from the Conductor project default; an empty base_branch uses that default, which Conductor does not report back.",
+    "description": "创建一个项目或存储库的Conductor云工作空间，选择使用提示启动其代理，然后等待回复。设置base_branch具体情况：在存储库的 PR 目标与导体项目默认目标不同时，base_branch使用默认的数据，该数据不会被Conductor报告。"
+  },
+  "d430d941-cf81-4f84-8b19-2e3f670b2fca": {
+    "type": "GoogleDocsCreateBlock",
+    "name": "Google 文档 · 创建文档",
+    "source": "Create a new Google Doc",
+    "description": "创建一个新的Google文档"
+  },
+  "d4e5f6a7-8901-4bcd-9012-3456789abcde": {
+    "type": "ExaListResearchBlock",
+    "name": "Exa · 列出研究任务",
+    "source": "List research tasks with pagination support. Legacy: now lists all of your team's Exa Agent runs; use 'List Exa Agent Runs' for new workflows.",
+    "description": "列出页面支持的研究任务。遗产：现在列出你们团队的Exa代理运行；使用'List Exa Agent Runs'用于新的工作流。"
+  },
+  "d4e9b2c6-5f8a-4173-a0d3-2c7b6e9f1a58": {
+    "type": "TregFindSimilarCompaniesBlock",
+    "name": "Treg · 查找相似公司",
+    "source": "Find companies similar to one you name, through Treg.",
+    "description": "通过Treg找到类似于你命名的公司。"
+  },
+  "d5ea33c8-a575-477a-b42f-2fe3be5055ec": {
+    "type": "TextSplitBlock",
+    "name": "拆分文本",
+    "source": "This block is used to split a text into a list of strings.",
+    "description": "按照分隔符将文本拆分为字符串列表。"
+  },
+  "d67a9c52-5e4e-11e2-bcfd-0800200c9a71": {
+    "type": "CountdownTimerBlock",
+    "name": "倒计时",
+    "source": "This block triggers after a specified duration.",
+    "description": "在指定时长后触发。"
+  },
+  "d6a116d8-de14-11ef-a94c-32d3674e8b7e": {
+    "type": "TodoistListSectionsBlock",
+    "name": "Todoist · 列出分区",
+    "source": "Gets all sections and their details from Todoist",
+    "description": "得到所有部分和他们的细节从 Todoist"
+  },
+  "d75bd7d8-a62f-11ef-b0d8-c7a9496f617f": {
+    "type": "TwitterGetSpacesBlock",
+    "name": "Twitter · 获取空间",
+    "source": "This block retrieves information about multiple Twitter Spaces.",
+    "description": "通过此区块，可以获取有关多个Twitter空间的信息。"
+  },
+  "d76bbe4c-930e-4894-8469-b66775511f71": {
+    "type": "AIImageCustomizerBlock",
+    "name": "AI 图像定制",
+    "source": "Generate and edit custom images using Google's Nano-Banana models from Gemini. Provide a prompt and optional reference images to create or modify images.",
+    "description": "使用 Google Gemini 的 Nano Banana 系列模型生成或编辑自定义图像，可提供提示词和参考图。"
+  },
+  "d7a0657b-58ab-48b2-898b-7bd94f44a708": {
+    "type": "AgentMailListOrgThreadsBlock",
+    "name": "AgentMail · 列出组织邮件会话",
+    "source": "List threads across ALL inboxes in your organization. Use for supervisor agents, dashboards, or cross-agent monitoring.",
+    "description": "列出组织中所有收件箱的会话，适合集中监控或生成报表。"
+  },
+  "d7a9f3e2-8b4c-4d6f-9e1a-3c5b7f8d2a6e": {
+    "type": "GmailDraftReplyBlock",
+    "name": "Gmail · 起草回复",
+    "source": "Create draft replies to Gmail threads with automatic HTML detection and proper text formatting. Plain text draft replies maintain natural paragraph flow without 78-character line wrapping. HTML content is automatically detected and formatted correctly.",
+    "description": "为 Gmail 会话起草回复并自动识别 HTML。纯文本保留自然段落，不会强制在第 78 个字符处换行。"
+  },
+  "d82a0bed-6e69-48ae-b391-3eb84842069e": {
+    "type": "RMFGGetReviewLinkBlock",
+    "name": "RMFG · 获取审阅链接",
+    "source": "Fetches an RMFG review link and the configuration a person saved on it",
+    "description": "带来一个RMFG审查链接和一个人保存的配置"
+  },
+  "d8710fc9-6e29-481e-a7d5-165eb16f8471": {
+    "type": "RetrieveInformationBlock",
+    "name": "读取已保存的数据",
+    "source": "Reads back a key-value pair previously saved by PersistInformationBlock.",
+    "description": "读取通过「持久化保存数据」模块保存的键值对。"
+  },
+  "d8b91fd4-da26-42d4-8ecb-8b196c6d84b6": {
+    "type": "MediaDurationBlock",
+    "name": "获取媒体时长",
+    "source": "Block to get the duration of a media file.",
+    "description": "阻止获取媒体文件的持续时间。"
+  },
+  "d90fc44b-d462-42be-8327-09b75ad06721": {
+    "type": "TavilyExtractBlock",
+    "name": "Tavily · 提取数据",
+    "source": "Extracts page content from one or more URLs using Tavily, optimized for LLM consumption",
+    "description": "使用 Tavily 从一个或多个 URL 提取适合大语言模型使用的网页内容。"
+  },
+  "d9291e87-301d-47a8-91fe-907fb55460e5": {
+    "type": "GoogleSheetsWriteBlock",
+    "name": "Google 表格 · 写入表格",
+    "source": "A block that writes data to a Google Sheets spreadsheet at a specified A1 notation range.",
+    "description": "写数据到 Google Sheets 电子表格中，在指定A1标记范围。"
+  },
+  "d93c5a93-ac7e-41c1-ae5c-ef67e6e9b826": {
+    "type": "RemoveFromListBlock",
+    "name": "移除列表项",
+    "source": "Removes an item from a list by value or index.",
+    "description": "按值或索引移除列表元素。"
+  },
+  "db7813ad-10bd-4652-8623-5667d6fecdd5": {
+    "type": "ExaWebsetItemsSummaryBlock",
+    "name": "Exa · 网页集合条目摘要",
+    "source": "Get a summary of webset items without retrieving all data",
+    "description": "获取网盘项目的总结，而不需要检索所有数据"
+  },
+  "db7d8f02-2f44-4c55-ab7a-eae0941f0c30": {
+    "type": "FillTextTemplateBlock",
+    "name": "填充文本模板",
+    "source": "This block formats the given texts using the format template.",
+    "description": "将输入文本填入指定的格式模板。"
+  },
+  "dbd619f5-476e-4395-af9a-a7a7c0fb8c4e": {
+    "type": "ExaBulkWebsetItemsBlock",
+    "name": "Exa · 批量获取网页集合条目",
+    "source": "Get all items from a webset in bulk (with configurable limits)",
+    "description": "从一个网盘中大量获取所有项目 (具有可配置的限制)"
+  },
+  "dcaff561-4c3e-4669-b841-4392b98cb024": {
+    "type": "AnySearchExtractBlock",
+    "name": "AnySearch 提取网页内容",
+    "source": "Extracts readable content from a single URL using AnySearch, optimized for LLM consumption",
+    "description": "使用AnySearch从单个URL中提取可读的内容，优化为LLM消费"
+  },
+  "dce97578-86be-45a4-ae50-f6de33fc935a": {
+    "type": "AddMemoryBlock",
+    "name": "添加记忆",
+    "source": "Add new memories to Mem0 with user segmentation",
+    "description": "向 Mem0 添加新的记忆，并按用户区分。"
+  },
+  "dd7c0293-c5af-4551-ba3e-fc162fb1fb89": {
+    "type": "Slant3DTrackingBlock",
+    "name": "Slant 3D · 跟踪物流",
+    "source": "Track order status and shipping",
+    "description": "追踪订单状况和运输"
+  },
+  "dda11fa8-5d5f-4254-a4b6-1d23afffea3b": {
+    "type": "HackerNewsGetStoriesBlock",
+    "name": "Hacker News · 获取新闻",
+    "source": "Get the top (front page), new, best, Ask HN, Show HN or job stories from Hacker News, in the order Hacker News ranks them. Each story comes with its rank, title, link, points, comment count and poster. Uses Hacker News's official API, which needs no account.",
+    "description": "获取来自Hacker News的顶部 (首页),新，最好的，问HN,展示HN或工作故事，每个故事都有其排名，标题，链接，积分，评论数量和海报。通过Hacker News的官方API,"
+  },
+  "ddc29d9f-78dc-4682-8787-c8a76f00cf38": {
+    "type": "GoogleDocsAppendPlainTextBlock",
+    "name": "Google 文档 · 追加纯文本",
+    "source": "Append plain text to the end of a Google Doc (no formatting applied)",
+    "description": "将直文添加到Google文档末端 (没有格式化)"
+  },
+  "ddc65c9a-c4b0-4389-8604-4aba01a3dfe6": {
+    "type": "TavilyMapBlock",
+    "name": "Tavily · 生成网站地图",
+    "source": "Maps a website's structure with Tavily, discovering its URLs without extracting content",
+    "description": "使用 Tavily 梳理网站结构并列出 URL，不提取正文。"
+  },
+  "de99219e-14cb-420b-b3d8-978c8d4ccd83": {
+    "type": "ExaDeleteAgentRunBlock",
+    "name": "Exa · 删除智能体任务",
+    "source": "Permanently delete a stored Exa Agent run and its output. It can no longer be fetched or used as a previous run.",
+    "description": "永久删除已保存的 Exa 任务及其输出；此后无法读取或将其用作上一次运行。"
+  },
+  "df06086a-d5ac-4abb-9996-2ad0acb2eff7": {
+    "type": "ReadDiscordMessagesBlock",
+    "name": "读取 Discord 消息",
+    "source": "Reads new messages from a Discord channel using a bot token and triggers when a new message is posted",
+    "description": "使用机器人令牌读取 Discord 频道，在新消息发布时触发。"
+  },
+  "df521b68-62d9-42e4-924f-fb6c245516fc": {
+    "type": "GoogleSheetsUpdateCellBlock",
+    "name": "Google 表格 · 更新单元格",
+    "source": "Update a single cell in a Google Sheets spreadsheet.",
+    "description": "更新单单元格Google Sheets电子表格。"
+  },
+  "dfb987f8-f197-4b2e-bf19-111812afd692": {
+    "type": "GithubMakePullRequestBlock",
+    "name": "GitHub · 创建拉取请求",
+    "source": "This block creates a new pull request on a specified GitHub repository.",
+    "description": "在指定GitHub 仓库中创建了一个新的拉取请求。"
+  },
+  "e01c890c-a630-11ef-9e20-37da24888bd0": {
+    "type": "TwitterGetUserMentionsBlock",
+    "name": "Twitter · 获取提及用户的推文",
+    "source": "This block retrieves Tweets mentioning a specific user.",
+    "description": "此模块检索提到特定用户的推文。"
+  },
+  "e0561cc1-2154-4abf-bd06-79509348a18e": {
+    "type": "GoogleDocsGetStructureBlock",
+    "name": "Google 文档 · 获取结构",
+    "source": "Get document structure with index positions for precise editing operations",
+    "description": "获取文件结构与索引位置，以准确编辑操作"
+  },
+  "e09613ea-aaf5-4393-9a2f-634e8c8ad899": {
+    "type": "ParallelYesNoDecisionBlock",
+    "name": "Parallel 是非判断",
+    "source": "Answer a yes/no question using current web evidence from Parallel, and forward data to the yes, no or unsure output.",
+    "description": "回答一yes/no通过使用来自Parallel的当前网络证据，并将数据转发到是的，否或不确定输出。"
+  },
+  "e0eea253-ccdc-4ee8-bb16-68e444dad6fc": {
+    "type": "RMFGListPowderCoatColorsBlock",
+    "name": "RMFG · 列出粉末涂层颜色",
+    "source": "Lists the powder-coat colors RMFG offers",
+    "description": "列出RMFG提供的粉末外套颜色"
+  },
+  "e104b3ab-dfef-45f9-9702-14e950988f53": {
+    "type": "GoogleDocsInsertTableBlock",
+    "name": "Google 文档 · 插入表",
+    "source": "Insert a table into a Google Doc, optionally with content and Markdown formatting",
+    "description": "插入一个表格到Google文档中，可选的是包含内容和标记格式"
+  },
+  "e189baac-8c20-45a1-94a7-55177ea42565": {
+    "type": "AgentExecutorBlock",
+    "name": "运行子工作流",
+    "source": "Executes an existing agent inside your agent",
+    "description": "在当前工作流中运行已有的子工作流。"
+  },
+  "e1eeead4-46cb-491e-8281-17b6b9c44a55": {
+    "type": "GmailCreateDraftBlock",
+    "name": "Gmail · 创建草稿",
+    "source": "Create draft emails in Gmail with automatic HTML detection and proper text formatting. Plain text drafts preserve natural paragraph flow without 78-character line wrapping. HTML content is automatically detected and formatted correctly.",
+    "description": "创建 Gmail 草稿并自动识别 HTML。纯文本保留自然段落，不会强制在第 78 个字符处换行。"
+  },
+  "e1f86c3b-0d7a-4b52-8c9e-3a5f1d7b2e68": {
+    "type": "TregFindPhoneNumberBlock",
+    "name": "Treg · 查找电话号码",
+    "source": "Find a person's phone number from their LinkedIn URL, email, or name and company domain. Treg tries providers cheapest first.",
+    "description": "在 LinkedIn URL,电子邮件或公司名称和域名中找到一个人的电话号码。Treg最便宜的供应商先去试试"
+  },
+  "e30a4d42-7b7d-4e6a-b36e-1f9b8e3b7d85": {
+    "type": "CombineTextsBlock",
+    "name": "合并文本",
+    "source": "This block combines multiple input texts into a single output text.",
+    "description": "将多段文本合并成一段。"
+  },
+  "e32d5642-7b51-458c-bd83-75ff96fec299": {
+    "type": "GoogleDocsExportBlock",
+    "name": "Google 文档 · 导出文档",
+    "source": "Export a Google Doc to PDF, Word, text, or other formats",
+    "description": "导出Google文件到PDF,Word,文本或其他格式"
+  },
+  "e3950439-fa0b-40e8-b19f-e0dca0bf5853": {
+    "type": "ValidateEmailsBlock",
+    "name": "验证电子邮件地址",
+    "source": "Validate emails",
+    "description": "验证电子邮件地址是否有效。"
+  },
+  "e40a6420-1db8-47bb-b00a-0e6aecd74176": {
+    "type": "ExaCancelWebsetBlock",
+    "name": "Exa · 取消网页集合",
+    "source": "Cancel all operations being performed on a Webset",
+    "description": "取消在 Webset 上执行的所有操作"
+  },
+  "e4100684-a62f-11ef-9be9-770cb41a2616": {
+    "type": "TwitterRemoveBookmarkTweetBlock",
+    "name": "Twitter · 移除推文书签",
+    "source": "This block removes a bookmark from a tweet on Twitter.",
+    "description": "此模块删除了Twitter上的书签。"
+  },
+  "e5046ee2-b094-418e-a25e-c0f90c91721c": {
+    "type": "GoogleDocsFindReplacePlainTextBlock",
+    "name": "Google 文档 · 查找并替换纯文本",
+    "source": "Find and replace plain text in a Google Doc (no formatting applied to replacement)",
+    "description": "在 Google Doc 中找到和更换平文 (更换没有格式化)"
+  },
+  "e58c0bad-6597-400c-9548-d151ec428ffc": {
+    "type": "GoogleSheetsLookupRowBlock",
+    "name": "Google 表格 · 查找行",
+    "source": "Look up a row by finding a value in a specific column. Returns the first matching row and optionally specific columns.",
+    "description": "通过在特定列中找到值来查找一行。返回第一个匹配的行和可选的特定列。"
+  },
+  "e7cc5420-a630-11ef-bfaf-13bdd8096a51": {
+    "type": "TwitterGetTweetsBlock",
+    "name": "Twitter · 获取推文",
+    "source": "This block retrieves information about multiple Tweets.",
+    "description": "此模块检索了多个推特的信息。"
+  },
+  "e7d9f41c-dc10-4f39-98ba-a432abd128c0": {
+    "type": "SaveCampaignSequencesBlock",
+    "name": "保存营销活动触达序列",
+    "source": "Save sequences within a campaign",
+    "description": "保存营销活动中的触达序列。"
+  },
+  "e84883b7-7c39-4c5c-88e8-0a72b078ea63": {
+    "type": "AgentMailListDraftsBlock",
+    "name": "AgentMail · 列出草稿",
+    "source": "List drafts in an AgentMail inbox. Filter by labels=['scheduled'] to find pending sends.",
+    "description": "列出收件箱中的草稿；可通过 labels=['scheduled'] 筛选待定时发送的邮件。"
+  },
+  "e8a2c6f0-9b4d-4e31-a7c5-2f6d8b0e4a19": {
+    "type": "TregSearchCatalogBlock",
+    "name": "Treg · 搜索工具目录",
+    "source": "Search Treg's catalog of 4,000+ tools by the job you need done, with each tool's price and success rate. Searching is free; call a tool you find with Treg Call Tool.",
+    "description": "根据需要完成的工作，搜索Treg的4000多个工具目录，每个工具的价格和成功率。搜索是免费的；使用Treg Call Tool找到的工具，请调用。"
+  },
+  "e8db3a38-ac76-48eb-a4a7-1ba405f483a4": {
+    "type": "ExaUpdateSearchMonitorBlock",
+    "name": "Exa · 更新搜索监控任务",
+    "source": "Update an Exa Search Monitor: pause or resume it, or change its query, schedule, output format or webhook",
+    "description": "更新更新Exa搜索监视器：暂停或恢复它，或更改它的查询、 计划、 输出格式或Webhook"
+  },
+  "e8f3c9a2-7b5d-4f1e-9c6a-3d8e2b4f7a1c": {
+    "type": "CreateDiscordThreadBlock",
+    "name": "创建 Discord 子区",
+    "source": "Creates a new thread in a Discord channel.",
+    "description": "在 Discord 频道中创建新的子区。"
+  },
+  "e96d01ec-b55e-4a99-8ce8-c8776dce850b": {
+    "type": "GithubListStargazersBlock",
+    "name": "GitHub · 列出加星用户",
+    "source": "This block lists all users who have starred a specified GitHub repository.",
+    "description": "此模块列出了已经使用特定GitHub 仓库的用户。"
+  },
+  "e9994fbd-7fa2-4bc6-a837-a3ac4fd9efb9": {
+    "type": "ExaListWebsetMonitorRunsBlock",
+    "name": "Exa · 列出网页集合监控运行记录",
+    "source": "List the scheduled runs of a Websets monitor, to check whether its updates succeeded",
+    "description": "列出Websets监视器的计划运行，以检查其更新是否成功"
+  },
+  "ea5580e2-de14-11ef-a5d3-32d3674e8b7e": {
+    "type": "TodoistGetSectionBlock",
+    "name": "Todoist · 获取分区",
+    "source": "Gets a single section by ID from Todoist",
+    "description": "获得单一个区域ID从Todoist"
+  },
+  "ea7c1309-303c-4da1-893f-89c0e9d64e78": {
+    "type": "BaasBotFetchMeetingDataBlock",
+    "name": "Meeting BaaS · 获取会议数据",
+    "source": "Retrieve recorded meeting data",
+    "description": "获取已录制的会议数据。"
+  },
+  "ed1ae7a0-b770-4089-b520-1f0005fad19a": {
+    "type": "AIImageGeneratorBlock",
+    "name": "AI 图像生成",
+    "source": "Generate images using various AI models through a unified interface",
+    "description": "通过统一接口使用不同的 AI 模型生成图像。"
+  },
+  "ed26783e-a62f-11ef-9a21-c77c57dd8a1f": {
+    "type": "TwitterGetBookmarkedTweetsBlock",
+    "name": "Twitter · 获取已收藏推文",
+    "source": "This block retrieves bookmarked tweets from Twitter.",
+    "description": "此模块检索了Twitter上的标记的推文。"
+  },
+  "ed2ec950-fbff-4204-94c0-023fb1d625e0": {
+    "type": "GoogleCalendarCreateEventBlock",
+    "name": "Google 日历 · 创建日程",
+    "source": "This block creates a new event in Google Calendar with customizable parameters.",
+    "description": "此模块在 Google Calendar 中创建一个新的事件，具有可定制参数。"
+  },
+  "ed55ac19-356e-4243-a6cb-bc599e9b716f": {
+    "type": "AIStructuredResponseGeneratorBlock",
+    "name": "AI 结构化回复生成",
+    "source": "A block that generates structured JSON responses using a Large Language Model (LLM), with schema validation and format enforcement.",
+    "description": "让大语言模型按照指定结构生成 JSON 回复，并验证格式。"
+  },
+  "ed7558ae-3a07-45f5-af55-a25fe88c9971": {
+    "type": "AgentMailListOrgDraftsBlock",
+    "name": "AgentMail · 列出组织草稿",
+    "source": "List all drafts across every inbox in your organization. Use for central approval dashboards.",
+    "description": "列出组织中所有收件箱的草稿，便于集中审阅。"
+  },
+  "ee4fe08c-18f9-442f-a985-235379b932e1": {
+    "type": "WordPressCreatePostBlock",
+    "name": "WordPress · 创建文章",
+    "source": "Create a new post on WordPress.com or Jetpack sites",
+    "description": "在WordPress.com或Jetpack网站创建新帖子"
+  },
+  "f06e2b38-5397-4e8f-aa85-491149dd98df": {
+    "type": "ExaListMonitorsBlock",
+    "name": "Exa · 列出监控任务",
+    "source": "List all monitors with optional webset filtering",
+    "description": "列出所有监控任务，可按所属网页集合筛选。"
+  },
+  "f0e52eee-de14-11ef-9b12-32d3674e8b7e": {
+    "type": "TodoistDeleteSectionBlock",
+    "name": "Todoist · 删除分区",
+    "source": "Deletes a section and all its tasks from Todoist",
+    "description": "从 Todoist 中删除部分及其所有任务"
+  },
+  "f0f43e2b-c943-48a0-a7f1-40136ca4d3b9": {
+    "type": "FirecrawlMapWebsiteBlock",
+    "name": "Firecrawl · 生成网站地图",
+    "source": "Firecrawl maps a website to extract all the links.",
+    "description": "Firecrawl绘制一个网站，以提取所有链接。"
+  },
+  "f0f522e1-99eb-4bf3-b394-202494a35189": {
+    "type": "ConductorGetAccountBlock",
+    "name": "Conductor · 获取账户",
+    "source": "Get an overview of your Conductor account in one call: who you are, the projects (repositories) you can open workspaces in, your sections and your routines. Use this first to find project IDs.",
+    "description": "在一次电话中，您可以查看您的导演账户：您是谁，您可以开设的工作空间的项目 (仓库),您的部分和日常活动。首先用这个来找到项目身份证。"
+  },
+  "f16f9b10-0c4d-4db8-997d-7b96b6026094": {
+    "type": "ExaDeleteMonitorBlock",
+    "name": "Exa · 删除监控任务",
+    "source": "Delete a monitor from a webset",
+    "description": "从网盘删除显示器"
+  },
+  "f199e674-803b-4ee8-8bbf-172e6512190b": {
+    "type": "GoogleDocsInsertPageBreakBlock",
+    "name": "Google 文档 · 插入分页符",
+    "source": "Insert a page break into a Google Doc",
+    "description": "插入一个页面入侵 Google文档"
+  },
+  "f2a7c4e9-3b8d-4f16-a0c5-7e9b1d3f6a84": {
+    "type": "TregWebSearchBlock",
+    "name": "Treg · 搜索网页",
+    "source": "Search the web, news, Google, research papers or YouTube through Treg, which picks the cheapest working search provider.",
+    "description": "搜索网络，新闻，Google、研究论文或YouTube至Treg选择最便宜的工作搜索提供者"
+  },
+  "f33a076f-0eb1-46b2-97a3-04ab23ab06f4": {
+    "type": "NotionAppendToPageBlock",
+    "name": "Notion · 向页面追加内容",
+    "source": "Add content to the end of an existing Notion page. Supports markdown content.",
+    "description": "添加现有Notion页面的最后内容。支持标记内容。"
+  },
+  "f33d67be-a62f-11ef-a797-ff83ec29ee8e": {
+    "type": "TwitterBookmarkTweetBlock",
+    "name": "Twitter · 收藏推文",
+    "source": "This block bookmarks a tweet on Twitter.",
+    "description": "此模块标记了Twitter上的推文。"
+  },
+  "f371f8cd-682d-4f5f-905c-529c74a8fb35": {
+    "type": "AgentMailDeletePodBlock",
+    "name": "AgentMail · 删除租户空间",
+    "source": "Permanently delete a pod. All inboxes and domains must be removed first.",
+    "description": "永久删除租户空间。必须先移除其中的所有收件箱和域名。"
+  },
+  "f3a2b1c0-8d7e-4f6a-9b5c-1234567890ab": {
+    "type": "CreateRedditPostBlock",
+    "name": "创建 Reddit 帖子",
+    "source": "Create a new post on a subreddit. Can create text posts or link posts.",
+    "description": "在一个子网上创建一个新帖子。创建文本帖子或链接帖子。"
+  },
+  "f3a8f7e1-4b1d-4e5f-9f2a-7c3d5a2e6b4c": {
+    "type": "TranscribeYoutubeVideoBlock",
+    "name": "转录 YouTube 视频",
+    "source": "Transcribes a YouTube video using a proxy.",
+    "description": "通过代理转录 YouTube 视频。"
+  },
+  "f3b1c1b2-4c4f-4f0d-8d2f-4c4f0d8d2f4c": {
+    "type": "PrintToConsoleBlock",
+    "name": "打印到控制台",
+    "source": "A debugging block that outputs text to the console for monitoring and troubleshooting workflow execution.",
+    "description": "将文本输出到控制台，方便观察和排查工作流的运行情况。"
+  },
+  "f46ac716-3b18-4da1-92e4-34ca9a464d48": {
+    "type": "AirtableUpdateFieldBlock",
+    "name": "Airtable · 更新字段",
+    "source": "Update field properties in an Airtable table",
+    "description": "更新 Airtable 表中字段的属性。"
+  },
+  "f46fe306-86d8-4da4-8043-ad93614ed2b7": {
+    "type": "Slant3DProcessOrderBlock",
+    "name": "Slant 3D · 处理订单",
+    "source": "Submit an approved Slant3D draft to order physical 3D-printed parts for manufacturing and delivery. Uses the order_id from Estimate Order or Estimate Shipping, charges the connected payment method, and starts production. Run only after the customer approves the quoted order.",
+    "description": "将客户已批准的草稿提交为真实的零件生产和配送订单。使用估价步骤返回的 order_id，从关联的支付方式扣款并开始生产。必须在客户批准报价后运行。"
+  },
+  "f47ac10b-58cc-4372-a567-0e02b2c3d479": {
+    "type": "GoogleMapsSearchBlock",
+    "name": "搜索 Google 地图",
+    "source": "This block searches for local businesses using Google Maps API.",
+    "description": "通过 Google 地图 API 查询本地商家。"
+  },
+  "f5155c3a-a630-11ef-9cc1-a309988b4d92": {
+    "type": "TwitterGetTweetBlock",
+    "name": "Twitter · 获取推文",
+    "source": "This block retrieves information about a specific Tweet.",
+    "description": "通过此模块获取有关特定推特的信息。"
+  },
+  "f59b88a8-54ce-4676-a508-fd614b4e8dce": {
+    "type": "AirtableCreateBaseBlock",
+    "name": "Airtable · 创建数据库",
+    "source": "Create or find a base in Airtable",
+    "description": "在 Airtable 中创建或查找数据库。"
+  },
+  "f5b0f5d0-1862-4d61-94be-3ad0fa772760": {
+    "type": "GetWikipediaSummaryBlock",
+    "name": "获取维基百科摘要",
+    "source": "This block fetches the summary of a given topic from Wikipedia.",
+    "description": "从维基百科获取指定主题的摘要。"
+  },
+  "f66a3543-28d3-4ab5-8945-9b336371e2ce": {
+    "type": "StepThroughItemsBlock",
+    "name": "逐项遍历",
+    "source": "Iterates over a list or dictionary and outputs each item.",
+    "description": "逐项遍历列表或字典，并依次输出每个元素。"
+  },
+  "f6e0ac73-4f1d-4acb-b4b7-b67066c5984e": {
+    "type": "GetLinkedinProfileBlock",
+    "name": "获取 LinkedIn 个人资料",
+    "source": "Fetch LinkedIn profile data using Enrichlayer",
+    "description": "使用Enrichlayer来获取LinkedIn个人资料数据"
+  },
+  "f73007d6-f48f-4aaf-9e6b-6883998a09b4": {
+    "type": "Slant3DCreateOrderBlock",
+    "name": "Slant 3D · 创建订单",
+    "source": "Order physical 3D-printed parts from Slant3D for manufacturing and delivery. Accepts multiple STL URLs, workspace attachments, or uploaded file IDs with per-part material and quantity, including complete project part sets. Creates a draft, charges the connected payment method, and submits the parts to production. Use only with real customer shipping details and order approval. For a printing-only quote without shipping or billing details, use Slant3D Slicer first.",
+    "description": "向 Slant 3D 订购需要制造和配送的实体零件。可提交多个 STL URL、工作区附件或已上传文件 ID，并分别指定材料和数量。此操作会创建草稿、扣款并投产，必须提供真实配送信息并获得客户批准。仅查询打印价格请先用「模型切片」。"
+  },
+  "f75643df-0a1a-4240-aa5b-9b2a1b20dcdd": {
+    "type": "RemoveRedditPostBlock",
+    "name": "移除 Reddit 帖子",
+    "source": "Removes a Reddit post or comment as a moderator. Requires 'modposts' scope. Reddit scopes are account-wide, so this grants the ability across every subreddit you moderate, not only the one set here.",
+    "description": "删除Reddit帖子或评论作为调节者。所需要求'modposts'范围。Reddit范围是整个账户范围的，因此这赋予了您的能力每一个子重组，你温和，而不仅仅是这里的一组。"
+  },
+  "f79bc6eb-33c0-4099-9c0f-d664ae1ba4d0": {
+    "type": "GithubListPRReviewsBlock",
+    "name": "GitHub · 列出拉取请求审阅",
+    "source": "This block lists all reviews for a specified GitHub pull request.",
+    "description": "此模块列出了指定GitHub拉取请求的所有评论。"
+  },
+  "f7a8b2c3-6d4e-5f8b-9e7f-6d4e5f8b9e7f": {
+    "type": "GetWeatherInformationBlock",
+    "name": "获取天气信息",
+    "source": "Retrieves weather information for a specified location using OpenWeatherMap API.",
+    "description": "通过 OpenWeatherMap API 查询指定地点的天气。"
+  },
+  "f86d4a13-e470-4a7c-9eba-2bb6a76c0552": {
+    "type": "HackerNewsSearchBlock",
+    "name": "Hacker News · 搜索",
+    "source": "Search Hacker News stories and comments by keyword, author, date, points or linked domain, sorted by relevance or newest first. Use it to find mentions of a product, links to a website, or the most upvoted stories of the week. Uses HN Search by Algolia, which needs no account. exact_match is on by default, so words that are only spelled alike are left out; turn it off to also catch misspellings.",
+    "description": "搜索搜索Hacker News按关键词、作者、日期、点或链接域分列的故事和评论，按相关关系或最新数据排序，先行。通过它找到产品的提及，网站的链接，或者本周最受欢迎的故事。通过Algolia的搜索，它不需要账户。exact_match默认开启，所以只有相同拼写的单词被遗漏；关闭它，以发现拼写错误。"
+  },
+  "f884b2fb-04f4-4265-9658-14f433926ac9": {
+    "type": "GmailAddLabelBlock",
+    "name": "Gmail · 添加标签",
+    "source": "A block that adds a label to a specific email message in Gmail, creating the label if it doesn't exist.",
+    "description": "添加标签到 Gmail 中特定的电子邮件信息的区块，如果没有，则创建标签。"
+  },
+  "f8a12c8d-3e4b-4d5f-b6a7-8c9d0e1f2g3h": {
+    "type": "Slant3DSlicerBlock",
+    "name": "Slant 3D · 模型切片",
+    "source": "Get a live 3D printing quote for physical parts from STL URLs or attached workspace files. Use this to price printable parts and complete project part sets before ordering from Slant3D, which manufactures and ships the parts. Binary STL URLs are accepted directly; no browser upload is needed. For complete projects, first read the assembly bill of materials: include repeated parts across subassemblies, select a design variant for alternative parts while keeping the required number of copies, and exclude reference assembly meshes. One copy of each STL is not necessarily a complete set. Quote each required file with its full assembly quantity and sum the returned prices, which already include quantity. Before reporting a complete quote, reconcile all quoted files and quantities against the parts list. Printing-only quotes need no shipping address or payment method. Returns a reusable file_id for ordering; this block does not place or charge an order.",
+    "description": "根据 STL URL 或工作区文件实时查询 3D 打印价格，无需配送地址或支付方式。二进制 STL 可直接通过 URL 提交。为整套项目询价前须核对装配清单：计入重复件，备选零件只选定一种方案并保留所需数量，排除仅供参考的装配网格。逐个文件按实际数量报价并汇总，返回价格已包含数量。返回的 file_id 可用于后续下单，本模块不会下单或扣款。"
+  },
+  "f8a9b0c1-d2e3-4567-890a-bcdef1234567": {
+    "type": "ExaCreateMonitorBlock",
+    "name": "Exa · 创建监控任务",
+    "source": "Create automated monitors to keep websets updated with fresh data on a schedule",
+    "description": "创建自动监控器，以按时间表更新Webset,以新数据"
+  },
+  "f8c3b2e1-9d4a-4e5f-8c7b-6a9e8d2f1c3b": {
+    "type": "PostToThreadsBlock",
+    "name": "发布到 Threads",
+    "source": "Post to Threads using Ayrshare",
+    "description": "通过 Ayrshare 发布到 Threads。"
+  },
+  "f8c4e2a1-9b3d-4e5f-a6c7-d8e9f0a1b2c3": {
+    "type": "ExaPreviewWebsetBlock",
+    "name": "Exa · 预览网页集合",
+    "source": "Preview how a search query will be interpreted before creating a webset. Helps understand entity detection, criteria generation, and available enrichments.",
+    "description": "在创建webset之前，先查看搜索查询将如何解释。帮助理解实体检测，标准生成和可用的丰富。"
+  },
+  "f8d2f28d-b3a1-405b-804e-418c087d288b": {
+    "type": "FirecrawlSearchBlock",
+    "name": "Firecrawl · 搜索",
+    "source": "Firecrawl searches the web for the given query.",
+    "description": "Firecrawl为给定查询搜索网页。"
+  },
+  "f9c68f55-dcca-40a8-8771-abf9601680aa": {
+    "type": "LinearCreateIssueBlock",
+    "name": "Linear · 创建议题",
+    "source": "Creates a new issue on Linear",
+    "description": "创建新问题于Linear"
+  },
+  "fa16834f-fff4-4d7a-9f7f-531ced90492b": {
+    "type": "GoogleSheetsGetNotesBlock",
+    "name": "Google 表格 · 获取备注",
+    "source": "Get notes from cells in a Google Sheet",
+    "description": "从单元格中获取笔记Google工作表工作表工作工作表"
+  },
+  "fabe3db0-fb32-4b05-8e68-b169477b02ec": {
+    "type": "ConductorGetSessionBlock",
+    "name": "Conductor · 获取会话",
+    "source": "Get a Conductor agent session: its details, whether the agent is idle, working or errored, and recent transcript messages.",
+    "description": "获取行为代理人会话：其细节，该代理人是否闲置、工作或错误，以及最近的笔录信息。"
+  },
+  "faf9f0f3-e659-4264-b33b-284a02166bec": {
+    "type": "ExaWebsetReadyCheckBlock",
+    "name": "Exa · 检查网页集合是否就绪",
+    "source": "Check if webset is ready for next operation - enables conditional workflow branching",
+    "description": "检查webset是否准备好进行下一次操作 - 启用条件工作流分类"
+  },
+  "fb117058-ab27-40d1-9231-eb1dd526fc7a": {
+    "type": "AgentMailGetListEntryBlock",
+    "name": "AgentMail · 获取名单条目",
+    "source": "Check if an email address or domain is in an allow/block list. Verify filtering rules.",
+    "description": "检查邮箱地址或域名是否在允许或阻止名单中，以核对筛选规则。"
+  },
+  "fb8106a4-1a8f-42f9-a502-f6d07e6fe0ec": {
+    "type": "AddLeadToCampaignBlock",
+    "name": "向营销活动添加潜在客户",
+    "source": "Add a lead to a campaign in SmartLead",
+    "description": "在 SmartLead 营销活动中添加潜在客户。"
+  },
+  "fbf62922-bea1-4a3d-8bac-23587f810b38": {
+    "type": "ReplaceListItemBlock",
+    "name": "替换列表项",
+    "source": "Replaces an item at the specified index.",
+    "description": "替换列表中指定索引处的元素。"
+  },
+  "fcc20ced-d817-42ea-9b40-c35e7bf34b4f": {
+    "type": "AirtableCreateTableBlock",
+    "name": "Airtable · 创建表",
+    "source": "Create a new table in an Airtable base",
+    "description": "在指定的 Airtable 数据库中创建新表。"
+  },
+  "fcd53135-88c9-4ba3-be50-cc6936286e6c": {
+    "type": "NotionReadDatabaseBlock",
+    "name": "Notion · 读取数据库",
+    "source": "Query a Notion database with optional filtering and sorting, returning structured entries.",
+    "description": "查询aNotion数据库中带有可选过滤和排序功能，返回结构化条目。"
+  },
+  "fcf9e4e4-a62f-11ef-9d85-57d3d06b616a": {
+    "type": "TwitterUnhideReplyBlock",
+    "name": "Twitter · 取消隐藏回复",
+    "source": "This block unhides a reply to a tweet.",
+    "description": "此模块区块揭开了对推特的回复。"
+  },
+  "fd3c0b18-2ba6-46ae-9339-fcb40537ad98": {
+    "type": "StagehandExtractBlock",
+    "name": "通过 Stagehand 提取数据",
+    "source": "Extract structured data from a webpage.",
+    "description": "从网页中提取结构化数据。"
+  },
+  "fdae49f8-685a-41ef-80a0-597566b5d4d7": {
+    "type": "JevPickBestBlock",
+    "name": "Jev 择优",
+    "source": "Choose the best candidate using Jev and rank candidates directly by its probabilities. State the comparison criteria in plain language.",
+    "description": "选择最好的候选人，使用Jev,并根据其概率直接排名候选人。简单地说明比较标准。"
+  },
+  "fde4f458-de14-11ef-bf0c-32d3674e8b7e": {
+    "type": "TodoistCreateTaskBlock",
+    "name": "Todoist · 创建任务",
+    "source": "Creates a new task in a Todoist project",
+    "description": "在 Todoist 项目中创建一个新的任务"
+  },
+  "ff0861c9-1726-4aec-9e5b-bf53f3622112": {
+    "type": "InstantiateCodeSandboxBlock",
+    "name": "创建代码沙箱",
+    "source": "Instantiate a sandbox environment with internet access in which you can execute code with the Execute Code Step block.",
+    "description": "创建可访问互联网的沙箱，供「执行代码步骤」模块使用。"
+  },
+  "ffef3c4c-6cd0-48dd-817d-459f975219f4": {
+    "type": "GithubListPullRequestsBlock",
+    "name": "GitHub · 列出拉取请求",
+    "source": "This block lists all pull requests for a specified GitHub repository.",
+    "description": "此模块列出了指定 GitHub 仓库的所有拉动请求。"
+  },
+  "fff86bcd-e001-4bad-a7f6-2eae4720c8dc": {
+    "type": "SendAuthenticatedWebRequestBlock",
+    "name": "发送带身份验证的 HTTP 请求",
+    "source": "Make an authenticated HTTP request with host-scoped credentials (JSON / form / multipart).",
+    "description": "使用限定主机范围的凭据发送 HTTP 请求，支持 JSON、表单和 multipart 格式。"
+  }
+}

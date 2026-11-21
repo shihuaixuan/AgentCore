@@ -21,12 +21,5 @@ export const BlocksList: React.FC<BlocksListProps> = ({
       </div>
     );
   }
-  return blocks.map((block) => (
-    <Block
-      key={block.id}
-      title={block.name}
-      description={block.description}
-      blockData={block}
-    />
-  ));
+  return blocks.map((block) => <Block key={block.id} blockData={block} />);
 };

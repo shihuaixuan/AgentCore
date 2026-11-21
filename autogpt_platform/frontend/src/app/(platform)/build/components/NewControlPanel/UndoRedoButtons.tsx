@@ -3,6 +3,7 @@ import { Separator } from "@/components/atoms/Separator/Separator";
 import {
   Tooltip,
   TooltipContent,
+  TooltipPortal,
   TooltipTrigger,
 } from "@/components/atoms/Tooltip/BaseTooltip";
 import { useHistoryStore } from "../../stores/historyStore";
@@ -18,6 +19,8 @@ import { Icon } from "@/components/atoms/Icon/Icon";
 export const UndoRedoButtons = () => {
   const { t } = useTranslation();
   const { undo, redo, canUndo, canRedo } = useHistoryStore();
+  const undoLabel = t("Undo", "撤销");
+  const redoLabel = t("Redo", "重做");
 
   // Keyboard shortcuts for undo and redo
   useEffect(() => {
@@ -51,13 +54,17 @@ export const UndoRedoButtons = () => {
           <ControlPanelButton
             as="button"
             data-id="undo-button"
+            aria-label={undoLabel}
+            aria-keyshortcuts="Control+Z Meta+Z"
             disabled={!canUndo()}
             onClick={undo}
           >
             <Icon icon={ArrowTurnBackwardIcon} className="size-5" />
           </ControlPanelButton>
         </TooltipTrigger>
-        <TooltipContent side="right">{t("Undo", "撤销")}</TooltipContent>
+        <TooltipPortal>
+          <TooltipContent side="right">{undoLabel} (Ctrl/⌘ + Z)</TooltipContent>
+        </TooltipPortal>
       </Tooltip>
       <Separator />
       <Tooltip delayDuration={100}>
@@ -65,13 +72,17 @@ export const UndoRedoButtons = () => {
           <ControlPanelButton
             as="button"
             data-id="redo-button"
+            aria-label={redoLabel}
+            aria-keyshortcuts="Control+Y Meta+Y"
             disabled={!canRedo()}
             onClick={redo}
           >
             <Icon icon={ArrowTurnForwardIcon} className="size-5" />
           </ControlPanelButton>
         </TooltipTrigger>
-        <TooltipContent side="right">{t("Redo", "重做")}</TooltipContent>
+        <TooltipPortal>
+          <TooltipContent side="right">{redoLabel} (Ctrl/⌘ + Y)</TooltipContent>
+        </TooltipPortal>
       </Tooltip>
     </>
   );

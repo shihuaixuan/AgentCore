@@ -1,7 +1,7 @@
 import { Button } from "@/components/atoms/Button/Button";
 import { Text } from "@/components/atoms/Text/Text";
 import { RJSFSchema } from "@rjsf/utils";
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
 import { useUpdateNodeInternals } from "@xyflow/react";
 import { useShallow } from "zustand/react/shallow";
 
@@ -14,6 +14,7 @@ import {
 } from "@/components/atoms/Tooltip/BaseTooltip";
 import { useEdgeStore } from "@/app/(platform)/build/stores/edgeStore";
 import { getTypeDisplayInfo } from "./helpers";
+import { getBuilderDisplaySchema, type BuilderSchemaText } from "./uiSchema";
 import {
   augmentOutputSchemaWithEdges,
   getOutputProperties,
@@ -33,9 +34,15 @@ interface Props {
   outputSchema: RJSFSchema;
   nodeId: string;
   uiType: BlockUIType;
+  schemaText?: BuilderSchemaText;
 }
 
-export function OutputHandler({ outputSchema, nodeId, uiType }: Props) {
+export function OutputHandler({
+  outputSchema,
+  nodeId,
+  uiType,
+  schemaText,
+}: Props) {
   const { t, locale } = useTranslation();
   const isOutputConnected = useEdgeStore((state) => state.isOutputConnected);
   const sourceHandles = useEdgeStore(
@@ -47,10 +54,18 @@ export function OutputHandler({ outputSchema, nodeId, uiType }: Props) {
       ),
     ),
   );
-  const properties = augmentOutputSchemaWithEdges(
-    outputSchema,
-    nodeId,
-    sourceHandles.map((sourceHandle) => ({ source: nodeId, sourceHandle })),
+  const displaySchema = useMemo(
+    () => getBuilderDisplaySchema(outputSchema, locale, schemaText),
+    [outputSchema, locale, schemaText],
+  );
+  const properties = useMemo(
+    () =>
+      augmentOutputSchemaWithEdges(
+        displaySchema,
+        nodeId,
+        sourceHandles.map((sourceHandle) => ({ source: nodeId, sourceHandle })),
+      ),
+    [displaySchema, nodeId, sourceHandles],
   );
   const [isOutputVisible, setIsOutputVisible] = useState(true);
   const brokenOutputs = useBrokenOutputs(nodeId);
@@ -65,7 +80,8 @@ export function OutputHandler({ outputSchema, nodeId, uiType }: Props) {
     updateNodeInternals(nodeId);
   }, [
     nodeId,
-    outputSchema,
+    displaySchema,
+    locale,
     sourceHandles,
     isOutputVisible,
     expandedObjects,
@@ -100,7 +116,6 @@ export function OutputHandler({ outputSchema, nodeId, uiType }: Props) {
   function renderOutputHandles(
     schema: OutputProperties,
     keyPrefix: string = "",
-    titlePrefix: string = "",
     connectedOnly: boolean = false,
   ): React.ReactNode[] {
     return Object.entries(schema).map(([key, definition]) => {
@@ -111,7 +126,7 @@ export function OutputHandler({ outputSchema, nodeId, uiType }: Props) {
           ? definition
           : {};
       const fullKey = keyPrefix ? `${keyPrefix}_#_${key}` : key;
-      const fieldTitle = titlePrefix + (fieldSchema?.title || key);
+      const fieldTitle = fieldSchema.title || key;
 
       const isConnected = isOutputConnected(nodeId, fullKey);
       const isBroken = brokenOutputs.has(fullKey);
@@ -139,7 +154,7 @@ export function OutputHandler({ outputSchema, nodeId, uiType }: Props) {
         <div
           key={fullKey}
           className="flex flex-col items-end gap-2"
-          data-tutorial-id={`output-handler-${nodeId}-${fieldTitle}`}
+          data-tutorial-id={`output-handler-${nodeId}-${fullKey}`}
         >
           <div className="relative flex items-center gap-2">
             {hasNestedProperties && (
@@ -200,7 +215,7 @@ export function OutputHandler({ outputSchema, nodeId, uiType }: Props) {
           {/* Nested properties */}
           {hasNestedProperties &&
             shouldRenderChildren &&
-            renderOutputHandles(nestedProperties, fullKey, "", !isExpanded)}
+            renderOutputHandles(nestedProperties, fullKey, !isExpanded)}
         </div>
       ) : null;
     });
@@ -230,7 +245,7 @@ export function OutputHandler({ outputSchema, nodeId, uiType }: Props) {
       </Button>
 
       <div className="flex flex-col items-end gap-2">
-        {renderOutputHandles(properties, "", "", !isOutputVisible)}
+        {renderOutputHandles(properties, "", !isOutputVisible)}
       </div>
     </div>
   );

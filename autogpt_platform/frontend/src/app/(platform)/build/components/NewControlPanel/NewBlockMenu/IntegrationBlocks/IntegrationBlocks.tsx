@@ -10,9 +10,10 @@ import { InfiniteScroll } from "@/components/contextual/InfiniteScroll/InfiniteS
 import { useBlockMenuStore } from "../../../../stores/blockMenuStore";
 import { useShallow } from "zustand/react/shallow";
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
+import { getIntegrationLabel } from "../integrationCopy";
 
 export const IntegrationBlocks = () => {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const { integration, setIntegration } = useBlockMenuStore(
     useShallow((state) => ({
       integration: state.integration,
@@ -94,7 +95,7 @@ export const IntegrationBlocks = () => {
               /
             </Text>
             <Text variant="body-medium" tone="emphasis">
-              {integration}
+              {integration && getIntegrationLabel(integration, locale)}
             </Text>
           </div>
           <span className="flex h-[1.375rem] w-[1.6875rem] items-center justify-center rounded-full bg-surface-hover p-1.5">
@@ -107,8 +108,6 @@ export const IntegrationBlocks = () => {
           {allBlocks.map((block) => (
             <IntegrationBlock
               key={block.id}
-              title={block.name}
-              description={block.description}
               blockData={block}
               icon_url={`/integrations/${integration}.png`}
             />

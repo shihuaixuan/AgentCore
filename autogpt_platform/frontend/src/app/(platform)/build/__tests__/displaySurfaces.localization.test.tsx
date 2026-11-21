@@ -43,7 +43,7 @@ describe("localized builder display surfaces", () => {
       </LanguageProvider>,
     );
     expect(screen.getByRole("img", { name: "集成图标" })).toBeDefined();
-    expect(screen.getByText("Git Hub")).toBeDefined();
+    expect(screen.getByText("GitHub")).toBeDefined();
     expect(screen.getByText("English provider description")).toBeDefined();
   });
 

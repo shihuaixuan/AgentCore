@@ -52,7 +52,9 @@ export const AnyOfFieldTitle = (props: customFieldProps) => {
   const { displayType, colorClass } = getTypeDisplayInfo(type, locale);
 
   const shouldShowSelector =
-    shouldShowTypeSelector(schema) && !isArrayItem && !isHandleConnected;
+    shouldShowTypeSelector(schema, registry.formContext.isBuilderNode) &&
+    !isArrayItem &&
+    !isHandleConnected;
   const shoudlShowType = isHandleConnected || (isOptional && type);
 
   const isInputBroken = useNodeStore((state) =>

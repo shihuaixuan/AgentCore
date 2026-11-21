@@ -30,6 +30,9 @@ describe("ReadOnlyBanner", () => {
 
     const button = screen.getByRole("button", { name: /duplicate/i });
     expect(button).not.toBeNull();
+    expect(screen.getByRole("status").textContent).toContain(
+      "You're viewing a read-only copy of this workflow.",
+    );
     expect(screen.getByText(/Duplicate it to make changes/i)).not.toBeNull();
 
     fireEvent.click(button);

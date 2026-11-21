@@ -1,4 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
+import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Stale query state: the URL still points at the version that existed BEFORE
@@ -34,6 +36,7 @@ interface ExecutionVariables {
 
 interface ExecutionOptions {
   mutation: {
+    onError: (error: unknown) => void;
     onSuccess: (
       response: { status: number; data: Record<string, unknown> },
       variables: ExecutionVariables,
@@ -44,7 +47,12 @@ interface ExecutionOptions {
 vi.mock("@/app/api/__generated__/endpoints/graphs/graphs", () => ({
   usePostV1ExecuteGraphAgent: (options: ExecutionOptions) => ({
     async mutateAsync(variables: ExecutionVariables) {
-      const response = await mockExecuteGraph(variables);
+      const response = await mockExecuteGraph(variables).catch(
+        (error: unknown) => {
+          options.mutation.onError(error);
+          throw error;
+        },
+      );
       options.mutation.onSuccess(response, variables);
       return response;
     },
@@ -93,6 +101,26 @@ vi.mock("@/app/(platform)/build/stores/tutorialStore", () => ({
 import { useRunGraph } from "./useRunGraph";
 
 describe("useRunGraph", () => {
+  it("retains the original API diagnostic under a localized failure title", async () => {
+    mockSaveGraph.mockResolvedValue({ id: "graph-1", version: 2 });
+    const error = new ApiError("Queue refused graph-1", 409, {
+      detail: "Queue refused graph-1",
+    });
+    mockExecuteGraph.mockRejectedValueOnce(error);
+    const { result } = renderHook(() => useRunGraph(), {
+      wrapper: LanguageProvider,
+    });
+    await act(async () => {
+      await expect(result.current.handleRunGraph()).rejects.toBe(error);
+    });
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "运行工作流时出错",
+        description: "Queue refused graph-1",
+      }),
+    );
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockExecuteGraph.mockResolvedValue({

@@ -1,7 +1,8 @@
 import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import React, { Fragment } from "react";
 import { Block } from "../Block";
-import { beautifyString, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { getBuilderCategoryLabel } from "@/app/(platform)/build/helpers/blockCopy";
 import { Text } from "@/components/atoms/Text/Text";
 import { Separator } from "@/components/atoms/Separator/Separator";
 
@@ -10,7 +11,7 @@ import { ErrorCard } from "@/components/molecules/ErrorCard/ErrorCard";
 import { blockMenuButtonBase, blockMenuContainerStyle } from "../style";
 
 export const AllBlocksContent = () => {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const {
     data,
     isLoading,
@@ -64,7 +65,7 @@ export const AllBlocksContent = () => {
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
               <Text variant="body-medium" tone="emphasis">
-                {category.name && beautifyString(category.name)}
+                {getBuilderCategoryLabel(category.name, locale)}
               </Text>
               <span className="rounded-full bg-surface-hover px-1.5">
                 <Text
@@ -80,12 +81,7 @@ export const AllBlocksContent = () => {
 
             <div className="space-y-2">
               {category.blocks.map((block) => (
-                <Block
-                  key={`${category.name}-${block.id}`}
-                  title={block.name as string}
-                  description={block.name as string}
-                  blockData={block}
-                />
+                <Block key={`${category.name}-${block.id}`} blockData={block} />
               ))}
 
               {isLoadingMore(category.name) && (
@@ -98,7 +94,7 @@ export const AllBlocksContent = () => {
                 </>
               )}
 
-              {!isErrorOnLoadingMore && (
+              {isErrorOnLoadingMore(category.name) && (
                 <ErrorCard
                   isSuccess={false}
                   responseError={{

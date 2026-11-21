@@ -1,9 +1,15 @@
 import { render, screen } from "@testing-library/react";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
+import type { AriaLabelConfig, Edge, Node } from "@xyflow/react";
 import { ReactNode } from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 let mockIsReadOnly = false;
 let mockHasWebhookNodes = false;
+const mockEdges: Edge[] = [
+  { id: "edge-ID", source: "From", target: "To" },
+  { id: "named-edge", source: "From", target: "To", ariaLabel: "My label" },
+];
 
 const mockUseFlow = vi.fn(() => ({
   onDragOver: vi.fn(),
@@ -20,7 +26,7 @@ vi.mock("../useFlowRealtime", () => ({ useFlowRealtime: vi.fn() }));
 vi.mock("../useCopyPaste", () => ({ useCopyPaste: vi.fn() }));
 vi.mock("../../edges/useCustomEdge", () => ({
   useCustomEdge: () => ({
-    edges: [],
+    edges: mockEdges,
     onConnect: vi.fn(),
     onEdgesChange: vi.fn(),
   }),
@@ -56,7 +62,9 @@ vi.mock("zustand/react/shallow", () => ({
 }));
 
 const nodeState = {
-  nodes: [],
+  nodes: [
+    { id: "node-ID", position: { x: 0, y: 0 }, data: { title: "My node" } },
+  ],
   setNodes: vi.fn(),
   onNodesChange: vi.fn(),
   hasWebhookNodes: () => mockHasWebhookNodes,
@@ -219,5 +227,41 @@ describe("Flow canvas re-render stability", () => {
       }) => void
     )({ preventDefault });
     expect(preventDefault).toHaveBeenCalled();
+  });
+
+  test("localizes React Flow's keyboard help and live moves without rebinding shortcuts", () => {
+    const { rerender } = render(<Flow />);
+    const english = mockCapturedReactFlowProps.at(-1)!;
+    expect(english["aria-label"]).toBe("Workflow canvas");
+
+    rerender(
+      <LanguageProvider initialLocale="zh-CN">
+        <Flow />
+      </LanguageProvider>,
+    );
+    const chinese = mockCapturedReactFlowProps.at(-1)!;
+    const labels = chinese.ariaLabelConfig as AriaLabelConfig;
+    expect(chinese["aria-label"]).toBe("工作流画布");
+    expect(labels["node.a11yDescription.keyboardDisabled"]).toContain("方向键");
+    expect(labels["edge.a11yDescription.default"]).toContain("取消选择");
+    expect(
+      labels["node.a11yDescription.ariaLiveMessage"]({
+        direction: "left",
+        x: -12,
+        y: 34,
+      }),
+    ).toBe("已向左移动所选节点。新位置：x：-12，y：34。");
+    expect(chinese.deleteKeyCode).toBe(english.deleteKeyCode);
+    const [displayNode] = chinese.nodes as Node[];
+    expect(displayNode.domAttributes?.["aria-roledescription"]).toBe("节点");
+    expect(displayNode.data).toBe(nodeState.nodes[0].data);
+    expect(english.nodes).toBe(nodeState.nodes);
+    expect(nodeState.nodes[0]).not.toHaveProperty("domAttributes");
+    const edges = chinese.edges as Edge[];
+    expect(edges[0].ariaLabel).toBe("从 From 到 To 的连接");
+    expect(edges[1].ariaLabel).toBe("My label");
+    expect(edges[0].domAttributes?.["aria-roledescription"]).toBe("连接");
+    expect(mockEdges[0].ariaLabel).toBeUndefined();
+    expect(english.edges).toBe(mockEdges);
   });
 });

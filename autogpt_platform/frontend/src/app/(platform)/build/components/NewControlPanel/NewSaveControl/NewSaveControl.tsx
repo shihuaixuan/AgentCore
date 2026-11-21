@@ -12,6 +12,7 @@ import { Input } from "@/components/atoms/Input/Input";
 import {
   Tooltip,
   TooltipContent,
+  TooltipPortal,
   TooltipTrigger,
 } from "@/components/atoms/Tooltip/BaseTooltip";
 import { useControlPanelStore } from "../../../stores/controlPanelStore";
@@ -25,6 +26,7 @@ export const NewSaveControl = () => {
   const { form, isSaving, graphVersion, handleSave } = useNewSaveControl();
   const { saveControlOpen, setSaveControlOpen, forceOpenSave } =
     useControlPanelStore();
+  const saveLabel = t("Save", "保存");
 
   return (
     <Popover
@@ -39,6 +41,9 @@ export const NewSaveControl = () => {
         <TooltipTrigger asChild>
           <PopoverTrigger asChild>
             <ControlPanelButton
+              as="button"
+              aria-label={saveLabel}
+              aria-keyshortcuts="Control+S Meta+S"
               data-id="save-control-popover-trigger"
               data-testid="save-control-save-button"
               selected={saveControlOpen}
@@ -48,7 +53,9 @@ export const NewSaveControl = () => {
             </ControlPanelButton>
           </PopoverTrigger>
         </TooltipTrigger>
-        <TooltipContent side="right">{t("Save", "保存")}</TooltipContent>
+        <TooltipPortal>
+          <TooltipContent side="right">{saveLabel} (Ctrl/⌘ + S)</TooltipContent>
+        </TooltipPortal>
       </Tooltip>
       <PopoverContent
         side="right"
@@ -65,7 +72,7 @@ export const NewSaveControl = () => {
                   <FormField
                     control={form.control}
                     name="name"
-                    render={({ field }) => (
+                    render={({ field, fieldState: { error } }) => (
                       <Input
                         id="name"
                         label={t("Name", "名称")}
@@ -77,6 +84,17 @@ export const NewSaveControl = () => {
                         data-id="save-control-name-input"
                         data-testid="save-control-name-input"
                         maxLength={100}
+                        aria-invalid={!!error}
+                        error={
+                          error?.type === "too_small"
+                            ? t("Name is required", "请填写名称")
+                            : error?.type === "too_big"
+                              ? t(
+                                  "Name must be at most 100 characters",
+                                  "名称不能超过 100 个字符",
+                                )
+                              : error?.message
+                        }
                         wrapperClassName="!mb-0"
                         {...field}
                       />
@@ -86,7 +104,7 @@ export const NewSaveControl = () => {
                   <FormField
                     control={form.control}
                     name="description"
-                    render={({ field }) => (
+                    render={({ field, fieldState: { error } }) => (
                       <Input
                         id="description"
                         size="small"
@@ -98,6 +116,15 @@ export const NewSaveControl = () => {
                         data-id="save-control-description-input"
                         data-testid="save-control-description-input"
                         maxLength={500}
+                        aria-invalid={!!error}
+                        error={
+                          error?.type === "too_big"
+                            ? t(
+                                "Description must be at most 500 characters",
+                                "描述不能超过 500 个字符",
+                              )
+                            : error?.message
+                        }
                         wrapperClassName="!mb-0"
                         {...field}
                       />

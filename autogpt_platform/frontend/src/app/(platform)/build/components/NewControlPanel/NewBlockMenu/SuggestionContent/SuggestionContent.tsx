@@ -123,12 +123,7 @@ export const SuggestionContent = () => {
           <div className="space-y-2">
             {!isLoading && suggestions
               ? suggestions.top_blocks.map((block, index) => (
-                  <Block
-                    key={`block-${index}`}
-                    title={block.name}
-                    description={block.description}
-                    blockData={block}
-                  />
+                  <Block key={`block-${index}`} blockData={block} />
                 ))
               : Array(3)
                   .fill(0)

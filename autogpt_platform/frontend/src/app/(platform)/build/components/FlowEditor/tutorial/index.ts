@@ -40,7 +40,7 @@ export const startTutorial = async (
   const tour = new Shepherd.Tour({
     useModalOverlay: TUTORIAL_CONFIG.USE_MODAL_OVERLAY,
     defaultStepOptions: {
-      cancelIcon: { enabled: true },
+      cancelIcon: { enabled: true, label: t("Close Tour", "关闭教程") },
       scrollTo: {
         behavior: TUTORIAL_CONFIG.SCROLL_BEHAVIOR,
         block: TUTORIAL_CONFIG.SCROLL_BLOCK,

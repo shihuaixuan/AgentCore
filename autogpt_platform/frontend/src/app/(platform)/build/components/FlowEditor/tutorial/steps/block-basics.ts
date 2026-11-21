@@ -21,7 +21,7 @@ export const createBlockBasicsSteps = (
     title: t("Your First Block!", "你的第一个模块！"),
     text: `
       <div class="text-body text-foreground-emphasis">
-        <p class="text-body font-normal text-foreground-emphasis m-0">${t("Excellent! This is your <strong>Calculator Block</strong>.", "很好！这就是你的 <strong>Calculator 模块</strong>。")}</p>
+        <p class="text-body font-normal text-foreground-emphasis m-0">${t("Excellent! This is your <strong>Calculator Block</strong>.", "很好！这就是你的<strong>计算器模块</strong>。")}</p>
         <p class="text-body font-normal text-foreground-emphasis m-0" style="margin-top: 0.5rem;">${t("Let's explore how blocks work.", "接下来了解模块的工作方式。")}</p>
       </div>
     `,

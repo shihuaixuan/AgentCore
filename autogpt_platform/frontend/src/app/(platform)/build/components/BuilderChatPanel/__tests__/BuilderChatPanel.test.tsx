@@ -6,6 +6,7 @@ import {
 } from "@/tests/integrations/test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BuilderChatPanel } from "../BuilderChatPanel";
+import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 
 vi.mock("../useBuilderChatPanel", () => ({
   useBuilderChatPanel: vi.fn(),
@@ -54,6 +55,33 @@ afterEach(() => {
 });
 
 describe("BuilderChatPanel", () => {
+  it("announces preparation and transport errors in Chinese and retries the transport check", () => {
+    const retryTransportCheck = vi.fn();
+    mockUseBuilderChatPanel.mockReturnValue(
+      makeMockHook({ isOpen: true, isBootstrapping: true }),
+    );
+    const panel = () => (
+      <LanguageProvider initialLocale="zh-CN">
+        <BuilderChatPanel />
+      </LanguageProvider>
+    );
+    const { rerender } = render(panel());
+    expect(screen.getByRole("status").textContent).toBe(
+      "正在准备构建助手对话…",
+    );
+    mockUseBuilderChatPanel.mockReturnValue(
+      makeMockHook({
+        isOpen: true,
+        transportCheckError: "failed_to_check_ai_connection",
+        retryTransportCheck,
+      }),
+    );
+    rerender(panel());
+    expect(screen.getByRole("alert").textContent).toContain("无法检查 AI 连接");
+    fireEvent.click(screen.getByRole("button", { name: "重试" }));
+    expect(retryTransportCheck).toHaveBeenCalledOnce();
+  });
+
   it("renders the toggle button when closed", () => {
     render(<BuilderChatPanel />);
     expect(screen.getByLabelText("Chat with builder")).toBeDefined();

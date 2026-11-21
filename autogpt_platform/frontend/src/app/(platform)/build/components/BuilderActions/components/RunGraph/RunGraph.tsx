@@ -35,6 +35,11 @@ export const RunGraph = ({ flowID }: { flowID: string | null }) => {
   );
 
   const isLoading = isExecutingGraph || isTerminatingGraph || isSaving;
+  const runLabel = isLoading
+    ? t("Processing...", "处理中…")
+    : isGraphRunning
+      ? t("Stop workflow", "停止工作流")
+      : t("Run workflow", "运行工作流");
 
   // Determine which icon to show with proper animation
   const renderIcon = () => {
@@ -60,6 +65,8 @@ export const RunGraph = ({ flowID }: { flowID: string | null }) => {
             <Button
               size="icon"
               variant="ghost-warning"
+              aria-label={t("Simulate workflow", "模拟工作流")}
+              withTooltip={false}
               data-id="simulate-graph-button"
               onClick={() => void handleRunGraph({ dryRun: true })}
               disabled={!flowID || isLoading}
@@ -82,29 +89,17 @@ export const RunGraph = ({ flowID }: { flowID: string | null }) => {
       )}
 
       {/* Run / Stop button */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            size="icon"
-            variant={isGraphRunning ? "destructive" : "primary"}
-            data-id={isGraphRunning ? "stop-graph-button" : "run-graph-button"}
-            onClick={
-              isGraphRunning ? handleStopGraph : () => void handleRunGraph()
-            }
-            disabled={!flowID || isLoading}
-            className="group"
-          >
-            {renderIcon()}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          {isLoading
-            ? t("Processing...", "处理中…")
-            : isGraphRunning
-              ? t("Stop workflow", "停止工作流")
-              : t("Run workflow", "运行工作流")}
-        </TooltipContent>
-      </Tooltip>
+      <Button
+        size="icon"
+        variant={isGraphRunning ? "destructive" : "primary"}
+        data-id={isGraphRunning ? "stop-graph-button" : "run-graph-button"}
+        aria-label={runLabel}
+        onClick={isGraphRunning ? handleStopGraph : () => void handleRunGraph()}
+        disabled={!flowID || isLoading}
+        className="group"
+      >
+        {renderIcon()}
+      </Button>
       <RunInputDialog
         isOpen={openRunInputDialog}
         setIsOpen={setOpenRunInputDialog}

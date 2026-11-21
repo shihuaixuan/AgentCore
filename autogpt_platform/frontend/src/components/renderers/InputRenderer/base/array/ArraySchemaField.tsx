@@ -1,4 +1,4 @@
-import { FieldProps, getUiOptions } from "@rjsf/utils";
+import { FieldProps, getUiOptions, TranslatableString } from "@rjsf/utils";
 import { getHandleId, updateUiOption } from "../../helpers";
 import { ARRAY_ITEM_FLAG } from "../../constants";
 
@@ -21,7 +21,11 @@ const ArraySchemaField = (props: FieldProps) => {
     <SchemaField
       {...props}
       uiSchema={updatedUiSchema}
-      title={"_item-" + index.toString()}
+      title={
+        registry.formContext.isBuilderNode
+          ? `${registry.translateString(TranslatableString.ArrayItemTitle)} ${index + 1}`
+          : "_item-" + index.toString()
+      }
     />
   );
 };

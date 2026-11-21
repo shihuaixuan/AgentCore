@@ -1,30 +1,33 @@
 import { ApiError } from "@/lib/autogpt-server-api/helpers";
 import type { GraphValidationErrorResponse } from "@/lib/autogpt-server-api/types";
 import { useNodeStore } from "../stores/nodeStore";
+import {
+  getGraphErrorMessage,
+  getGraphValidationMessage,
+} from "./graphErrorMessage";
+import { englishDisplayText, type DisplayTranslate } from "./translation";
 
 // A graph the backend refuses to save comes back as a structured validation
 // error naming each node's bad fields, e.g. "Agent Output › Name: This field
 // is required"; anything else is shown as it arrives.
 export function describeSaveError(
   error: unknown,
-  t: (english: string, chinese: string) => string = (english) => english,
+  t: DisplayTranslate = englishDisplayText,
 ) {
   if (isValidationError(error)) {
+    const message = getGraphValidationMessage(error.response.detail.message, t);
     return {
       title: t("Couldn't save your workflow", "无法保存工作流"),
       description: t(
-        `${error.response.detail.message}. Fix the highlighted fields and save again.`,
-        `${error.response.detail.message}。请修复高亮字段后重新保存。`,
+        `${message}. Fix the highlighted fields and save again.`,
+        `${message}。请修复高亮字段后重新保存。`,
       ),
       variant: "destructive" as const,
     };
   }
   return {
     title: t("Error saving workflow", "保存工作流时出错"),
-    description:
-      error instanceof Error
-        ? error.message
-        : t("An unexpected error occurred.", "发生意外错误。"),
+    description: getGraphErrorMessage(error, t),
     variant: "destructive" as const,
   };
 }

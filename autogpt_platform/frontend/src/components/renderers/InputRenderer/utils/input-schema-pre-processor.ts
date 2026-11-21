@@ -5,7 +5,18 @@ import { RJSFSchema } from "@rjsf/utils";
  * If a property doesn't have a type, it assigns a union of all supported JSON Schema types.
  */
 
-export function preprocessInputSchema(schema: RJSFSchema): RJSFSchema {
+export function preprocessInputSchema(
+  schema: RJSFSchema,
+  preserveNestedLabels = false,
+): RJSFSchema {
+  return processSchema(schema, preserveNestedLabels, true);
+}
+
+function processSchema(
+  schema: RJSFSchema,
+  preserveNestedLabels: boolean,
+  isRoot: boolean,
+): RJSFSchema {
   if (!schema || typeof schema !== "object") {
     return schema;
   }
@@ -25,7 +36,8 @@ export function preprocessInputSchema(schema: RJSFSchema): RJSFSchema {
           !processedProperty.type &&
           !processedProperty.anyOf &&
           !processedProperty.oneOf &&
-          !processedProperty.allOf
+          !processedProperty.allOf &&
+          !(preserveNestedLabels && processedProperty.$ref)
         ) {
           processedProperty.anyOf = [
             { type: "string" },
@@ -33,7 +45,11 @@ export function preprocessInputSchema(schema: RJSFSchema): RJSFSchema {
             { type: "integer" },
             { type: "boolean" },
             { type: "array", items: { type: "string" } },
-            { type: "object", title: "Object", additionalProperties: true },
+            {
+              type: "object",
+              ...(preserveNestedLabels ? {} : { title: "Object" }),
+              additionalProperties: true,
+            },
             { type: "null" },
           ];
         }
@@ -41,13 +57,18 @@ export function preprocessInputSchema(schema: RJSFSchema): RJSFSchema {
         // when encountering an array with items missing type
         if (processedProperty.type === "array" && processedProperty.items) {
           const items = processedProperty.items as RJSFSchema;
-          if (!items.type && !items.anyOf && !items.oneOf && !items.allOf) {
+          if (
+            !items.type &&
+            !items.anyOf &&
+            !items.oneOf &&
+            !items.allOf &&
+            !(preserveNestedLabels && (items.$ref || Array.isArray(items)))
+          ) {
             processedProperty.items = {
+              ...(preserveNestedLabels ? items : {}),
               type: "string",
               title: items.title ?? "",
             };
-          } else {
-            processedProperty.items = preprocessInputSchema(items);
           }
         }
 
@@ -59,6 +80,7 @@ export function preprocessInputSchema(schema: RJSFSchema): RJSFSchema {
         ) {
           processedProperty.properties = processProperties(
             processedProperty.properties,
+            preserveNestedLabels,
           );
         }
 
@@ -69,8 +91,9 @@ export function preprocessInputSchema(schema: RJSFSchema): RJSFSchema {
             processedProperty.type.includes("array"))
         ) {
           if (processedProperty.items) {
-            processedProperty.items = preprocessInputSchema(
-              processedProperty.items as RJSFSchema,
+            processedProperty.items = processItems(
+              processedProperty.items,
+              preserveNestedLabels,
             );
           }
         }
@@ -82,13 +105,16 @@ export function preprocessInputSchema(schema: RJSFSchema): RJSFSchema {
 
   // Process array items at root level
   if (processedSchema.items) {
-    processedSchema.items = preprocessInputSchema(
-      processedSchema.items as RJSFSchema,
+    processedSchema.items = processItems(
+      processedSchema.items,
+      preserveNestedLabels,
     );
   }
 
-  processedSchema.title = ""; // Otherwise our form creator will show the title of the schema in the input field
-  processedSchema.description = ""; // Otherwise our form creator will show the description of the schema in the input field
+  if (isRoot || !preserveNestedLabels) {
+    processedSchema.title = "";
+    processedSchema.description = "";
+  }
 
   return processedSchema;
 }
@@ -96,7 +122,20 @@ export function preprocessInputSchema(schema: RJSFSchema): RJSFSchema {
 /**
  * Helper function to process properties object
  */
-function processProperties(properties: any): any {
+function processItems(
+  items: NonNullable<RJSFSchema["items"]>,
+  preserveNestedLabels: boolean,
+): RJSFSchema["items"] {
+  if (preserveNestedLabels && Array.isArray(items)) {
+    return items.map((item) => processSchema(item as RJSFSchema, true, false));
+  }
+  return processSchema(items as RJSFSchema, preserveNestedLabels, false);
+}
+
+function processProperties(
+  properties: any,
+  preserveNestedLabels: boolean,
+): any {
   if (!properties || typeof properties !== "object") {
     return properties;
   }
@@ -105,7 +144,11 @@ function processProperties(properties: any): any {
 
   for (const [key, property] of Object.entries(processedProperties)) {
     if (property && typeof property === "object") {
-      processedProperties[key] = preprocessInputSchema(property as RJSFSchema);
+      processedProperties[key] = processSchema(
+        property as RJSFSchema,
+        preserveNestedLabels,
+        false,
+      );
     }
   }
 

@@ -53,8 +53,9 @@ export function stripEmptyProperties<T extends StrictRJSFSchema>(
  */
 export function shouldShowTypeSelector(
   schema: RJSFSchema | undefined,
+  isBuilderNode = false,
 ): boolean {
-  const anyOf = schema?.anyOf;
+  const anyOf = schema?.anyOf ?? (isBuilderNode ? schema?.oneOf : undefined);
   if (!anyOf || !Array.isArray(anyOf) || anyOf.length === 0) {
     return false;
   }
@@ -63,7 +64,7 @@ export function shouldShowTypeSelector(
     return false;
   }
 
-  return anyOf.length >= 3;
+  return anyOf.length >= (isBuilderNode ? 2 : 3);
 }
 
 export function isSimpleOptional(schema: RJSFSchema | undefined): boolean {

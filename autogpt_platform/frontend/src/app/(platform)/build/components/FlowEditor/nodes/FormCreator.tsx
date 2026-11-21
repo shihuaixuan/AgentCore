@@ -1,7 +1,12 @@
 import { RJSFSchema } from "@rjsf/utils";
 import type { IChangeEvent } from "@rjsf/core";
 import React, { useContext, useMemo } from "react";
-import { uiSchema } from "./uiSchema";
+import {
+  getBuilderDisplaySchema,
+  getBuilderUiSchema,
+  type BuilderSchemaText,
+} from "./uiSchema";
+import { useTranslation } from "@/lib/i18n/LanguageProvider";
 import { useNodeStore } from "../../../stores/nodeStore";
 import { BlockUIType } from "../../types";
 import { FormRenderer } from "@/components/renderers/InputRenderer/FormRenderer";
@@ -28,6 +33,7 @@ interface FormCreatorProps {
   uiType: BlockUIType;
   /** When true the block is an MCP Tool with a selected tool. */
   isMCPWithTool?: boolean;
+  schemaText?: BuilderSchemaText;
   showHandles?: boolean;
   className?: string;
 }
@@ -38,9 +44,11 @@ export const FormCreator: React.FC<FormCreatorProps> = React.memo(
     nodeId,
     uiType,
     isMCPWithTool = false,
+    schemaText,
     showHandles = true,
     className,
   }) => {
+    const { locale } = useTranslation();
     const updateNodeData = useNodeStore((state) => state.updateNodeData);
 
     const getHardCodedValues = useNodeStore(
@@ -50,6 +58,10 @@ export const FormCreator: React.FC<FormCreatorProps> = React.memo(
     const credentialsProviders = useContext(CredentialsProvidersContext);
 
     const isAgent = uiType === BlockUIType.AGENT;
+    const displaySchema = useMemo(
+      () => getBuilderDisplaySchema(jsonSchema, locale, schemaText),
+      [jsonSchema, locale, schemaText],
+    );
 
     const handleChange = ({
       formData,
@@ -142,11 +154,11 @@ export const FormCreator: React.FC<FormCreatorProps> = React.memo(
     const gatedSchema = useMemo(
       () =>
         gateDiscriminatorOptions(
-          jsonSchema,
+          displaySchema,
           credentialsProviders,
           initialValues,
         ),
-      [jsonSchema, credentialsProviders, initialValues],
+      [displaySchema, credentialsProviders, initialValues],
     );
 
     return (
@@ -157,9 +169,10 @@ export const FormCreator: React.FC<FormCreatorProps> = React.memo(
         <FormRenderer
           jsonSchema={gatedSchema}
           handleChange={handleChange}
-          uiSchema={uiSchema}
+          uiSchema={getBuilderUiSchema(locale)}
           initialValues={initialValues}
           formContext={{
+            isBuilderNode: true,
             nodeId: nodeId,
             uiType: uiType,
             showHandles: showHandles,
