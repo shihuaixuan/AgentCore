@@ -1,5 +1,10 @@
 import type { Database, SqlValue, Statement } from "sql.js";
 import { readFields, rowAttribution } from "./qwenWorkAttribution";
+import { prepareLargeQwenWorkParts } from "./qwenWorkLargeParts";
+import {
+  confirmedRecoverySession,
+  isBoundedTaskImport,
+} from "./qwenWorkRecovery";
 import { ImportValidationError } from "./validation";
 
 export const MAX_PROJECTED_ROWS = 2_000;
@@ -66,9 +71,10 @@ export function prepareQwenWorkQueries(db: Database) {
   const scheduled = runs
     ? "EXISTS (SELECT 1 FROM task_run_logs r WHERE r.chat_id=c.id)"
     : "0";
+  const task = chatCols.has("chat_type") ? "c.chat_type='task'" : "0";
   const chats =
     db.prepare(`SELECT c.id, CASE WHEN length(c.name) <= 1000 THEN c.name END,
-    CASE WHEN length(c.worktree_path) <= 1024 THEN c.worktree_path END, ${ext}, (${parent} OR ${scheduled})
+    CASE WHEN length(c.worktree_path) <= 1024 THEN c.worktree_path END, ${ext}, (${parent} OR ${scheduled}), ${task}
     ${candidateChats} ORDER BY c.updated_at DESC, c.created_at DESC, c.id LIMIT ? OFFSET ?`);
 
   const legacy = !msgCols.has("metadata") && !inputs;
@@ -86,21 +92,43 @@ export function prepareQwenWorkQueries(db: Database) {
     : "NULL";
   const join = `FROM messages m JOIN sub_chats s ON s.id=m.sub_chat_id AND s.chat_id=m.chat_id
     WHERE m.chat_id=? AND m.role IN ('user','assistant')`;
+  const subExt = subCols.has("ext")
+    ? bounded("s.ext", MAX_PARTS_BYTES)
+    : "NULL";
   const members = db.prepare(
-    `SELECT ${bounded("s.id", 1024)} FROM sub_chats s WHERE s.chat_id=? LIMIT 2`,
+    `SELECT ${bounded("s.id", 1024)}, ${sessionID}, ${subExt} FROM sub_chats s WHERE s.chat_id=? LIMIT 2`,
   );
+  const boundElsewhere = subCols.has("session_id")
+    ? db.prepare("SELECT 1 FROM sub_chats WHERE session_id=? AND id<>? LIMIT 1")
+    : undefined;
   const identities = `${meta}, ${sessionID}, ${messageID}, ${input}`;
   const ownership = db.prepare(
     `SELECT ${bounded("s.id", 1024)}, m.role, ${identities} ${join} LIMIT ${MAX_PROJECTED_ROWS + 1}`,
   );
   const messages =
     db.prepare(`SELECT m.role, ${bounded("m.parts", MAX_PARTS_BYTES)}, m.created_at, m.sequence,
-    ${identities} ${join} AND m.sub_chat_id=? ORDER BY m.sequence, m.id LIMIT ${MAX_PROJECTED_ROWS + 1}`);
+    ${identities}, CASE WHEN m.role='assistant' AND typeof(m.parts)='text'
+      AND length(CAST(m.parts AS BLOB)) > ${MAX_PARTS_BYTES}
+      AND length(CAST(m.id AS BLOB)) BETWEEN 1 AND 1024 THEN m.id END
+    ${join} AND m.sub_chat_id=? ORDER BY m.sequence, m.id LIMIT ${MAX_PROJECTED_ROWS + 1}`);
 
-  function publicThread(chat: string) {
+  function publicThread(
+    chat: string,
+    task: boolean,
+  ): { id: string; omitted: boolean; recoveredSession?: string } {
     const subs = [...rows(members, [chat], 2)];
-    if (subs.length === 1 && typeof subs[0][0] === "string" && subs[0][0])
-      return { id: subs[0][0], omitted: false };
+    if (subs.length === 1 && typeof subs[0][0] === "string" && subs[0][0]) {
+      const [id, active, extension] = subs[0];
+      if (task && !legacy && boundElsewhere && isBoundedTaskImport(extension)) {
+        const original = confirmedRecoverySession(
+          rows(ownership, [chat]),
+          active,
+        );
+        if (original && ![...rows(boundElsewhere, [original, id], 1)].length)
+          return { id, omitted: false, recoveredSession: original };
+      }
+      return { id, omitted: false };
+    }
     if (!inputs) throw new ImportValidationError("conversation");
 
     const possible = new Set<SqlValue>();
@@ -132,6 +160,7 @@ export function prepareQwenWorkQueries(db: Database) {
     total,
     legacy,
     publicThread,
+    readLargeParts: prepareLargeQwenWorkParts(db),
     pageRows: (limit: number, offset: number) =>
       rows(chats, [limit, offset], limit),
     messageRows: (chat: string, sub: string) => rows(messages, [chat, sub]),
